@@ -687,6 +687,62 @@ function drawHetakirin(ctx, s) {
 }
 
 
+/* ---- コンガラガーン：あおい あたま・オレンジの からだ・やじるしの て ---- */
+function drawKongaragan(ctx, s) {
+  const step = Math.sin(s.t * 8) * (s.moving ? 1 : 0);
+  const reach = s.atk >= 0 ? s.atk : 0;     // てを のばす ぐあい
+  const BLUE = '#1f39c4', ORANGE = '#d9832a', ARM = '#63b3e0';
+
+  ctx.save();
+
+  /* あし（くろい だ円 2つ）*/
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.ellipse(-9, -8 + step * 1.5, 8, 10, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(9, -8 - step * 1.5, 8, 10, 0, 0, Math.PI * 2); ctx.fill();
+
+  /* からだ（うえが せまい だいけい）*/
+  ctx.fillStyle = ORANGE;
+  ctx.beginPath();
+  ctx.moveTo(-12, -78); ctx.lineTo(12, -78); ctx.lineTo(24, -14); ctx.lineTo(-24, -14);
+  ctx.closePath(); ctx.fill();
+
+  /* うで（りょうがわに のびる みずいろの やじるし）*/
+  const baseY = -62;
+  const leftLen  = 34;
+  const rightLen = 34 + reach * 34;         // まえの てが のびる
+  ctx.fillStyle = ARM;
+  // よこぼう
+  ctx.fillRect(-leftLen, baseY - 5, leftLen + rightLen, 10);
+  // ひだりの やじり
+  ctx.beginPath();
+  ctx.moveTo(-leftLen - 16, baseY); ctx.lineTo(-leftLen, baseY - 13); ctx.lineTo(-leftLen, baseY + 13);
+  ctx.closePath(); ctx.fill();
+  // みぎの やじり（こうげきの さき）
+  ctx.beginPath();
+  ctx.moveTo(rightLen + 17, baseY); ctx.lineTo(rightLen, baseY - 14); ctx.lineTo(rightLen, baseY + 14);
+  ctx.closePath(); ctx.fill();
+  if (reach > 0.55) {                        // のばしきる ときの ひかり
+    ctx.fillStyle = 'rgba(255,255,255,' + ((reach - 0.55) * 1.2).toFixed(2) + ')';
+    ctx.beginPath();
+    ctx.moveTo(rightLen + 17, baseY); ctx.lineTo(rightLen + 2, baseY - 9); ctx.lineTo(rightLen + 2, baseY + 9);
+    ctx.closePath(); ctx.fill();
+  }
+
+  /* あたま（あおい しかく）*/
+  ctx.fillStyle = BLUE;
+  ctx.fillRect(-21, -122, 42, 44);
+  ctx.fillStyle = 'rgba(255,255,255,0.16)';
+  ctx.fillRect(-21, -122, 42, 12);
+
+  /* め（メタルらしい ひかる せん）*/
+  ctx.fillStyle = '#8fd7ff';
+  ctx.fillRect(2, -108, 12, 4);
+  ctx.fillRect(-14, -108, 12, 4);
+
+  ctx.restore();
+}
+
+
 /* ---- お菓子マン（おおボス）：やじるしで できた おかしの きょじん ---- */
 function drawOkashiman(ctx, s) {
   ctx.save();
@@ -803,6 +859,7 @@ const DRAWERS = {
   togehaya: drawTogehaya,
   saba: drawSaba,
   jiryu: drawJiryu,
+  kongaragan: drawKongaragan,
   hetakirin: drawHetakirin,
   okashiman: drawOkashiman,
 };

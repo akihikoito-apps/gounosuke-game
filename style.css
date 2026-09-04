@@ -48,6 +48,11 @@ html, body {
   cursor:pointer; font-family:inherit;
 }
 .big-btn:active { transform:translateY(4px); box-shadow:0 2px 0 #e65100; }
+.big-btn.wide {
+  padding:calc(15px * var(--ui)) calc(26px * var(--ui));
+  font-size:calc(min(5vw,21px) * var(--ui));
+  max-width:92vw;
+}
 
 .text-btn {
   background:none; border:none; color:#cfe8ff;

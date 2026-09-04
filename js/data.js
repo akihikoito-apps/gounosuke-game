@@ -11,19 +11,16 @@
    -------------------------------------------------------------------------- */
 const CONFIG = {
 
-  /* --- ぞくせいの あいしょう（じゃんけんが 2つ）---
+  /* --- ぞくせいの あいしょう ---
 
      【わ その1】  みず → ほのお → くさ → みず
-        みず  は ほのお に つよい
-        ほのお は くさ  に つよい
-        くさ  は みず  に つよい
-
      【わ その2】  まじゅつし → パワー → けもの → まじゅつし
-        まじゅつし は パワー   に つよい
-        パワー    は けもの   に つよい
-        けもの    は まじゅつし に つよい
+       ※ 2つの わ は べつべつ。わを またぐ くみあわせは 1ばい
 
-     ※ 2つの わ は べつべつ。わを またぐ くみあわせ（れい：ほのお vs けもの）は 1ばい
+     【メタル】  よわてんが 3つ ある かわりに きそのうりょくが たかい
+       ほのお・まじゅつし・パワー の 3つに よわい
+       メタルが とくいな あいては なし
+
      ※「む」は どの ぞくせいとも あいしょう なし                        */
   attrStrong: 2.5,   // ゆうりな とき ダメージ 2.5ばい
   attrWeak:   0.6,   // ふりな   とき ダメージ 0.6ばい
@@ -226,7 +223,7 @@ const ENEMIES = {
   saba: {
     id: 'saba', name: 'saba',
     attr: 'water',
-    hp: 260,    atk: 260,  range: 55,   speed: 70,   // speed 70 = さいそく
+    hp: 260,    atk: 260,  range: 55,   speed: 140,  // speed 140 = だんとつ さいそく
     attackInterval: 1.8,   attackWindup: 0.22,
     kbCount: 2,
     scale: 1.0,
@@ -265,6 +262,24 @@ const ENEMIES = {
     projectile: 'grass',
     money: 800,
     isBoss: true,
+  },
+
+  /* コンガラガーン ── あおい しかくい あたま と オレンジの からだ。
+                      みずいろの やじるしの てを のばして こうげきする。
+                      メタルぞくせい：ほのお・まじゅつし・パワー に よわい かわりに
+                      きそのうりょくが たかい。字一龍 と むれで やってくる  */
+  kongaragan: {
+    id: 'kongaragan', name: 'コンガラガーン',
+    attr: 'metal',
+    hp: 1800,   atk: 430,  range: 120,  speed: 45,
+    attackInterval: 2.2,   attackWindup: 0.45,   // てを のばす
+    kbCount: 3,
+    scale: 1.15,
+    attackType: 'single',
+    projectile: null,                            // ちょくせつ てを のばして なぐる
+    /* とくしゅのうりょく：60%の かくりつで クリティカル（ダメージ 2ばい）*/
+    crit: { chance: 0.60, mult: 2.0 },
+    money: 160,
   },
 
   /* お菓子マン ── さいごの おおボス。
@@ -318,11 +333,16 @@ const BACKGROUNDS = {
     deco: 'wave',
   },
 
-  /* しゃしんの はいけい（js/bg-photo.js の がぞうを つかう）*/
-  photo: {
-    photo: true,
+  /* しゃしんの はいけい（js/bg-photo.js の がぞうを なまえで えらぶ）*/
+  mori: {
+    photo: 'mori',                 // みどりの もり
     ground: '#4a6b2a', groundTop: '#6b9e3a',
     deco: 'none',
+  },
+  mizu: {
+    photo: 'mizu',                 // すいそう（さかなの かわ）
+    ground: '#3d6b86', groundTop: '#59a0c2',
+    deco: 'wave',
   },
 
   /* いわば */
@@ -339,6 +359,14 @@ const BACKGROUNDS = {
     hillFar: '#16352a', hillNear: '#0c2019',
     ground: '#241c14', groundTop: '#382b1e',
     deco: 'star',
+  },
+
+  /* はがねの せんじょう（メタルぐんだん）*/
+  steel: {
+    sky: ['#2b3a45', '#5d7f92', '#c3d3db'],
+    hillFar: '#54707f', hillNear: '#354a56',
+    ground: '#3f4b52', groundTop: '#5b6b74',
+    deco: 'rock',
   },
 
   /* ボスの ステージ */
@@ -398,7 +426,7 @@ const STAGES = [
     no: 3,
     name: 'さかなの かわ',
     desc: 'saba が すごい はやさで とっしんしてくる',
-    bg: 'water',
+    bg: 'mizu',
     castleHp: 3000,
     waves: [
       { at: 3,  id: 'togehaya', count: 1 },
@@ -414,7 +442,7 @@ const STAGES = [
     no: 4,
     name: 'みどりの もり',
     desc: 'ほのた と saba の こんせい ぐんだん',
-    bg: 'photo',
+    bg: 'mori',
     castleHp: 3600,
     waves: [
       { at: 3,  id: 'togehaya', count: 1 },
@@ -482,39 +510,68 @@ const STAGES = [
       { atCastleHp: 0.60, id: 'okashiman', count: 1 },
     ],
   },
+
+  {
+    no: 8,
+    name: 'はがねの ぐんだん',
+    desc: 'コンガラガーン とうじょう！ メタルは ほのお・まじゅつし・パワー に よわい',
+    bg: 'steel',
+    castleHp: 6000,
+    waves: [
+      { at: 3,   id: 'togehaya',   count: 1 },
+      { at: 14,  id: 'saba',       count: 2, gap: 1.4 },
+      { at: 27,  id: 'kongaragan', count: 1 },
+      { at: 40,  id: 'jiryu',      count: 1 },
+      { at: 52,  id: 'kongaragan', count: 3, gap: 1.8, repeat: 26 },
+      { at: 66,  id: 'honota',     count: 4, gap: 0.5, repeat: 24 },
+      { at: 78,  id: 'jiryu',      count: 1, repeat: 36 },
+      { at: 94,  id: 'saba',       count: 2, gap: 1.4, repeat: 28 },
+      /* さいしゅう ステージ：ボスが 2たい でてくる */
+      { atCastleHp: 0.85, id: 'hetakirin', count: 1 },
+      { atCastleHp: 0.55, id: 'okashiman', count: 1 },
+    ],
+  },
 ];
 
 
 /* --------------------------------------------------------------------------
    6. ぞくせいの あいしょう（さわらなくて OK）
    -------------------------------------------------------------------------- */
-/* 「A は B に つよい」の いちらん */
+/* 「A は B に つよい」の いちらん（1つでも、いくつでも かけます）*/
 const ATTR_BEATS = {
   /* わ その1 */
-  water: 'fire',    // みず   → ほのお
-  fire:  'grass',   // ほのお → くさ
-  grass: 'water',   // くさ   → みず
+  water: ['fire'],            // みず   → ほのお
+  fire:  ['grass', 'metal'],  // ほのお → くさ ／ メタル
+  grass: ['water'],           // くさ   → みず
   /* わ その2 */
-  magic: 'power',   // まじゅつし → パワー
-  power: 'beast',   // パワー    → けもの
-  beast: 'magic',   // けもの    → まじゅつし
+  magic: ['power', 'metal'],  // まじゅつし → パワー ／ メタル
+  power: ['beast', 'metal'],  // パワー    → けもの ／ メタル
+  beast: ['magic'],           // けもの    → まじゅつし
+  /* メタルは とくいな あいてが いない */
+  metal: [],
 };
 
 const ATTR_LABEL = {
   water: 'みず', fire: 'ほのお', grass: 'くさ',
-  magic: 'まじゅつし', power: 'パワー', beast: 'けもの',
+  magic: 'まじゅつし', power: 'パワー', beast: 'けもの', metal: 'メタル',
   none: 'む',
 };
 
 const ATTR_COLOR = {
   water: '#4fc3f7', fire: '#ff7043', grass: '#8bc34a',
-  magic: '#ba68c8', power: '#ffca28', beast: '#8d6e63',
+  magic: '#ba68c8', power: '#ffca28', beast: '#8d6e63', metal: '#78909c',
   none: '#bdbdbd',
 };
 
 /* こうげきする がわ → うける がわ の ダメージばいりつ */
+function attrBeats(a, b) {
+  const list = ATTR_BEATS[a];
+  if (!list) return false;
+  return (typeof list === 'string') ? (list === b) : (list.indexOf(b) >= 0);
+}
+
 function attrMultiplier(attacker, defender) {
-  if (ATTR_BEATS[attacker] === defender) return CONFIG.attrStrong; // ゆうり
-  if (ATTR_BEATS[defender] === attacker) return CONFIG.attrWeak;   // ふり
+  if (attrBeats(attacker, defender)) return CONFIG.attrStrong; // ゆうり
+  if (attrBeats(defender, attacker)) return CONFIG.attrWeak;   // ふり
   return 1.0;
 }

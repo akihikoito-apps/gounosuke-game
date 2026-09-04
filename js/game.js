@@ -31,7 +31,7 @@ const Game = {
   boss: null,
 
   camera: { x: 0, target: 0, manualUntil: 0 },
-  bgImage: null,          // はいけいの しゃしん
+  bgImages: null,         // はいけいの しゃしん（なまえごと）
   canvas: null, ctx: null,
   view: { w: 0, h: 0, scale: 1, groundY: 0 },
   hudHeight: 96,
@@ -350,6 +350,7 @@ const Game = {
         slow: u.def.slow || null,
         kbChance: u.def.knockbackChance || 0,
         stun: u.def.stun || null,
+        crit: u.def.crit || null,
         age: 0, life: 3,
       });
     } else {
@@ -368,6 +369,7 @@ const Game = {
     const slow   = src.def ? (src.def.slow || null) : (src.slow || null);
     const kbCh   = src.def ? (src.def.knockbackChance || 0) : (src.kbChance || 0);
     const stun   = src.def ? (src.def.stun || null) : (src.stun || null);
+    const crit   = src.def ? (src.def.crit || null) : (src.crit || null);
 
     if (target && target.castle) {
       const dmg = Math.round(atk * CONFIG.castleDamageRate);
@@ -393,8 +395,13 @@ const Game = {
 
     for (const v of victims) {
       const mult = attrMultiplier(attr, v.def.attr);
-      const dmg = Math.round(atk * mult);
-      this.damageUnit(v, dmg, attr, mult);
+      let dmg = Math.round(atk * mult);
+      let isCrit = false;
+      if (crit && Math.random() < ((crit.chance === undefined) ? 1 : crit.chance)) {
+        dmg = Math.round(dmg * (crit.mult || 2));
+        isCrit = true;
+      }
+      this.damageUnit(v, dmg, attr, mult, false, isCrit);
       if (slow && !v.dead) {
         const chance = (slow.chance === undefined) ? 1 : slow.chance;
         if (Math.random() < chance) {
@@ -419,7 +426,7 @@ const Game = {
   },
 
   /* ---- ダメージ ---- */
-  damageUnit(u, dmg, attr, mult, noNumber) {
+  damageUnit(u, dmg, attr, mult, noNumber, isCrit) {
     if (u.dead) return;
     u.hp -= dmg;
     u.flash = 0.12;
@@ -427,10 +434,12 @@ const Game = {
     let color = '#ffffff';
     if (mult > 1.01) color = '#ff5252';
     else if (mult < 0.99 && mult > 0) color = '#90a4ae';
+    if (isCrit) color = '#ffd54f';
 
     if (!noNumber) {
       this.addEffect({ type: 'dmg', x: u.x + (Math.random() - 0.5) * 14, y: this.groundWorldY() - 55 - u.lane,
-                       text: String(dmg), color: color, life: 0.65, big: mult > 1.01 });
+                       text: (isCrit ? '★' : '') + dmg, color: color, life: isCrit ? 0.85 : 0.65,
+                       big: isCrit || mult > 1.01 });
     }
     this.addEffect({ type: 'hit', x: u.x, y: this.groundWorldY() - 40 - u.lane, seed: Math.random() * 6, life: 0.25,
                      color: ATTR_COLOR[attr] || '#fff59d' });
@@ -639,10 +648,14 @@ const Game = {
 
   /* はいけいの しゃしんを よみこむ（1かいだけ）*/
   loadPhoto() {
-    if (this.bgImage) return;
-    if (typeof Image === 'undefined' || typeof BG_PHOTO_SRC === 'undefined') return;
-    this.bgImage = new Image();
-    this.bgImage.src = BG_PHOTO_SRC;
+    if (this.bgImages) return;
+    if (typeof Image === 'undefined' || typeof BG_PHOTOS === 'undefined') return;
+    this.bgImages = {};
+    for (const key in BG_PHOTOS) {
+      const img = new Image();
+      img.src = BG_PHOTOS[key];
+      this.bgImages[key] = img;
+    }
   },
 
   currentBg() {
@@ -653,9 +666,9 @@ const Game = {
   drawBackground(ctx) {
     const V = this.view;
     const bg = this.currentBg();
-    const img = this.bgImage;
+    const img = (bg.photo && this.bgImages) ? this.bgImages[bg.photo] : null;
 
-    if (bg.photo && img && img.complete && img.naturalWidth) {
+    if (img && img.complete && img.naturalWidth) {
       /* --- しゃしんの はいけい（ぜんたいに ひろげて まんなかを つかう）--- */
       const sc = Math.max(V.w / img.naturalWidth, V.groundY / img.naturalHeight);
       const w = img.naturalWidth * sc, h = img.naturalHeight * sc;

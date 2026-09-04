@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '1.6';
+  const GAME_VERSION = '1.7';
 
 
   /* =================================================
@@ -430,6 +430,9 @@
     $('#result-sub').textContent = win
       ? 'ステージ ' + Game.stage.no + ' 「' + Game.stage.name + '」 クリア！'
       : 'もういちど ちょうせん しよう';
+    // かったら「つぎへ」、まけたら「もういちど」を おおきく だす
+    $('#btn-result-main').textContent = win ? 'ステージせんたくに もどる' : 'もういちど ちょうせん';
+    $('#btn-result-sub').textContent  = win ? 'もういちど あそぶ' : 'ステージせんたくに もどる';
     if (win) markCleared(Game.stage.no);
     show('screen-result');
   }
@@ -559,8 +562,13 @@
     $('#btn-speed').addEventListener('click', cycleSpeed);
 
     /* けっか */
-    $('#btn-result-retry').addEventListener('click', () => startBattle(Game.stageIndex));
-    $('#btn-result-back').addEventListener('click', () => { buildStageList(); show('screen-stage'); });
+    const backToStages = () => { buildStageList(); show('screen-stage'); };
+    $('#btn-result-main').addEventListener('click', () => {
+      if (Game.result === 'win') backToStages(); else startBattle(Game.stageIndex);
+    });
+    $('#btn-result-sub').addEventListener('click', () => {
+      if (Game.result === 'win') startBattle(Game.stageIndex); else backToStages();
+    });
 
     /* あたらしい バージョンの おしらせ */
     $('#version-num').textContent = GAME_VERSION;
