@@ -32,6 +32,7 @@ const Game = {
 
   camera: { x: 0, target: 0, manualUntil: 0 },
   bgImages: null,         // はいけいの しゃしん（なまえごと）
+  levels: {},             // みかたキャラの レベル（main.js が セットする）
   canvas: null, ctx: null,
   view: { w: 0, h: 0, scale: 1, groundY: 0 },
   hudHeight: 96,
@@ -146,9 +147,14 @@ const Game = {
     const x = (side === 'ally')
       ? CONFIG.fieldLength - 40 - Math.random() * 20
       : 40 + Math.random() * 20;
+    // みかたは レベルの ぶん たいりょくと こうげきりょくが あがる
+    const lv = (side === 'ally') ? (this.levels[def.id] || 1) : 1;
+    const mul = (typeof levelMult === 'function') ? levelMult(lv) : 1;
+    const hp  = Math.round(def.hp * mul);
+    const atk = Math.round(def.atk * mul);
     return {
-      side, def, forward,
-      hp: def.hp, maxHp: def.hp,
+      side, def, forward, level: lv, atk: atk,
+      hp: hp, maxHp: hp,
       x,
       lane: (this.laneCounter++ % 4) * 7,
       state: 'walk',
@@ -343,7 +349,7 @@ const Game = {
         vx: speed * u.forward,
         dir: u.forward,
         side: u.side,
-        atk: u.def.atk,
+        atk: (u.atk !== undefined ? u.atk : u.def.atk),
         attr: u.def.attr,
         area: u.def.attackType === 'area',
         areaRadius: u.def.areaRadius || 0,
@@ -362,7 +368,7 @@ const Game = {
   /* ---- あたった ときの しょり ---- */
   applyHit(src, target, hx, hy) {
     const isArea = src.def ? src.def.attackType === 'area' : src.area;
-    const atk    = src.def ? src.def.atk  : src.atk;
+    const atk    = (src.atk !== undefined && src.atk !== null) ? src.atk : (src.def ? src.def.atk : 0);
     const attr   = src.def ? src.def.attr : src.attr;
     const side   = src.side;
     const radius = src.def ? (src.def.areaRadius || 0) : (src.areaRadius || 0);

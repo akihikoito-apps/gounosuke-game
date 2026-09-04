@@ -409,3 +409,140 @@ html, body {
   .home-tankun { grid-column:1; grid-row:4; justify-self:end; }
   .speech-bubble::after { right:calc(40px * var(--ui)); }
 }
+
+/* =======================================================
+   へんせい ／ パワーアップ ／ ガチャ の がめん
+   ======================================================= */
+
+#screen-party, #screen-power, #screen-gacha {
+  background:linear-gradient(180deg,#1e3c5a,#0d1b2a);
+  justify-content:flex-start; overflow-y:auto;
+  padding:calc(10px * var(--ui) + var(--safe-top)) calc(12px * var(--ui)) calc(20px * var(--ui));
+  gap:calc(10px * var(--ui));
+}
+
+.panel-head {
+  display:flex; align-items:center; gap:calc(12px * var(--ui));
+  width:min(calc(720px * var(--ui)), 96%);
+}
+.panel-head .sub-title { flex:1; margin:0; text-align:left; }
+.panel-hint { font-size:calc(12.5px * var(--ui)); color:#a8c8e0; text-align:center; }
+.panel-sub {
+  width:min(calc(720px * var(--ui)), 96%);
+  font-size:calc(13px * var(--ui)); font-weight:bold; color:#ffd54f;
+  border-bottom:1px solid rgba(255,255,255,.2); padding-bottom:calc(4px * var(--ui));
+}
+
+/* ---- けいけんち と Gコイン ---- */
+.wallet-bar {
+  display:flex; gap:calc(10px * var(--ui));
+  width:min(calc(720px * var(--ui)), 96%); justify-content:center;
+}
+.wallet-bar span {
+  flex:1; text-align:center;
+  padding:calc(7px * var(--ui)) calc(10px * var(--ui));
+  border-radius:calc(10px * var(--ui));
+  font-size:calc(13px * var(--ui)); font-weight:bold;
+}
+.w-exp  { background:rgba(76,175,80,.28);  color:#c8e6c9; border:1px solid rgba(129,199,132,.5); }
+.w-coin { background:rgba(255,193,7,.22);  color:#ffe082; border:1px solid rgba(255,213,79,.5); }
+.wallet-bar b { font-size:calc(17px * var(--ui)); font-variant-numeric:tabular-nums; }
+
+/* ---- へんせいの わく（5れつ x 2だん）---- */
+#party-slots {
+  width:min(calc(720px * var(--ui)), 96%);
+  display:grid; grid-template-columns:repeat(5, minmax(0,1fr));
+  gap:calc(6px * var(--ui));
+}
+.pslot {
+  position:relative; aspect-ratio:3/4;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  border-radius:calc(10px * var(--ui));
+  border:2px dashed rgba(255,255,255,.3);
+  background:rgba(255,255,255,.07);
+  color:#cfe8ff; font-family:inherit; cursor:pointer; overflow:hidden;
+  padding:calc(2px * var(--ui));
+}
+.pslot.filled { border-style:solid; border-color:#ffd54f; background:linear-gradient(180deg,#fffde7,#ffe0b2); color:#4e2600; }
+.pslot.sel { border-color:#4fc3f7; box-shadow:0 0 0 3px rgba(79,195,247,.6); }
+.pslot canvas { width:100%; flex:1 1 auto; min-height:0; display:block; }
+.pslot .ps-no {
+  position:absolute; top:2px; left:calc(5px * var(--ui));
+  font-size:calc(10px * var(--ui)); font-weight:bold; opacity:.65;
+}
+.pslot .ps-name { font-size:calc(10px * var(--ui)); font-weight:bold; white-space:nowrap; }
+.pslot .ps-lv { font-size:calc(10px * var(--ui)); font-weight:bold; color:#00695c; }
+.pslot.empty-label { font-size:calc(12px * var(--ui)); justify-content:center; }
+
+/* ---- もっている キャラの いちらん ---- */
+#party-pool, #power-list {
+  width:min(calc(720px * var(--ui)), 96%);
+  display:flex; flex-direction:column; gap:calc(7px * var(--ui));
+}
+#party-pool { display:grid; grid-template-columns:repeat(auto-fill, minmax(calc(86px * var(--ui)), 1fr)); }
+.pool-item {
+  position:relative; display:flex; flex-direction:column; align-items:center;
+  padding:calc(3px * var(--ui)); border-radius:calc(10px * var(--ui));
+  border:2px solid #90caf9; background:linear-gradient(180deg,#e3f2fd,#bbdefb);
+  color:#0d3050; font-family:inherit; cursor:pointer;
+}
+.pool-item canvas { width:100%; height:calc(46px * var(--ui)); display:block; }
+.pool-item .pi-name { font-size:calc(10.5px * var(--ui)); font-weight:bold; white-space:nowrap; }
+.pool-item .pi-lv { font-size:calc(10px * var(--ui)); font-weight:bold; color:#00695c; }
+.pool-item.used { opacity:.45; }
+.pool-item:active { transform:translateY(2px); }
+
+/* ---- パワーアップの リスト ---- */
+.power-row {
+  display:flex; align-items:center; gap:calc(10px * var(--ui));
+  padding:calc(8px * var(--ui)) calc(10px * var(--ui));
+  border-radius:calc(12px * var(--ui));
+  background:linear-gradient(180deg,#ffffff,#e3f2fd); color:#0d3050;
+}
+.power-row canvas { width:calc(56px * var(--ui)); height:calc(48px * var(--ui)); flex:0 0 auto; }
+.pr-info { flex:1; min-width:0; }
+.pr-name { font-size:calc(14px * var(--ui)); font-weight:bold; }
+.pr-lv   { font-size:calc(12px * var(--ui)); color:#00695c; font-weight:bold; }
+.pr-bar  { height:calc(7px * var(--ui)); border-radius:4px; background:#cfd8dc; overflow:hidden; margin-top:3px; }
+.pr-bar i { display:block; height:100%; background:linear-gradient(90deg,#66bb6a,#2e7d32); }
+.pr-stat { font-size:calc(10.5px * var(--ui)); color:#546e7a; margin-top:2px; }
+.pr-btn {
+  flex:0 0 auto; padding:calc(9px * var(--ui)) calc(12px * var(--ui));
+  border:none; border-radius:calc(10px * var(--ui));
+  font-family:inherit; font-size:calc(12.5px * var(--ui)); font-weight:bold;
+  color:#fff; background:linear-gradient(180deg,#66bb6a,#2e7d32);
+  box-shadow:0 3px 0 #1b5e20; cursor:pointer; line-height:1.25;
+}
+.pr-btn:disabled { background:#b0bec5; box-shadow:0 3px 0 #78909c; color:#eceff1; }
+.pr-btn:active:not(:disabled) { transform:translateY(2px); box-shadow:none; }
+.pr-btn.evolve { background:linear-gradient(180deg,#ba68c8,#7b1fa2); box-shadow:0 3px 0 #4a148c; }
+
+/* ---- ガチャ ---- */
+.gacha-machine { width:min(calc(260px * var(--ui)), 76%); }
+.gm-top { height:calc(16px * var(--ui)); border-radius:calc(10px * var(--ui)) calc(10px * var(--ui)) 0 0; background:#e53935; }
+.gm-window {
+  height:calc(140px * var(--ui));
+  background:radial-gradient(circle at 50% 35%, #ffffff 0%, #d7ecfa 60%, #a9d6ee 100%);
+  border:calc(6px * var(--ui)) solid #f2c94c;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  color:#0d3050; font-weight:bold; font-size:calc(15px * var(--ui)); line-height:1.5;
+  overflow:hidden;
+}
+.gm-window.pop { animation:gachaPop .5s ease-out; }
+@keyframes gachaPop {
+  0%   { transform:scale(.7) rotate(-6deg); }
+  60%  { transform:scale(1.08) rotate(3deg); }
+  100% { transform:scale(1) rotate(0); }
+}
+.gm-slot { height:calc(22px * var(--ui)); border-radius:0 0 calc(10px * var(--ui)) calc(10px * var(--ui)); background:#6fa8d0; }
+.gacha-rank { display:block; font-size:calc(30px * var(--ui)); line-height:1.1; }
+
+/* ---- ステージ せんたく：しょう と ロック ---- */
+.chapter-head {
+  width:100%; margin-top:calc(6px * var(--ui));
+  font-size:calc(15px * var(--ui)); font-weight:bold; color:#ffd54f;
+  border-bottom:2px solid rgba(255,213,79,.45); padding-bottom:calc(3px * var(--ui));
+}
+.stage-card.locked { background:linear-gradient(180deg,#cfd8dc,#b0bec5); color:#607d8b; box-shadow:0 calc(5px * var(--ui)) 0 #78909c; }
+.stage-card.locked .stage-no { color:#90a4ae; }
+.stage-reward { font-size:calc(11px * var(--ui)); color:#00695c; font-weight:bold; }

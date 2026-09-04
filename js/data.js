@@ -179,9 +179,52 @@ const UNITS = {
   },
 };
 
-/* がめん したの ボタンに ならぶ じゅんばん（さいだい10たい）
-   10たいに なると したの ボタンは じどうで 2だんに ならびます */
-const PARTY = ['tankun', 'purio', 'tokinotabibito', 'teruteru', 'hiibou', 'zunio'];
+/* はじめから もっている キャラ（へんせいの しょきち）
+   へんせいがめんで さいだい 10たい まで えらべます */
+const PARTY_MAX = 10;
+const DEFAULT_PARTY = ['tankun', 'purio', 'tokinotabibito', 'teruteru', 'hiibou', 'zunio'];
+let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく メンバー（へんせいで かわる）
+
+
+/* --------------------------------------------------------------------------
+   レベルアップ
+
+   キャラは Lv1 から Lv10 まで。けいけんちを つかって あげます。
+   1レベル あがるごとに たいりょくと こうげきりょくが ふえます。
+   -------------------------------------------------------------------------- */
+const LEVEL = {
+  max: 10,
+  /* Lv1→2, Lv2→3, … Lv9→10 に ひつような けいけんち */
+  expCost: [80, 120, 180, 260, 360, 500, 700, 950, 1300],
+  gainPerLevel: 0.10,      // 1レベルで +10%。Lv10 で 1.9ばい
+};
+
+/* レベルから つよさの ばいりつを だす */
+function levelMult(lv) {
+  const L = Math.max(1, Math.min(LEVEL.max, lv || 1));
+  return 1 + (L - 1) * LEVEL.gainPerLevel;
+}
+
+/* つぎの レベルまでに ひつような けいけんち（MAXなら null）*/
+function levelUpCost(lv) {
+  const L = Math.max(1, Math.min(LEVEL.max, lv || 1));
+  return (L >= LEVEL.max) ? null : LEVEL.expCost[L - 1];
+}
+
+
+/* --------------------------------------------------------------------------
+   ガチャ
+   -------------------------------------------------------------------------- */
+const GACHA = {
+  cost: 3,                 // 1かい ひくのに ひつような Gコイン
+  /* いまは けいけんちが あたります。
+     あたらしい キャラが ふえたら ここに キャラを ついかできます  */
+  prizes: [
+    { weight: 60, rank: 'N',  color: '#90caf9', exp: 80  },
+    { weight: 30, rank: 'R',  color: '#ffd54f', exp: 200 },
+    { weight: 10, rank: 'SR', color: '#ff8a65', exp: 500 },
+  ],
+};
 
 
 /* --------------------------------------------------------------------------
@@ -380,7 +423,13 @@ const BACKGROUNDS = {
 
 
 /* --------------------------------------------------------------------------
-   5. ステージ（7つ）
+   5. ステージ と コース
+
+   「ステージ」＝ おおきな くぎり（だい1ステージ・だい2ステージ …）
+   「コース」  ＝ その なかの 1かいぶんの たたかい
+   1つの ステージに 7コース いれる よていです。
+   コースを ふやす ときは、したの ならびに 1つ コピーして
+   no（とおしばんごう）・chapter・course・reward を なおして ください。
 
    waves の かきかた
      at         …… なんびょうごに でるか
@@ -394,6 +443,8 @@ const BACKGROUNDS = {
 const STAGES = [
   {
     no: 1,
+    chapter: 1,  course: 1,       // だい1ステージ の 1コースめ
+    reward: { coins: 3, exp: 60 },   // チュートリアルなので Gコイン おおめ
     name: 'はじまりの みち',
     desc: 'トゲハヤさん が でてくるよ',
     bg: 'meadow',
@@ -408,6 +459,8 @@ const STAGES = [
 
   {
     no: 2,
+    chapter: 1,  course: 2,       // だい1ステージ の 2コースめ
+    reward: { coins: 1, exp: 90 },
     name: 'ひのたま だいぐんだん',
     desc: 'ほのた の むれが おしよせる',
     bg: 'sunset',
@@ -424,6 +477,8 @@ const STAGES = [
 
   {
     no: 3,
+    chapter: 1,  course: 3,       // だい1ステージ の 3コースめ
+    reward: { coins: 1, exp: 120 },
     name: 'さかなの かわ',
     desc: 'saba が すごい はやさで とっしんしてくる',
     bg: 'mizu',
@@ -440,6 +495,8 @@ const STAGES = [
 
   {
     no: 4,
+    chapter: 1,  course: 4,       // だい1ステージ の 4コースめ
+    reward: { coins: 1, exp: 150 },
     name: 'みどりの もり',
     desc: 'ほのた と saba の こんせい ぐんだん',
     bg: 'mori',
@@ -457,6 +514,8 @@ const STAGES = [
 
   {
     no: 5,
+    chapter: 1,  course: 5,       // だい1ステージ の 5コースめ
+    reward: { coins: 1, exp: 180 },
     name: 'いわばの みち',
     desc: '字一龍 とうじょう！ ボスでは ないけど つよい',
     bg: 'rock',
@@ -473,6 +532,8 @@ const STAGES = [
 
   {
     no: 6,
+    chapter: 1,  course: 6,       // だい1ステージ の 6コースめ
+    reward: { coins: 1, exp: 210 },
     name: 'よるの もり',
     desc: 'ボス 下手なきりん が まちうける',
     bg: 'night',
@@ -492,6 +553,8 @@ const STAGES = [
 
   {
     no: 7,
+    chapter: 1,  course: 7,       // だい1ステージ の 7コースめ
+    reward: { coins: 1, exp: 260 },
     name: 'おかしマンの しろ',
     desc: 'さいご の おおボス お菓子マン。まじゅつし が よく きく！',
     bg: 'boss',
@@ -513,6 +576,8 @@ const STAGES = [
 
   {
     no: 8,
+    chapter: 2,  course: 1,       // だい2ステージ の 1コースめ
+    reward: { coins: 1, exp: 300 },
     name: 'はがねの ぐんだん',
     desc: 'コンガラガーン とうじょう！ メタルは ほのお・まじゅつし・パワー に よわい',
     bg: 'steel',

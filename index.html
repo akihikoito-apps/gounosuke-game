@@ -88,9 +88,54 @@
 
   <!-- ============ ステージ選択画面 ============ -->
   <section id="screen-stage" class="screen">
-    <h2 class="sub-title">ステージをえらぶ</h2>
+    <h2 class="sub-title">コースをえらぶ</h2>
     <div id="stage-list"></div>
     <button class="text-btn" id="btn-stage-back">もどる</button>
+  </section>
+
+  <!-- ============ キャラクター編成 ============ -->
+  <section id="screen-party" class="screen">
+    <div class="panel-head">
+      <h2 class="sub-title">キャラクター へんせい</h2>
+      <button class="mini-btn" id="btn-party-back">もどる</button>
+    </div>
+    <p class="panel-hint" id="party-hint">わくを タップして、したの キャラを えらぶと セットできます</p>
+    <div id="party-slots"></div>
+    <p class="panel-sub">もっている キャラ</p>
+    <div id="party-pool"></div>
+  </section>
+
+  <!-- ============ パワーアップ ============ -->
+  <section id="screen-power" class="screen">
+    <div class="panel-head">
+      <h2 class="sub-title">パワーアップ</h2>
+      <button class="mini-btn" id="btn-power-back">もどる</button>
+    </div>
+    <div class="wallet-bar">
+      <span class="w-exp">けいけんち <b id="power-exp">0</b></span>
+      <span class="w-coin">Gコイン <b id="power-coin">0</b></span>
+    </div>
+    <div id="power-list"></div>
+  </section>
+
+  <!-- ============ ガチャ ============ -->
+  <section id="screen-gacha" class="screen">
+    <div class="panel-head">
+      <h2 class="sub-title">ガチャ</h2>
+      <button class="mini-btn" id="btn-gacha-back">もどる</button>
+    </div>
+    <div class="gacha-machine">
+      <div class="gm-top"></div>
+      <div class="gm-window" id="gacha-window">
+        <span id="gacha-result">3Gコインで<br>1かい ひけるよ！</span>
+      </div>
+      <div class="gm-slot"></div>
+    </div>
+    <div class="wallet-bar">
+      <span class="w-coin">Gコイン <b id="gacha-coin">0</b></span>
+      <span class="w-exp">けいけんち <b id="gacha-exp">0</b></span>
+    </div>
+    <button class="big-btn" id="btn-gacha-pull">ガチャを ひく（3コイン）</button>
   </section>
 
   <!-- ============ バトル画面 ============ -->
