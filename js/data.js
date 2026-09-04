@@ -485,6 +485,7 @@ const BACKGROUNDS = {
      repeat     …… なんびょう おきに くりかえすか（なくても OK）
      atCastleHp …… てきの しろの たいりょくが この わりあい いかに なったら でる
      bg         …… はいけい（BACKGROUNDS の なまえ）
+     reward     …… クリアの ごほうび（Gコインは しょかいクリアだけ もらえます）
    -------------------------------------------------------------------------- */
 const STAGES = [
   {
@@ -506,7 +507,7 @@ const STAGES = [
   {
     no: 2,
     chapter: 1,  course: 2,       // だい1ステージ の 2コースめ
-    reward: { coins: 1, exp: 90 },
+    reward: { coins: 3, exp: 90 },   // ここまでで ガチャ 2かいぶん
     name: 'ひのたま だいぐんだん',
     desc: 'ほのた の むれが おしよせる',
     bg: 'sunset',
@@ -579,7 +580,7 @@ const STAGES = [
   {
     no: 6,
     chapter: 1,  course: 6,       // だい1ステージ の 6コースめ
-    reward: { coins: 1, exp: 210 },
+    reward: { coins: 2, exp: 210 },  // ボスコース
     name: 'よるの もり',
     desc: 'ボス 下手なきりん が まちうける',
     bg: 'night',
@@ -656,7 +657,7 @@ const STAGES = [
   {
     no: 7,
     chapter: 1,  course: 10,      // だい1ステージ の さいごの コース（ボス）
-    reward: { coins: 1, exp: 340 },
+    reward: { coins: 2, exp: 340 },  // ボスコース
     name: 'おかしマンの しろ',
     desc: 'さいご の おおボス お菓子マン。まじゅつし が よく きく！',
     bg: 'boss',
@@ -679,7 +680,7 @@ const STAGES = [
   {
     no: 8,
     chapter: 2,  course: 1,       // だい2ステージ の 1コースめ
-    reward: { coins: 1, exp: 300 },
+    reward: { coins: 2, exp: 300 },  // ボスコース
     name: 'はがねの ぐんだん',
     desc: 'コンガラガーン とうじょう！ メタルは ほのお・まじゅつし・パワー に よわい',
     bg: 'steel',
@@ -696,6 +697,46 @@ const STAGES = [
       /* さいしゅう ステージ：ボスが 2たい でてくる */
       { atCastleHp: 0.85, id: 'hetakirin', count: 1 },
       { atCastleHp: 0.55, id: 'okashiman', count: 1 },
+    ],
+  },
+  {
+    no: 12,
+    chapter: 2,  course: 2,       // だい2ステージ の 2コースめ
+    reward: { coins: 1, exp: 320 },
+    name: 'メタルの こうじょう',
+    desc: 'コンガラガーン だらけ。ほのお・まじゅつし・パワー が よく きく',
+    bg: 'steel',
+    castleHp: 5600,
+    waves: [
+      { at: 3,   id: 'togehaya',   count: 1 },
+      { at: 15,  id: 'kongaragan', count: 1 },
+      { at: 30,  id: 'honota',     count: 4, gap: 0.5 },
+      { at: 46,  id: 'kongaragan', count: 2, gap: 2.2, repeat: 30 },
+      { at: 62,  id: 'hoshikun',   count: 1, repeat: 38 },
+      { at: 78,  id: 'togehaya',   count: 2, gap: 2.2, repeat: 26 },
+      { at: 92,  id: 'honota',     count: 4, gap: 0.5, repeat: 24 },
+    ],
+  },
+
+  {
+    no: 13,
+    chapter: 2,  course: 3,       // だい2ステージ の 3コースめ（ボス）
+    reward: { coins: 2, exp: 380 },
+    name: 'はがねの よる',
+    desc: 'メタルぐんだん と 下手なきりん。くらやみの だいけっせん',
+    bg: 'night',
+    castleHp: 4600,
+    waves: [
+      { at: 3,   id: 'saba',       count: 2, gap: 1.4 },
+      { at: 16,  id: 'kongaragan', count: 1 },
+      { at: 30,  id: 'jiryu',      count: 1 },
+      { at: 44,  id: 'hoshikun',   count: 1 },
+      { at: 60,  id: 'kongaragan', count: 1, repeat: 34 },
+      { at: 76,  id: 'saba',       count: 2, gap: 1.4, repeat: 32 },
+      { at: 92,  id: 'jiryu',      count: 1, repeat: 52 },
+      { at: 108, id: 'hoshikun',   count: 1, repeat: 46 },
+      /* ボスは てきの しろが 75% まで へると でてくる */
+      { atCastleHp: 0.75, id: 'hetakirin', count: 1 },
     ],
   },
 ];

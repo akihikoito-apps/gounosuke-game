@@ -613,3 +613,30 @@ html, body {
   color:#2e7d32; margin-top:calc(4px * var(--ui));
 }
 .gacha-char { width:100%; height:calc(66px * var(--ui)); display:block; }
+
+/* ---- ガチャがめん：りょうわきに なかま ---- */
+.gacha-catch {
+  font-size:calc(17px * var(--ui)); font-weight:bold;
+  color:#ffd54f; text-shadow:0 2px 0 rgba(0,0,0,.45);
+  letter-spacing:1px;
+}
+.gacha-stage {
+  display:flex; align-items:flex-end; justify-content:center;
+  gap:calc(6px * var(--ui));
+  width:min(calc(560px * var(--ui)), 96%);
+}
+.gacha-stage .gacha-machine { flex:0 0 auto; width:calc(210px * var(--ui)); }
+.gacha-friend {
+  flex:1 1 0; min-width:0;
+  height:calc(120px * var(--ui));
+  display:block;
+}
+.gacha-friend.left  { animation:friendBobA 1.6s ease-in-out infinite alternate; }
+.gacha-friend.right { animation:friendBobB 1.9s ease-in-out infinite alternate; }
+@keyframes friendBobA { from { transform:translateY(0); } to { transform:translateY(calc(-6px * var(--ui))); } }
+@keyframes friendBobB { from { transform:translateY(calc(-5px * var(--ui))); } to { transform:translateY(0); } }
+
+@media (orientation:portrait) {
+  .gacha-friend { height:calc(88px * var(--ui)); }
+  .gacha-stage .gacha-machine { width:calc(165px * var(--ui)); }
+}

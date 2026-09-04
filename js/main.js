@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '1.9';
+  const GAME_VERSION = '2.0';
 
 
   /* =================================================
@@ -180,6 +180,7 @@
     slotIndex = i;
     if (!saveData.slots[i]) saveData.slots[i] = newSlot('データ' + (i + 1));
     fixSlot(saveData.slots[i]);
+    resetGachaWindow();          // データを かえたら ガチャの ひょうじも リセット
     saveData.slots[i].played = Date.now();
     storeSave();
     applyParty();
@@ -378,7 +379,10 @@
         '<span class="stage-info"><b>' + (open ? st.name : '？？？') +
             (isNext ? '<span class="next-badge">つぎは ここ！</span>' : '') + '</b>' +
           '<small>' + (open ? st.desc : 'まえの コースを クリアすると あそべます') + '</small>' +
-          (open ? '<span class="stage-reward">クリアで Gコイン+' + r.coins + '　けいけんち+' + r.exp + '</span>' : '') +
+          (open ? '<span class="stage-reward">' +
+              (cleared[st.no] ? 'けいけんち+' + r.exp + '（Gコインは しょかいのみ）'
+                              : 'クリアで Gコイン+' + r.coins + '　けいけんち+' + r.exp) +
+            '</span>' : '') +
         '</span>' +
         '<span class="stage-clear">' + (cleared[st.no] ? '⭐' : (open ? '' : '🔒')) + '</span>';
       if (open) b.addEventListener('click', () => startBattle(all));
@@ -657,7 +661,26 @@
   /* =================================================
      ガチャ
      ================================================= */
-  function openGacha() { refreshGacha(); show('screen-gacha'); }
+  function openGacha() {
+    resetGachaWindow();          // まえの けっかを けす
+    refreshGacha();
+    show('screen-gacha');
+    requestAnimationFrame(drawGachaFriends);
+  }
+
+  /* ガチャの まどを はじめの ひょうじに もどす */
+  function resetGachaWindow() {
+    const r = $('#gacha-result');
+    if (r) r.innerHTML = GACHA.cost + 'Gコインで<br>1かい ひけるよ！';
+    const w = $('#gacha-window');
+    if (w) w.classList.remove('pop');
+  }
+
+  /* ガチャきの りょうわきに いる ぷりおぷりねこ と タンクン */
+  function drawGachaFriends() {
+    paintChar($('#gacha-purio'),  'purio');
+    paintChar($('#gacha-tankun'), 'tankun');
+  }
 
   function refreshGacha() {
     const s = slot();
@@ -836,11 +859,14 @@
     if (win) {
       const r = Game.stage.reward || { coins: 1, exp: 100 };
       const s = slot();
+      const first = !!(s && !s.cleared[Game.stage.no]);   // はじめての クリアか
       if (s) {
-        s.coins = (s.coins || 0) + r.coins;
-        s.exp   = (s.exp   || 0) + r.exp;
+        if (first) s.coins = (s.coins || 0) + r.coins;    // Gコインは しょかいだけ
+        s.exp = (s.exp || 0) + r.exp;                     // けいけんちは まいかい
       }
-      $('#result-sub').textContent += '　／　Gコイン +' + r.coins + '　けいけんち +' + r.exp;
+      $('#result-sub').textContent += first
+        ? '　／　Gコイン +' + r.coins + '　けいけんち +' + r.exp
+        : '　／　けいけんち +' + r.exp + '（Gコインは しょかいだけ）';
       markCleared(Game.stage.no);
     }
     show('screen-result');
@@ -913,6 +939,7 @@
     }
     redrawIcons();
     if ($('#screen-home').classList.contains('active')) drawHomeTankun();
+    if ($('#screen-gacha').classList.contains('active')) drawGachaFriends();
   }
 
   function init() {

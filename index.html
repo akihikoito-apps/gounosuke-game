@@ -135,12 +135,17 @@
       <h2 class="sub-title">ガチャ</h2>
       <button class="mini-btn" id="btn-gacha-back">もどる</button>
     </div>
-    <div class="gacha-machine">
-      <div class="gm-top"></div>
-      <div class="gm-window" id="gacha-window">
-        <span id="gacha-result">3Gコインで<br>1かい ひけるよ！</span>
+    <p class="gacha-catch">なにが でるかは おたのしみ！</p>
+    <div class="gacha-stage">
+      <canvas class="gacha-friend left" id="gacha-purio"></canvas>
+      <div class="gacha-machine">
+        <div class="gm-top"></div>
+        <div class="gm-window" id="gacha-window">
+          <span id="gacha-result">3Gコインで<br>1かい ひけるよ！</span>
+        </div>
+        <div class="gm-slot"></div>
       </div>
-      <div class="gm-slot"></div>
+      <canvas class="gacha-friend right" id="gacha-tankun"></canvas>
     </div>
     <div class="wallet-bar">
       <span class="w-coin">Gコイン <b id="gacha-coin">0</b></span>
