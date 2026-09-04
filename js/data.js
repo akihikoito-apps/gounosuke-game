@@ -69,7 +69,8 @@ const CONFIG = {
   viewWidth:   0,           // 0 = じどう。もっと ひきで みたい ときだけ すうじを いれる
   charScale:   1.5,         // ふつうの キャラの おおきさ（おおきくすると みやすい）
   bossScale:   1.0,         // ボスだけの おおきさ（ボスは もともと おおきいので べつあつかい）
-  groundLine:  0.60,        // じめんの たかさ（0 = うえ / 1 = した の ボタンのすぐうえ）
+  tallestChar: 250,        // いちばん せの たかい キャラ（ボス）の たかさ。はみださない ように つかう
+  groundLine:  0.62,        // じめんの たかさ（0 = うえ / 1 = した の ボタンのすぐうえ）
                             //   ちいさくすると キャラが うえに いって したに すきまが できる
 };
 
@@ -160,10 +161,30 @@ const UNITS = {
     areaRadius: 46,                              // ばくはつの おおきさ
     projectile: 'fireball',
   },
+
+  /* ずにお ── しろい サイコロ。コロコロ ころがって すすむ。
+             1の めから ビームを だして はんいこうげき。
+             みず と けもの の てきだけ 50%で 2びょう とめる  */
+  zunio: {
+    id: 'zunio', name: 'ずにお', shortName: 'ずにお',
+    attr: 'none',
+    cost: 420,  recharge: 8.0,
+    hp: 420,    atk: 300,  range: 150,  speed: 16,
+    attackInterval: 4.0,   attackWindup: 0.5,    // クールタイム 4びょう
+    kbCount: 2,
+    scale: 1.0,
+    attackType: 'area',                          // はんい こうげき
+    areaRadius: 60,
+    projectile: 'beam',
+    rolls: true,                                 // ころがって いどうする
+    /* とくしゅのうりょく：みず と けもの の てきを 50%で 2びょう とめる */
+    stun: { duration: 2.0, chance: 0.5, attrs: ['water', 'beast'] },
+  },
 };
 
-/* がめん したの ボタンに ならぶ じゅんばん（さいだい10たい） */
-const PARTY = ['tankun', 'purio', 'tokinotabibito', 'teruteru', 'hiibou'];
+/* がめん したの ボタンに ならぶ じゅんばん（さいだい10たい）
+   10たいに なると したの ボタンは じどうで 2だんに ならびます */
+const PARTY = ['tankun', 'purio', 'tokinotabibito', 'teruteru', 'hiibou', 'zunio'];
 
 
 /* --------------------------------------------------------------------------

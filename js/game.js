@@ -158,7 +158,7 @@ const Game = {
       burst: null,
       kbT: 0, kbFrom: 0, kbTo: 0,
       nextKb: def.kbCount - 1,   // つぎに ふきとぶ しきいち（のこり）
-      slowUntil: -1, slowRate: 1,
+      slowUntil: -1, slowRate: 1, roll: 0,
       stunUntil: -1,
       dead: false,
       flash: 0,
@@ -297,6 +297,7 @@ const Game = {
       if (u.slowUntil > this.time) sp *= (u.slowRate || 0.5);
       u.x += sp * u.forward * dt;
       u.x = Math.max(0, Math.min(CONFIG.fieldLength, u.x));
+      if (u.def.rolls) u.roll += (sp * dt / 25) * -u.forward;   // コロコロ ころがる
     }
   },
 
@@ -405,7 +406,8 @@ const Game = {
           }
         }
       }
-      if (stun && !v.dead && Math.random() < ((stun.chance === undefined) ? 1 : stun.chance)) {
+      const stunOkAttr = stun && (!stun.attrs || stun.attrs.indexOf(v.def.attr) >= 0);
+      if (stunOkAttr && !v.dead && Math.random() < ((stun.chance === undefined) ? 1 : stun.chance)) {
         v.stunUntil = this.time + stun.duration;
         this.addEffect({ type: 'stunMark', x: v.x, y: this.groundWorldY() - 78, life: 0.9 });
       }
@@ -565,10 +567,15 @@ const Game = {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.view.w = w;
     this.view.h = h;
-    // せんじょう ぜんたい（しろも ふくむ）が よこに おさまる おおきさ
-    this.view.scale = Math.min(1.30, w / this.worldWidth());
+    // じめんの いち
     const playH = h - this.hudHeight;
-    this.view.groundY = this.hudTop() + playH * CONFIG.groundLine;
+    const groundY = this.hudTop() + playH * CONFIG.groundLine;
+    this.view.groundY = groundY;
+    // よこ：せんじょう ぜんたい（しろも ふくむ）が おさまる おおきさ
+    const byWidth  = w / this.worldWidth();
+    // たて：いちばん おおきい ボスが うえに はみださない おおきさ
+    const byHeight = Math.max(0.18, (groundY - this.hudTop()) / (CONFIG.tallestChar || 250));
+    this.view.scale = Math.min(1.30, byWidth, byHeight);
   },
 
   /* よこに うつす べき ワールドの はば */
@@ -581,7 +588,8 @@ const Game = {
     return this.view.w / this.view.scale >= CONFIG.fieldLength + CONFIG.castleMargin * 2 - 1;
   },
   _e: {},                            // エフェクトびょうが用の つかいまわし オブジェクト
-  hudTop() { return 50; },
+  hudTopHeight: 48,
+  hudTop() { return this.hudTopHeight || 48; },
   groundWorldY() { return 0; },     // ワールドy は つねに 0（じめん）
 
   worldToScreenX(wx) { return (wx - this.camera.x) * this.view.scale + this.view.w / 2; },
@@ -856,6 +864,7 @@ const Game = {
         moving: u.state === 'walk',
         atk: u.windup >= 0 ? Math.min(1, u.windup / u.def.attackWindup) : -1,
         hpRatio: u.hp / u.maxHp,
+        roll: u.roll || 0,
       };
       if (u.flash > 0) {
         ctx.save();

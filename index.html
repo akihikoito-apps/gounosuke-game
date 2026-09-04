@@ -25,7 +25,6 @@
     <button id="btn-update-later" class="up-later">あとで</button>
   </div>
 
-
   <!-- ============ タイトル画面 ============ -->
   <section id="screen-title" class="screen active">
     <div class="title-bg"></div>
@@ -33,6 +32,58 @@
     <button class="big-btn" id="btn-start">はじめる</button>
     <p class="rotate-hint">よこむきにすると あそびやすいよ</p>
     <p class="version-tag">ver <span id="version-num">-</span></p>
+  </section>
+
+  <!-- ============ セーブデータ選択 ============ -->
+  <section id="screen-save" class="screen">
+    <h2 class="sub-title">セーブデータを えらぶ</h2>
+    <div id="save-slots"></div>
+    <button class="text-btn" id="btn-save-back">タイトルへ もどる</button>
+  </section>
+
+  <!-- ============ トップ画面（ホーム） ============ -->
+  <section id="screen-home" class="screen">
+    <div class="home-wrap">
+
+      <div class="home-menu">
+        <button class="home-btn b1" id="btn-home-stage">
+          <span class="hb-label">ステージ せんたく</span><span class="hb-ico">🎲</span>
+        </button>
+        <button class="home-btn b2" id="btn-home-power">
+          <span class="hb-label">パワーアップ‼️</span><span class="hb-ico">🔺</span>
+        </button>
+        <button class="home-btn b3" id="btn-home-party">
+          <span class="hb-label">キャラクター へんせい</span><span class="hb-ico">😊</span>
+        </button>
+      </div>
+
+      <div class="home-speech">
+        <div class="speech-bubble" id="home-speech">
+          たんくんだよ！<br>ステージを クリアして<br>ほうしゅうを てに いれよう！！
+        </div>
+      </div>
+
+      <div class="home-shelf">
+        <div class="shelf-items"><span>⭐</span><span>🌭</span></div>
+        <div class="shelf-top"></div>
+        <div class="shelf-legs"><i></i><i></i></div>
+      </div>
+
+      <button class="gacha-btn" id="btn-home-gacha">
+        <span class="gacha-label">ガチャ🤩</span>
+        <span class="gacha-slot"></span>
+      </button>
+
+      <div class="home-tankun">
+        <canvas id="home-tankun-canvas"></canvas>
+      </div>
+
+      <div class="home-topbar">
+        <span class="home-slot-name" id="home-slot-label">データ1</span>
+        <button class="mini-btn" id="btn-home-back">データを かえる</button>
+      </div>
+
+    </div>
   </section>
 
   <!-- ============ ステージ選択画面 ============ -->
@@ -110,6 +161,20 @@
     <button class="big-btn" id="btn-result-retry">もういちど</button>
     <button class="text-btn" id="btn-result-back">ステージせんたくへ</button>
   </section>
+
+  <!-- ちいさな おしらせ -->
+  <div id="toast" class="hidden"></div>
+
+  <!-- セーブデータを けす かくにん -->
+  <div id="confirm-erase" class="modal hidden">
+    <div class="modal-box">
+      <p class="modal-text"><span id="erase-name">データ1</span> を<br>けしても いいですか？<br><small>もとには もどせません</small></p>
+      <div class="modal-btns">
+        <button id="btn-erase-no"  class="modal-btn keep">やめる</button>
+        <button id="btn-erase-yes" class="modal-btn quit">けす</button>
+      </div>
+    </div>
+  </div>
 
 </div>
 

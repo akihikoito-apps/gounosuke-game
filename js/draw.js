@@ -330,6 +330,50 @@ function drawHiibou(ctx, s) {
 }
 
 
+/* ---- ずにお：しろい サイコロ。ころがって すすみ、1の めから ビーム ---- */
+function drawZunio(ctx, s) {
+  const R = 25;                       // サイコロの はんぶんの おおきさ
+  const charge = s.atk >= 0 ? s.atk : 0;
+
+  ctx.save();
+  ctx.translate(0, -R - 2);
+  ctx.rotate(s.roll || 0);            // ころがり
+
+  // ほんたい（しろい かどまる しかく）
+  const g = ctx.createLinearGradient(-R, -R, R, R);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(1, '#dfe4ea');
+  ctx.fillStyle = g;
+  roundRect(ctx, -R, -R, R * 2, R * 2, 9); ctx.fill();
+  ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2.6;
+  roundRect(ctx, -R, -R, R * 2, R * 2, 9); ctx.stroke();
+
+  // 1の め（あかい まる）
+  const pulse = 1 + charge * 0.18;
+  ctx.fillStyle = '#e03131';
+  ctx.beginPath(); ctx.arc(0, 0, 11.5 * pulse, 0, Math.PI * 2); ctx.fill();
+  if (charge > 0) {
+    ctx.fillStyle = 'rgba(255,120,90,' + (0.25 + charge * 0.4) + ')';
+    ctx.beginPath(); ctx.arc(0, 0, 11.5 * pulse + 5 + charge * 6, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+
+  // ビームの ため（ころがりに つられない ように がいそくで かく）
+  if (charge > 0) {
+    ctx.save();
+    ctx.translate(0, -R - 2);
+    ctx.globalAlpha = 0.35 + charge * 0.5;
+    const bg = ctx.createLinearGradient(0, 0, 30 + charge * 30, 0);
+    bg.addColorStop(0, 'rgba(255,80,60,0.95)');
+    bg.addColorStop(1, 'rgba(255,180,120,0)');
+    ctx.fillStyle = bg;
+    const hh = 3 + charge * 6;
+    ctx.fillRect(8, -hh / 2, 26 + charge * 34, hh);
+    ctx.restore();
+  }
+}
+
+
 /* ==================================================================
    てきキャラ
    ================================================================== */
@@ -754,6 +798,7 @@ const DRAWERS = {
   teruteru: drawTeruteru,
   tokinotabibito: drawTokinotabibito,
   hiibou: drawHiibou,
+  zunio: drawZunio,
   honota: drawHonota,
   togehaya: drawTogehaya,
   saba: drawSaba,
@@ -816,6 +861,19 @@ function drawProjectile(ctx, p) {
         ctx.strokeText('字', 0, 0);
         ctx.fillStyle = '#1b3d0a';
         ctx.fillText('字', 0, 0);
+      }
+      break;
+    case 'beam':      // ずにおの ビーム
+      {
+        const g = ctx.createLinearGradient(-26 * p.dir, 0, 22 * p.dir, 0);
+        g.addColorStop(0, 'rgba(255,120,90,0)');
+        g.addColorStop(0.55, 'rgba(255,90,60,0.95)');
+        g.addColorStop(1, 'rgba(255,240,220,1)');
+        ctx.fillStyle = g;
+        const h = 9 + Math.sin(t * 40) * 2;
+        ctx.fillRect(-26 * p.dir, -h / 2, 48 * p.dir, h);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.beginPath(); ctx.arc(18 * p.dir, 0, 5.5, 0, Math.PI * 2); ctx.fill();
       }
       break;
     case 'stone':     // お菓子マンの いし
