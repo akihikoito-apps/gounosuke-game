@@ -86,11 +86,22 @@
     </div>
   </section>
 
-  <!-- ============ ステージ選択画面 ============ -->
+  <!-- ============ ステージ（章）選択画面 ============ -->
+  <section id="screen-chapter" class="screen">
+    <div class="panel-head">
+      <h2 class="sub-title">ステージを えらぶ</h2>
+      <button class="mini-btn" id="btn-chapter-back">もどる</button>
+    </div>
+    <div id="chapter-list"></div>
+  </section>
+
+  <!-- ============ コース選択画面 ============ -->
   <section id="screen-stage" class="screen">
-    <h2 class="sub-title">コースをえらぶ</h2>
+    <div class="panel-head">
+      <h2 class="sub-title" id="stage-title">コースをえらぶ</h2>
+      <button class="mini-btn" id="btn-stage-back">もどる</button>
+    </div>
     <div id="stage-list"></div>
-    <button class="text-btn" id="btn-stage-back">もどる</button>
   </section>
 
   <!-- ============ キャラクター編成 ============ -->
@@ -135,6 +146,7 @@
       <span class="w-coin">Gコイン <b id="gacha-coin">0</b></span>
       <span class="w-exp">けいけんち <b id="gacha-exp">0</b></span>
     </div>
+    <p id="gacha-rates" class="panel-hint"></p>
     <button class="big-btn" id="btn-gacha-pull">ガチャを ひく（3コイン）</button>
   </section>
 

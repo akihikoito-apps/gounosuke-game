@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '1.8';
+  const GAME_VERSION = '1.9';
 
 
   /* =================================================
@@ -69,10 +69,11 @@
       played: Date.now(),
       coins: 0,                          // Gコイン（ガチャに つかう）
       exp: 0,                            // けいけんち（レベルあげに つかう）
-      levels: {},                        // キャラごとの レベル
+      levels: {},                        // キャラごとの レベル（けいけんちで あがる）
+      plus: {},                          // レベルの じょうげんかいほう（ガチャの ダブりで ふえる）
       evolved: {},                       // しんかずみの キャラ
-      owned: DEFAULT_PARTY.slice(),      // もっている キャラ
-      party: DEFAULT_PARTY.slice(),      // せんとうに つれていく メンバー
+      owned: START_CHARS.slice(),        // もっている キャラ（はじめは 2たい）
+      party: START_CHARS.slice(),        // せんとうに つれていく メンバー
     };
   }
 
@@ -108,13 +109,31 @@
     if (typeof s.coins !== 'number') s.coins = 0;
     if (typeof s.exp   !== 'number') s.exp = 0;
     if (!s.levels)  s.levels = {};
+    if (!s.plus)    s.plus = {};
     if (!s.evolved) s.evolved = {};
-    if (!Array.isArray(s.owned) || !s.owned.length) s.owned = DEFAULT_PARTY.slice();
-    if (!Array.isArray(s.party) || !s.party.filter(Boolean).length) s.party = DEFAULT_PARTY.slice();
+    if (!Array.isArray(s.owned) || !s.owned.length) s.owned = START_CHARS.slice();
+    if (!Array.isArray(s.party) || !s.party.filter(Boolean).length) s.party = s.owned.slice(0, PARTY_MAX);
+    s.owned.forEach(id => { if (typeof s.plus[id] !== 'number') s.plus[id] = 0; });
+    s.party = s.party.map(id => (id && s.owned.indexOf(id) >= 0) ? id : null);
     s.owned.forEach(id => { if (!s.levels[id]) s.levels[id] = 1; });
     while (s.party.length < PARTY_MAX) s.party.push(null);
     s.party.length = PARTY_MAX;
     return s;
+  }
+
+  /* じつりょくレベル ＝ けいけんちで あげた レベル ＋ じょうげんかいほう(＋) */
+  function effLevel(s, id) {
+    if (!s) return 1;
+    const base = s.levels[id] || 1;
+    const plus = (s.plus && s.plus[id]) || 0;
+    return Math.min(LEVEL.max + GACHA.plusMax, base + plus);
+  }
+
+  /* せんとうに わたす レベルひょう を つくる */
+  function effLevelMap(s) {
+    const m = {};
+    (s.owned || []).forEach(id => { m[id] = effLevel(s, id); });
+    return m;
   }
 
   function markCleared(no) {
@@ -287,38 +306,82 @@
   /* =================================================
      ステージ せんたく
      ================================================= */
+  /* --- しょう（ステージ）ごとの コース --- */
+  function chapterList() {
+    const chs = [];
+    STAGES.forEach(st => { const c = st.chapter || 1; if (chs.indexOf(c) < 0) chs.push(c); });
+    return chs.sort((a, b) => a - b);
+  }
+  function coursesOf(ch) { return STAGES.filter(st => (st.chapter || 1) === ch); }
+
+  /* まえの しょうを ぜんぶ クリアすると つぎの しょうが あそべる */
+  function chapterOpen(ch) {
+    if (ch <= chapterList()[0]) return true;
+    const cleared = (slot() && slot().cleared) || {};
+    const prev = coursesOf(ch - 1);
+    return prev.length > 0 && prev.every(st => cleared[st.no]);
+  }
+
+  let currentChapter = 1;
+
+  function openChapters() {
+    const box = $('#chapter-list');
+    box.innerHTML = '';
+    const cleared = (slot() && slot().cleared) || {};
+    chapterList().forEach(ch => {
+      const list = coursesOf(ch);
+      const done = list.filter(st => cleared[st.no]).length;
+      const open = chapterOpen(ch);
+      const el = document.createElement('button');
+      el.className = 'chapter-card' + (open ? '' : ' locked');
+      el.innerHTML =
+        '<span class="cc-no">' + ch + '</span>' +
+        '<span class="cc-info"><b>だい' + ch + 'ステージ</b>' +
+          '<small>' + (open ? (done + ' / ' + list.length + ' コース クリア') : 'まえの ステージを ぜんぶ クリアすると あそべます') + '</small>' +
+          (open ? '<span class="cc-bar"><i style="width:' + (done / list.length * 100) + '%"></i></span>' : '') +
+        '</span>' +
+        '<span class="cc-mark">' + (open ? (done === list.length ? '⭐' : '▶') : '🔒') + '</span>';
+      if (open) el.addEventListener('click', () => { currentChapter = ch; buildStageList(); show('screen-stage'); });
+      else      el.addEventListener('click', () => toast('まえの ステージを ぜんぶ クリアしてね'));
+      box.appendChild(el);
+    });
+    show('screen-chapter');
+  }
+
   function buildStageList() {
     const box = $('#stage-list');
     box.innerHTML = '';
     const cleared = (slot() && slot().cleared) || {};
-    let lastChapter = 0;
+    const list = coursesOf(currentChapter);
+    $('#stage-title').textContent = 'だい' + currentChapter + 'ステージ';
 
-    STAGES.forEach((st, i) => {
-      // あたらしい ステージ（しょう）の みだし
-      const ch = st.chapter || 1;
-      if (ch !== lastChapter) {
-        lastChapter = ch;
-        const head = document.createElement('div');
-        head.className = 'chapter-head';
-        head.textContent = 'だい' + ch + 'ステージ';
-        box.appendChild(head);
-      }
+    // つぎに あそぶ コース（クリアして いない さいしょの コース）
+    let nextIdx = -1;
+    for (let k = 0; k < list.length; k++) {
+      const all = STAGES.indexOf(list[k]);
+      const prev = STAGES[all - 1];
+      const open = (all === 0) || !!cleared[prev.no] || !!cleared[list[k].no];
+      if (open && !cleared[list[k].no]) { nextIdx = k; break; }
+    }
 
-      // まえの コースを クリアして いれば あそべる
-      const prev = STAGES[i - 1];
-      const open = (i === 0) || !!cleared[prev.no];
+    list.forEach((st, k) => {
+      const all  = STAGES.indexOf(st);
+      const prev = STAGES[all - 1];
+      const open = (all === 0) || !!cleared[prev.no] || !!cleared[st.no];
+      const isNext = (k === nextIdx);
 
       const b = document.createElement('button');
-      b.className = 'stage-card' + (open ? '' : ' locked');
+      b.className = 'stage-card' + (open ? '' : ' locked') + (isNext ? ' next' : '');
       const r = st.reward || { coins: 1, exp: 100 };
       b.innerHTML =
-        '<span class="stage-no">' + ch + '-' + (st.course || st.no) + '</span>' +
-        '<span class="stage-info"><b>' + (open ? st.name : '？？？') + '</b>' +
+        '<span class="stage-no">' + st.chapter + '-' + (st.course || st.no) + '</span>' +
+        '<span class="stage-info"><b>' + (open ? st.name : '？？？') +
+            (isNext ? '<span class="next-badge">つぎは ここ！</span>' : '') + '</b>' +
           '<small>' + (open ? st.desc : 'まえの コースを クリアすると あそべます') + '</small>' +
           (open ? '<span class="stage-reward">クリアで Gコイン+' + r.coins + '　けいけんち+' + r.exp + '</span>' : '') +
         '</span>' +
         '<span class="stage-clear">' + (cleared[st.no] ? '⭐' : (open ? '' : '🔒')) + '</span>';
-      if (open) b.addEventListener('click', () => startBattle(i));
+      if (open) b.addEventListener('click', () => startBattle(all));
       else      b.addEventListener('click', () => toast('まえの コースを クリアしてね'));
       box.appendChild(b);
     });
@@ -508,7 +571,7 @@
     PARTY.length = 0;
     list.forEach(id => { if (UNITS[id]) PARTY.push(id); });
     if (PARTY.length === 0) PARTY.push(DEFAULT_PARTY[0]);
-    Game.levels = (s && s.levels) || {};
+    Game.levels = s ? effLevelMap(s) : {};
     applyUnitLayout();
     buildUnitButtons();
     requestAnimationFrame(redrawIcons);
@@ -519,6 +582,18 @@
      パワーアップ（レベルあげ）
      ================================================= */
   function openPower() { buildPower(); show('screen-power'); requestAnimationFrame(buildPower); }
+
+  function doLevelUp(id) {
+    const s = slot();
+    const c = levelUpCost(s.levels[id] || 1);
+    if (c === null || (s.exp || 0) < c) return;
+    s.exp -= c;
+    s.levels[id] = (s.levels[id] || 1) + 1;
+    storeSave();
+    Game.levels = effLevelMap(s);
+    toast(UNITS[id].name + ' が Lv.' + s.levels[id] + ' に なった！');
+    buildPower(); requestAnimationFrame(buildPower);
+  }
 
   function buildPower() {
     const s = slot();
@@ -532,10 +607,13 @@
       const def = UNITS[id];
       if (!def) return;
       const lv   = s.levels[id] || 1;
+      const plus = (s.plus && s.plus[id]) || 0;
+      const eff  = effLevel(s, id);
       const cost = levelUpCost(lv);
-      const mul  = levelMult(lv);
+      const mul  = levelMult(eff);
       const maxed = (cost === null);
       const can  = !maxed && (s.exp || 0) >= cost;
+      const canEvolve = eff >= LEVEL.max;
 
       const row = document.createElement('div');
       row.className = 'power-row';
@@ -543,7 +621,9 @@
         '<canvas></canvas>' +
         '<span class="pr-info">' +
           '<span class="pr-name">' + def.name + '</span>' +
-          '<span class="pr-lv">Lv.' + lv + ' / ' + LEVEL.max + (s.evolved && s.evolved[id] ? '　★しんかずみ' : '') + '</span>' +
+          '<span class="pr-lv">Lv.' + lv + ' / ' + LEVEL.max +
+            (plus ? ' <span class="pr-plus">＋' + plus + '</span>　じつりょく Lv.' + eff : '') +
+            (s.evolved && s.evolved[id] ? '　★しんかずみ' : '') + '</span>' +
           '<span class="pr-bar"><i style="width:' + ((lv - 1) / (LEVEL.max - 1) * 100) + '%"></i></span>' +
           '<span class="pr-stat">たいりょく ' + Math.round(def.hp * mul) +
             '　こうげき ' + Math.round(def.atk * mul) + '（' + mul.toFixed(1) + 'ばい）</span>' +
@@ -551,22 +631,21 @@
 
       const btn = document.createElement('button');
       btn.className = 'pr-btn' + (maxed ? ' evolve' : '');
-      if (maxed) {
-        btn.innerHTML = 'しんか<br><small>じゅんびちゅう</small>';
-        btn.addEventListener('click', () => toast('しんかは じゅんびちゅう！ すがたが きまったら つかえます'));
+      if (maxed || canEvolve) {
+        btn.innerHTML = maxed ? 'しんか<br><small>じゅんびちゅう</small>'
+                              : 'レベルアップ<br><small>' + cost + '</small>';
+        if (maxed) {
+          btn.className = 'pr-btn evolve';
+          btn.addEventListener('click', () => toast('しんかは じゅんびちゅう！ すがたが きまったら つかえます'));
+        } else {
+          btn.className = 'pr-btn';
+          btn.disabled = !can;
+          btn.addEventListener('click', () => doLevelUp(id));
+        }
       } else {
         btn.innerHTML = 'レベルアップ<br><small>' + cost + '</small>';
         btn.disabled = !can;
-        btn.addEventListener('click', () => {
-          const c = levelUpCost(s.levels[id] || 1);
-          if (c === null || (s.exp || 0) < c) return;
-          s.exp -= c;
-          s.levels[id] = (s.levels[id] || 1) + 1;
-          storeSave();
-          Game.levels = s.levels;
-          toast(def.name + ' が Lv.' + s.levels[id] + ' に なった！');
-          buildPower(); requestAnimationFrame(buildPower);
-        });
+        btn.addEventListener('click', () => doLevelUp(id));
       }
       row.appendChild(btn);
       box.appendChild(row);
@@ -588,6 +667,13 @@
     const btn = $('#btn-gacha-pull');
     btn.disabled = (s.coins || 0) < GACHA.cost;
     btn.textContent = 'ガチャを ひく（' + GACHA.cost + 'コイン）';
+    const info = $('#gacha-rates');
+    if (info && !info.dataset.done) {
+      info.dataset.done = '1';
+      info.innerHTML = ['N', 'R', 'SR', 'LR'].map(k =>
+        '<span class="rarity-tag" style="background:' + RARITY[k].color + '">' +
+        RARITY[k].star + ' ' + RARITY[k].label + ' ' + RARITY[k].rate + '%</span>').join(' ');
+    }
   }
 
   function pullGacha() {
@@ -595,22 +681,66 @@
     if (!s || (s.coins || 0) < GACHA.cost) { toast('Gコインが たりません'); return; }
     s.coins -= GACHA.cost;
 
-    const total = GACHA.prizes.reduce((a, p) => a + p.weight, 0);
-    let r = Math.random() * total, prize = GACHA.prizes[0];
-    for (const p of GACHA.prizes) { r -= p.weight; if (r <= 0) { prize = p; break; } }
+    /* --- レアリティを ちゅうせん --- */
+    const keys = ['N', 'R', 'SR', 'LR'];
+    const total = keys.reduce((a, k) => a + RARITY[k].rate, 0);
+    let r = Math.random() * total, rank = 'N';
+    for (const k of keys) { r -= RARITY[k].rate; if (r <= 0) { rank = k; break; } }
+    const info = RARITY[rank];
 
-    s.exp = (s.exp || 0) + prize.exp;
+    /* --- その レアリティの キャラから 1たい --- */
+    const pool = ALL_CHARS.filter(id => UNITS[id] && UNITS[id].rarity === rank);
+    let html = '';
+
+    if (pool.length === 0) {
+      /* まだ キャラが いない レアリティ（でんせつレア）*/
+      s.exp = (s.exp || 0) + GACHA.emptyExp;
+      html = '<span class="gacha-rank" style="color:' + info.color + '">' + info.star + '</span>' +
+             info.label + '<span class="gacha-new">まだ とうじょう して いません！<br>けいけんち +' + GACHA.emptyExp + '</span>';
+    } else {
+      const id = pool[Math.floor(Math.random() * pool.length)];
+      const def = UNITS[id];
+      const has = s.owned.indexOf(id) >= 0;
+
+      if (!has) {
+        /* --- あたらしい なかま！ --- */
+        s.owned.push(id);
+        s.levels[id] = 1;
+        s.plus[id] = 0;
+        const empty = s.party.indexOf(null);
+        if (empty >= 0) s.party[empty] = id;
+        html = '<span class="gacha-rank" style="color:' + info.color + '">' + info.star + '</span>' +
+               '<canvas class="gacha-char" data-char="' + id + '"></canvas>' +
+               '<span class="gacha-new">' + def.name + ' が なかまに なった！</span>';
+      } else if ((s.plus[id] || 0) < GACHA.plusMax) {
+        /* --- ダブり → レベルの じょうげんかいほう --- */
+        s.plus[id] = (s.plus[id] || 0) + 1;
+        html = '<span class="gacha-rank" style="color:' + info.color + '">' + info.star + '</span>' +
+               '<canvas class="gacha-char" data-char="' + id + '"></canvas>' +
+               '<span class="gacha-new">' + def.name + ' ＋' + s.plus[id] + '<br>じょうげんかいほう！</span>';
+      } else {
+        /* --- ＋が MAX → けいけんちに --- */
+        const e = GACHA.dupExp[rank] || 100;
+        s.exp = (s.exp || 0) + e;
+        html = '<span class="gacha-rank" style="color:' + info.color + '">' + info.star + '</span>' +
+               '<canvas class="gacha-char" data-char="' + id + '"></canvas>' +
+               '<span class="gacha-new">' + def.name + ' は ＋MAX！<br>けいけんち +' + e + '</span>';
+      }
+    }
+
     storeSave();
+    applyParty();
 
     const win = $('#gacha-window');
-    $('#gacha-result').innerHTML =
-      '<span class="gacha-rank" style="color:' + prize.color + '">' + prize.rank + '</span>' +
-      'けいけんち +' + prize.exp;
+    $('#gacha-result').innerHTML = html;
+    const cv = $('#gacha-result').querySelector('canvas');
+    if (cv) requestAnimationFrame(() => paintChar(cv, cv.dataset ? cv.dataset.char : null));
     win.classList.remove('pop');
     void win.offsetWidth;
     win.classList.add('pop');
     refreshGacha();
   }
+
 
 
   /* =================================================
@@ -809,7 +939,8 @@
     });
 
     /* トップがめん */
-    $('#btn-home-stage').addEventListener('click', () => { buildStageList(); show('screen-stage'); });
+    $('#btn-home-stage').addEventListener('click', openChapters);
+    $('#btn-chapter-back').addEventListener('click', openHome);
     $('#btn-home-power').addEventListener('click', openPower);
     $('#btn-home-party').addEventListener('click', openParty);
     $('#btn-home-gacha').addEventListener('click', openGacha);
@@ -820,7 +951,7 @@
     $('#btn-home-back').addEventListener('click', () => { buildSaveSlots(); show('screen-save'); });
 
     /* ステージ せんたく */
-    $('#btn-stage-back').addEventListener('click', () => openHome());
+    $('#btn-stage-back').addEventListener('click', openChapters);
 
     /* バトル */
     $('#btn-retreat').addEventListener('click', () => {

@@ -687,6 +687,59 @@ function drawHetakirin(ctx, s) {
 }
 
 
+/* ほしの かたちを かく（ほしくん ／ ほしの たま で つかう）*/
+function starPath(ctx, cx, cy, rOut, rIn, rot) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const r = (i % 2 === 0) ? rOut : rIn;
+    const a = (rot || 0) - Math.PI / 2 + i * Math.PI / 5;
+    const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+}
+
+/* ---- ほしくん：きいろい ほしの からだ ＋ たてながの あたま ---- */
+function drawHoshikun(ctx, s) {
+  const bob = Math.sin(s.t * 3) * 2 + (s.moving ? Math.sin(s.t * 9) * 1.5 : 0);
+  const charge = s.atk >= 0 ? s.atk : 0;
+  const Y = '#e8bf2e', Y2 = '#f5d356';
+
+  ctx.save();
+  ctx.translate(0, bob);
+
+  // からだ（ほし）
+  ctx.fillStyle = Y;
+  starPath(ctx, 0, -34, 38, 16, 0);
+  ctx.fill();
+
+  // あたま（たてながの かどまる）
+  ctx.fillStyle = Y2;
+  roundRect(ctx, -13, -104, 26, 58, 9); ctx.fill();
+  ctx.fillStyle = Y;
+  roundRect(ctx, -13, -104, 26, 58, 9);
+
+  // め（2ほんの たてせん）
+  ctx.strokeStyle = '#20202a'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+  const eyeH = 22 - charge * 6;
+  ctx.beginPath(); ctx.moveTo(-5, -96); ctx.lineTo(-5, -96 + eyeH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(5, -96);  ctx.lineTo(5, -96 + eyeH);  ctx.stroke();
+
+  // なげる まえの ほしを ためる
+  if (charge > 0) {
+    ctx.save();
+    ctx.translate(30 + charge * 8, -62);
+    ctx.rotate(s.t * 6);
+    ctx.fillStyle = 'rgba(255,241,118,' + (0.5 + charge * 0.5) + ')';
+    starPath(ctx, 0, 0, 8 + charge * 7, 3.5 + charge * 3, 0);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+
 /* ---- コンガラガーン：あおい あたま・オレンジの からだ・やじるしの て ---- */
 function drawKongaragan(ctx, s) {
   const step = Math.sin(s.t * 8) * (s.moving ? 1 : 0);
@@ -859,6 +912,7 @@ const DRAWERS = {
   togehaya: drawTogehaya,
   saba: drawSaba,
   jiryu: drawJiryu,
+  hoshikun: drawHoshikun,
   kongaragan: drawKongaragan,
   hetakirin: drawHetakirin,
   okashiman: drawOkashiman,
@@ -918,6 +972,21 @@ function drawProjectile(ctx, p) {
         ctx.strokeText('字', 0, 0);
         ctx.fillStyle = '#1b3d0a';
         ctx.fillText('字', 0, 0);
+      }
+      break;
+    case 'star':      // ほしくんの ほし
+      {
+        ctx.rotate(t * 7 * p.dir);
+        const r = 13 + Math.sin(t * 18) * 1.5;
+        ctx.fillStyle = '#ffe082';
+        starPath(ctx, 0, 0, r, r * 0.42, 0);
+        ctx.fill();
+        ctx.strokeStyle = '#e8a800'; ctx.lineWidth = 1.8;
+        starPath(ctx, 0, 0, r, r * 0.42, 0);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        starPath(ctx, -2, -2, r * 0.42, r * 0.18, 0);
+        ctx.fill();
       }
       break;
     case 'beam':      // ずにおの ビーム

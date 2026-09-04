@@ -90,6 +90,7 @@ const UNITS = {
   /* ぷりおぷりねこ ── オレンジの ゼリーねこ / じゃまやく */
   purio: {
     id: 'purio', name: 'ぷりおぷりねこ', shortName: 'ぷりお',
+    rarity: 'N',                          // ノーマル
     attr: 'none',
     cost: 90,   recharge: 3.5,
     hp: 560,    atk: 34,   range: 101,  speed: 22,
@@ -105,6 +106,7 @@ const UNITS = {
   /* タンクン ── よこながの みずいろ せんしゃねこ / かべやく */
   tankun: {
     id: 'tankun', name: 'タンクン', shortName: 'タンクン',
+    rarity: 'N',                          // ノーマル
     attr: 'none',
     cost: 75,   recharge: 2.4,
     hp: 1400,   atk: 22,   range: 62,   speed: 26,
@@ -118,6 +120,7 @@ const UNITS = {
   /* テルテル君 ── みずいろの てるてるぼうず / えんきょり（ガラスの たいほう） */
   teruteru: {
     id: 'teruteru', name: 'テルテル君', shortName: 'テルテル',
+    rarity: 'N',                          // ノーマル
     attr: 'water',
     cost: 380,  recharge: 9.0,
     hp: 360,    atk: 90,   range: 184,  speed: 14,
@@ -133,6 +136,7 @@ const UNITS = {
   /* 時の旅人 ── くろスーツの しょうねん / バランスがた */
   tokinotabibito: {
     id: 'tokinotabibito', name: '時の旅人', shortName: '旅人',
+    rarity: 'R',                          // レア
     attr: 'magic',                          // まじゅつし（パワーに つよい / けものに よわい）
     cost: 260,  recharge: 6.0,
     hp: 820,    atk: 155,  range: 131,  speed: 33,
@@ -148,6 +152,7 @@ const UNITS = {
   /* ひー坊 ── ほのおを まとった たかかりょく */
   hiibou: {
     id: 'hiibou', name: 'ひー坊', shortName: 'ひー坊',
+    rarity: 'SR',                          // スーパーレア
     attr: 'fire',
     cost: 450,  recharge: 10.0,
     hp: 1450,   atk: 430,  range: 118,  speed: 24,
@@ -164,6 +169,7 @@ const UNITS = {
              みず と けもの の てきだけ 50%で 2びょう とめる  */
   zunio: {
     id: 'zunio', name: 'ずにお', shortName: 'ずにお',
+    rarity: 'R',                          // レア
     attr: 'none',
     cost: 420,  recharge: 8.0,
     hp: 420,    atk: 300,  range: 150,  speed: 16,
@@ -182,7 +188,11 @@ const UNITS = {
 /* はじめから もっている キャラ（へんせいの しょきち）
    へんせいがめんで さいだい 10たい まで えらべます */
 const PARTY_MAX = 10;
-const DEFAULT_PARTY = ['tankun', 'purio', 'tokinotabibito', 'teruteru', 'hiibou', 'zunio'];
+/* はじめから もっている キャラ（のこりは ガチャで あつめます）*/
+const START_CHARS = ['tankun', 'purio'];
+const DEFAULT_PARTY = START_CHARS.slice();
+/* ガチャに でてくる キャラ ぜんぶ */
+const ALL_CHARS = ['tankun', 'purio', 'teruteru', 'tokinotabibito', 'zunio', 'hiibou'];
 let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく メンバー（へんせいで かわる）
 
 
@@ -199,9 +209,12 @@ const LEVEL = {
   gainPerLevel: 0.10,      // 1レベルで +10%。Lv10 で 1.9ばい
 };
 
-/* レベルから つよさの ばいりつを だす */
+/* レベルから つよさの ばいりつを だす
+   じょうげんかいほう(＋)の ぶんも「レベルが あがったのと おなじ」に なります。
+   けいけんちレベル 10 ＋ かいほう 30 = じつりょく Lv.40（4.9ばい）が さいだい  */
 function levelMult(lv) {
-  const L = Math.max(1, Math.min(LEVEL.max, lv || 1));
+  const cap = LEVEL.max + ((typeof GACHA !== 'undefined') ? GACHA.plusMax : 0);
+  const L = Math.max(1, Math.min(cap, lv || 1));
   return 1 + (L - 1) * LEVEL.gainPerLevel;
 }
 
@@ -213,17 +226,25 @@ function levelUpCost(lv) {
 
 
 /* --------------------------------------------------------------------------
-   ガチャ
+   レアリティ と ガチャ
+
+   ガチャは まず レアリティを ちゅうせんして、その なかから 1たい えらびます。
+   すでに もっている キャラが でたら「レベルの じょうげんかいほう（＋）」に なります。
    -------------------------------------------------------------------------- */
+const RARITY = {
+  N:  { label: 'ノーマル',     rate: 50, color: '#90caf9', star: '★'    },
+  R:  { label: 'レア',         rate: 30, color: '#81c784', star: '★★'   },
+  SR: { label: 'スーパーレア', rate: 17, color: '#ffd54f', star: '★★★'  },
+  LR: { label: 'でんせつレア', rate:  3, color: '#ff8a65', star: '★★★★' },
+};
+
 const GACHA = {
   cost: 3,                 // 1かい ひくのに ひつような Gコイン
-  /* いまは けいけんちが あたります。
-     あたらしい キャラが ふえたら ここに キャラを ついかできます  */
-  prizes: [
-    { weight: 60, rank: 'N',  color: '#90caf9', exp: 80  },
-    { weight: 30, rank: 'R',  color: '#ffd54f', exp: 200 },
-    { weight: 10, rank: 'SR', color: '#ff8a65', exp: 500 },
-  ],
+  plusMax: 30,             // レベルの じょうげんかいほう は ＋30 まで
+  /* ダブった とき（＋が MAXの とき）に もらえる けいけんち */
+  dupExp:  { N: 100, R: 250, SR: 600, LR: 1500 },
+  /* まだ キャラが いない レアリティが でた ときの おたのしみ */
+  emptyExp: 1000,
 };
 
 
@@ -305,6 +326,23 @@ const ENEMIES = {
     projectile: 'grass',
     money: 800,
     isBoss: true,
+  },
+
+  /* ほしくん ── きいろい ほし。ほしを とばして はんいこうげき。
+               50%で あいてを うしろに ふっとばす。クールタイム 4びょう  */
+  hoshikun: {
+    id: 'hoshikun', name: 'ほしくん',
+    attr: 'none',
+    hp: 1100,   atk: 380,  range: 125,  speed: 30,
+    attackInterval: 4.0,   attackWindup: 0.5,    // クールタイム 4びょう
+    kbCount: 3,
+    scale: 1.1,
+    attackType: 'area',                          // はんい こうげき
+    areaRadius: 62,
+    projectile: 'star',
+    /* とくしゅのうりょく：50%の かくりつで うしろに ふきとばす */
+    knockbackChance: 0.50,
+    money: 55,             // む ぞくせい なので すくなめ
   },
 
   /* コンガラガーン ── あおい しかくい あたま と オレンジの からだ。
@@ -401,6 +439,14 @@ const BACKGROUNDS = {
     sky: ['#080f2b', '#152352', '#2c3e7a'],
     hillFar: '#16352a', hillNear: '#0c2019',
     ground: '#241c14', groundTop: '#382b1e',
+    deco: 'star',
+  },
+
+  /* ほしぞら */
+  hoshizora: {
+    sky: ['#160d38', '#372663', '#7d6cb2'],
+    hillFar: '#2c2755', hillNear: '#1a1736',
+    ground: '#282240', groundTop: '#403964',
     deco: 'star',
   },
 
@@ -552,9 +598,65 @@ const STAGES = [
   },
 
   {
-    no: 7,
+    no: 9,
     chapter: 1,  course: 7,       // だい1ステージ の 7コースめ
-    reward: { coins: 1, exp: 260 },
+    reward: { coins: 1, exp: 230 },
+    name: 'ほしの ひろば',
+    desc: 'ほしくん とうじょう！ ほしを とばして ふきとばしてくる',
+    bg: 'hoshizora',
+    castleHp: 3200,
+    waves: [
+      { at: 3,  id: 'togehaya', count: 1 },
+      { at: 16, id: 'hoshikun', count: 1 },
+      { at: 32, id: 'honota',   count: 3, gap: 0.5 },
+      { at: 48, id: 'hoshikun', count: 1, repeat: 34 },
+      { at: 62, id: 'togehaya', count: 2, gap: 2.2, repeat: 28 },
+      { at: 78, id: 'honota',   count: 3, gap: 0.5, repeat: 26 },
+    ],
+  },
+
+  {
+    no: 10,
+    chapter: 1,  course: 8,       // だい1ステージ の 8コースめ
+    reward: { coins: 1, exp: 250 },
+    name: 'みずと ほしの みち',
+    desc: 'saba の とっしん と ほしくん の ふきとばし',
+    bg: 'water',
+    castleHp: 3600,
+    waves: [
+      { at: 3,  id: 'saba',     count: 1 },
+      { at: 15, id: 'togehaya', count: 2, gap: 2.2 },
+      { at: 30, id: 'hoshikun', count: 1 },
+      { at: 44, id: 'saba',     count: 2, gap: 1.4, repeat: 30 },
+      { at: 60, id: 'hoshikun', count: 1, repeat: 36 },
+      { at: 76, id: 'honota',   count: 3, gap: 0.5, repeat: 26 },
+    ],
+  },
+
+  {
+    no: 11,
+    chapter: 1,  course: 9,       // だい1ステージ の 9コースめ（ボスの まえ）
+    reward: { coins: 1, exp: 280 },
+    name: 'あらしの まえぶれ',
+    desc: 'ボスの まえの そうりょくせん。字一龍 も でてくる',
+    bg: 'rock',
+    castleHp: 4000,
+    waves: [
+      { at: 3,  id: 'togehaya', count: 1 },
+      { at: 14, id: 'honota',   count: 3, gap: 0.5 },
+      { at: 28, id: 'jiryu',    count: 1 },
+      { at: 42, id: 'hoshikun', count: 1 },
+      { at: 56, id: 'saba',     count: 2, gap: 1.4, repeat: 30 },
+      { at: 70, id: 'jiryu',    count: 1, repeat: 50 },
+      { at: 84, id: 'hoshikun', count: 1, repeat: 40 },
+      { at: 96, id: 'togehaya', count: 2, gap: 2.2, repeat: 28 },
+    ],
+  },
+
+  {
+    no: 7,
+    chapter: 1,  course: 10,      // だい1ステージ の さいごの コース（ボス）
+    reward: { coins: 1, exp: 340 },
     name: 'おかしマンの しろ',
     desc: 'さいご の おおボス お菓子マン。まじゅつし が よく きく！',
     bg: 'boss',
