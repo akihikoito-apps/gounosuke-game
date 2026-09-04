@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ごうのすけ">
+<meta name="theme-color" content="#0d47a1">
+<title>ごうのすけのゲーム</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- あたらしい バージョンの おしらせ -->
+  <div id="update-banner" class="hidden">
+    <span class="up-text">✨ あたらしい バージョンが あります</span>
+    <button id="btn-update" class="up-btn">こうしんする</button>
+    <button id="btn-update-later" class="up-later">あとで</button>
+  </div>
+
+
+  <!-- ============ タイトル画面 ============ -->
+  <section id="screen-title" class="screen active">
+    <div class="title-bg"></div>
+    <h1 class="game-title">ごうのすけ<br><span>のゲーム</span></h1>
+    <button class="big-btn" id="btn-start">はじめる</button>
+    <p class="rotate-hint">よこむきにすると あそびやすいよ</p>
+    <p class="version-tag">ver <span id="version-num">-</span></p>
+  </section>
+
+  <!-- ============ ステージ選択画面 ============ -->
+  <section id="screen-stage" class="screen">
+    <h2 class="sub-title">ステージをえらぶ</h2>
+    <div id="stage-list"></div>
+    <button class="text-btn" id="btn-stage-back">もどる</button>
+  </section>
+
+  <!-- ============ バトル画面 ============ -->
+  <section id="screen-battle" class="screen">
+    <canvas id="canvas"></canvas>
+
+    <!-- 上部HUD -->
+    <div id="hud-top">
+      <div class="castle-hp enemy">
+        <div class="castle-label">てきのしろ</div>
+        <div class="hp-bar"><div class="hp-fill" id="enemy-hp-fill"></div></div>
+      </div>
+      <button id="btn-retreat" class="mini-btn">やめる</button>
+      <div class="castle-hp player">
+        <div class="castle-label">じぶんのしろ</div>
+        <div class="hp-bar"><div class="hp-fill" id="player-hp-fill"></div></div>
+      </div>
+      <button id="btn-speed" class="speed-btn">
+        <span class="speed-num" id="speed-num">1.0</span><span class="speed-x">倍速</span>
+      </button>
+    </div>
+
+    <!-- 「やめる」の かくにん -->
+    <div id="confirm-quit" class="modal hidden">
+      <div class="modal-box">
+        <p class="modal-text">たたかいを やめますか？</p>
+        <div class="modal-btns">
+          <button id="btn-quit-no"  class="modal-btn keep">せんとうを つづける</button>
+          <button id="btn-quit-yes" class="modal-btn quit">ステージせんたくに もどる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ボスHPバー -->
+    <div id="boss-hp" class="hidden">
+      <div class="boss-name" id="boss-name"></div>
+      <div class="hp-bar boss"><div class="hp-fill" id="boss-hp-fill"></div></div>
+    </div>
+
+    <!-- お金バー -->
+    <div id="money-area">
+      <div class="money-bar"><div class="money-fill" id="money-fill"></div></div>
+      <div class="money-text"><span id="money-text">0</span></div>
+    </div>
+
+    <!-- 下部HUD -->
+    <div id="hud-bottom">
+      <button class="side-btn" id="btn-wallet">
+        <span class="side-icon">👛</span>
+        <span class="side-name">おさいふ君</span>
+        <span class="side-sub" id="wallet-sub">Lv.1</span>
+      </button>
+
+      <div id="unit-buttons"></div>
+
+      <button class="side-btn chudon" id="btn-chudon">
+        <span class="side-icon">💥</span>
+        <span class="side-name">ちゅどーん</span>
+        <span class="charge-wrap"><span class="charge-fill" id="chudon-fill"></span></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ 勝敗画面 ============ -->
+  <section id="screen-result" class="screen">
+    <h2 id="result-title"></h2>
+    <p id="result-sub"></p>
+    <button class="big-btn" id="btn-result-retry">もういちど</button>
+    <button class="text-btn" id="btn-result-back">ステージせんたくへ</button>
+  </section>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/bg-photo.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
