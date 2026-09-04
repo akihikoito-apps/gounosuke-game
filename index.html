@@ -86,13 +86,37 @@
     </div>
   </section>
 
-  <!-- ============ ステージ（章）選択画面 ============ -->
+  <!-- ============ ステージ（章）選択＝マップ ============ -->
   <section id="screen-chapter" class="screen">
-    <div class="panel-head">
-      <h2 class="sub-title">ステージを えらぶ</h2>
-      <button class="mini-btn" id="btn-chapter-back">もどる</button>
+    <div class="map-wrap">
+      <canvas id="map-canvas"></canvas>
+      <div id="map-nodes"></div>
+
+      <div class="map-top">
+        <button class="mini-btn" id="btn-chapter-back">もどる</button>
+        <span class="map-title">せかい ちず</span>
+        <button class="tower-btn" id="btn-tower">
+          <span class="tw-ico">🗼</span>
+          <span class="tw-name">あき坊の塔</span>
+        </button>
+      </div>
+
+      <p class="map-hint" id="map-hint">すすみたい ステージを タップしてね</p>
     </div>
-    <div id="chapter-list"></div>
+  </section>
+
+  <!-- ============ あき坊の塔 ============ -->
+  <section id="screen-tower" class="screen">
+    <div class="panel-head">
+      <h2 class="sub-title">🗼 あき坊の塔</h2>
+      <button class="mini-btn" id="btn-tower-back">もどる</button>
+    </div>
+    <p class="tower-lead" id="tower-lead">10かい ぜんぶ のぼると とくべつな なかまが もらえる！</p>
+    <div class="tower-prize" id="tower-prize">
+      <span class="tp-mark">🎁</span>
+      <span class="tp-text">ぜんかい クリアの ごほうび<br><b id="tower-reward-name">とくべつな なかま</b></span>
+    </div>
+    <div id="tower-floors"></div>
   </section>
 
   <!-- ============ コース選択画面 ============ -->

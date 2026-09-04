@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '2.0';
+  const GAME_VERSION = '2.1';
 
 
   /* =================================================
@@ -325,28 +325,205 @@
 
   let currentChapter = 1;
 
+/* =================================================
+     せかい ちず（ステージ せんたく）
+     ================================================= */
+
+  /* ステージ（しょう）が ちずの どこに あるか（0〜1 の わりあい）*/
+  function chapterPos(i, n) {
+    const t = (n <= 1) ? 0.5 : i / (n - 1);
+    return {
+      x: 0.14 + t * 0.72,
+      y: 0.56 + Math.sin(t * Math.PI * 2 + 0.6) * 0.17,
+    };
+  }
+
   function openChapters() {
-    const box = $('#chapter-list');
-    box.innerHTML = '';
+    show('screen-chapter');
+    requestAnimationFrame(() => { drawMap(); buildMapNodes(); });
+  }
+
+  /* --- ちずの え（そら・やま・かわ・き・みち）--- */
+  function drawMap() {
+    const cv = $('#map-canvas');
+    if (!cv) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = cv.clientWidth || 800, H = cv.clientHeight || 400;
+    if (W < 2 || H < 2) return;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    /* そら */
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#5ec8f5');
+    sky.addColorStop(0.45, '#a8e0f7');
+    sky.addColorStop(1, '#d9f2c9');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+
+    /* くも */
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    for (let i = 0; i < 4; i++) {
+      const cx = W * (0.12 + i * 0.26), cy = H * (0.12 + (i % 2) * 0.08), r = H * 0.045;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(cx + r * 0.9, cy + r * 0.2, r * 0.72, 0, Math.PI * 2);
+      ctx.arc(cx - r * 0.9, cy + r * 0.25, r * 0.62, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    /* とおくの やま */
+    ctx.fillStyle = '#7fa9c9';
+    for (let i = -1; i < 6; i++) {
+      const bx = W * (i * 0.24 + 0.05), by = H * 0.42;
+      ctx.beginPath();
+      ctx.moveTo(bx - W * 0.13, by);
+      ctx.lineTo(bx, by - H * 0.19);
+      ctx.lineTo(bx + W * 0.13, by);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#ffffff';
+    for (let i = -1; i < 6; i++) {
+      const bx = W * (i * 0.24 + 0.05), by = H * 0.42;
+      ctx.beginPath();
+      ctx.moveTo(bx - W * 0.035, by - H * 0.135);
+      ctx.lineTo(bx, by - H * 0.19);
+      ctx.lineTo(bx + W * 0.035, by - H * 0.135);
+      ctx.closePath(); ctx.fill();
+    }
+
+    /* じめん（おか）*/
+    ctx.fillStyle = '#8bc34a';
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.44);
+    ctx.quadraticCurveTo(W * 0.25, H * 0.36, W * 0.5, H * 0.44);
+    ctx.quadraticCurveTo(W * 0.75, H * 0.52, W, H * 0.42);
+    ctx.lineTo(W, H); ctx.lineTo(0, H);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#7cb342';
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.62);
+    ctx.quadraticCurveTo(W * 0.3, H * 0.54, W * 0.62, H * 0.66);
+    ctx.quadraticCurveTo(W * 0.85, H * 0.74, W, H * 0.66);
+    ctx.lineTo(W, H); ctx.lineTo(0, H);
+    ctx.closePath(); ctx.fill();
+
+    /* かわ */
+    ctx.strokeStyle = 'rgba(79,195,247,0.85)';
+    ctx.lineWidth = Math.max(6, H * 0.035);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(W * 0.02, H * 0.92);
+    ctx.quadraticCurveTo(W * 0.3, H * 0.78, W * 0.46, H * 0.95);
+    ctx.stroke();
+
+    /* き */
+    const trees = [[0.06, 0.72], [0.24, 0.84], [0.55, 0.8], [0.7, 0.5], [0.92, 0.78], [0.38, 0.52], [0.82, 0.9]];
+    trees.forEach(([tx, ty]) => {
+      const x = W * tx, y = H * ty, r = H * 0.045;
+      ctx.fillStyle = '#6d4c2f';
+      ctx.fillRect(x - r * 0.14, y - r * 0.2, r * 0.28, r * 0.7);
+      ctx.fillStyle = '#4e9a3f';
+      ctx.beginPath(); ctx.arc(x, y - r * 0.5, r * 0.62, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x - r * 0.4, y - r * 0.2, r * 0.44, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + r * 0.4, y - r * 0.22, r * 0.46, 0, Math.PI * 2); ctx.fill();
+    });
+
+    /* ステージを つなぐ みち */
+    const chs = chapterList();
     const cleared = (slot() && slot().cleared) || {};
-    chapterList().forEach(ch => {
+    for (let i = 0; i < chs.length - 1; i++) {
+      const a = chapterPos(i, chs.length), b = chapterPos(i + 1, chs.length);
+      const list = coursesOf(chs[i]);
+      const done = list.length > 0 && list.every(st => cleared[st.no]);
+      const ax = a.x * W, ay = a.y * H, bx = b.x * W, by = b.y * H;
+      const mx = (ax + bx) / 2, my = (ay + by) / 2 - H * 0.10;
+      // したじきの しろい ふちどり
+      ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+      ctx.lineWidth = Math.max(10, H * 0.055);
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo(mx, my, bx, by); ctx.stroke();
+      // みち ほんたい
+      ctx.strokeStyle = done ? '#ffd54f' : 'rgba(160,170,180,0.9)';
+      ctx.lineWidth = Math.max(6, H * 0.032);
+      ctx.setLineDash([Math.max(8, H * 0.035), Math.max(7, H * 0.03)]);
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo(mx, my, bx, by); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  /* --- ちずの うえの ステージボタン --- */
+  function buildMapNodes() {
+    const box = $('#map-nodes');
+    if (!box) return;
+    box.innerHTML = '';
+    const chs = chapterList();
+    const cleared = (slot() && slot().cleared) || {};
+
+    // いま すすむべき ステージ
+    let nowCh = chs[chs.length - 1];
+    for (const ch of chs) {
+      const list = coursesOf(ch);
+      if (chapterOpen(ch) && !list.every(st => cleared[st.no])) { nowCh = ch; break; }
+    }
+
+    chs.forEach((ch, i) => {
+      const p = chapterPos(i, chs.length);
       const list = coursesOf(ch);
       const done = list.filter(st => cleared[st.no]).length;
+      const all  = done === list.length;
       const open = chapterOpen(ch);
+
       const el = document.createElement('button');
-      el.className = 'chapter-card' + (open ? '' : ' locked');
+      el.className = 'map-node' + (open ? (all ? ' done' : (ch === nowCh ? ' now' : '')) : ' locked');
+      el.style.left = (p.x * 100) + '%';
+      el.style.top  = (p.y * 100) + '%';
       el.innerHTML =
-        '<span class="cc-no">' + ch + '</span>' +
-        '<span class="cc-info"><b>だい' + ch + 'ステージ</b>' +
-          '<small>' + (open ? (done + ' / ' + list.length + ' コース クリア') : 'まえの ステージを ぜんぶ クリアすると あそべます') + '</small>' +
-          (open ? '<span class="cc-bar"><i style="width:' + (done / list.length * 100) + '%"></i></span>' : '') +
-        '</span>' +
-        '<span class="cc-mark">' + (open ? (done === list.length ? '⭐' : '▶') : '🔒') + '</span>';
+        '<span class="mn-no">' + ch + '</span>' +
+        '<span class="mn-sub">' + (open ? done + '/' + list.length : 'ロック') + '</span>' +
+        (all ? '<span class="mn-badge">⭐</span>' : (open ? '' : '<span class="mn-badge">🔒</span>')) +
+        '<span class="mn-label">だい' + ch + 'ステージ</span>';
       if (open) el.addEventListener('click', () => { currentChapter = ch; buildStageList(); show('screen-stage'); });
       else      el.addEventListener('click', () => toast('まえの ステージを ぜんぶ クリアしてね'));
       box.appendChild(el);
     });
-    show('screen-chapter');
+
+    $('#map-hint').textContent = 'すすみたい ステージを タップしてね';
+  }
+
+
+  /* =================================================
+     あき坊の塔（とくべつステージ）
+     ================================================= */
+  function openTower() {
+    const s = slot();
+    $('#tower-lead').textContent = TOWER.desc;
+    $('#tower-reward-name').textContent = TOWER.rewardName;
+
+    const box = $('#tower-floors');
+    box.innerHTML = '';
+    const cleared = (s && s.cleared) || {};
+    for (let f = 1; f <= TOWER.floors; f++) {
+      const course = TOWER.courses.find(c => c.floor === f) || null;
+      const prev   = TOWER.courses.find(c => c.floor === f - 1) || null;
+      const open   = !!course && (f === 1 || (prev && cleared[prev.no]));
+      const el = document.createElement('button');
+      el.className = 'tower-floor' + (open ? ' open' : '');
+      el.innerHTML =
+        '<span class="tf-no">' + f + 'かい</span>' +
+        '<span class="tf-name">' + (course ? course.name : 'じゅんびちゅう') + '</span>' +
+        '<span class="tf-mark">' + (course && cleared[course.no] ? '⭐' : (open ? '▶' : '🔒')) + '</span>';
+      if (open) {
+        el.addEventListener('click', () => {
+          startBattle(course);
+        });
+      } else {
+        el.addEventListener('click', () => toast(course ? 'したの かいから のぼってね' : 'この かいは まだ じゅんびちゅう！'));
+      }
+      box.appendChild(el);
+    }
+    show('screen-tower');
   }
 
   function buildStageList() {
@@ -385,7 +562,7 @@
             '</span>' : '') +
         '</span>' +
         '<span class="stage-clear">' + (cleared[st.no] ? '⭐' : (open ? '' : '🔒')) + '</span>';
-      if (open) b.addEventListener('click', () => startBattle(all));
+      if (open) b.addEventListener('click', () => startBattle(st));
       else      b.addEventListener('click', () => toast('まえの コースを クリアしてね'));
       box.appendChild(b);
     });
@@ -779,13 +956,13 @@
     Game.hudTopHeight = (ht && ht > 10) ? ht : 48;
   }
 
-  function startBattle(index) {
+  function startBattle(course) {
     show('screen-battle');
     const canvas = $('#canvas');
     Game.canvas = canvas;
     Game.ctx = canvas.getContext('2d');
     measureHud();
-    Game.start(index);
+    Game.start(course);
     requestAnimationFrame(() => {
       measureHud();
       Game.resize();
@@ -940,6 +1117,7 @@
     redrawIcons();
     if ($('#screen-home').classList.contains('active')) drawHomeTankun();
     if ($('#screen-gacha').classList.contains('active')) drawGachaFriends();
+    if ($('#screen-chapter').classList.contains('active')) { drawMap(); buildMapNodes(); }
   }
 
   function init() {
@@ -968,6 +1146,8 @@
     /* トップがめん */
     $('#btn-home-stage').addEventListener('click', openChapters);
     $('#btn-chapter-back').addEventListener('click', openHome);
+    $('#btn-tower').addEventListener('click', openTower);
+    $('#btn-tower-back').addEventListener('click', openChapters);
     $('#btn-home-power').addEventListener('click', openPower);
     $('#btn-home-party').addEventListener('click', openParty);
     $('#btn-home-gacha').addEventListener('click', openGacha);
@@ -1004,10 +1184,10 @@
     /* けっか */
     const backToStages = () => { buildStageList(); show('screen-stage'); };
     $('#btn-result-main').addEventListener('click', () => {
-      if (Game.result === 'win') backToStages(); else startBattle(Game.stageIndex);
+      if (Game.result === 'win') backToStages(); else startBattle(Game.stage);
     });
     $('#btn-result-sub').addEventListener('click', () => {
-      if (Game.result === 'win') startBattle(Game.stageIndex); else backToStages();
+      if (Game.result === 'win') startBattle(Game.stage); else backToStages();
     });
 
     /* あたらしい バージョンの おしらせ */

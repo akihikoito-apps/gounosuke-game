@@ -640,3 +640,123 @@ html, body {
   .gacha-friend { height:calc(88px * var(--ui)); }
   .gacha-stage .gacha-machine { width:calc(165px * var(--ui)); }
 }
+
+/* =======================================================
+   せかい ちず（ステージ せんたく）
+   ======================================================= */
+
+#screen-chapter { padding:0; gap:0; background:#0d1b2a; }
+.map-wrap { position:relative; width:100%; height:100%; overflow:hidden; }
+#map-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+#map-nodes { position:absolute; inset:0; }
+
+.map-top {
+  position:absolute; top:0; left:0; right:0;
+  display:flex; align-items:center; gap:calc(10px * var(--ui));
+  padding:calc(8px * var(--ui) + var(--safe-top)) calc(12px * var(--ui)) 0;
+  z-index:3;
+}
+.map-title {
+  flex:1; text-align:center;
+  font-size:calc(17px * var(--ui)); font-weight:bold; color:#fff;
+  text-shadow:0 2px 0 rgba(0,0,0,.5), 0 0 10px rgba(0,0,0,.4);
+  letter-spacing:2px;
+}
+.map-hint {
+  position:absolute; left:0; right:0; bottom:calc(10px * var(--ui) + env(safe-area-inset-bottom,0px));
+  text-align:center; font-size:calc(12.5px * var(--ui)); color:#e8f4ff;
+  text-shadow:0 2px 3px rgba(0,0,0,.6); z-index:3; pointer-events:none;
+}
+
+/* あき坊の塔の ボタン（みぎうえ） */
+.tower-btn {
+  flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:calc(5px * var(--ui)) calc(11px * var(--ui));
+  border-radius:calc(12px * var(--ui));
+  border:2px solid #ce93d8;
+  background:linear-gradient(180deg, rgba(74,20,110,.92), rgba(40,8,64,.95));
+  color:#f3e5f5; font-family:inherit; line-height:1.15; cursor:pointer;
+  box-shadow:0 0 12px rgba(186,104,200,.55);
+  animation:towerGlow 1.8s ease-in-out infinite alternate;
+}
+@keyframes towerGlow {
+  from { box-shadow:0 0 6px rgba(186,104,200,.35); }
+  to   { box-shadow:0 0 18px rgba(206,147,216,.85); }
+}
+.tower-btn:active { transform:translateY(2px); }
+.tw-ico  { font-size:calc(19px * var(--ui)); }
+.tw-name { font-size:calc(10.5px * var(--ui)); font-weight:bold; white-space:nowrap; }
+
+/* マップの ノード（ステージ） */
+.map-node {
+  position:absolute; transform:translate(-50%, -50%);
+  width:calc(74px * var(--ui)); height:calc(74px * var(--ui));
+  border-radius:50%; border:calc(4px * var(--ui)) solid #fff;
+  background:linear-gradient(180deg,#ffe082,#ffa726);
+  color:#5d3a00; font-family:inherit; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+  box-shadow:0 calc(5px * var(--ui)) 0 rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.4);
+  z-index:2;
+}
+.map-node:active { transform:translate(-50%, -50%) translateY(3px); }
+.map-node.locked { background:linear-gradient(180deg,#b0bec5,#78909c); color:#37474f; border-color:#cfd8dc; }
+.map-node.done   { background:linear-gradient(180deg,#fff59d,#fbc02d); }
+.map-node.now    { animation:nodePulse 1.1s ease-in-out infinite alternate; }
+@keyframes nodePulse {
+  from { box-shadow:0 calc(5px * var(--ui)) 0 rgba(0,0,0,.35), 0 0 0 2px rgba(255,255,255,.5); }
+  to   { box-shadow:0 calc(5px * var(--ui)) 0 rgba(0,0,0,.35), 0 0 20px 8px rgba(255,235,120,.85); }
+}
+.mn-no    { font-size:calc(24px * var(--ui)); font-weight:bold; line-height:1; }
+.mn-sub   { font-size:calc(9.5px * var(--ui)); font-weight:bold; opacity:.85; }
+.mn-badge {
+  position:absolute; top:calc(-8px * var(--ui)); right:calc(-6px * var(--ui));
+  font-size:calc(18px * var(--ui)); filter:drop-shadow(0 2px 2px rgba(0,0,0,.5));
+}
+.mn-label {
+  position:absolute; top:calc(78px * var(--ui)); left:50%; transform:translateX(-50%);
+  white-space:nowrap; font-size:calc(11.5px * var(--ui)); font-weight:bold; color:#fff;
+  text-shadow:0 2px 3px rgba(0,0,0,.75);
+}
+
+/* =======================================================
+   あき坊の塔
+   ======================================================= */
+#screen-tower {
+  background:linear-gradient(180deg,#2b1046 0%,#140823 100%);
+  justify-content:flex-start; overflow-y:auto;
+  padding:calc(10px * var(--ui) + var(--safe-top)) calc(12px * var(--ui)) calc(20px * var(--ui));
+  gap:calc(10px * var(--ui));
+}
+.tower-lead {
+  font-size:calc(14px * var(--ui)); color:#e1bee7; text-align:center; font-weight:bold;
+}
+.tower-prize {
+  display:flex; align-items:center; gap:calc(12px * var(--ui));
+  width:min(calc(560px * var(--ui)), 96%);
+  padding:calc(12px * var(--ui)) calc(16px * var(--ui));
+  border-radius:calc(14px * var(--ui));
+  border:2px solid #ce93d8;
+  background:linear-gradient(180deg, rgba(123,31,162,.5), rgba(74,20,110,.6));
+  color:#f3e5f5;
+}
+.tp-mark { font-size:calc(30px * var(--ui)); }
+.tp-text { font-size:calc(12px * var(--ui)); line-height:1.5; }
+.tp-text b { font-size:calc(16px * var(--ui)); color:#ffd54f; }
+
+#tower-floors {
+  width:min(calc(560px * var(--ui)), 96%);
+  display:flex; flex-direction:column-reverse; gap:calc(6px * var(--ui));
+}
+.tower-floor {
+  display:flex; align-items:center; gap:calc(12px * var(--ui));
+  padding:calc(11px * var(--ui)) calc(16px * var(--ui));
+  border-radius:calc(11px * var(--ui));
+  border:none; font-family:inherit; text-align:left; cursor:default;
+  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+  color:#d1c4e9;
+  box-shadow:inset 0 0 0 1px rgba(206,147,216,.28);
+}
+.tower-floor.open { background:linear-gradient(180deg,#ffe082,#ffb74d); color:#4e2600; cursor:pointer; box-shadow:0 4px 0 #e65100; }
+.tf-no { font-size:calc(19px * var(--ui)); font-weight:bold; min-width:3.2em; }
+.tf-name { flex:1; font-size:calc(13.5px * var(--ui)); font-weight:bold; }
+.tf-mark { font-size:calc(16px * var(--ui)); }

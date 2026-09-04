@@ -40,10 +40,12 @@ const Game = {
   /* =====================================================================
      ゲームを はじめる
      ===================================================================== */
-  start(stageIndex) {
-    const st = STAGES[stageIndex];
+  start(stageOrCourse) {
+    // ばんごうでも、コースそのものでも うけとれます（あき坊の塔 のように
+    // STAGES に はいって いない コースにも たいおう するため）
+    const st = (typeof stageOrCourse === 'number') ? STAGES[stageOrCourse] : stageOrCourse;
     this.stage = st;
-    this.stageIndex = stageIndex;
+    this.stageIndex = STAGES.indexOf(st);
     this.active = true;
     this.paused = false;
     this.finished = false;
@@ -147,9 +149,15 @@ const Game = {
     const x = (side === 'ally')
       ? CONFIG.fieldLength - 40 - Math.random() * 20
       : 40 + Math.random() * 20;
-    // みかたは レベルの ぶん たいりょくと こうげきりょくが あがる
+    // みかたは レベルの ぶん、てきは コースの enemyMult の ぶん つよく なる
+    let mul;
+    if (side === 'ally') {
+      const lv = this.levels[def.id] || 1;
+      mul = (typeof levelMult === 'function') ? levelMult(lv) : 1;
+    } else {
+      mul = (this.stage && this.stage.enemyMult) ? this.stage.enemyMult : 1;
+    }
     const lv = (side === 'ally') ? (this.levels[def.id] || 1) : 1;
-    const mul = (typeof levelMult === 'function') ? levelMult(lv) : 1;
     const hp  = Math.round(def.hp * mul);
     const atk = Math.round(def.atk * mul);
     return {
