@@ -549,7 +549,7 @@ const STAGES = [
   {
     no: 4,
     chapter: 1,  course: 4,       // だい1ステージ の 4コースめ
-    enemyMult: 1.10,            // てきの つよさ 1.10ばい
+    enemyMult: 1.05,            // てきの つよさ 1.05ばい
     reward: { coins: 1, exp: 150 },
     name: 'みどりの もり',
     desc: 'ほのた と saba の こんせい ぐんだん',
@@ -569,7 +569,7 @@ const STAGES = [
   {
     no: 5,
     chapter: 1,  course: 5,       // だい1ステージ の 5コースめ
-    enemyMult: 1.10,            // てきの つよさ 1.10ばい
+    enemyMult: 1.05,            // てきの つよさ 1.05ばい
     reward: { coins: 1, exp: 180 },
     name: 'いわばの みち',
     desc: '字一龍 とうじょう！ ボスでは ないけど つよい',
@@ -588,7 +588,7 @@ const STAGES = [
   {
     no: 6,
     chapter: 1,  course: 6,       // だい1ステージ の 6コースめ
-    enemyMult: 1.10,            // てきの つよさ 1.10ばい
+    enemyMult: 1.05,            // てきの つよさ 1.05ばい
     reward: { coins: 2, exp: 210 },  // ボスコース
     name: 'よるの もり',
     desc: 'ボス 下手なきりん が まちうける',
@@ -610,12 +610,12 @@ const STAGES = [
   {
     no: 9,
     chapter: 1,  course: 7,       // だい1ステージ の 7コースめ
-    enemyMult: 1.20,            // てきの つよさ 1.20ばい
+    enemyMult: 1.10,            // てきの つよさ 1.10ばい
     reward: { coins: 1, exp: 230 },
     name: 'ほしの ひろば',
     desc: 'ほしくん とうじょう！ ほしを とばして ふきとばしてくる',
     bg: 'hoshizora',
-    castleHp: 2800,
+    castleHp: 2500,
     waves: [
       { at: 3,  id: 'togehaya', count: 1 },
       { at: 16, id: 'hoshikun', count: 1 },
@@ -629,12 +629,12 @@ const STAGES = [
   {
     no: 10,
     chapter: 1,  course: 8,       // だい1ステージ の 8コースめ
-    enemyMult: 1.20,            // てきの つよさ 1.20ばい
+    enemyMult: 1.10,            // てきの つよさ 1.10ばい
     reward: { coins: 1, exp: 250 },
     name: 'みずと ほしの みち',
     desc: 'saba の とっしん と ほしくん の ふきとばし',
     bg: 'water',
-    castleHp: 3200,
+    castleHp: 2900,
     waves: [
       { at: 3,  id: 'saba',     count: 1 },
       { at: 15, id: 'togehaya', count: 2, gap: 2.2 },
@@ -648,12 +648,12 @@ const STAGES = [
   {
     no: 11,
     chapter: 1,  course: 9,       // だい1ステージ の 9コースめ（ボスの まえ）
-    enemyMult: 1.25,            // てきの つよさ 1.25ばい
+    enemyMult: 1.12,            // てきの つよさ 1.12ばい
     reward: { coins: 1, exp: 280 },
     name: 'あらしの まえぶれ',
     desc: 'ボスの まえの そうりょくせん。字一龍 も でてくる',
     bg: 'rock',
-    castleHp: 3500,
+    castleHp: 3100,
     waves: [
       { at: 3,  id: 'togehaya', count: 1 },
       { at: 14, id: 'honota',   count: 3, gap: 0.5 },
@@ -669,12 +669,12 @@ const STAGES = [
   {
     no: 7,
     chapter: 1,  course: 10,      // だい1ステージ の さいごの コース（ボス）
-    enemyMult: 1.30,            // てきの つよさ 1.30ばい
+    enemyMult: 1.15,            // てきの つよさ 1.15ばい
     reward: { coins: 2, exp: 340 },  // ボスコース
     name: 'おかしマンの しろ',
     desc: 'さいご の おおボス お菓子マン。まじゅつし が よく きく！',
     bg: 'boss',
-    castleHp: 4300,
+    castleHp: 3900,
     waves: [
       { at: 3,  id: 'togehaya', count: 1 },
       { at: 14, id: 'honota',   count: 3, gap: 0.5 },
@@ -693,12 +693,12 @@ const STAGES = [
   {
     no: 8,
     chapter: 2,  course: 1,       // だい2ステージ の 1コースめ
-    enemyMult: 1.40,            // てきの つよさ 1.40ばい
+    enemyMult: 1.20,            // てきの つよさ 1.20ばい
     reward: { coins: 2, exp: 300 },  // ボスコース
     name: 'はがねの ぐんだん',
     desc: 'コンガラガーン とうじょう！ メタルは ほのお・まじゅつし・パワー に よわい',
     bg: 'steel',
-    castleHp: 6000,
+    castleHp: 4600,
     waves: [
       { at: 3,   id: 'togehaya',   count: 1 },
       { at: 14,  id: 'saba',       count: 2, gap: 1.4 },
@@ -709,19 +709,19 @@ const STAGES = [
       { at: 78,  id: 'jiryu',      count: 1, repeat: 36 },
       { at: 94,  id: 'saba',       count: 2, gap: 1.4, repeat: 28 },
       /* さいしゅう ステージ：ボスが 2たい でてくる */
-      { atCastleHp: 0.85, id: 'hetakirin', count: 1 },
-      { atCastleHp: 0.55, id: 'okashiman', count: 1 },
+      /* おおボスは てきの しろが 60% まで へると でてくる */
+      { atCastleHp: 0.60, id: 'okashiman', count: 1 },
     ],
   },
   {
     no: 12,
     chapter: 3,  course: 1,       // だい3ステージ の 1コースめ（メタルは ここから また ふえます）
-    enemyMult: 1.75,            // てきの つよさ 1.75ばい
+    enemyMult: 1.40,            // てきの つよさ 1.40ばい
     reward: { coins: 2, exp: 380 },
     name: 'メタルの こうじょう',
     desc: 'コンガラガーン だらけ。ほのお・まじゅつし・パワー が よく きく',
     bg: 'steel',
-    castleHp: 5600,
+    castleHp: 4400,
     waves: [
       { at: 3,   id: 'togehaya',   count: 1 },
       { at: 15,  id: 'kongaragan', count: 1 },
@@ -736,7 +736,7 @@ const STAGES = [
   {
     no: 17,
     chapter: 2,  course: 2,       // だい2ステージ の 2コースめ（メタルは でてきません）
-    enemyMult: 1.40,            // てきの つよさ 1.40ばい
+    enemyMult: 1.20,            // てきの つよさ 1.20ばい
     reward: { coins: 1, exp: 320 },
     name: 'かぜの かわら',
     desc: 'saba と ほのた の すばやい ぐんだん。かべが たいせつ',
@@ -755,7 +755,7 @@ const STAGES = [
   {
     no: 13,
     chapter: 2,  course: 3,       // だい2ステージ の 3コースめ（ボス）
-    enemyMult: 1.45,            // てきの つよさ 1.45ばい
+    enemyMult: 1.22,            // てきの つよさ 1.22ばい
     reward: { coins: 2, exp: 380 },
     name: 'はがねの よる',
     desc: 'メタルぐんだん と 下手なきりん。くらやみの だいけっせん',
@@ -778,12 +778,12 @@ const STAGES = [
   {
     no: 14,
     chapter: 2,  course: 4,       // だい2ステージ の 4コースめ
-    enemyMult: 1.50,            // てきの つよさ 1.50ばい
+    enemyMult: 1.28,            // てきの つよさ 1.28ばい
     reward: { coins: 1, exp: 340 },
     name: 'ほしと けものの もり',
     desc: 'ほしくん と 字一龍。けものは まじゅつしに つよい ので ちゅうい',
     bg: 'hoshizora',
-    castleHp: 3300,
+    castleHp: 3000,
     waves: [
       { at: 3,   id: 'togehaya', count: 1 },
       { at: 17,  id: 'hoshikun', count: 1 },
@@ -798,7 +798,7 @@ const STAGES = [
   {
     no: 15,
     chapter: 2,  course: 5,       // だい2ステージ の 5コースめ
-    enemyMult: 1.55,            // てきの つよさ 1.55ばい
+    enemyMult: 1.30,            // てきの つよさ 1.30ばい
     reward: { coins: 1, exp: 360 },
     name: 'ひのたま あらし',
     desc: 'ほのた の だいぐんだん。みずの なかまが かつやくする',
@@ -817,7 +817,7 @@ const STAGES = [
   {
     no: 16,
     chapter: 2,  course: 6,       // だい2ステージ の 6コースめ（ボス）
-    enemyMult: 1.60,            // てきの つよさ 1.60ばい
+    enemyMult: 1.32,            // てきの つよさ 1.32ばい
     reward: { coins: 2, exp: 400 },
     name: 'りゅうの たに',
     desc: '字一龍 の むれ と お菓子マン。だい2ステージの やま',
