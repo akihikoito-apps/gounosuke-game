@@ -930,3 +930,20 @@ body.dragging-slot #party-slots { touch-action:none; }
 /* メニューの ボタンを たてに */
 .modal-btns.col { flex-direction:column; }
 .modal-btn.info { background:linear-gradient(180deg,#4fc3f7,#0288d1); box-shadow:0 3px 0 #01579b; color:#fff; }
+
+
+/* ---------- せかい ⇄ うちゅう の きりかえボタン ---------- */
+.world-btn {
+  position:absolute; left:50%; transform:translateX(-50%);
+  bottom:calc(46px * var(--ui));
+  z-index:4;
+  padding:calc(9px * var(--ui)) calc(20px * var(--ui));
+  border:none; border-radius:999px;
+  font-family:inherit; font-size:calc(14px * var(--ui)); font-weight:bold;
+  color:#fff; letter-spacing:1px;
+  background:linear-gradient(180deg,#5c6bc0,#303f9f);
+  box-shadow:0 calc(4px * var(--ui)) 0 #1a237e, 0 0 calc(14px * var(--ui)) rgba(92,107,192,.6);
+  cursor:pointer;
+}
+.world-btn:active { transform:translateX(-50%) translateY(2px); box-shadow:0 calc(2px * var(--ui)) 0 #1a237e; }
+.world-btn.space  { background:linear-gradient(180deg,#43a047,#1b5e20); box-shadow:0 calc(4px * var(--ui)) 0 #0b3d10; }

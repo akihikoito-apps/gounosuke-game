@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '5.0';
+  const GAME_VERSION = '5.1';
 
 
   /* =================================================
@@ -325,16 +325,40 @@
      ステージ せんたく
      ================================================= */
   /* --- しょう（ステージ）ごとの コース --- */
-  function chapterList() {
+  /* いま みて いる ちず。'earth'＝せかいちず / 'space'＝うちゅうちず */
+  let currentWorld = 'earth';
+
+  /* その しょうが どちらの ちずに あるか */
+  function worldOf(ch) {
+    const info = (typeof CHAPTERS !== 'undefined') ? CHAPTERS[ch] : null;
+    return (info && info.world) ? info.world : 'earth';
+  }
+
+  /* ぜんぶの しょう（ちずに かんけいなく）*/
+  function allChapters() {
     const chs = [];
     STAGES.forEach(st => { const c = st.chapter || 1; if (chs.indexOf(c) < 0) chs.push(c); });
     return chs.sort((a, b) => a - b);
+  }
+
+  /* いま みて いる ちずの しょうだけ */
+  function chapterList() {
+    return allChapters().filter(ch => worldOf(ch) === currentWorld);
+  }
+
+  /* せかいちずを ぜんぶ クリアしたか（＝うちゅうへ いけるか）*/
+  function earthAllCleared() {
+    const cleared = (slot() && slot().cleared) || {};
+    const earth = allChapters().filter(ch => worldOf(ch) === 'earth');
+    return earth.every(ch => coursesOf(ch).every(st => cleared[st.no]));
   }
   function coursesOf(ch) { return STAGES.filter(st => (st.chapter || 1) === ch); }
 
   /* まえの しょうを ぜんぶ クリアすると つぎの しょうが あそべる */
   function chapterOpen(ch) {
-    if (ch <= chapterList()[0]) return true;
+    /* うちゅうの さいしょの ほしは、せかいちずを ぜんぶ クリアしたら あそべる */
+    const list = allChapters().filter(c => worldOf(c) === worldOf(ch));
+    if (ch <= list[0]) return (worldOf(ch) === 'earth') ? true : earthAllCleared();
     const cleared = (slot() && slot().cleared) || {};
     const prev = coursesOf(ch - 1);
     return prev.length > 0 && prev.every(st => cleared[st.no]);
@@ -364,7 +388,115 @@
 
   function openChapters() {
     show('screen-chapter');
-    requestAnimationFrame(() => { drawMap(); buildMapNodes(); });
+    requestAnimationFrame(() => { drawMap(); buildMapNodes(); refreshWorldBtn(); });
+  }
+
+  /* せかい ⇄ うちゅう の きりかえボタン */
+  function refreshWorldBtn() {
+    const b = $('#btn-world');
+    if (!b) return;
+    const canGo = earthAllCleared();
+    b.classList.toggle('hidden', !canGo);
+    b.classList.toggle('space', currentWorld === 'space');
+    b.textContent = (currentWorld === 'earth') ? '🚀 うちゅうへ' : '🌍 ちきゅうへ';
+    const t = $('.map-title');
+    if (t) t.textContent = (currentWorld === 'earth') ? 'せかい ちず' : 'うちゅう ちず';
+  }
+
+  function switchWorld() {
+    currentWorld = (currentWorld === 'earth') ? 'space' : 'earth';
+    drawMap(); buildMapNodes(); refreshWorldBtn();
+  }
+
+  /* --- うちゅうちずの え（ほしぞらと わくせい）--- */
+  function drawSpaceMap(ctx, W, H) {
+    /* まっくらな そら */
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#05030f'); g.addColorStop(0.55, '#0d0a24'); g.addColorStop(1, '#14082a');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    /* ほし（おなじ ばしょに でる ように たねを つかう）*/
+    for (let i = 0; i < 150; i++) {
+      const rx = ((i * 9301 + 49297) % 233280) / 233280;
+      const ry = ((i * 4523 + 12345) % 233280) / 233280;
+      const rr = ((i * 7919 + 104729) % 100) / 100;
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.25 + rr * 0.6) + ')';
+      ctx.beginPath(); ctx.arc(rx * W, ry * H, rr * 1.6 + 0.4, 0, Math.PI * 2); ctx.fill();
+    }
+    /* おおきく ひかる ほし */
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.2;
+    for (const [sx, sy, sr] of [[0.12, 0.22, 7], [0.68, 0.16, 5], [0.86, 0.86, 6], [0.44, 0.9, 5]]) {
+      const cx = sx * W, cy = sy * H, r = sr * (H / 400);
+      ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke();
+    }
+
+    /* とおくの ぎんが */
+    const ng = ctx.createRadialGradient(W * 0.78, H * 0.30, 2, W * 0.78, H * 0.30, W * 0.20);
+    ng.addColorStop(0, 'rgba(186,104,200,.30)');
+    ng.addColorStop(0.6, 'rgba(94,60,140,.16)');
+    ng.addColorStop(1, 'rgba(30,10,50,0)');
+    ctx.fillStyle = ng;
+    ctx.beginPath(); ctx.ellipse(W * 0.78, H * 0.30, W * 0.20, H * 0.13, -0.4, 0, Math.PI * 2); ctx.fill();
+
+    /* ちきゅう（ひだりした・きた みち）*/
+    const ex = W * 0.06, ey = H * 0.86, er = H * 0.10;
+    const eg = ctx.createRadialGradient(ex - er * 0.3, ey - er * 0.3, er * 0.1, ex, ey, er);
+    eg.addColorStop(0, '#6ec6ff'); eg.addColorStop(1, '#0d47a1');
+    ctx.fillStyle = eg;
+    ctx.beginPath(); ctx.arc(ex, ey, er, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(102,187,106,.85)';
+    ctx.beginPath(); ctx.ellipse(ex - er * 0.2, ey - er * 0.25, er * 0.45, er * 0.28, 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ex + er * 0.35, ey + er * 0.3, er * 0.35, er * 0.22, -0.2, 0, Math.PI * 2); ctx.fill();
+
+    /* 火星（しょうの ばしょに あわせて あかい ほしを かく）*/
+    const mars = chapterInfo(8);
+    if (typeof mars.x === 'number') {
+      const mx = mars.x * W, my = mars.y * H, mr = H * 0.15;
+      const mg = ctx.createRadialGradient(mx - mr * 0.3, my - mr * 0.3, mr * 0.1, mx, my, mr);
+      mg.addColorStop(0, '#ff8a65'); mg.addColorStop(0.6, '#e64a19'); mg.addColorStop(1, '#8d2c0c');
+      ctx.fillStyle = mg;
+      ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2); ctx.fill();
+      /* クレーター */
+      ctx.fillStyle = 'rgba(120,40,15,.5)';
+      for (const [cx2, cy2, cr] of [[-0.35, -0.2, 0.20], [0.25, 0.1, 0.26], [-0.1, 0.45, 0.15], [0.45, -0.35, 0.13]]) {
+        ctx.beginPath(); ctx.arc(mx + mr * cx2, my + mr * cy2, mr * cr, 0, Math.PI * 2); ctx.fill();
+      }
+      /* あかい ひかり */
+      const hg2 = ctx.createRadialGradient(mx, my, mr, mx, my, mr * 1.7);
+      hg2.addColorStop(0, 'rgba(255,112,67,.35)');
+      hg2.addColorStop(1, 'rgba(255,112,67,0)');
+      ctx.fillStyle = hg2;
+      ctx.beginPath(); ctx.arc(mx, my, mr * 1.7, 0, Math.PI * 2); ctx.fill();
+    }
+
+    /* これから いく ほし（まだ ない ぶんは かげだけ）*/
+    ctx.fillStyle = 'rgba(255,255,255,.07)';
+    ctx.strokeStyle = 'rgba(255,255,255,.16)';
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([5, 5]);
+    for (const [px, py, pr] of [[0.62, 0.66, 0.075], [0.86, 0.36, 0.06]]) {
+      ctx.beginPath(); ctx.arc(px * W, py * H, pr * H, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    ctx.font = 'bold ' + Math.round(H * 0.035) + 'px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('？', 0.62 * W, 0.66 * H + H * 0.012);
+    ctx.fillText('？', 0.86 * W, 0.36 * H + H * 0.012);
+    ctx.textAlign = 'start';
+
+    /* ロケットの みち（ちきゅう → 火星）*/
+    if (typeof mars.x === 'number') {
+      ctx.strokeStyle = 'rgba(255,213,79,.55)';
+      ctx.lineWidth = Math.max(3, H * 0.008);
+      ctx.setLineDash([Math.max(7, H * 0.03), Math.max(6, H * 0.026)]);
+      ctx.beginPath();
+      ctx.moveTo(ex + er, ey - er * 0.4);
+      ctx.quadraticCurveTo(W * 0.16, H * 0.48, mars.x * W - H * 0.16, mars.y * H + H * 0.05);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
   }
 
   /* --- ちずの え（そら・やま・かわ・き・みち）--- */
@@ -378,6 +510,9 @@
     const ctx = cv.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
+
+    /* うちゅうちずの ときは そちらを かいて おわり */
+    if (currentWorld === 'space') { drawSpaceMap(ctx, W, H); return; }
 
     /* そら */
     const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -1311,7 +1446,7 @@
   function toggleEvolve(id) {
     const s = slot();
     if (!s || !UNITS[id] || !UNITS[id].evolve) return;
-    if (effLevel(s, id) < LEVEL.max) { toast('じつりょく Lv.' + LEVEL.max + ' から しんか できます'); return; }
+    if (effLevel(s, id) < (LEVEL.evolveAt || 10)) { toast('じつりょく Lv.' + (LEVEL.evolveAt || 10) + ' から しんか できます'); return; }
     if (!s.evolved) s.evolved = {};
     const now = !s.evolved[id];
     if (now) s.evolved[id] = true; else delete s.evolved[id];
@@ -1360,7 +1495,7 @@
       const mul  = levelMult(eff, base.rarity);
       const maxed = (cost === null);
       const can  = !maxed && (s.exp || 0) >= cost;
-      const canEvolve = eff >= LEVEL.max;
+      const canEvolve = eff >= (LEVEL.evolveAt || 10);
 
       const row = document.createElement('div');
       row.className = 'power-row';
@@ -1397,7 +1532,7 @@
                               : 'しんか<br><small>' + base.evolve.name + '</small>';
           ev.addEventListener('click', () => toggleEvolve(id));
         } else {
-          ev.innerHTML = 'しんか<br><small>Lv.' + LEVEL.max + 'から</small>';
+          ev.innerHTML = 'しんか<br><small>Lv.' + (LEVEL.evolveAt || 10) + 'から</small>';
           ev.disabled = true;
         }
         row.appendChild(ev);
@@ -1988,6 +2123,7 @@
 
     /* トップがめん */
     $('#btn-home-stage').addEventListener('click', openChapters);
+    $('#btn-world').addEventListener('click', switchWorld);
     $('#btn-chapter-back').addEventListener('click', openHome);
     $('#btn-tower').addEventListener('click', openTower);
     $('#btn-tower-back').addEventListener('click', openChapters);

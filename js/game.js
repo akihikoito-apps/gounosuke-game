@@ -250,18 +250,26 @@ const Game = {
   },
 
   /* ---- てきの しゅつげん ---- */
+/* ★まだ でて いない ボスの ラインより したには しろの たいりょくを
+     ささえる。1フレームで まんタンから 0まで けずって しまうと、
+     ボスが でる まえに しあいが おわる ため、ダメージの あとにも よぶ。 */
+  holdBossFloor() {
+    let floor = 0;
+    for (const w of this.waves) {
+      if (w.done || w.atCastleHp === undefined) continue;
+      floor = Math.max(floor, w.atCastleHp * this.enemyCastle.maxHp);
+    }
+    if (floor > 0 && this.enemyCastle.hp < floor) this.enemyCastle.hp = floor;
+    return floor;
+  },
+
   updateWaves(dt) {
     /* ★ボスは かならず とうじょうさせる
        しろを 1げきで こわして しまうと、ボスが でる まえに しあいが
        おわって しまう ことが ある。まだ でて いない ボスの ラインより
        したには しろの たいりょくを ささえて おき、ボスが でた あとから
        こわせる ように する。 */
-    let bossFloor = 0;
-    for (const w of this.waves) {
-      if (w.done || w.atCastleHp === undefined) continue;
-      bossFloor = Math.max(bossFloor, w.atCastleHp * this.enemyCastle.maxHp);
-    }
-    if (bossFloor > 0 && this.enemyCastle.hp < bossFloor) this.enemyCastle.hp = bossFloor;
+    this.holdBossFloor();
 
     const ratio = this.enemyCastle.hp / this.enemyCastle.maxHp;
     for (const w of this.waves) {
@@ -921,6 +929,9 @@ const Game = {
 
   /* ---- しょうはい ---- */
   checkResult() {
+    /* ★ボスが まだ でて いないなら、しろは まだ こわれない */
+    if (!this.finished) this.holdBossFloor();
+
     if (this.finished) return;
     if (this.enemyCastle.hp <= 0)  { this.finished = true; this.result = 'win';  this.finishAt = this.time; }
     else if (this.playerCastle.hp <= 0) { this.finished = true; this.result = 'lose'; this.finishAt = this.time; }

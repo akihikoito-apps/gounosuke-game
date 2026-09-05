@@ -318,6 +318,27 @@ const UNITS = {
     weaken: { chance: 0.15, rate: 0.8, duration: 5.0 },
   },
 
+  /* 魚ファイターズ ── あおい タコと きいろい さかなの 2たい 1くみ。
+                     かわるがわる 体当たりして 2れんげきを あびせる。
+                     ★みず ＋ けもの の 2ぞくせいもち
+                     ★20%の かくりつで あいてを ふきとばす            */
+  sakanafighters: {
+    id: 'sakanafighters', name: '魚ファイターズ', shortName: '魚ファイ',
+    rarity: 'GR',                          // げきレア
+    attr: ['water', 'beast'],              // みず＋けもの
+    cost: 680,  recharge: 4.0,             // クールタイム 4びょう
+    hp: 2400,   atk: 300,  range: 72,   speed: 40,   // たいりょく たかめ／ちょい はやめ
+    attackInterval: 2.4,   attackWindup: 0.40,
+    kbCount: 3,
+    scale: 1.1,
+    attackType: 'single',                  // たんたい：1たいずつ 体当たり
+    projectile: null,                      // きんせつ
+    /* 2れんげき（タコ → さかな の じゅんに ぶつかる）*/
+    multiHit: { count: 2, delay: 0.22 },
+    /* 20%で ふきとばす */
+    knockbackChance: 0.20,
+  },
+
   /* あき坊 ── ぜんちぜんのうの かみさま。りょうてで かおを おしつぶして
               へんな かおを して いる。でも ちからは ほんもの。
               ★かみ ぞくせい：ぜんぶの ぞくせいに 1.2ばい、うける ダメージ 0.8ばい
@@ -589,9 +610,18 @@ let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく �
    1レベル あがるごとに たいりょくと こうげきりょくが ふえます。
    -------------------------------------------------------------------------- */
 const LEVEL = {
-  max: 10,
-  /* Lv1→2, Lv2→3, … Lv9→10 に ひつような けいけんち */
-  expCost: [80, 120, 180, 260, 360, 500, 700, 950, 1300],
+  max: 30,                     // ★宇宙編から じょうげん 30
+  evolveAt: 10,                // しんか できる ように なる レベル（じょうげんとは べつ）
+  /* Lv1→2, Lv2→3, … Lv29→30 に ひつような けいけんち
+     Lv.10 までは これまでどおり。そこから さきは 宇宙編の ながい みちのり。
+     Lv.10 まで  4,450
+     Lv.20 まで 23,300（＋18,850）
+     Lv.30 まで 75,500（＋52,200）                                   */
+  expCost: [
+    /* 1→10 */   80,  120,  180,  260,  360,  500,  700,  950, 1300,
+    /* 10→20 */ 850, 1050, 1250, 1450, 1700, 1950, 2200, 2500, 2800, 3100,
+    /* 20→30 */3450, 3800, 4150, 4550, 4950, 5350, 5800, 6250, 6700, 7200,
+  ],
 
   /* --------------------------------------------------------------
      レベルが あがると どれだけ つよく なるか
@@ -605,11 +635,11 @@ const LEVEL = {
      tiers は [そのレベルまで, 1レベルあたりの のび] の ならびです。
      -------------------------------------------------------------- */
   growth: {
-    N:  [[10, 0.10], [20, 0.05], [40, 0.025]],   // ノーマル      Lv.40 で 2.90ばい
-    R:  [[14, 0.10], [24, 0.05], [40, 0.025]],   // レア          Lv.40 で 3.20ばい
-    GR: [[18, 0.10], [28, 0.05], [40, 0.025]],   // げきレア      Lv.40 で 3.50ばい
-    SR: [[22, 0.10], [32, 0.05], [40, 0.025]],   // スーパーレア  Lv.40 で 3.80ばい
-    LR: [[26, 0.10], [36, 0.05], [40, 0.025]],   // でんせつレア  Lv.40 で 4.10ばい
+    N:  [[10, 0.10], [20, 0.05], [40, 0.025]],   // ノーマル      Lv.30 で 2.65ばい
+    R:  [[14, 0.10], [24, 0.05], [40, 0.025]],   // レア          Lv.30 で 2.95ばい
+    GR: [[18, 0.10], [28, 0.05], [40, 0.025]],   // げきレア      Lv.30 で 3.25ばい
+    SR: [[22, 0.10], [32, 0.05], [40, 0.025]],   // スーパーレア  Lv.30 で 3.50ばい
+    LR: [[26, 0.10], [36, 0.05], [40, 0.025]],   // でんせつレア  Lv.30 で 3.70ばい
   },
   /* growth に ないときの ほけん（てき など）*/
   gainPerLevel: 0.10,
@@ -1145,6 +1175,44 @@ const ENEMIES = {
     isBoss: true,
   },
 
+
+  /* ============================================================
+     ここから した は 宇宙編「火星」の てき
+     ============================================================ */
+
+  /* やじるしくん ── りょうほうこうの あかい やじるし。
+                   さんかくの だいの うえで にこにこ して いる。       */
+  yajirushi: {
+    id: 'yajirushi', name: 'やじるしくん',
+    rarity: 'R',
+    attr: 'fire',
+    hp: 620,    atk: 110,  range: 74,   speed: 46,
+    attackInterval: 1.3,   attackWindup: 0.28,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    /* やじるしに おされて すこし さがる */
+    knockbackChance: 0.15,
+    money: 90,
+  },
+
+  /* ポチ ── 火星の おおボス。みどりの からだに りゅうの あたま。
+             くちから ひを はいて、まわりごと やきはらう。
+             ★あてた あいてを かならず 1びょう とめる
+             ★ざこたちと いっしょに でて くる（しろを けずらなくても でる）*/
+  pochi: {
+    id: 'pochi', name: 'ポチ',
+    rarity: 'LR',
+    attr: 'fire',
+    hp: 7880,   atk: 470,  range: 180,  speed: 50,     // お菓子マンの 2ばいの たいりょく／はやい
+    attackInterval: 3.0,   attackWindup: 0.70,          // クールタイム 3びょう
+    kbCount: 99, scale: 1.5,
+    attackType: 'area', areaRadius: 78, projectile: 'flame',
+    kbImmune: true,
+    /* ★100%で 1びょう とめる */
+    stun: { duration: 1.0, chance: 1.0 },
+    money: 460,
+    isBoss: true,
+  },
 
   /* ============================================================
      ここから した は だい7しょう「闇の頂」の てき
@@ -2020,6 +2088,14 @@ const BACKGROUNDS = {
     deco: 'star',
   },
 
+  /* 火星（宇宙編）*/
+  mars: {
+    sky: ['#2a0d0a', '#6b2415', '#c25a2e'],
+    hillFar: '#7c3320', hillNear: '#4d1c11',
+    ground: '#8a3d22', groundTop: '#b55a30',
+    deco: 'star',
+  },
+
   /* いわば */
   rock: {
     sky: ['#8c9aa5', '#c3ced6', '#e8edf0'],
@@ -2409,7 +2485,7 @@ const STAGES = [
     desc: 'たぬポンに ちからを ぬかれる。かずで おしきろう',
     bg: 'mori',
     castleHp: 900,
-    power: 1.3,
+    power: 1.1,
     reward: { coins: 1, exp: 480 },
     waves: [
       { at: 3,  id: 'yamanemu',   count: 2, gap: 1.6 },
@@ -2657,7 +2733,7 @@ const STAGES = [
     desc: 'すべての げんきょう「廃炉獣メルトギア」。ほのお・まじゅつし・パワーで',
     bg: 'boss',
     castleHp: 1800,
-    power: 0.92,
+    power: 0.8,
     reward: { coins: 3, exp: 1400 },
     waves: [
       { at: 3,  id: 'kongaragan', count: 1 },
@@ -2876,7 +2952,7 @@ const STAGES = [
     desc: 'ひの まほうを つかう みならいたちの くんれんエリア',
     bg: 'sunset',
     castleHp: 2000,
-    power: 0.99,
+    power: 0.86,
     reward: { coins: 1, exp: 1400 },
     waves: [
       { at: 3,  id: 'runrunwisp', count: 3, gap: 0.9 },
@@ -2956,7 +3032,7 @@ const STAGES = [
     desc: 'おおボス「終焉の大魔導士ゼノス」。すべての まほうが あつまる さいごの たたかい',
     bg: 'boss',
     castleHp: 2700,
-    power: 1.3,
+    power: 1.12,
     reward: { coins: 3, exp: 2200 },
     waves: [
       { at: 3,   id: 'houkigob',    count: 3, gap: 1.0 },
@@ -3125,6 +3201,148 @@ const STAGES = [
     ],
   },
 
+  /* ==========================================================
+     宇宙編 だい1わく「火星」
+
+     ここから さきは 宇宙編。せかいちずを ぜんぶ クリアすると あそべる。
+     火星は あかい すなの ほし。ほのおの てきが おおく、
+     みずの なかまが とても ゆうり。メタルの てきも まざる ので、
+     ほのおの なかま（ひー坊・隕坊・スティーブ）も つよい。
+     ★8-7 の おおボス「ポチ」は しろを けずらなくても、
+       ざこたちと いっしょに はじめから でて きます。
+     ========================================================== */
+
+  /* ---------------- 8-1 あかい すなの へいげん ---------------- */
+  {
+    no: 74, chapter: 8, course: 1,
+    name: 'あかい すなの へいげん',
+    desc: 'はじめて ふむ 火星の つち。やじるしくんが おでむかえ',
+    bg: 'mars',
+    castleHp: 6200,
+    power: 3.73,
+    reward: { coins: 2, exp: 3200 },
+    waves: [
+      { at: 3,  id: 'yajirushi',  count: 4, gap: 0.9 },
+      { at: 18, id: 'yakipokkuru', count: 3, gap: 1.0 },
+      { at: 34, id: 'yajirushi',  count: 4, gap: 0.9, repeat: 14 },
+      { at: 50, id: 'nejiro',     count: 3, gap: 1.1, repeat: 17 },
+    ],
+  },
+
+  /* ---------------- 8-2 クレーターの そこ ---------------- */
+  {
+    no: 75, chapter: 8, course: 2,
+    name: 'クレーターの そこ',
+    desc: 'ふかい あなの なかで まちぶせる きかいたち',
+    bg: 'mars',
+    castleHp: 6500,
+    power: 3.82,
+    reward: { coins: 2, exp: 3300 },
+    waves: [
+      { at: 3,  id: 'yajirushi',  count: 4, gap: 0.9 },
+      { at: 18, id: 'ironkokko',  count: 3, gap: 1.1 },
+      { at: 34, id: 'moeris',     count: 3, gap: 1.0, repeat: 13 },
+      { at: 50, id: 'ironkokko',  count: 3, gap: 1.1, repeat: 17 },
+      { at: 66, id: 'yajirushi',  count: 4, gap: 0.9, repeat: 14 },
+    ],
+  },
+
+  /* ---------------- 8-3 さびた たんさきの あと ---------------- */
+  {
+    no: 76, chapter: 8, course: 3,
+    name: 'さびた たんさきの あと',
+    desc: 'むかし おちた たんさきの まわりに あつまる きかい',
+    bg: 'mars',
+    castleHp: 6700,
+    power: 3.91,
+    reward: { coins: 2, exp: 3400 },
+    waves: [
+      { at: 3,  id: 'yajirushi', count: 4, gap: 0.9 },
+      { at: 18, id: 'sabinchi',  count: 3, gap: 1.1 },
+      { at: 34, id: 'burner',    count: 1, repeat: 14 },
+      { at: 50, id: 'potank',    count: 1, repeat: 17 },
+      { at: 64, id: 'yajirushi', count: 4, gap: 0.9, repeat: 13 },
+    ],
+  },
+
+  /* ---------------- 8-4 かざんの ふもと（ちゅうボス）---------------- */
+  {
+    no: 77, chapter: 8, course: 4,
+    name: 'かざんの ふもと',
+    desc: 'ちゅうボス「廃炉獣メルトギア」。火星いちの おおきな かざん',
+    bg: 'mars',
+    castleHp: 7200,
+    power: 4,
+    reward: { coins: 3, exp: 3600 },
+    waves: [
+      { at: 3,  id: 'yajirushi', count: 4, gap: 0.9 },
+      { at: 18, id: 'burner',    count: 3, gap: 1.1 },
+      { at: 34, id: 'moeris',    count: 3, gap: 1.0, repeat: 13 },
+      { at: 50, id: 'yajirushi', count: 4, gap: 0.9, repeat: 14 },
+      { at: 66, id: 'forkun',    count: 1, repeat: 19 },
+      /* ★ちゅうボス */
+      { atCastleHp: 0.70, id: 'meltgear', count: 1 },
+    ],
+  },
+
+  /* ---------------- 8-5 すなあらしの たに ---------------- */
+  {
+    no: 78, chapter: 8, course: 5,
+    name: 'すなあらしの たに',
+    desc: 'あかい すなが まいあがり、まえが よく みえない',
+    bg: 'mars',
+    castleHp: 7400,
+    power: 4.09,
+    reward: { coins: 2, exp: 3800 },
+    waves: [
+      { at: 3,  id: 'yajirushi',  count: 5, gap: 0.8 },
+      { at: 18, id: 'flamemage',  count: 1 },
+      { at: 32, id: 'ironkokko',  count: 3, gap: 1.1, repeat: 14 },
+      { at: 48, id: 'flamemage',  count: 1, repeat: 17 },
+      { at: 64, id: 'yajirushi',  count: 5, gap: 0.8, repeat: 13 },
+    ],
+  },
+
+  /* ---------------- 8-6 きょだいな はぐるまの もん ---------------- */
+  {
+    no: 79, chapter: 8, course: 6,
+    name: 'きょだいな はぐるまの もん',
+    desc: 'だれが つくったのか わからない、おおきな はがねの もん',
+    bg: 'mars',
+    castleHp: 7700,
+    power: 4.19,
+    reward: { coins: 2, exp: 4000 },
+    waves: [
+      { at: 3,  id: 'yajirushi',  count: 5, gap: 0.8 },
+      { at: 18, id: 'pressuke',   count: 1 },
+      { at: 34, id: 'burner',     count: 3, gap: 1.1, repeat: 14 },
+      { at: 50, id: 'pressuke',   count: 1, repeat: 19 },
+      { at: 66, id: 'yajirushi',  count: 5, gap: 0.8, repeat: 13 },
+    ],
+  },
+
+  /* ---------------- 8-7 ポチの すあな（おおボス）---------------- */
+  {
+    no: 80, chapter: 8, course: 7,
+    name: 'ポチの すあな',
+    desc: 'おおボス「ポチ」。くちから ひを はく りゅう。はじめから でて くる！',
+    bg: 'boss',
+    castleHp: 8200,
+    power: 4.28,
+    reward: { coins: 3, exp: 5200 },
+    waves: [
+      /* ★ポチは ざこたちと いっしょに はじめから でて くる */
+      { at: 8,  id: 'pochi',      count: 1 },
+      { at: 3,  id: 'yajirushi',  count: 5, gap: 0.8 },
+      { at: 20, id: 'burner',     count: 3, gap: 1.1 },
+      { at: 36, id: 'yajirushi',  count: 5, gap: 0.8, repeat: 12 },
+      { at: 52, id: 'ironkokko',  count: 3, gap: 1.1, repeat: 15 },
+      { at: 68, id: 'flamemage',  count: 1, repeat: 18 },
+      /* しろが へると もう 1たい */
+      { atCastleHp: 0.45, id: 'pochi', count: 1 },
+    ],
+  },
+
 ];
 
 
@@ -3234,6 +3452,9 @@ const CHAPTERS = {
   5: { name: '賑わう近海',            short: 'きんかい', x: 0.60, y: 0.82, icon: '🌊' },
   6: { name: '魔導士の里',            short: 'まどうし', x: 0.74, y: 0.44, icon: '🔮' },
   7: { name: '闇の頂',                short: 'やみ',     x: 0.89, y: 0.72, icon: '🌑' },
+  /* ---- ここから 宇宙編。せかいちずを ぜんぶ クリアすると あそべる ----
+     world: 'space' の しょうは べつの ちず（うちゅうちず）に でます。   */
+  8: { name: '火星',  short: 'かせい', x: 0.30, y: 0.42, icon: '🔴', world: 'space' },
 };
 
 
