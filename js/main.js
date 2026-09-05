@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '3.4';
+  const GAME_VERSION = '3.5';
 
 
   /* =================================================
@@ -1280,7 +1280,7 @@
     const info = $('#gacha-rates');
     if (info && !info.dataset.done) {
       info.dataset.done = '1';
-      info.innerHTML = ['N', 'R', 'SR', 'LR'].map(k =>
+      info.innerHTML = RARITY_ORDER.map(k =>
         '<span class="rarity-tag" style="background:' + RARITY[k].color + '">' +
         RARITY[k].star + ' ' + RARITY[k].label + ' ' + RARITY[k].rate + '%</span>').join(' ');
     }
@@ -1292,7 +1292,7 @@
     s.coins -= GACHA.cost;
 
     /* --- レアリティを ちゅうせん --- */
-    const keys = ['N', 'R', 'SR', 'LR'];
+    const keys = RARITY_ORDER.slice();
     const total = keys.reduce((a, k) => a + RARITY[k].rate, 0);
     let r = Math.random() * total, rank = 'N';
     for (const k of keys) { r -= RARITY[k].rate; if (r <= 0) { rank = k; break; } }

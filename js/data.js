@@ -166,10 +166,10 @@ const UNITS = {
   /* ひー坊 ── ほのおを まとった たかかりょく */
   hiibou: {
     id: 'hiibou', name: 'ひー坊', shortName: 'ひー坊',
-    rarity: 'SR',                          // スーパーレア
+    rarity: 'GR',                        // げきレア
     attr: 'fire',
     cost: 1350, recharge: 30.0,
-    hp: 2900,   atk: 650,  range: 118,  speed: 24,
+    hp: 2900,   atk: 435,  range: 118,  speed: 24,
     attackInterval: 2.2,   attackWindup: 0.55,   // おおきく ふりかぶる
     kbCount: 3,
     scale: 1.1,
@@ -185,7 +185,7 @@ const UNITS = {
                  そのかわり たいりょくは ふつう。とびだしすぎに ちゅうい      */
   shurihen: {
     id: 'shurihen', name: 'しゅりへん', shortName: 'しゅりへん',
-    rarity: 'SR',                         // スーパーレア
+    rarity: 'GR',                        // げきレア
     attr: 'none',
     cost: 420,  recharge: 20.0,
     hp: 1400,   atk: 950,  range: 88,   speed: 125,   // saba なみの はやさ
@@ -315,7 +315,7 @@ const UNITS = {
                  ひの やを とても とおくまで うちつづける。コストは とても たかい  */
   steve: {
     id: 'steve', name: 'スティーブ', shortName: 'スティーブ',
-    rarity: 'SR',                         // スーパーレア（塔の ごほうび せんよう）
+    rarity: 'GR',                        // げきレア
     attr: 'fire',
     cost: 850,  recharge: 28.0,
     hp: 1300,   atk: 320,  range: 620,   speed: 0,
@@ -365,10 +365,11 @@ const LEVEL = {
      tiers は [そのレベルまで, 1レベルあたりの のび] の ならびです。
      -------------------------------------------------------------- */
   growth: {
-    N:  [[10, 0.10], [20, 0.05], [40, 0.025]],   // ノーマル
-    R:  [[15, 0.10], [25, 0.05], [40, 0.025]],   // レア
-    SR: [[20, 0.10], [30, 0.05], [40, 0.025]],   // スーパーレア
-    LR: [[25, 0.10], [35, 0.05], [40, 0.025]],   // でんせつレア
+    N:  [[10, 0.10], [20, 0.05], [40, 0.025]],   // ノーマル      Lv.40 で 2.90ばい
+    R:  [[14, 0.10], [24, 0.05], [40, 0.025]],   // レア          Lv.40 で 3.20ばい
+    GR: [[18, 0.10], [28, 0.05], [40, 0.025]],   // げきレア      Lv.40 で 3.50ばい
+    SR: [[22, 0.10], [32, 0.05], [40, 0.025]],   // スーパーレア  Lv.40 で 3.80ばい
+    LR: [[26, 0.10], [36, 0.05], [40, 0.025]],   // でんせつレア  Lv.40 で 4.10ばい
   },
   /* growth に ないときの ほけん（てき など）*/
   gainPerLevel: 0.10,
@@ -421,18 +422,23 @@ function levelUpCost(lv) {
    ガチャは まず レアリティを ちゅうせんして、その なかから 1たい えらびます。
    すでに もっている キャラが でたら「レベルの じょうげんかいほう（＋）」に なります。
    -------------------------------------------------------------------------- */
+/* レアリティは よわい じゅんに 5だんかい。
+   RARITY_ORDER の ならびが そのまま「ひくい → たかい」の じゅんばんです */
+const RARITY_ORDER = ['N', 'R', 'GR', 'SR', 'LR'];
+
 const RARITY = {
-  N:  { label: 'ノーマル',     rate: 50, color: '#90caf9', star: '★'    },
-  R:  { label: 'レア',         rate: 30, color: '#81c784', star: '★★'   },
-  SR: { label: 'スーパーレア', rate: 17, color: '#ffd54f', star: '★★★'  },
-  LR: { label: 'でんせつレア', rate:  3, color: '#ff8a65', star: '★★★★' },
+  N:  { label: 'ノーマル',     rate: 50, color: '#90caf9', star: '★'     },
+  R:  { label: 'レア',         rate: 30, color: '#81c784', star: '★★'    },
+  GR: { label: 'げきレア',     rate: 15, color: '#ffd54f', star: '★★★'   },
+  SR: { label: 'スーパーレア', rate:  4, color: '#ff8a65', star: '★★★★'  },
+  LR: { label: 'でんせつレア', rate:  1, color: '#ce93d8', star: '★★★★★' },
 };
 
 const GACHA = {
   cost: 3,                 // 1かい ひくのに ひつような Gコイン
   plusMax: 30,             // レベルの じょうげんかいほう は ＋30 まで
   /* ダブった とき（＋が MAXの とき）に もらえる けいけんち */
-  dupExp:  { N: 100, R: 250, SR: 600, LR: 1500 },
+  dupExp:  { N: 100, R: 250, GR: 600, SR: 1200, LR: 2500 },
   /* まだ キャラが いない レアリティが でた ときの おたのしみ */
   emptyExp: 1000,
 };
@@ -858,7 +864,7 @@ const ENEMIES = {
   gaou: {
     id: 'gaou', name: '森喰らい・ガオウ',
     attr: ['beast', 'grass'],             // 2ぞくせい もち
-    hp: 12000,  atk: 700,  range: 160,  speed: 12,
+    hp: 10000,  atk: 640,  range: 160,  speed: 12,
     attackInterval: 2.8,   attackWindup: 0.70,
     kbCount: 99,
     scale: 1.4,
@@ -1016,7 +1022,7 @@ const ENEMIES = {
   meltgear: {
     id: 'meltgear', name: '廃炉獣メルトギア',
     attr: ['metal', 'fire'],              // 2ぞくせい もち
-    hp: 9000,   atk: 520,  range: 185,  speed: 12,
+    hp: 7600,   atk: 470,  range: 185,  speed: 12,
     attackInterval: 3.0,   attackWindup: 0.75,
     kbCount: 99,
     scale: 1.45,
@@ -1806,8 +1812,8 @@ const STAGES = [
     name: 'はりの もり',
     desc: 'ハリ千本が とおくから はりを とばす。まえに でよう',
     bg: 'kemono',
-    castleHp: 2800,
-    enemyMult: 1.16,
+    castleHp: 2600,
+    enemyMult: 1.12,
     reward: { coins: 1, exp: 460 },
     waves: [
       { at: 3,  id: 'inocchi',    count: 2, gap: 1.2 },
@@ -1870,8 +1876,8 @@ const STAGES = [
     name: 'もりぐいの おくにわ',
     desc: 'おおボス「森喰らい・ガオウ」。ふきとばせない。ほのおと パワーで',
     bg: 'boss',
-    castleHp: 4200,
-    enemyMult: 1.34,
+    castleHp: 3400,
+    enemyMult: 1.20,
     reward: { coins: 2, exp: 620 },
     waves: [
       { at: 3,   id: 'inocchi',    count: 2, gap: 1.2 },
@@ -1956,8 +1962,8 @@ const STAGES = [
     name: 'エネルギー きょうきゅうく',
     desc: 'ほのおと みずの じっけんきが きどう',
     bg: 'steel',
-    castleHp: 2600,
-    enemyMult: 1.04,
+    castleHp: 2400,
+    enemyMult: 1.02,
     reward: { coins: 1, exp: 620 },
     waves: [
       { at: 3,  id: 'nejiro',   count: 3, gap: 0.8 },
@@ -2059,7 +2065,7 @@ const STAGES = [
     desc: 'さいごの ぼうえいライン。じゅうきが そろいぶみ',
     bg: 'sunset',
     castleHp: 3800,
-    enemyMult: 1.28,
+    enemyMult: 1.22,
     reward: { coins: 1, exp: 820 },
     waves: [
       { at: 3,   id: 'nejiro',   count: 3, gap: 0.8 },
@@ -2080,7 +2086,7 @@ const STAGES = [
     name: 'ようこうろの さいしんぶ',
     desc: 'すべての げんきょう「廃炉獣メルトギア」。ほのお・まじゅつし・パワーで',
     bg: 'boss',
-    castleHp: 3400,
+    castleHp: 3100,
     enemyMult: 1.16,
     reward: { coins: 2, exp: 1000 },
     waves: [
