@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '2.9';
+  const GAME_VERSION = '3.0';
 
 
   /* =================================================
@@ -330,12 +330,19 @@
      ================================================= */
 
   /* ステージ（しょう）が ちずの どこに あるか（0〜1 の わりあい）*/
-  function chapterPos(i, n) {
+  /* しょうの ばしょ。data.js の CHAPTERS に かいて あれば それを つかい、
+     なければ これまでどおり じどうで ならべます                        */
+  function chapterPos(i, n, ch) {
+    const info = (typeof CHAPTERS !== 'undefined') ? CHAPTERS[ch] : null;
+    if (info && typeof info.x === 'number') return { x: info.x, y: info.y };
     const t = (n <= 1) ? 0.5 : i / (n - 1);
     return {
       x: 0.14 + t * 0.72,
       y: 0.56 + Math.sin(t * Math.PI * 2 + 0.6) * 0.17,
     };
+  }
+  function chapterInfo(ch) {
+    return ((typeof CHAPTERS !== 'undefined') ? CHAPTERS[ch] : null) || {};
   }
 
   function openChapters() {
@@ -419,8 +426,92 @@
     ctx.quadraticCurveTo(W * 0.3, H * 0.78, W * 0.46, H * 0.95);
     ctx.stroke();
 
+    /* けものみち：だい3しょうの まわりを ふかい もりに する */
+    const kemo = (typeof CHAPTERS !== 'undefined' && CHAPTERS[3]) ? CHAPTERS[3] : null;
+    if (kemo) {
+      const kx = kemo.x * W, ky = kemo.y * H;
+      ctx.fillStyle = '#2f5a35';
+      ctx.beginPath();
+      ctx.ellipse(kx, ky + H * 0.02, W * 0.19, H * 0.17, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#3d6f3f';
+      ctx.beginPath();
+      ctx.ellipse(kx - W * 0.03, ky - H * 0.02, W * 0.14, H * 0.12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      /* けものの あしあと */
+      ctx.fillStyle = 'rgba(60,40,25,.5)';
+      for (let i = 0; i < 6; i++) {
+        const fx = kx - W * 0.15 + i * W * 0.05, fy = ky + H * 0.08 + ((i % 2) ? H * 0.02 : 0);
+        ctx.beginPath(); ctx.ellipse(fx, fy, H * 0.011, H * 0.015, 0, 0, Math.PI * 2); ctx.fill();
+        for (let k = 0; k < 3; k++) {
+          ctx.beginPath();
+          ctx.arc(fx - H * 0.012 + k * H * 0.012, fy - H * 0.019, H * 0.005, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    /* 廃れたメカニック工場：だい4しょうの まわりを こうじょうちたいに する */
+    const fac = (typeof CHAPTERS !== 'undefined' && CHAPTERS[4]) ? CHAPTERS[4] : null;
+    if (fac) {
+      const fx = fac.x * W, fy = fac.y * H;
+      /* すすけた じめん */
+      ctx.fillStyle = '#6b625a';
+      ctx.beginPath();
+      ctx.ellipse(fx, fy + H * 0.04, W * 0.17, H * 0.16, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#565049';
+      ctx.beginPath();
+      ctx.ellipse(fx + W * 0.02, fy + H * 0.02, W * 0.12, H * 0.10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* こうじょうの たてもの と えんとつ */
+      const bw = W * 0.035, bh = H * 0.13;
+      for (let i = 0; i < 3; i++) {
+        const bx = fx - W * 0.085 + i * W * 0.062, by = fy - H * 0.02;
+        ctx.fillStyle = ['#4e4a45', '#5a554e', '#443f3a'][i];
+        ctx.fillRect(bx, by - bh, bw, bh);
+        /* まど */
+        ctx.fillStyle = 'rgba(255,200,120,.35)';
+        for (let k = 0; k < 3; k++) ctx.fillRect(bx + bw * 0.2, by - bh + bh * (0.18 + k * 0.26), bw * 0.6, bh * 0.13);
+        /* えんとつ */
+        ctx.fillStyle = '#3d3833';
+        const cw = bw * 0.28, chh = bh * (0.5 + i * 0.22);
+        ctx.fillRect(bx + bw * 0.62, by - bh - chh, cw, chh);
+        /* けむり */
+        ctx.fillStyle = 'rgba(150,145,140,.4)';
+        for (let k = 0; k < 3; k++) {
+          ctx.beginPath();
+          ctx.arc(bx + bw * 0.76, by - bh - chh - H * (0.012 + k * 0.016), H * (0.009 + k * 0.005), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      /* クレーン */
+      ctx.strokeStyle = '#4a4540'; ctx.lineWidth = Math.max(2, H * 0.008);
+      ctx.beginPath();
+      ctx.moveTo(fx + W * 0.075, fy + H * 0.02);
+      ctx.lineTo(fx + W * 0.075, fy - H * 0.14);
+      ctx.lineTo(fx + W * 0.115, fy - H * 0.12);
+      ctx.stroke();
+      /* ころがった ギア */
+      ctx.fillStyle = 'rgba(90,84,78,.85)';
+      for (const [gx, gy, gr] of [[-0.10, 0.09, 0.016], [0.06, 0.11, 0.012], [-0.02, 0.13, 0.010]]) {
+        const cx2 = fx + W * gx, cy2 = fy + H * gy, r2 = H * gr;
+        ctx.beginPath(); ctx.arc(cx2, cy2, r2, 0, Math.PI * 2); ctx.fill();
+        for (let k = 0; k < 6; k++) {
+          const an = (k / 6) * Math.PI * 2;
+          ctx.fillRect(cx2 + Math.cos(an) * r2 - r2 * 0.28, cy2 + Math.sin(an) * r2 - r2 * 0.28, r2 * 0.56, r2 * 0.56);
+        }
+        ctx.fillStyle = 'rgba(60,56,52,.9)';
+        ctx.beginPath(); ctx.arc(cx2, cy2, r2 * 0.35, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(90,84,78,.85)';
+      }
+    }
+
     /* き */
-    const trees = [[0.06, 0.72], [0.24, 0.84], [0.55, 0.8], [0.7, 0.5], [0.92, 0.78], [0.38, 0.52], [0.82, 0.9]];
+    const trees = [[0.06, 0.72], [0.24, 0.84], [0.55, 0.8], [0.38, 0.52],
+                   /* けものみちの まわりは きが みっしゅう */
+                   [0.42, 0.66], [0.46, 0.88], [0.57, 0.62], [0.60, 0.90], [0.53, 0.94], [0.38, 0.80], [0.62, 0.72]];
     trees.forEach(([tx, ty]) => {
       const x = W * tx, y = H * ty, r = H * 0.045;
       ctx.fillStyle = '#6d4c2f';
@@ -435,7 +526,7 @@
     const chs = chapterList();
     const cleared = (slot() && slot().cleared) || {};
     for (let i = 0; i < chs.length - 1; i++) {
-      const a = chapterPos(i, chs.length), b = chapterPos(i + 1, chs.length);
+      const a = chapterPos(i, chs.length, chs[i]), b = chapterPos(i + 1, chs.length, chs[i + 1]);
       const list = coursesOf(chs[i]);
       const done = list.length > 0 && list.every(st => cleared[st.no]);
       const ax = a.x * W, ay = a.y * H, bx = b.x * W, by = b.y * H;
@@ -469,7 +560,7 @@
     }
 
     chs.forEach((ch, i) => {
-      const p = chapterPos(i, chs.length);
+      const p = chapterPos(i, chs.length, ch);
       const list = coursesOf(ch);
       const done = list.filter(st => cleared[st.no]).length;
       const all  = done === list.length;
@@ -480,10 +571,10 @@
       el.style.left = (p.x * 100) + '%';
       el.style.top  = (p.y * 100) + '%';
       el.innerHTML =
-        '<span class="mn-no">' + ch + '</span>' +
+        '<span class="mn-no">' + (chapterInfo(ch).icon || ch) + '</span>' +
         '<span class="mn-sub">' + (open ? done + '/' + list.length : 'ロック') + '</span>' +
         (all ? '<span class="mn-badge">⭐</span>' : (open ? '' : '<span class="mn-badge">🔒</span>')) +
-        '<span class="mn-label">だい' + ch + 'ステージ</span>';
+        '<span class="mn-label">' + (open ? (chapterInfo(ch).name || ('だい' + ch + 'ステージ')) : ('だい' + ch + 'ステージ')) + '</span>';
       if (open) el.addEventListener('click', () => { currentChapter = ch; buildStageList(); show('screen-stage'); });
       else      el.addEventListener('click', () => toast('まえの ステージを ぜんぶ クリアしてね'));
       box.appendChild(el);
@@ -543,7 +634,7 @@
     box.innerHTML = '';
     const cleared = (slot() && slot().cleared) || {};
     const list = coursesOf(currentChapter);
-    $('#stage-title').textContent = 'だい' + currentChapter + 'ステージ';
+    $('#stage-title').textContent = chapterInfo(currentChapter).name || ('だい' + currentChapter + 'ステージ');
 
     // つぎに あそぶ コース（クリアして いない さいしょの コース）
     let nextIdx = -1;

@@ -184,6 +184,9 @@ const Game = {
       healT: 0,                     // なかまを かいふく する タイマー
       windupDmg: 0,                 // タメちゅうに うけた ダメージ
       stunUntil: -1,
+      weakUntil: -1, weakRate: 1,   // こうげきりょくを さげられて いる
+      healedOnce: false,            // ピンチで 1どだけ かいふく（コケジカ）
+      enraged: false,               // ピンチで つよく なった（ヌシノオオカミ・ガオウ）
       dead: false,
       flash: 0,
     };
@@ -282,6 +285,27 @@ const Game = {
     if (this.finished) return;
 
     /* --- じどう かいふく（リジェネ）--- */
+    /* ピンチに なった ときの しょり */
+    if (!u.dead && u.maxHp > 0) {
+      const ratio = u.hp / u.maxHp;
+      // 1どだけ たいりょくを もどす（コケジカ）
+      const ho = u.def.healOnce;
+      if (ho && !u.healedOnce && ratio <= (ho.below || 0.5)) {
+        u.healedOnce = true;
+        u.hp = Math.min(u.maxHp, u.hp + u.maxHp * (ho.rate || 0.3));
+        this.addEffect({ type: 'healMark', x: u.x, y: this.groundWorldY() - 76 - u.lane, life: 0.9 });
+        this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 58 - u.lane,
+                         text: 'ふっかつ！', color: '#69f0ae', life: 0.9, big: true });
+      }
+      // ピンチで つよく なる（ヌシノオオカミ・ガオウ）
+      const en = u.def.enrage;
+      if (en && !u.enraged && ratio <= (en.below || 0.5)) {
+        u.enraged = true;
+        this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 104 - u.lane,
+                         text: 'ほんきモード！', color: '#ff5252', life: 1.1, big: true });
+      }
+    }
+
     if (u.def.regen && u.hp < u.maxHp) {
       u.hp = Math.min(u.maxHp, u.hp + u.def.regen * dt);
     }
@@ -420,9 +444,26 @@ const Game = {
     return best;
   },
 
+  /* いまの こうげきりょく。
+     ・weaken を うけて いる あいだは さがる
+     ・enrage（ピンチで つよく なる）の あいだは あがる      */
+  liveAtk(u) {
+    let a = (u.atk !== undefined ? u.atk : u.def.atk);
+    if (u.weakUntil > this.time) a *= (u.weakRate || 1);
+    if (u.enraged && u.def.enrage && u.def.enrage.atkMult) a *= u.def.enrage.atkMult;
+    return a;
+  },
+
+  /* いまの こうげきかんかく。ピンチで はやく なる ことが ある */
+  liveInterval(u) {
+    let iv = u.def.attackInterval;
+    if (u.enraged && u.def.enrage && u.def.enrage.intervalMult) iv *= u.def.enrage.intervalMult;
+    return iv;
+  },
+
   /* ---- こうげきの しゅんかん ---- */
   resolveAttack(u) {
-    u.atkCd = u.def.attackInterval;
+    u.atkCd = this.liveInterval(u);
     if (u.def.noAttack) return;          // かべくん は こうげき しない（たちはだかる だけ）
     if (u.def.multiHit) {
       u.burst = { left: u.def.multiHit.count, timer: 0, delay: u.def.multiHit.delay };
@@ -438,14 +479,17 @@ const Game = {
     const y = this.groundWorldY() - 40 - u.lane;
 
     if (u.def.projectile) {
-      const speed = ({ drop: 560, clock: 520, fireball: 400, grass: 380, jelly: 460 })[u.def.projectile] || 480;
+      const speed = ({ drop: 560, clock: 520, fireball: 400, grass: 380, jelly: 460,
+                         bubble: 300, nut: 520, needle: 640, flame: 420, cord: 560 })[u.def.projectile] || 480;
       this.projectiles.push({
         kind: u.def.projectile,
         x: u.x + 24 * u.forward, y: y - 14,
         vx: speed * u.forward,
         dir: u.forward,
         side: u.side,
-        atk: (u.atk !== undefined ? u.atk : u.def.atk),
+        atk: this.liveAtk(u),
+        bonusVs: u.def.bonusVs || null,
+        weaken: u.def.weaken || null,
         attr: u.def.attr,
         area: u.def.attackType === 'area',
         areaRadius: u.def.areaRadius || 0,
@@ -471,7 +515,7 @@ const Game = {
       return;
     }
     const isArea = src.def ? src.def.attackType === 'area' : src.area;
-    const atk    = (src.atk !== undefined && src.atk !== null) ? src.atk : (src.def ? src.def.atk : 0);
+    const atk    = src.def ? this.liveAtk(src) : ((src.atk !== undefined && src.atk !== null) ? src.atk : 0);
     const attr   = src.def ? src.def.attr : src.attr;
     const side   = src.side;
     const radius = src.def ? (src.def.areaRadius || 0) : (src.areaRadius || 0);
@@ -480,6 +524,8 @@ const Game = {
     const stun   = src.def ? (src.def.stun || null) : (src.stun || null);
     const blind  = src.def ? (src.def.blind || null) : (src.blind || null);
     const crit   = src.def ? (src.def.crit || null) : (src.crit || null);
+    const bonus  = src.def ? (src.def.bonusVs || null) : (src.bonusVs || null);
+    const weaken = src.def ? (src.def.weaken || null) : (src.weaken || null);
 
     if (target && target.castle) {
       const dmg = Math.round(atk * CONFIG.castleDamageRate);
@@ -504,7 +550,11 @@ const Game = {
     }
 
     for (const v of victims) {
-      const mult = attrMultiplier(attr, v.def.attr);
+      let mult = attrMultiplier(attr, v.def.attr);
+      // とくいな あいてには さらに よぶんに ダメージ（モエリス）
+      if (bonus && bonus.attrs && attrList(v.def.attr).some(x => bonus.attrs.indexOf(x) >= 0)) {
+        mult *= (bonus.mult || 1.5);
+      }
       let dmg = Math.round(atk * mult);
       let isCrit = false;
       if (crit && Math.random() < ((crit.chance === undefined) ? 1 : crit.chance)) {
@@ -536,6 +586,12 @@ const Game = {
       if (stunOkAttr && !v.dead && Math.random() < ((stun.chance === undefined) ? 1 : stun.chance)) {
         v.stunUntil = this.time + stun.duration;
         this.addEffect({ type: 'stunMark', x: v.x, y: this.groundWorldY() - 78, life: 0.9 });
+      }
+      if (weaken && !v.dead && Math.random() < ((weaken.chance === undefined) ? 1 : weaken.chance)) {
+        v.weakUntil = this.time + (weaken.duration || 3);
+        v.weakRate  = weaken.rate || 0.7;
+        this.addEffect({ type: 'dmg', x: v.x, y: this.groundWorldY() - 88 - v.lane,
+                         text: 'ちからダウン', color: '#90a4ae', life: 0.8 });
       }
       if (kbCh > 0 && !v.dead && Math.random() < kbCh) {
         this.knockback(v, CONFIG.knockbackDistance * 1.6);
@@ -627,6 +683,7 @@ const Game = {
   knockback(u, dist) {
     if (u.dead) return;
     if (u.def.stationary) return;   // ブロックの うえから おちない
+    if (u.def.kbImmune) return;     // ふきとばされない（森喰らい・ガオウ）
     u.state = 'kb';
     u.kbT = 0;
     u.kbFrom = u.x;
@@ -1040,6 +1097,8 @@ const Game = {
         hpRatio: u.hp / u.maxHp,
         roll: u.roll || 0,
         blocked: !!u.blocked,          // ふところに はいられて あわてて いる
+        enraged: !!u.enraged,          // ピンチで つよく なって いる
+        weak: (u.weakUntil > this.time),
         // うった ちょくご（クールタイムの さいしょ 35%）は「バタバタ」の あいだ
         fired: (u.atkCd > (u.def.attackInterval || 1) * 0.65),
       };
