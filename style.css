@@ -864,10 +864,11 @@ body.dragging-slot #party-slots { touch-action:none; }
 }
 .st-row {
   display:grid;
-  grid-template-columns: minmax(calc(96px * var(--ui)), auto) auto 1fr;
+  /* ラベルと ★の はばを こていして、★の いちを たてに そろえる */
+  grid-template-columns: calc(104px * var(--ui)) calc(80px * var(--ui)) 1fr;
   align-items:center; gap:calc(6px * var(--ui));
 }
-.st-lb  { font-style:normal; color:#546e7a; white-space:nowrap; }
+.st-lb  { font-style:normal; color:#546e7a; white-space:nowrap; overflow:hidden; text-overflow:clip; }
 .st-num { font-style:normal; color:#0d3050; font-weight:bold; white-space:nowrap; }
 .st-star {
   font-style:normal; letter-spacing:calc(1px * var(--ui));

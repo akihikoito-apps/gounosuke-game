@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '4.1';
+  const GAME_VERSION = '4.2';
 
 
   /* =================================================
@@ -1375,10 +1375,10 @@
     let stats =
       statRow('たいりょく', 'hp',    hp,  hp) +
       statRow('こうげき',   'atk',   atk, atk + (hits > 1 ? '×' + hits : '')) +
-      statRow('1びょうの ダメージ', 'dps', dps, dps) +
+      statRow('1びょうダメージ', 'dps', dps, dps) +
       statRow('しゃてい',   'range', def.range, def.range) +
-      statRow('うごく はやさ', 'speed', def.speed, def.speed) +
-      statRow('こうげきの はやさ', 'cycle', cycle, cycle.toFixed(1) + 'びょうに 1かい');
+      statRow('はやさ', 'speed', def.speed, def.speed) +
+      statRow('こうげき そくど', 'cycle', cycle, cycle.toFixed(1) + 'びょうに 1かい');
     if (isAlly) {
       stats += statRow('だしやすさ', 'cheap', def.cost, 'コスト ' + def.cost) +
                plainRow('さいせい', def.recharge + 'びょう');

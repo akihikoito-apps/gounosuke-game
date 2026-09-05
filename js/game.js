@@ -528,7 +528,8 @@ const Game = {
 
     if (u.def.projectile) {
       const speed = ({ drop: 560, clock: 520, fireball: 400, grass: 380, jelly: 460,
-                         bubble: 300, nut: 520, needle: 640, flame: 420, cord: 560 })[u.def.projectile] || 480;
+                         bubble: 300, nut: 520, needle: 640, flame: 420, cord: 560,
+                         ink: 480, splash: 700 })[u.def.projectile] || 480;
       this.projectiles.push({
         kind: u.def.projectile,
         x: u.x + 24 * u.forward, y: y - 14,
