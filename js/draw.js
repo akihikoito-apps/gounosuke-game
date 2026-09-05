@@ -330,6 +330,77 @@ function drawHiibou(ctx, s) {
 }
 
 
+/* ---- たんくんDX：タンクンの しんかけい ----
+   うえに ぶあつい そうこうばんを のせ、キャタピラも おおきく なりました。
+   たいりょく 2ばい・はやさ 2ばい。                                 */
+function drawTankundx(ctx, s) {
+  const bob = Math.sin(s.t * 13) * (s.moving ? 1.4 : 0);   // はやいので こまかく ゆれる
+  ctx.save();
+  ctx.translate(0, bob);
+
+  /* キャタピラ（おおきめ・ころが おおい）*/
+  ctx.fillStyle = '#263238';
+  roundRect(ctx, -40, -16, 80, 16, 8); ctx.fill();
+  ctx.fillStyle = '#90a4ae';
+  for (let i = -33; i <= 33; i += 11) {
+    ctx.beginPath();
+    ctx.arc(i, -8, 4.4, 0, Math.PI * 2); ctx.fill();
+  }
+  /* うごいて いる ときの ころがり */
+  if (s.moving) {
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.6;
+    for (let i = 0; i < 4; i++) {
+      const px = -34 + ((i * 20 + s.t * 90) % 70);
+      ctx.beginPath(); ctx.moveTo(px, -14); ctx.lineTo(px - 4, -3); ctx.stroke();
+    }
+  }
+
+  /* みみ（つの）*/
+  ctx.fillStyle = '#81d4fa';
+  ctx.beginPath(); ctx.moveTo(14, -44); ctx.lineTo(20, -62); ctx.lineTo(27, -44); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-24, -44); ctx.lineTo(-18, -61); ctx.lineTo(-11, -44); ctx.closePath(); ctx.fill();
+
+  /* からだ */
+  const g = ctx.createLinearGradient(0, -48, 0, -12);
+  g.addColorStop(0, '#b3e5fc'); g.addColorStop(1, '#4fc3f7');
+  ctx.fillStyle = g;
+  roundRect(ctx, -40, -48, 80, 36, 15); ctx.fill();
+  ctx.strokeStyle = '#1565c0'; ctx.lineWidth = 4;      // ふとい あおの ふちどり
+  roundRect(ctx, -40, -48, 80, 36, 15); ctx.stroke();
+
+  /* せんしゃっぽい ライン */
+  ctx.strokeStyle = '#4fa3e0'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(-32, -22); ctx.lineTo(28, -22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-16, -36); ctx.lineTo(16, -36); ctx.stroke();
+
+  /* ★そうこうばん（ボルト 4つ）*/
+  ctx.fillStyle = 'rgba(207,216,220,.92)';
+  roundRect(ctx, -38, -52, 34, 26, 5); ctx.fill();
+  ctx.strokeStyle = 'rgba(120,144,156,.8)'; ctx.lineWidth = 1.6;
+  roundRect(ctx, -38, -52, 34, 26, 5); ctx.stroke();
+  ctx.fillStyle = '#455a64';
+  for (const [bx, by] of [[-31, -45], [-11, -45], [-31, -33], [-11, -33]]) {
+    ctx.beginPath(); ctx.arc(bx, by, 2.6, 0, Math.PI * 2); ctx.fill();
+  }
+  /* そうこうばんの ハイライト */
+  ctx.fillStyle = 'rgba(255,255,255,.45)';
+  roundRect(ctx, -35, -50, 28, 4, 2); ctx.fill();
+
+  /* ほうしん（ふとく なった）*/
+  ctx.fillStyle = '#1565c0';
+  roundRect(ctx, 38, -36, 18, 10, 4); ctx.fill();
+
+  /* め と くち */
+  ctx.fillStyle = '#1565c0';
+  ellipse(ctx, 19, -32, 3.6, 4.4); ctx.fill();
+  ellipse(ctx, 30, -32, 3.6, 4.4); ctx.fill();
+  ctx.strokeStyle = '#1565c0'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(21, -21); ctx.quadraticCurveTo(25, -16, 29, -21); ctx.stroke();
+
+  ctx.restore();
+}
+
+
 /* ---- ずに太：ずにおの しんかけい。3のめ（ななめに 3つ）----
    こうげきりょくは はんぶんに なった かわりに 3れんげき。
    め が 3つ ある ぶん、3ぽんの ビームを だします。            */
@@ -3898,6 +3969,7 @@ function drawOkashiman(ctx, s) {
 const DRAWERS = {
   purio: drawPurio,
   tankun: drawTankun,
+  tankundx: drawTankundx,
   teruteru: drawTeruteru,
   tokinotabibito: drawTokinotabibito,
   hiibou: drawHiibou,

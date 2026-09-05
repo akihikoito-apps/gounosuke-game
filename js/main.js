@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '3.1';
+  const GAME_VERSION = '3.2';
 
 
   /* =================================================
@@ -725,7 +725,7 @@
       b.className = 'unit-btn';
       b.innerHTML =
         '<canvas class="u-icon"></canvas>' +
-        '<span class="u-name">' + def.shortName + '</span>' +
+        '<span class="u-name">' + (shownDef(id) || def).shortName + '</span>' +
         '<span class="u-cost">' + def.cost + '</span>' +
         '<span class="cd-mask" style="display:none"></span>';
       b.addEventListener('click', (ev) => { ev.preventDefault(); Game.summon(id); });
@@ -820,7 +820,7 @@
       if (id) {
         el.innerHTML = '<span class="ps-no">' + (i + 1) + '</span>' +
           '<canvas></canvas>' +
-          '<span class="ps-name">' + UNITS[id].shortName + '</span>' +
+          '<span class="ps-name">' + shownDef(id).shortName + '</span>' +
           '<span class="ps-lv">Lv.' + (s.levels[id] || 1) + '</span>';
       } else {
         el.className += ' empty-label';
@@ -850,7 +850,7 @@
       const el = document.createElement('button');
       el.className = 'pool-item' + (used >= 0 ? ' used' : '');
       el.innerHTML = '<canvas></canvas>' +
-        '<span class="pi-name">' + UNITS[id].shortName + '</span>' +
+        '<span class="pi-name">' + shownDef(id).shortName + '</span>' +
         '<span class="pi-lv">Lv.' + (s.levels[id] || 1) + '</span>';
       el.addEventListener('click', () => {
         const target = (selectedSlot >= 0) ? selectedSlot : firstEmptySlot(s);
@@ -984,7 +984,7 @@
     const g = document.createElement('div');
     g.className = 'pslot filled pslot-ghost';
     g.innerHTML = '<canvas></canvas>' +
-      '<span class="ps-name">' + UNITS[id].shortName + '</span>' +
+      '<span class="ps-name">' + shownDef(id).shortName + '</span>' +
       '<span class="ps-lv">Lv.' + (st.s.levels[id] || 1) + '</span>';
     const r0 = st.el.getBoundingClientRect ? st.el.getBoundingClientRect() : { width: 70, height: 94, left: 0, top: 0 };
     g.style.width = r0.width + 'px';
