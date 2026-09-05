@@ -1087,6 +1087,141 @@ const ENEMIES = {
   },
 
   /* ============================================================
+     ここから した は だい6しょう「魔導士の里」の てき
+     ほとんどが まじゅつし。けもの（シャドウヤマネコ）が とても ゆうり
+     ============================================================ */
+
+  /* ① ルンルンウィスプ ── ふわふわ ただよう ちいさな まほうだま */
+  runrunwisp: {
+    id: 'runrunwisp', name: 'ルンルンウィスプ',
+    attr: 'none',
+    hp: 600,    atk: 70,   range: 175,  speed: 26,
+    attackInterval: 1.6,   attackWindup: 0.35,
+    kbCount: 3, scale: 0.9,
+    attackType: 'single', projectile: 'bubble',
+    money: 80,
+  },
+
+  /* ② ホウキゴブ ── ほうきに のった くろねこ。すばやく つっこむ */
+  houkigob: {
+    id: 'houkigob', name: 'ホウキゴブ',
+    attr: 'magic',
+    hp: 700,    atk: 120,  range: 70,   speed: 52,
+    attackInterval: 1.3,   attackWindup: 0.30,
+    kbCount: 3, scale: 0.95,
+    attackType: 'single', projectile: null,
+    /* 10%で あいてを 1びょう とめる */
+    stun: { duration: 1.0, chance: 0.10 },
+    money: 110,
+  },
+
+  /* ③ マジックラビット ── まきものを よむ うさぎ。ちからを ぬく */
+  magicrabbit: {
+    id: 'magicrabbit', name: 'マジックラビット',
+    attr: 'magic',
+    hp: 1500,   atk: 180,  range: 190,  speed: 26,
+    attackInterval: 2.0,   attackWindup: 0.40,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: 'moji',
+    /* 15%で あいての こうげきりょくを 3びょう はんぶんに */
+    weaken: { chance: 0.15, rate: 0.5, duration: 3.0 },
+    money: 150,
+  },
+
+  /* ④ フレイムメイジ ── ほのおの まどうし。あいてを えんじょうさせる */
+  flamemage: {
+    id: 'flamemage', name: 'フレイムメイジ',
+    attr: ['fire', 'magic'],
+    hp: 1600,   atk: 330,  range: 210,  speed: 26,
+    attackInterval: 2.4,   attackWindup: 0.50,
+    kbCount: 3, scale: 1.0,
+    attackType: 'area', areaRadius: 60, projectile: 'fireball',
+    /* ★20%で あいてを 3びょう えんじょうさせる（じわじわ ダメージ）*/
+    burn: { chance: 0.20, dps: 60, duration: 3.0 },
+    money: 240,
+  },
+
+  /* ⑤ アイスウィッチ ── こおりの まじょ。うごきを おそくする */
+  icewitch: {
+    id: 'icewitch', name: 'アイスウィッチ',
+    attr: ['water', 'magic'],
+    hp: 1600,   atk: 240,  range: 210,  speed: 18,
+    attackInterval: 2.2,   attackWindup: 0.45,
+    kbCount: 3, scale: 1.0,
+    attackType: 'area', areaRadius: 58, projectile: 'drop',
+    slow: { rate: 0.5, duration: 2.0, chance: 0.20 },
+    money: 230,
+  },
+
+  /* ⑥ マンドレイク ── さけぶ ねっこ。おとで ふきとばす */
+  mandrake: {
+    id: 'mandrake', name: 'マンドレイク',
+    attr: ['grass', 'magic'],
+    hp: 2600,   atk: 220,  range: 130,  speed: 12,
+    attackInterval: 2.4,   attackWindup: 0.50,
+    kbCount: 4, scale: 1.05,
+    attackType: 'area', areaRadius: 62, projectile: null,
+    knockbackChance: 0.20,
+    money: 220,
+  },
+
+  /* ⑦ ルーンゴーレム ── ルーンが ひかる いしの きょじん */
+  runegolem: {
+    id: 'runegolem', name: 'ルーンゴーレム',
+    attr: 'magic',
+    hp: 3800,   atk: 360,  range: 75,   speed: 12,
+    attackInterval: 2.8,   attackWindup: 0.60,
+    kbCount: 6, scale: 1.25,
+    attackType: 'area', areaRadius: 66, projectile: null,
+    /* 30%で あいてを 2びょう とめる */
+    stun: { duration: 2.0, chance: 0.30 },
+    money: 340,
+  },
+
+  /* ⑧ カオススペル ── うかぶ まほうしょ。あいての こうげきを ふうじる */
+  chaosspell: {
+    id: 'chaosspell', name: 'カオススペル',
+    attr: ['none', 'magic'],
+    hp: 1900,   atk: 340,  range: 200,  speed: 26,
+    attackInterval: 2.6,   attackWindup: 0.55,
+    kbCount: 4, scale: 1.05,
+    attackType: 'area', areaRadius: 70, projectile: 'beam',
+    /* ★20%で 5びょう こうげき できなく する（ぜんぶ はずれる）*/
+    blind: { chance: 0.20, duration: 5.0, missRate: 1.0 },
+    money: 320,
+  },
+
+  /* ⑨ 賢者カロン ── だい5コースの ちゅうボス。とめて、ちからを ぬく */
+  sagecharon: {
+    id: 'sagecharon', name: '賢者カロン',
+    attr: ['none', 'magic'],
+    hp: 7000,   atk: 480,  range: 210,  speed: 18,
+    attackInterval: 2.8,   attackWindup: 0.70,
+    kbCount: 99, scale: 1.3,
+    attackType: 'area', areaRadius: 78, projectile: 'beam',
+    kbImmune: true,
+    stun:   { duration: 3.0, chance: 0.30 },
+    weaken: { chance: 0.30, rate: 0.5, duration: 5.0 },
+    money: 1400,
+    isBoss: true,
+  },
+
+  /* ⑩ 終焉の大魔導士ゼノス ── だい6しょうの おおボス。すべての まほうが あつまる */
+  zenos: {
+    id: 'zenos', name: '終焉の大魔導士ゼノス',
+    attr: ['none', 'magic'],
+    hp: 11000,  atk: 620,  range: 250,  speed: 10,
+    attackInterval: 3.2,   attackWindup: 0.80,
+    kbCount: 99, scale: 1.5,
+    attackType: 'area', areaRadius: 90, projectile: 'beam',
+    kbImmune: true,
+    stun:   { duration: 5.0, chance: 0.20 },
+    weaken: { chance: 0.15, rate: 0.8, duration: 3.0 },
+    money: 2600,
+    isBoss: true,
+  },
+
+  /* ============================================================
      ここから した は だい5しょう「賑わう近海」の てき
      ほとんどが みず ぞくせい。くさ（フタバッポ・たたみん）が とても ゆうり
      ============================================================ */
@@ -1551,6 +1686,14 @@ const BACKGROUNDS = {
     hillFar: '#2e7fa8', hillNear: '#1a5d80',
     ground: '#12455f', groundTop: '#1e6a8c',
     deco: 'wave',
+  },
+
+  /* 魔導士の里（だい6しょう）*/
+  mahou: {
+    sky: ['#1a0f3d', '#3a2270', '#6b4aa8'],
+    hillFar: '#2c1c56', hillNear: '#180e35',
+    ground: '#241640', groundTop: '#3a2568',
+    deco: 'star',
   },
 
   /* いわば */
@@ -2356,6 +2499,155 @@ const STAGES = [
     ],
   },
 
+  /* ==========================================================
+     だい6しょう「魔導士の里」
+     ほとんどが まじゅつし ぞくせい。
+     けもの（シャドウヤマネコ）が とても ゆうり。
+     ぎゃくに パワーと メタルの なかまは まじゅつしに よわい ので ちゅうい。
+     もとから いる まじゅつしの てき（モコ魔道士・イカマジン）も でて きます。
+     ========================================================== */
+
+  /* ---------------- 6-1 いりぐちの いしだたみ ---------------- */
+  {
+    no: 60, chapter: 6, course: 1,
+    name: 'いりぐちの いしだたみ',
+    desc: 'みならいたちが むかえる しずかな もんぜん',
+    bg: 'mahou',
+    castleHp: 4800,
+    enemyMult: 1.1,
+    reward: { coins: 1, exp: 1300 },
+    waves: [
+      { at: 3,  id: 'runrunwisp', count: 3, gap: 0.9 },
+      { at: 16, id: 'houkigob',   count: 2, gap: 1.2 },
+      { at: 28, id: 'runrunwisp', count: 4, gap: 0.8 },
+      { at: 42, id: 'houkigob',   count: 3, gap: 1.0, repeat: 20 },
+      { at: 56, id: 'runrunwisp', count: 4, gap: 0.8, repeat: 18 },
+    ],
+  },
+
+  /* ---------------- 6-2 まほうの いちば ---------------- */
+  {
+    no: 61, chapter: 6, course: 2,
+    name: 'まほうの いちば',
+    desc: 'にぎわう ろてんと こうきしんの つまる ばしょ',
+    bg: 'night',
+    castleHp: 5000,
+    enemyMult: 1.14,
+    reward: { coins: 1, exp: 1350 },
+    waves: [
+      { at: 3,  id: 'houkigob',     count: 2, gap: 1.2 },
+      { at: 14, id: 'magicrabbit',  count: 1 },
+      { at: 26, id: 'runrunwisp',   count: 4, gap: 0.8 },
+      { at: 38, id: 'mokomadoushi', count: 1 },
+      { at: 52, id: 'magicrabbit',  count: 1, repeat: 22 },
+      { at: 68, id: 'houkigob',     count: 3, gap: 1.0, repeat: 20 },
+      { at: 84, id: 'mokomadoushi', count: 1, repeat: 32 },
+    ],
+  },
+
+  /* ---------------- 6-3 ほのおの しれんじょう ---------------- */
+  {
+    no: 62, chapter: 6, course: 3,
+    name: 'ほのおの しれんじょう',
+    desc: 'ひの まほうを つかう みならいたちの くんれんエリア',
+    bg: 'sunset',
+    castleHp: 3200,
+    enemyMult: 1,
+    reward: { coins: 1, exp: 1400 },
+    waves: [
+      { at: 3,  id: 'runrunwisp', count: 3, gap: 0.9 },
+      { at: 14, id: 'flamemage',  count: 1 },
+      { at: 28, id: 'icewitch',   count: 1 },
+      { at: 42, id: 'houkigob',   count: 3, gap: 1.0 },
+      { at: 56, id: 'flamemage',  count: 1, repeat: 34 },
+      { at: 72, id: 'icewitch',   count: 1, repeat: 36 },
+      { at: 88, id: 'runrunwisp', count: 4, gap: 0.8, repeat: 25 },
+    ],
+  },
+
+  /* ---------------- 6-4 ルーンの かいろう ---------------- */
+  {
+    no: 63, chapter: 6, course: 4,
+    name: 'ルーンの かいろう',
+    desc: 'こだいの まほうもじが きざまれた いせき',
+    bg: 'mahou',
+    castleHp: 3200,
+    enemyMult: 1,
+    reward: { coins: 1, exp: 1450 },
+    waves: [
+      { at: 3,  id: 'mandrake',   count: 1 },
+      { at: 16, id: 'runegolem',  count: 1 },
+      { at: 32, id: 'houkigob',   count: 3, gap: 1.0 },
+      { at: 46, id: 'mandrake',   count: 1, repeat: 34 },
+      { at: 62, id: 'runegolem',  count: 1, repeat: 48 },
+      { at: 80, id: 'runrunwisp', count: 4, gap: 0.8, repeat: 25 },
+    ],
+  },
+
+  /* ---------------- 6-5 けんじゃの ま（ちゅうボス）---------------- */
+  {
+    no: 64, chapter: 6, course: 5,
+    name: 'けんじゃの ま',
+    desc: 'ちゅうボス「賢者カロン」。いだいな けんじゃとの たいじ',
+    bg: 'night',
+    castleHp: 3800,
+    enemyMult: 1.05,
+    reward: { coins: 3, exp: 1550 },
+    waves: [
+      { at: 3,  id: 'magicrabbit', count: 1 },
+      { at: 16, id: 'houkigob',    count: 3, gap: 1.0 },
+      { at: 30, id: 'icewitch',    count: 1 },
+      { at: 46, id: 'flamemage',   count: 1, repeat: 26 },
+      { at: 62, id: 'runrunwisp',  count: 4, gap: 0.8, repeat: 18 },
+      { at: 78, id: 'houkigob',    count: 3, gap: 1.0, repeat: 22 },
+      /* ★ちゅうボスは てきの しろが 70% まで へると でてくる */
+      { atCastleHp: 0.70, id: 'sagecharon', count: 1 },
+    ],
+  },
+
+  /* ---------------- 6-6 きんだんの としょかん ---------------- */
+  {
+    no: 65, chapter: 6, course: 6,
+    name: 'きんだんの としょかん',
+    desc: 'きけんな しょもつが ねむる しょこ。こうげきを ふうじられる',
+    bg: 'mahou',
+    castleHp: 3000,
+    enemyMult: 0.95,
+    reward: { coins: 1, exp: 1650 },
+    waves: [
+      { at: 3,  id: 'runrunwisp',  count: 3, gap: 0.9 },
+      { at: 16, id: 'chaosspell',  count: 1 },
+      { at: 32, id: 'ikamajin',    count: 1 },
+      { at: 46, id: 'runegolem',   count: 1 },
+      { at: 62, id: 'chaosspell',  count: 1, repeat: 39 },
+      { at: 80, id: 'ikamajin',    count: 1, repeat: 36 },
+      { at: 96, id: 'magicrabbit', count: 1, repeat: 34 },
+    ],
+  },
+
+  /* ---------------- 6-7 しゅうえんの とう（おおボス）---------------- */
+  {
+    no: 66, chapter: 6, course: 7,
+    name: 'しゅうえんの とう',
+    desc: 'おおボス「終焉の大魔導士ゼノス」。すべての まほうが あつまる さいごの たたかい',
+    bg: 'boss',
+    castleHp: 3400,
+    enemyMult: 0.95,
+    reward: { coins: 3, exp: 2200 },
+    waves: [
+      { at: 3,   id: 'houkigob',    count: 3, gap: 1.0 },
+      { at: 16,  id: 'magicrabbit', count: 1 },
+      { at: 30,  id: 'flamemage',   count: 1 },
+      { at: 44,  id: 'icewitch',    count: 1 },
+      { at: 58,  id: 'runegolem',   count: 1, repeat: 48 },
+      { at: 76,  id: 'chaosspell',  count: 1, repeat: 42 },
+      { at: 94,  id: 'mandrake',    count: 1, repeat: 36 },
+      { at: 110, id: 'runrunwisp',  count: 4, gap: 0.8, repeat: 25 },
+      /* ★おおボスは てきの しろが 75% まで へると でてくる */
+      { atCastleHp: 0.75, id: 'zenos', count: 1 },
+    ],
+  },
+
 ];
 
 
@@ -2407,11 +2699,12 @@ function starRate(kind, value) {
    なまえと ばしょを かえたい ときは ここだけ いじれば OK。
    -------------------------------------------------------------------------- */
 const CHAPTERS = {
-  1: { name: 'はじまりの のはら',      short: 'のはら',   x: 0.10, y: 0.56, icon: '🌱' },
-  2: { name: 'はがねの まち',          short: 'はがね',   x: 0.26, y: 0.34, icon: '⚙️' },
-  3: { name: 'けものみち',             short: 'けもの',   x: 0.44, y: 0.74, icon: '🐾' },
-  4: { name: '廃れたメカニック工場',    short: 'こうじょう', x: 0.64, y: 0.38, icon: '🏭' },
-  5: { name: '賑わう近海',             short: 'きんかい', x: 0.86, y: 0.70, icon: '🌊' },
+  1: { name: 'はじまりの のはら',     short: 'のはら',   x: 0.09, y: 0.54, icon: '🌱' },
+  2: { name: 'はがねの まち',         short: 'はがね',   x: 0.23, y: 0.32, icon: '⚙️' },
+  3: { name: 'けものみち',            short: 'けもの',   x: 0.38, y: 0.74, icon: '🐾' },
+  4: { name: '廃れたメカニック工場',   short: 'こうじょう', x: 0.55, y: 0.36, icon: '🏭' },
+  5: { name: '賑わう近海',            short: 'きんかい', x: 0.72, y: 0.72, icon: '🌊' },
+  6: { name: '魔導士の里',            short: 'まどうし', x: 0.89, y: 0.42, icon: '🔮' },
 };
 
 

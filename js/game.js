@@ -203,6 +203,7 @@ const Game = {
       windupDmg: 0,                 // タメちゅうに うけた ダメージ
       stunUntil: -1,
       weakUntil: -1, weakRate: 1,   // こうげきりょくを さげられて いる
+      burnUntil: -1, burnDps: 0,    // えんじょうちゅう（じわじわ ダメージ）
       healedOnce: false,            // ピンチで 1どだけ かいふく（コケジカ）
       enraged: false,               // ピンチで つよく なった（ヌシノオオカミ・ガオウ）
       dead: false,
@@ -304,6 +305,17 @@ const Game = {
     if (this.finished) return;
 
     /* --- じどう かいふく（リジェネ）--- */
+    /* えんじょうちゅうは じわじわ たいりょくが へる */
+    if (!u.dead && u.burnUntil > this.time && u.burnDps > 0) {
+      u.hp -= u.burnDps * dt;
+      if (Math.random() < dt * 6) {
+        this.addEffect({ type: 'hit', x: u.x + (Math.random() - 0.5) * 16,
+                         y: this.groundWorldY() - 30 - u.lane - Math.random() * 30,
+                         seed: Math.random() * 6, life: 0.25, color: '#ff7043' });
+      }
+      if (u.hp <= 0) { u.hp = 0; this.killUnit(u); return; }
+    }
+
     /* ピンチに なった ときの しょり */
     if (!u.dead && u.maxHp > 0) {
       const ratio = u.hp / u.maxHp;
@@ -539,6 +551,7 @@ const Game = {
         atk: this.liveAtk(u),
         bonusVs: u.def.bonusVs || null,
         weaken: u.def.weaken || null,
+        burn: u.def.burn || null,
         attr: u.def.attr,
         area: u.def.attackType === 'area',
         areaRadius: u.def.areaRadius || 0,
@@ -576,6 +589,7 @@ const Game = {
     const crit   = src.def ? (src.def.crit || null) : (src.crit || null);
     const bonus  = src.def ? (src.def.bonusVs || null) : (src.bonusVs || null);
     const weaken = src.def ? (src.def.weaken || null) : (src.weaken || null);
+    const burn   = src.def ? (src.def.burn   || null) : (src.burn   || null);
 
     if (target && target.castle) {
       const dmg = Math.round(atk * CONFIG.castleDamageRate);
@@ -642,6 +656,12 @@ const Game = {
       if (stunOkAttr && !v.dead && Math.random() < ((stun.chance === undefined) ? 1 : stun.chance)) {
         v.stunUntil = this.time + stun.duration;
         this.addEffect({ type: 'stunMark', x: v.x, y: this.groundWorldY() - 78, life: 0.9 });
+      }
+      if (burn && !v.dead && Math.random() < ((burn.chance === undefined) ? 1 : burn.chance)) {
+        v.burnUntil = this.time + (burn.duration || 3);
+        v.burnDps   = burn.dps || 50;
+        this.addEffect({ type: 'dmg', x: v.x, y: this.groundWorldY() - 92 - v.lane,
+                         text: 'えんじょう！', color: '#ff7043', life: 0.8 });
       }
       if (weaken && !v.dead && Math.random() < ((weaken.chance === undefined) ? 1 : weaken.chance)) {
         v.weakUntil = this.time + (weaken.duration || 3);
@@ -1198,6 +1218,7 @@ const Game = {
         blocked: !!u.blocked,          // ふところに はいられて あわてて いる
         enraged: !!u.enraged,          // ピンチで つよく なって いる
         weak: (u.weakUntil > this.time),
+        burning: (u.burnUntil > this.time),
         // うった ちょくご（クールタイムの さいしょ 35%）は「バタバタ」の あいだ
         fired: (u.atkCd > (u.def.attackInterval || 1) * 0.65),
       };
