@@ -205,6 +205,47 @@ const UNITS = {
     projectile: 'fireball',
   },
 
+  /* 霊太郎 ── ランドセルを せおって パンを くわえた しょうがくせいの おばけ。
+              がっこうに ちこく しそうで あわてて いる。
+              ★ゆうれい ぞくせい：むぞくせいと パワーの こうげきを むこうかする
+                （ダメージ 0。ただし ふくごう ぞくせい（2つ もち）の
+                  こうげきは むこうかできず、ふつうに ダメージを うける）
+              ★10%で あいてを 3びょう どんそくに する                      */
+  reitarou: {
+    id: 'reitarou', name: '霊太郎', shortName: '霊太郎',
+    rarity: 'R',                          // レア
+    attr: 'ghost',                        // ★あたらしい ゆうれい ぞくせい
+    cost: 170,  recharge: 6.0,
+    hp: 620,    atk: 80,   range: 68,   speed: 28,
+    attackInterval: 1.0,   attackWindup: 0.25,   // こうげきの かいすうは おおい
+    kbCount: 3,
+    scale: 1.0,
+    attackType: 'single',
+    projectile: null,
+    /* ★むこうか：むぞくせいと パワーの こうげきは ダメージ 0 */
+    nullify: { attrs: ['none', 'power'] },
+    /* 10%で 3びょう どんそく */
+    slow: { rate: 0.5, duration: 3.0, chance: 0.10 },
+  },
+
+  /* マッチくん ── ぼうの ぶぶんが おれて ふらふら あるく マッチぼう。
+                 かみの ように よわいが、まだまだ もえる。
+                 ★15%で あいての こうげきりょくを 5びょう 80%に さげる    */
+  matchkun: {
+    id: 'matchkun', name: 'マッチくん', shortName: 'マッチ',
+    rarity: 'N',                          // ノーマル
+    attr: 'fire',
+    cost: 110,  recharge: 4.0,
+    hp: 300,    atk: 105,  range: 62,   speed: 46,    // かみたいきゅう・はやめ
+    attackInterval: 1.3,   attackWindup: 0.30,
+    kbCount: 2,
+    scale: 0.95,
+    attackType: 'single',
+    projectile: null,
+    /* 15%で あいての こうげきりょくを 5びょう 80%に */
+    weaken: { chance: 0.15, rate: 0.8, duration: 5.0 },
+  },
+
   /* あき坊 ── ぜんちぜんのうの かみさま。りょうてで かおを おしつぶして
               へんな かおを して いる。でも ちからは ほんもの。
               ★かみ ぞくせい：ぜんぶの ぞくせいに 1.2ばい、うける ダメージ 0.8ばい
@@ -464,7 +505,8 @@ const DEFAULT_PARTY = START_CHARS.slice();
 /* ガチャに でてくる キャラ ぜんぶ */
 const ALL_CHARS = ['tankun', 'purio', 'teruteru',
                    'tokinotabibito', 'zunio', 'kabekun', 'futabappo', 'shadowyamaneko', 'tenmusumaru',
-                   'hiibou', 'shurihen', 'akun', 'tatamin', 'dondoko', 'bakegi', 'akibou'];
+                   'hiibou', 'shurihen', 'akun', 'tatamin', 'matchkun', 'reitarou',
+                   'dondoko', 'bakegi', 'akibou'];
 let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく メンバー（へんせいで かわる）
 
 
@@ -2524,12 +2566,15 @@ const ATTR_BEATS = {
   metal: [],
   /* かみは とくべつ あつかい（attrPairMultiplier を みてね）*/
   god: [],
+  /* ゆうれいは あいしょうは なし。そのかわり むこうか の のうりょくを もつ */
+  ghost: [],
 };
 
 const ATTR_LABEL = {
   water: 'みず', fire: 'ほのお', grass: 'くさ',
   magic: 'まじゅつし', power: 'パワー', beast: 'けもの', metal: 'メタル',
   god: 'かみ',
+  ghost: 'ゆうれい',
   none: 'む',
 };
 
@@ -2537,6 +2582,7 @@ const ATTR_COLOR = {
   water: '#4fc3f7', fire: '#ff7043', grass: '#8bc34a',
   magic: '#ba68c8', power: '#ffca28', beast: '#8d6e63', metal: '#78909c',
   god: '#ffe082',
+  ghost: '#b39ddb',
   none: '#bdbdbd',
 };
 

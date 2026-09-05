@@ -654,6 +654,19 @@ const Game = {
   damageUnit(u, dmg, attr, mult, noNumber, isCrit) {
     if (u.dead) return;
 
+    /* ★むこうか：きめられた ぞくせいの こうげきを ダメージ 0 に する（霊太郎）
+       ただし 2つの ぞくせいを もつ こうげきは すりぬけ できず、
+       ふつうに ダメージを うけます                                    */
+    const nu = u.def.nullify;
+    if (nu && attr && nu.attrs) {
+      const list = attrList(attr);
+      if (list.length === 1 && nu.attrs.indexOf(list[0]) >= 0) {
+        this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 60 - u.lane,
+                         text: 'すりぬけ！', color: '#b39ddb', life: 0.75, big: true });
+        return;
+      }
+    }
+
     /* ★きゅうしゅう：きめられた ぞくせいの こうげきは ダメージ 0。
        そのかわり おなじ ぶんだけ たいりょくが かいふく する          */
     const ab = u.def.absorb;
