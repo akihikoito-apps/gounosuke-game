@@ -25,6 +25,18 @@ const CONFIG = {
   attrStrong: 2.5,   // ゆうりな とき ダメージ 2.5ばい
   attrWeak:   0.6,   // ふりな   とき ダメージ 0.6ばい
 
+  /* --- かみ ぞくせい（あき坊）---
+     どの ぞくせいにも すこし ゆうり。ただし メタルにだけは よわい */
+  godAtk: 1.2,       // かみが なぐる とき ダメージ 1.2ばい
+  godDef: 0.8,       // かみが なぐられる とき ダメージ 0.8ばい
+
+  /* --- はどう（あき坊）--- */
+  wave: {
+    step:  120,      // レベル1ぶんの ながさ。レベル5 なら 120x5 = 600
+    speed: 620,      // はどうが すすむ はやさ（1びょうに すすむ きょり）
+    hitW:  34,       // はどうの あつみ（このなかに いる てきに あたる）
+  },
+
   /* --- さいしょに もっている おかね --- */
   startMoney: 250,
 
@@ -191,6 +203,52 @@ const UNITS = {
     attackType: 'area',                          // はんい こうげき
     areaRadius: 46,                              // ばくはつの おおきさ
     projectile: 'fireball',
+  },
+
+  /* あき坊 ── ぜんちぜんのうの かみさま。りょうてで かおを おしつぶして
+              へんな かおを して いる。でも ちからは ほんもの。
+              ★かみ ぞくせい：ぜんぶの ぞくせいに 1.2ばい、うける ダメージ 0.8ばい
+                        ただし メタルにだけは よわい
+              ★はどう レベル5：こうげきが あたると、まえに なみが はしって
+                        とおりみちの てき ぜんぶに ダメージ                 */
+  akibou: {
+    id: 'akibou', name: 'あき坊', shortName: 'あき坊',
+    rarity: 'LR',                         // でんせつレア
+    attr: 'god',                          // ★あたらしい かみ ぞくせい
+    cost: 1800, recharge: 240.0,          // さいせい 4ふん
+    hp: 5200,   atk: 900,  range: 210,  speed: 52,
+    attackInterval: 4.2,   attackWindup: 0.9,   // クールタイム すこし ながめ
+    kbCount: 5,
+    scale: 1.9,                                 // からだが とても おおきい
+    attackType: 'single',
+    projectile: null,
+    /* ★はどう レベル5（にゃんこ大戦争と おなじ かんがえかた）
+       こうげきが あたった とき、まえに なみが はしって
+       とおりみちの てき ぜんぶに おなじ ダメージを あたえる       */
+    wave: { level: 5, damageRate: 1.0 },
+  },
+
+  /* バケ着 ── みずの はいった バケツを もった ぼうにんげん。
+             たかく とびあがって マイクラの「みずバケツちゃくち」を する。
+             その みずしぶきで まわりの てきを まとめて こうげき。
+             ★あてた あいての こうげきりょくを 5びょう 20%さげる
+             ★15%で ちゃくちに しっぱいして、じぶんだけ ダメージ      */
+  bakegi: {
+    id: 'bakegi', name: 'バケ着', shortName: 'バケ着',
+    rarity: 'SR',                         // スーパーレア
+    attr: 'water',
+    cost: 780,  recharge: 22.0,
+    hp: 2600,   atk: 340,  range: 175,  speed: 26,
+    attackInterval: 1.9,   attackWindup: 0.55,  // こうげきの かいすうは おおめ
+    kbCount: 4,
+    scale: 1.05,
+    attackType: 'area',
+    areaRadius: 105,                      // ちゃくちの みずしぶきは とても ひろい
+    projectile: null,
+    /* あてた あいての こうげきりょくを 5びょう 20%さげる */
+    weaken: { chance: 1.0, rate: 0.8, duration: 5.0 },
+    /* 15%で ちゃくちに しっぱい。こうげきは そらぶり、じぶんに 10%ダメージ */
+    selfHurt: { chance: 0.15, rate: 0.10 },
   },
 
   /* A（エーくん）── まほうの ぼうしを かぶった きいろい「A」。
@@ -406,7 +464,7 @@ const DEFAULT_PARTY = START_CHARS.slice();
 /* ガチャに でてくる キャラ ぜんぶ */
 const ALL_CHARS = ['tankun', 'purio', 'teruteru',
                    'tokinotabibito', 'zunio', 'kabekun', 'futabappo', 'shadowyamaneko', 'tenmusumaru',
-                   'hiibou', 'shurihen', 'akun', 'tatamin', 'dondoko'];
+                   'hiibou', 'shurihen', 'akun', 'tatamin', 'dondoko', 'bakegi', 'akibou'];
 let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく メンバー（へんせいで かわる）
 
 
@@ -2464,17 +2522,21 @@ const ATTR_BEATS = {
   beast: ['magic'],           // けもの    → まじゅつし
   /* メタルは とくいな あいてが いない */
   metal: [],
+  /* かみは とくべつ あつかい（attrPairMultiplier を みてね）*/
+  god: [],
 };
 
 const ATTR_LABEL = {
   water: 'みず', fire: 'ほのお', grass: 'くさ',
   magic: 'まじゅつし', power: 'パワー', beast: 'けもの', metal: 'メタル',
+  god: 'かみ',
   none: 'む',
 };
 
 const ATTR_COLOR = {
   water: '#4fc3f7', fire: '#ff7043', grass: '#8bc34a',
   magic: '#ba68c8', power: '#ffca28', beast: '#8d6e63', metal: '#78909c',
+  god: '#ffe082',
   none: '#bdbdbd',
 };
 
@@ -2510,6 +2572,13 @@ function attrBeats(a, b) {
 
 /* ぞくせい 1つ どうしの ばいりつ */
 function attrPairMultiplier(a, d) {
+  /* --- かみ ぞくせい（あき坊）---
+     ぜんぶの ぞくせいに すこし つよい（1.2ばい）。
+     うける ダメージも すこし すくない（0.8ばい）。
+     ただし メタルにだけは ふつうの よわてん あつかい        */
+  if (a === 'god') return (d === 'metal') ? CONFIG.attrWeak   : CONFIG.godAtk;
+  if (d === 'god') return (a === 'metal') ? CONFIG.attrStrong : CONFIG.godDef;
+
   if (attrBeats(a, d)) return CONFIG.attrStrong; // ゆうり
   if (attrBeats(d, a)) return CONFIG.attrWeak;   // ふり
   return 1.0;

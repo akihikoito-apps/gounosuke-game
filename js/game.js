@@ -62,6 +62,7 @@ const Game = {
 
     this.units = [];
     this.projectiles = [];
+    this.shocks = [];        // はどう（まえに すすむ なみ）
     this.effects = [];
     this.spawnQueue = [];
     this.boss = null;
@@ -227,6 +228,7 @@ const Game = {
 
     for (const u of this.units) this.updateUnit(u, dt);
     this.updateProjectiles(dt);
+    this.updateShocks(dt);
     this.updateEffects(dt);
 
     // しんだ ユニットを かたづける
@@ -473,9 +475,38 @@ const Game = {
     return iv;
   },
 
+  /* はどうを だす（あき坊）*/
+  spawnShock(u, x, y) {
+    const w = u.def.wave;
+    if (!w) return;
+    const cf = (CONFIG.wave || { step: 120, speed: 620, hitW: 34 });
+    this.shocks.push({
+      x: x, y: y, dir: u.forward, side: u.side,
+      atk: this.liveAtk(u) * (w.damageRate === undefined ? 1 : w.damageRate),
+      attr: u.def.attr,
+      left: (w.level || 1) * cf.step,     // あと どれだけ すすめるか
+      hit: [],                             // もう あてた あいて
+      age: 0,
+    });
+  },
+
   /* ---- こうげきの しゅんかん ---- */
   resolveAttack(u) {
     u.atkCd = this.liveInterval(u);
+
+    /* ★ちゃくちに しっぱい（バケ着）
+       こうげきは そらぶりに なり、じぶんだけ ダメージを うける */
+    const sh = u.def.selfHurt;
+    if (sh && Math.random() < (sh.chance || 0)) {
+      const d = Math.max(1, Math.round(u.maxHp * (sh.rate || 0.1)));
+      u.hp -= d;
+      this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 96 - u.lane,
+                       text: 'しっぱい！', color: '#90a4ae', life: 0.9, big: true });
+      this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 58 - u.lane,
+                       text: String(d), color: '#ff8a80', life: 0.7 });
+      if (u.hp <= 0) { u.hp = 0; this.killUnit(u); }
+      return;
+    }
     if (u.def.noAttack) return;          // かべくん は こうげき しない（たちはだかる だけ）
     if (u.def.multiHit) {
       u.burst = { left: u.def.multiHit.count, timer: 0, delay: u.def.multiHit.delay };
@@ -515,6 +546,7 @@ const Game = {
     } else {
       // なぐる（たまなし）
       this.applyHit(u, target, u.x + (u.def.range * 0.6) * u.forward, y);
+      if (u.def.wave) this.spawnShock(u, u.x + (u.def.range * 0.6) * u.forward, y);
     }
   },
 
@@ -711,6 +743,27 @@ const Game = {
   },
 
   /* ---- たまの こうしん ---- */
+  /* はどうを すすめて、とおりみちの あいてに ダメージを あたえる */
+  updateShocks(dt) {
+    const cf = (CONFIG.wave || { step: 120, speed: 620, hitW: 34 });
+    for (let i = this.shocks.length - 1; i >= 0; i--) {
+      const w = this.shocks[i];
+      const move = cf.speed * dt;
+      w.x += move * w.dir;
+      w.left -= move;
+      w.age += dt;
+      for (const o of this.units) {
+        if (o.dead || o.side === w.side) continue;
+        if (w.hit.indexOf(o) >= 0) continue;
+        if (Math.abs(o.x - w.x) > cf.hitW) continue;
+        w.hit.push(o);
+        const mult = attrMultiplier(w.attr, o.def.attr);
+        this.damageUnit(o, Math.round(w.atk * mult), w.attr, mult, false, false);
+      }
+      if (w.left <= 0 || w.x < -60 || w.x > CONFIG.fieldLength + 60) this.shocks.splice(i, 1);
+    }
+  },
+
   updateProjectiles(dt) {
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const p = this.projectiles[i];
@@ -854,6 +907,15 @@ const Game = {
     // ユニット（うしろの レーンから）
     const list = this.units.slice().sort((a, b) => a.lane - b.lane);
     for (const u of list) this.drawUnit(ctx, u);
+
+    // はどう（あき坊）
+    for (const w of this.shocks) {
+      ctx.save();
+      ctx.translate(this.worldToScreenX(w.x), gy);
+      ctx.scale(s * w.dir, s);
+      drawShock(ctx, { age: w.age });
+      ctx.restore();
+    }
 
     // たま（ワールドy は じめんからの たかさ。マイナスが うえ）
     for (const p of this.projectiles) {
