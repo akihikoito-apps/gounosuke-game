@@ -606,6 +606,27 @@ const ENEMIES = {
     isBoss: true,
   },
 
+  /* 獄熱オニごん ── あかおに と あおおに の ふたりぐみで 1たいの おおボス。
+                   2にんで わるさを しながら、とおくから キビだんごを なげて くる。
+                   ★はじめての「2ぞくせい もち」＝ ほのお ＋ まじゅつし
+                     → みず でも けもの でも 2.5ばいが とおる（こうりゃくの みちが 2つ）
+                   ★ふところ（minRange）に はいられると、ちかすぎて なげられない。
+                     その ばで あわてる だけ。ここが かけひきの キモ       */
+  onigon: {
+    id: 'onigon', name: '獄熱オニごん',
+    attr: ['fire', 'magic'],              // ★ 2ぞくせい もち
+    hp: 7000,   atk: 520,  range: 300,   speed: 22,
+    minRange: 130,                        // ★ これより ちかいと なげられない
+    attackInterval: 3.6,   attackWindup: 0.9,
+    kbCount: 5,
+    scale: 1.35,
+    attackType: 'area',                   // ちゃくだんてんで ばくはつ
+    areaRadius: 60,
+    projectile: 'dango',                  // キビだんご
+    money: 1400,
+    isBoss: true,
+  },
+
   /* 下手なきりん ── ボス。くさを とばす はんいこうげき */
   hetakirin: {
     id: 'hetakirin', name: '下手なきりん',
@@ -1009,7 +1030,7 @@ const STAGES = [
   {
     no: 12,
     chapter: 3,  course: 1,       // だい3ステージ の 1コースめ（メタルは ここから また ふえます）
-    enemyMult: 1.40,            // てきの つよさ 1.40ばい
+    enemyMult: 1.4,            // てきの つよさ 1.40ばい
     reward: { coins: 2, exp: 380 },
     name: 'メタルの こうじょう',
     desc: 'コンガラガーン だらけ。ほのお・まじゅつし・パワー が よく きく',
@@ -1113,7 +1134,7 @@ const STAGES = [
     enemyMult: 1.32,            // てきの つよさ 1.32ばい
     reward: { coins: 2, exp: 400 },
     name: 'りゅうの たに',
-    desc: '字一龍 の むれ と お菓子マン。だい2ステージの やま',
+    desc: '字一龍 の むれ と お菓子マン。なかばの やま',
     bg: 'rock',
     castleHp: 5000,
     waves: [
@@ -1128,8 +1149,93 @@ const STAGES = [
       { atCastleHp: 0.65, id: 'okashiman', count: 1 },
     ],
   },
-];
+  /* ---------------- 2-7 ---------------- */
+  {
+    no: 18, chapter: 2, course: 7,
+    name: 'まほうの としょかん',
+    desc: 'モコ魔道士が いっぱい。けもので せめよう',
+    bg: 'night',
+    castleHp: 4200,
+    enemyMult: 1.34,
+    reward: { coins: 1, exp: 340 },
+    waves: [
+      { at: 3,  id: 'togehaya',     count: 1 },
+      { at: 12, id: 'mokomadoushi', count: 1 },
+      { at: 24, id: 'nyororiinu',   count: 3, gap: 0.6 },
+      { at: 34, id: 'mokomadoushi', count: 1 },
+      { at: 46, id: 'usagorilla',   count: 1 },
+      { at: 58, id: 'mokomadoushi', count: 2, gap: 3.0, repeat: 26 },
+      { at: 70, id: 'nyororiinu',   count: 3, gap: 0.6, repeat: 18 },
+      { at: 84, id: 'togehaya',     count: 2, gap: 2.0, repeat: 24 },
+    ],
+  },
 
+  /* ---------------- 2-8 ---------------- */
+  {
+    no: 19, chapter: 2, course: 8,
+    name: 'かぜの ほうだい',
+    desc: 'そらから カモメェル。うしろに きを つけて',
+    bg: 'hoshizora',
+    castleHp: 4000,
+    enemyMult: 1.36,
+    reward: { coins: 1, exp: 360 },
+    waves: [
+      { at: 3,  id: 'blockwan',   count: 1 },
+      { at: 14, id: 'kamomeeru',  count: 2, gap: 1.2 },
+      { at: 26, id: 'ojiinouenchou', count: 1 },
+      { at: 38, id: 'kamomeeru',  count: 3, gap: 1.0 },
+      { at: 50, id: 'kumabee',    count: 1 },
+      { at: 62, id: 'kamomeeru',  count: 3, gap: 1.0, repeat: 20 },
+      { at: 74, id: 'blockwan',   count: 1, repeat: 26 },
+      { at: 88, id: 'ojiinouenchou', count: 1, repeat: 30 },
+    ],
+  },
+
+  /* ---------------- 2-9 ---------------- */
+  {
+    no: 20, chapter: 2, course: 9,
+    name: 'おにが すむ やま',
+    desc: 'おおボスの てまえ。ぜんぶの ぞくせいが でる',
+    bg: 'rock',
+    castleHp: 5200,
+    enemyMult: 1.4,
+    reward: { coins: 1, exp: 400 },
+    waves: [
+      { at: 3,  id: 'togehaya',     count: 1 },
+      { at: 12, id: 'yakipokkuru',  count: 3, gap: 0.6 },
+      { at: 24, id: 'kongaragan',   count: 1 },
+      { at: 36, id: 'mokomadoushi', count: 1 },
+      { at: 46, id: 'kumabee',      count: 1 },
+      { at: 58, id: 'usagorilla',   count: 1 },
+      { at: 70, id: 'bakecchin',    count: 2, gap: 1.4, repeat: 22 },
+      { at: 82, id: 'yakipokkuru',  count: 3, gap: 0.6, repeat: 18 },
+      { at: 96, id: 'kongaragan',   count: 1, repeat: 30 },
+      { at: 110, id: 'togehaya',    count: 2, gap: 2.0, repeat: 26 },
+    ],
+  },
+
+  /* ---------------- 2-10（だい2しょう おおボス）---------------- */
+  {
+    no: 21, chapter: 2, course: 10,
+    name: '獄熱オニごんの ひやま',
+    desc: 'ふところに とびこめ！とおくからは なげられ ほうだい',
+    bg: 'boss',
+    castleHp: 4200,
+    enemyMult: 1.25,
+    reward: { coins: 2, exp: 480 },
+    waves: [
+      { at: 3,   id: 'togehaya',    count: 1 },
+      { at: 14,  id: 'yakipokkuru', count: 3, gap: 0.6 },
+      { at: 26,  id: 'blockwan',    count: 1 },
+      { at: 40,  id: 'onigon',      count: 1 },              // ★ おおボス とうじょう
+      { at: 56,  id: 'yakipokkuru', count: 3, gap: 0.6, repeat: 20 },
+      { at: 70,  id: 'togehaya',    count: 2, gap: 2.0, repeat: 24 },
+      { at: 88,  id: 'honota',      count: 4, gap: 0.5, repeat: 22 },
+      { at: 104, id: 'blockwan',    count: 1, repeat: 34 },
+    ],
+  },
+
+];
 
 
 /* コースは「しょう → コースばんごう」の じゅんに じどうで ならべかえます。
@@ -1146,7 +1252,7 @@ STAGES.sort((a, b) => ((a.chapter || 1) - (b.chapter || 1)) || ((a.course || a.n
 
    れい：
      { no: 101, floor: 1, name: '1かい', desc: '...', bg: 'steel',
-       castleHp: 3000, reward: { coins: 0, exp: 200 }, waves: [ ... ] },
+       castleHp: 2000, reward: { coins: 0, exp: 200 }, waves: [ ... ] },
    -------------------------------------------------------------------------- */
 const TOWER = {
   name: 'あき坊の塔',
@@ -1155,7 +1261,239 @@ const TOWER = {
   rewardChar: 'steve',        // ぜんぶ クリアで もらえる とくべつキャラ
   rewardName: 'スティーブ',
   courses: [
-    /* ここに 1かい〜10かい を ついかして いきます */
+
+    /* ============ 1かい：むぞくせい だけ ============
+       ぞくせいの あいしょうは かんけいなし。まずは かべ＋アタッカーの
+       きほんの かたちを おぼえる かい。みかた 5たいが Lv.3 なら のぼれます */
+    {
+      no: 101, floor: 1, chapter: 0, course: 1,
+      name: 'にゅうもんの ま',
+      desc: 'むぞくせいの てき だけ。きほんの たたかいかた',
+      bg: 'rock',
+      castleHp: 2000,
+      enemyMult: 0.9,
+      reward: { coins: 1, exp: 180 },
+      waves: [
+        { at: 3,  id: 'nyororiinu', count: 2, gap: 0.8 },
+        { at: 14, id: 'togehaya',   count: 1 },
+        { at: 26, id: 'nyororiinu', count: 3, gap: 0.7 },
+        { at: 38, id: 'blockwan',   count: 1 },
+        { at: 52, id: 'togehaya',   count: 1, repeat: 24 },
+        { at: 64, id: 'nyororiinu', count: 3, gap: 0.7, repeat: 18 },
+      ],
+    },
+
+    /* ============ 2かい：む ＋ ほのお ============
+       ほのおの むれが かべを もやして きます。
+       ★みず（テルテル君）が いると らくに なります */
+    {
+      no: 102, floor: 2, chapter: 0, course: 2,
+      name: 'ひばしらの ま',
+      desc: 'ほのおの てきが たくさん。みずが ゆうりです',
+      bg: 'sunset',
+      castleHp: 1800,
+      enemyMult: 1.15,
+      reward: { coins: 1, exp: 210 },
+      waves: [
+        { at: 3,  id: 'togehaya',    count: 1 },
+        { at: 10, id: 'honota',      count: 5, gap: 0.4 },
+        { at: 20, id: 'yakipokkuru', count: 4, gap: 0.5 },
+        { at: 32, id: 'honota',      count: 5, gap: 0.4, repeat: 16 },
+        { at: 44, id: 'yakipokkuru', count: 4, gap: 0.5, repeat: 17 },
+        { at: 60, id: 'blockwan',    count: 1, repeat: 34 },
+      ],
+    },
+
+    /* ============ 3かい：む ＋ みず ============
+       サバが とても はやく つっこんで きます。
+       ★くさ（フタバッポ）が いると、みずの こうげきを すいとって
+         ぎゃくに かいふく します。ここで その つよさが よく わかります */
+    {
+      no: 103, floor: 3, chapter: 0, course: 3,
+      name: 'しぶきの ま',
+      desc: 'みずの てき。くさが ゆうりです',
+      bg: 'mizu',
+      castleHp: 2600,
+      enemyMult: 1.25,
+      reward: { coins: 1, exp: 240 },
+      waves: [
+        { at: 3,  id: 'togehaya',  count: 1 },
+        { at: 10, id: 'saba',      count: 3, gap: 0.8 },
+        { at: 20, id: 'bakecchin', count: 3, gap: 1.2 },
+        { at: 32, id: 'saba',      count: 4, gap: 0.7, repeat: 11 },
+        { at: 44, id: 'bakecchin', count: 3, gap: 1.2, repeat: 14 },
+        { at: 58, id: 'blockwan',  count: 1, repeat: 30 },
+      ],
+    },
+
+    /* ============ 4かい：む ＋ くさ ============
+       モーモー・プラントが まえの なかまを どんどん かいふく して きます。
+       ★ほのお（ひー坊）で かいふくやくを さきに たおすのが せいかい */
+    {
+      no: 104, floor: 4, chapter: 0, course: 4,
+      name: 'めばえの ま',
+      desc: 'かいふくして くる くさの てき。ほのおが ゆうりです',
+      bg: 'mori',
+      castleHp: 2200,
+      enemyMult: 1.1,
+      reward: { coins: 1, exp: 270 },
+      /* かいふくやくを かたく する（ほのおで さきに たおすのが せいかい）*/
+      enemyBuff: { momoplant: { hp: 1900 } },
+      waves: [
+        { at: 3,  id: 'togehaya',      count: 1 },
+        { at: 12, id: 'momoplant',     count: 2, gap: 2.0 },
+        { at: 24, id: 'ojiinouenchou', count: 1 },
+        { at: 36, id: 'momoplant',     count: 2, gap: 2.0 },
+        { at: 50, id: 'togehaya',      count: 2, gap: 2.0, repeat: 26 },
+        { at: 64, id: 'momoplant',     count: 2, gap: 2.0, repeat: 26 },
+        { at: 80, id: 'ojiinouenchou', count: 1, repeat: 34 },
+      ],
+    },
+
+    /* ============ 5かい：む ＋ パワー ============
+       ウサ・ゴリラの ものすごい かいりょく。
+       ★まじゅつし（時の旅人）が パワーに つよい */
+    {
+      no: 105, floor: 5, chapter: 0, course: 5,
+      name: 'ごうわんの ま',
+      desc: 'パワーの てき。まじゅつしが ゆうりです',
+      bg: 'steel',
+      castleHp: 2600,
+      enemyMult: 1.25,
+      reward: { coins: 1, exp: 300 },
+      /* ウサ・ゴリラを かたく する（まじゅつしの ありがたみ）*/
+      enemyBuff: { usagorilla: { hp: 3500 } },
+      waves: [
+        { at: 3,  id: 'togehaya',   count: 1 },
+        { at: 12, id: 'usagorilla', count: 1 },
+        { at: 26, id: 'nyororiinu', count: 4, gap: 0.6, repeat: 16 },
+        { at: 36, id: 'usagorilla', count: 1, repeat: 18 },
+        { at: 60, id: 'blockwan',   count: 1, repeat: 34 },
+      ],
+    },
+
+    /* ============ 6かい：む ＋ けもの ============
+       クマべぇ と 字一龍。
+       ★パワー（豪傑天むす丸）が けものに つよい。
+         かべくんは こうげき 0 なので、ここは 天むす丸の でばん */
+    {
+      no: 106, floor: 6, chapter: 0, course: 6,
+      name: 'けものの ま',
+      desc: 'けものの てき。パワーが ゆうりです',
+      bg: 'mori',
+      castleHp: 2800,
+      enemyMult: 1.2,
+      reward: { coins: 1, exp: 330 },
+      /* クマべぇを かたく する（パワーの ありがたみ）*/
+      enemyBuff: { kumabee: { hp: 3800 } },
+      waves: [
+        { at: 3,  id: 'togehaya', count: 1 },
+        { at: 12, id: 'kumabee',  count: 1 },
+        { at: 26, id: 'kumabee',  count: 1, repeat: 18 },
+        { at: 44, id: 'jiryu',    count: 1, repeat: 30 },
+        { at: 60, id: 'blockwan', count: 1, repeat: 34 },
+      ],
+    },
+
+    /* ============ 7かい：む ＋ まじゅつし ============
+       モコ魔道士は しゃていが 190 と とても ながい。
+       ★けもの（シャドウヤマネコ）が はやく つっこんで きれる */
+    {
+      no: 107, floor: 7, chapter: 0, course: 7,
+      name: 'まじゅつの ま',
+      desc: 'とおくから うつ まじゅつし。けものが ゆうりです',
+      bg: 'night',
+      castleHp: 3400,
+      enemyMult: 1.3,
+      reward: { coins: 1, exp: 360 },
+      waves: [
+        { at: 3,  id: 'togehaya',     count: 1 },
+        { at: 12, id: 'mokomadoushi', count: 1 },
+        { at: 24, id: 'nyororiinu',   count: 4, gap: 0.6, repeat: 12 },
+        { at: 34, id: 'mokomadoushi', count: 1, repeat: 15 },
+        { at: 58, id: 'blockwan',     count: 1, repeat: 30 },
+      ],
+    },
+
+    /* ============ 8かい：む ＋ メタル ============
+       メタルは よわてんが 3つ（ほのお・まじゅつし・パワー）ありますが、
+       それ いがいの こうげきは ほとんど とおりません。
+       ★アイアン・コッコは かたく、コンガラガーンは はやくて つよい */
+    {
+      no: 108, floor: 8, chapter: 0, course: 8,
+      name: 'はがねの ま',
+      desc: 'メタルの てき。ほのお・まじゅつし・パワーが ゆうり',
+      bg: 'steel',
+      castleHp: 2800,
+      enemyMult: 1.3,
+      reward: { coins: 1, exp: 400 },
+      /* アイアン・コッコを かたく する（ほのお・まじゅつし・パワーの ありがたみ）*/
+      enemyBuff: { ironkokko: { hp: 3400 } },
+      waves: [
+        { at: 3,  id: 'togehaya',   count: 1 },
+        { at: 12, id: 'ironkokko',  count: 1 },
+        { at: 26, id: 'kongaragan', count: 1 },
+        { at: 40, id: 'ironkokko',  count: 1, repeat: 20 },
+        { at: 52, id: 'kongaragan', count: 1, repeat: 19 },
+        { at: 66, id: 'blockwan',   count: 1, repeat: 34 },
+      ],
+    },
+
+    /* ============ 9かい：さまざまな ぞくせい ============
+       いままでの まとめ。どの ぞくせいも でて きます。
+       みかたを Lv.7 くらいまで そだてて いどみましょう */
+    {
+      no: 109, floor: 9, chapter: 0, course: 9,
+      name: 'まとめの ま',
+      desc: 'すべての ぞくせいが でる。いままでの まとめ',
+      bg: 'hoshizora',
+      castleHp: 4000,
+      enemyMult: 1.4,
+      reward: { coins: 1, exp: 450 },
+      waves: [
+        { at: 3,   id: 'togehaya',     count: 1 },
+        { at: 12,  id: 'honota',       count: 4, gap: 0.5 },
+        { at: 22,  id: 'saba',         count: 2, gap: 1.2 },
+        { at: 32,  id: 'momoplant',    count: 1 },
+        { at: 42,  id: 'usagorilla',   count: 1 },
+        { at: 54,  id: 'kumabee',      count: 1 },
+        { at: 66,  id: 'mokomadoushi', count: 1 },
+        { at: 78,  id: 'kongaragan',   count: 1 },
+        { at: 90,  id: 'kamomeeru',    count: 2, gap: 1.2, repeat: 22 },
+        { at: 102, id: 'honota',       count: 4, gap: 0.5, repeat: 20 },
+        { at: 114, id: 'jiryu',        count: 1, repeat: 34 },
+        { at: 128, id: 'togehaya',     count: 2, gap: 2.0, repeat: 24 },
+      ],
+    },
+
+    /* ============ 10かい：さいじょうかい・スティーブ ============
+       9かい ＋ おおボス「スティーブ」。
+       スティーブは まえに でて こない かわりに、しゃてい 950 の
+       ひの やで こちらの ぜんれつを ねらいつづけます。
+       てきの しろが 70% まで へると あらわれます                */
+    {
+      no: 110, floor: 10, chapter: 0, course: 10,
+      name: 'てっぺんの ま',
+      desc: 'おおボス「スティーブ」。かって 10かい せいは！',
+      bg: 'boss',
+      castleHp: 4400,
+      enemyMult: 1.45,
+      reward: { coins: 2, exp: 600 },
+      waves: [
+        { at: 3,   id: 'togehaya',     count: 1 },
+        { at: 12,  id: 'honota',       count: 4, gap: 0.5 },
+        { at: 24,  id: 'kongaragan',   count: 1 },
+        { at: 36,  id: 'usagorilla',   count: 1 },
+        { at: 48,  id: 'mokomadoushi', count: 1 },
+        { at: 60,  id: 'kumabee',      count: 1, repeat: 30 },
+        { at: 74,  id: 'saba',         count: 2, gap: 1.2, repeat: 22 },
+        { at: 88,  id: 'honota',       count: 4, gap: 0.5, repeat: 20 },
+        { at: 102, id: 'togehaya',     count: 2, gap: 2.0, repeat: 26 },
+        /* おおボスは てきの しろが 70% まで へると でてくる */
+        { atCastleHp: 0.7, id: 'steve', count: 1 },
+      ],
+    },
+
   ],
 };
 
@@ -1189,6 +1527,22 @@ const ATTR_COLOR = {
   none: '#bdbdbd',
 };
 
+/* --------------------------------------------------------------------------
+   ぞくせいは 1つでも 2つでも かけます
+
+     attr: 'fire'                ← 1つ
+     attr: ['fire', 'magic']     ← 2つ もち（獄熱オニごん）
+
+   2つ もちの ときは「いちばん ゆうりな くみあわせ」を つかいます。
+   つまり──
+     ・まもる とき：みずでも けものでも 2.5ばいが とおる（こうりゃくの みちが 2つ）
+     ・せめる とき：あいてに ささる ほうの ぞくせいで けいさんする
+   -------------------------------------------------------------------------- */
+function attrList(a) { return Array.isArray(a) ? a : [a]; }
+function attrMain(a) { return Array.isArray(a) ? a[0] : a; }          // いろ などに つかう だいひょう
+function attrHas(a, x) { return attrList(a).indexOf(x) >= 0; }
+function attrLabelOf(a) { return attrList(a).map(x => ATTR_LABEL[x] || x).join('・'); }
+
 /* こうげきする がわ → うける がわ の ダメージばいりつ */
 function attrBeats(a, b) {
   const list = ATTR_BEATS[a];
@@ -1196,8 +1550,17 @@ function attrBeats(a, b) {
   return (typeof list === 'string') ? (list === b) : (list.indexOf(b) >= 0);
 }
 
-function attrMultiplier(attacker, defender) {
-  if (attrBeats(attacker, defender)) return CONFIG.attrStrong; // ゆうり
-  if (attrBeats(defender, attacker)) return CONFIG.attrWeak;   // ふり
+/* ぞくせい 1つ どうしの ばいりつ */
+function attrPairMultiplier(a, d) {
+  if (attrBeats(a, d)) return CONFIG.attrStrong; // ゆうり
+  if (attrBeats(d, a)) return CONFIG.attrWeak;   // ふり
   return 1.0;
+}
+
+function attrMultiplier(attacker, defender) {
+  const A = attrList(attacker), D = attrList(defender);
+  if (A.length === 1 && D.length === 1) return attrPairMultiplier(A[0], D[0]);
+  let best = 0;
+  for (const a of A) for (const d of D) best = Math.max(best, attrPairMultiplier(a, d));
+  return best;
 }

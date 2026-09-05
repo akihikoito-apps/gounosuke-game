@@ -145,6 +145,11 @@ const Game = {
      ユニットを つくる
      ===================================================================== */
   makeUnit(def, side) {
+    /* コースが てきを つよく する ばあい（あき坊の塔 など）。
+       ENEMIES の もとの データは さわらず、この たいだけの コピーを つくります */
+    if (side === 'enemy' && this.stage && this.stage.enemyBuff && this.stage.enemyBuff[def.id]) {
+      def = Object.assign({}, def, this.stage.enemyBuff[def.id]);
+    }
     const forward = (side === 'ally') ? -1 : 1;
     const x = (side === 'ally')
       ? CONFIG.fieldLength - 40 - Math.random() * 20
@@ -355,6 +360,7 @@ const Game = {
       let sp = u.def.speed;
       if (u.slowUntil > this.time) sp *= (u.slowRate || 0.5);
       if (u.def.stationary) { u.state = 'attack'; return; }   // その ばから うごかない
+      if (u.blocked) { u.state = 'blocked'; return; }         // ふところに はいられて あわてて いる
       if (u.def.leak) {
         u.speedBonus = Math.min(u.def.leak.speedMax || 60, u.speedBonus + u.def.leak.speedGain * dt);
         u.hp -= u.def.leak.hpLoss * dt;
@@ -385,18 +391,32 @@ const Game = {
       return null;                              // かべに とまらず すすみつづける
     }
 
+    /* --- ふところの まあい ---
+       minRange より ちかくに あいてが 1たいでも はいると、
+       ちかすぎて こうげきが できなく なります（獄熱オニごん）。
+       その ばで あわてる だけで、まえにも すすみません          */
+    const minR = u.def.minRange || 0;
+    u.blocked = false;
+    if (minR > 0) {
+      for (const o of this.units) {
+        if (o.dead || o.side === u.side) continue;
+        if (Math.abs(o.x - u.x) < minR) { u.blocked = true; return null; }
+      }
+    }
+
     let best = null, bestDist = Infinity;
     for (const o of this.units) {
       if (o.dead || o.side === u.side) continue;
       const d = (o.x - u.x) * u.forward;          // まえに いれば プラス
       if (d < -25) continue;                      // うしろは むし
       const dist = Math.abs(o.x - u.x);
+      if (dist < minR) continue;                  // ちかすぎる あいては ねらえない
       if (dist <= range && dist < bestDist) { best = o; bestDist = dist; }
     }
     // しろも あいて
     const castleX = (u.side === 'ally') ? 0 : CONFIG.fieldLength;
     const cd = Math.abs(castleX - u.x);
-    if (cd <= range && cd < bestDist) return { castle: true, x: castleX };
+    if (cd >= minR && cd <= range && cd < bestDist) return { castle: true, x: castleX };
     return best;
   },
 
@@ -511,7 +531,8 @@ const Game = {
         v.blindRate = blind.missRate || 0.3;
         this.addEffect({ type: 'slowMark', x: v.x, y: this.groundWorldY() - 70, life: 0.8 });
       }
-      const stunOkAttr = stun && (!stun.attrs || stun.attrs.indexOf(v.def.attr) >= 0);
+      // 2ぞくせい もちは、どちらか 1つでも あてはまれば こうかが でる
+      const stunOkAttr = stun && (!stun.attrs || attrList(v.def.attr).some(x => stun.attrs.indexOf(x) >= 0));
       if (stunOkAttr && !v.dead && Math.random() < ((stun.chance === undefined) ? 1 : stun.chance)) {
         v.stunUntil = this.time + stun.duration;
         this.addEffect({ type: 'stunMark', x: v.x, y: this.groundWorldY() - 78, life: 0.9 });
@@ -530,7 +551,8 @@ const Game = {
     /* ★きゅうしゅう：きめられた ぞくせいの こうげきは ダメージ 0。
        そのかわり おなじ ぶんだけ たいりょくが かいふく する          */
     const ab = u.def.absorb;
-    if (ab && attr && ab.attrs && ab.attrs.indexOf(attr) >= 0) {
+    // 2ぞくせい もちの こうげきは、りょうほうとも すいとれる ときだけ ダメージ 0
+    if (ab && attr && ab.attrs && attrList(attr).every(x => ab.attrs.indexOf(x) >= 0)) {
       const heal = Math.max(1, Math.round(dmg * (ab.rate === undefined ? 1 : ab.rate)));
       const room = Math.max(0, u.maxHp - u.hp);
       const got  = Math.min(room, heal);
@@ -569,7 +591,7 @@ const Game = {
                        big: isCrit || mult > 1.01 });
     }
     this.addEffect({ type: 'hit', x: u.x, y: this.groundWorldY() - 40 - u.lane, seed: Math.random() * 6, life: 0.25,
-                     color: ATTR_COLOR[attr] || '#fff59d' });
+                     color: ATTR_COLOR[attrMain(attr)] || '#fff59d' });
 
     if (u.hp <= 0) {
       u.dead = true;
@@ -1017,6 +1039,7 @@ const Game = {
         atk: u.windup >= 0 ? Math.min(1, u.windup / u.def.attackWindup) : -1,
         hpRatio: u.hp / u.maxHp,
         roll: u.roll || 0,
+        blocked: !!u.blocked,          // ふところに はいられて あわてて いる
         // うった ちょくご（クールタイムの さいしょ 35%）は「バタバタ」の あいだ
         fired: (u.atkCd > (u.def.attackInterval || 1) * 0.65),
       };

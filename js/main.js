@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '2.7';
+  const GAME_VERSION = '2.8';
 
 
   /* =================================================
@@ -941,6 +941,30 @@
     document.removeEventListener('touchcancel', onDocUp);
   }
 
+  /* =================================================
+     あき坊の塔を 10かい ぜんぶ クリアすると、とくべつな なかまが
+     1どだけ もらえます。この キャラは ガチャには でて きません。
+     ================================================= */
+  function towerAllCleared(s) {
+    if (!s || !TOWER.courses.length) return false;
+    if (TOWER.courses.length < TOWER.floors) return false;   // まだ ぜんぶ できて いない
+    return TOWER.courses.every(c => !!s.cleared[c.no]);
+  }
+
+  function giveTowerReward() {
+    const s = slot();
+    const id = TOWER.rewardChar;
+    if (!s || !id || !UNITS[id]) return null;
+    if (!towerAllCleared(s)) return null;
+    if (!Array.isArray(s.owned)) s.owned = START_CHARS.slice();
+    if (s.owned.indexOf(id) >= 0) return null;               // もう もらって いる
+    s.owned.push(id);
+    if (typeof s.levels[id] !== 'number') s.levels[id] = 1;
+    if (typeof s.plus[id]   !== 'number') s.plus[id]   = 0;
+    storeSave();
+    return id;
+  }
+
   function firstEmptySlot(s) {
     for (let i = 0; i < PARTY_MAX; i++) if (!s.party[i]) return i;
     return -1;
@@ -1254,6 +1278,11 @@
         ? '　／　Gコイン +' + r.coins + '　けいけんち +' + r.exp
         : '　／　けいけんち +' + r.exp + '（Gコインは しょかいだけ）';
       markCleared(Game.stage.no);
+      const got = giveTowerReward();          // ★あき坊の塔を ぜんぶ のぼった ごほうび
+      if (got) {
+        $('#result-sub').textContent =
+          'あき坊の塔 10かい せいは！　「' + UNITS[got].name + '」が なかまに なった！';
+      }
     }
     show('screen-result');
   }
