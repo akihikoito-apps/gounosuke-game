@@ -336,6 +336,7 @@ const Game = {
   /* ---- こうげきの しゅんかん ---- */
   resolveAttack(u) {
     u.atkCd = u.def.attackInterval;
+    if (u.def.noAttack) return;          // かべくん は こうげき しない（たちはだかる だけ）
     if (u.def.multiHit) {
       u.burst = { left: u.def.multiHit.count, timer: 0, delay: u.def.multiHit.delay };
     } else {

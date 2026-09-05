@@ -164,6 +164,23 @@ const UNITS = {
     projectile: 'fireball',
   },
 
+  /* かべくん ── ちゃいろい かべ。こうげきは まったく しない かわりに
+                たいりょくが ものすごく たかい。はやく はしって いって
+                てきの まえに たちはだかる、まもり せんもんの なかま  */
+  kabekun: {
+    id: 'kabekun', name: 'かべくん', shortName: 'かべくん',
+    rarity: 'R',                          // レア
+    attr: 'power',                        // パワー（けものに つよい／まじゅつしに よわい）
+    cost: 400,  recharge: 12.0,
+    hp: 5000,   atk: 0,    range: 78,   speed: 60,
+    attackInterval: 2.0,   attackWindup: 0.3,
+    kbCount: 5,                           // なかなか ふきとばされない
+    scale: 1.0,
+    attackType: 'single',
+    projectile: null,
+    noAttack: true,                       // ★ こうげき しない（たちはだかる だけ）
+  },
+
   /* ずにお ── しろい サイコロ。コロコロ ころがって すすむ。
              1の めから ビームを だして はんいこうげき。
              みず と けもの の てきだけ 50%で 2びょう とめる  */
@@ -192,7 +209,7 @@ const PARTY_MAX = 10;
 const START_CHARS = ['tankun', 'purio'];
 const DEFAULT_PARTY = START_CHARS.slice();
 /* ガチャに でてくる キャラ ぜんぶ */
-const ALL_CHARS = ['tankun', 'purio', 'teruteru', 'tokinotabibito', 'zunio', 'hiibou'];
+const ALL_CHARS = ['tankun', 'purio', 'teruteru', 'tokinotabibito', 'zunio', 'kabekun', 'hiibou'];
 let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく メンバー（へんせいで かわる）
 
 

@@ -330,6 +330,60 @@ function drawHiibou(ctx, s) {
 }
 
 
+/* ---- かべくん：ちゃいろい かべ。こうげきは しない ---- */
+function drawKabekun(ctx, s) {
+  const brace = (s.atk >= 0) ? 1 : 0;                 // てきを うけとめて いる
+  const wob = Math.sin(s.t * (brace ? 18 : 2.5)) * (brace ? 1.6 : 0.8);
+  ctx.save();
+  ctx.translate(wob, 0);
+
+  /* ほんたい（したが 2またに とがった はた の かたち）*/
+  const g = ctx.createLinearGradient(-30, 0, 30, 0);
+  g.addColorStop(0, '#8a5a24');
+  g.addColorStop(0.45, '#a86c2c');
+  g.addColorStop(1, '#7d4f1e');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(-30, -116);
+  ctx.lineTo(30, -116);
+  ctx.lineTo(30, -34);
+  ctx.lineTo(7, -1);
+  ctx.lineTo(7, -16);
+  ctx.lineTo(-7, -16);
+  ctx.lineTo(-7, -1);
+  ctx.lineTo(-30, -34);
+  ctx.closePath();
+  ctx.fill();
+
+  /* ふちの ハイライト */
+  ctx.strokeStyle = 'rgba(255,225,180,0.45)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-30, -116); ctx.lineTo(30, -116);
+  ctx.stroke();
+
+  /* かお（くろい せん）*/
+  ctx.strokeStyle = '#1b1b1b';
+  ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  // ひだりの め「し」
+  ctx.beginPath();
+  ctx.moveTo(-9, -96);
+  ctx.quadraticCurveTo(-14, -80, -2, -76);
+  ctx.stroke();
+  // みぎの め（たてぼう）
+  ctx.beginPath();
+  ctx.moveTo(9, -98); ctx.lineTo(9, -74);
+  ctx.stroke();
+  // くち（ながい うねり）
+  ctx.beginPath();
+  ctx.moveTo(-11, -62);
+  ctx.quadraticCurveTo(-14, -44, -4, -42);
+  ctx.quadraticCurveTo(8, -40, 14, -52);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 /* ---- ずにお：しろい サイコロ。ころがって すすみ、1の めから ビーム ---- */
 function drawZunio(ctx, s) {
   const R = 25;                       // サイコロの はんぶんの おおきさ
@@ -908,6 +962,7 @@ const DRAWERS = {
   tokinotabibito: drawTokinotabibito,
   hiibou: drawHiibou,
   zunio: drawZunio,
+  kabekun: drawKabekun,
   honota: drawHonota,
   togehaya: drawTogehaya,
   saba: drawSaba,
