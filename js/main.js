@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '3.9';
+  const GAME_VERSION = '4.0';
 
 
   /* =================================================
@@ -72,6 +72,7 @@
       levels: {},                        // キャラごとの レベル（けいけんちで あがる）
       plus: {},                          // レベルの じょうげんかいほう（ガチャの ダブりで ふえる）
       evolved: {},                       // しんかずみの キャラ
+      seenEnemies: {},                   // ずかん：いままで でてきた てき
       owned: START_CHARS.slice(),        // もっている キャラ（はじめは 2たい）
       party: START_CHARS.slice(),        // せんとうに つれていく メンバー
     };
@@ -111,6 +112,7 @@
     if (!s.levels)  s.levels = {};
     if (!s.plus)    s.plus = {};
     if (!s.evolved) s.evolved = {};
+    if (!s.seenEnemies) s.seenEnemies = {};
     if (!Array.isArray(s.owned) || !s.owned.length) s.owned = START_CHARS.slice();
     if (!Array.isArray(s.party) || !s.party.filter(Boolean).length) s.party = s.owned.slice(0, PARTY_MAX);
     s.owned.forEach(id => { if (typeof s.plus[id] !== 'number') s.plus[id] = 0; });
@@ -739,6 +741,7 @@
       b.className = 'unit-btn';
       b.innerHTML =
         '<canvas class="u-icon"></canvas>' +
+        markHtml(def, 'u-mark') +
         '<span class="u-name">' + (shownDef(id) || def).shortName + '</span>' +
         '<span class="u-cost">' + def.cost + '</span>' +
         '<span class="cd-mask" style="display:none"></span>';
@@ -833,9 +836,11 @@
       el.className = 'pslot' + (id ? ' filled' : '') + (i === selectedSlot ? ' sel' : '');
       if (id) {
         el.innerHTML = '<span class="ps-no">' + (i + 1) + '</span>' +
+          markHtml(UNITS[id], 'ps-mark') +
           '<canvas></canvas>' +
           '<span class="ps-name">' + shownDef(id).shortName + '</span>' +
-          '<span class="ps-lv">Lv.' + (s.levels[id] || 1) + '</span>';
+          '<span class="ps-lv">Lv.' + (s.levels[id] || 1) + '</span>' +
+          '<span class="ps-cost">' + UNITS[id].cost + '</span>';
       } else {
         el.className += ' empty-label';
         el.innerHTML = '<span class="ps-no">' + (i + 1) + '</span><span>あき</span>';
@@ -864,8 +869,10 @@
       const el = document.createElement('button');
       el.className = 'pool-item' + (used >= 0 ? ' used' : '');
       el.innerHTML = '<canvas></canvas>' +
+        markHtml(UNITS[id], 'pi-mark') +
         '<span class="pi-name">' + shownDef(id).shortName + '</span>' +
-        '<span class="pi-lv">Lv.' + (s.levels[id] || 1) + '</span>';
+        '<span class="pi-lv">Lv.' + (s.levels[id] || 1) + '</span>' +
+        '<span class="pi-cost">コスト ' + UNITS[id].cost + '</span>';
       el.addEventListener('click', () => {
         const target = (selectedSlot >= 0) ? selectedSlot : firstEmptySlot(s);
         if (target < 0) { toast('わくが いっぱいです'); return; }
@@ -1245,6 +1252,224 @@
   }
 
 
+  /* キャラボタン・へんせいの わくに つける ちいさな しるし
+     （どの ぞくせいで、どのくらい レアか が ひとめで わかる ように）*/
+  function markHtml(def, cls) {
+    const dots = attrList(def.attr).map(x =>
+      '<i class="u-dot" style="background:' + (ATTR_COLOR[x] || '#bdbdbd') + '"></i>').join('');
+    const r = RARITY[def.rarity];
+    return '<span class="' + cls + '">' + dots +
+           (r ? '<i class="u-rar" style="color:' + r.color + '">' + r.star + '</i>' : '') + '</span>';
+  }
+
+  /* =================================================
+     ずかん
+     ================================================= */
+  let dexSide = 'ally';       // 'ally' か 'enemy'
+  let dexAttr = 'all';
+  let dexRar  = 'all';
+  let dexLimit = null;        // せんとうちゅうは この なかだけ みせる
+  let dexBackTo = 'home';     // もどる さきの がめん
+
+  /* せんとうで でてきた てきを セーブに かきうつす */
+  function recordSeen() {
+    const s = slot();
+    if (!s || !Game.seen) return;
+    if (!s.seenEnemies) s.seenEnemies = {};
+    let added = false;
+    for (const id in Game.seen) { if (!s.seenEnemies[id]) { s.seenEnemies[id] = true; added = true; } }
+    if (added) storeSave();
+  }
+
+  /* --- ぞくせいの バッジ --- */
+  function attrTagHtml(attr) {
+    return attrList(attr).map(x =>
+      '<span class="tag attr" style="background:' + (ATTR_COLOR[x] || '#bdbdbd') + '">' +
+      (ATTR_LABEL[x] || x) + '</span>').join('');
+  }
+  function rarityTagHtml(r) {
+    const info = RARITY[r];
+    if (!info) return '';
+    return '<span class="tag rar" style="background:' + info.color + '">' + info.star + ' ' + info.label + '</span>';
+  }
+
+  /* --- とくせいの せつめい（にほんごに なおす）--- */
+  function abilityLines(def) {
+    const L = [];
+    const pc = (v) => Math.round(v * 100) + '%';
+    const al = (a) => (a || []).map(x => ATTR_LABEL[x] || x).join('・');
+
+    if (def.noAttack)    L.push('こうげきを しない。たちはだかる だけの かべやく');
+    if (def.attackType === 'area') L.push('はんいこうげき：まわり ' + (def.areaRadius || 0) + ' の あいて ぜんぶに あたる');
+    if (def.multiHit)    L.push(def.multiHit.count + 'れんげき：1かいの こうげきで ' + def.multiHit.count + 'はつ あたる');
+    if (def.wave)        L.push('はどう レベル' + def.wave.level + '：あてると まえに なみが はしり、とおりみちの あいて ぜんぶに おなじ ダメージ');
+    if (def.minRange)    L.push('ふところの まあい：きょり ' + def.minRange + ' より ちかづかれると こうげきできない');
+    if (def.stationary)  L.push('その ばから うごかない');
+    if (def.flying)      L.push('そらを とぶ：かべを こえて いちばん おくの あいてを ねらう');
+    if (def.rolls)       L.push('コロコロ ころがって すすむ');
+    if (def.blocks)      L.push('とうじょうすると つちブロックを ' + def.blocks + 'だん つんで、その うえに たつ');
+
+    if (def.nullify)     L.push('★' + al(def.nullify.attrs) + ' の こうげきを むこうか（ダメージ 0）。ただし 2つの ぞくせいを もつ こうげきには きかない');
+    if (def.absorb)      L.push('★' + al(def.absorb.attrs) + ' の こうげきを すいとって、そのぶん たいりょくが かいふく する');
+    if (def.resist)      L.push('★' + al(def.resist.attrs) + ' の こうげきを ' + pc(def.resist.mult) + ' まで おさえる');
+    if (def.kbImmune)    L.push('★ふきとばされない');
+    if (def.crit)        L.push('★' + pc(def.crit.chance) + 'で かいしんの いちげき（ダメージ ' + def.crit.mult + 'ばい'
+                                + (def.crit.ignoreAttr ? '・ぞくせいの あいしょうは けいさんに いれない' : '') + '）');
+    if (def.knockbackChance) L.push('★' + pc(def.knockbackChance) + 'で あいてを うしろに ふきとばす');
+    if (def.slow)        L.push('★' + pc(def.slow.chance === undefined ? 1 : def.slow.chance) + 'で あいてを '
+                                + def.slow.duration + 'びょう どんそくに する（はやさ ' + pc(def.slow.rate) + '）');
+    if (def.stun)        L.push('★' + pc(def.stun.chance === undefined ? 1 : def.stun.chance) + 'で あいてを '
+                                + def.stun.duration + 'びょう とめる' + (def.stun.attrs ? '（' + al(def.stun.attrs) + ' だけ）' : ''));
+    if (def.weaken)      L.push('★' + pc(def.weaken.chance === undefined ? 1 : def.weaken.chance) + 'で あいての こうげきりょくを '
+                                + def.weaken.duration + 'びょう ' + pc(def.weaken.rate) + ' に さげる');
+    if (def.blind)       L.push('★' + pc(def.blind.chance === undefined ? 1 : def.blind.chance) + 'で あいての こうげきを '
+                                + def.blind.duration + 'びょう はずれやすく する');
+    if (def.bonusVs)     L.push('★' + al(def.bonusVs.attrs) + ' の あいてには さらに ' + def.bonusVs.mult + 'ばいの ダメージ');
+    if (def.healOnce)    L.push('★たいりょくが ' + pc(def.healOnce.below) + ' いかに なると、1どだけ さいだいの ' + pc(def.healOnce.rate) + ' かいふく');
+    if (def.enrage) {
+      const e = def.enrage;
+      L.push('★たいりょくが ' + pc(e.below) + ' いかで ' +
+        (e.atkMult ? 'こうげきりょく ' + e.atkMult + 'ばい' : '') +
+        (e.intervalMult ? 'こうげきが はやく なる' : ''));
+    }
+    if (def.selfHurt)    L.push('★' + pc(def.selfHurt.chance) + 'で こうげきに しっぱいして、じぶんだけ さいだいたいりょくの ' + pc(def.selfHurt.rate) + ' ダメージ');
+    if (def.regen)       L.push('★じぶんの たいりょくが すこしずつ かいふく する（1びょうに ' + def.regen + '）');
+    if (def.heal)        L.push('★ちかくの なかまを ' + def.heal.interval + 'びょうごとに ' + def.heal.amount + ' かいふく する');
+    if (def.rest)        L.push('★ときどき やすんで うごかなく なる（' + def.rest.duration + 'びょう）。そのあいだは ダメージを うけやすい');
+    if (def.leak)        L.push('★すすむほど はやく なるが、たいりょくが へって いく');
+    if (def.stagger)     L.push('★おおきな ダメージを うけると こうげきが キャンセル される');
+    if (def.evolve)      L.push('じつりょく Lv.' + LEVEL.max + ' で「' + def.evolve.name + '」に しんか できる');
+    return L;
+  }
+
+  /* --- ずかんの カード 1まい --- */
+  function dexCard(def, isAlly) {
+    const s = slot();
+    const row = document.createElement('div');
+    row.className = 'dex-card';
+
+    let stats = '';
+    if (isAlly) {
+      const lv  = s ? effLevel(s, def.id) : 1;
+      const mul = levelMult(lv, def.rarity);
+      const hits = def.multiHit ? def.multiHit.count : 1;
+      const dps = Math.round((def.atk * hits * mul) / (def.attackInterval + def.attackWindup));
+      stats =
+        '<span>コスト <b>' + def.cost + '</b></span>' +
+        '<span>さいせい <b>' + def.recharge + '</b>びょう</span>' +
+        '<span>たいりょく <b>' + Math.round(def.hp * mul) + '</b></span>' +
+        '<span>こうげき <b>' + Math.round(def.atk * mul) + '</b>' + (hits > 1 ? '×' + hits : '') + '</span>' +
+        '<span>しゃてい <b>' + def.range + '</b></span>' +
+        '<span>はやさ <b>' + def.speed + '</b></span>' +
+        '<span>こうげき かんかく <b>' + (def.attackInterval + def.attackWindup).toFixed(1) + '</b>びょう</span>' +
+        '<span>1びょう ダメージ <b>' + dps + '</b></span>';
+    } else {
+      const hits = def.multiHit ? def.multiHit.count : 1;
+      const dps = Math.round((def.atk * hits) / (def.attackInterval + def.attackWindup));
+      stats =
+        '<span>たいりょく <b>' + def.hp + '</b></span>' +
+        '<span>こうげき <b>' + def.atk + '</b>' + (hits > 1 ? '×' + hits : '') + '</span>' +
+        '<span>しゃてい <b>' + def.range + '</b></span>' +
+        '<span>はやさ <b>' + def.speed + '</b></span>' +
+        '<span>こうげき かんかく <b>' + (def.attackInterval + def.attackWindup).toFixed(1) + '</b>びょう</span>' +
+        '<span>1びょう ダメージ <b>' + dps + '</b></span>' +
+        '<span>たおすと <b>' + (def.money || 0) + '</b>えん</span>';
+    }
+
+    const ab = abilityLines(def);
+    const lvTxt = (isAlly && s) ? '　<small>Lv.' + effLevel(s, def.id) + '</small>' : '';
+    row.innerHTML =
+      '<canvas></canvas>' +
+      '<span class="dex-body">' +
+        '<span class="dex-name">' + def.name + lvTxt + '</span>' +
+        '<span class="dex-badges">' +
+          (isAlly ? rarityTagHtml(def.rarity) : (def.isBoss ? '<span class="tag boss">ボス</span>' : '')) +
+          attrTagHtml(def.attr) +
+        '</span>' +
+        '<span class="dex-stats">' + stats + '</span>' +
+        (ab.length ? '<span class="dex-abil">' + ab.map(x => '<i>' + x + '</i>').join('') + '</span>' : '') +
+      '</span>';
+    return row;
+  }
+
+  /* --- ずかんを つくる --- */
+  function buildDex() {
+    const s = slot();
+
+    /* ぞくせいの ボタン */
+    const attrBox = $('#dex-attr');
+    const attrs = ['all', 'none', 'water', 'fire', 'grass', 'magic', 'power', 'beast', 'metal', 'god', 'ghost'];
+    attrBox.innerHTML = '';
+    attrs.forEach(k => {
+      const b = document.createElement('button');
+      b.className = 'dex-tab' + (dexAttr === k ? ' on' : '');
+      b.textContent = (k === 'all') ? 'ぜんぶ' : (ATTR_LABEL[k] || k);
+      if (k !== 'all') b.style.borderColor = ATTR_COLOR[k];
+      b.addEventListener('click', () => { dexAttr = k; buildDex(); });
+      attrBox.appendChild(b);
+    });
+
+    /* レアどの ボタン（みかた だけ）*/
+    $('#dex-rarity-wrap').style.display = (dexSide === 'ally') ? '' : 'none';
+    const rarBox = $('#dex-rarity');
+    rarBox.innerHTML = '';
+    ['all'].concat(RARITY_ORDER).forEach(k => {
+      const b = document.createElement('button');
+      b.className = 'dex-tab' + (dexRar === k ? ' on' : '');
+      b.textContent = (k === 'all') ? 'ぜんぶ' : RARITY[k].star;
+      if (k !== 'all') b.style.borderColor = RARITY[k].color;
+      b.addEventListener('click', () => { dexRar = k; buildDex(); });
+      rarBox.appendChild(b);
+    });
+
+    /* タブの みため */
+    Array.prototype.forEach.call($('#dex-side').children, (b) => {
+      b.className = 'dex-tab' + (b.dataset.side === dexSide ? ' on' : '');
+    });
+
+    /* --- ならべる --- */
+    const box = $('#dex-list');
+    box.innerHTML = '';
+    let list = [];
+    if (dexSide === 'ally') {
+      const owned = (s && s.owned) ? s.owned : DEFAULT_PARTY;
+      list = owned.filter(id => UNITS[id]).map(id => UNITS[id]);
+      if (dexLimit && dexLimit.ally) list = list.filter(d => dexLimit.ally.indexOf(d.id) >= 0);
+      if (dexRar !== 'all') list = list.filter(d => d.rarity === dexRar);
+      const ord = {}; RARITY_ORDER.forEach((k, i) => ord[k] = i);
+      list.sort((a, b) => (ord[a.rarity] - ord[b.rarity]) || (a.cost - b.cost));
+    } else {
+      const seen = (s && s.seenEnemies) ? s.seenEnemies : {};
+      list = Object.keys(ENEMIES).filter(id => seen[id]).map(id => ENEMIES[id]);
+      if (dexLimit && dexLimit.enemy) list = list.filter(d => dexLimit.enemy.indexOf(d.id) >= 0);
+      list.sort((a, b) => ((a.isBoss ? 1 : 0) - (b.isBoss ? 1 : 0)) || (a.hp - b.hp));
+    }
+    if (dexAttr !== 'all') list = list.filter(d => attrList(d.attr).indexOf(dexAttr) >= 0);
+
+    list.forEach(def => {
+      const card = dexCard(def, dexSide === 'ally');
+      box.appendChild(card);
+      paintChar(card.querySelector('canvas'), def.id, { enemy: dexSide === 'enemy' });
+    });
+
+    const total = (dexSide === 'ally') ? Object.keys(UNITS).length : Object.keys(ENEMIES).length;
+    $('#dex-count').textContent = dexLimit
+      ? ('この ステージに でてくる ' + (dexSide === 'ally' ? 'みかた' : 'てき') + ' ' + list.length + 'たい')
+      : (list.length + 'たい ひょうじちゅう　（ぜんぶで ' + total + 'たい）');
+  }
+
+  function openDex(opts) {
+    opts = opts || {};
+    dexLimit  = opts.limit || null;
+    dexBackTo = opts.back || 'home';
+    dexSide   = opts.side || 'ally';
+    dexAttr = 'all'; dexRar = 'all';
+    recordSeen();
+    buildDex();
+    show('screen-dex');
+    requestAnimationFrame(buildDex);
+  }
+
   /* =================================================
      ガチャ
      ================================================= */
@@ -1433,6 +1658,7 @@
 
   function showResult() {
     resultShown = true;
+    recordSeen();                 // まけても「でてきた てき」は ずかんに のこす
     const win = Game.result === 'win';
     const t = $('#result-title');
     t.textContent = win ? 'かった！' : 'まけた…';
@@ -1455,6 +1681,7 @@
         ? '　／　Gコイン +' + r.coins + '　けいけんち +' + r.exp
         : '　／　けいけんち +' + r.exp + '（Gコインは しょかいだけ）';
       markCleared(Game.stage.no);
+      recordSeen();
       const got = giveTowerReward();          // ★あき坊の塔を ぜんぶ のぼった ごほうび
       if (got) {
         $('#result-sub').textContent =
@@ -1572,6 +1799,21 @@
     $('#btn-gacha-pull').addEventListener('click', pullGacha);
     $('#btn-home-back').addEventListener('click', () => { buildSaveSlots(); show('screen-save'); });
 
+    /* ずかん */
+    $('#btn-home-dex').addEventListener('click', () => openDex({ back: 'home' }));
+    $('#btn-dex-back').addEventListener('click', () => {
+      if (dexBackTo === 'battle') {
+        show('screen-battle');
+        Game.paused = false;
+        lastTime = performance.now();
+      } else {
+        openHome();
+      }
+    });
+    Array.prototype.forEach.call($('#dex-side').children, (b) => {
+      b.addEventListener('click', () => { dexSide = b.dataset.side; dexAttr = 'all'; dexRar = 'all'; buildDex(); });
+    });
+
     /* ステージ せんたく */
     $('#btn-stage-back').addEventListener('click', openChapters);
 
@@ -1587,10 +1829,20 @@
     });
     $('#btn-quit-yes').addEventListener('click', () => {
       $('#confirm-quit').classList.add('hidden');
+      recordSeen();
       Game.paused = false;
       Game.active = false;
       buildStageList();
       show('screen-stage');
+    });
+    /* メニュー →「キャラ じょうほう」：この ステージの みかたと てき だけの ずかん */
+    $('#btn-menu-dex').addEventListener('click', () => {
+      $('#confirm-quit').classList.add('hidden');
+      const es = [];
+      if (Game.stage && Game.stage.waves) {
+        Game.stage.waves.forEach(w => { if (w.id && es.indexOf(w.id) < 0) es.push(w.id); });
+      }
+      openDex({ back: 'battle', limit: { ally: PARTY.slice(), enemy: es } });
     });
     $('#btn-wallet').addEventListener('click', () => Game.upgradeWallet());
     $('#btn-chudon').addEventListener('click', () => Game.fireChudon());

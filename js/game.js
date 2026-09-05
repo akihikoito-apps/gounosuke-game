@@ -34,6 +34,7 @@ const Game = {
   bgImages: null,         // はいけいの しゃしん（なまえごと）
   levels: {},             // みかたキャラの レベル（main.js が セットする）
   evolved: {},            // しんかずみの キャラ（main.js が セットする）
+  seen: {},               // この せんとうで でてきた てき（ずかん に つかう）
   canvas: null, ctx: null,
   view: { w: 0, h: 0, scale: 1, groundY: 0 },
   hudHeight: 96,
@@ -159,6 +160,10 @@ const Game = {
   makeUnit(def, side) {
     /* コースが てきを つよく する ばあい（あき坊の塔 など）。
        ENEMIES の もとの データは さわらず、この たいだけの コピーを つくります */
+    if (side === 'enemy') {
+      if (!this.seen) this.seen = {};
+      this.seen[def.id] = true;          // ずかんに「でてきた」と きろく
+    }
     if (side === 'enemy' && this.stage && this.stage.enemyBuff && this.stage.enemyBuff[def.id]) {
       def = Object.assign({}, def, this.stage.enemyBuff[def.id]);
     }

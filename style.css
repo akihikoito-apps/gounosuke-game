@@ -165,6 +165,7 @@ html, body {
 .home-btn.b1 { background:linear-gradient(180deg,#7fb8dd,#5a9ecb); }
 .home-btn.b2 { background:linear-gradient(180deg,#a8d8ef,#86c5e6); }
 .home-btn.b3 { background:linear-gradient(180deg,#c9e6f5,#a9d6ee); }
+.home-btn.b4 { background:linear-gradient(180deg,#dcf0fa,#bfe2f4); }
 .home-btn.soon .hb-label::after { content:' （じゅんびちゅう）'; font-size:.72em; font-weight:normal; opacity:.75; }
 
 .home-speech { grid-column:2; grid-row:2; display:flex; align-items:flex-start; justify-content:center; }
@@ -806,3 +807,108 @@ body.dragging-slot #party-slots { touch-action:none; }
   border:2px dashed rgba(255,255,255,.22);
   border-radius:calc(12px * var(--ui));
 }
+
+
+/* =======================================================
+   ずかん
+   ======================================================= */
+#screen-dex {
+  background:linear-gradient(180deg,#1e3c5a,#0d1b2a);
+  justify-content:flex-start; overflow-y:auto;
+  padding:calc(10px * var(--ui) + var(--safe-top)) calc(12px * var(--ui)) calc(20px * var(--ui));
+  gap:calc(8px * var(--ui));
+}
+.dex-tabs {
+  width:min(calc(720px * var(--ui)), 96%);
+  display:flex; gap:calc(6px * var(--ui));
+}
+.dex-tabs.wrap { flex-wrap:wrap; }
+.dex-tab {
+  flex:0 0 auto;
+  padding:calc(6px * var(--ui)) calc(12px * var(--ui));
+  border-radius:calc(999px);
+  border:2px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.08); color:#cfe8ff;
+  font-family:inherit; font-size:calc(12.5px * var(--ui)); font-weight:bold;
+  cursor:pointer; white-space:nowrap;
+}
+.dex-tab.on { background:#4fc3f7; border-color:#81d4fa; color:#06283d; }
+.dex-filter-label {
+  width:min(calc(720px * var(--ui)), 96%);
+  margin:0; font-size:calc(11px * var(--ui)); color:#90a4ae;
+}
+#dex-list {
+  width:min(calc(720px * var(--ui)), 96%);
+  display:flex; flex-direction:column; gap:calc(9px * var(--ui));
+}
+.dex-card {
+  display:flex; gap:calc(10px * var(--ui));
+  padding:calc(10px * var(--ui));
+  border-radius:calc(14px * var(--ui));
+  background:linear-gradient(180deg,#ffffff,#e8f1fa);
+  color:#123; box-shadow:0 calc(3px * var(--ui)) 0 rgba(0,0,0,.25);
+}
+.dex-card canvas {
+  flex:0 0 auto;
+  width:calc(88px * var(--ui)); height:calc(88px * var(--ui));
+  background:linear-gradient(180deg,#dff0ff,#b8ddf5);
+  border-radius:calc(10px * var(--ui));
+}
+.dex-body { flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:calc(3px * var(--ui)); }
+.dex-name { font-size:calc(15px * var(--ui)); font-weight:bold; }
+.dex-badges { display:flex; flex-wrap:wrap; gap:calc(4px * var(--ui)); }
+.dex-stats {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(calc(88px * var(--ui)), 1fr));
+  gap:calc(2px * var(--ui)) calc(8px * var(--ui));
+  font-size:calc(11.5px * var(--ui)); color:#37474f;
+  font-variant-numeric:tabular-nums;
+}
+.dex-stats b { color:#0d3050; }
+.dex-abil {
+  margin-top:calc(3px * var(--ui));
+  padding:calc(6px * var(--ui)) calc(8px * var(--ui));
+  border-radius:calc(8px * var(--ui));
+  background:rgba(79,195,247,.16);
+  border-left:calc(4px * var(--ui)) solid #4fc3f7;
+  font-size:calc(11.5px * var(--ui)); color:#123; line-height:1.45;
+}
+.dex-abil i { display:block; font-style:normal; }
+.dex-locked { opacity:.55; }
+
+/* レア度と ぞくせいの ちいさな バッジ */
+.tag {
+  display:inline-block; padding:0 calc(6px * var(--ui));
+  border-radius:calc(999px);
+  font-size:calc(10.5px * var(--ui)); font-weight:bold; line-height:1.7;
+  white-space:nowrap;
+}
+.tag.attr  { color:#1b2740; }
+.tag.rar   { color:#3b2a00; }
+.tag.boss  { background:#ef5350; color:#fff; }
+
+/* せんとうがめんの キャラボタンの すみに つける しるし */
+.unit-btn .u-mark {
+  position:absolute; top:1px; right:2px;
+  display:flex; gap:1px; align-items:center;
+  pointer-events:none;
+}
+.u-dot {
+  width:calc(9px * var(--ui)); height:calc(9px * var(--ui));
+  border-radius:50%; border:1.5px solid rgba(0,0,0,.35);
+}
+.u-rar {
+  font-size:calc(8.5px * var(--ui)); font-weight:bold;
+  color:#5d4037; letter-spacing:-1px;
+}
+/* へんせいの わく */
+.pslot .ps-mark { position:absolute; top:2px; right:3px; display:flex; gap:1px; align-items:center; }
+.pslot .ps-cost {
+  position:absolute; bottom:2px; right:4px;
+  font-size:calc(9.5px * var(--ui)); font-weight:bold; color:#00695c;
+}
+.pool-item .pi-mark { position:absolute; top:2px; right:3px; display:flex; gap:1px; align-items:center; }
+.pool-item .pi-cost { font-size:calc(10px * var(--ui)); font-weight:bold; color:#00695c; }
+
+/* メニューの ボタンを たてに */
+.modal-btns.col { flex-direction:column; }
+.modal-btn.info { background:linear-gradient(180deg,#4fc3f7,#0288d1); box-shadow:0 3px 0 #01579b; color:#fff; }

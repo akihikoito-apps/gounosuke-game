@@ -55,6 +55,9 @@
         <button class="home-btn b3" id="btn-home-party">
           <span class="hb-label">キャラクター へんせい</span><span class="hb-ico">😊</span>
         </button>
+        <button class="home-btn b4" id="btn-home-dex">
+          <span class="hb-label">ずかん</span><span class="hb-ico">📖</span>
+        </button>
       </div>
 
       <div class="home-speech">
@@ -140,6 +143,30 @@
     <div id="party-pool"></div>
   </section>
 
+  <!-- ============ ずかん ============ -->
+  <section id="screen-dex" class="screen">
+    <div class="panel-head">
+      <h2 class="sub-title">ずかん</h2>
+      <button class="mini-btn" id="btn-dex-back">もどる</button>
+    </div>
+
+    <div class="dex-tabs" id="dex-side">
+      <button class="dex-tab on"  data-side="ally">みかた</button>
+      <button class="dex-tab"     data-side="enemy">てき</button>
+    </div>
+
+    <p class="dex-filter-label">ぞくせい</p>
+    <div class="dex-tabs wrap" id="dex-attr"></div>
+
+    <div id="dex-rarity-wrap">
+      <p class="dex-filter-label">レアど</p>
+      <div class="dex-tabs wrap" id="dex-rarity"></div>
+    </div>
+
+    <p class="panel-hint" id="dex-count">－</p>
+    <div id="dex-list"></div>
+  </section>
+
   <!-- ============ パワーアップ ============ -->
   <section id="screen-power" class="screen">
     <div class="panel-head">
@@ -189,7 +216,7 @@
         <div class="castle-label">てきのしろ</div>
         <div class="hp-bar"><div class="hp-fill" id="enemy-hp-fill"></div></div>
       </div>
-      <button id="btn-retreat" class="mini-btn">やめる</button>
+      <button id="btn-retreat" class="mini-btn">メニュー</button>
       <div class="castle-hp player">
         <div class="castle-label">じぶんのしろ</div>
         <div class="hp-bar"><div class="hp-fill" id="player-hp-fill"></div></div>
@@ -199,13 +226,14 @@
       </button>
     </div>
 
-    <!-- 「やめる」の かくにん -->
+    <!-- せんとうちゅうの メニュー -->
     <div id="confirm-quit" class="modal hidden">
       <div class="modal-box">
-        <p class="modal-text">たたかいを やめますか？</p>
-        <div class="modal-btns">
-          <button id="btn-quit-no"  class="modal-btn keep">せんとうを つづける</button>
-          <button id="btn-quit-yes" class="modal-btn quit">ステージせんたくに もどる</button>
+        <p class="modal-text">メニュー</p>
+        <div class="modal-btns col">
+          <button id="btn-menu-dex" class="modal-btn info">キャラ じょうほう</button>
+          <button id="btn-quit-yes" class="modal-btn quit">せんとうを やめる</button>
+          <button id="btn-quit-no"  class="modal-btn keep">せんとうに もどる</button>
         </div>
       </div>
     </div>
