@@ -101,6 +101,21 @@ const UNITS = {
     projectile: 'jelly',         // とばす たまの しゅるい（null なら なぐる）
     /* とくしゅのうりょく：あてた てきの スピードを はんぶんに する */
     slow: { rate: 0.5, duration: 4.0, chance: 1.0 },  // rate 0.5 → はやさ はんぶん / 4びょう / 100%
+
+    /* ------------------------------------------------------------
+       しんか：じつりょく Lv.10 で「ぷりぷりおぷりねこ」に なれます
+
+       ・じゃまする じかん（どんそく）が 2ばい（4びょう → 8びょう）
+       ・たいりょくと こうげきりょくが 1.5ばい
+       ・おおきな くちを あけた すがたに かわります
+       ------------------------------------------------------------ */
+    evolve: {
+      name: 'ぷりぷりおぷりねこ', shortName: 'ぷりぷり',
+      hp: 840,                                        // 560 x 1.5
+      atk: 51,                                        // 34 x 1.5
+      slow: { rate: 0.5, duration: 8.0, chance: 1.0 },// じゃまする じかん 2ばい
+      drawAs: 'puripurio',
+    },
   },
 
   /* タンクン ── よこながの みずいろ せんしゃねこ / かべやく */
@@ -169,10 +184,10 @@ const UNITS = {
     rarity: 'GR',                        // げきレア
     attr: 'fire',
     cost: 1350, recharge: 30.0,
-    hp: 2900,   atk: 435,  range: 118,  speed: 24,
+    hp: 1900,   atk: 500,  range: 118,  speed: 24,
     attackInterval: 2.2,   attackWindup: 0.55,   // おおきく ふりかぶる
     kbCount: 3,
-    scale: 1.1,
+    scale: 1.65,                                 // みための おおきさ 1.5ばい
     attackType: 'area',                          // はんい こうげき
     areaRadius: 46,                              // ばくはつの おおきさ
     projectile: 'fireball',
@@ -296,7 +311,7 @@ const UNITS = {
                    ★35%で あいてを ふきとばす                            */
   tenmusumaru: {
     id: 'tenmusumaru', name: '豪傑天むす丸', shortName: '天むす丸',
-    rarity: 'R',                          // レア
+    rarity: 'GR',                         // げきレア
     attr: 'power',                        // パワー（けものに つよい／まじゅつしに よわい）
     cost: 520,  recharge: 15.0,
     hp: 2100,   atk: 460,  range: 70,   speed: 15,
@@ -317,8 +332,8 @@ const UNITS = {
     id: 'steve', name: 'スティーブ', shortName: 'スティーブ',
     rarity: 'GR',                        // げきレア
     attr: 'fire',
-    cost: 850,  recharge: 28.0,
-    hp: 1300,   atk: 320,  range: 620,   speed: 0,
+    cost: 850,  recharge: 180.0,                 // さいせい 3ぷん
+    hp: 1300,   atk: 960,  range: 1000,  speed: 0,   // てきの しろの すぐ てまえまで とどく
     attackInterval: 3.0,   attackWindup: 1.0,    // ゆみを 1びょうかけて ひきしぼる
     kbCount: 3,
     scale: 1.25,
@@ -2086,8 +2101,8 @@ const STAGES = [
     name: 'ようこうろの さいしんぶ',
     desc: 'すべての げんきょう「廃炉獣メルトギア」。ほのお・まじゅつし・パワーで',
     bg: 'boss',
-    castleHp: 3100,
-    enemyMult: 1.16,
+    castleHp: 2900,
+    enemyMult: 1.10,
     reward: { coins: 2, exp: 1000 },
     waves: [
       { at: 3,   id: 'nejiro',   count: 3, gap: 0.8 },

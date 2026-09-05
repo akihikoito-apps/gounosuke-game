@@ -330,6 +330,126 @@ function drawHiibou(ctx, s) {
 }
 
 
+/* ---- ぷりぷりおぷりねこ：ぷりおぷりねこの しんかけい ----
+   おおきな くちを あけた しろい ねこ。
+   じゃまする じかんが 2ばいに なり、たいりょくと こうげきも 1.5ばい。   */
+function drawPuripurio(ctx, s) {
+  const a = s.atk;
+  const wob = Math.sin(s.t * 6) * 0.06;
+  const rx = 34 * (1 + wob), ry = 30 * (1 - wob);
+  const cy = -ry - 10;
+  /* こうげきの ときは くちが もっと おおきく あく */
+  const open = (a >= 0) ? 1 + a * 0.55 : 1 + Math.sin(s.t * 3) * 0.05;
+
+  ctx.save();
+
+  /* --- しっぽ --- */
+  ctx.strokeStyle = '#cfd3d6'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-rx + 6, cy + 10);
+  ctx.quadraticCurveTo(-rx - 20, cy + Math.sin(s.t * 5) * 6, -rx - 18, cy - 22);
+  ctx.stroke();
+  ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-rx + 6, cy + 10);
+  ctx.quadraticCurveTo(-rx - 20, cy + Math.sin(s.t * 5) * 6, -rx - 18, cy - 22);
+  ctx.stroke();
+
+  /* --- あし（ほそい てがきの せん）--- */
+  ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  const step = Math.sin(s.t * 8) * (s.moving ? 4 : 0);
+  ctx.beginPath();
+  ctx.moveTo(-12, cy + ry - 4);
+  ctx.lineTo(-15 + step, -2); ctx.lineTo(-22 + step, -2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(12, cy + ry - 4);
+  ctx.lineTo(15 - step, -2); ctx.lineTo(22 - step, -2);
+  ctx.stroke();
+
+  /* --- て（りょうわきに ちいさく）--- */
+  ctx.beginPath();
+  ctx.moveTo(-rx + 2, cy + 6);
+  ctx.quadraticCurveTo(-rx - 14, cy + 12, -rx - 12, cy + 22);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(rx - 2, cy + 4);
+  ctx.quadraticCurveTo(rx + 14, cy + 8, rx + 12, cy + 20);
+  ctx.stroke();
+
+  /* --- みみ（とがった ギザギザ）--- */
+  ctx.fillStyle = '#f2f4f5';
+  ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-20, cy - ry + 8);
+  ctx.lineTo(-14, cy - ry - 20);
+  ctx.lineTo(-3, cy - ry + 2);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(6, cy - ry + 2);
+  ctx.lineTo(17, cy - ry - 22);
+  ctx.lineTo(23, cy - ry + 6);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  /* --- かお（まるい しろい かたまり）--- */
+  const g = ctx.createLinearGradient(0, cy - ry, 0, cy + ry);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(0.6, '#eceff0');
+  g.addColorStop(1, '#c9cfd2');
+  ctx.fillStyle = g;
+  ellipse(ctx, 0, cy, rx, ry); ctx.fill();
+  ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3.4;
+  ellipse(ctx, 0, cy, rx, ry); ctx.stroke();
+
+  /* ひかりの はんしゃ */
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ellipse(ctx, -13, cy - 13, 8, 5); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ellipse(ctx, 6, cy - 18, 4, 2.6); ctx.fill();
+
+  /* --- め（ちいさい てん）--- */
+  ctx.fillStyle = '#1b1b1b';
+  ctx.beginPath(); ctx.arc(-7, cy - 6, 2.8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(11, cy - 6, 2.8, 0, Math.PI * 2); ctx.fill();
+
+  /* --- おおきく あいた くち --- */
+  const mw = 22 * open, mh = 18 * open;
+  ctx.fillStyle = '#5d3a34';
+  ctx.beginPath();
+  ctx.moveTo(-mw, cy + 4);
+  ctx.quadraticCurveTo(0, cy + 4 + mh * 1.9, mw, cy + 4);
+  ctx.quadraticCurveTo(0, cy - 2, -mw, cy + 4);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3; ctx.stroke();
+  /* した */
+  ctx.fillStyle = '#c98a86';
+  ctx.beginPath();
+  ctx.ellipse(2, cy + 4 + mh * 1.1, mw * 0.42, mh * 0.42, 0, 0, Math.PI * 2);
+  ctx.fill();
+  /* きば 2ほん */
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-mw * 0.5, cy + 4); ctx.lineTo(-mw * 0.28, cy + 4 + mh * 0.7); ctx.lineTo(-mw * 0.1, cy + 4);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(mw * 0.14, cy + 4); ctx.lineTo(mw * 0.36, cy + 4 + mh * 0.7); ctx.lineTo(mw * 0.54, cy + 4);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  /* --- じゃまの なみ（どんそくに する ちから）--- */
+  if (a >= 0) {
+    ctx.strokeStyle = 'rgba(120,190,255,' + (0.35 + a * 0.45) + ')';
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc(rx + 6, cy + 4, 12 + i * 9 + a * 8, -0.6, 0.6);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+
 /* ---- しゅりへん：せなかに かべを かついだ しゅりけん ----
    ・こうげきの ときは ぐるぐる まわって とびかかる
    ・うしろの きいろい いたが「せなかの かべ」                    */
@@ -4071,6 +4191,7 @@ function drawOkashiman(ctx, s) {
    ================================================================== */
 const DRAWERS = {
   purio: drawPurio,
+  puripurio: drawPuripurio,
   tankun: drawTankun,
   tankundx: drawTankundx,
   teruteru: drawTeruteru,
