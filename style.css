@@ -112,10 +112,19 @@ html, body {
   font-size:calc(22px * var(--ui)); font-weight:bold; color:#1976d2;
   min-width:calc(2.4em); line-height:1;
 }
-.slot-info { flex:1; }
-.slot-info b { font-size:calc(18px * var(--ui)); display:block; }
-.slot-info small { font-size:calc(12px * var(--ui)); color:#455a64; }
-.slot-stars { font-size:calc(15px * var(--ui)); letter-spacing:1px; }
+/* min-width:0 が ないと、よこに ながい ものが あった とき
+   なまえの らんが つぶれて たてがきに なって しまいます        */
+.slot-info { flex:1 1 auto; min-width:0; }
+.slot-info b {
+  font-size:calc(18px * var(--ui)); display:block;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.slot-info small { font-size:calc(12px * var(--ui)); color:#455a64; white-space:nowrap; }
+.slot-stars {
+  flex:0 0 auto; white-space:nowrap;
+  font-size:calc(16px * var(--ui)); color:#5d4037;
+}
+.slot-stars b { font-size:calc(17px * var(--ui)); font-weight:bold; margin-left:calc(2px * var(--ui)); }
 .slot-erase {
   flex:0 0 auto; width:calc(30px * var(--ui)); height:calc(30px * var(--ui));
   border-radius:50%; border:none; background:#ef9a9a; color:#7f0000;

@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '3.3';
+  const GAME_VERSION = '3.4';
 
 
   /* =================================================
@@ -144,7 +144,16 @@
     storeSave();
   }
 
-  function clearedCount(s) { return s ? Object.keys(s.cleared || {}).length : 0; }
+  /* ふつうの ステージを いくつ クリアしたか（あき坊の塔は かぞえない）*/
+  function clearedCount(s) {
+    if (!s || !s.cleared) return 0;
+    return STAGES.filter(st => s.cleared[st.no]).length;
+  }
+  /* あき坊の塔を なんかい のぼったか */
+  function towerCount(s) {
+    if (!s || !s.cleared || typeof TOWER === 'undefined' || !TOWER.courses) return 0;
+    return TOWER.courses.filter(c => s.cleared[c.no]).length;
+  }
 
   function buildSaveSlots() {
     const box = $('#save-slots');
@@ -153,12 +162,17 @@
       const el = document.createElement('button');
       el.className = 'save-slot' + (s ? '' : ' empty');
       if (s) {
-        const n = clearedCount(s);
-        const stars = '⭐'.repeat(Math.min(n, STAGES.length));
+        const n  = clearedCount(s);
+        const tw = towerCount(s);
+        /* ★を ならべると よこに はみだして なまえが つぶれる ので、
+           「⭐ ×23」の かたちで みじかく だします                    */
+        const stars = n > 0 ? ('⭐<b>×' + n + '</b>') : '';
         el.innerHTML =
           '<span class="slot-no">' + (i + 1) + '</span>' +
           '<span class="slot-info"><b>' + s.name + '</b>' +
-          '<small>ステージ ' + n + ' / ' + STAGES.length + ' クリア</small></span>' +
+          '<small>ステージ ' + n + ' / ' + STAGES.length + ' クリア' +
+            (tw > 0 ? '　🗼 ' + tw + ' / ' + TOWER.floors + ' かい' : '') +
+          '</small></span>' +
           '<span class="slot-stars">' + stars + '</span>';
         const del = document.createElement('span');
         del.className = 'slot-erase';
