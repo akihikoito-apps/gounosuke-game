@@ -567,6 +567,12 @@ const Game = {
       if (bonus && bonus.attrs && attrList(v.def.attr).some(x => bonus.attrs.indexOf(x) >= 0)) {
         mult *= (bonus.mult || 1.5);
       }
+      // ★きめられた ぞくせいの こうげきを おさえる（たたみん）
+      //   ふつうより ちいさく なる ときだけ てきよう します
+      const rs = v.def.resist;
+      if (rs && rs.attrs && attrList(attr).some(x => rs.attrs.indexOf(x) >= 0)) {
+        mult = Math.min(mult, rs.mult);
+      }
       let dmg = Math.round(atk * mult);
       let isCrit = false;
       if (crit && Math.random() < ((crit.chance === undefined) ? 1 : crit.chance)) {

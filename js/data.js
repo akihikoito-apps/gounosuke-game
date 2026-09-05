@@ -193,6 +193,59 @@ const UNITS = {
     projectile: 'fireball',
   },
 
+  /* A（エーくん）── まほうの ぼうしを かぶった きいろい「A」。
+                    ほしの つえで まほうを うつ。ノーマルで はじめての まじゅつし。
+                    ★10%で あいての うごきを 2びょう とめる                     */
+  akun: {
+    id: 'akun', name: 'A（エーくん）', shortName: 'エーくん',
+    rarity: 'N',                          // ノーマル
+    attr: 'magic',                        // まじゅつし
+    cost: 160,  recharge: 4.5,
+    hp: 400,    atk: 95,   range: 165,  speed: 26,
+    attackInterval: 1.8,   attackWindup: 0.35,
+    kbCount: 3,
+    scale: 1.0,
+    attackType: 'single',
+    projectile: 'star',
+    /* とくしゅのうりょく：10%で あいてを 2びょう とめる */
+    stun: { duration: 2.0, chance: 0.10 },
+  },
+
+  /* たたみん ── たった たたみ。どっしり かまえて みんなを まもる。
+                ★みずの こうげきを 20%に おさえる（ふつうは 60%）      */
+  tatamin: {
+    id: 'tatamin', name: 'たたみん', shortName: 'たたみん',
+    rarity: 'N',                          // ノーマル
+    attr: 'grass',                        // くさ
+    cost: 200,  recharge: 6.0,
+    hp: 1300,   atk: 45,   range: 62,   speed: 16,
+    attackInterval: 2.0,   attackWindup: 0.35,
+    kbCount: 4,
+    scale: 1.0,
+    attackType: 'single',
+    projectile: null,
+    /* とくしゅのうりょく：みずの こうげきを 20%まで おさえる
+       （くさは もともと みずに つよくて 60%。それを さらに 20%に）  */
+    resist: { attrs: ['water'], mult: 0.2 },
+  },
+
+  /* ドンドコ力士 ── はらたいこの りきし。バチで おなかを たたくと、
+                   おとの しょうげきはが まわりの てき ぜんぶに とどく。
+                   さいせいは 3ぷん。1せんに 1かいの きりふだ           */
+  dondoko: {
+    id: 'dondoko', name: 'ドンドコ力士', shortName: 'ドンドコ',
+    rarity: 'SR',                         // スーパーレア
+    attr: 'power',                        // パワー
+    cost: 1100, recharge: 180.0,          // さいせい やく3ぷん
+    hp: 3800,   atk: 800,  range: 120,  speed: 12,
+    attackInterval: 3.4,   attackWindup: 0.80,
+    kbCount: 6,
+    scale: 1.3,
+    attackType: 'area',                   // じぶんの まわり ぜんぶ
+    areaRadius: 120,                      // とても ひろい
+    projectile: null,
+  },
+
   /* しゅりへん ── せなかに かべを かついだ しゅりけん。
                  じぶんから ものすごい はやさで とびかかって いく。
                  4びょうに 1かい、おおきく まわって はんいこうげき。
@@ -353,7 +406,7 @@ const DEFAULT_PARTY = START_CHARS.slice();
 /* ガチャに でてくる キャラ ぜんぶ */
 const ALL_CHARS = ['tankun', 'purio', 'teruteru',
                    'tokinotabibito', 'zunio', 'kabekun', 'futabappo', 'shadowyamaneko', 'tenmusumaru',
-                   'hiibou', 'shurihen'];
+                   'hiibou', 'shurihen', 'akun', 'tatamin', 'dondoko'];
 let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく メンバー（へんせいで かわる）
 
 
