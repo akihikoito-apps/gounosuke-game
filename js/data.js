@@ -2915,7 +2915,7 @@ const STAGES = [
     castleHp: 6000,
     enemyMult: 1.00,
     moneyMult: 2.4,
-    reward: { coins: 2, exp: 2400 },
+    reward: { coins: 3, exp: 2400 },
     waves: [
       { at: 3,  id: 'togehaya', count: 3, gap: 0.9 },
       { at: 18, id: 'tanupon',  count: 2, gap: 1.1 },
@@ -2936,7 +2936,7 @@ const STAGES = [
     castleHp: 5300,
     enemyMult: 1.00,
     moneyMult: 2.6,
-    reward: { coins: 2, exp: 2500 },
+    reward: { coins: 3, exp: 2500 },
     waves: [
       { at: 3,  id: 'tanupon',  count: 2, gap: 1.0 },
       { at: 20, id: 'kokejika', count: 1 },
@@ -2957,7 +2957,7 @@ const STAGES = [
     castleHp: 6200,
     enemyMult: 1.00,
     moneyMult: 2.4,
-    reward: { coins: 2, exp: 2600 },
+    reward: { coins: 3, exp: 2600 },
     waves: [
       { at: 3,  id: 'ironkokko', count: 2, gap: 1.0 },
       { at: 20, id: 'pressuke',  count: 1 },
@@ -2978,7 +2978,7 @@ const STAGES = [
     castleHp: 6400,
     enemyMult: 1.00,
     moneyMult: 2.2,
-    reward: { coins: 2, exp: 2700 },
+    reward: { coins: 3, exp: 2700 },
     waves: [
       { at: 3,  id: 'umihebi',    count: 2, gap: 1.0 },
       { at: 20, id: 'octocannon', count: 1 },
@@ -3043,7 +3043,7 @@ const STAGES = [
     castleHp: 8500,
     enemyMult: 1.00,
     moneyMult: 2.6,
-    reward: { coins: 5, exp: 5000 },
+    reward: { coins: 3, exp: 5000 },
     waves: [
       { at: 3,  id: 'kongaragan', count: 2, gap: 1.0 },
       { at: 18, id: 'chaosspell', count: 1 },
@@ -3107,14 +3107,26 @@ function starRate(kind, value) {
    x / y は ちずの ひだりうえを 0、みぎしたを 1 とした わりあいです。
    なまえと ばしょを かえたい ときは ここだけ いじれば OK。
    -------------------------------------------------------------------------- */
+/* しょうの ばしょ（ちずの よこ・たての わりあい 0〜1）
+
+   ★みぎうえは「あき坊の塔」ボタンが ある ので、そこには おかない こと。
+   ★じぐざぐに ならべて、コースの ないようと じめんが あう ように して います。
+       うえの れつ … はがね（まち）・こうじょう・まどうしの さと
+       したの れつ … のはら・けものみち（もり）・きんかい（うみ）・闇の頂  */
+/* ボスラッシュ（だい7しょう）を ぜんぶ クリアした ときの ごほうび */
+const BOSSRUSH = {
+  chapter: 7,
+  clearBonus: 20,      // ★7-1〜7-7 ぜんぶ クリアで Gコイン 20まい（1どだけ）
+};
+
 const CHAPTERS = {
-  1: { name: 'はじまりの のはら',     short: 'のはら',   x: 0.08, y: 0.56, icon: '🌱' },
-  2: { name: 'はがねの まち',         short: 'はがね',   x: 0.21, y: 0.33, icon: '⚙️' },
-  3: { name: 'けものみち',            short: 'けもの',   x: 0.34, y: 0.75, icon: '🐾' },
-  4: { name: '廃れたメカニック工場',   short: 'こうじょう', x: 0.48, y: 0.38, icon: '🏭' },
-  5: { name: '賑わう近海',            short: 'きんかい', x: 0.62, y: 0.74, icon: '🌊' },
-  6: { name: '魔導士の里',            short: 'まどうし', x: 0.76, y: 0.44, icon: '🔮' },
-  7: { name: '闇の頂',                short: 'やみ',     x: 0.91, y: 0.20, icon: '🌑' },
+  1: { name: 'はじまりの のはら',     short: 'のはら',   x: 0.07, y: 0.58, icon: '🌱' },
+  2: { name: 'はがねの まち',         short: 'はがね',   x: 0.20, y: 0.34, icon: '⚙️' },
+  3: { name: 'けものみち',            short: 'けもの',   x: 0.33, y: 0.76, icon: '🐾' },
+  4: { name: '廃れたメカニック工場',   short: 'こうじょう', x: 0.46, y: 0.40, icon: '🏭' },
+  5: { name: '賑わう近海',            short: 'きんかい', x: 0.60, y: 0.82, icon: '🌊' },
+  6: { name: '魔導士の里',            short: 'まどうし', x: 0.74, y: 0.44, icon: '🔮' },
+  7: { name: '闇の頂',                short: 'やみ',     x: 0.89, y: 0.72, icon: '🌑' },
 };
 
 

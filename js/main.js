@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '4.7';
+  const GAME_VERSION = '4.8';
 
 
   /* =================================================
@@ -525,10 +525,156 @@
       }
     }
 
+    /* はがねの まち：だい2しょうの まわりを はがねの まちに する */
+    const stl = chapterInfo(2);
+    if (typeof stl.x === 'number') {
+      const sx = stl.x * W, sy = stl.y * H;
+      ctx.fillStyle = '#9aa4ad';
+      ctx.beginPath(); ctx.ellipse(sx, sy + H * 0.04, W * 0.13, H * 0.13, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#aeb8c0';
+      ctx.beginPath(); ctx.ellipse(sx - W * 0.01, sy + H * 0.01, W * 0.09, H * 0.09, 0, 0, Math.PI * 2); ctx.fill();
+      /* ぎんいろの ビル */
+      for (let i = 0; i < 4; i++) {
+        const bw = W * 0.022, bh = H * (0.09 + (i % 2) * 0.05);
+        const bx = sx - W * 0.055 + i * W * 0.032, by = sy + H * 0.03;
+        ctx.fillStyle = ['#7d8791', '#8d97a1', '#6e7883', '#98a2ab'][i];
+        ctx.fillRect(bx, by - bh, bw, bh);
+        ctx.fillStyle = 'rgba(180,225,255,.5)';
+        for (let k = 0; k < 4; k++) ctx.fillRect(bx + bw * 0.22, by - bh + bh * (0.12 + k * 0.21), bw * 0.56, bh * 0.10);
+      }
+      /* おおきな ハグルマ */
+      ctx.fillStyle = 'rgba(110,120,130,.9)';
+      const gx = sx + W * 0.052, gy = sy - H * 0.02, gr = H * 0.028;
+      ctx.beginPath(); ctx.arc(gx, gy, gr, 0, Math.PI * 2); ctx.fill();
+      for (let k = 0; k < 8; k++) {
+        const an = (k / 8) * Math.PI * 2;
+        ctx.fillRect(gx + Math.cos(an) * gr - gr * 0.24, gy + Math.sin(an) * gr - gr * 0.24, gr * 0.48, gr * 0.48);
+      }
+      ctx.fillStyle = '#aeb8c0';
+      ctx.beginPath(); ctx.arc(gx, gy, gr * 0.36, 0, Math.PI * 2); ctx.fill();
+    }
+
+    /* 賑わう近海：だい5しょうの まわりを うみに する */
+    const sea = chapterInfo(5);
+    if (typeof sea.x === 'number') {
+      const ox = sea.x * W, oy = sea.y * H;
+      const og = ctx.createRadialGradient(ox, oy, H * 0.02, ox, oy, W * 0.20);
+      og.addColorStop(0, '#1e88e5'); og.addColorStop(0.65, '#42a5f5'); og.addColorStop(1, '#81d4fa');
+      ctx.fillStyle = og;
+      ctx.beginPath(); ctx.ellipse(ox, oy + H * 0.05, W * 0.20, H * 0.19, 0, 0, Math.PI * 2); ctx.fill();
+      /* すなはま */
+      ctx.strokeStyle = 'rgba(255,236,179,.85)';
+      ctx.lineWidth = Math.max(4, H * 0.02);
+      ctx.beginPath(); ctx.ellipse(ox, oy + H * 0.05, W * 0.20, H * 0.19, 0, 0, Math.PI * 2); ctx.stroke();
+      /* なみ */
+      ctx.strokeStyle = 'rgba(255,255,255,.75)';
+      ctx.lineWidth = Math.max(2, H * 0.008); ctx.lineCap = 'round';
+      for (let i = 0; i < 5; i++) {
+        const wy = oy - H * 0.04 + i * H * 0.045;
+        const ww = W * (0.11 - Math.abs(i - 2) * 0.025);
+        ctx.beginPath();
+        ctx.moveTo(ox - ww, wy);
+        ctx.quadraticCurveTo(ox - ww * 0.5, wy - H * 0.014, ox, wy);
+        ctx.quadraticCurveTo(ox + ww * 0.5, wy + H * 0.014, ox + ww, wy);
+        ctx.stroke();
+      }
+      /* こぶね */
+      const bx2 = ox + W * 0.055, by2 = oy - H * 0.02;
+      ctx.fillStyle = '#8d6e63';
+      ctx.beginPath();
+      ctx.moveTo(bx2 - H * 0.032, by2);
+      ctx.lineTo(bx2 + H * 0.032, by2);
+      ctx.lineTo(bx2 + H * 0.020, by2 + H * 0.020);
+      ctx.lineTo(bx2 - H * 0.020, by2 + H * 0.020);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#5d4037'; ctx.lineWidth = Math.max(2, H * 0.006);
+      ctx.beginPath(); ctx.moveTo(bx2, by2); ctx.lineTo(bx2, by2 - H * 0.05); ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(bx2 + H * 0.004, by2 - H * 0.048);
+      ctx.lineTo(bx2 + H * 0.036, by2 - H * 0.010);
+      ctx.lineTo(bx2 + H * 0.004, by2 - H * 0.010);
+      ctx.closePath(); ctx.fill();
+    }
+
+    /* 魔導士の里：だい6しょうの まわりを まほうの もりに する */
+    const mag = chapterInfo(6);
+    if (typeof mag.x === 'number') {
+      const mx2 = mag.x * W, my2 = mag.y * H;
+      ctx.fillStyle = '#4a2f78';
+      ctx.beginPath(); ctx.ellipse(mx2, my2 + H * 0.04, W * 0.145, H * 0.15, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#5e3d94';
+      ctx.beginPath(); ctx.ellipse(mx2 - W * 0.012, my2 + H * 0.015, W * 0.10, H * 0.10, 0, 0, Math.PI * 2); ctx.fill();
+      /* まほうの とう */
+      const tw = W * 0.030, th = H * 0.17;
+      const tx2 = mx2 - W * 0.012, ty2 = my2 + H * 0.045;
+      ctx.fillStyle = '#3f2a63';
+      ctx.fillRect(tx2 - tw / 2, ty2 - th, tw, th);
+      ctx.fillStyle = 'rgba(179,157,219,.75)';
+      for (let k = 0; k < 3; k++) ctx.fillRect(tx2 - tw * 0.18, ty2 - th + th * (0.20 + k * 0.24), tw * 0.36, th * 0.11);
+      /* とんがり やね */
+      ctx.fillStyle = '#7e57c2';
+      ctx.beginPath();
+      ctx.moveTo(tx2 - tw * 0.85, ty2 - th);
+      ctx.lineTo(tx2, ty2 - th - H * 0.055);
+      ctx.lineTo(tx2 + tw * 0.85, ty2 - th);
+      ctx.closePath(); ctx.fill();
+      /* うかぶ ルーン */
+      ctx.fillStyle = 'rgba(206,147,216,.9)';
+      for (const [rx, ry, rr] of [[0.045, -0.055, 0.011], [0.070, -0.010, 0.008], [0.030, 0.020, 0.007], [-0.055, -0.030, 0.009]]) {
+        const cx3 = mx2 + W * rx, cy3 = my2 + H * ry, r3 = H * rr;
+        ctx.beginPath();
+        for (let k = 0; k < 6; k++) {
+          const an = -Math.PI / 2 + (k / 6) * Math.PI * 2;
+          const px = cx3 + Math.cos(an) * r3, py = cy3 + Math.sin(an) * r3;
+          if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath(); ctx.fill();
+      }
+    }
+
+    /* 闇の頂：だい7しょう（ボスラッシュ）は くろい やま */
+    const dark = chapterInfo(7);
+    if (typeof dark.x === 'number') {
+      const dx = dark.x * W, dy = dark.y * H;
+      /* まわりの やみ */
+      const dg = ctx.createRadialGradient(dx, dy, H * 0.02, dx, dy, W * 0.17);
+      dg.addColorStop(0, 'rgba(30,10,40,.92)');
+      dg.addColorStop(0.6, 'rgba(20,6,28,.7)');
+      dg.addColorStop(1, 'rgba(12,4,18,0)');
+      ctx.fillStyle = dg;
+      ctx.beginPath(); ctx.ellipse(dx, dy + H * 0.02, W * 0.17, H * 0.19, 0, 0, Math.PI * 2); ctx.fill();
+      /* とがった くろい やま（3ぼん）*/
+      const peaks = [[-0.045, 0.15, 0.030], [0.010, 0.21, 0.038], [0.055, 0.14, 0.028]];
+      peaks.forEach(([px, ph, pw]) => {
+        const bxx = dx + W * px, byy = dy + H * 0.075;
+        ctx.fillStyle = '#150a1e';
+        ctx.beginPath();
+        ctx.moveTo(bxx - W * pw, byy);
+        ctx.lineTo(bxx, byy - H * ph);
+        ctx.lineTo(bxx + W * pw, byy);
+        ctx.closePath(); ctx.fill();
+        /* あかく ひかる われめ */
+        ctx.strokeStyle = 'rgba(229,57,53,.85)';
+        ctx.lineWidth = Math.max(1.5, H * 0.005);
+        ctx.beginPath();
+        ctx.moveTo(bxx, byy - H * ph * 0.85);
+        ctx.lineTo(bxx - W * pw * 0.25, byy - H * ph * 0.4);
+        ctx.lineTo(bxx + W * pw * 0.12, byy - H * ph * 0.15);
+        ctx.stroke();
+      });
+      /* いただきの あかい ひかり */
+      const rg2 = ctx.createRadialGradient(dx + W * 0.010, dy - H * 0.135, 1, dx + W * 0.010, dy - H * 0.135, H * 0.06);
+      rg2.addColorStop(0, 'rgba(255,82,82,.9)');
+      rg2.addColorStop(1, 'rgba(255,82,82,0)');
+      ctx.fillStyle = rg2;
+      ctx.beginPath(); ctx.arc(dx + W * 0.010, dy - H * 0.135, H * 0.06, 0, Math.PI * 2); ctx.fill();
+    }
+
     /* き */
-    const trees = [[0.06, 0.72], [0.24, 0.84], [0.55, 0.8], [0.38, 0.52],
-                   /* けものみちの まわりは きが みっしゅう */
-                   [0.42, 0.66], [0.46, 0.88], [0.57, 0.62], [0.60, 0.90], [0.53, 0.94], [0.38, 0.80], [0.62, 0.72]];
+    const trees = [[0.05, 0.78], [0.13, 0.68], [0.11, 0.88],
+                   /* けものみち（0.33, 0.76）の まわりは きが みっしゅう */
+                   [0.24, 0.70], [0.26, 0.88], [0.38, 0.66], [0.41, 0.88], [0.33, 0.94], [0.20, 0.80], [0.44, 0.76]];
     trees.forEach(([tx, ty]) => {
       const x = W * tx, y = H * ty, r = H * 0.045;
       ctx.fillStyle = '#6d4c2f';
@@ -1081,6 +1227,21 @@
     if (!s || !TOWER.courses.length) return false;
     if (TOWER.courses.length < TOWER.floors) return false;   // まだ ぜんぶ できて いない
     return TOWER.courses.every(c => !!s.cleared[c.no]);
+  }
+
+  /* ボスラッシュ（だい7しょう）を ぜんぶ クリアしたら Gコインを どんと もらえる。
+     1どだけ。s.bossRush に もらった しるしを のこす。                    */
+  function giveBossRushReward() {
+    const s = slot();
+    if (!s || typeof BOSSRUSH === 'undefined') return 0;
+    if (s.bossRush) return 0;                                  // もう もらって いる
+    const list = coursesOf(BOSSRUSH.chapter);
+    if (!list.length) return 0;
+    if (!list.every(st => s.cleared[st.no])) return 0;          // まだ ぜんぶ クリアして いない
+    s.bossRush = true;
+    s.coins = (s.coins || 0) + BOSSRUSH.clearBonus;
+    storeSave();
+    return BOSSRUSH.clearBonus;
   }
 
   function giveTowerReward() {
@@ -1717,6 +1878,11 @@
         : '　／　けいけんち +' + r.exp + '（Gコインは しょかいだけ）';
       markCleared(Game.stage.no);
       recordSeen();
+      const rush = giveBossRushReward();      // ★ボスラッシュ ぜんクリアの ごほうび
+      if (rush) {
+        $('#result-sub').textContent +=
+          '　／　★ボスラッシュ せいは！　Gコイン +' + rush;
+      }
       const got = giveTowerReward();          // ★あき坊の塔を ぜんぶ のぼった ごほうび
       if (got) {
         $('#result-sub').textContent =
