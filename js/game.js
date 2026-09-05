@@ -174,6 +174,8 @@ const Game = {
       nextKb: def.kbCount - 1,   // つぎに ふきとぶ しきいち（のこり）
       slowUntil: -1, slowRate: 1, roll: 0,
       restT: 0, resting: false,     // きゅうけい（ひるね・ゼンマイぎれ）
+      blindUntil: -1, blindRate: 0, // めくらまし（こうげきが はずれる）
+      speedBonus: 0,                // みずもれ などで あがった はやさ
       healT: 0,                     // なかまを かいふく する タイマー
       windupDmg: 0,                 // タメちゅうに うけた ダメージ
       stunUntil: -1,
@@ -352,7 +354,13 @@ const Game = {
       u.state = 'walk';
       let sp = u.def.speed;
       if (u.slowUntil > this.time) sp *= (u.slowRate || 0.5);
-      u.x += sp * u.forward * dt;
+      if (u.def.stationary) { u.state = 'attack'; return; }   // その ばから うごかない
+      if (u.def.leak) {
+        u.speedBonus = Math.min(u.def.leak.speedMax || 60, u.speedBonus + u.def.leak.speedGain * dt);
+        u.hp -= u.def.leak.hpLoss * dt;
+        if (u.hp <= 0) { u.hp = 0; this.killUnit(u); return; }
+      }
+      u.x += (sp + u.speedBonus) * u.forward * dt;
       u.x = Math.max(0, Math.min(CONFIG.fieldLength, u.x));
       if (u.def.rolls) u.roll += (sp * dt / 25) * -u.forward;   // コロコロ ころがる
     }
@@ -361,6 +369,22 @@ const Game = {
   /* ---- こうげき あいてを さがす ---- */
   findTarget(u) {
     const range = u.def.range;
+
+    /* --- そらを とぶ あいて（カモメェル）は かべを こえて
+           いちばん おくに いる あいてを ねらう --- */
+    if (u.def.flying) {
+      let far = null, farDepth = -Infinity;
+      for (const o of this.units) {
+        if (o.dead || o.side === u.side) continue;
+        const depth = o.x * u.forward;          // すすむ さきほど おおきい
+        if (depth > farDepth) { far = o; farDepth = depth; }
+      }
+      if (far && Math.abs(far.x - u.x) <= range) return far;
+      const cx = (u.side === 'ally') ? 0 : CONFIG.fieldLength;
+      if (Math.abs(cx - u.x) <= range) return { castle: true, x: cx };
+      return null;                              // かべに とまらず すすみつづける
+    }
+
     let best = null, bestDist = Infinity;
     for (const o of this.units) {
       if (o.dead || o.side === u.side) continue;
@@ -408,6 +432,7 @@ const Game = {
         slow: u.def.slow || null,
         kbChance: u.def.knockbackChance || 0,
         stun: u.def.stun || null,
+        blind: u.def.blind || null,
         crit: u.def.crit || null,
         age: 0, life: 3,
       });
@@ -419,6 +444,12 @@ const Game = {
 
   /* ---- あたった ときの しょり ---- */
   applyHit(src, target, hx, hy) {
+    // めくらまし ちゅうは こうげきが はずれる ことが ある
+    if (src && src.blindUntil > this.time && Math.random() < (src.blindRate || 0)) {
+      this.addEffect({ type: 'dmg', x: src.x, y: this.groundWorldY() - 90 - (src.lane || 0),
+                       text: 'はずれ！', color: '#90caf9', life: 0.7 });
+      return;
+    }
     const isArea = src.def ? src.def.attackType === 'area' : src.area;
     const atk    = (src.atk !== undefined && src.atk !== null) ? src.atk : (src.def ? src.def.atk : 0);
     const attr   = src.def ? src.def.attr : src.attr;
@@ -427,6 +458,7 @@ const Game = {
     const slow   = src.def ? (src.def.slow || null) : (src.slow || null);
     const kbCh   = src.def ? (src.def.knockbackChance || 0) : (src.kbChance || 0);
     const stun   = src.def ? (src.def.stun || null) : (src.stun || null);
+    const blind  = src.def ? (src.def.blind || null) : (src.blind || null);
     const crit   = src.def ? (src.def.crit || null) : (src.crit || null);
 
     if (target && target.castle) {
@@ -470,6 +502,11 @@ const Game = {
             this.addEffect({ type: 'slowMark', x: v.x, y: this.groundWorldY() - 70, life: 0.9 });
           }
         }
+      }
+      if (blind && !v.dead && Math.random() < ((blind.chance === undefined) ? 1 : blind.chance)) {
+        v.blindUntil = this.time + blind.duration;
+        v.blindRate = blind.missRate || 0.3;
+        this.addEffect({ type: 'slowMark', x: v.x, y: this.groundWorldY() - 70, life: 0.8 });
       }
       const stunOkAttr = stun && (!stun.attrs || stun.attrs.indexOf(v.def.attr) >= 0);
       if (stunOkAttr && !v.dead && Math.random() < ((stun.chance === undefined) ? 1 : stun.chance)) {
@@ -538,8 +575,17 @@ const Game = {
     }
   },
 
+  /* たいりょくが 0 に なった ときの しょり（みずもれ など）*/
+  killUnit(u) {
+    if (u.dead) return;
+    u.dead = true;
+    this.addEffect({ type: 'boom', x: u.x, y: this.groundWorldY() - 35,
+                     radius: 34 * (u.def.scale || 1), color: '#eceff1', life: 0.4 });
+  },
+
   knockback(u, dist) {
     if (u.dead) return;
+    if (u.def.stationary) return;   // ブロックの うえから おちない
     u.state = 'kb';
     u.kbT = 0;
     u.kbFrom = u.x;
@@ -917,6 +963,7 @@ const Game = {
 
     const sc = s * (u.def.scale || 1) * (u.def.isBoss ? CONFIG.bossScale : CONFIG.charScale);
     let yoff = u.lane * 0.7 * s;
+    if (u.def.flying) yoff -= 48 * s;      // そらを とんで いる
     if (u.state === 'kb') {
       const k = Math.min(1, u.kbT / CONFIG.knockbackTime);
       yoff -= Math.sin(k * Math.PI) * 26 * s;
@@ -951,6 +998,8 @@ const Game = {
         atk: u.windup >= 0 ? Math.min(1, u.windup / u.def.attackWindup) : -1,
         hpRatio: u.hp / u.maxHp,
         roll: u.roll || 0,
+        // うった ちょくご（クールタイムの さいしょ 35%）は「バタバタ」の あいだ
+        fired: (u.atkCd > (u.def.attackInterval || 1) * 0.65),
       };
       if (u.flash > 0) {
         ctx.save();

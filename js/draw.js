@@ -957,6 +957,474 @@ function drawMokomadoushi(ctx, s) {
 }
 
 
+/* ---- バケッチン：みずを なみなみ もった バケツの おばけ ---- */
+function drawBakecchin(ctx, s) {
+  const hop = Math.abs(Math.sin(s.t * 7)) * (s.moving ? 7 : 1);
+  const splash = s.atk >= 0 ? s.atk : 0;
+  ctx.save();
+  ctx.translate(0, -hop);
+
+  // とって
+  ctx.strokeStyle = '#9e9e9e'; ctx.lineWidth = 3.4;
+  ctx.beginPath(); ctx.arc(0, -52, 20, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+
+  // バケツ（ブリキ）
+  const g = ctx.createLinearGradient(-24, 0, 24, 0);
+  g.addColorStop(0, '#9fb4c2'); g.addColorStop(0.4, '#dbe6ee'); g.addColorStop(1, '#8fa5b4');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(-24, -52); ctx.lineTo(24, -52); ctx.lineTo(18, -2); ctx.lineTo(-18, -2);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#607d8b'; ctx.lineWidth = 2.2; ctx.stroke();
+  // よこの おび
+  ctx.beginPath(); ctx.moveTo(-22, -38); ctx.lineTo(22, -38); ctx.stroke();
+
+  // なかの みず
+  ctx.fillStyle = 'rgba(79,195,247,0.9)';
+  ctx.beginPath();
+  ctx.moveTo(-23, -48);
+  for (let x = -23; x <= 23; x += 4) ctx.lineTo(x, -48 + Math.sin(x * 0.35 + s.t * 6) * 2.5);
+  ctx.lineTo(23, -48); ctx.lineTo(18, -4); ctx.lineTo(-18, -4);
+  ctx.closePath(); ctx.fill();
+
+  // おばけの かお（みずに うかぶ）
+  ctx.fillStyle = '#0d3b52';
+  ctx.beginPath(); ctx.ellipse(-6, -32, 3.4, 4.6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(7, -32, 3.4, 4.6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#0d3b52'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(1, -22, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+
+  // こぼれる みず
+  for (let i = 0; i < 3; i++) {
+    const a = s.t * 5 + i * 2;
+    ctx.fillStyle = 'rgba(129,212,250,' + (0.5 + Math.sin(a) * 0.3).toFixed(2) + ')';
+    ctx.beginPath();
+    ctx.ellipse(-26 - i * 6, -20 + Math.sin(a) * 8, 3.5, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ばしゃばしゃ スプラッシュ
+  if (splash > 0) {
+    ctx.fillStyle = 'rgba(79,195,247,' + (0.4 + splash * 0.5) + ')';
+    for (let i = 0; i < 5; i++) {
+      const r = 4 + splash * 6;
+      ctx.beginPath();
+      ctx.arc(28 + i * 7, -30 + Math.sin(i * 1.7 + s.t * 12) * 10, r * (1 - i * 0.13), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+/* ---- ブロック・ワン：しかくい ブロックの いぬ ---- */
+function drawBlockwan(ctx, s) {
+  const slide = Math.sin(s.t * 6) * (s.moving ? 1.4 : 0);
+  ctx.save();
+  ctx.translate(slide, 0);
+
+  const O = '#d9762f', O2 = '#b85c1e', L = '#f0a468';
+
+  // あし（4ほんの しかく）
+  ctx.fillStyle = O2;
+  ctx.fillRect(-26, -14, 11, 14);
+  ctx.fillRect(-8, -14, 11, 14);
+  ctx.fillRect(9, -14, 11, 14);
+  ctx.fillRect(24, -14, 11, 14);
+
+  // どうたい（おおきな ブロック）
+  ctx.fillStyle = O;
+  ctx.fillRect(-30, -58, 62, 46);
+  ctx.fillStyle = L;
+  ctx.fillRect(-30, -58, 62, 9);
+  ctx.strokeStyle = O2; ctx.lineWidth = 2;
+  ctx.strokeRect(-30, -58, 62, 46);
+  // ブロックの ぽっち
+  ctx.fillStyle = L;
+  for (let i = 0; i < 3; i++) {
+    ctx.fillRect(-22 + i * 20, -66, 13, 9);
+  }
+
+  // あたま（しかく）
+  ctx.fillStyle = O;
+  ctx.fillRect(18, -86, 40, 34);
+  ctx.strokeStyle = O2; ctx.lineWidth = 2;
+  ctx.strokeRect(18, -86, 40, 34);
+  // みみ（しかく）
+  ctx.fillStyle = O2;
+  ctx.fillRect(20, -100, 12, 15);
+  ctx.fillRect(44, -100, 12, 15);
+  // はな
+  ctx.fillStyle = '#3e2a20';
+  ctx.fillRect(50, -66, 12, 9);
+  // め
+  ctx.fillStyle = '#2b1a12';
+  ctx.fillRect(30, -78, 6, 7);
+  ctx.fillRect(44, -78, 6, 7);
+  // くび わ
+  ctx.fillStyle = '#e53935';
+  ctx.fillRect(14, -58, 8, 20);
+
+  // しっぽ（しかく）
+  ctx.fillStyle = O;
+  ctx.fillRect(-40, -50, 12, 11);
+
+  ctx.restore();
+}
+
+/* ---- ニョロリ〜ヌ：うどんの ヘビ ---- */
+function drawNyororiinu(ctx, s) {
+  ctx.save();
+  const wave = s.t * 9;
+  const Y = '#f2d98c', Y2 = '#d9b95e';
+
+  // からだ（くねくね）
+  ctx.strokeStyle = Y; ctx.lineWidth = 13; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  for (let i = 0; i <= 10; i++) {
+    const x = -46 + i * 8;
+    const y = -16 + Math.sin(wave + i * 0.8) * 9;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.strokeStyle = Y2; ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let i = 0; i <= 10; i++) {
+    const x = -46 + i * 8;
+    const y = -12 + Math.sin(wave + i * 0.8) * 9;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // あたま
+  const hy = -16 + Math.sin(wave + 8 * 0.8) * 9;
+  ctx.fillStyle = Y;
+  ctx.beginPath(); ctx.ellipse(40, hy - 8, 15, 12, -0.2, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = Y2; ctx.lineWidth = 2; ctx.stroke();
+  // め
+  ctx.fillStyle = '#3b2f16';
+  ctx.beginPath(); ctx.arc(44, hy - 12, 2.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(37, hy - 13, 2.4, 0, Math.PI * 2); ctx.fill();
+  // した
+  ctx.strokeStyle = '#e57373'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(53, hy - 5); ctx.lineTo(62, hy - 3); ctx.stroke();
+
+  ctx.restore();
+}
+
+/* ---- おじい農園長：むぎわらぼうしの のうか ---- */
+function drawOjiinouenchou(ctx, s) {
+  const step = Math.sin(s.t * 4) * (s.moving ? 1 : 0);
+  const throwing = s.atk >= 0 ? s.atk : -1;
+  ctx.save();
+
+  // あし
+  ctx.fillStyle = '#6d5b45';
+  ctx.fillRect(-14, -18, 11, 18);
+  ctx.fillRect(4, -18, 11, 18);
+  ctx.fillStyle = '#4e3b2a';
+  ctx.fillRect(-17, -6 + step, 16, 6);
+  ctx.fillRect(2, -6 - step, 16, 6);
+
+  // からだ（オーバーオール）
+  ctx.fillStyle = '#cbb185';
+  ctx.beginPath();
+  ctx.moveTo(-22, -72); ctx.quadraticCurveTo(-30, -40, -20, -16);
+  ctx.lineTo(20, -16); ctx.quadraticCurveTo(30, -40, 22, -72);
+  ctx.closePath(); ctx.fill();
+  // あかい チェックの シャツ（かた）
+  ctx.fillStyle = '#c94a3d';
+  ctx.fillRect(-24, -78, 48, 20);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1.6;
+  for (let i = -20; i < 24; i += 9) { ctx.beginPath(); ctx.moveTo(i, -78); ctx.lineTo(i, -58); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(-24, -68); ctx.lineTo(24, -68); ctx.stroke();
+  // オーバーオールの かたひも
+  ctx.fillStyle = '#cbb185';
+  ctx.fillRect(-14, -78, 7, 22);
+  ctx.fillRect(7, -78, 7, 22);
+
+  // かお
+  ctx.fillStyle = '#e8bd93';
+  ctx.beginPath(); ctx.arc(2, -92, 15, 0, Math.PI * 2); ctx.fill();
+  // ひげ
+  ctx.fillStyle = '#4a3a2c';
+  ctx.beginPath(); ctx.arc(2, -86, 13, 0, Math.PI); ctx.fill();
+  ctx.fillRect(-6, -92, 16, 4);
+  // め
+  ctx.fillStyle = '#2b1a12';
+  ctx.beginPath(); ctx.arc(-2, -96, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(7, -96, 2, 0, Math.PI * 2); ctx.fill();
+  // むぎわらぼうし
+  ctx.fillStyle = '#e3b856';
+  ctx.beginPath(); ctx.ellipse(2, -104, 28, 7, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(2, -112, 14, 11, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#b8913a'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(2, -106, 14, 5, 0, 0, Math.PI * 2); ctx.stroke();
+
+  // うで＋トマト
+  const a = (throwing >= 0) ? (-2.2 + throwing * 1.9) : -0.3;
+  ctx.save();
+  ctx.translate(20, -66);
+  ctx.rotate(a);
+  ctx.strokeStyle = '#e8bd93'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(18, 0); ctx.stroke();
+  ctx.fillStyle = '#e53935';
+  ctx.beginPath(); ctx.arc(23, 0, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#66bb6a';
+  ctx.beginPath(); ctx.arc(23, -6, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // かご
+  ctx.strokeStyle = '#a1743c'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(-24, -34, 10, 0, Math.PI); ctx.stroke();
+
+  ctx.restore();
+}
+
+/* ---- クマべぇ：もふもふの クマ ---- */
+function drawKumabee(ctx, s) {
+  const step = Math.sin(s.t * 4.5) * (s.moving ? 1 : 0);
+  const swipe = s.atk >= 0 ? s.atk : -1;
+  ctx.save();
+
+  const B = '#8a5c37', B2 = '#6d4527', L = '#c99a6a';
+
+  // あし
+  ctx.fillStyle = B2;
+  ctx.beginPath(); ctx.ellipse(-13, -12 + step * 2, 12, 12, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(13, -12 - step * 2, 12, 12, 0, 0, Math.PI * 2); ctx.fill();
+
+  // からだ
+  ctx.fillStyle = B;
+  ctx.beginPath(); ctx.ellipse(0, -48, 26, 30, 0, 0, Math.PI * 2); ctx.fill();
+  // おなか（エプロン）
+  ctx.fillStyle = '#e0cba8';
+  ctx.beginPath(); ctx.ellipse(2, -40, 16, 20, 0, 0, Math.PI * 2); ctx.fill();
+
+  // あたま
+  ctx.fillStyle = B;
+  ctx.beginPath(); ctx.ellipse(6, -88, 21, 19, 0, 0, Math.PI * 2); ctx.fill();
+  // みみ
+  ctx.beginPath(); ctx.arc(-8, -104, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(20, -104, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = L;
+  ctx.beginPath(); ctx.arc(-8, -104, 4.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(20, -104, 4.2, 0, Math.PI * 2); ctx.fill();
+  // はなさき
+  ctx.fillStyle = L;
+  ctx.beginPath(); ctx.ellipse(16, -82, 12, 9, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#2f1d10';
+  ctx.beginPath(); ctx.ellipse(21, -85, 4.6, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+  // め
+  ctx.beginPath(); ctx.arc(2, -92, 2.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(13, -93, 2.6, 0, Math.PI * 2); ctx.fill();
+  // くち（あくび）
+  ctx.strokeStyle = '#2f1d10'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(16, -76, 5, 0, Math.PI); ctx.stroke();
+
+  // まえあし（ひっかき）
+  const a = (swipe >= 0) ? (-1.4 + swipe * 2.2) : -0.2;
+  ctx.save();
+  ctx.translate(22, -52);
+  ctx.rotate(a);
+  ctx.strokeStyle = B; ctx.lineWidth = 12; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(20, 0); ctx.stroke();
+  ctx.strokeStyle = '#fff8e1'; ctx.lineWidth = 2.4;
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath(); ctx.moveTo(22, i * 4); ctx.lineTo(31, i * 6); ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.restore();
+}
+
+/* ---- カモメェル：そらを とぶ カモメ ---- */
+function drawKamomeeru(ctx, s) {
+  const flap = Math.sin(s.t * 14);
+  const dive = s.atk >= 0 ? s.atk : 0;
+  ctx.save();
+  ctx.translate(0, -20 + Math.sin(s.t * 3) * 4 + dive * 14);
+  ctx.rotate(dive * 0.5);
+
+  // つばさ（うしろ）
+  ctx.fillStyle = '#b0bec5';
+  ctx.beginPath();
+  ctx.moveTo(-6, -34);
+  ctx.quadraticCurveTo(-34, -46 - flap * 14, -40, -22 - flap * 8);
+  ctx.quadraticCurveTo(-24, -26, -6, -26);
+  ctx.closePath(); ctx.fill();
+
+  // からだ
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.ellipse(0, -30, 22, 14, -0.12, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#cfd8dc'; ctx.lineWidth = 1.6; ctx.stroke();
+
+  // つばさ（まえ）
+  ctx.fillStyle = '#eceff1';
+  ctx.beginPath();
+  ctx.moveTo(-2, -34);
+  ctx.quadraticCurveTo(-22, -50 + flap * 16, -30, -30 + flap * 10);
+  ctx.quadraticCurveTo(-14, -30, -2, -28);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#b0bec5'; ctx.lineWidth = 1.4; ctx.stroke();
+
+  // あたま
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(19, -40, 11, 0, Math.PI * 2); ctx.fill();
+  // くちばし
+  ctx.fillStyle = '#ffb300';
+  ctx.beginPath();
+  ctx.moveTo(28, -42); ctx.lineTo(44, -38); ctx.lineTo(28, -35); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#e53935';
+  ctx.beginPath(); ctx.arc(31, -38, 1.8, 0, Math.PI * 2); ctx.fill();
+  // め
+  ctx.fillStyle = '#263238';
+  ctx.beginPath(); ctx.arc(22, -43, 2.4, 0, Math.PI * 2); ctx.fill();
+
+  // あし
+  ctx.strokeStyle = '#ffa726'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(2, -18); ctx.lineTo(4, -8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(10, -18); ctx.lineTo(12, -8); ctx.stroke();
+
+  ctx.restore();
+}
+
+/* ---- スティーブ：つちブロックの うえから ひの やを うつ ----
+   マイクラの ゆみに あわせて、ひきしぼりを 3だんかいで あらわします。
+   0だんかい → 1だんかい → 2だんかい（フルチャージ／1びょう）          */
+function drawSteve(ctx, s) {
+  const draw = (s.atk >= 0) ? s.atk : -1;          // 0→1 で ひきしぼり
+  const fired = !!s.fired;                          // うった ちょくご（バタバタ）
+
+  /* マイクラの ゆみは 3だんかい。なめらかでは なく カクッと かわります */
+  let stage = -1;
+  if (draw >= 0) stage = (draw < 0.33) ? 0 : (draw < 0.75) ? 1 : 2;
+  const pullBy = [3, 8, 14];                        // つるを ひく ながさ
+  const pull   = (stage >= 0) ? pullBy[stage] : 0;
+  const bend   = (stage >= 0) ? [0.50, 0.58, 0.68][stage] : 0.45;   // ゆみの しなり
+
+  /* フルチャージは からだが すこし ふるえる（マイクラの がめんゆれ）*/
+  const shake = (stage === 2) ? Math.sin(s.t * 34) * 2.2 : 0;
+  /* うった ちょくごは おちそうで バタバタ */
+  const flail = fired ? Math.sin(s.t * 22) : Math.sin(s.t * 2) * 0.25;
+
+  ctx.save();
+
+  /* --- つちブロック 3だん --- */
+  const BW = 34, BH = 24;
+  for (let i = 0; i < 3; i++) {
+    const by = -BH * (i + 1);
+    ctx.fillStyle = '#7b5230';
+    ctx.fillRect(-BW / 2, by, BW, BH);
+    ctx.fillStyle = '#6b452a';
+    for (let k = 0; k < 5; k++) {
+      ctx.fillRect(-BW / 2 + (k * 7 + (i % 2) * 3) % (BW - 5), by + 4 + (k % 3) * 6, 4, 4);
+    }
+    if (i === 2) {
+      ctx.fillStyle = '#5d9c3c';
+      ctx.fillRect(-BW / 2, by, BW, 7);
+      ctx.fillStyle = '#4c8531';
+      for (let k = 0; k < 4; k++) ctx.fillRect(-BW / 2 + 3 + k * 8, by + 1, 4, 4);
+    }
+    ctx.strokeStyle = 'rgba(0,0,0,0.28)'; ctx.lineWidth = 1.4;
+    ctx.strokeRect(-BW / 2, by, BW, BH);
+  }
+
+  /* --- スティーブ本体 --- */
+  ctx.save();
+  ctx.translate(shake * 0.5 + flail * 1.2, -72);
+  ctx.rotate(fired ? flail * 0.05 : 0);
+
+  const SKIN = '#c58c58', SHIRT = '#26c6c6', PANTS = '#3f47a8', SHOE = '#4a4a4a', HAIR = '#3f2b1c';
+
+  // あし（ブロックの ふちに つまさきだち）
+  ctx.fillStyle = PANTS;
+  ctx.fillRect(-11, -22, 10, 22);
+  ctx.fillRect(2, -22, 10, 22);
+  ctx.fillStyle = SHOE;
+  ctx.fillRect(-11, -5, 10, 5);
+  ctx.fillRect(2, -5, 10, 5);
+
+  // からだ
+  ctx.fillStyle = SHIRT;
+  ctx.fillRect(-13, -50, 26, 28);
+
+  /* --- うしろの うで ---
+     ゆみを ひいて いる ときは つるを ひく。
+     うった あとは おちそうで バタバタ させる          */
+  ctx.save();
+  ctx.translate(-11, -46);
+  if (stage >= 0) ctx.rotate(-1.15 + pull * 0.02);
+  else            ctx.rotate(fired ? (-2.3 + flail * 0.9) : (-0.15 + flail));
+  ctx.fillStyle = SHIRT; ctx.fillRect(0, -5, 18, 10);
+  ctx.fillStyle = SKIN;  ctx.fillRect(16, -5, 8, 10);
+  ctx.restore();
+
+  /* --- まえの うで：ゆみを まっすぐ かまえる（マイクラの さんにんしょう）--- */
+  ctx.save();
+  ctx.translate(11, -46);
+  if (stage >= 0) ctx.rotate(-0.05);
+  else            ctx.rotate(fired ? (-2.0 - flail * 0.9) : (0.12 - flail));
+  ctx.fillStyle = SHIRT; ctx.fillRect(0, -5, 18, 10);
+  ctx.fillStyle = SKIN;  ctx.fillRect(16, -5, 8, 10);
+  ctx.restore();
+
+  // あたま
+  ctx.fillStyle = SKIN;
+  ctx.fillRect(-13, -76, 26, 26);
+  ctx.fillStyle = HAIR;
+  ctx.fillRect(-13, -78, 26, 10);
+  ctx.fillRect(-13, -78, 5, 22);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, -68, 6, 5); ctx.fillRect(9, -68, 6, 5);
+  ctx.fillStyle = '#5b4fd6'; ctx.fillRect(3, -68, 3, 5); ctx.fillRect(12, -68, 3, 5);
+  ctx.fillStyle = HAIR; ctx.fillRect(1, -60, 11, 3);
+
+  /* --- ゆみ（ひきしぼると しなる）--- */
+  if (!fired || stage >= 0) {
+    ctx.save();
+    ctx.translate(33, -46);
+    ctx.strokeStyle = '#8d6e3a'; ctx.lineWidth = 3.6; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(0, 0, 18, -Math.PI * bend, Math.PI * bend);
+    ctx.stroke();
+    // つる（3だんかいで カクッと ひける）
+    const ax = Math.cos(-Math.PI * bend) * 18, ay = Math.sin(-Math.PI * bend) * 18;
+    const bx = Math.cos(Math.PI * bend) * 18,  by2 = Math.sin(Math.PI * bend) * 18;
+    ctx.strokeStyle = '#efe7d6'; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay); ctx.lineTo(-pull, 0); ctx.lineTo(bx, by2);
+    ctx.stroke();
+
+    // ひの や
+    if (stage >= 0) {
+      ctx.strokeStyle = '#7b5230'; ctx.lineWidth = 2.8;
+      ctx.beginPath(); ctx.moveTo(-pull, 0); ctx.lineTo(15, 0); ctx.stroke();
+      ctx.fillStyle = '#cfd8dc';
+      ctx.beginPath(); ctx.moveTo(23, 0); ctx.lineTo(14, -5); ctx.lineTo(14, 5); ctx.closePath(); ctx.fill();
+      const r = 6 + stage * 5;
+      const fg = ctx.createRadialGradient(20, 0, 1, 20, 0, r);
+      fg.addColorStop(0, '#fff59d'); fg.addColorStop(0.5, '#ff9800'); fg.addColorStop(1, 'rgba(255,87,34,0)');
+      ctx.fillStyle = fg;
+      ctx.beginPath(); ctx.arc(20, 0, r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /* --- フルチャージの キラキラ（マイクラの エンチャントの ように）--- */
+  if (stage === 2) {
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    for (let i = 0; i < 4; i++) {
+      const an = s.t * 9 + i * 1.57;
+      ctx.beginPath();
+      ctx.arc(34 + Math.cos(an) * 22, -46 + Math.sin(an) * 16, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+  ctx.restore();
+}
+
+
 /* ---- 下手なきりん（ボス）：わざと ガタガタの え ---- */
 function drawHetakirin(ctx, s) {
   ctx.save();
@@ -1282,6 +1750,13 @@ const DRAWERS = {
   usagorilla: drawUsagorilla,
   momoplant: drawMomoplant,
   mokomadoushi: drawMokomadoushi,
+  bakecchin: drawBakecchin,
+  blockwan: drawBlockwan,
+  nyororiinu: drawNyororiinu,
+  ojiinouenchou: drawOjiinouenchou,
+  kumabee: drawKumabee,
+  kamomeeru: drawKamomeeru,
+  steve: drawSteve,
   kongaragan: drawKongaragan,
   hetakirin: drawHetakirin,
   okashiman: drawOkashiman,
@@ -1341,6 +1816,46 @@ function drawProjectile(ctx, p) {
         ctx.strokeText('字', 0, 0);
         ctx.fillStyle = '#1b3d0a';
         ctx.fillText('字', 0, 0);
+      }
+      break;
+    case 'tomato':    // おじい農園長の トマト
+      {
+        ctx.rotate(t * 9 * p.dir);
+        ctx.fillStyle = '#e53935';
+        ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.beginPath(); ctx.arc(-3, -3, 2.6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#66bb6a';
+        for (let i = 0; i < 4; i++) {
+          ctx.save(); ctx.rotate(i * 1.57);
+          ctx.beginPath(); ctx.ellipse(0, -8, 2.4, 4, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+      }
+      break;
+    case 'firearrow': // スティーブの ひを まとった や
+      {
+        const dir = p.dir;
+        // ほのおの お
+        const fg = ctx.createLinearGradient(-30 * dir, 0, 6 * dir, 0);
+        fg.addColorStop(0, 'rgba(255,87,34,0)');
+        fg.addColorStop(0.6, 'rgba(255,152,0,0.85)');
+        fg.addColorStop(1, 'rgba(255,241,118,0.95)');
+        ctx.fillStyle = fg;
+        const h = 8 + Math.sin(t * 30) * 2.5;
+        ctx.beginPath();
+        ctx.moveTo(-32 * dir, 0);
+        ctx.lineTo(4 * dir, -h / 2);
+        ctx.lineTo(4 * dir, h / 2);
+        ctx.closePath(); ctx.fill();
+        // やがら
+        ctx.strokeStyle = '#7b5230'; ctx.lineWidth = 2.6;
+        ctx.beginPath(); ctx.moveTo(-12 * dir, 0); ctx.lineTo(12 * dir, 0); ctx.stroke();
+        // やじり
+        ctx.fillStyle = '#cfd8dc';
+        ctx.beginPath();
+        ctx.moveTo(20 * dir, 0); ctx.lineTo(11 * dir, -5); ctx.lineTo(11 * dir, 5);
+        ctx.closePath(); ctx.fill();
       }
       break;
     case 'wool':      // モコ魔道士の ひかる ひつじの け

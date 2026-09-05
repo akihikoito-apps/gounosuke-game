@@ -200,6 +200,24 @@ const UNITS = {
     /* とくしゅのうりょく：みず と けもの の てきを 50%で 2びょう とめる */
     stun: { duration: 2.0, chance: 0.5, attrs: ['water', 'beast'] },
   },
+
+  /* スティーブ ── あき坊の塔を ぜんぶ クリアすると なかまに なる とくべつキャラ。
+                 じじょうの まえに つちブロックを つんで、そこから うごかずに
+                 ひの やを とても とおくまで うちつづける。コストは とても たかい  */
+  steve: {
+    id: 'steve', name: 'スティーブ', shortName: 'スティーブ',
+    rarity: 'LR',                         // でんせつレア（塔の ごほうび せんよう）
+    attr: 'fire',
+    cost: 900,  recharge: 30.0,
+    hp: 1800,   atk: 420,  range: 950,   speed: 0,
+    attackInterval: 2.5,   attackWindup: 1.0,    // ゆみを 1びょうかけて ひきしぼる
+    kbCount: 3,
+    scale: 1.25,
+    attackType: 'single',
+    projectile: 'firearrow',
+    stationary: true,                     // うごかない（まもりの やぐら）
+    blocks: 3,
+  },
 };
 
 /* はじめから もっている キャラ（へんせいの しょきち）
@@ -413,6 +431,120 @@ const ENEMIES = {
     attackType: 'single',
     projectile: 'wool',
     money: 150,
+  },
+
+  /* バケッチン ── みずを なみなみ もった バケツの おばけ。
+                  みずを かけて めくらましに する。はしるほど みずが こぼれて
+                  はやく なるが たいりょくが へって いく                  */
+  bakecchin: {
+    id: 'bakecchin', name: 'バケッチン',
+    attr: 'water',
+    hp: 900,    atk: 60,   range: 68,   speed: 34,
+    attackInterval: 1.6,   attackWindup: 0.28,
+    kbCount: 3,
+    scale: 1.0,
+    attackType: 'single',
+    projectile: null,
+    /* みずしぶきで あいての めいちゅうりつを さげる */
+    blind: { chance: 0.6, duration: 4.0, missRate: 0.30 },
+    /* はしるほど はやく なるが たいりょくが へる */
+    leak: { speedGain: 7, speedMax: 70, hpLoss: 16 },
+    money: 80,
+  },
+
+  /* ブロック・ワン ── しかくい ブロックの いぬ。こうげきは ほぼ ゼロだが
+                    かたくて、あたって きた みかたを おしかえす            */
+  blockwan: {
+    id: 'blockwan', name: 'ブロック・ワン',
+    attr: 'none',
+    hp: 2400,   atk: 25,   range: 58,   speed: 26,
+    attackInterval: 1.8,   attackWindup: 0.3,
+    kbCount: 5,
+    scale: 1.05,
+    attackType: 'single',
+    projectile: null,
+    knockbackChance: 0.5,                 // びみょうに おしかえす
+    money: 55,
+  },
+
+  /* ニョロリ〜ヌ ── うどんの ヘビ。とても はやくて てかずが おおいが
+                    かみのように よわい。ときどき じぶんで ちょうちょむすびに なる */
+  nyororiinu: {
+    id: 'nyororiinu', name: 'ニョロリ〜ヌ',
+    attr: 'none',
+    hp: 220,    atk: 55,   range: 58,   speed: 75,
+    attackInterval: 0.7,   attackWindup: 0.15,   // てかずが おおい
+    kbCount: 2,
+    scale: 0.95,
+    attackType: 'single',
+    projectile: null,
+    rest: { every: 10.0, duration: 1.8, mark: '🎀', vuln: 1.4 },
+    money: 50,
+  },
+
+  /* おじい農園長 ── むぎわらぼうしの のうか。トマトを なげて こうげき。
+                    10じに なると おちゃを のんで 3びょう やすむ            */
+  ojiinouenchou: {
+    id: 'ojiinouenchou', name: 'おじい農園長',
+    attr: 'none',
+    hp: 1200,   atk: 130,  range: 140,  speed: 16,
+    attackInterval: 2.2,   attackWindup: 0.4,
+    kbCount: 3,
+    scale: 1.05,
+    attackType: 'single',
+    projectile: 'tomato',
+    rest: { every: 11.0, duration: 3.0, mark: '🍵', vuln: 1.4 },
+    money: 95,
+  },
+
+  /* クマべぇ ── もふもふの クマ。ときどき さけの もうそうで うっとり とまる */
+  kumabee: {
+    id: 'kumabee', name: 'クマべぇ',
+    attr: 'beast',
+    hp: 1700,   atk: 190,  range: 72,   speed: 20,
+    attackInterval: 1.9,   attackWindup: 0.4,
+    kbCount: 3,
+    scale: 1.1,
+    attackType: 'single',
+    projectile: null,
+    rest: { every: 9.0, duration: 2.0, mark: '🐟', vuln: 1.5 },
+    money: 105,
+  },
+
+  /* カモメェル ── そらを とぶ カモメ。かべを こえて うしろの みかたを おそう。
+                  かみのように よわいので、とどけば すぐ おちる            */
+  kamomeeru: {
+    id: 'kamomeeru', name: 'カモメェル',
+    attr: 'none',
+    hp: 200,    atk: 110,  range: 65,   speed: 68,
+    attackInterval: 1.4,   attackWindup: 0.25,
+    kbCount: 2,
+    scale: 1.0,
+    attackType: 'single',
+    projectile: null,
+    flying: true,                         // ★ かべを こえて いちばん うしろを ねらう
+    /* ポテトを みつけると おちて うごけなく なる */
+    rest: { every: 11.0, duration: 2.2, mark: '🍟', vuln: 1.6 },
+    money: 70,
+  },
+
+  /* スティーブ ── あき坊の塔の おおボス。
+                  とうじょうと どうじに つちブロックを 3だん つみ、その うえに たつ。
+                  まえには すすまず、ひを まとった やを とても とおくまで うつ。
+                  たおして クリアすると なかまに なる（コストは とても たかい）  */
+  steve: {
+    id: 'steve', name: 'スティーブ',
+    attr: 'fire',
+    hp: 3000,   atk: 500,  range: 950,   speed: 0,
+    attackInterval: 2.5,   attackWindup: 1.0,    // ゆみを 1びょうかけて ひきしぼる（マイクラと おなじ）
+    kbCount: 3,
+    scale: 1.25,
+    attackType: 'single',
+    projectile: 'firearrow',
+    stationary: true,                     // ★ まえに すすまない
+    blocks: 3,                            // つちブロックを 3だん つむ
+    money: 900,
+    isBoss: true,
   },
 
   /* 下手なきりん ── ボス。くさを とばす はんいこうげき */
@@ -961,8 +1093,8 @@ const TOWER = {
   name: 'あき坊の塔',
   desc: '10かい ぜんぶ のぼると とくべつな なかまが もらえる！',
   floors: 10,                 // ぜんぶで なんかい あるか
-  rewardChar: null,           // ぜんぶ クリアで もらえる とくべつキャラ（これから きめます）
-  rewardName: 'とくべつな なかま',
+  rewardChar: 'steve',        // ぜんぶ クリアで もらえる とくべつキャラ
+  rewardName: 'スティーブ',
   courses: [
     /* ここに 1かい〜10かい を ついかして いきます */
   ],
