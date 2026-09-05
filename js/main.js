@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '5.2';
+  const GAME_VERSION = '5.3';
 
 
   /* =================================================
@@ -152,10 +152,29 @@
     if (!s || !s.cleared) return 0;
     return STAGES.filter(st => s.cleared[st.no]).length;
   }
+  /* ------------------------------------------------------------
+     とくべつステージ（あき坊の塔 と あき坊の宇宙船）
+
+     どちらも おなじ がめんを つかいまわします。
+     currentTower が いま みて いる ほうを さします。
+     ------------------------------------------------------------ */
+  function allTowers() {
+    const list = [];
+    if (typeof TOWER !== 'undefined' && TOWER) list.push(TOWER);
+    if (typeof SPACESHIP !== 'undefined' && SPACESHIP) list.push(SPACESHIP);
+    return list;
+  }
+  /* その ちずに ある とくべつステージ */
+  function towerOfWorld(world) {
+    return allTowers().find(t => (t.world || 'earth') === world) || null;
+  }
+  let currentTower = (typeof TOWER !== 'undefined') ? TOWER : null;
+
   /* あき坊の塔を なんかい のぼったか */
   function towerCount(s) {
-    if (!s || !s.cleared || typeof TOWER === 'undefined' || !TOWER.courses) return 0;
-    return TOWER.courses.filter(c => s.cleared[c.no]).length;
+    const T = currentTower;
+    if (!s || !s.cleared || !T || !T.courses) return 0;
+    return T.courses.filter(c => s.cleared[c.no]).length;
   }
 
   function buildSaveSlots() {
@@ -392,6 +411,19 @@
   }
 
   /* せかい ⇄ うちゅう の きりかえボタン */
+  /* ちずの みぎうえの とくべつステージ ボタン */
+  function refreshTowerBtn() {
+    const b = $('#btn-tower');
+    if (!b) return;
+    const T = towerOfWorld(currentWorld);
+    b.classList.toggle('hidden', !T);
+    if (!T) return;
+    const ico = b.querySelector('.tw-ico');
+    const nm  = b.querySelector('.tw-name');
+    if (ico) ico.textContent = (currentWorld === 'space') ? '🚀' : '🗼';
+    if (nm)  nm.textContent  = T.name;
+  }
+
   function refreshWorldBtn() {
     const b = $('#btn-world');
     if (!b) return;
@@ -399,6 +431,7 @@
     b.classList.toggle('hidden', !canGo);
     b.classList.toggle('space', currentWorld === 'space');
     b.textContent = (currentWorld === 'earth') ? '🚀 うちゅうへ' : '🌍 ちきゅうへ';
+    refreshTowerBtn();
     const t = $('.map-title');
     if (t) t.textContent = (currentWorld === 'earth') ? 'せかい ちず' : 'うちゅう ちず';
   }
@@ -887,16 +920,19 @@
      ================================================= */
   function openTower() {
     const s = slot();
-    $('#tower-lead').textContent = TOWER.desc;
-    $('#tower-reward-name').textContent = TOWER.rewardName;
+    const T = currentTower || TOWER;
+    const title = $('#tower-title');
+    if (title) title.textContent = ((T.world === 'space') ? '🚀 ' : '🗼 ') + T.name;
+    $('#tower-lead').textContent = T.desc;
+    $('#tower-reward-name').textContent = T.rewardName;
 
     const box = $('#tower-floors');
     box.innerHTML = '';
     const cleared = (s && s.cleared) || {};
     let lockedFloors = 0;
-    for (let f = 1; f <= TOWER.floors; f++) {
-      const course = TOWER.courses.find(c => c.floor === f) || null;
-      const prev   = TOWER.courses.find(c => c.floor === f - 1) || null;
+    for (let f = 1; f <= T.floors; f++) {
+      const course = T.courses.find(c => c.floor === f) || null;
+      const prev   = T.courses.find(c => c.floor === f - 1) || null;
       const open   = !!course && (f === 1 || (prev && cleared[prev.no]));
       const done   = !!(course && cleared[course.no]);
       if (!open && !done) {
@@ -1359,13 +1395,31 @@
      1どだけ もらえます。この キャラは ガチャには でて きません。
      ================================================= */
   function towerAllCleared(s) {
-    if (!s || !TOWER.courses.length) return false;
-    if (TOWER.courses.length < TOWER.floors) return false;   // まだ ぜんぶ できて いない
-    return TOWER.courses.every(c => !!s.cleared[c.no]);
+    const T = currentTower || TOWER;
+    if (!s || !T.courses.length) return false;
+    if (T.courses.length < T.floors) return false;   // まだ ぜんぶ できて いない
+    return T.courses.every(c => !!s.cleared[c.no]);
   }
 
   /* ボスラッシュ（だい7しょう）を ぜんぶ クリアしたら Gコインを どんと もらえる。
      1どだけ。s.bossRush に もらった しるしを のこす。                    */
+  /* とくべつステージを ぜんかい クリアした ときの Gコイン（1どだけ）。
+     キャラの ごほうびが ない ほう（あき坊の宇宙船）で つかいます。      */
+  function giveTowerCoins() {
+    const s = slot();
+    const T = currentTower;
+    if (!s || !T || !T.clearBonus) return 0;
+    const key = 'towerBonus_' + (T.name || '');
+    if (!s.bonuses) s.bonuses = {};
+    if (s.bonuses[key]) return 0;
+    if (!T.courses.length || T.courses.length < T.floors) return 0;
+    if (!T.courses.every(c => s.cleared[c.no])) return 0;
+    s.bonuses[key] = true;
+    s.coins = (s.coins || 0) + T.clearBonus;
+    storeSave();
+    return T.clearBonus;
+  }
+
   function giveBossRushReward() {
     const s = slot();
     if (!s || typeof BOSSRUSH === 'undefined') return 0;
@@ -1381,7 +1435,8 @@
 
   function giveTowerReward() {
     const s = slot();
-    const id = TOWER.rewardChar;
+    const T = currentTower || TOWER;
+    const id = T.rewardChar;
     if (!s || !id || !UNITS[id]) return null;
     if (!towerAllCleared(s)) return null;
     if (!Array.isArray(s.owned)) s.owned = START_CHARS.slice();
@@ -1601,7 +1656,7 @@
       });
     };
     mark(STAGES);
-    if (typeof TOWER !== 'undefined') mark(TOWER.courses);
+    allTowers().forEach(t => mark(t.courses));
     return added;
   }
 
@@ -2046,6 +2101,11 @@
         $('#result-sub').textContent +=
           '　／　★ボスラッシュ せいは！　Gコイン +' + rush;
       }
+      const coins = giveTowerCoins();         // ★とくべつステージ ぜんかいの Gコイン
+      if (coins) {
+        $('#result-sub').textContent +=
+          '　／　★' + (currentTower ? currentTower.name : '') + ' せいは！　Gコイン +' + coins;
+      }
       const got = giveTowerReward();          // ★あき坊の塔を ぜんぶ のぼった ごほうび
       if (got) {
         $('#result-sub').textContent =
@@ -2153,7 +2213,12 @@
     $('#btn-home-stage').addEventListener('click', openChapters);
     $('#btn-world').addEventListener('click', switchWorld);
     $('#btn-chapter-back').addEventListener('click', openHome);
-    $('#btn-tower').addEventListener('click', openTower);
+    $('#btn-tower').addEventListener('click', () => {
+      const T = towerOfWorld(currentWorld);
+      if (!T) { toast('ここには とくべつステージが ありません'); return; }
+      currentTower = T;
+      (openTower)();
+    });
     $('#btn-tower-back').addEventListener('click', openChapters);
     $('#btn-home-power').addEventListener('click', openPower);
     $('#btn-home-party').addEventListener('click', openParty);

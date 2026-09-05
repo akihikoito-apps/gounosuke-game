@@ -2098,6 +2098,14 @@ const BACKGROUNDS = {
     deco: 'star',
   },
 
+  /* あき坊の宇宙船（うちゅうせんの なか）*/
+  ship: {
+    sky: ['#050b18', '#0d1b3a', '#1b2f5c'],
+    hillFar: '#16233f', hillNear: '#0a1122',
+    ground: '#1c2740', groundTop: '#2f4066',
+    deco: 'star',
+  },
+
   /* 火星（宇宙編）*/
   mars: {
     sky: ['#2a0d0a', '#6b2415', '#c25a2e'],
@@ -2965,7 +2973,7 @@ const STAGES = [
     power: 0.86,
     reward: { coins: 1, exp: 1400 },
     waves: [
-      { at: 3,  id: 'runrunwisp', count: 3, gap: 0.9 },
+      { at: 3,  id: 'icewitch',     count: 2, gap: 1.1 },
       { at: 14, id: 'flamemage',  count: 1 },
       { at: 28, id: 'icewitch',   count: 1 },
       { at: 42, id: 'houkigob',   count: 3, gap: 1.0 },
@@ -3025,7 +3033,7 @@ const STAGES = [
     power: 0.95,
     reward: { coins: 1, exp: 1650 },
     waves: [
-      { at: 3,  id: 'runrunwisp',  count: 3, gap: 0.9 },
+      { at: 3,  id: 'ikamajin',     count: 2, gap: 1.1 },
       { at: 16, id: 'chaosspell',  count: 1 },
       { at: 32, id: 'ikamajin',    count: 1 },
       { at: 46, id: 'runegolem',   count: 1 },
@@ -3045,7 +3053,7 @@ const STAGES = [
     power: 1.12,
     reward: { coins: 3, exp: 2200 },
     waves: [
-      { at: 3,   id: 'houkigob',    count: 3, gap: 1.0 },
+      { at: 3,  id: 'mokomadoushi', count: 2, gap: 1.1 },
       { at: 16,  id: 'magicrabbit', count: 1 },
       { at: 30,  id: 'flamemage',   count: 1 },
       { at: 44,  id: 'icewitch',    count: 1 },
@@ -3232,10 +3240,10 @@ const STAGES = [
     power: 3.73,
     reward: { coins: 2, exp: 3200 },
     waves: [
-      { at: 3,  id: 'yajirushi',  count: 4, gap: 0.9 },
+      { at: 3,  id: 'yajirushi',   count: 4, gap: 0.8 },
       { at: 18, id: 'yakipokkuru', count: 3, gap: 1.0 },
-      { at: 34, id: 'yajirushi',  count: 4, gap: 0.9, repeat: 14 },
-      { at: 50, id: 'nejiro',     count: 3, gap: 1.1, repeat: 17 },
+      { at: 34, id: 'yajirushi',   count: 4, gap: 0.8, repeat: 14 },
+      { at: 50, id: 'nejiro',      count: 3, gap: 1.1, repeat: 16 },
     ],
   },
 
@@ -3249,11 +3257,11 @@ const STAGES = [
     power: 3.82,
     reward: { coins: 2, exp: 3300 },
     waves: [
-      { at: 3,  id: 'yajirushi',  count: 4, gap: 0.9 },
-      { at: 18, id: 'ironkokko',  count: 3, gap: 1.1 },
-      { at: 34, id: 'moeris',     count: 3, gap: 1.0, repeat: 13 },
-      { at: 50, id: 'ironkokko',  count: 3, gap: 1.1, repeat: 17 },
-      { at: 66, id: 'yajirushi',  count: 4, gap: 0.9, repeat: 14 },
+      { at: 3,  id: 'ironkokko',  count: 3, gap: 0.9 },
+      { at: 16, id: 'yajirushi',  count: 3, gap: 0.8 },
+      { at: 30, id: 'moeris',     count: 3, gap: 1.0, repeat: 15 },
+      { at: 44, id: 'ironkokko',  count: 3, gap: 0.9, repeat: 17 },
+      { at: 60, id: 'yajirushi',  count: 4, gap: 0.8, repeat: 19 },
     ],
   },
 
@@ -3267,11 +3275,11 @@ const STAGES = [
     power: 3.91,
     reward: { coins: 2, exp: 3400 },
     waves: [
-      { at: 3,  id: 'yajirushi', count: 4, gap: 0.9 },
-      { at: 18, id: 'sabinchi',  count: 3, gap: 1.1 },
-      { at: 34, id: 'burner',    count: 1, repeat: 14 },
-      { at: 50, id: 'potank',    count: 1, repeat: 17 },
-      { at: 64, id: 'yajirushi', count: 4, gap: 0.9, repeat: 13 },
+      { at: 3,  id: 'sabinchi',   count: 3, gap: 1.0 },
+      { at: 17, id: 'nejiro',     count: 3, gap: 1.0 },
+      { at: 31, id: 'yajirushi',  count: 4, gap: 0.8, repeat: 15 },
+      { at: 45, id: 'burner',     count: 1, repeat: 18 },
+      { at: 60, id: 'potank',     count: 1, repeat: 21 },
     ],
   },
 
@@ -3285,11 +3293,11 @@ const STAGES = [
     power: 4,
     reward: { coins: 3, exp: 3600 },
     waves: [
-      { at: 3,  id: 'yajirushi', count: 4, gap: 0.9 },
-      { at: 18, id: 'burner',    count: 3, gap: 1.1 },
-      { at: 34, id: 'moeris',    count: 3, gap: 1.0, repeat: 13 },
-      { at: 50, id: 'yajirushi', count: 4, gap: 0.9, repeat: 14 },
-      { at: 66, id: 'forkun',    count: 1, repeat: 19 },
+      { at: 3,  id: 'burner',     count: 2, gap: 1.1 },
+      { at: 16, id: 'moeris',     count: 3, gap: 0.9 },
+      { at: 30, id: 'yajirushi',  count: 4, gap: 0.8, repeat: 16 },
+      { at: 46, id: 'burner',     count: 2, gap: 1.1, repeat: 19 },
+      { at: 62, id: 'forkun',     count: 1, repeat: 22 },
       /* ★ちゅうボス */
       { atCastleHp: 0.70, id: 'meltgear', count: 1 },
     ],
@@ -3305,11 +3313,11 @@ const STAGES = [
     power: 4.09,
     reward: { coins: 2, exp: 3800 },
     waves: [
-      { at: 3,  id: 'yajirushi',  count: 5, gap: 0.8 },
-      { at: 18, id: 'flamemage',  count: 1 },
-      { at: 32, id: 'ironkokko',  count: 3, gap: 1.1, repeat: 14 },
-      { at: 48, id: 'flamemage',  count: 1, repeat: 17 },
-      { at: 64, id: 'yajirushi',  count: 5, gap: 0.8, repeat: 13 },
+      { at: 3,  id: 'flamemage',  count: 1 },
+      { at: 14, id: 'yakipokkuru', count: 4, gap: 0.8 },
+      { at: 28, id: 'ironkokko',  count: 3, gap: 0.9, repeat: 16 },
+      { at: 42, id: 'flamemage',  count: 1, repeat: 20 },
+      { at: 58, id: 'yajirushi',  count: 5, gap: 0.7, repeat: 15 },
     ],
   },
 
@@ -3323,11 +3331,11 @@ const STAGES = [
     power: 4.19,
     reward: { coins: 2, exp: 4000 },
     waves: [
-      { at: 3,  id: 'yajirushi',  count: 5, gap: 0.8 },
-      { at: 18, id: 'pressuke',   count: 1 },
-      { at: 34, id: 'burner',     count: 3, gap: 1.1, repeat: 14 },
-      { at: 50, id: 'pressuke',   count: 1, repeat: 19 },
-      { at: 66, id: 'yajirushi',  count: 5, gap: 0.8, repeat: 13 },
+      { at: 3,  id: 'pressuke',   count: 1 },
+      { at: 15, id: 'nejiro',     count: 4, gap: 0.9 },
+      { at: 30, id: 'burner',     count: 3, gap: 1.0, repeat: 16 },
+      { at: 46, id: 'pressuke',   count: 1, repeat: 22 },
+      { at: 62, id: 'yajirushi',  count: 5, gap: 0.7, repeat: 15 },
     ],
   },
 
@@ -3341,13 +3349,13 @@ const STAGES = [
     power: 4.28,
     reward: { coins: 3, exp: 5200 },
     waves: [
-      /* ★ポチは ざこたちと いっしょに はじめから でて くる */
-      { at: 8,  id: 'pochi',      count: 1 },
-      { at: 3,  id: 'yajirushi',  count: 5, gap: 0.8 },
-      { at: 20, id: 'burner',     count: 3, gap: 1.1 },
-      { at: 36, id: 'yajirushi',  count: 5, gap: 0.8, repeat: 12 },
-      { at: 52, id: 'ironkokko',  count: 3, gap: 1.1, repeat: 15 },
-      { at: 68, id: 'flamemage',  count: 1, repeat: 18 },
+      /* ★ポチは はじめから。ざこも いっしょ */
+      { at: 6,  id: 'pochi',      count: 1 },
+      { at: 3,  id: 'burner',     count: 3, gap: 1.0 },
+      { at: 18, id: 'yajirushi',  count: 5, gap: 0.7 },
+      { at: 32, id: 'ironkokko',  count: 3, gap: 0.9, repeat: 17 },
+      { at: 48, id: 'flamemage',  count: 1, repeat: 20 },
+      { at: 64, id: 'yajirushi',  count: 5, gap: 0.7, repeat: 14 },
       /* しろが へると もう 1たい */
       { atCastleHp: 0.45, id: 'pochi', count: 1 },
     ],
@@ -3452,6 +3460,212 @@ function enemyPowerOf(stage, rarity) {
   if (stage && stage.powerBy && typeof stage.powerBy[r] === 'number') return stage.powerBy[r];
   return (stage && typeof stage.power === 'number') ? stage.power : 1;
 }
+
+
+
+
+/* --------------------------------------------------------------------------
+   あき坊の宇宙船（宇宙編の とくべつステージ）
+
+   火星に ついた あと、そらに うかぶ おおきな うちゅうせん。
+   10かい ぜんぶ せいはすると おおきな ごほうびが もらえます。
+
+   ★あき坊の塔と おなじで、ステージの じゅんばんとは べつあつかい。
+     1かいずつ したから のぼって いきます。
+   ★ぞくせいの あいしょうを ためす かいが つづきます。
+     どの なかまを つれて いくかを かんがえる ステージです。
+   -------------------------------------------------------------------------- */
+const SPACESHIP = {
+  name: 'あき坊の宇宙船',
+  desc: '10かい ぜんぶ せいはすると おおきな ごほうびが もらえる！',
+  floors: 10,
+  world: 'space',            // うちゅうちずに でます
+  rewardChar: null,          // とくべつキャラは これから
+  rewardName: 'Gコイン 30まい',
+  clearBonus: 30,            // ★ぜんかい クリアで Gコイン 30まい（1どだけ）
+  courses: [
+
+    /* ---- 1かい：かんげいの ハッチ（むぞくせい と ほのお）---- */
+    {
+      no: 201, floor: 1, chapter: 0, course: 1,
+      name: 'かんげいの ハッチ',
+      desc: 'うちゅうせんの いりぐち。やじるしくんが であいがしら',
+      bg: 'ship',
+      castleHp: 4200,
+      power: 4.8,
+      reward: { coins: 3, exp: 900 },
+      waves: [
+        { at: 3,  id: 'yajirushi',  count: 3, gap: 0.9 },
+        { at: 16, id: 'yakipokkuru', count: 3, gap: 0.9 },
+        { at: 30, id: 'yajirushi',  count: 4, gap: 0.8, repeat: 16 },
+        { at: 46, id: 'honota',     count: 4, gap: 0.6, repeat: 18 },
+      ],
+    },
+
+    /* ---- 2かい：れいきゃくの ろうか（みず）---- */
+    {
+      no: 202, floor: 2, chapter: 0, course: 2,
+      name: 'れいきゃくの ろうか',
+      desc: 'みずの てきばかり。くさの なかまが ゆうり',
+      bg: 'ship',
+      castleHp: 4400,
+      power: 2.6,
+      reward: { coins: 3, exp: 950 },
+      waves: [
+        { at: 3,  id: 'chibisame',  count: 3, gap: 0.9 },
+        { at: 17, id: 'togefugu',   count: 2, gap: 1.1 },
+        { at: 32, id: 'umihebi',    count: 3, gap: 0.9, repeat: 16 },
+        { at: 48, id: 'octocannon', count: 1, repeat: 20 },
+      ],
+    },
+
+    /* ---- 3かい：はぐるまの きかいしつ（メタル）---- */
+    {
+      no: 203, floor: 3, chapter: 0, course: 3,
+      name: 'はぐるまの きかいしつ',
+      desc: 'メタルの てきばかり。ほのおの なかまが ゆうり',
+      bg: 'ship',
+      castleHp: 4600,
+      power: 1.8,
+      reward: { coins: 3, exp: 1000 },
+      waves: [
+        { at: 3,  id: 'ironkokko', count: 3, gap: 0.9 },
+        { at: 17, id: 'hakobot',   count: 3, gap: 1.0 },
+        { at: 32, id: 'potank',    count: 1, repeat: 18 },
+        { at: 48, id: 'pressuke',  count: 1, repeat: 22 },
+      ],
+    },
+
+    /* ---- 4かい：みどりの おんしつ（くさ）---- */
+    {
+      no: 204, floor: 4, chapter: 0, course: 4,
+      name: 'みどりの おんしつ',
+      desc: 'くさの てきばかり。ほのおの なかまが ゆうり',
+      bg: 'ship',
+      castleHp: 4800,
+      power: 2,
+      reward: { coins: 3, exp: 1100 },
+      waves: [
+        { at: 3,  id: 'momoplant', count: 2, gap: 1.1 },
+        { at: 17, id: 'tsuyugaeru', count: 3, gap: 0.9 },
+        { at: 32, id: 'mandrake',  count: 1, repeat: 18 },
+        { at: 48, id: 'kokejika',  count: 2, gap: 1.1, repeat: 20 },
+      ],
+    },
+
+    /* ---- 5かい：じゅうりょくの ま（けもの・ちゅうボス）---- */
+    {
+      no: 205, floor: 5, chapter: 0, course: 5,
+      name: 'じゅうりょくの ま',
+      desc: 'ちゅうボス「ヌシノオオカミ」。けものたちの すみか',
+      bg: 'ship',
+      castleHp: 5200,
+      power: 3.6,
+      reward: { coins: 4, exp: 1300 },
+      waves: [
+        { at: 3,  id: 'inocchi',   count: 3, gap: 0.9 },
+        { at: 17, id: 'kumabee',   count: 2, gap: 1.1 },
+        { at: 32, id: 'kumatta',   count: 1, repeat: 20 },
+        { at: 48, id: 'tanupon',   count: 3, gap: 1.0, repeat: 18 },
+        { atCastleHp: 0.70, id: 'nushinoookami', count: 1 },
+      ],
+    },
+
+    /* ---- 6かい：まほうの けんきゅうしつ（まじゅつし）---- */
+    {
+      no: 206, floor: 6, chapter: 0, course: 6,
+      name: 'まほうの けんきゅうしつ',
+      desc: 'まじゅつしの てきばかり。けものの なかまが ゆうり',
+      bg: 'ship',
+      castleHp: 5400,
+      power: 2.5,
+      reward: { coins: 3, exp: 1400 },
+      waves: [
+        { at: 3,  id: 'magicrabbit', count: 2, gap: 1.1 },
+        { at: 17, id: 'icewitch',    count: 1, repeat: 18 },
+        { at: 32, id: 'flamemage',   count: 1, repeat: 20 },
+        { at: 48, id: 'runegolem',   count: 1, repeat: 22 },
+        { at: 62, id: 'houkigob',    count: 4, gap: 0.8, repeat: 14 },
+      ],
+    },
+
+    /* ---- 7かい：ちからくらべの アリーナ（パワー）---- */
+    {
+      no: 207, floor: 7, chapter: 0, course: 7,
+      name: 'ちからくらべの アリーナ',
+      desc: 'パワーの てきばかり。ゆうれい（霊太郎）なら こうげきが きかない',
+      bg: 'ship',
+      castleHp: 5600,
+      power: 1.15,
+      reward: { coins: 3, exp: 1550 },
+      waves: [
+        { at: 3,  id: 'usagorilla', count: 2, gap: 1.1 },
+        { at: 18, id: 'octocannon', count: 2, gap: 1.1 },
+        { at: 34, id: 'usagorilla', count: 2, gap: 1.1, repeat: 20 },
+        { at: 50, id: 'okashiman',  count: 1, repeat: 30 },
+      ],
+    },
+
+    /* ---- 8かい：ふくごう ぞくせいの かいろう ---- */
+    {
+      no: 208, floor: 8, chapter: 0, course: 8,
+      name: 'ふくごうの かいろう',
+      desc: '2つの ぞくせいを もつ てきばかり。あいしょうが ふくざつ',
+      bg: 'ship',
+      castleHp: 5800,
+      power: 1.55,
+      reward: { coins: 3, exp: 1700 },
+      waves: [
+        { at: 3,  id: 'icewitch',   count: 1 },
+        { at: 16, id: 'meltgear',   count: 1, repeat: 30 },
+        { at: 32, id: 'gaou',       count: 1, repeat: 32 },
+        { at: 48, id: 'flamemage',  count: 1, repeat: 20 },
+        { at: 62, id: 'octocannon', count: 2, gap: 1.1, repeat: 18 },
+      ],
+    },
+
+    /* ---- 9かい：かみと やみの ま ---- */
+    {
+      no: 209, floor: 9, chapter: 0, course: 9,
+      name: 'かみと やみの ま',
+      desc: 'つよい ボスたちが つづけて でて くる',
+      bg: 'ship',
+      castleHp: 6200,
+      power: 1.3,
+      reward: { coins: 4, exp: 2000 },
+      waves: [
+        { at: 3,  id: 'runegolem',  count: 1 },
+        { at: 18, id: 'kanitank',   count: 1, repeat: 24 },
+        { at: 34, id: 'forkun',     count: 1, repeat: 26 },
+        { at: 50, id: 'chaosspell', count: 1, repeat: 22 },
+        { atCastleHp: 0.80, id: 'sagecharon', count: 1 },
+        { atCastleHp: 0.45, id: 'zabaan',     count: 1 },
+      ],
+    },
+
+    /* ---- 10かい：ブリッジ（さいじょうかい）---- */
+    {
+      no: 210, floor: 10, chapter: 0, course: 10,
+      name: 'ブリッジ',
+      desc: 'さいじょうかい。ポチと ゼノスが まちうける',
+      bg: 'boss',
+      castleHp: 6800,
+      power: 1.4,
+      reward: { coins: 5, exp: 2600 },
+      waves: [
+        /* ★ポチは はじめから でて きます（あき坊の塔の スティーブと おなじ） */
+        { at: 5,  id: 'pochi',      count: 1 },
+        { at: 3,  id: 'yajirushi',  count: 5, gap: 0.7 },
+        { at: 20, id: 'burner',     count: 3, gap: 1.0, repeat: 18 },
+        { at: 36, id: 'runegolem',  count: 1, repeat: 24 },
+        { at: 52, id: 'yajirushi',  count: 5, gap: 0.7, repeat: 16 },
+        { at: 68, id: 'flamemage',  count: 1, repeat: 22 },
+        { atCastleHp: 0.55, id: 'zenos', count: 1 },
+      ],
+    },
+
+  ],
+};
 
 
 const CHAPTERS = {
