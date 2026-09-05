@@ -206,11 +206,11 @@ const UNITS = {
                  ひの やを とても とおくまで うちつづける。コストは とても たかい  */
   steve: {
     id: 'steve', name: 'スティーブ', shortName: 'スティーブ',
-    rarity: 'LR',                         // でんせつレア（塔の ごほうび せんよう）
+    rarity: 'SR',                         // スーパーレア（塔の ごほうび せんよう）
     attr: 'fire',
-    cost: 900,  recharge: 30.0,
-    hp: 1800,   atk: 420,  range: 950,   speed: 0,
-    attackInterval: 2.5,   attackWindup: 1.0,    // ゆみを 1びょうかけて ひきしぼる
+    cost: 850,  recharge: 28.0,
+    hp: 1300,   atk: 320,  range: 620,   speed: 0,
+    attackInterval: 3.0,   attackWindup: 1.0,    // ゆみを 1びょうかけて ひきしぼる
     kbCount: 3,
     scale: 1.25,
     attackType: 'single',
