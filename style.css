@@ -947,3 +947,11 @@ body.dragging-slot #party-slots { touch-action:none; }
 }
 .world-btn:active { transform:translateX(-50%) translateY(2px); box-shadow:0 calc(2px * var(--ui)) 0 #1a237e; }
 .world-btn.space  { background:linear-gradient(180deg,#43a047,#1b5e20); box-shadow:0 calc(4px * var(--ui)) 0 #0b3d10; }
+
+
+/* ---- Lv.30 で えられる だい3けいたい（じゅんびちゅう）---- */
+.pr-btn.evolve.third {
+  background:linear-gradient(180deg,#ab47bc,#6a1b9a);
+  box-shadow:0 calc(3px * var(--ui)) 0 #4a148c;
+  opacity:.92;
+}

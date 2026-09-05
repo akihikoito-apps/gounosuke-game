@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '5.1';
+  const GAME_VERSION = '5.2';
 
 
   /* =================================================
@@ -965,7 +965,7 @@
             (isNext ? '<span class="next-badge">つぎは ここ！</span>' : '') + '</b>' +
           '<small>' + (open ? st.desc : 'まえの コースを クリアすると あそべます') + '</small>' +
           (open ? '<span class="stage-reward">' +
-              (cleared[st.no] ? 'けいけんち+' + r.exp + '（Gコインは しょかいのみ）'
+              (cleared[st.no] ? 'けいけんち+' + gainExp(r.exp, false) + '（しゅうかいは すくなめ）'
                               : 'クリアで Gコイン+' + r.coins + '　けいけんち+' + r.exp) +
             '</span>' : '') +
         '</span>' +
@@ -1496,6 +1496,9 @@
       const maxed = (cost === null);
       const can  = !maxed && (s.exp || 0) >= cost;
       const canEvolve = eff >= (LEVEL.evolveAt || 10);
+      /* ★じつりょく Lv.30（じょうげん）で だい3けいたいの けんりを えます。
+         まだ つくって いない ので、いまは「じゅんびちゅう」と だします。 */
+      const canThird = eff >= LEVEL.max;
 
       const row = document.createElement('div');
       row.className = 'power-row';
@@ -1536,11 +1539,25 @@
           ev.disabled = true;
         }
         row.appendChild(ev);
+
+        /* ★じつりょく Lv.30 に とどくと「だい3けいたい」の けんりを えます。
+           まだ つくって いない ので、いまは じゅんびちゅうと だします。   */
+        if (canThird) {
+          const t3 = document.createElement('button');
+          t3.className = 'pr-btn evolve third';
+          t3.innerHTML = 'だい3けいたい<br><small>じゅんびちゅう</small>';
+          t3.addEventListener('click', () =>
+            toast('Lv.' + LEVEL.max + ' たっせい！　だい3けいたいは じゅんびちゅうです'));
+          row.appendChild(t3);
+        }
       } else if (maxed) {
         const ev = document.createElement('button');
         ev.className = 'pr-btn evolve';
-        ev.innerHTML = 'しんか<br><small>じゅんびちゅう</small>';
-        ev.addEventListener('click', () => toast('この キャラの しんかは じゅんびちゅう！'));
+        ev.innerHTML = (canThird ? 'だい3けいたい' : 'しんか') + '<br><small>じゅんびちゅう</small>';
+        if (canThird) ev.classList.add('third');
+        ev.addEventListener('click', () => toast(canThird
+          ? ('Lv.' + LEVEL.max + ' たっせい！　だい3けいたいは じゅんびちゅうです')
+          : 'この キャラの しんかは じゅんびちゅう！'));
         row.appendChild(ev);
       }
       box.appendChild(row);
@@ -1987,6 +2004,15 @@
     }
   }
 
+  /* クリアで もらえる けいけんち。
+     しょかいは まるまる、2かいめ いこうは LEVEL.repeatExpRate ぶんだけ。 */
+  function gainExp(base, first) {
+    if (first) return base;
+    const rate = (typeof LEVEL !== 'undefined' && typeof LEVEL.repeatExpRate === 'number')
+      ? LEVEL.repeatExpRate : 1;
+    return Math.max(1, Math.round(base * rate));
+  }
+
   function showResult() {
     resultShown = true;
     recordSeen();                 // まけても「でてきた てき」は ずかんに のこす
@@ -2006,11 +2032,13 @@
       const first = !!(s && !s.cleared[Game.stage.no]);   // はじめての クリアか
       if (s) {
         if (first) s.coins = (s.coins || 0) + r.coins;    // Gコインは しょかいだけ
-        s.exp = (s.exp || 0) + r.exp;                     // けいけんちは まいかい
+        /* ★けいけんちは まいかい もらえるが、2かいめ いこうは すくない */
+        s.exp = (s.exp || 0) + gainExp(r.exp, first);
       }
       $('#result-sub').textContent += first
         ? '　／　Gコイン +' + r.coins + '　けいけんち +' + r.exp
-        : '　／　けいけんち +' + r.exp + '（Gコインは しょかいだけ）';
+        : '　／　けいけんち +' + gainExp(r.exp, false)
+          + '（2かいめ いこうは すくなめ・Gコインは しょかいだけ）';
       markCleared(Game.stage.no);
       recordSeen();
       const rush = giveBossRushReward();      // ★ボスラッシュ ぜんクリアの ごほうび
