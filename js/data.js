@@ -111,8 +111,8 @@ const UNITS = {
     scale: 1.0,
     attackType: 'single',        // single = ひとりだけ / area = はんい
     projectile: 'jelly',         // とばす たまの しゅるい（null なら なぐる）
-    /* とくしゅのうりょく：あてた てきの スピードを はんぶんに する */
-    slow: { rate: 0.5, duration: 4.0, chance: 1.0 },  // rate 0.5 → はやさ はんぶん / 4びょう / 100%
+    /* とくしゅのうりょく：あてた てきの スピードを 30%に する（70% ダウン） */
+    slow: { rate: 0.3, duration: 4.0, chance: 1.0 },  // rate 0.3 → はやさ 30%（70% ダウン）/ 4びょう / 100%
 
     /* ------------------------------------------------------------
        しんか：じつりょく Lv.10 で「ぷりぷりおぷりねこ」に なれます
@@ -120,12 +120,18 @@ const UNITS = {
        ・じゃまする じかん（どんそく）が 2ばい（4びょう → 8びょう）
        ・たいりょくと こうげきりょくが 1.5ばい
        ・おおきな くちを あけた すがたに かわります
+       ・★はどうストッパー：はどうの ダメージを うけず、なみを せきとめる
        ------------------------------------------------------------ */
     evolve: {
       name: 'ぷりぷりおぷりねこ', shortName: 'ぷりぷり',
       hp: 840,                                        // 560 x 1.5
       atk: 51,                                        // 34 x 1.5
-      slow: { rate: 0.5, duration: 8.0, chance: 1.0 },// じゃまする じかん 2ばい
+      slow: { rate: 0.3, duration: 8.0, chance: 1.0 },// じゃまする じかん 2ばい
+      /* ★はどうストッパー
+         じぶんは はどうの ダメージを うけず、
+         なみを ここで とめる ので、うしろの なかまにも とどかない。
+         闇堕ちあき坊の はどう レベル5 たいさくに なる。            */
+      waveStopper: true,
       drawAs: 'puripurio',
     },
   },
@@ -242,6 +248,33 @@ const UNITS = {
     attackType: 'area',                          // はんい こうげき
     areaRadius: 46,                              // ばくはつの おおきさ
     projectile: 'fireball',
+
+    /* ------------------------------------------------------------
+       しんか：じつりょく Lv.10 で「隕坊（いんぼう）」に なれます
+
+       いんせきの ように なって、ほのおの おを ひきながら すすむ。
+       つよさに かかわる ところが ぜんぶ 1.3ばい：
+         たいりょく  1900 → 2470
+         こうげき     500 →  650
+         しゃてい     118 →  153
+         はやさ        24 →   31
+         ばくはつの おおきさ 46 → 60
+         こうげきの はやさ 2.2びょう → 1.69びょう（1.3ばい はやい）
+       そのうえで──
+         ★100%で あいての こうげきりょくを 2びょう 80%に さげる
+       ------------------------------------------------------------ */
+    evolve: {
+      name: '隕坊', shortName: '隕坊',
+      hp: 2470,
+      atk: 650,
+      range: 153,
+      speed: 31,
+      attackInterval: 1.69,
+      areaRadius: 60,
+      /* ★かならず あいての こうげきりょくを 2びょう 20% さげる */
+      weaken: { chance: 1.0, rate: 0.8, duration: 2.0 },
+      drawAs: 'inbou',
+    },
   },
 
   /* 霊太郎 ── ランドセルを せおって パンを くわえた しょうがくせいの おばけ。
@@ -1086,6 +1119,214 @@ const ENEMIES = {
     isBoss: true,
   },
 
+
+  /* ============================================================
+     ここから した は だい7しょう「闇の頂」の てき
+
+     ★「覚醒」ボス
+        これまで たおして きた ボスたちが、闇の ちからで よみがえった すがた。
+        6しょうを クリアした ころの じつりょくに あわせて、
+        たいりょくと こうげきりょくを ぐんと あげて ある。
+        もとの ボスの くせ（ふきとび無効・きぜつ・はんい…）は そのまま。
+     ============================================================ */
+
+  /* --- 1しょう組 --- */
+  hetakirin_x: {
+    id: 'hetakirin_x', name: '覚醒 下手なきりん',
+    attr: 'grass',
+    hp: 11000,  atk: 720,  range: 150,  speed: 12,
+    attackInterval: 2.8,   attackWindup: 0.55,
+    kbCount: 8, scale: 1.5,
+    attackType: 'area', areaRadius: 60, projectile: 'grass',
+    money: 2400,
+    isBoss: true,
+  },
+  okashiman_x: {
+    id: 'okashiman_x', name: '覚醒 お菓子マン',
+    attr: 'power',
+    hp: 13000,  atk: 880,  range: 130,  speed: 11,
+    attackInterval: 1.9,   attackWindup: 0.9,
+    kbCount: 8, scale: 1.55,
+    attackType: 'single', projectile: 'stone',
+    stun: { duration: 1.5, chance: 0.18 },
+    money: 3000,
+    isBoss: true,
+  },
+
+  /* --- 3しょう（けもの）組 --- */
+  nushinoookami_x: {
+    id: 'nushinoookami_x', name: '覚醒 ヌシノオオカミ',
+    attr: 'beast',
+    hp: 10500,  atk: 700,  range: 100,  speed: 56,
+    attackInterval: 1.8,   attackWindup: 0.35,
+    kbCount: 8, scale: 1.4,
+    attackType: 'area', areaRadius: 64, projectile: null,
+    knockbackChance: 0.15,
+    enrage: { below: 0.5, atkMult: 1.5 },
+    money: 2600,
+    isBoss: true,
+  },
+  gaou_x: {
+    id: 'gaou_x', name: '覚醒 森喰らい・ガオウ',
+    attr: ['beast', 'grass'],
+    hp: 11000,  atk: 750,  range: 175,  speed: 14,
+    attackInterval: 2.6,   attackWindup: 0.65,
+    kbCount: 99, scale: 1.55,
+    attackType: 'area', areaRadius: 78, projectile: null,
+    kbImmune: true,
+    slow: { rate: 0.5, duration: 3.0, chance: 0.15 },
+    enrage: { below: 0.4, intervalMult: 0.6 },
+    money: 3000,
+    isBoss: true,
+  },
+
+  /* --- 4しょう（メタル）組 --- */
+  garakutei_x: {
+    id: 'garakutei_x', name: '覚醒 ガラク帝',
+    attr: 'metal',
+    hp: 12500,  atk: 690,  range: 165,  speed: 16,
+    attackInterval: 2.5,   attackWindup: 0.5,
+    kbCount: 99, scale: 1.45,
+    attackType: 'area', areaRadius: 68, projectile: null,
+    kbImmune: true,
+    enrage: { below: 0.5, atkMult: 1.5 },
+    money: 2600,
+    isBoss: true,
+  },
+  meltgear_x: {
+    id: 'meltgear_x', name: '覚醒 廃炉獣メルトギア',
+    attr: ['metal', 'fire'],
+    hp: 13000,  atk: 700,  range: 200,  speed: 14,
+    attackInterval: 2.8,   attackWindup: 0.7,
+    kbCount: 99, scale: 1.6,
+    attackType: 'area', areaRadius: 78, projectile: null,
+    kbImmune: true,
+    weaken: { chance: 0.25, rate: 0.7, duration: 3.0 },
+    enrage: { below: 0.3, intervalMult: 0.6 },
+    money: 3200,
+    isBoss: true,
+  },
+
+  /* --- 5しょう（うみ）組 --- */
+  nereid_x: {
+    id: 'nereid_x', name: '覚醒 深海の主 ネレイド',
+    attr: ['water', 'magic'],
+    hp: 12000,  atk: 730,  range: 220,  speed: 26,
+    attackInterval: 2.7,   attackWindup: 0.65,
+    kbCount: 99, scale: 1.45,
+    attackType: 'area', areaRadius: 88, projectile: 'drop',
+    kbImmune: true,
+    enrage: { below: 0.5, atkMult: 1.5 },
+    money: 2800,
+    isBoss: true,
+  },
+  leviza_x: {
+    id: 'leviza_x', name: '覚醒 暴海竜リヴァイザ',
+    attr: ['water', 'power'],
+    hp: 12000,  atk: 730,  range: 230,  speed: 14,
+    attackInterval: 2.9,   attackWindup: 0.75,
+    kbCount: 99, scale: 1.5,
+    attackType: 'area', areaRadius: 92, projectile: 'drop',
+    kbImmune: true,
+    knockbackChance: 0.20,
+    enrage: { below: 0.3, intervalMult: 0.6 },
+    money: 3000,
+    isBoss: true,
+  },
+  zabaan_x: {
+    id: 'zabaan_x', name: '覚醒 波獣ザバーン',
+    attr: 'water',
+    hp: 34000,  atk: 470,  range: 215,  speed: 18,
+    attackInterval: 0.5,   attackWindup: 0.15,
+    kbCount: 99, scale: 1.75,
+    attackType: 'single', projectile: 'splash',
+    kbImmune: true,
+    money: 5000,
+    isBoss: true,
+  },
+
+  /* --- 2しょう／6しょう（まどうし）組 --- */
+  onigon_x: {
+    id: 'onigon_x', name: '覚醒 獄熱オニごん',
+    attr: ['fire', 'magic'],
+    hp: 12500,  atk: 730,  range: 320,  speed: 24,
+    minRange: 130,
+    attackInterval: 3.4,   attackWindup: 0.85,
+    kbCount: 10, scale: 1.5,
+    attackType: 'area', areaRadius: 68, projectile: 'dango',
+    burn: { chance: 0.25, dps: 90, duration: 3.0 },
+    money: 2800,
+    isBoss: true,
+  },
+  sagecharon_x: {
+    id: 'sagecharon_x', name: '覚醒 賢者カロン',
+    attr: ['none', 'magic'],
+    hp: 12000,  atk: 700,  range: 230,  speed: 20,
+    attackInterval: 2.7,   attackWindup: 0.65,
+    kbCount: 99, scale: 1.45,
+    attackType: 'area', areaRadius: 86, projectile: 'beam',
+    kbImmune: true,
+    stun:   { duration: 3.0, chance: 0.30 },
+    weaken: { chance: 0.30, rate: 0.5, duration: 5.0 },
+    money: 2800,
+    isBoss: true,
+  },
+  zenos_x: {
+    id: 'zenos_x', name: '覚醒 終焉の大魔導士ゼノス',
+    attr: ['none', 'magic'],
+    hp: 15000,  atk: 780,  range: 270,  speed: 12,
+    attackInterval: 3.0,   attackWindup: 0.75,
+    kbCount: 99, scale: 1.7,
+    attackType: 'area', areaRadius: 98, projectile: 'beam',
+    kbImmune: true,
+    stun:   { duration: 4.0, chance: 0.25 },
+    weaken: { chance: 0.20, rate: 0.8, duration: 3.0 },
+    money: 5000,
+    isBoss: true,
+  },
+
+  /* ============================================================
+     ★★ 闇堕ちあき坊 ── だい7しょうの さいごの ボス ★★
+
+     あき坊の いろちがい。くろ・グレー・シルバーを きほんに、
+     めだけが まっかに ひかる。闇の ちからに あやつられた すがた。
+
+     ぞくせい：かみ ＋ ゆうれい の 2つもち
+       → かみ  ：ぜんぶの ぞくせいに つよく（あたえる 1.2ばい／うける 0.8ばい）
+       → ゆうれい：あいしょうは ぜんぶ ふつう。でも──
+
+     ★★ むぞくせい と パワー の こうげきが きかない（ダメージ 0）★★
+        しゅりへん・ドンドコ力士・豪傑天むす丸・ずにお・ぷりおぷりねこ・
+        タンクン・かべくん の こうげきは とおらない。
+        （ふくごう ぞくせい なら とおる、という ルールは 霊太郎と おなじ）
+
+     ★ぶきに なるのは「ほんもの の あき坊」だけ
+        かみ ぞくせい どうしなので、あき坊の こうげきだけが 1.44ばい とおり、
+        うける ダメージも 0.96ばいで すむ。
+        ほかは ひー坊・スティーブ・バケ着 など ぞくせいもちで せめる。
+
+     ★はどう レベル5 ＋ ひろい はんいこうげき。
+       かべを ならべても うしろまで まとめて けずられる。
+     ============================================================ */
+  yamiakibou: {
+    id: 'yamiakibou', name: '闇堕ちあき坊',
+    attr: ['god', 'ghost'],
+    hp: 58000,  atk: 1000,  range: 360,  speed: 15,
+    attackInterval: 2.8,   attackWindup: 0.75,
+    kbCount: 99, scale: 2.1,
+    attackType: 'area', areaRadius: 105, projectile: null,
+    kbImmune: true,
+    /* ★むぞくせい と パワーの こうげきは ダメージ 0 */
+    nullify: { attrs: ['none', 'power'] },
+    /* ★はどう レベル5 */
+    wave: { level: 5, damageRate: 1.0 },
+    stun:   { duration: 2.5, chance: 0.22 },
+    weaken: { chance: 0.25, rate: 0.6, duration: 4.0 },
+    enrage: { below: 0.35, intervalMult: 0.65 },
+    money: 12000,
+    isBoss: true,
+  },
+
   /* ============================================================
      ここから した は だい6しょう「魔導士の里」の てき
      ほとんどが まじゅつし。けもの（シャドウヤマネコ）が とても ゆうり
@@ -1693,6 +1934,14 @@ const BACKGROUNDS = {
     sky: ['#1a0f3d', '#3a2270', '#6b4aa8'],
     hillFar: '#2c1c56', hillNear: '#180e35',
     ground: '#241640', groundTop: '#3a2568',
+    deco: 'star',
+  },
+
+  /* 闇の頂（だい7しょう・ボスラッシュ）*/
+  yami: {
+    sky: ['#05040a', '#160d22', '#2e1230'],
+    hillFar: '#140a1e', hillNear: '#0a050f',
+    ground: '#120a18', groundTop: '#241030',
     deco: 'star',
   },
 
@@ -2648,6 +2897,166 @@ const STAGES = [
     ],
   },
 
+  /* ==========================================================
+     だい7しょう「闇の頂」── ボスラッシュ
+
+     これまでの ボスが「覚醒」して つぎつぎ おそって くる さいごの みち。
+     1コースに 2〜3たいの ボスが でて くる。
+     ボスは てきの しろの たいりょくが へると じゅんばんに でて くるので、
+     いっきに かたを つけようと せず、1たいずつ ならべて たおすのが コツ。
+     ========================================================== */
+
+  /* ---------------- 7-1 めざめの もん ---------------- */
+  {
+    no: 67, chapter: 7, course: 1,
+    name: 'めざめの もん',
+    desc: 'はじまりの のはらの ぬしたちが 闇の ちからで よみがえる',
+    bg: 'yami',
+    castleHp: 6000,
+    enemyMult: 1.00,
+    moneyMult: 2.4,
+    reward: { coins: 2, exp: 2400 },
+    waves: [
+      { at: 3,  id: 'togehaya', count: 3, gap: 0.9 },
+      { at: 18, id: 'tanupon',  count: 2, gap: 1.1 },
+      { at: 36, id: 'togehaya', count: 3, gap: 0.9, repeat: 30 },
+      { at: 54, id: 'tanupon',  count: 2, gap: 1.1, repeat: 32 },
+      /* ★ボス 2たい */
+      { atCastleHp: 0.85, id: 'hetakirin_x', count: 1 },
+      { atCastleHp: 0.45, id: 'okashiman_x', count: 1 },
+    ],
+  },
+
+  /* ---------------- 7-2 けものの おうざ ---------------- */
+  {
+    no: 68, chapter: 7, course: 2,
+    name: 'けものの おうざ',
+    desc: 'けものみちの ぬしと 森喰らいが そろって たちふさがる',
+    bg: 'yami',
+    castleHp: 5300,
+    enemyMult: 1.00,
+    moneyMult: 2.6,
+    reward: { coins: 2, exp: 2500 },
+    waves: [
+      { at: 3,  id: 'tanupon',  count: 2, gap: 1.0 },
+      { at: 20, id: 'kokejika', count: 1 },
+      { at: 38, id: 'tanupon',  count: 2, gap: 1.0, repeat: 30 },
+      { at: 56, id: 'kumatta',  count: 1, repeat: 40 },
+      /* ★ボス 2たい */
+      { atCastleHp: 0.85, id: 'nushinoookami_x', count: 1 },
+      { atCastleHp: 0.45, id: 'gaou_x',          count: 1 },
+    ],
+  },
+
+  /* ---------------- 7-3 くろがねの はいきょ ---------------- */
+  {
+    no: 69, chapter: 7, course: 3,
+    name: 'くろがねの はいきょ',
+    desc: 'こうじょうの きかいたちが 闇に つながれて うごきだす',
+    bg: 'yami',
+    castleHp: 6200,
+    enemyMult: 1.00,
+    moneyMult: 2.4,
+    reward: { coins: 2, exp: 2600 },
+    waves: [
+      { at: 3,  id: 'ironkokko', count: 2, gap: 1.0 },
+      { at: 20, id: 'pressuke',  count: 1 },
+      { at: 38, id: 'ironkokko', count: 2, gap: 1.0, repeat: 30 },
+      { at: 56, id: 'pressuke',  count: 1, repeat: 38 },
+      /* ★ボス 2たい（どちらも メタル。ほのおの なかまが ゆうり）*/
+      { atCastleHp: 0.85, id: 'garakutei_x', count: 1 },
+      { atCastleHp: 0.45, id: 'meltgear_x',  count: 1 },
+    ],
+  },
+
+  /* ---------------- 7-4 しずんだ おうこく ---------------- */
+  {
+    no: 70, chapter: 7, course: 4,
+    name: 'しずんだ おうこく',
+    desc: 'うみの ぬしと あばれ りゅうが そろって おそって くる',
+    bg: 'yami',
+    castleHp: 6400,
+    enemyMult: 1.00,
+    moneyMult: 2.2,
+    reward: { coins: 2, exp: 2700 },
+    waves: [
+      { at: 3,  id: 'umihebi',    count: 2, gap: 1.0 },
+      { at: 20, id: 'octocannon', count: 1 },
+      { at: 38, id: 'umihebi',    count: 2, gap: 1.0, repeat: 28 },
+      { at: 56, id: 'daiouei',    count: 1, repeat: 34 },
+      /* ★ボス 2たい */
+      { atCastleHp: 0.85, id: 'nereid_x', count: 1 },
+      { atCastleHp: 0.45, id: 'leviza_x', count: 1 },
+    ],
+  },
+
+  /* ---------------- 7-5 まじゅつの きょくち ---------------- */
+  {
+    no: 71, chapter: 7, course: 5,
+    name: 'まじゅつの きょくち',
+    desc: 'ボス 3たい。ほのおの おにと けんじゃ、そして きりんが まちうける',
+    bg: 'yami',
+    castleHp: 6600,
+    enemyMult: 1.00,
+    moneyMult: 2.4,
+    reward: { coins: 3, exp: 2900 },
+    waves: [
+      { at: 3,  id: 'houkigob',   count: 3, gap: 0.9 },
+      { at: 20, id: 'chaosspell', count: 1 },
+      { at: 38, id: 'houkigob',   count: 3, gap: 0.9, repeat: 28 },
+      { at: 56, id: 'runegolem',  count: 1, repeat: 36 },
+      /* ★ボス 3たい */
+      { atCastleHp: 0.88, id: 'onigon_x',     count: 1 },
+      { atCastleHp: 0.58, id: 'sagecharon_x', count: 1 },
+      { atCastleHp: 0.28, id: 'hetakirin_x',  count: 1 },
+    ],
+  },
+
+  /* ---------------- 7-6 ぜつぼうの かいろう ---------------- */
+  {
+    no: 72, chapter: 7, course: 6,
+    name: 'ぜつぼうの かいろう',
+    desc: 'ボス 3たい。かたい なみの けものと 大魔導士が まちかまえる',
+    bg: 'yami',
+    castleHp: 5400,
+    enemyMult: 1.00,
+    moneyMult: 2.6,
+    reward: { coins: 3, exp: 3200 },
+    waves: [
+      { at: 3,  id: 'kongaragan', count: 2, gap: 1.1 },
+      { at: 22, id: 'runegolem',  count: 1 },
+      { at: 40, id: 'kongaragan', count: 2, gap: 1.1, repeat: 30 },
+      { at: 58, id: 'chaosspell', count: 1, repeat: 34 },
+      /* ★ボス 3たい */
+      { atCastleHp: 0.88, id: 'okashiman_x', count: 1 },
+      { atCastleHp: 0.58, id: 'zabaan_x',    count: 1 },
+      { atCastleHp: 0.26, id: 'zenos_x',     count: 1 },
+    ],
+  },
+
+  /* ---------------- 7-7 闇の いただき（さいしゅうけっせん）---------------- */
+  {
+    no: 73, chapter: 7, course: 7,
+    name: '闇の いただき',
+    desc: 'さいごの てき「闇堕ちあき坊」。むぞくせいと パワーの こうげきは とおらない',
+    bg: 'boss',
+    castleHp: 8500,
+    enemyMult: 1.00,
+    moneyMult: 2.6,
+    reward: { coins: 5, exp: 5000 },
+    waves: [
+      { at: 3,  id: 'kongaragan', count: 2, gap: 1.0 },
+      { at: 18, id: 'chaosspell', count: 1 },
+      { at: 32, id: 'kongaragan', count: 2, gap: 1.0, repeat: 22 },
+      { at: 46, id: 'runegolem',  count: 1, repeat: 26 },
+      { at: 60, id: 'chaosspell', count: 1, repeat: 24 },
+      /* ★とりまきの ボス 2たい → そして さいごの あき坊 */
+      { atCastleHp: 0.90, id: 'sagecharon_x', count: 1 },
+      { atCastleHp: 0.62, id: 'zenos_x',      count: 1 },
+      { atCastleHp: 0.34, id: 'yamiakibou',   count: 1 },
+    ],
+  },
+
 ];
 
 
@@ -2699,12 +3108,13 @@ function starRate(kind, value) {
    なまえと ばしょを かえたい ときは ここだけ いじれば OK。
    -------------------------------------------------------------------------- */
 const CHAPTERS = {
-  1: { name: 'はじまりの のはら',     short: 'のはら',   x: 0.09, y: 0.54, icon: '🌱' },
-  2: { name: 'はがねの まち',         short: 'はがね',   x: 0.23, y: 0.32, icon: '⚙️' },
-  3: { name: 'けものみち',            short: 'けもの',   x: 0.38, y: 0.74, icon: '🐾' },
-  4: { name: '廃れたメカニック工場',   short: 'こうじょう', x: 0.55, y: 0.36, icon: '🏭' },
-  5: { name: '賑わう近海',            short: 'きんかい', x: 0.72, y: 0.72, icon: '🌊' },
-  6: { name: '魔導士の里',            short: 'まどうし', x: 0.89, y: 0.42, icon: '🔮' },
+  1: { name: 'はじまりの のはら',     short: 'のはら',   x: 0.08, y: 0.56, icon: '🌱' },
+  2: { name: 'はがねの まち',         short: 'はがね',   x: 0.21, y: 0.33, icon: '⚙️' },
+  3: { name: 'けものみち',            short: 'けもの',   x: 0.34, y: 0.75, icon: '🐾' },
+  4: { name: '廃れたメカニック工場',   short: 'こうじょう', x: 0.48, y: 0.38, icon: '🏭' },
+  5: { name: '賑わう近海',            short: 'きんかい', x: 0.62, y: 0.74, icon: '🌊' },
+  6: { name: '魔導士の里',            short: 'まどうし', x: 0.76, y: 0.44, icon: '🔮' },
+  7: { name: '闇の頂',                short: 'やみ',     x: 0.91, y: 0.20, icon: '🌑' },
 };
 
 

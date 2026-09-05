@@ -330,6 +330,87 @@ function drawHiibou(ctx, s) {
 }
 
 
+/* ---- 隕坊：ひー坊の しんかけい ----
+   いんせきに なった ひー坊。あかい わの なかに オレンジの まるい かお。
+   めは たての くろい せんが 2ほん だけ。
+   うしろに ほのおの おを ひきながら すすむ。
+   こうげきの うごきは だい1けいたいと おなじく「ふりかぶって なげる」。   */
+function drawInbou(ctx, s) {
+  const a = s.atk;
+  const bob = Math.sin(s.t * 3.2) * 3;
+  ctx.save();
+  ctx.translate(0, -8 + bob);
+
+  /* --- ほのおの お（うしろ・ななめ した へ）--- */
+  for (let i = 0; i < 12; i++) {
+    const ph = (s.t * 1.5 + i * 0.28) % 1;
+    const len = 24 + ph * 74;
+    const tx = -len;
+    const ty = -30 + ph * 34;
+    const r  = (1 - ph) * 11 + 2.5;
+    ctx.fillStyle = (i % 3 === 0)
+      ? 'rgba(255,235,59,' + (0.55 * (1 - ph)) + ')'
+      : ((i % 3 === 1) ? 'rgba(255,112,67,' + (0.55 * (1 - ph)) + ')'
+                       : 'rgba(211,47,47,' + (0.5 * (1 - ph)) + ')');
+    ctx.beginPath();
+    ctx.arc(tx + Math.sin(ph * 7 + i) * 5, ty + Math.cos(ph * 5 + i) * 4, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  /* おの すじ（ながい ひのて）*/
+  ctx.strokeStyle = 'rgba(229,57,53,.7)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  for (let i = 0; i < 4; i++) {
+    const w = Math.sin(s.t * 5 + i) * 6;
+    ctx.beginPath();
+    ctx.moveTo(-22, -34 + i * 4);
+    ctx.quadraticCurveTo(-56, -26 + i * 6 + w, -92 - i * 7, -6 + i * 5 + w);
+    ctx.stroke();
+  }
+
+  /* --- そとの あかい わ --- */
+  const halo = ctx.createRadialGradient(0, -34, 20, 0, -34, 42);
+  halo.addColorStop(0, 'rgba(255,87,34,0)');
+  halo.addColorStop(0.7, 'rgba(255,87,34,.35)');
+  halo.addColorStop(1, 'rgba(255,87,34,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(0, -34, 42, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = '#e0402a';
+  ctx.beginPath(); ctx.arc(0, -34, 30, 0, Math.PI * 2); ctx.fill();
+
+  /* --- なかの オレンジの かお --- */
+  const g = ctx.createRadialGradient(-6, -42, 4, 0, -34, 22);
+  g.addColorStop(0, '#ffc046'); g.addColorStop(1, '#f0a021');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(0, -34, 21, 0, Math.PI * 2); ctx.fill();
+
+  /* --- め：たての くろい せんが 2ほん --- */
+  ctx.strokeStyle = '#1b1b1b';
+  ctx.lineWidth = 2; ctx.lineCap = 'butt';
+  const blink = (Math.sin(s.t * 0.9) > 0.97) ? 0.25 : 1;
+  ctx.beginPath(); ctx.moveTo(-1, -44); ctx.lineTo(-1, -44 + 20 * blink); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(9, -43); ctx.lineTo(9, -43 + 15 * blink); ctx.stroke();
+
+  /* --- ふりかぶる うで（だい1けいたいと おなじ うごき）--- */
+  const swing = (a >= 0) ? -2.2 + a * 3.0 : -0.4;
+  ctx.save();
+  ctx.translate(18, -34);
+  ctx.rotate(swing);
+  ctx.strokeStyle = '#c1341f'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(18, 0); ctx.stroke();
+  if (a >= 0) {
+    const r = 6 + a * 9;
+    const fg = ctx.createRadialGradient(23, 0, 1, 23, 0, r);
+    fg.addColorStop(0, '#fffde7'); fg.addColorStop(0.55, '#ffa726');
+    fg.addColorStop(1, 'rgba(255,87,34,0)');
+    ctx.fillStyle = fg;
+    ctx.beginPath(); ctx.arc(23, 0, r, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+
+  ctx.restore();
+}
+
+
 /* ==================================================================
    だい6しょう「魔導士の里」の てきたち
    ================================================================== */
@@ -2800,6 +2881,238 @@ function drawTokinogara(ctx, s) {
   ctx.beginPath(); ctx.moveTo(24, 0); ctx.lineTo(24, -5); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(24, 0); ctx.lineTo(28, 2); ctx.stroke();
   ctx.restore();
+
+  ctx.restore();
+}
+
+
+
+/* ============================================================
+   だい7しょう「闇の頂」の びょうが
+   ============================================================ */
+
+/* ---- 覚醒オーラ ----
+   よみがえった ボスの まわりに、くろい もやと あかい ひが たつ。
+   もとの ボスの えを そのまま つかい、うしろと まえに オーラを かさねる。 */
+function awakenAura(ctx, s, back) {
+  const pulse = 0.5 + Math.sin(s.t * 3.4) * 0.5;
+  ctx.save();
+  if (back) {
+    /* うしろ：くろむらさきの もや */
+    const g = ctx.createRadialGradient(0, -60, 10, 0, -60, 96);
+    g.addColorStop(0,   'rgba(90,10,40,' + (0.42 + pulse * 0.16) + ')');
+    g.addColorStop(0.6, 'rgba(48,6,26,0.26)');
+    g.addColorStop(1,   'rgba(20,0,10,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, -60, 96, 0, Math.PI * 2); ctx.fill();
+    /* じめんの あかい わ */
+    ctx.strokeStyle = 'rgba(229,57,53,' + (0.30 + pulse * 0.25) + ')';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ellipse(ctx, 0, -3, 46 + pulse * 6, 12 + pulse * 2); ctx.stroke();
+  } else {
+    /* まえ：あかい ひのこが たちのぼる */
+    ctx.fillStyle = 'rgba(255,87,34,' + (0.42 + pulse * 0.3) + ')';
+    for (let i = 0; i < 7; i++) {
+      const ph = (s.t * 0.85 + i * 0.37) % 1;
+      const ex = -40 + ((i * 37) % 80);
+      const ey = -6 - ph * 118;
+      const r  = (1 - ph) * 3.4 + 0.7;
+      ctx.beginPath(); ctx.arc(ex + Math.sin(ph * 7 + i) * 6, ey, r, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+/* もとの ボスの えを「覚醒」すがたに つつむ */
+function awakened(fn) {
+  return function (ctx, s) {
+    awakenAura(ctx, s, true);
+    fn(ctx, s);
+    awakenAura(ctx, s, false);
+  };
+}
+
+
+/* ---- 闇堕ちあき坊：さいごの ボス ----
+   あき坊の いろちがい。くろ・グレー・シルバーが きほんで、
+   めだけが まっかに ひかる。闇の ちからに あやつられて いる すがた。   */
+function drawYamiAkibou(ctx, s) {
+  const a = s.atk;
+  const float = Math.sin(s.t * 2.2) * 3;
+  const step = Math.sin(s.t * 6) * (s.moving ? 1 : 0);
+  const push = (a >= 0) ? (a < 0.65 ? -a * 8 : (a - 0.65) / 0.35 * 30 - 5.2) : 0;
+  const glow = (a >= 0) ? 0.45 + a * 0.45 : 0.3 + Math.sin(s.t * 3) * 0.08;
+
+  ctx.save();
+  ctx.translate(push, float);
+
+  /* --- 闇の オーラ（うしろ）--- */
+  const hg = ctx.createRadialGradient(0, -62, 8, 0, -62, 92);
+  hg.addColorStop(0,   'rgba(120,10,40,' + (glow * 0.85) + ')');
+  hg.addColorStop(0.5, 'rgba(40,6,24,0.4)');
+  hg.addColorStop(1,   'rgba(8,0,6,0)');
+  ctx.fillStyle = hg;
+  ctx.beginPath(); ctx.arc(0, -62, 92, 0, Math.PI * 2); ctx.fill();
+
+  /* --- くろい かみなり（ためて いる とき）--- */
+  if (a >= 0) {
+    ctx.strokeStyle = 'rgba(186,104,200,' + (0.45 + a * 0.5) + ')';
+    ctx.lineWidth = 3.4; ctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      const bx = -50 + i * 46, by = -138;
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      ctx.lineTo(bx + 7, by + 14);
+      ctx.lineTo(bx - 3, by + 16);
+      ctx.lineTo(bx + 5, by + 32);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(229,57,53,' + (0.3 + a * 0.4) + ')';
+    ctx.lineWidth = 1.6;
+    for (let i = 0; i < 3; i++) {
+      const bx = -50 + i * 46, by = -138;
+      ctx.beginPath();
+      ctx.moveTo(bx, by); ctx.lineTo(bx + 7, by + 14);
+      ctx.lineTo(bx - 3, by + 16); ctx.lineTo(bx + 5, by + 32);
+      ctx.stroke();
+    }
+  }
+
+  /* --- あし（くろい すそ）--- */
+  ctx.fillStyle = '#2a2a30';
+  roundRect(ctx, -26 - step * 3, -22, 22, 22, 8); ctx.fill();
+  roundRect(ctx,   6 + step * 3, -22, 22, 22, 8); ctx.fill();
+
+  /* --- ころも（くろ〜グレーの ローブ）--- */
+  const rg = ctx.createLinearGradient(0, -96, 0, -10);
+  rg.addColorStop(0, '#5a5f68');
+  rg.addColorStop(0.55, '#2e3138');
+  rg.addColorStop(1, '#131418');
+  ctx.fillStyle = rg;
+  ctx.beginPath();
+  ctx.moveTo(-30, -96);
+  ctx.quadraticCurveTo(-46, -50, -40, -10);
+  ctx.lineTo(40, -10);
+  ctx.quadraticCurveTo(46, -50, 30, -96);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#8c93a0'; ctx.lineWidth = 2; ctx.stroke();
+  /* すそに はしる あかい すじ */
+  ctx.strokeStyle = 'rgba(229,57,53,' + (0.5 + glow * 0.4) + ')';
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(-34, -18); ctx.quadraticCurveTo(-6, -30, 34, -18); ctx.stroke();
+
+  /* シルバーの おび */
+  const bg = ctx.createLinearGradient(-36, 0, 38, 0);
+  bg.addColorStop(0, '#8a919c'); bg.addColorStop(0.5, '#dfe4ea'); bg.addColorStop(1, '#767c86');
+  ctx.fillStyle = bg;
+  roundRect(ctx, -36, -52, 74, 11, 4); ctx.fill();
+  /* おびの まんなかの あかい たま */
+  ctx.fillStyle = '#b71c1c';
+  ctx.beginPath(); ctx.arc(2, -46, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,82,82,' + (0.55 + glow * 0.45) + ')';
+  ctx.beginPath(); ctx.arc(2, -46, 4.6, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#c9ced6'; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.arc(2, -46, 8, 0, Math.PI * 2); ctx.stroke();
+
+  /* --- ひげ（くろ〜シルバー）--- */
+  const beard = ctx.createLinearGradient(0, -104, 0, -46);
+  beard.addColorStop(0, '#9aa1ac'); beard.addColorStop(1, '#3a3d44');
+  ctx.fillStyle = beard;
+  ctx.beginPath();
+  ctx.moveTo(-22, -104);
+  ctx.quadraticCurveTo(-16, -58, 2, -46);
+  ctx.quadraticCurveTo(20, -58, 26, -104);
+  ctx.quadraticCurveTo(2, -92, -22, -104);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#6b7280'; ctx.lineWidth = 1.6; ctx.stroke();
+
+  /* --- あたま --- */
+  ctx.save();
+  ctx.translate(2, -126);
+
+  /* もじゃもじゃの かみ（くろ・シルバーの ハイライト）*/
+  ctx.fillStyle = '#26282e';
+  ctx.beginPath();
+  for (let i = 0; i <= 14; i++) {
+    const an = Math.PI + (i / 14) * Math.PI;
+    const rr = 34 + Math.sin(i * 2.7) * 6;
+    const px = Math.cos(an) * rr, py = Math.sin(an) * rr * 0.9;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(200,208,218,.5)'; ctx.lineWidth = 1.4; ctx.stroke();
+
+  /* かお（はいいろ）*/
+  const fg = ctx.createLinearGradient(0, -26, 0, 26);
+  fg.addColorStop(0, '#7e838d'); fg.addColorStop(1, '#4a4e57');
+  ctx.fillStyle = fg;
+  ellipse(ctx, 0, 0, 28, 26); ctx.fill();
+
+  /* ★まっかに ひかる め */
+  ctx.fillStyle = '#1a1a1e';
+  ellipse(ctx, -10, -6, 8, 9); ctx.fill();
+  ellipse(ctx, 11, -6, 8, 9); ctx.fill();
+  ctx.save();
+  ctx.shadowColor = 'rgba(255,23,68,' + (0.75 + glow * 0.25) + ')';
+  ctx.shadowBlur = 16 + glow * 14;
+  ctx.fillStyle = '#ff1744';
+  ellipse(ctx, -9, -5, 4.6, 5.4); ctx.fill();
+  ellipse(ctx, 12, -5, 4.6, 5.4); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = 'rgba(255,205,210,.9)';
+  ctx.beginPath(); ctx.arc(-10.4, -6.6, 1.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(10.6, -6.6, 1.5, 0, Math.PI * 2); ctx.fill();
+
+  /* おしつぶされた くち */
+  ctx.fillStyle = '#2a0d12';
+  ellipse(ctx, 1, 12, 7, (a >= 0 ? 11 : 8)); ctx.fill();
+  ctx.fillStyle = 'rgba(183,28,28,.55)';
+  ellipse(ctx, 1, 12, 4.4, (a >= 0 ? 7.4 : 5)); ctx.fill();
+
+  /* シルバーの かんむり */
+  const cg = ctx.createLinearGradient(-32, 0, 34, 0);
+  cg.addColorStop(0, '#727881'); cg.addColorStop(0.5, '#e3e8ee'); cg.addColorStop(1, '#6a707a');
+  ctx.fillStyle = cg;
+  ctx.strokeStyle = '#3d424a'; ctx.lineWidth = 1.6;
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * 12 - 5, -30);
+    ctx.quadraticCurveTo(i * 12, -48 - (i === 0 ? 8 : 0), i * 12 + 5, -30);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  ctx.fillStyle = cg;
+  roundRect(ctx, -32, -32, 66, 8, 4); ctx.fill();
+  /* かんむりの あかい たま */
+  ctx.fillStyle = 'rgba(255,23,68,' + (0.7 + glow * 0.3) + ')';
+  ctx.beginPath(); ctx.arc(1, -44, 3.6, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  /* --- りょうての うで（かおを おさえて いる）--- */
+  ctx.strokeStyle = '#6e737d'; ctx.lineWidth = 14; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-30, -80); ctx.quadraticCurveTo(-44, -110, -28, -126); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(32, -80); ctx.quadraticCurveTo(48, -110, 32, -126); ctx.stroke();
+  /* シルバーの うでわ */
+  ctx.strokeStyle = '#d7dce3'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.moveTo(-36, -96); ctx.lineTo(-28, -92); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(40, -96);  ctx.lineTo(32, -92);  ctx.stroke();
+  /* て */
+  ctx.fillStyle = '#767b85';
+  ctx.beginPath(); ctx.arc(-28, -126, 10, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(32, -126, 10, 0, Math.PI * 2); ctx.fill();
+
+  /* --- まえがわの 闇の つぶ --- */
+  ctx.fillStyle = 'rgba(186,104,200,' + (0.35 + glow * 0.3) + ')';
+  for (let i = 0; i < 9; i++) {
+    const ph = (s.t * 0.6 + i * 0.31) % 1;
+    const ex = -46 + ((i * 41) % 96);
+    const ey = -8 - ph * 150;
+    ctx.beginPath();
+    ctx.arc(ex + Math.sin(ph * 6 + i) * 7, ey, (1 - ph) * 3.6 + 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   ctx.restore();
 }
@@ -6408,6 +6721,7 @@ const DRAWERS = {
   tokinotabibito: drawTokinotabibito,
   tokinogara: drawTokinogara,
   hiibou: drawHiibou,
+  inbou: drawInbou,
   zunio: drawZunio,
   zunita: drawZunita,
   shurihen: drawShurihen,
@@ -6456,6 +6770,23 @@ const DRAWERS = {
   kongaragan: drawKongaragan,
   hetakirin: drawHetakirin,
   okashiman: drawOkashiman,
+
+  /* ---- だい7しょう「闇の頂」---- */
+  /* 覚醒ボス：もとの えに 闇の オーラを かさねる */
+  hetakirin_x:      awakened(drawHetakirin),
+  okashiman_x:      awakened(drawOkashiman),
+  nushinoookami_x:  awakened(drawNushinoookami),
+  gaou_x:           awakened(drawGaou),
+  garakutei_x:      awakened(drawGarakutei),
+  meltgear_x:       awakened(drawMeltgear),
+  nereid_x:         awakened(drawNereid),
+  leviza_x:         awakened(drawLeviza),
+  zabaan_x:         awakened(drawZabaan),
+  onigon_x:         awakened(drawOnigon),
+  sagecharon_x:     awakened(drawSagecharon),
+  zenos_x:          awakened(drawZenos),
+  /* さいごの ボス */
+  yamiakibou:       drawYamiAkibou,
 };
 
 

@@ -754,7 +754,11 @@ const Game = {
       u.dead = true;
       if (u.side === 'enemy' && u.def.money) {
         const before = this.money;
-        this.money = Math.min(this.moneyMax, this.money + u.def.money);
+        /* コースごとの おかね ばいりつ（moneyMult）。
+           よわい てきばかりの コースだと おかねが たまらず、
+           たかい なかまを だせなく なる ため、コースがわで ちょうせいする。 */
+        const mm = (this.stage && this.stage.moneyMult) ? this.stage.moneyMult : 1;
+        this.money = Math.min(this.moneyMax, this.money + Math.round(u.def.money * mm));
         const got = Math.round(this.money - before);
         if (got > 0) {
           this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 100,
@@ -803,14 +807,27 @@ const Game = {
       w.x += move * w.dir;
       w.left -= move;
       w.age += dt;
-      for (const o of this.units) {
-        if (o.dead || o.side === w.side) continue;
-        if (w.hit.indexOf(o) >= 0) continue;
-        if (Math.abs(o.x - w.x) > cf.hitW) continue;
+      /* なみが とおる じゅんばん（てまえから おく）に ならべて しらべる。
+         ★はどうストッパー が いると、そこで なみが きえる ので
+           うしろの なかまには とどかない。                         */
+      const targets = this.units.filter(o =>
+        !o.dead && o.side !== w.side && w.hit.indexOf(o) < 0 &&
+        Math.abs(o.x - w.x) <= cf.hitW);
+      targets.sort((a, b) => (a.x - b.x) * w.dir);
+      let stopped = false;
+      for (const o of targets) {
         w.hit.push(o);
+        /* ★はどうストッパー：じぶんは ダメージ 0。なみは ここで とまる */
+        if (o.def.waveStopper) {
+          this.addEffect({ type: 'dmg', x: o.x, y: this.groundWorldY() - 92 - o.lane,
+                           text: 'はどう ストップ！', color: '#4dd0e1', life: 1.0 });
+          stopped = true;
+          break;
+        }
         const mult = attrMultiplier(w.attr, o.def.attr);
         this.damageUnit(o, Math.round(w.atk * mult), w.attr, mult, false, false);
       }
+      if (stopped) { this.shocks.splice(i, 1); continue; }
       if (w.left <= 0 || w.x < -60 || w.x > CONFIG.fieldLength + 60) this.shocks.splice(i, 1);
     }
   },
