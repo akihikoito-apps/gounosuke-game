@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '4.0';
+  const GAME_VERSION = '4.1';
 
 
   /* =================================================
@@ -1342,38 +1342,48 @@
     return L;
   }
 
+  /* すうじを「★★★☆☆ 1900」の かたちに する */
+  function statRow(label, kind, value, shown) {
+    const n = starRate(kind, value);
+    let st = '';
+    for (let i = 0; i < 5; i++) st += (i < n) ? '★' : '☆';
+    return '<span class="st-row">' +
+             '<i class="st-lb">' + label + '</i>' +
+             '<i class="st-star s' + n + '">' + st + '</i>' +
+             '<i class="st-num">' + (shown === undefined ? value : shown) + '</i>' +
+           '</span>';
+  }
+  /* ★を つけない ぎょう */
+  function plainRow(label, shown) {
+    return '<span class="st-row"><i class="st-lb">' + label + '</i>' +
+           '<i class="st-star none">－</i><i class="st-num">' + shown + '</i></span>';
+  }
+
   /* --- ずかんの カード 1まい --- */
   function dexCard(def, isAlly) {
     const s = slot();
     const row = document.createElement('div');
     row.className = 'dex-card';
 
-    let stats = '';
+    const hits  = def.multiHit ? def.multiHit.count : 1;
+    const cycle = def.attackInterval + def.attackWindup;
+    const mul   = isAlly ? levelMult(s ? effLevel(s, def.id) : 1, def.rarity) : 1;
+    const hp    = Math.round(def.hp * mul);
+    const atk   = Math.round(def.atk * mul);
+    const dps   = Math.round((atk * hits) / cycle);
+
+    let stats =
+      statRow('たいりょく', 'hp',    hp,  hp) +
+      statRow('こうげき',   'atk',   atk, atk + (hits > 1 ? '×' + hits : '')) +
+      statRow('1びょうの ダメージ', 'dps', dps, dps) +
+      statRow('しゃてい',   'range', def.range, def.range) +
+      statRow('うごく はやさ', 'speed', def.speed, def.speed) +
+      statRow('こうげきの はやさ', 'cycle', cycle, cycle.toFixed(1) + 'びょうに 1かい');
     if (isAlly) {
-      const lv  = s ? effLevel(s, def.id) : 1;
-      const mul = levelMult(lv, def.rarity);
-      const hits = def.multiHit ? def.multiHit.count : 1;
-      const dps = Math.round((def.atk * hits * mul) / (def.attackInterval + def.attackWindup));
-      stats =
-        '<span>コスト <b>' + def.cost + '</b></span>' +
-        '<span>さいせい <b>' + def.recharge + '</b>びょう</span>' +
-        '<span>たいりょく <b>' + Math.round(def.hp * mul) + '</b></span>' +
-        '<span>こうげき <b>' + Math.round(def.atk * mul) + '</b>' + (hits > 1 ? '×' + hits : '') + '</span>' +
-        '<span>しゃてい <b>' + def.range + '</b></span>' +
-        '<span>はやさ <b>' + def.speed + '</b></span>' +
-        '<span>こうげき かんかく <b>' + (def.attackInterval + def.attackWindup).toFixed(1) + '</b>びょう</span>' +
-        '<span>1びょう ダメージ <b>' + dps + '</b></span>';
+      stats += statRow('だしやすさ', 'cheap', def.cost, 'コスト ' + def.cost) +
+               plainRow('さいせい', def.recharge + 'びょう');
     } else {
-      const hits = def.multiHit ? def.multiHit.count : 1;
-      const dps = Math.round((def.atk * hits) / (def.attackInterval + def.attackWindup));
-      stats =
-        '<span>たいりょく <b>' + def.hp + '</b></span>' +
-        '<span>こうげき <b>' + def.atk + '</b>' + (hits > 1 ? '×' + hits : '') + '</span>' +
-        '<span>しゃてい <b>' + def.range + '</b></span>' +
-        '<span>はやさ <b>' + def.speed + '</b></span>' +
-        '<span>こうげき かんかく <b>' + (def.attackInterval + def.attackWindup).toFixed(1) + '</b>びょう</span>' +
-        '<span>1びょう ダメージ <b>' + dps + '</b></span>' +
-        '<span>たおすと <b>' + (def.money || 0) + '</b>えん</span>';
+      stats += plainRow('たおすと', (def.money || 0) + 'えん');
     }
 
     const ab = abilityLines(def);
