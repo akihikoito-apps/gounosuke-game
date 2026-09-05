@@ -3380,6 +3380,118 @@ function drawPochi(ctx, s) {
 }
 
 
+/* ---- アイアンゴーレム ----
+   しろっぽい てつの からだ。かたい しかくい あたまに おおきな はな、
+   ちょっと よりめ。からだと うでに みどりの つるが まきつく。
+   こうげきの ときは りょううでを おおきく ふりあげて うちあげる。      */
+function drawIronGolem(ctx, s) {
+  const a = s.atk;
+  const step = Math.sin(s.t * 4.5) * (s.moving ? 1 : 0);
+  /* ふりかぶり → ふりあげ */
+  let arm = -0.15;
+  if (a >= 0) arm = (a < 0.6) ? (-0.15 + a / 0.6 * 0.75) : (0.6 - (a - 0.6) / 0.4 * 2.4);
+  const hurt = (s.hpRate !== undefined && s.hpRate < 0.5);
+
+  const IRON = '#c9ccc4', IRON2 = '#a9ada4', IRON3 = '#8d918a', VINE = '#5b8f3a';
+
+  ctx.save();
+
+  /* --- あし（ふとい 2ほん）--- */
+  ctx.fillStyle = IRON2;
+  roundRect(ctx, -22 - step * 4, -34, 18, 34, 4); ctx.fill();
+  roundRect(ctx,   5 + step * 4, -34, 18, 34, 4); ctx.fill();
+  ctx.fillStyle = IRON3;
+  roundRect(ctx, -24 - step * 4, -6, 22, 6, 3); ctx.fill();
+  roundRect(ctx,   4 + step * 4, -6, 22, 6, 3); ctx.fill();
+
+  /* --- からだ（しかくい）--- */
+  const bg = ctx.createLinearGradient(-28, -96, 28, -36);
+  bg.addColorStop(0, IRON); bg.addColorStop(1, IRON2);
+  ctx.fillStyle = bg;
+  roundRect(ctx, -28, -96, 56, 62, 6); ctx.fill();
+  ctx.strokeStyle = IRON3; ctx.lineWidth = 2;
+  roundRect(ctx, -28, -96, 56, 62, 6); ctx.stroke();
+
+  /* からだの つる（みどり）*/
+  ctx.strokeStyle = VINE; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-24, -88); ctx.quadraticCurveTo(-6, -74, -18, -56);
+  ctx.quadraticCurveTo(-28, -44, -10, -38); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(20, -90); ctx.quadraticCurveTo(6, -78, 16, -62); ctx.stroke();
+  /* つるの は */
+  ctx.fillStyle = '#7cb342';
+  for (const [vx, vy] of [[-22, -80], [-14, -62], [-14, -42], [16, -82], [14, -66]]) {
+    ellipse(ctx, vx, vy, 5, 3.4); ctx.fill();
+  }
+
+  /* たいりょくが へると ひびが はいる（マイクラと おなじ）*/
+  if (hurt) {
+    ctx.strokeStyle = 'rgba(70,74,68,.8)'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(-6, -92); ctx.lineTo(2, -78); ctx.lineTo(-4, -66); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(14, -56); ctx.lineTo(6, -46); ctx.stroke();
+  }
+
+  /* --- うで（ながく、ひざの あたりまで たれる）--- */
+  for (const side of [-1, 1]) {
+    ctx.save();
+    ctx.translate(side * 30, -88);
+    ctx.rotate(side * arm * (side > 0 ? 1 : -1) - (side > 0 ? 0 : 0));
+    ctx.fillStyle = (side > 0) ? IRON : IRON2;
+    roundRect(ctx, -8, 0, 16, 56, 5); ctx.fill();
+    ctx.strokeStyle = IRON3; ctx.lineWidth = 1.8;
+    roundRect(ctx, -8, 0, 16, 56, 5); ctx.stroke();
+    /* こぶし */
+    ctx.fillStyle = IRON2;
+    roundRect(ctx, -10, 50, 20, 16, 4); ctx.fill();
+    /* うでの つる */
+    ctx.strokeStyle = VINE; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(-6, 10); ctx.quadraticCurveTo(4, 22, -4, 34); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* --- あたま --- */
+  ctx.save();
+  ctx.translate(2, -96);
+  ctx.fillStyle = IRON;
+  roundRect(ctx, -19, -34, 38, 34, 4); ctx.fill();
+  ctx.strokeStyle = IRON3; ctx.lineWidth = 2;
+  roundRect(ctx, -19, -34, 38, 34, 4); ctx.stroke();
+  /* おおきな はな（まんなかに でっぱる）*/
+  ctx.fillStyle = IRON2;
+  roundRect(ctx, -5, -22, 12, 22, 3); ctx.fill();
+  ctx.fillStyle = IRON3;
+  roundRect(ctx, 7, -20, 6, 18, 2); ctx.fill();
+  /* ちょっと よりめ */
+  ctx.fillStyle = '#2b2f2a';
+  roundRect(ctx, -13, -24, 7, 8, 2); ctx.fill();
+  roundRect(ctx,   8, -24, 7, 8, 2); ctx.fill();
+  ctx.fillStyle = '#d84315';
+  roundRect(ctx, -8.5, -22, 2.6, 4, 1); ctx.fill();
+  roundRect(ctx,  8.5, -22, 2.6, 4, 1); ctx.fill();
+  /* あたまの つる */
+  ctx.strokeStyle = VINE; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-19, -28); ctx.quadraticCurveTo(-10, -20, -16, -10); ctx.stroke();
+  ctx.restore();
+
+  /* --- ふりあげの かぜ（うちあげる ちから）--- */
+  if (a >= 0.55) {
+    const k = (a - 0.55) / 0.45;
+    ctx.strokeStyle = 'rgba(255,255,255,' + (0.55 * (1 - k)) + ')';
+    ctx.lineWidth = 4; ctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      const yy = -30 - i * 26 - k * 40;
+      ctx.beginPath();
+      ctx.moveTo(34 + i * 5, yy);
+      ctx.quadraticCurveTo(52 + i * 6, yy - 14, 44 + i * 5, yy - 30);
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+}
+
+
 /* ---- ずに太：ずにおの しんかけい。3のめ（ななめに 3つ）----
    こうげきりょくは はんぶんに なった かわりに 3れんげき。
    め が 3つ ある ぶん、3ぽんの ビームを だします。            */
@@ -6977,6 +7089,8 @@ const DRAWERS = {
   akun: drawAkun,
   tatamin: drawTatamin,
   dondoko: drawDondoko,
+  irongolem: drawIronGolem,
+  irongolem_e: drawIronGolem,
   purio: drawPurio,
   puripurio: drawPuripurio,
   tankun: drawTankun,

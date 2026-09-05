@@ -339,6 +339,29 @@ const UNITS = {
     knockbackChance: 0.20,
   },
 
+  /* アイアンゴーレム ── マイクラの むらの まもりがみ。
+                       しろい てつの からだに みどりの つるが まきつく。
+                       うでを ふりあげて あいてを そらへ うちあげる。
+                       ★メタル ＋ パワー の 2ぞくせいもち
+                       ★こうげきが あたると かならず ふきとばす
+                       ★じぶんは ぜったいに ふきとばされない            */
+  irongolem: {
+    id: 'irongolem', name: 'アイアンゴーレム', shortName: 'ゴーレム',
+    rarity: 'SR',                          // スーパーレア
+    attr: ['metal', 'power'],              // メタル＋パワー
+    cost: 1150, recharge: 60.0,            // さいせい 1ぷん
+    hp: 4200,   atk: 880,  range: 96,   speed: 13,   // たいりょく・こうげき ともに たかい
+    attackInterval: 3.2,   attackWindup: 0.75,       // おおきく ふりかぶる
+    kbCount: 99,
+    scale: 2.1,                                      // からだが おおきい
+    attackType: 'single',                            // たんたい こうげき
+    projectile: null,
+    /* ★かならず ふきとばす */
+    knockbackChance: 1.0,
+    /* ★じぶんは ふきとばされない（マイクラと おなじ）*/
+    kbImmune: true,
+  },
+
   /* あき坊 ── ぜんちぜんのうの かみさま。りょうてで かおを おしつぶして
               へんな かおを して いる。でも ちからは ほんもの。
               ★かみ ぞくせい：ぜんぶの ぞくせいに 1.2ばい、うける ダメージ 0.8ばい
@@ -1185,6 +1208,22 @@ const ENEMIES = {
     isBoss: true,
   },
 
+
+  /* アイアンゴーレム（てき）── あき坊の宇宙船 10かいの おおボス。
+                              たおすと なかまに なって くれます。      */
+  irongolem_e: {
+    id: 'irongolem_e', name: 'アイアンゴーレム',
+    rarity: 'SR',
+    attr: ['metal', 'power'],
+    hp: 5400,   atk: 560,  range: 105,  speed: 16,
+    attackInterval: 3.0,   attackWindup: 0.70,
+    kbCount: 99, scale: 2.2,
+    attackType: 'single', projectile: null,
+    kbImmune: true,
+    knockbackChance: 1.0,                  // ★かならず ふきとばす
+    money: 300,
+    isBoss: true,
+  },
 
   /* ============================================================
      ここから した は 宇宙編「火星」の てき
@@ -3477,11 +3516,11 @@ function enemyPowerOf(stage, rarity) {
    -------------------------------------------------------------------------- */
 const SPACESHIP = {
   name: 'あき坊の宇宙船',
-  desc: '10かい ぜんぶ せいはすると おおきな ごほうびが もらえる！',
+  desc: '10かい ぜんぶ せいはすると「アイアンゴーレム」が なかまに なる！',
   floors: 10,
   world: 'space',            // うちゅうちずに でます
-  rewardChar: null,          // とくべつキャラは これから
-  rewardName: 'Gコイン 30まい',
+  rewardChar: 'irongolem',   // ★10かい クリアで なかまに なる
+  rewardName: 'アイアンゴーレム',
   clearBonus: 30,            // ★ぜんかい クリアで Gコイン 30まい（1どだけ）
   courses: [
 
@@ -3492,7 +3531,7 @@ const SPACESHIP = {
       desc: 'うちゅうせんの いりぐち。やじるしくんが であいがしら',
       bg: 'ship',
       castleHp: 4200,
-      power: 4.8,
+      power: 7.2,
       reward: { coins: 3, exp: 900 },
       waves: [
         { at: 3,  id: 'yajirushi',  count: 3, gap: 0.9 },
@@ -3509,7 +3548,7 @@ const SPACESHIP = {
       desc: 'みずの てきばかり。くさの なかまが ゆうり',
       bg: 'ship',
       castleHp: 4400,
-      power: 2.6,
+      power: 3.9,
       reward: { coins: 3, exp: 950 },
       waves: [
         { at: 3,  id: 'chibisame',  count: 3, gap: 0.9 },
@@ -3526,7 +3565,7 @@ const SPACESHIP = {
       desc: 'メタルの てきばかり。ほのおの なかまが ゆうり',
       bg: 'ship',
       castleHp: 4600,
-      power: 1.8,
+      power: 3.2,
       reward: { coins: 3, exp: 1000 },
       waves: [
         { at: 3,  id: 'ironkokko', count: 3, gap: 0.9 },
@@ -3543,12 +3582,12 @@ const SPACESHIP = {
       desc: 'くさの てきばかり。ほのおの なかまが ゆうり',
       bg: 'ship',
       castleHp: 4800,
-      power: 2,
+      power: 1.7,
       reward: { coins: 3, exp: 1100 },
       waves: [
         { at: 3,  id: 'momoplant', count: 2, gap: 1.1 },
         { at: 17, id: 'tsuyugaeru', count: 3, gap: 0.9 },
-        { at: 32, id: 'mandrake',  count: 1, repeat: 18 },
+        { at: 32, id: 'mandrake',  count: 1, repeat: 30 },
         { at: 48, id: 'kokejika',  count: 2, gap: 1.1, repeat: 20 },
       ],
     },
@@ -3560,7 +3599,7 @@ const SPACESHIP = {
       desc: 'ちゅうボス「ヌシノオオカミ」。けものたちの すみか',
       bg: 'ship',
       castleHp: 5200,
-      power: 3.6,
+      power: 5,
       reward: { coins: 4, exp: 1300 },
       waves: [
         { at: 3,  id: 'inocchi',   count: 3, gap: 0.9 },
@@ -3578,13 +3617,13 @@ const SPACESHIP = {
       desc: 'まじゅつしの てきばかり。けものの なかまが ゆうり',
       bg: 'ship',
       castleHp: 5400,
-      power: 2.5,
+      power: 1.9,
       reward: { coins: 3, exp: 1400 },
       waves: [
         { at: 3,  id: 'magicrabbit', count: 2, gap: 1.1 },
-        { at: 17, id: 'icewitch',    count: 1, repeat: 18 },
-        { at: 32, id: 'flamemage',   count: 1, repeat: 20 },
-        { at: 48, id: 'runegolem',   count: 1, repeat: 22 },
+        { at: 17, id: 'icewitch',    count: 1, repeat: 34 },
+        { at: 32, id: 'flamemage',   count: 1, repeat: 30 },
+        { at: 48, id: 'runegolem',   count: 1, repeat: 40 },
         { at: 62, id: 'houkigob',    count: 4, gap: 0.8, repeat: 14 },
       ],
     },
@@ -3596,7 +3635,7 @@ const SPACESHIP = {
       desc: 'パワーの てきばかり。ゆうれい（霊太郎）なら こうげきが きかない',
       bg: 'ship',
       castleHp: 5600,
-      power: 1.15,
+      power: 3.2,
       reward: { coins: 3, exp: 1550 },
       waves: [
         { at: 3,  id: 'usagorilla', count: 2, gap: 1.1 },
@@ -3631,7 +3670,7 @@ const SPACESHIP = {
       desc: 'つよい ボスたちが つづけて でて くる',
       bg: 'ship',
       castleHp: 6200,
-      power: 1.3,
+      power: 1.9,
       reward: { coins: 4, exp: 2000 },
       waves: [
         { at: 3,  id: 'runegolem',  count: 1 },
@@ -3647,20 +3686,21 @@ const SPACESHIP = {
     {
       no: 210, floor: 10, chapter: 0, course: 10,
       name: 'ブリッジ',
-      desc: 'さいじょうかい。ポチと ゼノスが まちうける',
+      desc: 'さいじょうかい。おおボス「アイアンゴーレム」。たおすと なかまに なる！',
       bg: 'boss',
       castleHp: 6800,
-      power: 1.4,
+      power: 2.1,
       reward: { coins: 5, exp: 2600 },
       waves: [
-        /* ★ポチは はじめから でて きます（あき坊の塔の スティーブと おなじ） */
-        { at: 5,  id: 'pochi',      count: 1 },
         { at: 3,  id: 'yajirushi',  count: 5, gap: 0.7 },
-        { at: 20, id: 'burner',     count: 3, gap: 1.0, repeat: 18 },
-        { at: 36, id: 'runegolem',  count: 1, repeat: 24 },
-        { at: 52, id: 'yajirushi',  count: 5, gap: 0.7, repeat: 16 },
-        { at: 68, id: 'flamemage',  count: 1, repeat: 22 },
-        { atCastleHp: 0.55, id: 'zenos', count: 1 },
+        { at: 18, id: 'burner',     count: 3, gap: 1.0, repeat: 18 },
+        { at: 34, id: 'runegolem',  count: 1, repeat: 24 },
+        { at: 50, id: 'ironkokko',  count: 3, gap: 0.9, repeat: 20 },
+        { at: 66, id: 'flamemage',  count: 1, repeat: 22 },
+        /* ★おおボス「アイアンゴーレム」。たおすと なかまに なる。
+           かならず ふきとばして くる ので、ぜんせんが なんども さがります。 */
+        { atCastleHp: 0.85, id: 'irongolem_e', count: 1 },
+        { atCastleHp: 0.40, id: 'pochi',       count: 1 },
       ],
     },
 
