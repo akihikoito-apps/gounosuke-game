@@ -247,6 +247,18 @@ const Game = {
 
   /* ---- てきの しゅつげん ---- */
   updateWaves(dt) {
+    /* ★ボスは かならず とうじょうさせる
+       しろを 1げきで こわして しまうと、ボスが でる まえに しあいが
+       おわって しまう ことが ある。まだ でて いない ボスの ラインより
+       したには しろの たいりょくを ささえて おき、ボスが でた あとから
+       こわせる ように する。 */
+    let bossFloor = 0;
+    for (const w of this.waves) {
+      if (w.done || w.atCastleHp === undefined) continue;
+      bossFloor = Math.max(bossFloor, w.atCastleHp * this.enemyCastle.maxHp);
+    }
+    if (bossFloor > 0 && this.enemyCastle.hp < bossFloor) this.enemyCastle.hp = bossFloor;
+
     const ratio = this.enemyCastle.hp / this.enemyCastle.maxHp;
     for (const w of this.waves) {
       if (w.done) continue;
