@@ -173,6 +173,9 @@ const Game = {
       kbT: 0, kbFrom: 0, kbTo: 0,
       nextKb: def.kbCount - 1,   // つぎに ふきとぶ しきいち（のこり）
       slowUntil: -1, slowRate: 1, roll: 0,
+      restT: 0, resting: false,     // きゅうけい（ひるね・ゼンマイぎれ）
+      healT: 0,                     // なかまを かいふく する タイマー
+      windupDmg: 0,                 // タメちゅうに うけた ダメージ
       stunUntil: -1,
       dead: false,
       flash: 0,
@@ -271,6 +274,46 @@ const Game = {
 
     if (this.finished) return;
 
+    /* --- じどう かいふく（リジェネ）--- */
+    if (u.def.regen && u.hp < u.maxHp) {
+      u.hp = Math.min(u.maxHp, u.hp + u.def.regen * dt);
+    }
+
+    /* --- ちかくの なかまを かいふく（モーモー・プラント）--- */
+    if (u.def.heal && !u.resting) {
+      u.healT += dt;
+      if (u.healT >= u.def.heal.interval) {
+        u.healT = 0;
+        let healed = 0;
+        for (const o of this.units) {
+          if (o.dead || o.side !== u.side || o === u) continue;
+          if (Math.abs(o.x - u.x) <= u.def.heal.radius && o.hp < o.maxHp) {
+            o.hp = Math.min(o.maxHp, o.hp + u.def.heal.amount);
+            this.addEffect({ type: 'healMark', x: o.x, y: this.groundWorldY() - 70 - o.lane, life: 0.8 });
+            healed++;
+          }
+        }
+        if (healed) {
+          this.addEffect({ type: 'boom', x: u.x, y: this.groundWorldY() - 40,
+                           radius: u.def.heal.radius * 0.5, color: '#a5d6a7', life: 0.45 });
+        }
+      }
+    }
+
+    /* --- きゅうけい（ひるね／ゼンマイぎれ）--- */
+    if (u.def.rest) {
+      u.restT += dt;
+      if (u.resting) {
+        if (u.restT >= u.def.rest.duration) { u.resting = false; u.restT = 0; }
+        else { u.windup = -1; u.burst = null; return; }   // うごけない
+      } else if (u.restT >= u.def.rest.every) {
+        u.resting = true; u.restT = 0; u.windup = -1; u.burst = null;
+        this.addEffect({ type: 'restMark', x: u.x, y: this.groundWorldY() - 85 - u.lane,
+                         text: u.def.rest.mark || '💤', life: 1.0 });
+        return;
+      }
+    }
+
     // うごきを とめられて いる（お菓子マンの いし）
     if (u.stunUntil > this.time) {
       u.windup = -1; u.burst = null;
@@ -304,7 +347,7 @@ const Game = {
 
     if (target) {
       u.state = 'attack';
-      if (u.atkCd <= 0 && !u.burst) u.windup = 0;   // こうげき かいし
+      if (u.atkCd <= 0 && !u.burst) { u.windup = 0; u.windupDmg = 0; }   // こうげき かいし
     } else {
       u.state = 'walk';
       let sp = u.def.speed;
@@ -443,8 +486,21 @@ const Game = {
   /* ---- ダメージ ---- */
   damageUnit(u, dmg, attr, mult, noNumber, isCrit) {
     if (u.dead) return;
+    // きゅうけいちゅうは よけいに ダメージを うける
+    if (u.resting && u.def.rest && u.def.rest.vuln) dmg = Math.round(dmg * u.def.rest.vuln);
     u.hp -= dmg;
     u.flash = 0.12;
+
+    // タメちゅうに たくさん たたくと こうげきを キャンセルできる
+    if (u.def.stagger && u.windup >= 0) {
+      u.windupDmg += dmg;
+      if (u.windupDmg >= u.def.stagger.damage) {
+        u.windup = -1; u.windupDmg = 0;
+        u.atkCd = Math.max(u.atkCd, u.def.attackInterval * 0.5);
+        this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 100 - u.lane,
+                         text: 'よろけた！', color: '#4fc3f7', life: 0.9, big: true });
+      }
+    }
 
     let color = '#ffffff';
     if (mult > 1.01) color = '#ff5252';
@@ -867,6 +923,7 @@ const Game = {
     }
 
     const stunned = u.stunUntil > this.time;
+    const resting = !!u.resting;
     ctx.save();
     ctx.translate(x + (stunned ? Math.sin(this.time * 40) * 2 : 0), V.groundY + yoff);
 
@@ -883,6 +940,7 @@ const Game = {
     ctx.restore();
 
     ctx.scale(sc, sc);
+    if (resting) { ctx.translate(0, 6); ctx.rotate(0.22); }   // きゅうけいちゅうは ころんで いる
     if (u.side === 'ally') ctx.scale(-1, 1);      // みかたは ひだりむき
 
     const drawer = DRAWERS[u.def.id];

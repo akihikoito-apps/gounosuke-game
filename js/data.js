@@ -330,6 +330,91 @@ const ENEMIES = {
     money: 220,            // ぞくせい あり ＆ つよい
   },
 
+  /* ==========================================================
+     ここから した は「あき坊の塔」に でてくる ざこてき
+     ========================================================== */
+
+  /* やきポックル ── ちいさな こぶた。はないきで ひを ふく。
+                    1ぴきなら よわいが、むれで おしよせる       */
+  yakipokkuru: {
+    id: 'yakipokkuru', name: 'やきポックル',
+    attr: 'fire',
+    hp: 260,    atk: 70,   range: 60,   speed: 50,
+    attackInterval: 1.3,   attackWindup: 0.25,
+    kbCount: 3,
+    scale: 0.95,
+    attackType: 'single',
+    projectile: null,
+    money: 60,
+  },
+
+  /* アイアン・コッコ ── てつの ニワトリロボ。たいりょくが とても たかいが
+                        こうげきは ほとんど きかない。ときどき ゼンマイが きれて コケる */
+  ironkokko: {
+    id: 'ironkokko', name: 'アイアン・コッコ',
+    attr: 'metal',
+    hp: 2600,   atk: 45,   range: 70,   speed: 22,
+    attackInterval: 1.4,   attackWindup: 0.3,
+    kbCount: 5,
+    scale: 1.1,
+    attackType: 'single',
+    projectile: null,
+    /* ゼンマイぎれ：ときどき ころんで うごけなく なる（そのあいだ よわい）*/
+    rest: { every: 9.0, duration: 1.8, mark: '⚙', vuln: 1.4 },
+    money: 90,
+  },
+
+  /* ウサ・ゴリラ ── マッチョな うさぎ。おおぶりの ニンジンで なぐる。
+                    タメが ながく、タメちゅうに たたくと こうげきを キャンセルできる */
+  usagorilla: {
+    id: 'usagorilla', name: 'ウサ・ゴリラ',
+    attr: 'power',
+    hp: 1900,   atk: 420,  range: 85,   speed: 20,
+    attackInterval: 3.6,   attackWindup: 3.0,    // 3びょうも ふりかぶる
+    kbCount: 4,
+    scale: 1.15,
+    attackType: 'single',
+    projectile: null,
+    knockbackChance: 1.0,                        // あたると 1ぽ こうたい
+    /* タメちゅうに この ダメージを あたえると こうげきが ふはつに なる */
+    stagger: { damage: 400 },
+    money: 130,
+  },
+
+  /* モーモー・プラント ── くさを せおった うし。ちかくの なかまを かいふくする。
+                          まんぷくに なると すわって ひるねを して しまう      */
+  momoplant: {
+    id: 'momoplant', name: 'モーモー・プラント',
+    attr: 'grass',
+    hp: 1500,   atk: 40,   range: 65,   speed: 14,
+    attackInterval: 2.0,   attackWindup: 0.3,
+    kbCount: 3,
+    scale: 1.0,
+    attackType: 'single',
+    projectile: null,
+    /* じどう かいふく（じぶん）*/
+    regen: 12,
+    /* ちかくの なかまを ちょっとずつ かいふく */
+    heal: { amount: 70, radius: 210, interval: 3.0 },
+    /* ひるね：ときどき すわって うごけなく なる（そのあいだ よわい）*/
+    rest: { every: 12.0, duration: 3.0, mark: '💤', vuln: 1.5 },
+    money: 110,
+  },
+
+  /* モコ魔道士 ── かんむりを かぶった ひつじの まほうつかい。
+                  えんきょりから ひかる ひつじの けを とばす。まもりが かたい */
+  mokomadoushi: {
+    id: 'mokomadoushi', name: 'モコ魔道士',
+    attr: 'magic',
+    hp: 2200,   atk: 260,  range: 190,  speed: 16,
+    attackInterval: 2.4,   attackWindup: 0.45,
+    kbCount: 3,
+    scale: 1.05,
+    attackType: 'single',
+    projectile: 'wool',
+    money: 150,
+  },
+
   /* 下手なきりん ── ボス。くさを とばす はんいこうげき */
   hetakirin: {
     id: 'hetakirin', name: '下手なきりん',
