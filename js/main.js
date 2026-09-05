@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '3.0';
+  const GAME_VERSION = '3.1';
 
 
   /* =================================================
@@ -708,7 +708,7 @@
     // キャラは たて 80〜110 くらい。ボタンの おおきさに あわせて ちぢめる
     const sc = Math.min(w / 105, h / 80);
     ctx.scale(sc, sc);
-    const fn = DRAWERS[id];
+    const fn = DRAWERS[shownDrawId(id)];
     if (fn) fn(ctx, { t: 0.7, moving: false, atk: -1, hpRatio: 1, roll: 0.35 });
     ctx.restore();
   }
@@ -755,6 +755,21 @@
   /* =================================================
      キャラの え を キャンバスに かく（つかいまわし）
      ================================================= */
+  /* しんかずみ なら しんかごの すがた／なまえに する */
+  function shownDef(id) {
+    const s = slot();
+    const base = UNITS[id];
+    if (!base) return null;
+    if (s && s.evolved && s.evolved[id] && base.evolve) {
+      return Object.assign({}, base, base.evolve, { id: id });
+    }
+    return base;
+  }
+  function shownDrawId(id) {
+    const def = shownDef(id);
+    return (def && def.drawAs) ? def.drawAs : id;
+  }
+
   function paintChar(canvas, id, opt) {
     if (!canvas) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -768,7 +783,7 @@
     ctx.translate(w / 2, h - 2);
     const sc = Math.min(w / 110, h / 88) * ((opt && opt.zoom) || 1);
     ctx.scale(sc, sc);
-    const fn = DRAWERS[id];
+    const fn = DRAWERS[shownDrawId(id)];
     if (fn) fn(ctx, { t: 0.7, moving: false, atk: -1, hpRatio: 1, roll: 0.35 });
     ctx.restore();
   }
@@ -787,6 +802,10 @@
   }
 
   function buildParty() {
+    withScrollKept('#screen-party', buildPartyInner);
+  }
+
+  function buildPartyInner() {
     const s = slot();
     if (!s) return;
     if (!Array.isArray(s.party)) s.party = DEFAULT_PARTY.slice();
@@ -1077,6 +1096,7 @@
     list.forEach(id => { if (UNITS[id]) PARTY.push(id); });
     if (PARTY.length === 0) PARTY.push(DEFAULT_PARTY[0]);
     Game.levels = s ? effLevelMap(s) : {};
+    Game.evolved = (s && s.evolved) ? s.evolved : {};
     applyUnitLayout();
     buildUnitButtons();
     requestAnimationFrame(redrawIcons);
@@ -1087,6 +1107,38 @@
      パワーアップ（レベルあげ）
      ================================================= */
   function openPower() { buildPower(); show('screen-power'); requestAnimationFrame(buildPower); }
+
+  /* =================================================
+     いちらんを つくりなおしても、スクロールの いちが
+     もどらない ように します。
+     （れんぞくで レベルアップする とき、ちがう キャラを
+       おしてしまう のを ふせぐ ため）
+     ================================================= */
+  function withScrollKept(screenId, build) {
+    const host = $(screenId);
+    const y = host ? (host.scrollTop || 0) : 0;
+    build();
+    if (host && y > 0) {
+      host.scrollTop = y;
+      requestAnimationFrame(() => { host.scrollTop = y; });
+    }
+  }
+
+  /* しんか／もとに もどす を きりかえる */
+  function toggleEvolve(id) {
+    const s = slot();
+    if (!s || !UNITS[id] || !UNITS[id].evolve) return;
+    if (effLevel(s, id) < LEVEL.max) { toast('じつりょく Lv.' + LEVEL.max + ' から しんか できます'); return; }
+    if (!s.evolved) s.evolved = {};
+    const now = !s.evolved[id];
+    if (now) s.evolved[id] = true; else delete s.evolved[id];
+    storeSave();
+    applyParty();
+    toast(now ? (UNITS[id].evolve.name + ' に しんかした！')
+              : (UNITS[id].name + ' に もどした'));
+    buildPower();
+    requestAnimationFrame(buildPower);
+  }
 
   function doLevelUp(id) {
     const s = slot();
@@ -1101,6 +1153,10 @@
   }
 
   function buildPower() {
+    withScrollKept('#screen-power', buildPowerInner);
+  }
+
+  function buildPowerInner() {
     const s = slot();
     if (!s) return;
     $('#power-exp').textContent  = Math.floor(s.exp || 0);
@@ -1109,13 +1165,16 @@
     const box = $('#power-list');
     box.innerHTML = '';
     (s.owned || DEFAULT_PARTY).forEach(id => {
-      const def = UNITS[id];
-      if (!def) return;
+      const base = UNITS[id];
+      if (!base) return;
+      const def  = shownDef(id);          // しんかずみなら しんかごの すがた
+      const isEv = !!(s.evolved && s.evolved[id] && base.evolve);
+      const canEv = !!base.evolve;
       const lv   = s.levels[id] || 1;
       const plus = (s.plus && s.plus[id]) || 0;
       const eff  = effLevel(s, id);
       const cost = levelUpCost(lv);
-      const mul  = levelMult(eff);
+      const mul  = levelMult(eff, base.rarity);
       const maxed = (cost === null);
       const can  = !maxed && (s.exp || 0) >= cost;
       const canEvolve = eff >= LEVEL.max;
@@ -1125,34 +1184,47 @@
       row.innerHTML =
         '<canvas></canvas>' +
         '<span class="pr-info">' +
-          '<span class="pr-name">' + def.name + '</span>' +
+          '<span class="pr-name">' + def.name + (isEv ? ' <span class="pr-ev">しんか</span>' : '') + '</span>' +
           '<span class="pr-lv">Lv.' + lv + ' / ' + LEVEL.max +
             (plus ? ' <span class="pr-plus">＋' + plus + '</span>　じつりょく Lv.' + eff : '') +
-            (s.evolved && s.evolved[id] ? '　★しんかずみ' : '') + '</span>' +
+            '</span>' +
           '<span class="pr-bar"><i style="width:' + ((lv - 1) / (LEVEL.max - 1) * 100) + '%"></i></span>' +
           '<span class="pr-stat">たいりょく ' + Math.round(def.hp * mul) +
-            '　こうげき ' + Math.round(def.atk * mul) + '（' + mul.toFixed(1) + 'ばい）</span>' +
+            '　こうげき ' + Math.round(def.atk * mul) +
+            (def.multiHit ? '×' + def.multiHit.count : '') +
+            '（' + mul.toFixed(1) + 'ばい）</span>' +
         '</span>';
 
-      const btn = document.createElement('button');
-      btn.className = 'pr-btn' + (maxed ? ' evolve' : '');
-      if (maxed || canEvolve) {
-        btn.innerHTML = maxed ? 'しんか<br><small>じゅんびちゅう</small>'
-                              : 'レベルアップ<br><small>' + cost + '</small>';
-        if (maxed) {
-          btn.className = 'pr-btn evolve';
-          btn.addEventListener('click', () => toast('しんかは じゅんびちゅう！ すがたが きまったら つかえます'));
-        } else {
-          btn.className = 'pr-btn';
-          btn.disabled = !can;
-          btn.addEventListener('click', () => doLevelUp(id));
-        }
-      } else {
+      /* レベルアップ ボタン（Lv.10 まで）*/
+      if (!maxed) {
+        const btn = document.createElement('button');
+        btn.className = 'pr-btn';
         btn.innerHTML = 'レベルアップ<br><small>' + cost + '</small>';
         btn.disabled = !can;
         btn.addEventListener('click', () => doLevelUp(id));
+        row.appendChild(btn);
       }
-      row.appendChild(btn);
+
+      /* しんか ボタン（じつりょく Lv.10 いじょう）*/
+      if (canEv) {
+        const ev = document.createElement('button');
+        ev.className = 'pr-btn evolve' + (isEv ? ' on' : '');
+        if (canEvolve) {
+          ev.innerHTML = isEv ? 'もとに<br><small>もどす</small>'
+                              : 'しんか<br><small>' + base.evolve.name + '</small>';
+          ev.addEventListener('click', () => toggleEvolve(id));
+        } else {
+          ev.innerHTML = 'しんか<br><small>Lv.' + LEVEL.max + 'から</small>';
+          ev.disabled = true;
+        }
+        row.appendChild(ev);
+      } else if (maxed) {
+        const ev = document.createElement('button');
+        ev.className = 'pr-btn evolve';
+        ev.innerHTML = 'しんか<br><small>じゅんびちゅう</small>';
+        ev.addEventListener('click', () => toast('この キャラの しんかは じゅんびちゅう！'));
+        row.appendChild(ev);
+      }
       box.appendChild(row);
       paintChar(row.querySelector('canvas'), id);
     });

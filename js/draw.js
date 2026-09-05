@@ -330,6 +330,65 @@ function drawHiibou(ctx, s) {
 }
 
 
+/* ---- ずに太：ずにおの しんかけい。3のめ（ななめに 3つ）----
+   こうげきりょくは はんぶんに なった かわりに 3れんげき。
+   め が 3つ ある ぶん、3ぽんの ビームを だします。            */
+function drawZunita(ctx, s) {
+  const R = 25;
+  const charge = s.atk >= 0 ? s.atk : 0;
+
+  ctx.save();
+  ctx.translate(0, -R - 2);
+  ctx.rotate(s.roll || 0);
+
+  /* ほんたい */
+  const g = ctx.createLinearGradient(-R, -R, R, R);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(1, '#dfe4ea');
+  ctx.fillStyle = g;
+  roundRect(ctx, -R, -R, R * 2, R * 2, 9); ctx.fill();
+  ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 2.6;
+  roundRect(ctx, -R, -R, R * 2, R * 2, 9); ctx.stroke();
+
+  /* 3の め（ひだりした → まんなか → みぎうえ の ななめ）*/
+  const pulse = 1 + charge * 0.16;
+  const pips = [[-13, 13], [0, 0], [13, -13]];
+  pips.forEach((pp, i) => {
+    const bright = charge > 0 ? (0.55 + 0.45 * Math.abs(Math.sin(s.t * 9 + i * 1.1))) : 1;
+    ctx.fillStyle = '#1b1b1b';
+    ctx.beginPath(); ctx.arc(pp[0], pp[1], 7.4 * pulse, 0, Math.PI * 2); ctx.fill();
+    if (charge > 0) {
+      ctx.fillStyle = 'rgba(255,120,90,' + (0.3 + charge * 0.5) * bright + ')';
+      ctx.beginPath(); ctx.arc(pp[0], pp[1], 7.4 * pulse + 4 + charge * 5, 0, Math.PI * 2); ctx.fill();
+    }
+  });
+
+  /* しんかの しるし（かどの きらり）*/
+  ctx.fillStyle = 'rgba(255,213,79,' + (0.5 + Math.sin(s.t * 4) * 0.3) + ')';
+  starPath(ctx, R - 5, -R + 5, 5, 2.2, s.t * 2);
+  ctx.fill();
+
+  ctx.restore();
+
+  /* 3ぽんの ビームの ため */
+  if (charge > 0) {
+    ctx.save();
+    ctx.translate(0, -R - 2);
+    for (let i = 0; i < 3; i++) {
+      const oy = -12 + i * 12;
+      ctx.globalAlpha = (0.3 + charge * 0.5) * (0.7 + 0.3 * Math.abs(Math.sin(s.t * 9 + i)));
+      const bg = ctx.createLinearGradient(0, 0, 26 + charge * 26, 0);
+      bg.addColorStop(0, 'rgba(255,80,60,0.95)');
+      bg.addColorStop(1, 'rgba(255,180,120,0)');
+      ctx.fillStyle = bg;
+      const hh = 2.4 + charge * 4;
+      ctx.fillRect(8, oy - hh / 2, 22 + charge * 28, hh);
+    }
+    ctx.restore();
+  }
+}
+
+
 /* ---- かべくん：ちゃいろい かべ。こうげきは しない ---- */
 function drawKabekun(ctx, s) {
   const brace = (s.atk >= 0) ? 1 : 0;                 // てきを うけとめて いる
@@ -3843,6 +3902,7 @@ const DRAWERS = {
   tokinotabibito: drawTokinotabibito,
   hiibou: drawHiibou,
   zunio: drawZunio,
+  zunita: drawZunita,
   kabekun: drawKabekun,
   futabappo: drawFutabappo,
   shadowyamaneko: drawShadowyamaneko,

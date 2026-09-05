@@ -172,7 +172,7 @@ const UNITS = {
     rarity: 'R',                          // レア
     attr: 'power',                        // パワー（けものに つよい／まじゅつしに よわい）
     cost: 400,  recharge: 12.0,
-    hp: 5000,   atk: 0,    range: 78,   speed: 60,
+    hp: 2500,   atk: 0,    range: 78,   speed: 60,
     attackInterval: 2.0,   attackWindup: 0.3,
     kbCount: 5,                           // なかなか ふきとばされない
     scale: 1.0,
@@ -199,6 +199,25 @@ const UNITS = {
     rolls: true,                                 // ころがって いどうする
     /* とくしゅのうりょく：みず と けもの の てきを 50%で 2びょう とめる */
     stun: { duration: 2.0, chance: 0.5, attrs: ['water', 'beast'] },
+
+    /* ------------------------------------------------------------
+       しんか：じつりょく Lv.10 で「ずに太」に なれます
+
+       ・たいりょくが 1.5ばい
+       ・こうげきりょくは はんぶん。そのかわり 3れんげき
+         → ぜんぶ あたれば じっしつ 1.5ばい
+       ・パワーアップがめんの ボタンで いつでも もとに もどせます
+
+       evolve に かいた こうもく だけが さしかわります。
+       ------------------------------------------------------------ */
+    evolve: {
+      id: 'zunio',                       // え を えらぶ ときの なまえ（したで きりかえ）
+      name: 'ずに太', shortName: 'ずに太',
+      hp: 630,                           // 420 x 1.5
+      atk: 150,                          // 300 の はんぶん
+      multiHit: { count: 3, delay: 0.18 },   // 3れんげき（ぜんぶ あたれば 450 ＝ 1.5ばい）
+      drawAs: 'zunita',                  // え は ずに太（3のめ）
+    },
   },
 
   /* フタバッポ ── うえきばちに はえた ふたば。ふたつの はっぱに かおが ある。
@@ -300,16 +319,60 @@ const LEVEL = {
   max: 10,
   /* Lv1→2, Lv2→3, … Lv9→10 に ひつような けいけんち */
   expCost: [80, 120, 180, 260, 360, 500, 700, 950, 1300],
-  gainPerLevel: 0.10,      // 1レベルで +10%。Lv10 で 1.9ばい
+
+  /* --------------------------------------------------------------
+     レベルが あがると どれだけ つよく なるか
+
+     にゃんこ大戦争と おなじ かんがえかたに しました。
+       ・レベル1の ステータスを もとに、1レベルごとに きまった ぶんだけ たす
+       ・ある レベルを こえると、のびる ぶんが はんぶん → さらに はんぶん に なる
+       ・その「にぶり はじめる レベル」が レア度で ちがう
+         → レア度が たかい キャラほど、ながく ぐんぐん のびる
+
+     tiers は [そのレベルまで, 1レベルあたりの のび] の ならびです。
+     -------------------------------------------------------------- */
+  growth: {
+    N:  [[10, 0.10], [20, 0.05], [40, 0.025]],   // ノーマル
+    R:  [[15, 0.10], [25, 0.05], [40, 0.025]],   // レア
+    SR: [[20, 0.10], [30, 0.05], [40, 0.025]],   // スーパーレア
+    LR: [[25, 0.10], [35, 0.05], [40, 0.025]],   // でんせつレア
+  },
+  /* growth に ないときの ほけん（てき など）*/
+  gainPerLevel: 0.10,
 };
 
 /* レベルから つよさの ばいりつを だす
    じょうげんかいほう(＋)の ぶんも「レベルが あがったのと おなじ」に なります。
    けいけんちレベル 10 ＋ かいほう 30 = じつりょく Lv.40（4.9ばい）が さいだい  */
-function levelMult(lv) {
+/* --------------------------------------------------------------------------
+   じつりょくレベル → つよさの ばいりつ
+
+   levelMult(20, 'N')  →  ノーマルの Lv.20 の ばいりつ
+   levelMult(20, 'SR') →  スーパーレアの Lv.20 の ばいりつ（こちらの ほうが たかい）
+
+   レア度を わたさない ときは いちばん ひくい ノーマルと おなじ あつかいです。
+   -------------------------------------------------------------------------- */
+function levelMult(lv, rarity) {
   const cap = LEVEL.max + ((typeof GACHA !== 'undefined') ? GACHA.plusMax : 0);
   const L = Math.max(1, Math.min(cap, lv || 1));
-  return 1 + (L - 1) * LEVEL.gainPerLevel;
+  const tiers = (LEVEL.growth && LEVEL.growth[rarity]) || (LEVEL.growth && LEVEL.growth.N);
+  if (!tiers) return 1 + (L - 1) * LEVEL.gainPerLevel;
+
+  let mult = 1, from = 1;
+  for (const [upto, gain] of tiers) {
+    if (L <= from) break;
+    const steps = Math.min(L, upto) - from;   // この くぎりで あがった レベルの かず
+    if (steps > 0) mult += steps * gain;
+    from = Math.min(L, upto);
+    if (from >= L) break;
+  }
+  return mult;
+}
+
+/* キャラの id から ばいりつを だす（レア度を じどうで みる）*/
+function unitLevelMult(id, lv) {
+  const def = (typeof UNITS !== 'undefined') ? UNITS[id] : null;
+  return levelMult(lv, def ? def.rarity : undefined);
 }
 
 /* つぎの レベルまでに ひつような けいけんち（MAXなら null）*/
@@ -1650,8 +1713,8 @@ const STAGES = [
     name: 'あめあがりの さわ',
     desc: 'ツユガエルの しずくが はんいに ひろがる',
     bg: 'mizu',
-    castleHp: 2500,
-    enemyMult: 1.1,
+    castleHp: 2300,
+    enemyMult: 1.06,
     reward: { coins: 1, exp: 380 },
     waves: [
       { at: 3,  id: 'inocchi',    count: 2, gap: 1.2 },
@@ -1710,8 +1773,8 @@ const STAGES = [
     name: 'はりの もり',
     desc: 'ハリ千本が とおくから はりを とばす。まえに でよう',
     bg: 'kemono',
-    castleHp: 3200,
-    enemyMult: 1.22,
+    castleHp: 2800,
+    enemyMult: 1.16,
     reward: { coins: 1, exp: 460 },
     waves: [
       { at: 3,  id: 'inocchi',    count: 2, gap: 1.2 },
@@ -1750,8 +1813,8 @@ const STAGES = [
     name: 'けものたちの さかみち',
     desc: 'けものみちの てき ぜんいんが でて くる。おおボスの てまえ',
     bg: 'night',
-    castleHp: 3900,
-    enemyMult: 1.34,
+    castleHp: 3400,
+    enemyMult: 1.28,
     reward: { coins: 1, exp: 520 },
     waves: [
       { at: 3,   id: 'inocchi',       count: 2, gap: 1.2 },
@@ -1774,8 +1837,8 @@ const STAGES = [
     name: 'もりぐいの おくにわ',
     desc: 'おおボス「森喰らい・ガオウ」。ふきとばせない。ほのおと パワーで',
     bg: 'boss',
-    castleHp: 4600,
-    enemyMult: 1.42,
+    castleHp: 4200,
+    enemyMult: 1.34,
     reward: { coins: 2, exp: 620 },
     waves: [
       { at: 3,   id: 'inocchi',    count: 2, gap: 1.2 },
@@ -1860,18 +1923,18 @@ const STAGES = [
     name: 'エネルギー きょうきゅうく',
     desc: 'ほのおと みずの じっけんきが きどう',
     bg: 'steel',
-    castleHp: 2800,
-    enemyMult: 1.08,
+    castleHp: 2600,
+    enemyMult: 1.04,
     reward: { coins: 1, exp: 620 },
     waves: [
       { at: 3,  id: 'nejiro',   count: 3, gap: 0.8 },
       { at: 14, id: 'burner',   count: 1 },
       { at: 26, id: 'potank',   count: 1 },
       { at: 38, id: 'sabinchi', count: 2, gap: 1.6 },
-      { at: 54, id: 'burner',   count: 1, repeat: 28 },
-      { at: 68, id: 'potank',   count: 1, repeat: 30 },
+      { at: 58, id: 'burner',   count: 1, repeat: 36 },
+      { at: 76, id: 'potank',   count: 1, repeat: 38 },
       { at: 82, id: 'nejiro',   count: 4, gap: 0.7, repeat: 16 },
-      { at: 44, id: 'ironkokko',  count: 1, repeat: 32 },
+      { at: 50, id: 'ironkokko',  count: 1, repeat: 42 },
     ],
   },
 
@@ -1984,8 +2047,8 @@ const STAGES = [
     name: 'ようこうろの さいしんぶ',
     desc: 'すべての げんきょう「廃炉獣メルトギア」。ほのお・まじゅつし・パワーで',
     bg: 'boss',
-    castleHp: 3800,
-    enemyMult: 1.22,
+    castleHp: 3400,
+    enemyMult: 1.16,
     reward: { coins: 2, exp: 1000 },
     waves: [
       { at: 3,   id: 'nejiro',   count: 3, gap: 0.8 },
@@ -2033,7 +2096,7 @@ const CHAPTERS = {
 
    れい：
      { no: 101, floor: 1, name: '1かい', desc: '...', bg: 'steel',
-       castleHp: 2000, reward: { coins: 0, exp: 200 }, waves: [ ... ] },
+       castleHp: 2000, reward: { coins: 2, exp: 200 }, waves: [ ... ] },
    -------------------------------------------------------------------------- */
 const TOWER = {
   name: 'あき坊の塔',
@@ -2053,7 +2116,7 @@ const TOWER = {
       bg: 'rock',
       castleHp: 2000,
       enemyMult: 0.9,
-      reward: { coins: 1, exp: 180 },
+      reward: { coins: 2, exp: 180 },
       waves: [
         { at: 3,  id: 'nyororiinu', count: 2, gap: 0.8 },
         { at: 14, id: 'togehaya',   count: 1 },
@@ -2074,7 +2137,7 @@ const TOWER = {
       bg: 'sunset',
       castleHp: 1800,
       enemyMult: 1.15,
-      reward: { coins: 1, exp: 210 },
+      reward: { coins: 2, exp: 210 },
       waves: [
         { at: 3,  id: 'togehaya',    count: 1 },
         { at: 10, id: 'honota',      count: 5, gap: 0.4 },
@@ -2096,7 +2159,7 @@ const TOWER = {
       bg: 'mizu',
       castleHp: 2600,
       enemyMult: 1.25,
-      reward: { coins: 1, exp: 240 },
+      reward: { coins: 2, exp: 240 },
       waves: [
         { at: 3,  id: 'togehaya',  count: 1 },
         { at: 10, id: 'saba',      count: 3, gap: 0.8 },
@@ -2117,7 +2180,7 @@ const TOWER = {
       bg: 'mori',
       castleHp: 2200,
       enemyMult: 1.1,
-      reward: { coins: 1, exp: 270 },
+      reward: { coins: 2, exp: 270 },
       /* かいふくやくを かたく する（ほのおで さきに たおすのが せいかい）*/
       enemyBuff: { momoplant: { hp: 1900 } },
       waves: [
@@ -2141,7 +2204,7 @@ const TOWER = {
       bg: 'steel',
       castleHp: 2600,
       enemyMult: 1.25,
-      reward: { coins: 1, exp: 300 },
+      reward: { coins: 2, exp: 300 },
       /* ウサ・ゴリラを かたく する（まじゅつしの ありがたみ）*/
       enemyBuff: { usagorilla: { hp: 3500 } },
       waves: [
@@ -2164,7 +2227,7 @@ const TOWER = {
       bg: 'mori',
       castleHp: 2800,
       enemyMult: 1.2,
-      reward: { coins: 1, exp: 330 },
+      reward: { coins: 2, exp: 330 },
       /* クマべぇを かたく する（パワーの ありがたみ）*/
       enemyBuff: { kumabee: { hp: 3800 } },
       waves: [
@@ -2186,7 +2249,7 @@ const TOWER = {
       bg: 'night',
       castleHp: 3400,
       enemyMult: 1.3,
-      reward: { coins: 1, exp: 360 },
+      reward: { coins: 2, exp: 360 },
       waves: [
         { at: 3,  id: 'togehaya',     count: 1 },
         { at: 12, id: 'mokomadoushi', count: 1 },
@@ -2207,7 +2270,7 @@ const TOWER = {
       bg: 'steel',
       castleHp: 2800,
       enemyMult: 1.3,
-      reward: { coins: 1, exp: 400 },
+      reward: { coins: 2, exp: 400 },
       /* アイアン・コッコを かたく する（ほのお・まじゅつし・パワーの ありがたみ）*/
       enemyBuff: { ironkokko: { hp: 3400 } },
       waves: [
@@ -2230,7 +2293,7 @@ const TOWER = {
       bg: 'hoshizora',
       castleHp: 4000,
       enemyMult: 1.4,
-      reward: { coins: 1, exp: 450 },
+      reward: { coins: 2, exp: 450 },
       waves: [
         { at: 3,   id: 'togehaya',     count: 1 },
         { at: 12,  id: 'honota',       count: 4, gap: 0.5 },

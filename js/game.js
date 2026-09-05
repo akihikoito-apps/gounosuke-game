@@ -33,6 +33,7 @@ const Game = {
   camera: { x: 0, target: 0, manualUntil: 0 },
   bgImages: null,         // はいけいの しゃしん（なまえごと）
   levels: {},             // みかたキャラの レベル（main.js が セットする）
+  evolved: {},            // しんかずみの キャラ（main.js が セットする）
   canvas: null, ctx: null,
   view: { w: 0, h: 0, scale: 1, groundY: 0 },
   hudHeight: 96,
@@ -93,8 +94,18 @@ const Game = {
      ===================================================================== */
 
   /* みかたを しょうかんする */
+  /* しんかずみ なら しんかごの データを かえす */
+  defOf(id) {
+    const base = UNITS[id];
+    if (!base) return null;
+    if (this.evolved && this.evolved[id] && base.evolve) {
+      return Object.assign({}, base, base.evolve, { id: id });
+    }
+    return base;
+  },
+
   summon(id) {
-    const def = UNITS[id];
+    const def = this.defOf(id);
     if (!def || !this.active || this.finished) return false;
     if (this.cooldown[id] > 0) return false;
     if (this.money < def.cost) return false;
@@ -158,7 +169,8 @@ const Game = {
     let mul;
     if (side === 'ally') {
       const lv = this.levels[def.id] || 1;
-      mul = (typeof levelMult === 'function') ? levelMult(lv) : 1;
+      // レア度で のびかたが かわる（たかい レア度ほど ながく のびる）
+      mul = (typeof levelMult === 'function') ? levelMult(lv, def.rarity) : 1;
     } else {
       mul = (this.stage && this.stage.enemyMult) ? this.stage.enemyMult : 1;
     }
@@ -1088,7 +1100,7 @@ const Game = {
     if (resting) { ctx.translate(0, 6); ctx.rotate(0.22); }   // きゅうけいちゅうは ころんで いる
     if (u.side === 'ally') ctx.scale(-1, 1);      // みかたは ひだりむき
 
-    const drawer = DRAWERS[u.def.id];
+    const drawer = DRAWERS[u.def.drawAs || u.def.id];
     if (drawer) {
       const st = {
         t: u.t,

@@ -534,6 +534,16 @@ body.dragging-slot #party-slots { touch-action:none; }
 .pr-btn:disabled { background:#b0bec5; box-shadow:0 3px 0 #78909c; color:#eceff1; }
 .pr-btn:active:not(:disabled) { transform:translateY(2px); box-shadow:none; }
 .pr-btn.evolve { background:linear-gradient(180deg,#ba68c8,#7b1fa2); box-shadow:0 3px 0 #4a148c; }
+.pr-btn.evolve.on { background:linear-gradient(180deg,#ffb74d,#ef6c00); box-shadow:0 3px 0 #bf360c; }
+.pr-ev {
+  display:inline-block; margin-left:calc(5px * var(--ui));
+  padding:0 calc(6px * var(--ui));
+  border-radius:calc(8px * var(--ui));
+  background:linear-gradient(180deg,#ffb74d,#ef6c00); color:#fff;
+  font-size:calc(10px * var(--ui));
+}
+/* ボタンが 2つ ならぶ ので すこし せまく */
+.power-row .pr-btn { padding:calc(9px * var(--ui)) calc(9px * var(--ui)); font-size:calc(11.5px * var(--ui)); }
 
 /* ---- ガチャ ---- */
 .gacha-machine { width:min(calc(260px * var(--ui)), 76%); }
