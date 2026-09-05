@@ -1900,7 +1900,9 @@ const STAGES = [
       { at: 3,  id: 'kamomeeru',  count: 2, gap: 1.2 },
       { at: 14,  id: 'yakipokkuru', count: 3, gap: 0.6 },
       { at: 26,  id: 'blockwan',    count: 1 },
-      { at: 40,  id: 'onigon',      count: 1 },              // ★ おおボス とうじょう
+      /* ★おおボスは てきの しろが 75% まで へると でてくる
+         （じかん していだと、つよい へんせいの とき でる まえに おわって しまう）*/
+      { atCastleHp: 0.75, id: 'onigon', count: 1 },
       { at: 56,  id: 'yakipokkuru', count: 3, gap: 0.6, repeat: 20 },
       { at: 70,  id: 'togehaya',    count: 2, gap: 2.0, repeat: 24 },
       { at: 88,  id: 'honota',      count: 4, gap: 0.5, repeat: 22 },
@@ -1985,7 +1987,8 @@ const STAGES = [
       { at: 3,  id: 'tanupon',    count: 1 },
       { at: 14, id: 'tanupon', count: 1 },
       { at: 26, id: 'moeris',  count: 1 },
-      { at: 40, id: 'nushinoookami', count: 1 },        // ★ ちゅうボス
+      /* ★ちゅうボスは てきの しろが 70% まで へると でてくる */
+      { atCastleHp: 0.70, id: 'nushinoookami', count: 1 },
       { at: 56, id: 'inocchi', count: 3, gap: 1.0, repeat: 22 },
       { at: 70, id: 'tanupon', count: 1, repeat: 31 },
       { at: 62, id: 'kumabee',  count: 1, repeat: 56 },
@@ -2132,7 +2135,8 @@ const STAGES = [
       { at: 3,  id: 'ironkokko',  count: 1 },
       { at: 14, id: 'hakobot',   count: 1 },
       { at: 26, id: 'sabinchi',  count: 2, gap: 1.6 },
-      { at: 42, id: 'garakutei', count: 1 },              // ★ ちゅうボス
+      /* ★ちゅうボスは てきの しろが 70% まで へると でてくる */
+      { atCastleHp: 0.70, id: 'garakutei', count: 1 },
       { at: 60, id: 'nejiro',    count: 4, gap: 0.7, repeat: 28 },
       { at: 74, id: 'hakobot',   count: 1, repeat: 43 },
     ],
@@ -2279,7 +2283,8 @@ const STAGES = [
       { at: 3,  id: 'togefugu',   count: 1 },
       { at: 14, id: 'chibisame',  count: 2, gap: 1.2 },
       { at: 26, id: 'ikamajin',   count: 1 },
-      { at: 42, id: 'nereid',     count: 1 },            // ★ ちゅうボス
+      /* ★ちゅうボスは てきの しろが 70% まで へると でてくる */
+      { atCastleHp: 0.70, id: 'nereid', count: 1 },
       { at: 60, id: 'pukakurage', count: 4, gap: 0.8, repeat: 18 },
       { at: 74, id: 'chibisame',  count: 2, gap: 1.2, repeat: 22 },
     ],
@@ -2319,7 +2324,8 @@ const STAGES = [
       { at: 14,  id: 'umihebi',    count: 2, gap: 1.5 },
       { at: 30,  id: 'daiouei',    count: 1 },
       { at: 46,  id: 'octocannon', count: 1 },
-      { at: 62,  id: 'leviza',     count: 1 },           // ★ りゅう が でる
+      /* ★りゅうは てきの しろが 65% まで へると でてくる */
+      { atCastleHp: 0.65, id: 'leviza', count: 1 },
       { at: 86,  id: 'umihebi',    count: 2, gap: 1.5, repeat: 30 },
       { at: 104, id: 'daiouei',    count: 1, repeat: 44 },
       { at: 110, id: 'tsuyugaeru', count: 2, gap: 1.4, repeat: 26 },
@@ -2655,8 +2661,10 @@ const TOWER = {
         { at: 74,  id: 'saba',         count: 2, gap: 1.2, repeat: 22 },
         { at: 88,  id: 'honota',       count: 4, gap: 0.5, repeat: 20 },
         { at: 102, id: 'togehaya',     count: 2, gap: 2.0, repeat: 26 },
-        /* おおボスは てきの しろが 70% まで へると でてくる */
-        { atCastleHp: 0.7, id: 'steve', count: 1 },
+        /* ★スティーブは はじめから いる。
+           うごかない やぐらなので、あとから でて きても こわく ないため。
+           しゃてい 950 の ひの やが せんじょう ぜんたいに とどく          */
+        { at: 3, id: 'steve', count: 1 },
       ],
     },
 
