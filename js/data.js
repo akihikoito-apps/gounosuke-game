@@ -3346,7 +3346,7 @@ const STAGES = [
     desc: 'おおボス「ポチ」。くちから ひを はく りゅう。はじめから でて くる！',
     bg: 'boss',
     castleHp: 8200,
-    power: 4.28,
+    power: 3.51,
     reward: { coins: 3, exp: 5200 },
     waves: [
       /* ★ポチは はじめから。ざこも いっしょ */
