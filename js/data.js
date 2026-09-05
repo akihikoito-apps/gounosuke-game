@@ -394,7 +394,7 @@ const UNITS = {
     id: 'bakegi', name: 'バケ着', shortName: 'バケ着',
     rarity: 'SR',                         // スーパーレア
     attr: 'water',
-    cost: 780,  recharge: 22.0,
+    cost: 1350, recharge: 180.0,          // さいせい 3ぷん
     hp: 2600,   atk: 340,  range: 175,  speed: 26,
     attackInterval: 1.9,   attackWindup: 0.55,  // こうげきの かいすうは おおめ
     kbCount: 4,
@@ -405,7 +405,7 @@ const UNITS = {
     /* あてた あいての こうげきりょくを 5びょう 20%さげる */
     weaken: { chance: 1.0, rate: 0.8, duration: 5.0 },
     /* 15%で ちゃくちに しっぱい。こうげきは そらぶり、じぶんに 10%ダメージ */
-    selfHurt: { chance: 0.15, rate: 0.10 },
+    selfHurt: { chance: 0.15, rate: 0.4 },
   },
 
   /* A（エーくん）── まほうの ぼうしを かぶった きいろい「A」。
@@ -3051,7 +3051,7 @@ const STAGES = [
     desc: 'ひの まほうを つかう みならいたちの くんれんエリア',
     bg: 'sunset',
     castleHp: 2000,
-    power: 0.86,
+    power: 0.76,
     reward: { coins: 1, exp: 1400 },
     waves: [
       { at: 3,  id: 'icewitch',     count: 2, gap: 1.1 },
@@ -3131,7 +3131,7 @@ const STAGES = [
     desc: 'おおボス「終焉の大魔導士ゼノス」。すべての まほうが あつまる さいごの たたかい',
     bg: 'boss',
     castleHp: 2700,
-    power: 1.12,
+    power: 0.82,
     reward: { coins: 3, exp: 2200 },
     waves: [
       { at: 3,  id: 'mokomadoushi', count: 2, gap: 1.1 },
@@ -3353,7 +3353,7 @@ const STAGES = [
     desc: 'むかし おちた たんさきの まわりに あつまる きかい',
     bg: 'mars',
     castleHp: 6700,
-    power: 3.91,
+    power: 4.89,
     reward: { coins: 2, exp: 3400 },
     waves: [
       { at: 3,  id: 'sabinchi',   count: 3, gap: 1.0 },
@@ -3427,7 +3427,7 @@ const STAGES = [
     desc: 'おおボス「ポチ」。くちから ひを はく りゅう。はじめから でて くる！',
     bg: 'boss',
     castleHp: 8200,
-    power: 3.51,
+    power: 2.88,
     reward: { coins: 3, exp: 5200 },
     waves: [
       /* ★ポチは はじめから。ざこも いっしょ */
@@ -3492,7 +3492,7 @@ const STAGES = [
     desc: 'こおりの まじょが うごきを とめて くる。けものの なかまが ゆうり',
     bg: 'mercury',
     castleHp: 6800,
-    power: 2.8,
+    power: 2.3,
     reward: { coins: 2, exp: 4100 },
     waves: [
       { at: 3,  id: 'icewitch',    count: 1 },
@@ -3547,7 +3547,7 @@ const STAGES = [
     desc: 'そこの みえない ふかい みぞ。おもい てきが つづく',
     bg: 'mercury',
     castleHp: 7600,
-    power: 2.1,
+    power: 1.85,
     reward: { coins: 2, exp: 4700 },
     waves: [
       { at: 3,  id: 'octocannon',  count: 2, gap: 1.1 },
@@ -3765,7 +3765,7 @@ const SPACESHIP = {
       desc: 'くさの てきばかり。ほのおの なかまが ゆうり',
       bg: 'ship',
       castleHp: 4800,
-      power: 1.35,
+      power: 1.11,
       reward: { coins: 3, exp: 1100 },
       waves: [
         { at: 6,  id: 'gaou',       count: 1 },
@@ -3783,7 +3783,7 @@ const SPACESHIP = {
       desc: 'ちゅうボス「ヌシノオオカミ」。けものたちの すみか',
       bg: 'ship',
       castleHp: 5200,
-      power: 5,
+      power: 4.1,
       reward: { coins: 4, exp: 1300 },
       waves: [
         { at: 6,  id: 'nushinoookami', count: 1 },
@@ -3857,7 +3857,7 @@ const SPACESHIP = {
       desc: 'つよい ボスたちが つづけて でて くる',
       bg: 'ship',
       castleHp: 6200,
-      power: 1.9,
+      power: 1.48,
       reward: { coins: 4, exp: 2000 },
       waves: [
         { at: 6,  id: 'zabaan',     count: 1 },
