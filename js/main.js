@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '4.2';
+  const GAME_VERSION = '4.3';
 
 
   /* =================================================
@@ -113,6 +113,7 @@
     if (!s.plus)    s.plus = {};
     if (!s.evolved) s.evolved = {};
     if (!s.seenEnemies) s.seenEnemies = {};
+    backfillSeen(s);          // まえに クリアした ステージの てきを ずかんに のせる
     if (!Array.isArray(s.owned) || !s.owned.length) s.owned = START_CHARS.slice();
     if (!Array.isArray(s.party) || !s.party.filter(Boolean).length) s.party = s.owned.slice(0, PARTY_MAX);
     s.owned.forEach(id => { if (typeof s.plus[id] !== 'number') s.plus[id] = 0; });
@@ -1271,13 +1272,36 @@
   let dexLimit = null;        // せんとうちゅうは この なかだけ みせる
   let dexBackTo = 'home';     // もどる さきの がめん
 
+  /* クリアずみの コースに でてくる てきは、ぜんぶ「あった こと が ある」ことに する。
+     （ずかんを あとから ついかした ので、まえに クリアした ぶんも のせる ため）*/
+  function backfillSeen(s) {
+    if (!s || !s.cleared) return false;
+    if (!s.seenEnemies) s.seenEnemies = {};
+    let added = false;
+    const mark = (list) => {
+      if (!list) return;
+      list.forEach(st => {
+        if (!st || !s.cleared[st.no] || !st.waves) return;
+        st.waves.forEach(w => {
+          if (w && w.id && ENEMIES[w.id] && !s.seenEnemies[w.id]) { s.seenEnemies[w.id] = true; added = true; }
+        });
+      });
+    };
+    mark(STAGES);
+    if (typeof TOWER !== 'undefined') mark(TOWER.courses);
+    return added;
+  }
+
   /* せんとうで でてきた てきを セーブに かきうつす */
   function recordSeen() {
     const s = slot();
-    if (!s || !Game.seen) return;
+    if (!s) return;
     if (!s.seenEnemies) s.seenEnemies = {};
     let added = false;
-    for (const id in Game.seen) { if (!s.seenEnemies[id]) { s.seenEnemies[id] = true; added = true; } }
+    if (Game.seen) {
+      for (const id in Game.seen) { if (!s.seenEnemies[id]) { s.seenEnemies[id] = true; added = true; } }
+    }
+    if (backfillSeen(s)) added = true;
     if (added) storeSave();
   }
 

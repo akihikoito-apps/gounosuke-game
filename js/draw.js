@@ -2068,6 +2068,175 @@ function drawTankundx(ctx, s) {
 }
 
 
+/* ---- デルテル君（怒り）：テルテル君の しんかけい ----
+   おこった かおに なり、しずくを 6れんげき とばす。しゃていも 1.5ばい。   */
+function drawDeruteru(ctx, s) {
+  const a = s.atk;
+  const sway = Math.sin(s.t * 4.2) * 3.4;
+  const shake = (a >= 0) ? Math.sin(s.t * 30) * 1.8 : 0;
+  ctx.save();
+  ctx.translate(sway * 0.4 + shake, Math.sin(s.t * 3) * 2);
+  ctx.rotate(sway * 0.014);
+
+  /* からだ */
+  const g = ctx.createLinearGradient(0, -50, 0, 0);
+  g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#4fa8e0');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(-12, -50);
+  ctx.lineTo(-27, -2);
+  ctx.quadraticCurveTo(0, 6, 27, -2);
+  ctx.lineTo(12, -50);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#1565c0'; ctx.lineWidth = 2.6; ctx.stroke();
+
+  /* くびの ひも */
+  ctx.strokeStyle = '#e53935'; ctx.lineWidth = 3.4;
+  ctx.beginPath(); ctx.moveTo(-13, -50); ctx.lineTo(13, -50); ctx.stroke();
+
+  /* あたま */
+  const gh = ctx.createRadialGradient(-5, -68, 2, 0, -64, 22);
+  gh.addColorStop(0, '#ffffff'); gh.addColorStop(1, '#9fd6f5');
+  ctx.fillStyle = gh;
+  ctx.beginPath(); ctx.arc(0, -64, 19, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#1565c0'; ctx.lineWidth = 3; ctx.stroke();
+
+  /* ★おこった め（つりあがった「へ」）*/
+  ctx.strokeStyle = '#1a3fa0'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-13, -72); ctx.lineTo(-4, -66); ctx.lineTo(-13, -61);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(12, -72); ctx.lineTo(4, -66); ctx.lineTo(12, -61);
+  ctx.stroke();
+  /* おこった くち */
+  ctx.beginPath();
+  ctx.moveTo(-7, -52); ctx.quadraticCurveTo(0, -58, 7, -52);
+  ctx.stroke();
+
+  /* ★いかりの しるし（あかい ✕）*/
+  ctx.strokeStyle = '#f44336'; ctx.lineWidth = 4.4; ctx.lineCap = 'round';
+  for (const [mx, my, sc] of [[24, -84, 1], [-22, -46, 0.8]]) {
+    const r = 9 * sc * (a >= 0 ? 1.2 : 1);
+    ctx.beginPath();
+    ctx.moveTo(mx - r, my - r); ctx.lineTo(mx + r, my + r);
+    ctx.moveTo(mx + r, my - r); ctx.lineTo(mx - r, my + r);
+    ctx.stroke();
+  }
+
+  /* ★ためて いる しずく（6はつぶん）*/
+  if (a >= 0) {
+    ctx.fillStyle = 'rgba(79,195,247,' + (0.4 + a * 0.5) + ')';
+    for (let i = 0; i < 6; i++) {
+      const an = -1.0 + i * 0.34;
+      const rr = 26 + a * 12;
+      const px = 24 + Math.cos(an) * rr, py = -60 + Math.sin(an) * rr * 0.6;
+      ctx.beginPath();
+      ctx.moveTo(px, py - 6);
+      ctx.quadraticCurveTo(px + 4.5, py, px, py + 4);
+      ctx.quadraticCurveTo(px - 4.5, py, px, py - 6);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+
+/* ---- 時の柄：時の旅人の しんかけい ----
+   おおきな とけいを からだに つけ、あたまの うえにも とけいを うかべる。
+   つよさに かかわる ところが ぜんぶ 1.3ばい。
+   あてた あいてを 1びょう とめる ちからが くわわった。               */
+function drawTokinogara(ctx, s) {
+  const step = Math.sin(s.t * 11) * (s.moving ? 1 : 0);
+  const a = s.atk;
+  ctx.save();
+
+  /* --- うかんだ とけい（あたまの うえ）--- */
+  ctx.save();
+  ctx.translate(2, -104 + Math.sin(s.t * 2.4) * 3);
+  ctx.strokeStyle = '#37474f'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, 12); ctx.lineTo(0, -2); ctx.stroke();
+  ctx.fillStyle = '#c9a06a';
+  ctx.beginPath(); ctx.arc(0, -14, 15, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffd54f';
+  ctx.beginPath(); ctx.arc(0, -14, 12, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#6d4c2f'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(0, -22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(-7, -12); ctx.stroke();
+  ctx.restore();
+
+  /* --- あし --- */
+  ctx.strokeStyle = '#212121'; ctx.lineWidth = 7; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-4, -24); ctx.lineTo(-6 + step * 6, -1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(5, -24); ctx.lineTo(7 - step * 6, -1); ctx.stroke();
+
+  /* --- からだ（スーツ）--- */
+  ctx.fillStyle = '#263238';
+  roundRect(ctx, -14, -56, 28, 34, 6); ctx.fill();
+  ctx.fillStyle = '#fafafa';
+  ctx.beginPath();
+  ctx.moveTo(-5, -56); ctx.lineTo(5, -56); ctx.lineTo(3, -34); ctx.lineTo(-3, -34); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#d32f2f';
+  ctx.beginPath();
+  ctx.moveTo(0, -53); ctx.lineTo(-7, -57); ctx.lineTo(-7, -48); ctx.closePath();
+  ctx.moveTo(0, -53); ctx.lineTo(7, -57); ctx.lineTo(7, -48); ctx.closePath();
+  ctx.fill();
+
+  /* --- むねの おおきな とけい（しんかの しるし）--- */
+  ctx.save();
+  ctx.translate(6, -40);
+  ctx.fillStyle = '#f5a623';
+  ctx.beginPath(); ctx.arc(0, 0, 17, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffd54f';
+  ctx.beginPath(); ctx.arc(0, 0, 13.5, 0, Math.PI * 2); ctx.fill();
+  /* はり（こうげきの ときは はやく まわる）*/
+  const sp = (a >= 0) ? s.t * 9 : s.t * 1.6;
+  ctx.strokeStyle = '#3a2a12'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, 0);
+  ctx.lineTo(Math.cos(sp - Math.PI / 2) * 9, Math.sin(sp - Math.PI / 2) * 9); ctx.stroke();
+  ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.moveTo(0, 0);
+  ctx.lineTo(Math.cos(sp * 0.4 - Math.PI / 2) * 6, Math.sin(sp * 0.4 - Math.PI / 2) * 6); ctx.stroke();
+  /* とめる ちからの ひかり */
+  if (a >= 0) {
+    ctx.strokeStyle = 'rgba(255,213,79,' + (0.3 + a * 0.5) + ')';
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 2; i++) {
+      ctx.beginPath(); ctx.arc(0, 0, 20 + i * 9 + a * 8, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  ctx.restore();
+
+  /* --- あたま --- */
+  ctx.fillStyle = '#ffe0b2';
+  ctx.beginPath(); ctx.arc(1, -68, 13, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#212121';
+  ctx.beginPath(); ctx.arc(1, -70, 13, Math.PI * 1.05, Math.PI * 2.05); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(12, -73); ctx.lineTo(15, -64); ctx.lineTo(9, -69); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#3e2723';
+  ellipse(ctx, 5, -67, 1.9, 2.8); ctx.fill();
+  ellipse(ctx, 11, -67, 1.9, 2.8); ctx.fill();
+
+  /* --- うで（ふりかぶる）--- */
+  const swing = (a >= 0) ? -1.6 + a * 2.6 : -0.35;
+  ctx.save();
+  ctx.translate(10, -50);
+  ctx.rotate(swing);
+  ctx.strokeStyle = '#263238'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(18, 0); ctx.stroke();
+  ctx.fillStyle = '#c9a06a';
+  ctx.beginPath(); ctx.arc(24, 0, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffd54f';
+  ctx.beginPath(); ctx.arc(24, 0, 6.6, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#3a2a12'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(24, 0); ctx.lineTo(24, -5); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(24, 0); ctx.lineTo(28, 2); ctx.stroke();
+  ctx.restore();
+
+  ctx.restore();
+}
+
+
 /* ---- ずに太：ずにおの しんかけい。3のめ（ななめに 3つ）----
    こうげきりょくは はんぶんに なった かわりに 3れんげき。
    め が 3つ ある ぶん、3ぽんの ビームを だします。            */
@@ -5657,7 +5826,9 @@ const DRAWERS = {
   tankun: drawTankun,
   tankundx: drawTankundx,
   teruteru: drawTeruteru,
+  deruteru: drawDeruteru,
   tokinotabibito: drawTokinotabibito,
+  tokinogara: drawTokinogara,
   hiibou: drawHiibou,
   zunio: drawZunio,
   zunita: drawZunita,

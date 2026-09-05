@@ -172,6 +172,20 @@ const UNITS = {
     projectile: 'drop',
     /* とくしゅのうりょく：しずくを 3れんげき */
     multiHit: { count: 3, delay: 0.16 },   // 3はつを 0.16びょう おきに とばす
+
+    /* ------------------------------------------------------------
+       しんか：じつりょく Lv.10 で「デルテル君（怒り）」に なれます
+         れんげき  3はつ → 6はつ（ダメージ 2ばい）
+         しゃてい  184 → 276（1.5ばい）
+         コスト    250 → 300
+       ------------------------------------------------------------ */
+    evolve: {
+      name: 'デルテル君', shortName: 'デルテル',
+      cost: 300,
+      range: 276,                            // 184 x 1.5
+      multiHit: { count: 6, delay: 0.14 },   // 6れんげき
+      drawAs: 'deruteru',
+    },
   },
 
   /* 時の旅人 ── くろスーツの しょうねん / バランスがた */
@@ -188,6 +202,31 @@ const UNITS = {
     projectile: 'clock',
     /* とくしゅのうりょく：20%の かくりつで てきを ふきとばす */
     knockbackChance: 0.20,
+
+    /* ------------------------------------------------------------
+       しんか：じつりょく Lv.10 で「時の柄」に なれます
+
+       つよさに かかわる ところを ぜんぶ 1.3ばいに：
+         たいりょく 820 → 1066
+         こうげき   155 →  202
+         しゃてい   131 →  170
+         はやさ      33 →   43
+         こうげきの はやさ 1.8びょう → 1.38びょう（1.3ばい はやい）
+         ふきとばす かくりつ 20% → 26%
+       そのうえで──
+         ★あてた あいてを 1びょう とめる（20%）を あたらしく ついか
+       ------------------------------------------------------------ */
+    evolve: {
+      name: '時の柄', shortName: '時の柄',
+      hp: 1066,
+      atk: 202,
+      range: 170,
+      speed: 43,
+      attackInterval: 1.38,
+      knockbackChance: 0.26,
+      stun: { duration: 1.0, chance: 0.20 },   // ★あたらしく ついか
+      drawAs: 'tokinogara',
+    },
   },
 
   /* ひー坊 ── ほのおを まとった たかかりょく */
@@ -1589,7 +1628,7 @@ const STAGES = [
     bg: 'meadow',
     castleHp: 1300,
     waves: [
-      { at: 3,  id: 'togehaya', count: 1 },
+      { at: 3,  id: 'togehaya',   count: 1 },
       { at: 16, id: 'togehaya', count: 1 },
       { at: 30, id: 'togehaya', count: 2, gap: 2.0 },
       { at: 50, id: 'togehaya', count: 2, gap: 2.5, repeat: 22 },
@@ -1606,7 +1645,7 @@ const STAGES = [
     bg: 'sunset',
     castleHp: 2400,
     waves: [
-      { at: 3,  id: 'togehaya', count: 1 },
+      { at: 3,  id: 'honota',     count: 3, gap: 0.6 },
       { at: 12, id: 'honota',   count: 3, gap: 0.5 },
       { at: 26, id: 'togehaya', count: 2, gap: 2.0 },
       { at: 38, id: 'honota',   count: 3, gap: 0.5 },
@@ -1625,7 +1664,7 @@ const STAGES = [
     bg: 'mizu',
     castleHp: 3000,
     waves: [
-      { at: 3,  id: 'togehaya', count: 1 },
+      { at: 3,  id: 'saba',       count: 1 },
       { at: 15, id: 'saba',     count: 1 },
       { at: 28, id: 'togehaya', count: 2, gap: 2.0 },
       { at: 40, id: 'saba',     count: 2, gap: 1.4 },
@@ -1644,7 +1683,7 @@ const STAGES = [
     bg: 'rock',
     castleHp: 4200,
     waves: [
-      { at: 3,  id: 'togehaya', count: 1 },
+      { at: 3,  id: 'nyororiinu', count: 2, gap: 0.8 },
       { at: 16, id: 'honota',   count: 3, gap: 0.5 },
       { at: 26, id: 'jiryu',    count: 1 },
       { at: 48, id: 'togehaya', count: 2, gap: 2.0, repeat: 21 },
@@ -1663,7 +1702,7 @@ const STAGES = [
     bg: 'night',
     castleHp: 4800,
     waves: [
-      { at: 3,  id: 'saba',     count: 1 },
+      { at: 3,  id: 'togehaya',   count: 2, gap: 2.0 },
       { at: 13, id: 'togehaya', count: 2, gap: 2.0 },
       { at: 28, id: 'jiryu',    count: 1 },
       { at: 42, id: 'saba',     count: 3, gap: 1.2 },
@@ -1685,7 +1724,7 @@ const STAGES = [
     bg: 'hoshizora',
     castleHp: 2500,
     waves: [
-      { at: 3,  id: 'togehaya', count: 1 },
+      { at: 3,  id: 'hoshikun',   count: 1 },
       { at: 16, id: 'hoshikun', count: 1 },
       { at: 32, id: 'honota',   count: 3, gap: 0.5 },
       { at: 48, id: 'hoshikun', count: 1, repeat: 34 },
@@ -1704,7 +1743,7 @@ const STAGES = [
     bg: 'boss',
     castleHp: 3900,
     waves: [
-      { at: 3,  id: 'togehaya', count: 1 },
+      { at: 3,  id: 'blockwan',   count: 1 },
       { at: 14, id: 'honota',   count: 3, gap: 0.5 },
       { at: 28, id: 'saba',     count: 2, gap: 1.4 },
       { at: 42, id: 'jiryu',    count: 1 },
@@ -1728,7 +1767,7 @@ const STAGES = [
     bg: 'steel',
     castleHp: 4600,
     waves: [
-      { at: 3,   id: 'togehaya',   count: 1 },
+      { at: 3,  id: 'kongaragan', count: 1 },
       { at: 14,  id: 'saba',       count: 2, gap: 1.4 },
       { at: 27,  id: 'kongaragan', count: 1 },
       { at: 40,  id: 'jiryu',      count: 1 },
@@ -1751,7 +1790,7 @@ const STAGES = [
     bg: 'night',
     castleHp: 3400,
     waves: [
-      { at: 3,   id: 'saba',       count: 1 },
+      { at: 3,  id: 'bakecchin',  count: 2, gap: 1.4 },
       { at: 18,  id: 'kongaragan', count: 1 },
       { at: 34,  id: 'jiryu',      count: 1 },
       { at: 50,  id: 'hoshikun',   count: 1 },
@@ -1774,7 +1813,7 @@ const STAGES = [
     bg: 'sunset',
     castleHp: 4600,
     waves: [
-      { at: 3,   id: 'honota',   count: 4, gap: 0.4 },
+      { at: 3,  id: 'yakipokkuru',count: 3, gap: 0.6 },
       { at: 16,  id: 'togehaya', count: 2, gap: 2.0 },
       { at: 30,  id: 'honota',   count: 5, gap: 0.4, repeat: 18 },
       { at: 44,  id: 'saba',     count: 2, gap: 1.4, repeat: 26 },
@@ -1793,7 +1832,7 @@ const STAGES = [
     bg: 'rock',
     castleHp: 5000,
     waves: [
-      { at: 3,   id: 'togehaya',   count: 1 },
+      { at: 3,  id: 'jiryu',      count: 1 },
       { at: 14,  id: 'jiryu',      count: 1 },
       { at: 28,  id: 'saba',       count: 2, gap: 1.4 },
       { at: 42,  id: 'jiryu',      count: 1, repeat: 34 },
@@ -1814,7 +1853,7 @@ const STAGES = [
     enemyMult: 1.34,
     reward: { coins: 1, exp: 480 },
     waves: [
-      { at: 3,  id: 'togehaya',     count: 1 },
+      { at: 3,  id: 'nyororiinu', count: 3, gap: 0.7 },
       { at: 12, id: 'mokomadoushi', count: 1 },
       { at: 24, id: 'nyororiinu',   count: 3, gap: 0.6 },
       { at: 34, id: 'mokomadoushi', count: 1 },
@@ -1835,7 +1874,7 @@ const STAGES = [
     enemyMult: 1.4,
     reward: { coins: 1, exp: 560 },
     waves: [
-      { at: 3,  id: 'togehaya',     count: 1 },
+      { at: 3,  id: 'ojiinouenchou', count: 1 },
       { at: 12, id: 'yakipokkuru',  count: 3, gap: 0.6 },
       { at: 24, id: 'kongaragan',   count: 1 },
       { at: 36, id: 'mokomadoushi', count: 1 },
@@ -1858,7 +1897,7 @@ const STAGES = [
     enemyMult: 1.25,
     reward: { coins: 3, exp: 670 },
     waves: [
-      { at: 3,   id: 'togehaya',    count: 1 },
+      { at: 3,  id: 'kamomeeru',  count: 2, gap: 1.2 },
       { at: 14,  id: 'yakipokkuru', count: 3, gap: 0.6 },
       { at: 26,  id: 'blockwan',    count: 1 },
       { at: 40,  id: 'onigon',      count: 1 },              // ★ おおボス とうじょう
@@ -1885,7 +1924,7 @@ const STAGES = [
     enemyMult: 1.10,
     reward: { coins: 1, exp: 450 },
     waves: [
-      { at: 3,  id: 'inocchi',  count: 2, gap: 1.2 },
+      { at: 3,  id: 'inocchi',    count: 2, gap: 1.2 },
       { at: 14, id: 'yamanemu', count: 1 },
       { at: 24, id: 'inocchi',  count: 3, gap: 1.0 },
       { at: 36, id: 'tanupon',  count: 1 },
@@ -1900,17 +1939,17 @@ const STAGES = [
     name: 'たぬきの ひろば',
     desc: 'たぬポンに ちからを ぬかれる。かずで おしきろう',
     bg: 'mori',
-    castleHp: 1700,
+    castleHp: 1800,
     enemyMult: 1,
     reward: { coins: 1, exp: 480 },
     waves: [
-      { at: 3,  id: 'inocchi',  count: 2, gap: 1.2 },
+      { at: 3,  id: 'yamanemu',   count: 2, gap: 1.6 },
       { at: 14, id: 'tanupon',  count: 1 },
       { at: 26, id: 'tanupon',  count: 2, gap: 2.5 },
       { at: 38, id: 'yamanemu', count: 2, gap: 2.0 },
-      { at: 50, id: 'tanupon',  count: 2, gap: 2.5, repeat: 18 },
-      { at: 64, id: 'inocchi',  count: 3, gap: 1.0, repeat: 16 },
-      { at: 44, id: 'kumabee',  count: 1, repeat: 26 },   // もとから いる けものの てき
+      { at: 50, id: 'tanupon',  count: 2, gap: 2.5, repeat: 31 },
+      { at: 64, id: 'inocchi',  count: 3, gap: 1.0, repeat: 28 },
+      { at: 44, id: 'kumabee',  count: 1, repeat: 45 },   // もとから いる けものの てき
     ],
   },
 
@@ -1920,16 +1959,16 @@ const STAGES = [
     name: 'あめあがりの さわ',
     desc: 'ツユガエルの しずくが はんいに ひろがる',
     bg: 'mizu',
-    castleHp: 1900,
+    castleHp: 2400,
     enemyMult: 1.06,
     reward: { coins: 1, exp: 530 },
     waves: [
-      { at: 3,  id: 'inocchi',    count: 2, gap: 1.2 },
+      { at: 3,  id: 'tsuyugaeru', count: 1 },
       { at: 14, id: 'tsuyugaeru', count: 1 },
       { at: 28, id: 'tsuyugaeru', count: 2, gap: 2.0 },
       { at: 40, id: 'yamanemu',   count: 2, gap: 2.0 },
-      { at: 54, id: 'tsuyugaeru', count: 2, gap: 2.0, repeat: 22 },
-      { at: 70, id: 'tanupon',    count: 1, repeat: 24 },
+      { at: 54, id: 'tsuyugaeru', count: 2, gap: 2.0, repeat: 31 },
+      { at: 70, id: 'tanupon',    count: 1, repeat: 34 },
     ],
   },
 
@@ -1939,17 +1978,17 @@ const STAGES = [
     name: 'ぬしの なわばり',
     desc: 'ちゅうボス「ヌシノオオカミ」。ピンチに なると ほんきを だす',
     bg: 'night',
-    castleHp: 1800,
+    castleHp: 2200,
     enemyMult: 1.02,
     reward: { coins: 3, exp: 590 },
     waves: [
-      { at: 3,  id: 'inocchi', count: 2, gap: 1.2 },
+      { at: 3,  id: 'tanupon',    count: 1 },
       { at: 14, id: 'tanupon', count: 1 },
       { at: 26, id: 'moeris',  count: 1 },
       { at: 40, id: 'nushinoookami', count: 1 },        // ★ ちゅうボス
-      { at: 56, id: 'inocchi', count: 3, gap: 1.0, repeat: 16 },
-      { at: 70, id: 'tanupon', count: 1, repeat: 22 },
-      { at: 62, id: 'kumabee',  count: 1, repeat: 40 },
+      { at: 56, id: 'inocchi', count: 3, gap: 1.0, repeat: 22 },
+      { at: 70, id: 'tanupon', count: 1, repeat: 31 },
+      { at: 62, id: 'kumabee',  count: 1, repeat: 56 },
     ],
   },
 
@@ -1959,11 +1998,11 @@ const STAGES = [
     name: 'はりの もり',
     desc: 'ハリ千本が とおくから はりを とばす。まえに でよう',
     bg: 'kemono',
-    castleHp: 1500,
+    castleHp: 2600,
     enemyMult: 0.85,
     reward: { coins: 1, exp: 640 },
     waves: [
-      { at: 3,  id: 'inocchi',    count: 2, gap: 1.2 },
+      { at: 3,  id: 'moeris',     count: 1 },
       { at: 14, id: 'harisenbon', count: 1 },
       { at: 30, id: 'tanupon',    count: 1 },
       { at: 48, id: 'harisenbon', count: 1, repeat: 32 },
@@ -1979,17 +2018,17 @@ const STAGES = [
     name: 'くまの すみか',
     desc: 'クマったは かたくて ふきとびにくい。ちからも ぬかれる',
     bg: 'rock',
-    castleHp: 1700,
+    castleHp: 2200,
     enemyMult: 0.9,
     reward: { coins: 1, exp: 670 },
     waves: [
-      { at: 3,  id: 'inocchi',    count: 2, gap: 1.2 },
+      { at: 3,  id: 'kumabee',    count: 1 },
       { at: 14, id: 'kumatta',    count: 1 },
       { at: 30, id: 'moeris',     count: 2, gap: 2.0 },
-      { at: 42, id: 'kumatta',    count: 1, repeat: 20 },
-      { at: 58, id: 'harisenbon', count: 1, repeat: 22 },
-      { at: 74, id: 'inocchi',    count: 3, gap: 1.0, repeat: 16 },
-      { at: 46, id: 'jiryu',    count: 1, repeat: 34 },   // 字一龍（けもの）
+      { at: 42, id: 'kumatta',    count: 1, repeat: 28 },
+      { at: 58, id: 'harisenbon', count: 1, repeat: 31 },
+      { at: 74, id: 'inocchi',    count: 3, gap: 1.0, repeat: 22 },
+      { at: 46, id: 'jiryu',    count: 1, repeat: 48 },   // 字一龍（けもの）
     ],
   },
 
@@ -1999,20 +2038,20 @@ const STAGES = [
     name: 'もりぐいの おくにわ',
     desc: 'おおボス「森喰らい・ガオウ」。ふきとばせない。ほのおと パワーで',
     bg: 'boss',
-    castleHp: 2000,
+    castleHp: 1800,
     enemyMult: 0.92,
     reward: { coins: 3, exp: 870 },
     waves: [
-      { at: 3,   id: 'inocchi',    count: 2, gap: 1.2 },
+      { at: 3,  id: 'inocchi',    count: 3, gap: 1.0 },
       { at: 14,  id: 'tanupon',    count: 1 },
       { at: 26,  id: 'kokejika',   count: 1 },
       { at: 38,  id: 'harisenbon', count: 1 },
-      { at: 52,  id: 'kumatta',    count: 1, repeat: 30 },
-      { at: 68,  id: 'moeris',     count: 2, gap: 2.0, repeat: 20 },
-      { at: 84,  id: 'inocchi',    count: 3, gap: 1.0, repeat: 16 },
+      { at: 52,  id: 'kumatta',    count: 1, repeat: 57 },
+      { at: 68,  id: 'moeris',     count: 2, gap: 2.0, repeat: 38 },
+      { at: 84,  id: 'inocchi',    count: 3, gap: 1.0, repeat: 30 },
       /* おおボスは てきの しろが 75% まで へると でてくる */
       { atCastleHp: 0.75, id: 'gaou', count: 1 },
-      { at: 46, id: 'jiryu',    count: 1, repeat: 38 },
+      { at: 46, id: 'jiryu',    count: 1, repeat: 72 },
     ],
   },
 
@@ -2029,11 +2068,11 @@ const STAGES = [
     name: 'さびた はんにゅうぐち',
     desc: 'うごきだした ちいさな ネジたち',
     bg: 'haikoujou',
-    castleHp: 2400,
+    castleHp: 4600,
     enemyMult: 1,
     reward: { coins: 1, exp: 780 },
     waves: [
-      { at: 3,  id: 'nejiro', count: 3, gap: 0.8 },
+      { at: 3,  id: 'nejiro',     count: 3, gap: 0.8 },
       { at: 16, id: 'nejiro', count: 4, gap: 0.7 },
       { at: 30, id: 'nejiro', count: 5, gap: 0.6, repeat: 14 },
       { at: 46, id: 'hakobot', count: 1, repeat: 26 },
@@ -2050,7 +2089,7 @@ const STAGES = [
     enemyMult: 1.05,
     reward: { coins: 1, exp: 810 },
     waves: [
-      { at: 3,  id: 'nejiro',  count: 3, gap: 0.8 },
+      { at: 3,  id: 'hakobot',    count: 1 },
       { at: 14, id: 'hakobot', count: 2, gap: 2.5 },
       { at: 28, id: 'nejiro',  count: 4, gap: 0.7 },
       { at: 40, id: 'hakobot', count: 2, gap: 2.5, repeat: 20 },
@@ -2069,7 +2108,7 @@ const STAGES = [
     enemyMult: 0.88,
     reward: { coins: 1, exp: 870 },
     waves: [
-      { at: 3,  id: 'nejiro',   count: 3, gap: 0.8 },
+      { at: 3,  id: 'sabinchi',   count: 2, gap: 1.4 },
       { at: 14, id: 'burner',   count: 1 },
       { at: 26, id: 'potank',   count: 1 },
       { at: 38, id: 'sabinchi', count: 2, gap: 1.6 },
@@ -2090,12 +2129,12 @@ const STAGES = [
     enemyMult: 1.15,
     reward: { coins: 3, exp: 950 },
     waves: [
-      { at: 3,  id: 'nejiro',    count: 3, gap: 0.8 },
+      { at: 3,  id: 'ironkokko',  count: 1 },
       { at: 14, id: 'hakobot',   count: 1 },
       { at: 26, id: 'sabinchi',  count: 2, gap: 1.6 },
       { at: 42, id: 'garakutei', count: 1 },              // ★ ちゅうボス
-      { at: 60, id: 'nejiro',    count: 4, gap: 0.7, repeat: 16 },
-      { at: 74, id: 'hakobot',   count: 1, repeat: 24 },
+      { at: 60, id: 'nejiro',    count: 4, gap: 0.7, repeat: 28 },
+      { at: 74, id: 'hakobot',   count: 1, repeat: 43 },
     ],
   },
 
@@ -2109,7 +2148,7 @@ const STAGES = [
     enemyMult: 1.18,
     reward: { coins: 1, exp: 980 },
     waves: [
-      { at: 3,  id: 'nejiro',   count: 3, gap: 0.8 },
+      { at: 3,  id: 'mojacord',   count: 1 },
       { at: 14, id: 'mojacord', count: 1 },
       { at: 28, id: 'mojacord', count: 1 },
       { at: 40, id: 'sabinchi', count: 2, gap: 1.6 },
@@ -2125,18 +2164,18 @@ const STAGES = [
     name: 'プレスこうじょう',
     desc: 'あっとうてきな はかいりょく。プレスケが おしつぶす',
     bg: 'haikoujou',
-    castleHp: 3800,
+    castleHp: 3600,
     enemyMult: 1.26,
     reward: { coins: 1, exp: 1090 },
     waves: [
-      { at: 3,  id: 'nejiro',   count: 3, gap: 0.8 },
+      { at: 3,  id: 'nejiro',     count: 5, gap: 0.6 },
       { at: 14, id: 'pressuke', count: 1 },
       { at: 30, id: 'hakobot',  count: 2, gap: 2.5 },
       { at: 42, id: 'sabinchi', count: 2, gap: 1.6 },
       { at: 54, id: 'mojacord', count: 1 },
-      { at: 66, id: 'pressuke', count: 1, repeat: 26 },
-      { at: 84, id: 'nejiro',   count: 4, gap: 0.7, repeat: 16 },
-      { at: 52, id: 'kongaragan', count: 1, repeat: 26 },
+      { at: 66, id: 'pressuke', count: 1, repeat: 45 },
+      { at: 84, id: 'nejiro',   count: 4, gap: 0.7, repeat: 28 },
+      { at: 52, id: 'kongaragan', count: 1, repeat: 45 },
     ],
   },
 
@@ -2146,20 +2185,20 @@ const STAGES = [
     name: 'ようこうろの さいしんぶ',
     desc: 'すべての げんきょう「廃炉獣メルトギア」。ほのお・まじゅつし・パワーで',
     bg: 'boss',
-    castleHp: 2900,
+    castleHp: 3000,
     enemyMult: 1.10,
     reward: { coins: 3, exp: 1400 },
     waves: [
-      { at: 3,   id: 'nejiro',   count: 3, gap: 0.8 },
+      { at: 3,  id: 'kongaragan', count: 1 },
       { at: 14,  id: 'sabinchi', count: 2, gap: 1.6 },
       { at: 28,  id: 'burner',   count: 1 },
       { at: 42,  id: 'forkun',   count: 1 },
-      { at: 58,  id: 'pressuke', count: 1, repeat: 30 },
-      { at: 76,  id: 'potank',   count: 1, repeat: 26 },
-      { at: 92,  id: 'nejiro',   count: 4, gap: 0.7, repeat: 16 },
+      { at: 58,  id: 'pressuke', count: 1, repeat: 42 },
+      { at: 76,  id: 'potank',   count: 1, repeat: 36 },
+      { at: 92,  id: 'nejiro',   count: 4, gap: 0.7, repeat: 22 },
       /* さいしゅうボスは てきの しろが 75% まで へると でてくる */
       { atCastleHp: 0.75, id: 'meltgear', count: 1 },
-      { at: 68, id: 'kongaragan', count: 1, repeat: 42 },
+      { at: 68, id: 'kongaragan', count: 1, repeat: 59 },
     ],
   },
 
@@ -2176,8 +2215,8 @@ const STAGES = [
     name: 'しずかな いりえ',
     desc: 'おだやかな うみに あらわれる ちいさな てきたち',
     bg: 'kinkai',
-    castleHp: 2600,
-    enemyMult: 1.00,
+    castleHp: 4400,
+    enemyMult: 1.15,
     reward: { coins: 1, exp: 900 },
     waves: [
       { at: 3,  id: 'pukakurage', count: 3, gap: 0.9 },
@@ -2194,11 +2233,11 @@ const STAGES = [
     name: 'ぎょじょうの しゅうへん',
     desc: 'チビサメの むれが すばやく つっこんで くる',
     bg: 'mizu',
-    castleHp: 2800,
-    enemyMult: 1.04,
+    castleHp: 4600,
+    enemyMult: 1.2,
     reward: { coins: 1, exp: 950 },
     waves: [
-      { at: 3,  id: 'pukakurage', count: 3, gap: 0.9 },
+      { at: 3,  id: 'chibisame',  count: 2, gap: 1.2 },
       { at: 14, id: 'chibisame',  count: 2, gap: 1.2 },
       { at: 28, id: 'chibisame',  count: 3, gap: 1.0 },
       { at: 40, id: 'bakecchin',  count: 2, gap: 1.5 },
@@ -2213,11 +2252,11 @@ const STAGES = [
     name: 'しずみかけた ふね',
     desc: 'ざんがいから あらわれる トゲフグと イカマジン',
     bg: 'kinkai',
-    castleHp: 1700,
-    enemyMult: 0.92,
+    castleHp: 4200,
+    enemyMult: 1.15,
     reward: { coins: 1, exp: 1000 },
     waves: [
-      { at: 3,  id: 'pukakurage', count: 3, gap: 0.9 },
+      { at: 3,  id: 'saba',       count: 3, gap: 1.0 },
       { at: 14, id: 'ikamajin',   count: 1 },
       { at: 26, id: 'togefugu',   count: 1 },
       { at: 38, id: 'chibisame',  count: 3, gap: 1.0 },
@@ -2233,11 +2272,11 @@ const STAGES = [
     name: 'ちょうりゅうの こうさてん',
     desc: 'ちゅうボス「深海の主 ネレイド」。かいりゅうが ぶつかる きけんな かいいき',
     bg: 'water',
-    castleHp: 2400,
-    enemyMult: 0.95,
+    castleHp: 3000,
+    enemyMult: 1.05,
     reward: { coins: 3, exp: 1100 },
     waves: [
-      { at: 3,  id: 'pukakurage', count: 3, gap: 0.9 },
+      { at: 3,  id: 'togefugu',   count: 1 },
       { at: 14, id: 'chibisame',  count: 2, gap: 1.2 },
       { at: 26, id: 'ikamajin',   count: 1 },
       { at: 42, id: 'nereid',     count: 1 },            // ★ ちゅうボス
@@ -2252,11 +2291,11 @@ const STAGES = [
     name: 'しげんの さいくつじょう',
     desc: 'じゅうそうの てき。オクトキャノンと カニタンクが まちうける',
     bg: 'kinkai',
-    castleHp: 1800,
-    enemyMult: 0.8,
+    castleHp: 2800,
+    enemyMult: 0.95,
     reward: { coins: 1, exp: 1150 },
     waves: [
-      { at: 3,  id: 'pukakurage', count: 3, gap: 0.9 },
+      { at: 3,  id: 'ikamajin',   count: 1 },
       { at: 14, id: 'octocannon', count: 1 },
       { at: 30, id: 'kanitank',   count: 1 },
       { at: 46, id: 'togefugu',   count: 1 },
@@ -2272,11 +2311,11 @@ const STAGES = [
     name: 'うみの だいかいろう',
     desc: 'おおきな かいりゅうと きょだいな いきもの。あらしの まえぶれ',
     bg: 'water',
-    castleHp: 2000,
-    enemyMult: 0.85,
+    castleHp: 2900,
+    enemyMult: 0.97,
     reward: { coins: 1, exp: 1250 },
     waves: [
-      { at: 3,   id: 'pukakurage', count: 3, gap: 0.9 },
+      { at: 3,  id: 'bakecchin',  count: 3, gap: 1.2 },
       { at: 14,  id: 'umihebi',    count: 2, gap: 1.5 },
       { at: 30,  id: 'daiouei',    count: 1 },
       { at: 46,  id: 'octocannon', count: 1 },
@@ -2297,7 +2336,7 @@ const STAGES = [
     enemyMult: 1.00,
     reward: { coins: 3, exp: 1800 },
     waves: [
-      { at: 3,   id: 'pukakurage', count: 3, gap: 0.9 },
+      { at: 3,  id: 'umihebi',    count: 2, gap: 1.5 },
       { at: 14,  id: 'chibisame',  count: 3, gap: 1.0 },
       { at: 28,  id: 'togefugu',   count: 1 },
       { at: 42,  id: 'octocannon', count: 1 },
