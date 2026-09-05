@@ -488,7 +488,10 @@ const Game = {
       let dmg = Math.round(atk * mult);
       let isCrit = false;
       if (crit && Math.random() < ((crit.chance === undefined) ? 1 : crit.chance)) {
-        dmg = Math.round(dmg * (crit.mult || 2));
+        // ignoreAttr の とき は「もとの こうげきりょく × ばいりつ」。
+        // あいしょうの ゆうり／ふりは まったく けいさんに いれない
+        dmg = crit.ignoreAttr ? Math.round(atk * (crit.mult || 2))
+                              : Math.round(dmg * (crit.mult || 2));
         isCrit = true;
       }
       this.damageUnit(v, dmg, attr, mult, false, isCrit);
@@ -523,6 +526,22 @@ const Game = {
   /* ---- ダメージ ---- */
   damageUnit(u, dmg, attr, mult, noNumber, isCrit) {
     if (u.dead) return;
+
+    /* ★きゅうしゅう：きめられた ぞくせいの こうげきは ダメージ 0。
+       そのかわり おなじ ぶんだけ たいりょくが かいふく する          */
+    const ab = u.def.absorb;
+    if (ab && attr && ab.attrs && ab.attrs.indexOf(attr) >= 0) {
+      const heal = Math.max(1, Math.round(dmg * (ab.rate === undefined ? 1 : ab.rate)));
+      const room = Math.max(0, u.maxHp - u.hp);
+      const got  = Math.min(room, heal);
+      u.hp += got;
+      this.addEffect({ type: 'healMark', x: u.x, y: this.groundWorldY() - 72 - u.lane, life: 0.8 });
+      this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 55 - u.lane,
+                       text: got > 0 ? ('＋' + got) : 'すいとった！',
+                       color: '#69f0ae', life: 0.75, big: true });
+      return;
+    }
+
     // きゅうけいちゅうは よけいに ダメージを うける
     if (u.resting && u.def.rest && u.def.rest.vuln) dmg = Math.round(dmg * u.def.rest.vuln);
     u.hp -= dmg;

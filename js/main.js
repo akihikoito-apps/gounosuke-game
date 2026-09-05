@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '2.6';
+  const GAME_VERSION = '2.7';
 
 
   /* =================================================
@@ -504,10 +504,16 @@
     const box = $('#tower-floors');
     box.innerHTML = '';
     const cleared = (s && s.cleared) || {};
+    let lockedFloors = 0;
     for (let f = 1; f <= TOWER.floors; f++) {
       const course = TOWER.courses.find(c => c.floor === f) || null;
       const prev   = TOWER.courses.find(c => c.floor === f - 1) || null;
       const open   = !!course && (f === 1 || (prev && cleared[prev.no]));
+      const done   = !!(course && cleared[course.no]);
+      if (!open && !done) {
+        lockedFloors++;
+        if (lockedFloors > 1) continue;   // つぎの 1かい だけ みせる
+      }
       const el = document.createElement('button');
       el.className = 'tower-floor' + (open ? ' open' : '');
       el.innerHTML =
@@ -522,6 +528,12 @@
         el.addEventListener('click', () => toast(course ? 'したの かいから のぼってね' : 'この かいは まだ じゅんびちゅう！'));
       }
       box.appendChild(el);
+    }
+    if (lockedFloors > 1) {
+      const more = document.createElement('div');
+      more.className = 'more-note';
+      more.textContent = 'この うえに あと ' + (lockedFloors - 1) + ' かい';
+      box.appendChild(more);   // ならびは column-reverse なので さいごが いちばん うえ
     }
     show('screen-tower');
   }
@@ -542,11 +554,18 @@
       if (open && !cleared[list[k].no]) { nextIdx = k; break; }
     }
 
+    // まだ あそべない コースは「つぎの 1つ」だけ みせる（ならびが ながく ならない ように）
+    let lockedShown = 0;
+
     list.forEach((st, k) => {
       const all  = STAGES.indexOf(st);
       const prev = STAGES[all - 1];
       const open = (all === 0) || !!cleared[prev.no] || !!cleared[st.no];
       const isNext = (k === nextIdx);
+      if (!open) {
+        lockedShown++;
+        if (lockedShown > 1) return;      // 2つめ いこうは かくす
+      }
 
       const b = document.createElement('button');
       b.className = 'stage-card' + (open ? '' : ' locked') + (isNext ? ' next' : '');
@@ -566,6 +585,19 @@
       else      b.addEventListener('click', () => toast('まえの コースを クリアしてね'));
       box.appendChild(b);
     });
+
+    // まだ みせて いない コースが なんこ あるか
+    const hidden = list.filter(st => {
+      const all = STAGES.indexOf(st);
+      const prev = STAGES[all - 1];
+      return !((all === 0) || cleared[prev.no] || cleared[st.no]);
+    }).length - 1;
+    if (hidden > 0) {
+      const more = document.createElement('div');
+      more.className = 'more-note';
+      more.textContent = 'この さきに あと ' + hidden + ' コース（クリアすると でてきます）';
+      box.appendChild(more);
+    }
   }
 
 
@@ -694,6 +726,7 @@
         buildParty();
         requestAnimationFrame(buildParty);
       });
+      if (id) attachSlotDrag(el, i, s);       // ★ながおしで ドラッグ＆ドロップ
       box.appendChild(el);
       if (id) paintChar(el.querySelector('canvas'), id);
     }
@@ -729,7 +762,183 @@
 
     $('#party-hint').textContent = (selectedSlot >= 0)
       ? (selectedSlot + 1) + 'ばんめの わくに いれる キャラを えらんでね'
-      : 'わくを タップして、したの キャラを えらぶと セットできます';
+      : 'わくを タップして したの キャラを えらぶと セット。ながおしで じゅんばんを いれかえ';
+  }
+
+  /* =================================================
+     へんせいの わくを ながおし → ドラッグして じゅんばん いれかえ
+
+     ・ながおし 300ミリびょうで「もちあげ」モードに はいります
+     ・ゆびを はなすまでは がめんは スクロール しません
+     ・ほかの わくの うえで はなすと、そこに わりこんで じゅんばんが かわります
+     ================================================= */
+  const DRAG_HOLD_MS = 300;      // これだけ おしっぱなしで もちあげ
+  const DRAG_SLIP    = 12;       // これいじょう ゆびが うごいたら ながおし キャンセル
+  let dragState = null;
+
+  function pointerXY(e) {
+    if (e.touches && e.touches.length)            return { x: e.touches[0].clientX,       y: e.touches[0].clientY };
+    if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function attachSlotDrag(el, index, s) {
+    const onDown = (e) => {
+      if (dragState) return;
+      if (e.button !== undefined && e.button !== 0) return;   // マウスは ひだりボタン だけ
+      const p0 = pointerXY(e);
+      dragState = {
+        el: el, from: index, over: index, s: s,
+        x0: p0.x, y0: p0.y, held: false,
+        ghost: null, rects: null, timer: null,
+      };
+      const st = dragState;
+      st.timer = setTimeout(() => { if (dragState === st) beginHold(st); }, DRAG_HOLD_MS);
+      document.addEventListener('mousemove', onDocMove, { passive: false });
+      document.addEventListener('touchmove', onDocMove, { passive: false });
+      document.addEventListener('mouseup', onDocUp);
+      document.addEventListener('touchend', onDocUp);
+      document.addEventListener('touchcancel', onDocUp);
+    };
+
+    el.addEventListener('mousedown', onDown);
+    el.addEventListener('touchstart', onDown, { passive: true });
+    /* もちあげた あとの タップで「はずす」が はしらない ように */
+    el.addEventListener('click', (e) => {
+      if (el._justDragged) {
+        el._justDragged = false;
+        e.stopPropagation();
+        if (e.preventDefault) e.preventDefault();
+      }
+    }, true);
+  }
+
+  /* --- ゆびが うごいた とき（ドキュメント ぜんたいで 1つ だけ）--- */
+  function onDocMove(e) {
+    const st = dragState;
+    if (!st) return;
+    const p = pointerXY(e);
+    if (!st.held) {
+      // まだ もちあげて いない：うごいたら ながおしは とりやめ（スクロール ゆうせん）
+      if (Math.abs(p.x - st.x0) > DRAG_SLIP || Math.abs(p.y - st.y0) > DRAG_SLIP) endDrag(false);
+      return;
+    }
+    if (e.cancelable && e.preventDefault) e.preventDefault();   // スクロール させない
+    moveGhost(st, p);
+    const over = slotAt(st, p);
+    if (over !== st.over) { st.over = over; markOver(st); }
+  }
+
+  /* --- ゆびを はなした とき --- */
+  function onDocUp() {
+    const st = dragState;
+    if (!st) return;
+    const held = st.held;
+    if (held && st.over !== st.from) {
+      const list = st.s.party.filter(Boolean);
+      const item = list.splice(st.from, 1)[0];
+      list.splice(Math.min(st.over, list.length), 0, item);
+      st.s.party = list.concat(new Array(PARTY_MAX - list.length).fill(null));
+      applyParty();
+      storeSave();
+    }
+    endDrag(true);
+    if (held) {
+      selectedSlot = -1;
+      buildParty();
+      requestAnimationFrame(buildParty);
+    }
+  }
+
+  /* --- もちあげ かいし --- */
+  function beginHold(st) {
+    st.held = true;
+    const box = $('#party-slots');
+    if (!box || !box.children) return;
+
+    /* わくの いちを おぼえて おく（ドラッグちゅうは うごかない）*/
+    st.rects = [];
+    for (let i = 0; i < box.children.length; i++) {
+      const c = box.children[i];
+      if (!c.getBoundingClientRect) continue;
+      const r = c.getBoundingClientRect();
+      if (st.s.party[i]) st.rects.push({ i: i, r: r });
+    }
+
+    /* もちあげた みため */
+    if (st.el.classList) st.el.classList.add('dragging');
+    if (document.body && document.body.classList) document.body.classList.add('dragging-slot');
+
+    /* おばけ（ゆびに ついてくる コピー）*/
+    const id = st.s.party[st.from];
+    const g = document.createElement('div');
+    g.className = 'pslot filled pslot-ghost';
+    g.innerHTML = '<canvas></canvas>' +
+      '<span class="ps-name">' + UNITS[id].shortName + '</span>' +
+      '<span class="ps-lv">Lv.' + (st.s.levels[id] || 1) + '</span>';
+    const r0 = st.el.getBoundingClientRect ? st.el.getBoundingClientRect() : { width: 70, height: 94, left: 0, top: 0 };
+    g.style.width = r0.width + 'px';
+    g.style.height = r0.height + 'px';
+    document.body.appendChild(g);
+    st.ghost = g;
+    paintChar(g.querySelector('canvas'), id);
+    moveGhost(st, { x: r0.left + r0.width / 2, y: r0.top + r0.height / 2 });
+    markOver(st);
+
+    if (typeof navigator !== 'undefined' && navigator.vibrate) { try { navigator.vibrate(12); } catch (err) {} }
+    $('#party-hint').textContent = 'すきな ばしょまで はこんで ゆびを はなしてね';
+  }
+
+  function moveGhost(st, p) {
+    if (!st.ghost || !st.ghost.style) return;
+    st.ghost.style.left = p.x + 'px';
+    st.ghost.style.top  = p.y + 'px';
+  }
+
+  /* ゆびの したに ある わくの ばんごうを かえす */
+  function slotAt(st, p) {
+    if (!st.rects || !st.rects.length) return st.from;
+    let best = st.from, bestD = Infinity;
+    for (const it of st.rects) {
+      const cx = it.r.left + it.r.width / 2;
+      const cy = it.r.top + it.r.height / 2;
+      const d = Math.abs(p.x - cx) + Math.abs(p.y - cy) * 1.4;
+      if (d < bestD) { bestD = d; best = it.i; }
+    }
+    return best;
+  }
+
+  function markOver(st) {
+    const box = $('#party-slots');
+    if (!box || !box.children) return;
+    for (let i = 0; i < box.children.length; i++) {
+      const c = box.children[i];
+      if (!c.classList) continue;
+      if (i === st.over && i !== st.from) c.classList.add('drop-target');
+      else c.classList.remove('drop-target');
+    }
+  }
+
+  function endDrag(markClick) {
+    const st = dragState;
+    dragState = null;
+    if (!st) return;
+    if (st.timer) clearTimeout(st.timer);
+    if (st.ghost && st.ghost.parentNode) st.ghost.parentNode.removeChild(st.ghost);
+    if (st.el && st.el.classList) st.el.classList.remove('dragging');
+    if (markClick && st.held && st.el) st.el._justDragged = true;
+    if (document.body && document.body.classList) document.body.classList.remove('dragging-slot');
+    const box = $('#party-slots');
+    if (box && box.children) {
+      for (let i = 0; i < box.children.length; i++) {
+        if (box.children[i].classList) box.children[i].classList.remove('drop-target');
+      }
+    }
+    document.removeEventListener('mousemove', onDocMove);
+    document.removeEventListener('touchmove', onDocMove);
+    document.removeEventListener('mouseup', onDocUp);
+    document.removeEventListener('touchend', onDocUp);
+    document.removeEventListener('touchcancel', onDocUp);
   }
 
   function firstEmptySlot(s) {

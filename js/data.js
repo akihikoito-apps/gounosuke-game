@@ -201,6 +201,63 @@ const UNITS = {
     stun: { duration: 2.0, chance: 0.5, attrs: ['water', 'beast'] },
   },
 
+  /* フタバッポ ── うえきばちに はえた ふたば。ふたつの はっぱに かおが ある。
+                ピョコピョコ すすんで、あたまで ポカポカ こうげき。
+                ★みずの こうげきを すいとって、そのぶん げんきに なる（かいふく）  */
+  futabappo: {
+    id: 'futabappo', name: 'フタバッポ', shortName: 'フタバッポ',
+    rarity: 'R',                          // レア
+    attr: 'grass',                        // くさ（みずに つよい／ほのおに よわい）
+    cost: 240,  recharge: 7.0,
+    hp: 1150,   atk: 80,   range: 90,   speed: 28,
+    attackInterval: 1.5,   attackWindup: 0.30,
+    kbCount: 3,
+    scale: 1.0,
+    attackType: 'single',
+    projectile: null,
+    /* とくしゅのうりょく：みずの こうげきは ダメージ 0。
+       そのかわり おなじ ぶんだけ たいりょくが かいふく する            */
+    absorb: { attrs: ['water'], rate: 1.0 },
+  },
+
+  /* シャドウヤマネコ ── くろっぽい やまねこの こども。みみの さきに ふさげ。
+                      とても はやく はしり、するどい ツメで れんぞく スラッシュ。
+                      ★15%で かいしんの いちげき（3ばい・あいしょうは かんけいなし）*/
+  shadowyamaneko: {
+    id: 'shadowyamaneko', name: 'シャドウヤマネコ', shortName: 'ヤマネコ',
+    rarity: 'R',                          // レア
+    attr: 'beast',                        // けもの（まじゅつしに つよい／パワーに よわい）
+    cost: 280,  recharge: 8.0,
+    hp: 600,    atk: 120,  range: 112,  speed: 48,
+    attackInterval: 0.85,  attackWindup: 0.18,   // こうそく れんぞく スラッシュ
+    kbCount: 2,                                  // たいりょくは ひくめ（ガラスの ツメ）
+    scale: 1.0,
+    attackType: 'single',
+    projectile: null,
+    /* とくしゅのうりょく：15%で かいしんの いちげき。
+       ダメージ 3ばい。ぞくせいの あいしょうは けいさんに いれない        */
+    crit: { chance: 0.15, mult: 3, ignoreAttr: true },
+  },
+
+  /* 豪傑天むす丸 ── さんかくおにぎりの ごうけつ。あたまに エビの てんぷら。
+                   ドシンドシン ゆっくり すすみ、めのまえで エビ天を フルスイング。
+                   ★35%で あいてを ふきとばす                            */
+  tenmusumaru: {
+    id: 'tenmusumaru', name: '豪傑天むす丸', shortName: '天むす丸',
+    rarity: 'R',                          // レア
+    attr: 'power',                        // パワー（けものに つよい／まじゅつしに よわい）
+    cost: 520,  recharge: 15.0,
+    hp: 2100,   atk: 460,  range: 70,   speed: 15,
+    attackInterval: 2.8,   attackWindup: 0.70,   // おおきく ふりかぶる
+    kbCount: 4,
+    scale: 1.1,
+    attackType: 'area',                          // まえに てんぷらの しょうげきは
+    areaRadius: 52,
+    projectile: null,
+    /* とくしゅのうりょく：35%で あいてを ふきとばす */
+    knockbackChance: 0.35,
+  },
+
   /* スティーブ ── あき坊の塔を ぜんぶ クリアすると なかまに なる とくべつキャラ。
                  じじょうの まえに つちブロックを つんで、そこから うごかずに
                  ひの やを とても とおくまで うちつづける。コストは とても たかい  */
@@ -227,7 +284,9 @@ const PARTY_MAX = 10;
 const START_CHARS = ['tankun', 'purio'];
 const DEFAULT_PARTY = START_CHARS.slice();
 /* ガチャに でてくる キャラ ぜんぶ */
-const ALL_CHARS = ['tankun', 'purio', 'teruteru', 'tokinotabibito', 'zunio', 'kabekun', 'hiibou'];
+const ALL_CHARS = ['tankun', 'purio', 'teruteru',
+                   'tokinotabibito', 'zunio', 'kabekun', 'futabappo', 'shadowyamaneko', 'tenmusumaru',
+                   'hiibou'];
 let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく メンバー（へんせいで かわる）
 
 
