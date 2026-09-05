@@ -1533,10 +1533,17 @@ const ATTR_COLOR = {
      attr: 'fire'                ← 1つ
      attr: ['fire', 'magic']     ← 2つ もち（獄熱オニごん）
 
-   2つ もちの ときは「いちばん ゆうりな くみあわせ」を つかいます。
-   つまり──
-     ・まもる とき：みずでも けものでも 2.5ばいが とおる（こうりゃくの みちが 2つ）
-     ・せめる とき：あいてに ささる ほうの ぞくせいで けいさんする
+   2つ もちの ときは、かんけいの ある ぶんを ぜんぶ かけざん します。
+   ポケモンの「こうかは ばつぐんだ／いまひとつ」と おなじ かんがえかたです。
+
+     ほのお＋まじゅつし の あいてに──
+       みず   → ほのおに ゆうり(2.5) × まじゅつしには とうばい(1.0) = 2.5ばい
+       けもの → ほのおに とうばい(1.0) × まじゅつしに ゆうり(2.5)  = 2.5ばい
+       くさ   → ほのおに ふり(0.6)   × まじゅつしには とうばい(1.0) = 0.6ばい
+       メタル → ほのおに ふり(0.6)   × まじゅつしにも ふり(0.6)     = 0.36ばい
+
+   1つでも ふりが あれば ダメージは おちます。
+   ゆうりが かさなれば どんどん とおるように なります。
    -------------------------------------------------------------------------- */
 function attrList(a) { return Array.isArray(a) ? a : [a]; }
 function attrMain(a) { return Array.isArray(a) ? a[0] : a; }          // いろ などに つかう だいひょう
@@ -1560,7 +1567,7 @@ function attrPairMultiplier(a, d) {
 function attrMultiplier(attacker, defender) {
   const A = attrList(attacker), D = attrList(defender);
   if (A.length === 1 && D.length === 1) return attrPairMultiplier(A[0], D[0]);
-  let best = 0;
-  for (const a of A) for (const d of D) best = Math.max(best, attrPairMultiplier(a, d));
-  return best;
+  let mult = 1;
+  for (const a of A) for (const d of D) mult *= attrPairMultiplier(a, d);
+  return mult;
 }
