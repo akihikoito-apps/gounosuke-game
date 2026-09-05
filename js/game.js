@@ -178,7 +178,11 @@ const Game = {
       // レア度で のびかたが かわる（たかい レア度ほど ながく のびる）
       mul = (typeof levelMult === 'function') ? levelMult(lv, def.rarity) : 1;
     } else {
-      mul = (this.stage && this.stage.enemyMult) ? this.stage.enemyMult : 1;
+      /* ★てきは「Lv.1 の すがた」で ほぞんされて いて、
+         コースの power × レア度の おび の ぶんだけ つよく なる。 */
+      mul = (typeof enemyPowerOf === 'function')
+        ? enemyPowerOf(this.stage, def.rarity)
+        : ((this.stage && this.stage.enemyMult) ? this.stage.enemyMult : 1);
     }
     const lv = (side === 'ally') ? (this.levels[def.id] || 1) : 1;
     const hp  = Math.round(def.hp * mul);
@@ -757,7 +761,11 @@ const Game = {
         /* コースごとの おかね ばいりつ（moneyMult）。
            よわい てきばかりの コースだと おかねが たまらず、
            たかい なかまを だせなく なる ため、コースがわで ちょうせいする。 */
-        const mm = (this.stage && this.stage.moneyMult) ? this.stage.moneyMult : 1;
+        /* ★おかねも おなじ ばいりつで ふえる。
+           こうしないと、よわい てきばかりの コースで おかねが たまらず
+           たかい なかまを だせなく なって しまう。               */
+        const mm = (typeof enemyPowerOf === 'function')
+          ? enemyPowerOf(this.stage, u.def.rarity) : 1;
         this.money = Math.min(this.moneyMax, this.money + Math.round(u.def.money * mm));
         const got = Math.round(this.money - before);
         if (got > 0) {

@@ -695,50 +695,54 @@ const ENEMIES = {
   /* ほのた ── まるい ひのたま。むれで くる */
   honota: {
     id: 'honota', name: 'ほのた',
+    rarity: 'N',
     attr: 'fire',
-    hp: 420,    atk: 62,   range: 63,   speed: 38,
+    hp: 310,    atk: 45,   range: 63,   speed: 38,
     attackInterval: 1.2,   attackWindup: 0.25,
     kbCount: 3,
     scale: 0.9,
     attackType: 'single',
     projectile: null,
-    money: 65,             // ぞくせい あり
+    money: 45,             // ぞくせい あり
   },
 
   /* トゲハヤさん ── しかくい はこがた ロボット */
   togehaya: {
     id: 'togehaya', name: 'トゲハヤさん',
+    rarity: 'R',
     attr: 'none',
-    hp: 950,    atk: 155,  range: 68,   speed: 24,
+    hp: 640,    atk: 105,  range: 68,   speed: 24,
     attackInterval: 1.6,   attackWindup: 0.30,
     kbCount: 4,
     scale: 1.0,
     attackType: 'single',
     projectile: null,
-    money: 40,             // む ぞくせい なので すくなめ
+    money: 80,             // む ぞくせい なので すくなめ
   },
 
   /* saba ── あおい さかな。ものすごい はやさで とっしんして くる
              もろいけど あたると いたい。かべを ようい してから むかえうつ */
   saba: {
     id: 'saba', name: 'saba',
+    rarity: 'R',
     attr: 'water',
-    hp: 260,    atk: 260,  range: 55,   speed: 140,  // speed 140 = だんとつ さいそく
+    hp: 170,    atk: 170,  range: 55,   speed: 140,  // speed 140 = だんとつ さいそく
     attackInterval: 1.8,   attackWindup: 0.22,
     kbCount: 2,
     scale: 1.0,
     attackType: 'area',                              // とっしんの はんい こうげき
     areaRadius: 55,
     projectile: null,
-    money: 95,             // ぞくせい あり
+    money: 60,             // ぞくせい あり
   },
 
   /* 字一龍（じーりゅう）── みどりの りゅう。「字」を はいて こうげき
                           ボスでは ないけど かなり つよい ちゅうボス */
   jiryu: {
     id: 'jiryu', name: '字一龍',
+    rarity: 'GR',
     attr: 'beast',
-    hp: 2600,   atk: 320,  range: 100,  speed: 34,
+    hp: 1660,   atk: 205,  range: 100,  speed: 34,
     attackInterval: 3.0,   attackWindup: 0.45,
     kbCount: 3,
     scale: 1.2,
@@ -746,7 +750,7 @@ const ENEMIES = {
     projectile: 'moji',                              // 字を はく
     /* とくしゅのうりょく：50%の かくりつで 2びょうかん どんそくに する */
     slow: { rate: 0.5, duration: 2.0, chance: 0.5 },
-    money: 220,            // ぞくせい あり ＆ つよい
+    money: 125,            // ぞくせい あり ＆ つよい
   },
 
   /* ==========================================================
@@ -757,22 +761,24 @@ const ENEMIES = {
                     1ぴきなら よわいが、むれで おしよせる       */
   yakipokkuru: {
     id: 'yakipokkuru', name: 'やきポックル',
+    rarity: 'N',
     attr: 'fire',
-    hp: 260,    atk: 70,   range: 60,   speed: 50,
+    hp: 140,    atk: 40,   range: 60,   speed: 50,
     attackInterval: 1.3,   attackWindup: 0.25,
     kbCount: 3,
     scale: 0.95,
     attackType: 'single',
     projectile: null,
-    money: 60,
+    money: 25,
   },
 
   /* アイアン・コッコ ── てつの ニワトリロボ。たいりょくが とても たかいが
                         こうげきは ほとんど きかない。ときどき ゼンマイが きれて コケる */
   ironkokko: {
     id: 'ironkokko', name: 'アイアン・コッコ',
+    rarity: 'R',
     attr: 'metal',
-    hp: 2600,   atk: 45,   range: 70,   speed: 22,
+    hp: 1640,   atk: 30,   range: 70,   speed: 22,
     attackInterval: 1.4,   attackWindup: 0.3,
     kbCount: 5,
     scale: 1.1,
@@ -780,15 +786,16 @@ const ENEMIES = {
     projectile: null,
     /* ゼンマイぎれ：ときどき ころんで うごけなく なる（そのあいだ よわい）*/
     rest: { every: 9.0, duration: 1.8, mark: '⚙', vuln: 1.4 },
-    money: 90,
+    money: 65,
   },
 
   /* ウサ・ゴリラ ── マッチョな うさぎ。おおぶりの ニンジンで なぐる。
                     タメが ながく、タメちゅうに たたくと こうげきを キャンセルできる */
   usagorilla: {
     id: 'usagorilla', name: 'ウサ・ゴリラ',
+    rarity: 'R',
     attr: 'power',
-    hp: 1900,   atk: 420,  range: 85,   speed: 20,
+    hp: 1290,   atk: 285,  range: 85,   speed: 20,
     attackInterval: 3.6,   attackWindup: 3.0,    // 3びょうも ふりかぶる
     kbCount: 4,
     scale: 1.15,
@@ -797,15 +804,16 @@ const ENEMIES = {
     knockbackChance: 1.0,                        // あたると 1ぽ こうたい
     /* タメちゅうに この ダメージを あたえると こうげきが ふはつに なる */
     stagger: { damage: 400 },
-    money: 130,
+    money: 105,
   },
 
   /* モーモー・プラント ── くさを せおった うし。ちかくの なかまを かいふくする。
                           まんぷくに なると すわって ひるねを して しまう      */
   momoplant: {
     id: 'momoplant', name: 'モーモー・プラント',
+    rarity: 'N',
     attr: 'grass',
-    hp: 1500,   atk: 40,   range: 65,   speed: 14,
+    hp: 1110,   atk: 30,   range: 65,   speed: 14,
     attackInterval: 2.0,   attackWindup: 0.3,
     kbCount: 3,
     scale: 1.0,
@@ -817,21 +825,22 @@ const ENEMIES = {
     heal: { amount: 70, radius: 210, interval: 3.0 },
     /* ひるね：ときどき すわって うごけなく なる（そのあいだ よわい）*/
     rest: { every: 12.0, duration: 3.0, mark: '💤', vuln: 1.5 },
-    money: 110,
+    money: 50,
   },
 
   /* モコ魔道士 ── かんむりを かぶった ひつじの まほうつかい。
                   えんきょりから ひかる ひつじの けを とばす。まもりが かたい */
   mokomadoushi: {
     id: 'mokomadoushi', name: 'モコ魔道士',
+    rarity: 'GR',
     attr: 'magic',
-    hp: 2200,   atk: 260,  range: 190,  speed: 16,
+    hp: 1360,   atk: 160,  range: 190,  speed: 16,
     attackInterval: 2.4,   attackWindup: 0.45,
     kbCount: 3,
     scale: 1.05,
     attackType: 'single',
     projectile: 'wool',
-    money: 150,
+    money: 100,
   },
 
   /* バケッチン ── みずを なみなみ もった バケツの おばけ。
@@ -839,8 +848,9 @@ const ENEMIES = {
                   はやく なるが たいりょくが へって いく                  */
   bakecchin: {
     id: 'bakecchin', name: 'バケッチン',
+    rarity: 'N',
     attr: 'water',
-    hp: 900,    atk: 60,   range: 68,   speed: 34,
+    hp: 740,    atk: 50,   range: 68,   speed: 34,
     attackInterval: 1.6,   attackWindup: 0.28,
     kbCount: 3,
     scale: 1.0,
@@ -850,15 +860,16 @@ const ENEMIES = {
     blind: { chance: 0.6, duration: 4.0, missRate: 0.30 },
     /* はしるほど はやく なるが たいりょくが へる */
     leak: { speedGain: 7, speedMax: 70, hpLoss: 16 },
-    money: 80,
+    money: 60,
   },
 
   /* ブロック・ワン ── しかくい ブロックの いぬ。こうげきは ほぼ ゼロだが
                     かたくて、あたって きた みかたを おしかえす            */
   blockwan: {
     id: 'blockwan', name: 'ブロック・ワン',
+    rarity: 'N',
     attr: 'none',
-    hp: 2400,   atk: 25,   range: 58,   speed: 26,
+    hp: 1850,   atk: 20,   range: 58,   speed: 26,
     attackInterval: 1.8,   attackWindup: 0.3,
     kbCount: 5,
     scale: 1.05,
@@ -872,52 +883,56 @@ const ENEMIES = {
                     かみのように よわい。ときどき じぶんで ちょうちょむすびに なる */
   nyororiinu: {
     id: 'nyororiinu', name: 'ニョロリ〜ヌ',
+    rarity: 'N',
     attr: 'none',
-    hp: 220,    atk: 55,   range: 58,   speed: 75,
+    hp: 150,    atk: 35,   range: 58,   speed: 75,
     attackInterval: 0.7,   attackWindup: 0.15,   // てかずが おおい
     kbCount: 2,
     scale: 0.95,
     attackType: 'single',
     projectile: null,
     rest: { every: 10.0, duration: 1.8, mark: '🎀', vuln: 1.4 },
-    money: 50,
+    money: 35,
   },
 
   /* おじい農園長 ── むぎわらぼうしの のうか。トマトを なげて こうげき。
                     10じに なると おちゃを のんで 3びょう やすむ            */
   ojiinouenchou: {
     id: 'ojiinouenchou', name: 'おじい農園長',
+    rarity: 'R',
     attr: 'none',
-    hp: 1200,   atk: 130,  range: 140,  speed: 16,
+    hp: 780,   atk: 85,  range: 140,  speed: 16,
     attackInterval: 2.2,   attackWindup: 0.4,
     kbCount: 3,
     scale: 1.05,
     attackType: 'single',
     projectile: 'tomato',
     rest: { every: 11.0, duration: 3.0, mark: '🍵', vuln: 1.4 },
-    money: 95,
+    money: 65,
   },
 
   /* クマべぇ ── もふもふの クマ。ときどき さけの もうそうで うっとり とまる */
   kumabee: {
     id: 'kumabee', name: 'クマべぇ',
+    rarity: 'R',
     attr: 'beast',
-    hp: 1700,   atk: 190,  range: 72,   speed: 20,
+    hp: 1100,   atk: 125,  range: 72,   speed: 20,
     attackInterval: 1.9,   attackWindup: 0.4,
     kbCount: 3,
     scale: 1.1,
     attackType: 'single',
     projectile: null,
     rest: { every: 9.0, duration: 2.0, mark: '🐟', vuln: 1.5 },
-    money: 105,
+    money: 110,
   },
 
   /* カモメェル ── そらを とぶ カモメ。かべを こえて うしろの みかたを おそう。
                   かみのように よわいので、とどけば すぐ おちる            */
   kamomeeru: {
     id: 'kamomeeru', name: 'カモメェル',
+    rarity: 'N',
     attr: 'none',
-    hp: 200,    atk: 110,  range: 65,   speed: 68,
+    hp: 120,    atk: 65,  range: 65,   speed: 68,
     attackInterval: 1.4,   attackWindup: 0.25,
     kbCount: 2,
     scale: 1.0,
@@ -926,7 +941,7 @@ const ENEMIES = {
     flying: true,                         // ★ かべを こえて いちばん うしろを ねらう
     /* ポテトを みつけると おちて うごけなく なる */
     rest: { every: 11.0, duration: 2.2, mark: '🍟', vuln: 1.6 },
-    money: 70,
+    money: 30,
   },
 
   /* スティーブ ── あき坊の塔の おおボス。
@@ -935,8 +950,9 @@ const ENEMIES = {
                   たおして クリアすると なかまに なる（コストは とても たかい）  */
   steve: {
     id: 'steve', name: 'スティーブ',
+    rarity: 'SR',
     attr: 'fire',
-    hp: 3000,   atk: 500,  range: 950,   speed: 0,
+    hp: 2760,   atk: 460,  range: 950,   speed: 0,
     attackInterval: 2.5,   attackWindup: 1.0,    // ゆみを 1びょうかけて ひきしぼる（マイクラと おなじ）
     kbCount: 3,
     scale: 1.25,
@@ -944,7 +960,7 @@ const ENEMIES = {
     projectile: 'firearrow',
     stationary: true,                     // ★ まえに すすまない
     blocks: 3,                            // つちブロックを 3だん つむ
-    money: 900,
+    money: 275,
     isBoss: true,
   },
 
@@ -956,8 +972,9 @@ const ENEMIES = {
   /* イノっち ── いのしし。まっすぐ つっこんで きて ふきとばす */
   inocchi: {
     id: 'inocchi', name: 'イノっち',
+    rarity: 'R',
     attr: 'beast',
-    hp: 700,    atk: 150,  range: 62,   speed: 62,
+    hp: 450,    atk: 95,  range: 62,   speed: 62,
     attackInterval: 1.2,   attackWindup: 0.25,
     kbCount: 3,
     scale: 1.0,
@@ -971,8 +988,9 @@ const ENEMIES = {
   /* たぬポン ── まるい たぬき。おなかを たたいて まわりの ちからを ぬく */
   tanupon: {
     id: 'tanupon', name: 'たぬポン',
+    rarity: 'R',
     attr: 'beast',
-    hp: 1900,   atk: 70,   range: 78,   speed: 18,
+    hp: 1290,   atk: 45,   range: 78,   speed: 18,
     attackInterval: 2.2,   attackWindup: 0.40,
     kbCount: 4,
     scale: 1.0,
@@ -981,14 +999,15 @@ const ENEMIES = {
     projectile: null,
     /* とくしゅのうりょく：30%で あいての こうげきりょくを 3びょう さげる */
     weaken: { chance: 0.30, rate: 0.6, duration: 3.0 },
-    money: 110,
+    money: 80,
   },
 
   /* ヤマネム ── ねぶくろで ねむって いる やまね。ゆめの あわで どんそくに */
   yamanemu: {
     id: 'yamanemu', name: 'ヤマネム',
+    rarity: 'N',
     attr: 'none',
-    hp: 500,    atk: 55,   range: 120,  speed: 6,
+    hp: 370,    atk: 40,   range: 120,  speed: 6,
     attackInterval: 2.4,   attackWindup: 0.50,
     kbCount: 2,
     scale: 0.95,
@@ -997,15 +1016,16 @@ const ENEMIES = {
     projectile: 'bubble',
     /* とくしゅのうりょく：20%で 2びょう どんそくに する */
     slow: { rate: 0.5, duration: 2.0, chance: 0.20 },
-    money: 70,
+    money: 40,
   },
 
   /* モエリス ── ほのおを まとった りす。もえる どんぐりを なげる。
                 くさの あいてに とくに つよい                        */
   moeris: {
     id: 'moeris', name: 'モエリス',
+    rarity: 'R',
     attr: ['beast', 'fire'],              // 2ぞくせい もち
-    hp: 420,    atk: 260,  range: 200,  speed: 55,
+    hp: 260,    atk: 160,  range: 200,  speed: 55,
     attackInterval: 2.0,   attackWindup: 0.40,
     kbCount: 2,
     scale: 0.95,
@@ -1013,14 +1033,15 @@ const ENEMIES = {
     projectile: 'nut',
     /* とくしゅのうりょく：くさの あいてに よぶんに ダメージ */
     bonusVs: { attrs: ['grass'], mult: 1.4 },
-    money: 140,
+    money: 50,
   },
 
   /* ツユガエル ── はっぱの かさを さした かえる。しずくを とばす */
   tsuyugaeru: {
     id: 'tsuyugaeru', name: 'ツユガエル',
+    rarity: 'R',
     attr: ['beast', 'water'],             // 2ぞくせい もち
-    hp: 900,    atk: 150,  range: 150,  speed: 30,
+    hp: 600,    atk: 100,  range: 150,  speed: 30,
     attackInterval: 2.0,   attackWindup: 0.40,
     kbCount: 3,
     scale: 1.0,
@@ -1029,14 +1050,15 @@ const ENEMIES = {
     projectile: 'drop',
     /* とくしゅのうりょく：25%で あいてを ふきとばす */
     knockbackChance: 0.25,
-    money: 130,
+    money: 85,
   },
 
   /* コケジカ ── こけと きのこを せおった しか。ピンチで 1どだけ たちなおる */
   kokejika: {
     id: 'kokejika', name: 'コケジカ',
+    rarity: 'GR',
     attr: ['beast', 'grass'],             // 2ぞくせい もち
-    hp: 2200,   atk: 160,  range: 78,   speed: 28,
+    hp: 1410,   atk: 100,  range: 78,   speed: 28,
     attackInterval: 1.8,   attackWindup: 0.35,
     kbCount: 3,
     scale: 1.1,
@@ -1044,14 +1066,15 @@ const ENEMIES = {
     projectile: null,
     /* とくしゅのうりょく：たいりょく 50%いかで 1どだけ 30% かいふく */
     healOnce: { below: 0.5, rate: 0.3 },
-    money: 170,
+    money: 90,
   },
 
   /* ハリ千本 ── はりねずみ。はりを いっせいに とばす とおくの こうげき */
   harisenbon: {
     id: 'harisenbon', name: 'ハリ千本',
+    rarity: 'R',
     attr: 'beast',
-    hp: 700,    atk: 330,  range: 190,  speed: 16,
+    hp: 470,    atk: 220,  range: 190,  speed: 16,
     attackInterval: 2.6,   attackWindup: 0.60,
     kbCount: 2,
     scale: 0.95,
@@ -1060,15 +1083,16 @@ const ENEMIES = {
     projectile: 'needle',
     /* とくしゅのうりょく：20%で かいしんの いちげき */
     crit: { chance: 0.20, mult: 2 },
-    money: 190,
+    money: 100,
   },
 
   /* クマった ── こまった かおの くま。おもたい ひとふりで ちからを ぬく。
                 なかなか ふきとばされない                              */
   kumatta: {
     id: 'kumatta', name: 'クマった',
+    rarity: 'GR',
     attr: 'beast',
-    hp: 4200,   atk: 300,  range: 62,   speed: 14,
+    hp: 2120,   atk: 150,  range: 62,   speed: 14,
     attackInterval: 2.4,   attackWindup: 0.50,
     kbCount: 6,                           // ノックバックしにくい
     scale: 1.15,
@@ -1077,15 +1101,16 @@ const ENEMIES = {
     projectile: null,
     /* とくしゅのうりょく：30%で あいての こうげきりょくを さげる */
     weaken: { chance: 0.30, rate: 0.7, duration: 3.0 },
-    money: 260,
+    money: 190,
   },
 
   /* ヌシノオオカミ ── けものみちの ぬし。だい5コースの ちゅうボス。
                      たいりょくが はんぶんを きると ほんきを だす      */
   nushinoookami: {
     id: 'nushinoookami', name: 'ヌシノオオカミ',
+    rarity: 'SR',
     attr: 'beast',
-    hp: 6500,   atk: 480,  range: 90,   speed: 52,
+    hp: 2540,   atk: 185,  range: 90,   speed: 52,
     attackInterval: 1.9,   attackWindup: 0.40,
     kbCount: 4,
     scale: 1.25,
@@ -1095,7 +1120,7 @@ const ENEMIES = {
     /* とくしゅのうりょく */
     enrage: { below: 0.5, atkMult: 1.5 },   // たいりょく 50%いかで こうげき 1.5ばい
     knockbackChance: 0.30,                  // 30%で ふきとばす
-    money: 700,
+    money: 260,
     isBoss: true,
   },
 
@@ -1103,8 +1128,9 @@ const ENEMIES = {
                        ふきとばされず、ピンチで こうげきが はやく なる   */
   gaou: {
     id: 'gaou', name: '森喰らい・ガオウ',
+    rarity: 'SR',
     attr: ['beast', 'grass'],             // 2ぞくせい もち
-    hp: 6500,   atk: 560,  range: 160,  speed: 12,
+    hp: 2740,   atk: 235,  range: 160,  speed: 12,
     attackInterval: 2.8,   attackWindup: 0.70,
     kbCount: 99,
     scale: 1.4,
@@ -1115,7 +1141,7 @@ const ENEMIES = {
     kbImmune: true,                              // ノックバック むこう
     slow: { rate: 0.5, duration: 3.0, chance: 0.20 },   // 20%で 3びょう どんそく
     enrage: { below: 0.4, intervalMult: 0.6 },   // たいりょく 40%いかで こうげきが はやく
-    money: 1500,
+    money: 235,
     isBoss: true,
   },
 
@@ -1133,155 +1159,167 @@ const ENEMIES = {
   /* --- 1しょう組 --- */
   hetakirin_x: {
     id: 'hetakirin_x', name: '覚醒 下手なきりん',
+    rarity: 'SR',
     attr: 'grass',
-    hp: 11000,  atk: 720,  range: 150,  speed: 12,
+    hp: 3430,  atk: 225,  range: 150,  speed: 12,
     attackInterval: 2.8,   attackWindup: 0.55,
     kbCount: 8, scale: 1.5,
     attackType: 'area', areaRadius: 60, projectile: 'grass',
-    money: 2400,
+    money: 285,
     isBoss: true,
   },
   okashiman_x: {
     id: 'okashiman_x', name: '覚醒 お菓子マン',
+    rarity: 'LR',
     attr: 'power',
-    hp: 13000,  atk: 880,  range: 130,  speed: 11,
+    hp: 5770,  atk: 390,  range: 130,  speed: 11,
     attackInterval: 1.9,   attackWindup: 0.9,
     kbCount: 8, scale: 1.55,
     attackType: 'single', projectile: 'stone',
     stun: { duration: 1.5, chance: 0.18 },
-    money: 3000,
+    money: 415,
     isBoss: true,
   },
 
   /* --- 3しょう（けもの）組 --- */
   nushinoookami_x: {
     id: 'nushinoookami_x', name: '覚醒 ヌシノオオカミ',
+    rarity: 'SR',
     attr: 'beast',
-    hp: 10500,  atk: 700,  range: 100,  speed: 56,
+    hp: 3230,  atk: 215,  range: 100,  speed: 56,
     attackInterval: 1.8,   attackWindup: 0.35,
     kbCount: 8, scale: 1.4,
     attackType: 'area', areaRadius: 64, projectile: null,
     knockbackChance: 0.15,
     enrage: { below: 0.5, atkMult: 1.5 },
-    money: 2600,
+    money: 365,
     isBoss: true,
   },
   gaou_x: {
     id: 'gaou_x', name: '覚醒 森喰らい・ガオウ',
+    rarity: 'SR',
     attr: ['beast', 'grass'],
-    hp: 11000,  atk: 750,  range: 175,  speed: 14,
+    hp: 3580,  atk: 245,  range: 175,  speed: 14,
     attackInterval: 2.6,   attackWindup: 0.65,
     kbCount: 99, scale: 1.55,
     attackType: 'area', areaRadius: 78, projectile: null,
     kbImmune: true,
     slow: { rate: 0.5, duration: 3.0, chance: 0.15 },
     enrage: { below: 0.4, intervalMult: 0.6 },
-    money: 3000,
+    money: 320,
     isBoss: true,
   },
 
   /* --- 4しょう（メタル）組 --- */
   garakutei_x: {
     id: 'garakutei_x', name: '覚醒 ガラク帝',
+    rarity: 'SR',
     attr: 'metal',
-    hp: 12500,  atk: 690,  range: 165,  speed: 16,
+    hp: 4100,  atk: 225,  range: 165,  speed: 16,
     attackInterval: 2.5,   attackWindup: 0.5,
     kbCount: 99, scale: 1.45,
     attackType: 'area', areaRadius: 68, projectile: null,
     kbImmune: true,
     enrage: { below: 0.5, atkMult: 1.5 },
-    money: 2600,
+    money: 350,
     isBoss: true,
   },
   meltgear_x: {
     id: 'meltgear_x', name: '覚醒 廃炉獣メルトギア',
+    rarity: 'SR',
     attr: ['metal', 'fire'],
-    hp: 13000,  atk: 700,  range: 200,  speed: 14,
+    hp: 4280,  atk: 230,  range: 200,  speed: 14,
     attackInterval: 2.8,   attackWindup: 0.7,
     kbCount: 99, scale: 1.6,
     attackType: 'area', areaRadius: 78, projectile: null,
     kbImmune: true,
     weaken: { chance: 0.25, rate: 0.7, duration: 3.0 },
     enrage: { below: 0.3, intervalMult: 0.6 },
-    money: 3200,
+    money: 330,
     isBoss: true,
   },
 
   /* --- 5しょう（うみ）組 --- */
   nereid_x: {
     id: 'nereid_x', name: '覚醒 深海の主 ネレイド',
+    rarity: 'SR',
     attr: ['water', 'magic'],
-    hp: 12000,  atk: 730,  range: 220,  speed: 26,
+    hp: 4030,  atk: 245,  range: 220,  speed: 26,
     attackInterval: 2.7,   attackWindup: 0.65,
     kbCount: 99, scale: 1.45,
     attackType: 'area', areaRadius: 88, projectile: 'drop',
     kbImmune: true,
     enrage: { below: 0.5, atkMult: 1.5 },
-    money: 2800,
+    money: 340,
     isBoss: true,
   },
   leviza_x: {
     id: 'leviza_x', name: '覚醒 暴海竜リヴァイザ',
+    rarity: 'SR',
     attr: ['water', 'power'],
-    hp: 12000,  atk: 730,  range: 230,  speed: 14,
+    hp: 3820,  atk: 230,  range: 230,  speed: 14,
     attackInterval: 2.9,   attackWindup: 0.75,
     kbCount: 99, scale: 1.5,
     attackType: 'area', areaRadius: 92, projectile: 'drop',
     kbImmune: true,
     knockbackChance: 0.20,
     enrage: { below: 0.3, intervalMult: 0.6 },
-    money: 3000,
+    money: 295,
     isBoss: true,
   },
   zabaan_x: {
     id: 'zabaan_x', name: '覚醒 波獣ザバーン',
+    rarity: 'LR',
     attr: 'water',
-    hp: 34000,  atk: 470,  range: 215,  speed: 18,
+    hp: 7970,  atk: 110,  range: 215,  speed: 18,
     attackInterval: 0.5,   attackWindup: 0.15,
     kbCount: 99, scale: 1.75,
     attackType: 'single', projectile: 'splash',
     kbImmune: true,
-    money: 5000,
+    money: 610,
     isBoss: true,
   },
 
   /* --- 2しょう／6しょう（まどうし）組 --- */
   onigon_x: {
     id: 'onigon_x', name: '覚醒 獄熱オニごん',
+    rarity: 'SR',
     attr: ['fire', 'magic'],
-    hp: 12500,  atk: 730,  range: 320,  speed: 24,
+    hp: 3990,  atk: 235,  range: 320,  speed: 24,
     minRange: 130,
     attackInterval: 3.4,   attackWindup: 0.85,
     kbCount: 10, scale: 1.5,
     attackType: 'area', areaRadius: 68, projectile: 'dango',
     burn: { chance: 0.25, dps: 90, duration: 3.0 },
-    money: 2800,
+    money: 270,
     isBoss: true,
   },
   sagecharon_x: {
     id: 'sagecharon_x', name: '覚醒 賢者カロン',
+    rarity: 'SR',
     attr: ['none', 'magic'],
-    hp: 12000,  atk: 700,  range: 230,  speed: 20,
+    hp: 3830,  atk: 225,  range: 230,  speed: 20,
     attackInterval: 2.7,   attackWindup: 0.65,
     kbCount: 99, scale: 1.45,
     attackType: 'area', areaRadius: 86, projectile: 'beam',
     kbImmune: true,
     stun:   { duration: 3.0, chance: 0.30 },
     weaken: { chance: 0.30, rate: 0.5, duration: 5.0 },
-    money: 2800,
+    money: 305,
     isBoss: true,
   },
   zenos_x: {
     id: 'zenos_x', name: '覚醒 終焉の大魔導士ゼノス',
+    rarity: 'LR',
     attr: ['none', 'magic'],
-    hp: 15000,  atk: 780,  range: 270,  speed: 12,
+    hp: 6610,  atk: 345,  range: 270,  speed: 12,
     attackInterval: 3.0,   attackWindup: 0.75,
     kbCount: 99, scale: 1.7,
     attackType: 'area', areaRadius: 98, projectile: 'beam',
     kbImmune: true,
     stun:   { duration: 4.0, chance: 0.25 },
     weaken: { chance: 0.20, rate: 0.8, duration: 3.0 },
-    money: 5000,
+    money: 480,
     isBoss: true,
   },
 
@@ -1310,8 +1348,9 @@ const ENEMIES = {
      ============================================================ */
   yamiakibou: {
     id: 'yamiakibou', name: '闇堕ちあき坊',
+    rarity: 'LR',
     attr: ['god', 'ghost'],
-    hp: 58000,  atk: 1000,  range: 360,  speed: 15,
+    hp: 14180,  atk: 245,  range: 360,  speed: 15,
     attackInterval: 2.8,   attackWindup: 0.75,
     kbCount: 99, scale: 2.1,
     attackType: 'area', areaRadius: 105, projectile: null,
@@ -1323,7 +1362,7 @@ const ENEMIES = {
     stun:   { duration: 2.5, chance: 0.22 },
     weaken: { chance: 0.25, rate: 0.6, duration: 4.0 },
     enrage: { below: 0.35, intervalMult: 0.65 },
-    money: 12000,
+    money: 670,
     isBoss: true,
   },
 
@@ -1335,130 +1374,140 @@ const ENEMIES = {
   /* ① ルンルンウィスプ ── ふわふわ ただよう ちいさな まほうだま */
   runrunwisp: {
     id: 'runrunwisp', name: 'ルンルンウィスプ',
+    rarity: 'N',
     attr: 'none',
-    hp: 600,    atk: 70,   range: 175,  speed: 26,
+    hp: 450,    atk: 50,   range: 175,  speed: 26,
     attackInterval: 1.6,   attackWindup: 0.35,
     kbCount: 3, scale: 0.9,
     attackType: 'single', projectile: 'bubble',
-    money: 80,
+    money: 45,
   },
 
   /* ② ホウキゴブ ── ほうきに のった くろねこ。すばやく つっこむ */
   houkigob: {
     id: 'houkigob', name: 'ホウキゴブ',
+    rarity: 'R',
     attr: 'magic',
-    hp: 700,    atk: 120,  range: 70,   speed: 52,
+    hp: 440,    atk: 75,  range: 70,   speed: 52,
     attackInterval: 1.3,   attackWindup: 0.30,
     kbCount: 3, scale: 0.95,
     attackType: 'single', projectile: null,
     /* 10%で あいてを 1びょう とめる */
     stun: { duration: 1.0, chance: 0.10 },
-    money: 110,
+    money: 55,
   },
 
   /* ③ マジックラビット ── まきものを よむ うさぎ。ちからを ぬく */
   magicrabbit: {
     id: 'magicrabbit', name: 'マジックラビット',
+    rarity: 'R',
     attr: 'magic',
-    hp: 1500,   atk: 180,  range: 190,  speed: 26,
+    hp: 990,   atk: 120,  range: 190,  speed: 26,
     attackInterval: 2.0,   attackWindup: 0.40,
     kbCount: 3, scale: 1.0,
     attackType: 'single', projectile: 'moji',
     /* 15%で あいての こうげきりょくを 3びょう はんぶんに */
     weaken: { chance: 0.15, rate: 0.5, duration: 3.0 },
-    money: 150,
+    money: 95,
   },
 
   /* ④ フレイムメイジ ── ほのおの まどうし。あいてを えんじょうさせる */
   flamemage: {
     id: 'flamemage', name: 'フレイムメイジ',
+    rarity: 'GR',
     attr: ['fire', 'magic'],
-    hp: 1600,   atk: 330,  range: 210,  speed: 26,
+    hp: 1030,   atk: 215,  range: 210,  speed: 26,
     attackInterval: 2.4,   attackWindup: 0.50,
     kbCount: 3, scale: 1.0,
     attackType: 'area', areaRadius: 60, projectile: 'fireball',
     /* ★20%で あいてを 3びょう えんじょうさせる（じわじわ ダメージ）*/
     burn: { chance: 0.20, dps: 60, duration: 3.0 },
-    money: 240,
+    money: 145,
   },
 
   /* ⑤ アイスウィッチ ── こおりの まじょ。うごきを おそくする */
   icewitch: {
     id: 'icewitch', name: 'アイスウィッチ',
+    rarity: 'GR',
     attr: ['water', 'magic'],
-    hp: 1600,   atk: 240,  range: 210,  speed: 18,
+    hp: 1010,   atk: 150,  range: 210,  speed: 18,
     attackInterval: 2.2,   attackWindup: 0.45,
     kbCount: 3, scale: 1.0,
     attackType: 'area', areaRadius: 58, projectile: 'drop',
     slow: { rate: 0.5, duration: 2.0, chance: 0.20 },
-    money: 230,
+    money: 120,
   },
 
   /* ⑥ マンドレイク ── さけぶ ねっこ。おとで ふきとばす */
   mandrake: {
     id: 'mandrake', name: 'マンドレイク',
+    rarity: 'GR',
     attr: ['grass', 'magic'],
-    hp: 2600,   atk: 220,  range: 130,  speed: 12,
+    hp: 1700,   atk: 145,  range: 130,  speed: 12,
     attackInterval: 2.4,   attackWindup: 0.50,
     kbCount: 4, scale: 1.05,
     attackType: 'area', areaRadius: 62, projectile: null,
     knockbackChance: 0.20,
-    money: 220,
+    money: 155,
   },
 
   /* ⑦ ルーンゴーレム ── ルーンが ひかる いしの きょじん */
   runegolem: {
     id: 'runegolem', name: 'ルーンゴーレム',
+    rarity: 'GR',
     attr: 'magic',
-    hp: 3800,   atk: 360,  range: 75,   speed: 12,
+    hp: 1820,   atk: 175,  range: 75,   speed: 12,
     attackInterval: 2.8,   attackWindup: 0.60,
     kbCount: 6, scale: 1.25,
     attackType: 'area', areaRadius: 66, projectile: null,
     /* 30%で あいてを 2びょう とめる */
     stun: { duration: 2.0, chance: 0.30 },
-    money: 340,
+    money: 170,
   },
 
   /* ⑧ カオススペル ── うかぶ まほうしょ。あいての こうげきを ふうじる */
   chaosspell: {
     id: 'chaosspell', name: 'カオススペル',
+    rarity: 'GR',
     attr: ['none', 'magic'],
-    hp: 1900,   atk: 340,  range: 200,  speed: 26,
+    hp: 1250,   atk: 225,  range: 200,  speed: 26,
     attackInterval: 2.6,   attackWindup: 0.55,
     kbCount: 4, scale: 1.05,
     attackType: 'area', areaRadius: 70, projectile: 'beam',
     /* ★20%で 5びょう こうげき できなく する（ぜんぶ はずれる）*/
     blind: { chance: 0.20, duration: 5.0, missRate: 1.0 },
-    money: 320,
+    money: 160,
   },
 
   /* ⑨ 賢者カロン ── だい5コースの ちゅうボス。とめて、ちからを ぬく */
   sagecharon: {
     id: 'sagecharon', name: '賢者カロン',
+    rarity: 'SR',
     attr: ['none', 'magic'],
-    hp: 7000,   atk: 480,  range: 210,  speed: 18,
+    hp: 2880,   atk: 200,  range: 210,  speed: 18,
     attackInterval: 2.8,   attackWindup: 0.70,
     kbCount: 99, scale: 1.3,
     attackType: 'area', areaRadius: 78, projectile: 'beam',
     kbImmune: true,
     stun:   { duration: 3.0, chance: 0.30 },
     weaken: { chance: 0.30, rate: 0.5, duration: 5.0 },
-    money: 1400,
+    money: 215,
     isBoss: true,
   },
 
   /* ⑩ 終焉の大魔導士ゼノス ── だい6しょうの おおボス。すべての まほうが あつまる */
   zenos: {
     id: 'zenos', name: '終焉の大魔導士ゼノス',
+    rarity: 'LR',
     attr: ['none', 'magic'],
-    hp: 11000,  atk: 620,  range: 250,  speed: 10,
+    hp: 5380,  atk: 305,  range: 250,  speed: 10,
     attackInterval: 3.2,   attackWindup: 0.80,
     kbCount: 99, scale: 1.5,
     attackType: 'area', areaRadius: 90, projectile: 'beam',
     kbImmune: true,
     stun:   { duration: 5.0, chance: 0.20 },
     weaken: { chance: 0.15, rate: 0.8, duration: 3.0 },
-    money: 2600,
+    money: 350,
     isBoss: true,
   },
 
@@ -1470,19 +1519,21 @@ const ENEMIES = {
   /* ① プカクラゲ ── ふわふわ ただよう くらげ。しょくしゅで こうげき */
   pukakurage: {
     id: 'pukakurage', name: 'プカクラゲ',
+    rarity: 'N',
     attr: 'water',
-    hp: 700,    atk: 70,   range: 66,   speed: 26,
+    hp: 620,    atk: 60,   range: 66,   speed: 26,
     attackInterval: 1.4,   attackWindup: 0.30,
     kbCount: 3, scale: 0.95,
     attackType: 'single', projectile: null,
-    money: 70,
+    money: 65,
   },
 
   /* ② チビサメ ── すばやく とっしんして かみつく */
   chibisame: {
     id: 'chibisame', name: 'チビサメ',
+    rarity: 'GR',
     attr: 'water',
-    hp: 1500,   atk: 200,  range: 62,   speed: 70,
+    hp: 970,   atk: 130,  range: 62,   speed: 70,
     attackInterval: 1.2,   attackWindup: 0.25,
     kbCount: 3, scale: 1.0,
     attackType: 'single', projectile: null,
@@ -1492,107 +1543,115 @@ const ENEMIES = {
   /* ③ イカマジン ── みずの まほうで こうはんいを こうげき */
   ikamajin: {
     id: 'ikamajin', name: 'イカマジン',
+    rarity: 'GR',
     attr: ['water', 'magic'],
-    hp: 1400,   atk: 190,  range: 180,  speed: 26,
+    hp: 870,   atk: 120,  range: 180,  speed: 26,
     attackInterval: 2.2,   attackWindup: 0.45,
     kbCount: 3, scale: 1.0,
     attackType: 'area', areaRadius: 55, projectile: 'bubble',
     /* 30%で あいての はやさを 3びょう さげる */
     slow: { rate: 0.5, duration: 3.0, chance: 0.30 },
-    money: 160,
+    money: 85,
   },
 
   /* ④ トゲフグ ── ふくらんで しゅういに ダメージ */
   togefugu: {
     id: 'togefugu', name: 'トゲフグ',
+    rarity: 'GR',
     attr: 'water',
-    hp: 2800,   atk: 110,  range: 70,   speed: 12,
+    hp: 1820,   atk: 70,  range: 70,   speed: 12,
     attackInterval: 2.4,   attackWindup: 0.50,
     kbCount: 5, scale: 1.05,
     attackType: 'area', areaRadius: 60, projectile: null,
     /* 20%で あいてを うしろに ふきとばす */
     knockbackChance: 0.20,
-    money: 150,
+    money: 95,
   },
 
   /* ⑤ オクトキャノン ── すみだんを うつ たこ。こうはんいを こうげき */
   octocannon: {
     id: 'octocannon', name: 'オクトキャノン',
+    rarity: 'GR',
     attr: ['water', 'power'],
-    hp: 1800,   atk: 300,  range: 190,  speed: 16,
+    hp: 1170,   atk: 195,  range: 190,  speed: 16,
     attackInterval: 2.6,   attackWindup: 0.55,
     kbCount: 4, scale: 1.05,
     attackType: 'area', areaRadius: 62, projectile: 'ink',
     /* 20%で あいての こうげきりょくを 3びょう さげる */
     weaken: { chance: 0.20, rate: 0.7, duration: 3.0 },
-    money: 230,
+    money: 140,
   },
 
   /* ⑥ ウミヘビ ── しなやかに すばやく かみつく */
   umihebi: {
     id: 'umihebi', name: 'ウミヘビ',
+    rarity: 'GR',
     attr: 'water',
-    hp: 2000,   atk: 230,  range: 70,   speed: 66,
+    hp: 1310,   atk: 150,  range: 70,   speed: 66,
     attackInterval: 1.5,   attackWindup: 0.30,
     kbCount: 3, scale: 1.0,
     attackType: 'single', projectile: null,
     /* 30%で あいてを 1びょう とめる */
     stun: { duration: 1.0, chance: 0.30 },
-    money: 200,
+    money: 135,
   },
 
   /* ⑦ カニタンク ── きょだいな ハサミと ほうげきで ぜんせんを あっぱく */
   kanitank: {
     id: 'kanitank', name: 'カニタンク',
+    rarity: 'GR',
     attr: 'water',
-    hp: 4000,   atk: 380,  range: 130,  speed: 12,
+    hp: 1940,   atk: 185,  range: 130,  speed: 12,
     attackInterval: 3.0,   attackWindup: 0.70,
     kbCount: 6, scale: 1.2,
     attackType: 'area', areaRadius: 70, projectile: null,
     /* 30%で あいてを ふきとばす */
     knockbackChance: 0.30,
-    money: 340,
+    money: 175,
   },
 
   /* ⑧ ダイオウエイ ── おおきな ひれで かいりゅうを おこす */
   daiouei: {
     id: 'daiouei', name: 'ダイオウエイ',
+    rarity: 'GR',
     attr: 'water',
-    hp: 3800,   atk: 360,  range: 150,  speed: 34,
+    hp: 1890,   atk: 180,  range: 150,  speed: 34,
     attackInterval: 2.6,   attackWindup: 0.60,
     kbCount: 8,                          // ノックバックしにくい
     scale: 1.2,
     attackType: 'area', areaRadius: 75, projectile: null,
-    money: 330,
+    money: 185,
   },
 
   /* ⑨ 深海の主 ネレイド ── うみを すべる ちゅうボス。
                           たいりょくが はんぶんを きると ほんきを だす */
   nereid: {
     id: 'nereid', name: '深海の主 ネレイド',
+    rarity: 'SR',
     attr: ['water', 'magic'],
-    hp: 7000,   atk: 560,  range: 200,  speed: 24,
+    hp: 2920,   atk: 235,  range: 200,  speed: 24,
     attackInterval: 2.8,   attackWindup: 0.70,
     kbCount: 99, scale: 1.3,
     attackType: 'area', areaRadius: 80, projectile: 'drop',
     kbImmune: true,
     enrage: { below: 0.5, atkMult: 1.5 },
-    money: 1300,
+    money: 250,
     isBoss: true,
   },
 
   /* ⑩ 暴海竜リヴァイザ ── きんかいの すべてを のみこむ りゅう */
   leviza: {
     id: 'leviza', name: '暴海竜リヴァイザ',
+    rarity: 'SR',
     attr: ['water', 'power'],
-    hp: 7000,   atk: 560,  range: 210,  speed: 12,
+    hp: 2870,   atk: 230,  range: 210,  speed: 12,
     attackInterval: 3.0,   attackWindup: 0.80,
     kbCount: 99, scale: 1.35,
     attackType: 'area', areaRadius: 85, projectile: 'drop',
     kbImmune: true,
     knockbackChance: 0.20,
     enrage: { below: 0.3, intervalMult: 0.6 },
-    money: 1500,
+    money: 225,
     isBoss: true,
   },
 
@@ -1603,13 +1662,14 @@ const ENEMIES = {
                     字一龍 1たいと むれで こうどうする                */
   zabaan: {
     id: 'zabaan', name: '波獣ザバーン',
+    rarity: 'LR',
     attr: 'water',
-    hp: 36000,  atk: 260,  range: 200,  speed: 16,
+    hp: 10180,  atk: 75,  range: 200,  speed: 16,
     attackInterval: 0.5,   attackWindup: 0.15,   // こうげき クールタイム 0.5びょう
     kbCount: 99, scale: 1.6,
     attackType: 'single', projectile: 'splash',
     kbImmune: true,
-    money: 2500,
+    money: 545,
     isBoss: true,
   },
 
@@ -1621,34 +1681,37 @@ const ENEMIES = {
   /* ① ネジロー ── あたまを こうそくかいてんさせて たいあたり */
   nejiro: {
     id: 'nejiro', name: 'ネジロー',
+    rarity: 'R',
     attr: 'metal',
-    hp: 800,    atk: 110,  range: 60,   speed: 30,
+    hp: 480,    atk: 65,  range: 60,   speed: 30,
     attackInterval: 1.4,   attackWindup: 0.30,
     kbCount: 3,
     scale: 0.95,
     attackType: 'single',
     projectile: null,
-    money: 80,
+    money: 50,
   },
 
   /* ② ハコボット ── にもつを おしつけて こうげき。ふきとばされにくい */
   hakobot: {
     id: 'hakobot', name: 'ハコボット',
+    rarity: 'R',
     attr: 'none',
-    hp: 2000,   atk: 90,   range: 58,   speed: 14,
+    hp: 1300,   atk: 60,   range: 58,   speed: 14,
     attackInterval: 2.0,   attackWindup: 0.35,
     kbCount: 6,                           // ノックバックしにくい
     scale: 1.05,
     attackType: 'single',
     projectile: null,
-    money: 100,
+    money: 75,
   },
 
   /* ③ サビンチ ── さびた ペンチ。ガチンと はさんで うごきを とめる */
   sabinchi: {
     id: 'sabinchi', name: 'サビンチ',
+    rarity: 'R',
     attr: 'metal',
-    hp: 1300,   atk: 160,  range: 78,   speed: 40,
+    hp: 840,   atk: 105,  range: 78,   speed: 40,
     attackInterval: 1.6,   attackWindup: 0.30,
     kbCount: 3,
     scale: 1.0,
@@ -1656,28 +1719,30 @@ const ENEMIES = {
     projectile: null,
     /* とくしゅのうりょく：20%で あいてを 1びょう とめる */
     stun: { duration: 1.0, chance: 0.20 },
-    money: 130,
+    money: 95,
   },
 
   /* ④ バーナー君 ── バーナーの ほのおで こうはんいを やく */
   burner: {
     id: 'burner', name: 'バーナー君',
+    rarity: 'GR',
     attr: ['metal', 'fire'],              // 2ぞくせい もち
-    hp: 1400,   atk: 240,  range: 150,  speed: 28,
+    hp: 890,   atk: 150,  range: 150,  speed: 28,
     attackInterval: 2.2,   attackWindup: 0.45,
     kbCount: 3,
     scale: 1.0,
     attackType: 'area',
     areaRadius: 62,
     projectile: 'flame',
-    money: 210,
+    money: 105,
   },
 
   /* ⑤ ポタンク ── こうあつの みずを ふんしゃする。ふきとばす */
   potank: {
     id: 'potank', name: 'ポタンク',
+    rarity: 'GR',
     attr: ['metal', 'water'],             // 2ぞくせい もち
-    hp: 2400,   atk: 170,  range: 150,  speed: 18,
+    hp: 1560,   atk: 110,  range: 150,  speed: 18,
     attackInterval: 2.2,   attackWindup: 0.45,
     kbCount: 4,
     scale: 1.05,
@@ -1686,14 +1751,15 @@ const ENEMIES = {
     projectile: 'drop',
     /* とくしゅのうりょく：30%で あいてを うしろに ふきとばす */
     knockbackChance: 0.30,
-    money: 220,
+    money: 130,
   },
 
   /* ⑥ モジャコード ── のびた コードで たたきつける。うごきを おそくする */
   mojacord: {
     id: 'mojacord', name: 'モジャコード',
+    rarity: 'R',
     attr: ['metal', 'grass'],             // 2ぞくせい もち
-    hp: 1500,   atk: 170,  range: 185,  speed: 38,
+    hp: 960,   atk: 110,  range: 185,  speed: 38,
     attackInterval: 2.0,   attackWindup: 0.40,
     kbCount: 3,
     scale: 1.0,
@@ -1701,14 +1767,15 @@ const ENEMIES = {
     projectile: 'cord',
     /* とくしゅのうりょく：30%で あいての はやさを 3びょう さげる */
     slow: { rate: 0.5, duration: 3.0, chance: 0.30 },
-    money: 230,
+    money: 90,
   },
 
   /* ⑦ フォークン ── フォークで とっしんし、なぎたおす */
   forkun: {
     id: 'forkun', name: 'フォークン',
+    rarity: 'GR',
     attr: 'metal',
-    hp: 3400,   atk: 300,  range: 62,   speed: 46,
+    hp: 1660,   atk: 145,  range: 62,   speed: 46,
     attackInterval: 2.0,   attackWindup: 0.40,
     kbCount: 4,
     scale: 1.15,
@@ -1717,28 +1784,30 @@ const ENEMIES = {
     /* とくしゅのうりょく：50%で あいてを ふきとばす */
     knockbackChance: 0.50,
     projectile: null,
-    money: 320,
+    money: 180,
   },
 
   /* ⑧ プレスケ ── きょだいな プレスで じめんごと おしつぶす */
   pressuke: {
     id: 'pressuke', name: 'プレスケ',
+    rarity: 'GR',
     attr: 'metal',
-    hp: 4200,   atk: 400,  range: 80,   speed: 8,
+    hp: 2120,   atk: 200,  range: 80,   speed: 8,
     attackInterval: 3.0,   attackWindup: 0.70,
     kbCount: 5,
     scale: 1.2,
     attackType: 'area',
     areaRadius: 60,
     projectile: null,
-    money: 340,
+    money: 195,
   },
 
   /* ⑨ ガラク帝 ── はがねの おう。だい5コースの ちゅうボス */
   garakutei: {
     id: 'garakutei', name: 'ガラク帝',
+    rarity: 'SR',
     attr: 'metal',
-    hp: 6500,   atk: 460,  range: 150,  speed: 14,
+    hp: 2520,   atk: 180,  range: 150,  speed: 14,
     attackInterval: 2.6,   attackWindup: 0.55,
     kbCount: 99,
     scale: 1.3,
@@ -1748,15 +1817,16 @@ const ENEMIES = {
     /* とくしゅのうりょく */
     kbImmune: true,                          // ノックバック むこう
     enrage: { below: 0.5, atkMult: 1.5 },    // たいりょく 50%いかで こうげき 1.5ばい
-    money: 900,
+    money: 190,
     isBoss: true,
   },
 
   /* ⑩ 廃炉獣メルトギア ── すたれた ろが せかいを のみこむ。さいしゅうボス */
   meltgear: {
     id: 'meltgear', name: '廃炉獣メルトギア',
+    rarity: 'SR',
     attr: ['metal', 'fire'],              // 2ぞくせい もち
-    hp: 7600,   atk: 470,  range: 185,  speed: 12,
+    hp: 3040,   atk: 190,  range: 185,  speed: 12,
     attackInterval: 3.0,   attackWindup: 0.75,
     kbCount: 99,
     scale: 1.45,
@@ -1767,7 +1837,7 @@ const ENEMIES = {
     kbImmune: true,
     weaken: { chance: 0.20, rate: 0.7, duration: 3.0 },   // 20%で こうげきりょく ダウン
     enrage: { below: 0.3, intervalMult: 0.6 },            // 30%いかで こうげきが はやく
-    money: 1800,
+    money: 200,
     isBoss: true,
   },
 
@@ -1779,8 +1849,9 @@ const ENEMIES = {
                      その ばで あわてる だけ。ここが かけひきの キモ       */
   onigon: {
     id: 'onigon', name: '獄熱オニごん',
+    rarity: 'SR',
     attr: ['fire', 'magic'],              // ★ 2ぞくせい もち
-    hp: 7000,   atk: 520,  range: 300,   speed: 22,
+    hp: 2740,   atk: 205,  range: 300,   speed: 22,
     minRange: 130,                        // ★ これより ちかいと なげられない
     attackInterval: 3.6,   attackWindup: 0.9,
     kbCount: 5,
@@ -1788,22 +1859,23 @@ const ENEMIES = {
     attackType: 'area',                   // ちゃくだんてんで ばくはつ
     areaRadius: 60,
     projectile: 'dango',                  // キビだんご
-    money: 1400,
+    money: 170,
     isBoss: true,
   },
 
   /* 下手なきりん ── ボス。くさを とばす はんいこうげき */
   hetakirin: {
     id: 'hetakirin', name: '下手なきりん',
+    rarity: 'SR',
     attr: 'grass',
-    hp: 4200,   atk: 700,  range: 135,  speed: 10,
+    hp: 1700,   atk: 285,  range: 135,  speed: 10,
     attackInterval: 3.0,   attackWindup: 0.6,
     kbCount: 4,
     scale: 1.35,
     attackType: 'area',
     areaRadius: 52,
     projectile: 'grass',
-    money: 800,
+    money: 180,
     isBoss: true,
   },
 
@@ -1811,8 +1883,9 @@ const ENEMIES = {
                50%で あいてを うしろに ふっとばす。クールタイム 4びょう  */
   hoshikun: {
     id: 'hoshikun', name: 'ほしくん',
+    rarity: 'R',
     attr: 'none',
-    hp: 1100,   atk: 380,  range: 125,  speed: 30,
+    hp: 710,   atk: 245,  range: 125,  speed: 30,
     attackInterval: 4.0,   attackWindup: 0.5,    // クールタイム 4びょう
     kbCount: 3,
     scale: 1.1,
@@ -1821,7 +1894,7 @@ const ENEMIES = {
     projectile: 'star',
     /* とくしゅのうりょく：50%の かくりつで うしろに ふきとばす */
     knockbackChance: 0.50,
-    money: 55,             // む ぞくせい なので すくなめ
+    money: 110,             // む ぞくせい なので すくなめ
   },
 
   /* コンガラガーン ── あおい しかくい あたま と オレンジの からだ。
@@ -1830,8 +1903,9 @@ const ENEMIES = {
                       きそのうりょくが たかい。字一龍 と むれで やってくる  */
   kongaragan: {
     id: 'kongaragan', name: 'コンガラガーン',
+    rarity: 'GR',
     attr: 'metal',
-    hp: 1800,   atk: 430,  range: 120,  speed: 45,
+    hp: 1190,   atk: 285,  range: 120,  speed: 45,
     attackInterval: 2.2,   attackWindup: 0.45,   // てを のばす
     kbCount: 3,
     scale: 1.15,
@@ -1839,7 +1913,7 @@ const ENEMIES = {
     projectile: null,                            // ちょくせつ てを のばして なぐる
     /* とくしゅのうりょく：60%の かくりつで クリティカル（ダメージ 2ばい）*/
     crit: { chance: 0.60, mult: 2.0 },
-    money: 160,
+    money: 150,
   },
 
   /* お菓子マン ── さいごの おおボス。
@@ -1847,8 +1921,9 @@ const ENEMIES = {
                  パワーぞくせい なので「まじゅつし」の 時の旅人 が とても よく きく！ */
   okashiman: {
     id: 'okashiman', name: 'お菓子マン',
+    rarity: 'LR',
     attr: 'power',
-    hp: 9000,   atk: 900,  range: 115,  speed: 9,
+    hp: 3940,   atk: 395,  range: 115,  speed: 9,
     attackInterval: 2.0,   attackWindup: 1.0,   // おおきく ふりかぶって いしを なげる
     kbCount: 4,
     scale: 1.40,
@@ -1856,7 +1931,7 @@ const ENEMIES = {
     projectile: 'stone',
     /* とくしゅのうりょく：30%の かくりつで 1びょうかん うごきを とめる */
     stun: { duration: 1.0, chance: 0.30 },
-    money: 1200,
+    money: 290,
     isBoss: true,
   },
 };
@@ -2013,7 +2088,7 @@ const STAGES = [
   {
     no: 1,
     chapter: 1,  course: 1,       // だい1ステージ の 1コースめ
-    enemyMult: 1.00,            // てきの つよさ 1.00ばい
+    power: 1.31,            // てきの つよさ 1.00ばい
     reward: { coins: 3, exp: 80 },   // チュートリアルなので Gコイン おおめ
     name: 'はじまりの みち',
     desc: 'トゲハヤさん が でてくるよ',
@@ -2030,7 +2105,7 @@ const STAGES = [
   {
     no: 2,
     chapter: 1,  course: 2,       // だい1ステージ の 2コースめ
-    enemyMult: 1.00,            // てきの つよさ 1.00ばい
+    power: 1.34,            // てきの つよさ 1.00ばい
     reward: { coins: 3, exp: 130 },   // ここまでで ガチャ 2かいぶん
     name: 'ひのたま だいぐんだん',
     desc: 'ほのた の むれが おしよせる',
@@ -2049,7 +2124,7 @@ const STAGES = [
   {
     no: 3,
     chapter: 1,  course: 3,       // だい1ステージ の 3コースめ
-    enemyMult: 1.00,            // てきの つよさ 1.00ばい
+    power: 1.38,            // てきの つよさ 1.00ばい
     reward: { coins: 1, exp: 170 },
     name: 'さかなの かわ',
     desc: 'saba が すごい はやさで とっしんしてくる',
@@ -2068,7 +2143,7 @@ const STAGES = [
   {
     no: 5,
     chapter: 1,  course: 4,       // だい1ステージ の 5コースめ
-    enemyMult: 1.05,            // てきの つよさ 1.05ばい
+    power: 1.42,            // てきの つよさ 1.05ばい
     reward: { coins: 1, exp: 250 },
     name: 'いわばの みち',
     desc: '字一龍 とうじょう！ ボスでは ないけど つよい',
@@ -2087,7 +2162,7 @@ const STAGES = [
   {
     no: 6,
     chapter: 1,  course: 5,       // だい1ステージ の 6コースめ
-    enemyMult: 1.05,            // てきの つよさ 1.05ばい
+    power: 1.46,            // てきの つよさ 1.05ばい
     reward: { coins: 3, exp: 290 },  // ボスコース
     name: 'よるの もり',
     desc: 'ボス 下手なきりん が まちうける',
@@ -2109,7 +2184,7 @@ const STAGES = [
   {
     no: 9,
     chapter: 1,  course: 6,       // だい1ステージ の 7コースめ
-    enemyMult: 1.10,            // てきの つよさ 1.10ばい
+    power: 1.5,            // てきの つよさ 1.10ばい
     reward: { coins: 1, exp: 320 },
     name: 'ほしの ひろば',
     desc: 'ほしくん とうじょう！ ほしを とばして ふきとばしてくる',
@@ -2128,7 +2203,7 @@ const STAGES = [
   {
     no: 7,
     chapter: 1,  course: 7,      // だい1ステージ の さいごの コース（ボス）
-    enemyMult: 1.15,            // てきの つよさ 1.15ばい
+    power: 1.53,            // てきの つよさ 1.15ばい
     reward: { coins: 3, exp: 480 },  // ボスコース
     name: 'おかしマンの しろ',
     desc: 'さいご の おおボス お菓子マン。まじゅつし が よく きく！',
@@ -2139,10 +2214,10 @@ const STAGES = [
       { at: 14, id: 'honota',   count: 3, gap: 0.5 },
       { at: 28, id: 'saba',     count: 2, gap: 1.4 },
       { at: 42, id: 'jiryu',    count: 1 },
-      { at: 58, id: 'togehaya', count: 2, gap: 2.0, repeat: 28 },
-      { at: 68, id: 'honota',   count: 4, gap: 0.5, repeat: 26 },
-      { at: 82, id: 'saba',     count: 2, gap: 1.4, repeat: 27 },
-      { at: 96, id: 'jiryu',    count: 1, repeat: 55 },
+      { at: 58, id: 'togehaya', count: 2, gap: 2.0, repeat: 23 },
+      { at: 68, id: 'honota',   count: 4, gap: 0.5, repeat: 21 },
+      { at: 82, id: 'saba',     count: 2, gap: 1.4, repeat: 22 },
+      { at: 96, id: 'jiryu',    count: 1, repeat: 45 },
       /* ちゅうボス → おおボス の 2だんがまえ */
       { atCastleHp: 0.90, id: 'hetakirin', count: 1 },
       { atCastleHp: 0.60, id: 'okashiman', count: 1 },
@@ -2152,7 +2227,7 @@ const STAGES = [
   {
     no: 8,
     chapter: 2,  course: 1,       // だい2ステージ の 1コースめ
-    enemyMult: 0.96,            // てきの つよさ 1.20ばい
+    power: 1.32,            // てきの つよさ 1.20ばい
     reward: { coins: 2, exp: 420 },  // ボスコース
     name: 'はがねの ぐんだん',
     desc: 'コンガラガーン とうじょう！ メタルは ほのお・まじゅつし・パワー に よわい',
@@ -2175,7 +2250,7 @@ const STAGES = [
   {
     no: 13,
     chapter: 2,  course: 2,       // だい2ステージ の 3コースめ（ボス）
-    enemyMult: 1.04,            // てきの つよさ 1.22ばい
+    power: 1.36,            // てきの つよさ 1.22ばい
     reward: { coins: 2, exp: 530 },
     name: 'はがねの よる',
     desc: 'メタルぐんだん と 下手なきりん。くらやみの だいけっせん',
@@ -2186,10 +2261,10 @@ const STAGES = [
       { at: 18,  id: 'kongaragan', count: 1 },
       { at: 34,  id: 'jiryu',      count: 1 },
       { at: 50,  id: 'hoshikun',   count: 1 },
-      { at: 66,  id: 'kongaragan', count: 1, repeat: 53 },
-      { at: 84,  id: 'saba',       count: 2, gap: 1.4, repeat: 48 },
-      { at: 100, id: 'jiryu',      count: 1, repeat: 75 },
-      { at: 118, id: 'hoshikun',   count: 1, repeat: 68 },
+      { at: 66,  id: 'kongaragan', count: 1, repeat: 32 },
+      { at: 84,  id: 'saba',       count: 2, gap: 1.4, repeat: 29 },
+      { at: 100, id: 'jiryu',      count: 1, repeat: 45 },
+      { at: 118, id: 'hoshikun',   count: 1, repeat: 41 },
       /* ボスは てきの しろが 75% まで へると でてくる */
       { atCastleHp: 0.75, id: 'hetakirin', count: 1 },
     ],
@@ -2198,7 +2273,7 @@ const STAGES = [
   {
     no: 15,
     chapter: 2,  course: 3,       // だい2ステージ の 5コースめ
-    enemyMult: 1.04,            // てきの つよさ 1.30ばい
+    power: 1.4,            // てきの つよさ 1.30ばい
     reward: { coins: 1, exp: 500 },
     name: 'ひのたま あらし',
     desc: 'ほのた の だいぐんだん。みずの なかまが かつやくする',
@@ -2217,7 +2292,7 @@ const STAGES = [
   {
     no: 16,
     chapter: 2,  course: 4,       // だい2ステージ の 6コースめ（ボス）
-    enemyMult: 1.32,            // てきの つよさ 1.32ばい
+    power: 1.44,            // てきの つよさ 1.32ばい
     reward: { coins: 3, exp: 560 },
     name: 'りゅうの たに',
     desc: '字一龍 の むれ と お菓子マン。なかばの やま',
@@ -2242,7 +2317,7 @@ const STAGES = [
     desc: 'モコ魔道士が いっぱい。けもので せめよう',
     bg: 'night',
     castleHp: 4200,
-    enemyMult: 1.34,
+    power: 1.48,
     reward: { coins: 1, exp: 480 },
     waves: [
       { at: 3,  id: 'nyororiinu', count: 3, gap: 0.7 },
@@ -2263,7 +2338,7 @@ const STAGES = [
     desc: 'おおボスの てまえ。ぜんぶの ぞくせいが でる',
     bg: 'rock',
     castleHp: 5200,
-    enemyMult: 1.4,
+    power: 1.52,
     reward: { coins: 1, exp: 560 },
     waves: [
       { at: 3,  id: 'ojiinouenchou', count: 1 },
@@ -2286,7 +2361,7 @@ const STAGES = [
     desc: 'ふところに とびこめ！とおくからは なげられ ほうだい',
     bg: 'boss',
     castleHp: 4200,
-    enemyMult: 1.25,
+    power: 1.56,
     reward: { coins: 3, exp: 670 },
     waves: [
       { at: 3,  id: 'kamomeeru',  count: 2, gap: 1.2 },
@@ -2315,7 +2390,7 @@ const STAGES = [
     desc: 'イノっちが つっこんで くる。ふきとばしに ちゅうい',
     bg: 'kemono',
     castleHp: 2400,
-    enemyMult: 0.94,
+    power: 1.6,
     reward: { coins: 1, exp: 450 },
     waves: [
       { at: 3,  id: 'inocchi',    count: 2, gap: 1.2 },
@@ -2334,16 +2409,16 @@ const STAGES = [
     desc: 'たぬポンに ちからを ぬかれる。かずで おしきろう',
     bg: 'mori',
     castleHp: 900,
-    enemyMult: 0.58,
+    power: 1.3,
     reward: { coins: 1, exp: 480 },
     waves: [
       { at: 3,  id: 'yamanemu',   count: 2, gap: 1.6 },
       { at: 14, id: 'tanupon',  count: 1 },
       { at: 26, id: 'tanupon',  count: 2, gap: 2.5 },
       { at: 38, id: 'yamanemu', count: 2, gap: 2.0 },
-      { at: 50, id: 'tanupon',  count: 2, gap: 2.5, repeat: 51 },
-      { at: 64, id: 'inocchi',  count: 3, gap: 1.0, repeat: 46 },
-      { at: 44, id: 'kumabee',  count: 1, repeat: 73 },   // もとから いる けものの てき
+      { at: 50, id: 'tanupon',  count: 2, gap: 2.5, repeat: 31 },
+      { at: 64, id: 'inocchi',  count: 3, gap: 1.0, repeat: 28 },
+      { at: 44, id: 'kumabee',  count: 1, repeat: 45 },   // もとから いる けものの てき
     ],
   },
 
@@ -2354,15 +2429,15 @@ const STAGES = [
     desc: 'ツユガエルの しずくが はんいに ひろがる',
     bg: 'mizu',
     castleHp: 1600,
-    enemyMult: 0.72,
+    power: 1.27,
     reward: { coins: 1, exp: 530 },
     waves: [
       { at: 3,  id: 'tsuyugaeru', count: 1 },
       { at: 14, id: 'tsuyugaeru', count: 1 },
       { at: 28, id: 'tsuyugaeru', count: 2, gap: 2.0 },
       { at: 40, id: 'yamanemu',   count: 2, gap: 2.0 },
-      { at: 54, id: 'tsuyugaeru', count: 2, gap: 2.0, repeat: 39 },
-      { at: 70, id: 'tanupon',    count: 1, repeat: 43 },
+      { at: 54, id: 'tsuyugaeru', count: 2, gap: 2.0, repeat: 41 },
+      { at: 70, id: 'tanupon',    count: 1, repeat: 45 },
     ],
   },
 
@@ -2373,7 +2448,7 @@ const STAGES = [
     desc: 'ちゅうボス「ヌシノオオカミ」。ピンチに なると ほんきを だす',
     bg: 'night',
     castleHp: 1400,
-    enemyMult: 0.74,
+    power: 1.74,
     reward: { coins: 3, exp: 590 },
     waves: [
       { at: 3,  id: 'tanupon',    count: 1 },
@@ -2381,9 +2456,9 @@ const STAGES = [
       { at: 26, id: 'moeris',  count: 1 },
       /* ★ちゅうボスは てきの しろが 70% まで へると でてくる */
       { atCastleHp: 0.70, id: 'nushinoookami', count: 1 },
-      { at: 56, id: 'inocchi', count: 3, gap: 1.0, repeat: 36 },
-      { at: 70, id: 'tanupon', count: 1, repeat: 51 },
-      { at: 62, id: 'kumabee',  count: 1, repeat: 91 },
+      { at: 56, id: 'inocchi', count: 3, gap: 1.0, repeat: 18 },
+      { at: 70, id: 'tanupon', count: 1, repeat: 25 },
+      { at: 62, id: 'kumabee',  count: 1, repeat: 45 },
     ],
   },
 
@@ -2394,16 +2469,16 @@ const STAGES = [
     desc: 'ハリ千本が とおくから はりを とばす。まえに でよう',
     bg: 'kemono',
     castleHp: 2100,
-    enemyMult: 0.72,
+    power: 1.15,
     reward: { coins: 1, exp: 640 },
     waves: [
       { at: 3,  id: 'moeris',     count: 1 },
       { at: 14, id: 'harisenbon', count: 1 },
       { at: 30, id: 'tanupon',    count: 1 },
-      { at: 48, id: 'harisenbon', count: 1, repeat: 40 },
-      { at: 60, id: 'tsuyugaeru', count: 1, repeat: 28 },
-      { at: 74, id: 'inocchi',    count: 3, gap: 1.0, repeat: 23 },
-      { at: 56, id: 'kumabee',  count: 1, repeat: 60 },
+      { at: 48, id: 'harisenbon', count: 1, repeat: 30 },
+      { at: 60, id: 'tsuyugaeru', count: 1, repeat: 21 },
+      { at: 74, id: 'inocchi',    count: 3, gap: 1.0, repeat: 17 },
+      { at: 56, id: 'kumabee',  count: 1, repeat: 45 },
     ],
   },
 
@@ -2414,16 +2489,16 @@ const STAGES = [
     desc: 'クマったは かたくて ふきとびにくい。ちからも ぬかれる',
     bg: 'rock',
     castleHp: 1200,
-    enemyMult: 0.52,
+    power: 0.86,
     reward: { coins: 1, exp: 670 },
     waves: [
       { at: 3,  id: 'kumabee',    count: 1 },
       { at: 14, id: 'kumatta',    count: 1 },
       { at: 30, id: 'moeris',     count: 2, gap: 2.0 },
-      { at: 42, id: 'kumatta',    count: 1, repeat: 46 },
-      { at: 58, id: 'harisenbon', count: 1, repeat: 51 },
-      { at: 74, id: 'inocchi',    count: 3, gap: 1.0, repeat: 36 },
-      { at: 46, id: 'jiryu',    count: 1, repeat: 78 },   // 字一龍（けもの）
+      { at: 42, id: 'kumatta',    count: 1, repeat: 26 },
+      { at: 58, id: 'harisenbon', count: 1, repeat: 29 },
+      { at: 74, id: 'inocchi',    count: 3, gap: 1.0, repeat: 21 },
+      { at: 46, id: 'jiryu',    count: 1, repeat: 45 },   // 字一龍（けもの）
     ],
   },
 
@@ -2434,19 +2509,19 @@ const STAGES = [
     desc: 'おおボス「森喰らい・ガオウ」。ふきとばせない。ほのおと パワーで',
     bg: 'boss',
     castleHp: 1100,
-    enemyMult: 0.66,
+    power: 0.95,
     reward: { coins: 3, exp: 870 },
     waves: [
       { at: 3,  id: 'inocchi',    count: 3, gap: 1.0 },
       { at: 14,  id: 'tanupon',    count: 1 },
       { at: 26,  id: 'kokejika',   count: 1 },
       { at: 38,  id: 'harisenbon', count: 1 },
-      { at: 52,  id: 'kumatta',    count: 1, repeat: 92 },
-      { at: 68,  id: 'moeris',     count: 2, gap: 2.0, repeat: 62 },
-      { at: 84,  id: 'inocchi',    count: 3, gap: 1.0, repeat: 49 },
+      { at: 52,  id: 'kumatta',    count: 1, repeat: 35 },
+      { at: 68,  id: 'moeris',     count: 2, gap: 2.0, repeat: 24 },
+      { at: 84,  id: 'inocchi',    count: 3, gap: 1.0, repeat: 19 },
       /* おおボスは てきの しろが 75% まで へると でてくる */
       { atCastleHp: 0.75, id: 'gaou', count: 1 },
-      { at: 46, id: 'jiryu',    count: 1, repeat: 117 },
+      { at: 46, id: 'jiryu',    count: 1, repeat: 45 },
     ],
   },
 
@@ -2464,7 +2539,7 @@ const STAGES = [
     desc: 'うごきだした ちいさな ネジたち',
     bg: 'haikoujou',
     castleHp: 9500,
-    enemyMult: 0.85,
+    power: 1.58,
     reward: { coins: 1, exp: 780 },
     waves: [
       { at: 3,  id: 'nejiro',     count: 3, gap: 0.8 },
@@ -2481,7 +2556,7 @@ const STAGES = [
     desc: 'うんぱんロボが いくてを ふさぐ',
     bg: 'steel',
     castleHp: 2100,
-    enemyMult: 0.89,
+    power: 1.63,
     reward: { coins: 1, exp: 810 },
     waves: [
       { at: 3,  id: 'hakobot',    count: 1 },
@@ -2500,17 +2575,17 @@ const STAGES = [
     desc: 'ほのおと みずの じっけんきが きどう',
     bg: 'steel',
     castleHp: 1500,
-    enemyMult: 0.75,
+    power: 1.14,
     reward: { coins: 1, exp: 870 },
     waves: [
       { at: 3,  id: 'sabinchi',   count: 2, gap: 1.4 },
       { at: 14, id: 'burner',   count: 1 },
       { at: 26, id: 'potank',   count: 1 },
       { at: 38, id: 'sabinchi', count: 2, gap: 1.6 },
-      { at: 58, id: 'burner',   count: 1, repeat: 45 },
-      { at: 76, id: 'potank',   count: 1, repeat: 48 },
-      { at: 82, id: 'nejiro',   count: 4, gap: 0.7, repeat: 20 },
-      { at: 50, id: 'ironkokko',  count: 1, repeat: 53 },
+      { at: 58, id: 'burner',   count: 1, repeat: 38 },
+      { at: 76, id: 'potank',   count: 1, repeat: 41 },
+      { at: 82, id: 'nejiro',   count: 4, gap: 0.7, repeat: 17 },
+      { at: 50, id: 'ironkokko',  count: 1, repeat: 45 },
     ],
   },
 
@@ -2521,7 +2596,7 @@ const STAGES = [
     desc: 'ちゅうボス「ガラク帝」。ふきとばせない はがねの おう',
     bg: 'haikoujou',
     castleHp: 2600,
-    enemyMult: 0.98,
+    power: 1.72,
     reward: { coins: 3, exp: 950 },
     waves: [
       { at: 3,  id: 'ironkokko',  count: 1 },
@@ -2529,8 +2604,8 @@ const STAGES = [
       { at: 26, id: 'sabinchi',  count: 2, gap: 1.6 },
       /* ★ちゅうボスは てきの しろが 70% まで へると でてくる */
       { atCastleHp: 0.70, id: 'garakutei', count: 1 },
-      { at: 60, id: 'nejiro',    count: 4, gap: 0.7, repeat: 35 },
-      { at: 74, id: 'hakobot',   count: 1, repeat: 54 },
+      { at: 60, id: 'nejiro',    count: 4, gap: 0.7, repeat: 29 },
+      { at: 74, id: 'hakobot',   count: 1, repeat: 45 },
     ],
   },
 
@@ -2541,7 +2616,7 @@ const STAGES = [
     desc: 'からまる コードの わな。うごきが おそくなる',
     bg: 'night',
     castleHp: 2700,
-    enemyMult: 1,
+    power: 1.77,
     reward: { coins: 1, exp: 980 },
     waves: [
       { at: 3,  id: 'mojacord',   count: 1 },
@@ -2561,7 +2636,7 @@ const STAGES = [
     desc: 'あっとうてきな はかいりょく。プレスケが おしつぶす',
     bg: 'haikoujou',
     castleHp: 2200,
-    enemyMult: 0.91,
+    power: 1.81,
     reward: { coins: 1, exp: 1090 },
     waves: [
       { at: 3,  id: 'nejiro',     count: 5, gap: 0.6 },
@@ -2569,9 +2644,9 @@ const STAGES = [
       { at: 30, id: 'hakobot',  count: 2, gap: 2.5 },
       { at: 42, id: 'sabinchi', count: 2, gap: 1.6 },
       { at: 54, id: 'mojacord', count: 1 },
-      { at: 66, id: 'pressuke', count: 1, repeat: 73 },
-      { at: 84, id: 'nejiro',   count: 4, gap: 0.7, repeat: 46 },
-      { at: 52, id: 'kongaragan', count: 1, repeat: 73 },
+      { at: 66, id: 'pressuke', count: 1, repeat: 45 },
+      { at: 84, id: 'nejiro',   count: 4, gap: 0.7, repeat: 28 },
+      { at: 52, id: 'kongaragan', count: 1, repeat: 45 },
     ],
   },
 
@@ -2582,19 +2657,19 @@ const STAGES = [
     desc: 'すべての げんきょう「廃炉獣メルトギア」。ほのお・まじゅつし・パワーで',
     bg: 'boss',
     castleHp: 1800,
-    enemyMult: 0.8,
+    power: 0.92,
     reward: { coins: 3, exp: 1400 },
     waves: [
       { at: 3,  id: 'kongaragan', count: 1 },
       { at: 14,  id: 'sabinchi', count: 2, gap: 1.6 },
       { at: 28,  id: 'burner',   count: 1 },
       { at: 42,  id: 'forkun',   count: 1 },
-      { at: 58,  id: 'pressuke', count: 1, repeat: 69 },
-      { at: 76,  id: 'potank',   count: 1, repeat: 59 },
-      { at: 92,  id: 'nejiro',   count: 4, gap: 0.7, repeat: 36 },
+      { at: 58,  id: 'pressuke', count: 1, repeat: 32 },
+      { at: 76,  id: 'potank',   count: 1, repeat: 28 },
+      { at: 92,  id: 'nejiro',   count: 4, gap: 0.7, repeat: 17 },
       /* さいしゅうボスは てきの しろが 75% まで へると でてくる */
       { atCastleHp: 0.75, id: 'meltgear', count: 1 },
-      { at: 68, id: 'kongaragan', count: 1, repeat: 96 },
+      { at: 68, id: 'kongaragan', count: 1, repeat: 45 },
     ],
   },
 
@@ -2612,7 +2687,7 @@ const STAGES = [
     desc: 'おだやかな うみに あらわれる ちいさな てきたち',
     bg: 'kinkai',
     castleHp: 4400,
-    enemyMult: 1.15,
+    power: 1.5,
     reward: { coins: 1, exp: 900 },
     waves: [
       { at: 3,  id: 'pukakurage', count: 3, gap: 0.9 },
@@ -2630,7 +2705,7 @@ const STAGES = [
     desc: 'チビサメの むれが すばやく つっこんで くる',
     bg: 'mizu',
     castleHp: 4600,
-    enemyMult: 1.2,
+    power: 1.54,
     reward: { coins: 1, exp: 950 },
     waves: [
       { at: 3,  id: 'chibisame',  count: 2, gap: 1.2 },
@@ -2649,7 +2724,7 @@ const STAGES = [
     desc: 'ざんがいから あらわれる トゲフグと イカマジン',
     bg: 'kinkai',
     castleHp: 4200,
-    enemyMult: 1.15,
+    power: 1.59,
     reward: { coins: 1, exp: 1000 },
     waves: [
       { at: 3,  id: 'saba',       count: 3, gap: 1.0 },
@@ -2669,7 +2744,7 @@ const STAGES = [
     desc: 'ちゅうボス「深海の主 ネレイド」。かいりゅうが ぶつかる きけんな かいいき',
     bg: 'water',
     castleHp: 3000,
-    enemyMult: 1.05,
+    power: 1.63,
     reward: { coins: 3, exp: 1100 },
     waves: [
       { at: 3,  id: 'togefugu',   count: 1 },
@@ -2689,15 +2764,15 @@ const STAGES = [
     desc: 'じゅうそうの てき。オクトキャノンと カニタンクが まちうける',
     bg: 'kinkai',
     castleHp: 2800,
-    enemyMult: 0.95,
+    power: 1.67,
     reward: { coins: 1, exp: 1150 },
     waves: [
       { at: 3,  id: 'ikamajin',   count: 1 },
       { at: 14, id: 'octocannon', count: 1 },
       { at: 30, id: 'kanitank',   count: 1 },
       { at: 46, id: 'togefugu',   count: 1 },
-      { at: 62, id: 'octocannon', count: 1, repeat: 36 },
-      { at: 84, id: 'kanitank',   count: 1, repeat: 46 },
+      { at: 62, id: 'octocannon', count: 1, repeat: 35 },
+      { at: 84, id: 'kanitank',   count: 1, repeat: 45 },
       { at: 92, id: 'chibisame',  count: 3, gap: 1.0, repeat: 18 },
     ],
   },
@@ -2709,7 +2784,7 @@ const STAGES = [
     desc: 'おおきな かいりゅうと きょだいな いきもの。あらしの まえぶれ',
     bg: 'water',
     castleHp: 2900,
-    enemyMult: 0.97,
+    power: 1.72,
     reward: { coins: 1, exp: 1250 },
     waves: [
       { at: 3,  id: 'bakecchin',  count: 3, gap: 1.2 },
@@ -2731,7 +2806,7 @@ const STAGES = [
     desc: 'おおボス「波獣ザバーン」。字一龍を したがえた なみが すべてを のみこむ',
     bg: 'boss',
     castleHp: 3600,
-    enemyMult: 1.00,
+    power: 1.76,
     reward: { coins: 3, exp: 1800 },
     waves: [
       { at: 3,  id: 'umihebi',    count: 2, gap: 1.5 },
@@ -2763,7 +2838,7 @@ const STAGES = [
     desc: 'みならいたちが むかえる しずかな もんぜん',
     bg: 'mahou',
     castleHp: 3800,
-    enemyMult: 0.94,
+    power: 1.86,
     reward: { coins: 1, exp: 1300 },
     waves: [
       { at: 3,  id: 'runrunwisp', count: 3, gap: 0.9 },
@@ -2781,7 +2856,7 @@ const STAGES = [
     desc: 'にぎわう ろてんと こうきしんの つまる ばしょ',
     bg: 'night',
     castleHp: 4000,
-    enemyMult: 0.97,
+    power: 1.91,
     reward: { coins: 1, exp: 1350 },
     waves: [
       { at: 3,  id: 'houkigob',     count: 2, gap: 1.2 },
@@ -2801,16 +2876,16 @@ const STAGES = [
     desc: 'ひの まほうを つかう みならいたちの くんれんエリア',
     bg: 'sunset',
     castleHp: 2000,
-    enemyMult: 0.72,
+    power: 0.99,
     reward: { coins: 1, exp: 1400 },
     waves: [
       { at: 3,  id: 'runrunwisp', count: 3, gap: 0.9 },
       { at: 14, id: 'flamemage',  count: 1 },
       { at: 28, id: 'icewitch',   count: 1 },
       { at: 42, id: 'houkigob',   count: 3, gap: 1.0 },
-      { at: 56, id: 'flamemage',  count: 1, repeat: 56 },
-      { at: 72, id: 'icewitch',   count: 1, repeat: 59 },
-      { at: 88, id: 'runrunwisp', count: 4, gap: 0.8, repeat: 40 },
+      { at: 56, id: 'flamemage',  count: 1, repeat: 42 },
+      { at: 72, id: 'icewitch',   count: 1, repeat: 45 },
+      { at: 88, id: 'runrunwisp', count: 4, gap: 0.8, repeat: 30 },
     ],
   },
 
@@ -2821,15 +2896,15 @@ const STAGES = [
     desc: 'こだいの まほうもじが きざまれた いせき',
     bg: 'mahou',
     castleHp: 1700,
-    enemyMult: 0.58,
+    power: 0.73,
     reward: { coins: 1, exp: 1450 },
     waves: [
       { at: 3,  id: 'mandrake',   count: 1 },
       { at: 16, id: 'runegolem',  count: 1 },
       { at: 32, id: 'houkigob',   count: 3, gap: 1.0 },
-      { at: 46, id: 'mandrake',   count: 1, repeat: 56 },
-      { at: 62, id: 'runegolem',  count: 1, repeat: 78 },
-      { at: 80, id: 'runrunwisp', count: 4, gap: 0.8, repeat: 40 },
+      { at: 46, id: 'mandrake',   count: 1, repeat: 32 },
+      { at: 62, id: 'runegolem',  count: 1, repeat: 45 },
+      { at: 80, id: 'runrunwisp', count: 4, gap: 0.8, repeat: 23 },
     ],
   },
 
@@ -2840,15 +2915,15 @@ const STAGES = [
     desc: 'ちゅうボス「賢者カロン」。いだいな けんじゃとの たいじ',
     bg: 'night',
     castleHp: 2300,
-    enemyMult: 0.76,
+    power: 0.97,
     reward: { coins: 3, exp: 1550 },
     waves: [
       { at: 3,  id: 'magicrabbit', count: 1 },
       { at: 16, id: 'houkigob',    count: 3, gap: 1.0 },
       { at: 30, id: 'icewitch',    count: 1 },
-      { at: 46, id: 'flamemage',   count: 1, repeat: 43 },
-      { at: 62, id: 'runrunwisp',  count: 4, gap: 0.8, repeat: 30 },
-      { at: 78, id: 'houkigob',    count: 3, gap: 1.0, repeat: 36 },
+      { at: 46, id: 'flamemage',   count: 1, repeat: 45 },
+      { at: 62, id: 'runrunwisp',  count: 4, gap: 0.8, repeat: 32 },
+      { at: 78, id: 'houkigob',    count: 3, gap: 1.0, repeat: 38 },
       /* ★ちゅうボスは てきの しろが 70% まで へると でてくる */
       { atCastleHp: 0.70, id: 'sagecharon', count: 1 },
     ],
@@ -2861,16 +2936,16 @@ const STAGES = [
     desc: 'きけんな しょもつが ねむる しょこ。こうげきを ふうじられる',
     bg: 'mahou',
     castleHp: 2000,
-    enemyMult: 0.65,
+    power: 0.95,
     reward: { coins: 1, exp: 1650 },
     waves: [
       { at: 3,  id: 'runrunwisp',  count: 3, gap: 0.9 },
       { at: 16, id: 'chaosspell',  count: 1 },
       { at: 32, id: 'ikamajin',    count: 1 },
       { at: 46, id: 'runegolem',   count: 1 },
-      { at: 62, id: 'chaosspell',  count: 1, repeat: 49 },
-      { at: 80, id: 'ikamajin',    count: 1, repeat: 45 },
-      { at: 96, id: 'magicrabbit', count: 1, repeat: 43 },
+      { at: 62, id: 'chaosspell',  count: 1, repeat: 45 },
+      { at: 80, id: 'ikamajin',    count: 1, repeat: 42 },
+      { at: 96, id: 'magicrabbit', count: 1, repeat: 40 },
     ],
   },
 
@@ -2881,17 +2956,17 @@ const STAGES = [
     desc: 'おおボス「終焉の大魔導士ゼノス」。すべての まほうが あつまる さいごの たたかい',
     bg: 'boss',
     castleHp: 2700,
-    enemyMult: 0.81,
+    power: 1.3,
     reward: { coins: 3, exp: 2200 },
     waves: [
       { at: 3,   id: 'houkigob',    count: 3, gap: 1.0 },
       { at: 16,  id: 'magicrabbit', count: 1 },
       { at: 30,  id: 'flamemage',   count: 1 },
       { at: 44,  id: 'icewitch',    count: 1 },
-      { at: 58,  id: 'runegolem',   count: 1, repeat: 60 },
-      { at: 76,  id: 'chaosspell',  count: 1, repeat: 53 },
-      { at: 94,  id: 'mandrake',    count: 1, repeat: 45 },
-      { at: 110, id: 'runrunwisp',  count: 4, gap: 0.8, repeat: 31 },
+      { at: 58,  id: 'runegolem',   count: 1, repeat: 45 },
+      { at: 76,  id: 'chaosspell',  count: 1, repeat: 40 },
+      { at: 94,  id: 'mandrake',    count: 1, repeat: 34 },
+      { at: 110, id: 'runrunwisp',  count: 4, gap: 0.8, repeat: 23 },
       /* ★おおボスは てきの しろが 75% まで へると でてくる */
       { atCastleHp: 0.75, id: 'zenos', count: 1 },
     ],
@@ -2913,8 +2988,7 @@ const STAGES = [
     desc: 'はじまりの のはらの ぬしたちが 闇の ちからで よみがえる',
     bg: 'yami',
     castleHp: 6000,
-    enemyMult: 1.00,
-    moneyMult: 2.4,
+    power: 1.57,
     reward: { coins: 3, exp: 2400 },
     waves: [
       { at: 3,  id: 'togehaya', count: 3, gap: 0.9 },
@@ -2934,8 +3008,7 @@ const STAGES = [
     desc: 'けものみちの ぬしと 森喰らいが そろって たちふさがる',
     bg: 'yami',
     castleHp: 5300,
-    enemyMult: 1.00,
-    moneyMult: 2.6,
+    power: 1.17,
     reward: { coins: 3, exp: 2500 },
     waves: [
       { at: 3,  id: 'tanupon',  count: 2, gap: 1.0 },
@@ -2955,8 +3028,7 @@ const STAGES = [
     desc: 'こうじょうの きかいたちが 闇に つながれて うごきだす',
     bg: 'yami',
     castleHp: 6200,
-    enemyMult: 1.00,
-    moneyMult: 2.4,
+    power: 1.66,
     reward: { coins: 3, exp: 2600 },
     waves: [
       { at: 3,  id: 'ironkokko', count: 2, gap: 1.0 },
@@ -2976,8 +3048,7 @@ const STAGES = [
     desc: 'うみの ぬしと あばれ りゅうが そろって おそって くる',
     bg: 'yami',
     castleHp: 6400,
-    enemyMult: 1.00,
-    moneyMult: 2.2,
+    power: 1.71,
     reward: { coins: 3, exp: 2700 },
     waves: [
       { at: 3,  id: 'umihebi',    count: 2, gap: 1.0 },
@@ -2997,8 +3068,7 @@ const STAGES = [
     desc: 'ボス 3たい。ほのおの おにと けんじゃ、そして きりんが まちうける',
     bg: 'yami',
     castleHp: 6600,
-    enemyMult: 1.00,
-    moneyMult: 2.4,
+    power: 1.76,
     reward: { coins: 3, exp: 2900 },
     waves: [
       { at: 3,  id: 'houkigob',   count: 3, gap: 0.9 },
@@ -3019,8 +3089,7 @@ const STAGES = [
     desc: 'ボス 3たい。かたい なみの けものと 大魔導士が まちかまえる',
     bg: 'yami',
     castleHp: 5400,
-    enemyMult: 1.00,
-    moneyMult: 2.6,
+    power: 1.8,
     reward: { coins: 3, exp: 3200 },
     waves: [
       { at: 3,  id: 'kongaragan', count: 2, gap: 1.1 },
@@ -3041,8 +3110,7 @@ const STAGES = [
     desc: 'さいごの てき「闇堕ちあき坊」。むぞくせいと パワーの こうげきは とおらない',
     bg: 'boss',
     castleHp: 8500,
-    enemyMult: 1.00,
-    moneyMult: 2.6,
+    power: 1.26,
     reward: { coins: 3, exp: 5000 },
     waves: [
       { at: 3,  id: 'kongaragan', count: 2, gap: 1.0 },
@@ -3119,6 +3187,45 @@ const BOSSRUSH = {
   clearBonus: 20,      // ★7-1〜7-7 ぜんぶ クリアで Gコイン 20まい（1どだけ）
 };
 
+/* --------------------------------------------------------------------------
+   てきの レア度と、その おびの つよさ
+
+   ★かんがえかた★
+     てきの たいりょく・こうげき・おかねは「Lv.1 の すがた」で ほぞんして あり、
+     ステージの power と レア度の おびを かけた ぶんだけ つよく なります。
+
+        じっさいの つよさ ＝ ほぞんずみの すうち（おびこみ）× ステージの power
+
+     こうすると、1しょうの てきでも 7しょうに だせば ちゃんと つよく なり、
+     どの てきも どの ステージでも つかえます。
+
+   ★おびの ばい（ほぞんずみの すうちに すでに はいって います）★
+     N（こザコ）1.0 ／ R（ちゅうザコ）1.8 ／ GR（おおがたザコ）3.2
+     SR（ボス）5.5 ／ LR（ラスボスきゅう）9.0
+
+   ★ばいりつが かかるのは たいりょく・こうげき・おかね だけ★
+     しゃてい・はやさ・こうげきかんかく・ふきとび かいすう・
+     とくしゅのうりょくの かくりつや びょうすうは かわりません。
+   -------------------------------------------------------------------------- */
+const ENEMY_BAND = {
+  N:  1.0,
+  R:  1.8,
+  GR: 3.2,
+  SR: 5.5,
+  LR: 9.0,
+};
+
+/* コースの てきの ばいりつを もとめる。
+   ふつうは stage.power だけ。とくべつな コースは powerBy で
+   レア度ごとに うわがき できる（れい：powerBy: { SR: 7.5 }）。   */
+function enemyPowerOf(stage, rarity) {
+  const r = rarity || 'N';
+  /* とくべつな コースは レア度ごとに うわがき できる */
+  if (stage && stage.powerBy && typeof stage.powerBy[r] === 'number') return stage.powerBy[r];
+  return (stage && typeof stage.power === 'number') ? stage.power : 1;
+}
+
+
 const CHAPTERS = {
   1: { name: 'はじまりの のはら',     short: 'のはら',   x: 0.07, y: 0.58, icon: '🌱' },
   2: { name: 'はがねの まち',         short: 'はがね',   x: 0.20, y: 0.34, icon: '⚙️' },
@@ -3158,7 +3265,7 @@ const TOWER = {
       desc: 'むぞくせいの てき だけ。きほんの たたかいかた',
       bg: 'rock',
       castleHp: 2000,
-      enemyMult: 0.9,
+      power: 1,
       reward: { coins: 2, exp: 180 },
       waves: [
         { at: 3,  id: 'nyororiinu', count: 2, gap: 0.8 },
@@ -3179,7 +3286,7 @@ const TOWER = {
       desc: 'ほのおの てきが たくさん。みずが ゆうりです',
       bg: 'sunset',
       castleHp: 1800,
-      enemyMult: 1.15,
+      power: 1.4,
       reward: { coins: 2, exp: 210 },
       waves: [
         { at: 3,  id: 'togehaya',    count: 1 },
@@ -3201,7 +3308,7 @@ const TOWER = {
       desc: 'みずの てき。くさが ゆうりです',
       bg: 'mizu',
       castleHp: 2600,
-      enemyMult: 1.25,
+      power: 1.8,
       reward: { coins: 2, exp: 240 },
       waves: [
         { at: 3,  id: 'togehaya',  count: 1 },
@@ -3222,10 +3329,10 @@ const TOWER = {
       desc: 'かいふくして くる くさの てき。ほのおが ゆうりです',
       bg: 'mori',
       castleHp: 2200,
-      enemyMult: 1.1,
+      power: 2.2,
       reward: { coins: 2, exp: 270 },
       /* かいふくやくを かたく する（ほのおで さきに たおすのが せいかい）*/
-      enemyBuff: { momoplant: { hp: 1900 } },
+      enemyBuff: { momoplant: { hp: 1410 } },
       waves: [
         { at: 3,  id: 'togehaya',      count: 1 },
         { at: 12, id: 'momoplant',     count: 2, gap: 2.0 },
@@ -3246,10 +3353,10 @@ const TOWER = {
       desc: 'パワーの てき。まじゅつしが ゆうりです',
       bg: 'steel',
       castleHp: 2600,
-      enemyMult: 1.25,
+      power: 2.6,
       reward: { coins: 2, exp: 300 },
       /* ウサ・ゴリラを かたく する（まじゅつしの ありがたみ）*/
-      enemyBuff: { usagorilla: { hp: 3500 } },
+      enemyBuff: { usagorilla: { hp: 2370 } },
       waves: [
         { at: 3,  id: 'togehaya',   count: 1 },
         { at: 12, id: 'usagorilla', count: 1 },
@@ -3269,10 +3376,10 @@ const TOWER = {
       desc: 'けものの てき。パワーが ゆうりです',
       bg: 'mori',
       castleHp: 2800,
-      enemyMult: 1.2,
+      power: 3,
       reward: { coins: 2, exp: 330 },
       /* クマべぇを かたく する（パワーの ありがたみ）*/
-      enemyBuff: { kumabee: { hp: 3800 } },
+      enemyBuff: { kumabee: { hp: 2460 } },
       waves: [
         { at: 3,  id: 'togehaya', count: 1 },
         { at: 12, id: 'kumabee',  count: 1 },
@@ -3291,7 +3398,7 @@ const TOWER = {
       desc: 'とおくから うつ まじゅつし。けものが ゆうりです',
       bg: 'night',
       castleHp: 3400,
-      enemyMult: 1.3,
+      power: 3.4,
       reward: { coins: 2, exp: 360 },
       waves: [
         { at: 3,  id: 'togehaya',     count: 1 },
@@ -3312,10 +3419,10 @@ const TOWER = {
       desc: 'メタルの てき。ほのお・まじゅつし・パワーが ゆうり',
       bg: 'steel',
       castleHp: 2800,
-      enemyMult: 1.3,
+      power: 3.8,
       reward: { coins: 2, exp: 400 },
       /* アイアン・コッコを かたく する（ほのお・まじゅつし・パワーの ありがたみ）*/
-      enemyBuff: { ironkokko: { hp: 3400 } },
+      enemyBuff: { ironkokko: { hp: 2140 } },
       waves: [
         { at: 3,  id: 'togehaya',   count: 1 },
         { at: 12, id: 'ironkokko',  count: 1 },
@@ -3335,7 +3442,7 @@ const TOWER = {
       desc: 'すべての ぞくせいが でる。いままでの まとめ',
       bg: 'hoshizora',
       castleHp: 4000,
-      enemyMult: 1.4,
+      power: 4.2,
       reward: { coins: 2, exp: 450 },
       waves: [
         { at: 3,   id: 'togehaya',     count: 1 },
@@ -3364,7 +3471,7 @@ const TOWER = {
       desc: 'おおボス「スティーブ」。かって 10かい せいは！',
       bg: 'boss',
       castleHp: 4400,
-      enemyMult: 1.45,
+      power: 4.6,
       reward: { coins: 2, exp: 600 },
       waves: [
         { at: 3,   id: 'togehaya',     count: 1 },
