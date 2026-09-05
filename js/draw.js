@@ -330,6 +330,109 @@ function drawHiibou(ctx, s) {
 }
 
 
+/* ---- しゅりへん：せなかに かべを かついだ しゅりけん ----
+   ・こうげきの ときは ぐるぐる まわって とびかかる
+   ・うしろの きいろい いたが「せなかの かべ」                    */
+function drawShurihen(ctx, s) {
+  const a = s.atk;                                   // 0→1 で ためて いる
+  const run = Math.sin(s.t * 16) * (s.moving ? 1 : 0);
+  /* こうげき：ためて → いっきに とびかかる */
+  const lunge = (a >= 0) ? (a < 0.55 ? -a * 14 : (a - 0.55) / 0.45 * 46 - 7.7) : 0;
+  /* まわる はやさ（ためるほど はやく）*/
+  const spin = (a >= 0) ? s.t * (6 + a * 40) : s.t * 2.2;
+
+  ctx.save();
+  ctx.translate(lunge, 0);
+
+  /* --- せなかの かべ（きいろい いた）--- */
+  ctx.save();
+  ctx.translate(-16, -46);
+  ctx.rotate(-0.12 + run * 0.04);
+  const wg = ctx.createLinearGradient(-24, -26, 24, 26);
+  wg.addColorStop(0, '#f5d76e');
+  wg.addColorStop(1, '#d4a72c');
+  ctx.fillStyle = wg;
+  roundRect(ctx, -24, -26, 48, 52, 4); ctx.fill();
+  ctx.strokeStyle = 'rgba(120,90,20,.55)'; ctx.lineWidth = 2;
+  roundRect(ctx, -24, -26, 48, 52, 4); ctx.stroke();
+  /* いたの もくめ */
+  ctx.strokeStyle = 'rgba(150,115,30,.4)'; ctx.lineWidth = 1.4;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath(); ctx.moveTo(-20, -16 + i * 16); ctx.lineTo(20, -14 + i * 16); ctx.stroke();
+  }
+  ctx.restore();
+
+  /* --- あし（ほそい 2ほん）--- */
+  ctx.strokeStyle = '#2b2b30'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-5, -26);
+  ctx.quadraticCurveTo(-11 + run * 4, -14, -13 + run * 6, 0);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(5, -26);
+  ctx.quadraticCurveTo(11 - run * 4, -14, 13 - run * 6, 0);
+  ctx.stroke();
+  /* あしさき */
+  ctx.beginPath(); ctx.moveTo(-13 + run * 6, 0); ctx.lineTo(-19 + run * 6, -2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(13 - run * 6, 0); ctx.lineTo(19 - run * 6, -2); ctx.stroke();
+
+  /* --- うで（ほそい 2ほん）--- */
+  ctx.beginPath();
+  ctx.moveTo(-16, -50);
+  ctx.quadraticCurveTo(-28, -46, -30, -56);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(16, -50);
+  ctx.quadraticCurveTo(28, -46, 30, -56);
+  ctx.stroke();
+
+  /* --- しゅりけんの ほんたい（4ほうの ほし・まわる）--- */
+  ctx.save();
+  ctx.translate(0, -52);
+  ctx.rotate(spin);
+
+  /* まわって いる ときの ざんぞう */
+  if (a >= 0) {
+    ctx.fillStyle = 'rgba(255,255,255,' + (0.10 + a * 0.18) + ')';
+    ctx.beginPath(); ctx.arc(0, 0, 30 + a * 6, 0, Math.PI * 2); ctx.fill();
+  }
+
+  const R1 = 30, R2 = 9;
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const an = (i / 8) * Math.PI * 2 - Math.PI / 2;
+    const r = (i % 2 === 0) ? R1 : R2;
+    const px = Math.cos(an) * r, py = Math.sin(an) * r;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  const sg = ctx.createLinearGradient(-R1, -R1, R1, R1);
+  sg.addColorStop(0, '#ffffff');
+  sg.addColorStop(1, '#dfe4ea');
+  ctx.fillStyle = sg; ctx.fill();
+  ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2.6; ctx.stroke();
+
+  /* まんなかの あな */
+  ctx.fillStyle = '#1b1b1b';
+  ctx.beginPath(); ctx.arc(0, 0, 8.5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  /* --- とびかかった しゅんかんの きりさき --- */
+  if (a >= 0 && a > 0.6) {
+    const t2 = (a - 0.6) / 0.4;
+    ctx.strokeStyle = 'rgba(255,255,255,' + (1 - t2) + ')';
+    ctx.lineWidth = 3.4; ctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(24 + i * 8, -86 + i * 10);
+      ctx.quadraticCurveTo(44 + i * 8, -56 + i * 10, 32 + i * 8, -22 + i * 10);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+
 /* ---- たんくんDX：タンクンの しんかけい ----
    うえに ぶあつい そうこうばんを のせ、キャタピラも おおきく なりました。
    たいりょく 2ばい・はやさ 2ばい。                                 */
@@ -3975,6 +4078,7 @@ const DRAWERS = {
   hiibou: drawHiibou,
   zunio: drawZunio,
   zunita: drawZunita,
+  shurihen: drawShurihen,
   kabekun: drawKabekun,
   futabappo: drawFutabappo,
   shadowyamaneko: drawShadowyamaneko,

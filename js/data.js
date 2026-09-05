@@ -136,7 +136,7 @@ const UNITS = {
     id: 'teruteru', name: 'テルテル君', shortName: 'テルテル',
     rarity: 'N',                          // ノーマル
     attr: 'water',
-    cost: 380,  recharge: 9.0,
+    cost: 250,  recharge: 6.5,
     hp: 360,    atk: 90,   range: 184,  speed: 14,
     attackInterval: 2.6,   attackWindup: 0.45,
     kbCount: 2,
@@ -168,14 +168,33 @@ const UNITS = {
     id: 'hiibou', name: 'ひー坊', shortName: 'ひー坊',
     rarity: 'SR',                          // スーパーレア
     attr: 'fire',
-    cost: 450,  recharge: 10.0,
-    hp: 1450,   atk: 430,  range: 118,  speed: 24,
+    cost: 1350, recharge: 30.0,
+    hp: 2900,   atk: 650,  range: 118,  speed: 24,
     attackInterval: 2.2,   attackWindup: 0.55,   // おおきく ふりかぶる
     kbCount: 3,
     scale: 1.1,
     attackType: 'area',                          // はんい こうげき
     areaRadius: 46,                              // ばくはつの おおきさ
     projectile: 'fireball',
+  },
+
+  /* しゅりへん ── せなかに かべを かついだ しゅりけん。
+                 じぶんから ものすごい はやさで とびかかって いく。
+                 4びょうに 1かい、おおきく まわって はんいこうげき。
+                 むぞくせいなので どんな あいてにも ふつうに ダメージが とおる。
+                 そのかわり たいりょくは ふつう。とびだしすぎに ちゅうい      */
+  shurihen: {
+    id: 'shurihen', name: 'しゅりへん', shortName: 'しゅりへん',
+    rarity: 'SR',                         // スーパーレア
+    attr: 'none',
+    cost: 420,  recharge: 20.0,
+    hp: 1400,   atk: 950,  range: 88,   speed: 125,   // saba なみの はやさ
+    attackInterval: 4.0,   attackWindup: 0.5,         // こうげき クールタイム 4びょう
+    kbCount: 2,
+    scale: 1.0,
+    attackType: 'area',                   // はんいこうげき
+    areaRadius: 58,
+    projectile: null,
   },
 
   /* かべくん ── ちゃいろい かべ。こうげきは まったく しない かわりに
@@ -319,7 +338,7 @@ const DEFAULT_PARTY = START_CHARS.slice();
 /* ガチャに でてくる キャラ ぜんぶ */
 const ALL_CHARS = ['tankun', 'purio', 'teruteru',
                    'tokinotabibito', 'zunio', 'kabekun', 'futabappo', 'shadowyamaneko', 'tenmusumaru',
-                   'hiibou'];
+                   'hiibou', 'shurihen'];
 let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく メンバー（へんせいで かわる）
 
 
