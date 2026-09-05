@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '5.4';
+  const GAME_VERSION = '5.5';
 
 
   /* =================================================
@@ -503,19 +503,52 @@
       ctx.beginPath(); ctx.arc(mx, my, mr * 1.7, 0, Math.PI * 2); ctx.fill();
     }
 
+    /* 水星（あおい ほし）*/
+    const merc = chapterInfo(9);
+    if (typeof merc.x === 'number') {
+      const wx = merc.x * W, wy = merc.y * H, wr = H * 0.115;
+      const wg = ctx.createRadialGradient(wx - wr * 0.3, wy - wr * 0.3, wr * 0.1, wx, wy, wr);
+      wg.addColorStop(0, '#81d4fa'); wg.addColorStop(0.6, '#1e88e5'); wg.addColorStop(1, '#0b3d91');
+      ctx.fillStyle = wg;
+      ctx.beginPath(); ctx.arc(wx, wy, wr, 0, Math.PI * 2); ctx.fill();
+      /* みずの もよう */
+      ctx.strokeStyle = 'rgba(224,247,250,.6)'; ctx.lineWidth = Math.max(2, H * 0.006);
+      for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.moveTo(wx - wr * 0.8, wy + i * wr * 0.42);
+        ctx.quadraticCurveTo(wx, wy + i * wr * 0.42 - wr * 0.18, wx + wr * 0.8, wy + i * wr * 0.42);
+        ctx.stroke();
+      }
+      /* あおい ひかり */
+      const wh = ctx.createRadialGradient(wx, wy, wr, wx, wy, wr * 1.7);
+      wh.addColorStop(0, 'rgba(79,195,247,.30)'); wh.addColorStop(1, 'rgba(79,195,247,0)');
+      ctx.fillStyle = wh;
+      ctx.beginPath(); ctx.arc(wx, wy, wr * 1.7, 0, Math.PI * 2); ctx.fill();
+      /* 火星 → 水星の みち */
+      if (typeof mars.x === 'number') {
+        ctx.strokeStyle = 'rgba(255,213,79,.5)';
+        ctx.lineWidth = Math.max(3, H * 0.008);
+        ctx.setLineDash([Math.max(7, H * 0.03), Math.max(6, H * 0.026)]);
+        ctx.beginPath();
+        ctx.moveTo(mars.x * W + H * 0.16, mars.y * H + H * 0.05);
+        ctx.quadraticCurveTo(W * 0.46, H * 0.44, wx - wr, wy - wr * 0.4);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
     /* これから いく ほし（まだ ない ぶんは かげだけ）*/
     ctx.fillStyle = 'rgba(255,255,255,.07)';
     ctx.strokeStyle = 'rgba(255,255,255,.16)';
     ctx.lineWidth = 1.6;
     ctx.setLineDash([5, 5]);
-    for (const [px, py, pr] of [[0.62, 0.66, 0.075], [0.86, 0.36, 0.06]]) {
+    for (const [px, py, pr] of [[0.86, 0.36, 0.06]]) {
       ctx.beginPath(); ctx.arc(px * W, py * H, pr * H, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     }
     ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(255,255,255,.35)';
     ctx.font = 'bold ' + Math.round(H * 0.035) + 'px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('？', 0.62 * W, 0.66 * H + H * 0.012);
     ctx.fillText('？', 0.86 * W, 0.36 * H + H * 0.012);
     ctx.textAlign = 'start';
 

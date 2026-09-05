@@ -1226,6 +1226,40 @@ const ENEMIES = {
   },
 
   /* ============================================================
+     ここから した は 宇宙編「水星」の てき
+     ============================================================ */
+
+  /* ウォーターサーバー君 ── たてながの みずいろの ボディ。
+                          あたまの みずぐちから みずを とばして こうげき。 */
+  waterserver: {
+    id: 'waterserver', name: 'ウォーターサーバー君',
+    rarity: 'R',
+    attr: 'water',
+    hp: 780,    atk: 105,  range: 175,  speed: 22,
+    attackInterval: 1.7,   attackWindup: 0.35,
+    kbCount: 3, scale: 1.05,
+    attackType: 'single', projectile: 'drop',
+    money: 95,
+  },
+
+  /* アルティメット・ザバーン ── 波獣ザバーンが すすんだ すがた。
+        もとの ザバーンと おなじく たいりょくの かたまり だが、
+        ★こうげきりょくが とくに つよく なって いる（もとの 4.5ばい）
+        あおい ボディに きんの かどと、いくつもの ひれ。            */
+  zabaan_u: {
+    id: 'zabaan_u', name: 'アルティメット・ザバーン',
+    rarity: 'LR',
+    attr: 'water',
+    hp: 15300,  atk: 340,  range: 230,  speed: 18,
+    attackInterval: 0.5,   attackWindup: 0.15,   // 0.5びょうごとに うちつづける
+    kbCount: 99, scale: 2.0,
+    attackType: 'single', projectile: 'splash',
+    kbImmune: true,
+    money: 900,
+    isBoss: true,
+  },
+
+  /* ============================================================
      ここから した は 宇宙編「火星」の てき
      ============================================================ */
 
@@ -2134,6 +2168,14 @@ const BACKGROUNDS = {
     sky: ['#05040a', '#160d22', '#2e1230'],
     hillFar: '#140a1e', hillNear: '#0a050f',
     ground: '#120a18', groundTop: '#241030',
+    deco: 'star',
+  },
+
+  /* 水星（宇宙編）── みずの ほし。あおと みずいろの せかい */
+  mercury: {
+    sky: ['#04182e', '#0b3a63', '#1d78ad'],
+    hillFar: '#1b5a86', hillNear: '#0b3050',
+    ground: '#12496f', groundTop: '#2a7ba8',
     deco: 'star',
   },
 
@@ -3400,6 +3442,143 @@ const STAGES = [
     ],
   },
 
+  /* ==========================================================
+     宇宙編 だい2わく「水星」
+
+     いちめんの みずの ほし。ウォーターサーバー君が あちこちに いる。
+     みずの てきが おおいので、くさの なかま（フタバッポ・たたみん）と
+     でんきの ように よく とおる なかまが つよい。
+     ★コースごとに でて くる めんつと じゅんばんを かえて あります。
+     ========================================================== */
+
+  /* ---------------- 9-1 みずうみの きし ---------------- */
+  {
+    no: 81, chapter: 9, course: 1,
+    name: 'みずうみの きし',
+    desc: 'ウォーターサーバー君が ずらりと ならぶ みずぎわ',
+    bg: 'mercury',
+    castleHp: 6400,
+    power: 3.3,
+    reward: { coins: 2, exp: 3900 },
+    waves: [
+      { at: 3,  id: 'waterserver', count: 3, gap: 0.9 },
+      { at: 17, id: 'pukakurage',  count: 4, gap: 0.8 },
+      { at: 32, id: 'waterserver', count: 3, gap: 0.9, repeat: 15 },
+      { at: 48, id: 'chibisame',   count: 2, gap: 1.0, repeat: 18 },
+    ],
+  },
+
+  /* ---------------- 9-2 しおの ながれみち ---------------- */
+  {
+    no: 82, chapter: 9, course: 2,
+    name: 'しおの ながれみち',
+    desc: 'はやい ウミヘビが かけぬける みずの みち',
+    bg: 'mercury',
+    castleHp: 6600,
+    power: 3.35,
+    reward: { coins: 2, exp: 4000 },
+    waves: [
+      { at: 3,  id: 'umihebi',     count: 3, gap: 0.9 },
+      { at: 16, id: 'togefugu',    count: 2, gap: 1.1 },
+      { at: 31, id: 'waterserver', count: 4, gap: 0.8, repeat: 20 },
+      { at: 47, id: 'umihebi',     count: 3, gap: 0.9, repeat: 24 },
+    ],
+  },
+
+  /* ---------------- 9-3 こおりの みさき（みず＋まじゅつし）---------------- */
+  {
+    no: 83, chapter: 9, course: 3,
+    name: 'こおりの みさき',
+    desc: 'こおりの まじょが うごきを とめて くる。けものの なかまが ゆうり',
+    bg: 'mercury',
+    castleHp: 6800,
+    power: 2.8,
+    reward: { coins: 2, exp: 4100 },
+    waves: [
+      { at: 3,  id: 'icewitch',    count: 1 },
+      { at: 15, id: 'ikamajin',    count: 2, gap: 1.1 },
+      { at: 30, id: 'waterserver', count: 4, gap: 0.8, repeat: 21 },
+      { at: 45, id: 'icewitch',    count: 1, repeat: 31 },
+      { at: 60, id: 'chibisame',   count: 3, gap: 0.9, repeat: 25 },
+    ],
+  },
+
+  /* ---------------- 9-4 しずんだ こうじょう（みず＋メタル・ちゅうボス）---------------- */
+  {
+    no: 84, chapter: 9, course: 4,
+    name: 'しずんだ こうじょう',
+    desc: 'ちゅうボス「暴海竜リヴァイザ」。みずに しずんだ はがねの ばしょ',
+    bg: 'mercury',
+    castleHp: 7200,
+    power: 2.8,
+    reward: { coins: 3, exp: 4300 },
+    waves: [
+      { at: 3,  id: 'ironkokko',   count: 3, gap: 0.9 },
+      { at: 18, id: 'waterserver', count: 3, gap: 0.9 },
+      { at: 34, id: 'hakobot',     count: 2, gap: 1.1, repeat: 22 },
+      { at: 52, id: 'waterserver', count: 3, gap: 0.9, repeat: 26 },
+      /* ★ちゅうボス */
+      { atCastleHp: 0.70, id: 'leviza', count: 1 },
+    ],
+  },
+
+  /* ---------------- 9-5 ねっすいの わきでぐち（みず＋ほのお）---------------- */
+  {
+    no: 85, chapter: 9, course: 5,
+    name: 'ねっすいの わきでぐち',
+    desc: 'あつい みずが ふきだす ばしょ。ほのおの てきも まざる',
+    bg: 'mercury',
+    castleHp: 7400,
+    power: 2.3,
+    reward: { coins: 2, exp: 4500 },
+    waves: [
+      { at: 3,  id: 'burner',      count: 3, gap: 1.0 },
+      { at: 18, id: 'waterserver', count: 3, gap: 0.9 },
+      { at: 34, id: 'moeris',      count: 3, gap: 0.9, repeat: 20 },
+      { at: 52, id: 'flamemage',   count: 1, repeat: 30 },
+      { at: 70, id: 'waterserver', count: 3, gap: 0.9, repeat: 26 },
+    ],
+  },
+
+  /* ---------------- 9-6 ふかい かいこう（みず＋パワー）---------------- */
+  {
+    no: 86, chapter: 9, course: 6,
+    name: 'ふかい かいこう',
+    desc: 'そこの みえない ふかい みぞ。おもい てきが つづく',
+    bg: 'mercury',
+    castleHp: 7600,
+    power: 2.1,
+    reward: { coins: 2, exp: 4700 },
+    waves: [
+      { at: 3,  id: 'octocannon',  count: 2, gap: 1.1 },
+      { at: 18, id: 'waterserver', count: 4, gap: 0.8 },
+      { at: 34, id: 'umihebi',     count: 3, gap: 0.9, repeat: 22 },
+      { at: 52, id: 'daiouei',     count: 1, repeat: 30 },
+      { at: 70, id: 'waterserver', count: 4, gap: 0.8, repeat: 24 },
+    ],
+  },
+
+  /* ---------------- 9-7 アルティメットの うみ（おおボス）---------------- */
+  {
+    no: 87, chapter: 9, course: 7,
+    name: 'アルティメットの うみ',
+    desc: 'おおボス「アルティメット・ザバーン」。こうげきりょくが けたちがい',
+    bg: 'boss',
+    castleHp: 8000,
+    power: 3.6,
+    reward: { coins: 3, exp: 5600 },
+    waves: [
+      { at: 3,  id: 'chibisame',   count: 3, gap: 0.9 },
+      { at: 18, id: 'waterserver', count: 5, gap: 0.7 },
+      { at: 34, id: 'umihebi',     count: 3, gap: 0.9, repeat: 22 },
+      { at: 50, id: 'icewitch',    count: 1, repeat: 31 },
+      { at: 66, id: 'waterserver', count: 5, gap: 0.7, repeat: 20 },
+      { at: 82, id: 'kanitank',    count: 1, repeat: 34 },
+      /* ★おおボス */
+      { atCastleHp: 0.75, id: 'zabaan_u', count: 1 },
+    ],
+  },
+
 ];
 
 
@@ -3516,7 +3695,7 @@ function enemyPowerOf(stage, rarity) {
    -------------------------------------------------------------------------- */
 const SPACESHIP = {
   name: 'あき坊の宇宙船',
-  desc: '10かい ぜんぶ せいはすると「アイアンゴーレム」が なかまに なる！',
+  desc: 'どの かいも ボスが はじめから せまって くる！10かい せいはで アイアンゴーレムが なかまに！',
   floors: 10,
   world: 'space',            // うちゅうちずに でます
   rewardChar: 'irongolem',   // ★10かい クリアで なかまに なる
@@ -3534,10 +3713,12 @@ const SPACESHIP = {
       power: 7.2,
       reward: { coins: 3, exp: 900 },
       waves: [
-        { at: 3,  id: 'yajirushi',  count: 3, gap: 0.9 },
+        /* ★ボスは はじめから いっしょに でて きて、じわじわ せまる */
+        { at: 6,  id: 'hetakirin',   count: 1 },
+        { at: 3,  id: 'yajirushi',   count: 3, gap: 0.9 },
         { at: 16, id: 'yakipokkuru', count: 3, gap: 0.9 },
-        { at: 30, id: 'yajirushi',  count: 4, gap: 0.8, repeat: 16 },
-        { at: 46, id: 'honota',     count: 4, gap: 0.6, repeat: 18 },
+        { at: 30, id: 'yajirushi',   count: 4, gap: 0.8, repeat: 16 },
+        { at: 46, id: 'honota',      count: 4, gap: 0.6, repeat: 18 },
       ],
     },
 
@@ -3548,9 +3729,10 @@ const SPACESHIP = {
       desc: 'みずの てきばかり。くさの なかまが ゆうり',
       bg: 'ship',
       castleHp: 4400,
-      power: 3.9,
+      power: 2.9,
       reward: { coins: 3, exp: 950 },
       waves: [
+        { at: 6,  id: 'nereid',     count: 1 },
         { at: 3,  id: 'chibisame',  count: 3, gap: 0.9 },
         { at: 17, id: 'togefugu',   count: 2, gap: 1.1 },
         { at: 32, id: 'umihebi',    count: 3, gap: 0.9, repeat: 16 },
@@ -3568,6 +3750,7 @@ const SPACESHIP = {
       power: 3.2,
       reward: { coins: 3, exp: 1000 },
       waves: [
+        { at: 6,  id: 'garakutei', count: 1 },
         { at: 3,  id: 'ironkokko', count: 3, gap: 0.9 },
         { at: 17, id: 'hakobot',   count: 3, gap: 1.0 },
         { at: 32, id: 'potank',    count: 1, repeat: 18 },
@@ -3582,13 +3765,14 @@ const SPACESHIP = {
       desc: 'くさの てきばかり。ほのおの なかまが ゆうり',
       bg: 'ship',
       castleHp: 4800,
-      power: 1.7,
+      power: 1.35,
       reward: { coins: 3, exp: 1100 },
       waves: [
-        { at: 3,  id: 'momoplant', count: 2, gap: 1.1 },
+        { at: 6,  id: 'gaou',       count: 1 },
+        { at: 3,  id: 'momoplant',  count: 2, gap: 1.1 },
         { at: 17, id: 'tsuyugaeru', count: 3, gap: 0.9 },
-        { at: 32, id: 'mandrake',  count: 1, repeat: 30 },
-        { at: 48, id: 'kokejika',  count: 2, gap: 1.1, repeat: 20 },
+        { at: 32, id: 'mandrake',   count: 1, repeat: 30 },
+        { at: 48, id: 'kokejika',   count: 2, gap: 1.1, repeat: 20 },
       ],
     },
 
@@ -3602,11 +3786,11 @@ const SPACESHIP = {
       power: 5,
       reward: { coins: 4, exp: 1300 },
       waves: [
+        { at: 6,  id: 'nushinoookami', count: 1 },
         { at: 3,  id: 'inocchi',   count: 3, gap: 0.9 },
         { at: 17, id: 'kumabee',   count: 2, gap: 1.1 },
         { at: 32, id: 'kumatta',   count: 1, repeat: 20 },
         { at: 48, id: 'tanupon',   count: 3, gap: 1.0, repeat: 18 },
-        { atCastleHp: 0.70, id: 'nushinoookami', count: 1 },
       ],
     },
 
@@ -3617,9 +3801,10 @@ const SPACESHIP = {
       desc: 'まじゅつしの てきばかり。けものの なかまが ゆうり',
       bg: 'ship',
       castleHp: 5400,
-      power: 1.9,
+      power: 1.5,
       reward: { coins: 3, exp: 1400 },
       waves: [
+        { at: 6,  id: 'sagecharon',  count: 1 },
         { at: 3,  id: 'magicrabbit', count: 2, gap: 1.1 },
         { at: 17, id: 'icewitch',    count: 1, repeat: 34 },
         { at: 32, id: 'flamemage',   count: 1, repeat: 30 },
@@ -3638,10 +3823,11 @@ const SPACESHIP = {
       power: 3.2,
       reward: { coins: 3, exp: 1550 },
       waves: [
+        { at: 6,  id: 'okashiman',  count: 1 },
         { at: 3,  id: 'usagorilla', count: 2, gap: 1.1 },
         { at: 18, id: 'octocannon', count: 2, gap: 1.1 },
         { at: 34, id: 'usagorilla', count: 2, gap: 1.1, repeat: 20 },
-        { at: 50, id: 'okashiman',  count: 1, repeat: 30 },
+        { at: 52, id: 'okashiman',  count: 1, repeat: 34 },
       ],
     },
 
@@ -3652,14 +3838,15 @@ const SPACESHIP = {
       desc: '2つの ぞくせいを もつ てきばかり。あいしょうが ふくざつ',
       bg: 'ship',
       castleHp: 5800,
-      power: 1.55,
+      power: 1.2,
       reward: { coins: 3, exp: 1700 },
       waves: [
+        { at: 6,  id: 'meltgear',   count: 1 },
         { at: 3,  id: 'icewitch',   count: 1 },
-        { at: 16, id: 'meltgear',   count: 1, repeat: 30 },
-        { at: 32, id: 'gaou',       count: 1, repeat: 32 },
-        { at: 48, id: 'flamemage',  count: 1, repeat: 20 },
-        { at: 62, id: 'octocannon', count: 2, gap: 1.1, repeat: 18 },
+        { at: 20, id: 'gaou',       count: 1, repeat: 32 },
+        { at: 36, id: 'flamemage',  count: 1, repeat: 20 },
+        { at: 52, id: 'octocannon', count: 2, gap: 1.1, repeat: 18 },
+        { at: 68, id: 'meltgear',   count: 1, repeat: 36 },
       ],
     },
 
@@ -3673,12 +3860,12 @@ const SPACESHIP = {
       power: 1.9,
       reward: { coins: 4, exp: 2000 },
       waves: [
+        { at: 6,  id: 'zabaan',     count: 1 },
         { at: 3,  id: 'runegolem',  count: 1 },
-        { at: 18, id: 'kanitank',   count: 1, repeat: 24 },
-        { at: 34, id: 'forkun',     count: 1, repeat: 26 },
-        { at: 50, id: 'chaosspell', count: 1, repeat: 22 },
-        { atCastleHp: 0.80, id: 'sagecharon', count: 1 },
-        { atCastleHp: 0.45, id: 'zabaan',     count: 1 },
+        { at: 20, id: 'kanitank',   count: 1, repeat: 24 },
+        { at: 36, id: 'forkun',     count: 1, repeat: 26 },
+        { at: 52, id: 'chaosspell', count: 1, repeat: 22 },
+        { atCastleHp: 0.55, id: 'sagecharon', count: 1 },
       ],
     },
 
@@ -3692,15 +3879,14 @@ const SPACESHIP = {
       power: 2.1,
       reward: { coins: 5, exp: 2600 },
       waves: [
-        { at: 3,  id: 'yajirushi',  count: 5, gap: 0.7 },
-        { at: 18, id: 'burner',     count: 3, gap: 1.0, repeat: 18 },
-        { at: 34, id: 'runegolem',  count: 1, repeat: 24 },
-        { at: 50, id: 'ironkokko',  count: 3, gap: 0.9, repeat: 20 },
-        { at: 66, id: 'flamemage',  count: 1, repeat: 22 },
-        /* ★おおボス「アイアンゴーレム」。たおすと なかまに なる。
-           かならず ふきとばして くる ので、ぜんせんが なんども さがります。 */
-        { atCastleHp: 0.85, id: 'irongolem_e', count: 1 },
-        { atCastleHp: 0.40, id: 'pochi',       count: 1 },
+        /* ★おおボス「アイアンゴーレム」は はじめから。たおすと なかまに なる */
+        { at: 6,  id: 'irongolem_e', count: 1 },
+        { at: 3,  id: 'yajirushi',   count: 5, gap: 0.7 },
+        { at: 18, id: 'burner',      count: 3, gap: 1.0, repeat: 18 },
+        { at: 34, id: 'runegolem',   count: 1, repeat: 24 },
+        { at: 50, id: 'ironkokko',   count: 3, gap: 0.9, repeat: 20 },
+        { at: 66, id: 'flamemage',   count: 1, repeat: 22 },
+        { atCastleHp: 0.40, id: 'pochi', count: 1 },
       ],
     },
 
@@ -3719,6 +3905,7 @@ const CHAPTERS = {
   /* ---- ここから 宇宙編。せかいちずを ぜんぶ クリアすると あそべる ----
      world: 'space' の しょうは べつの ちず（うちゅうちず）に でます。   */
   8: { name: '火星',  short: 'かせい', x: 0.30, y: 0.42, icon: '🔴', world: 'space' },
+  9: { name: '水星',  short: 'すいせい', x: 0.62, y: 0.66, icon: '💧', world: 'space' },
 };
 
 
