@@ -955,3 +955,19 @@ body.dragging-slot #party-slots { touch-action:none; }
   box-shadow:0 calc(3px * var(--ui)) 0 #4a148c;
   opacity:.92;
 }
+
+
+/* ---- 2つめの とくべつステージ ボタン（惑星ごーの）---- */
+.map-top { flex-wrap:wrap; }
+.tower-btn2 { background:linear-gradient(180deg,#ab47bc,#6a1b9a); box-shadow:0 calc(3px * var(--ui)) 0 #4a148c; }
+.tower-limit {
+  margin:calc(4px * var(--ui)) auto calc(6px * var(--ui));
+  padding:calc(6px * var(--ui)) calc(14px * var(--ui));
+  border-radius:999px;
+  background:rgba(171,71,188,.25);
+  border:2px solid rgba(206,147,216,.7);
+  color:#f3e5f5; font-size:calc(13px * var(--ui)); font-weight:bold;
+  text-align:center;
+}
+/* へんせいがめん・せんとうがめんで つかえない キャラ */
+.locked-rarity { opacity:.35; filter:grayscale(1); }

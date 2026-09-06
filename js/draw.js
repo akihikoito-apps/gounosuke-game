@@ -3695,6 +3695,85 @@ function drawZabaanU(ctx, s) {
 }
 
 
+/* ---- クリーパー ----
+   みどりと きみどりの まだらの からだ。てが なく、みじかい あしが 4ほん。
+   かおは あなの あいた ような め 2つと、ぐにゃりと した くち。
+   こうげきの ときは しろく ひかって ふくらみ、さいごに ばくはつする。   */
+function drawCreeper(ctx, s) {
+  const a = s.atk;
+  const step = Math.sin(s.t * 6) * (s.moving ? 1 : 0);
+  /* ふくらむ → ひかる → ドカーン */
+  const swell = (a >= 0) ? 1 + Math.min(a, 0.85) * 0.30 : 1;
+  const flash = (a >= 0) ? (Math.sin(a * 34) * 0.5 + 0.5) * Math.min(1, a * 1.4) : 0;
+  const boom  = (a >= 0.85) ? (a - 0.85) / 0.15 : 0;
+
+  ctx.save();
+
+  /* --- ばくはつ --- */
+  if (boom > 0) {
+    const r = 30 + boom * 74;
+    const bg = ctx.createRadialGradient(0, -34, 4, 0, -34, r);
+    bg.addColorStop(0, 'rgba(255,255,255,' + (0.9 * (1 - boom)) + ')');
+    bg.addColorStop(0.4, 'rgba(255,213,79,' + (0.7 * (1 - boom)) + ')');
+    bg.addColorStop(0.75, 'rgba(255,112,67,' + (0.5 * (1 - boom)) + ')');
+    bg.addColorStop(1, 'rgba(120,120,120,0)');
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.arc(0, -34, r, 0, Math.PI * 2); ctx.fill();
+  }
+
+  ctx.save();
+  ctx.translate(0, -2);
+  ctx.scale(swell, swell);
+  ctx.translate(0, 2);
+
+  /* --- あし 4ほん（まえ 2・うしろ 2）--- */
+  const legs = [[-16, '#3f7a2e'], [-4, '#4c8f37'], [6, '#3f7a2e'], [16, '#4c8f37']];
+  legs.forEach(([lx, col], i) => {
+    const sw = step * ((i % 2) ? -3 : 3);
+    ctx.fillStyle = col;
+    ctx.fillRect(lx - 5 + sw, -16, 10, 16);
+  });
+
+  /* --- からだ（たてながの はこ）--- */
+  ctx.fillStyle = '#57a943';
+  ctx.fillRect(-15, -62, 30, 46);
+  /* まだらの もよう */
+  const spots = [[-12, -58, 6, 7], [-3, -60, 5, 5], [6, -56, 7, 6], [-10, -44, 5, 6],
+                 [1, -46, 6, 7], [9, -40, 5, 5], [-13, -30, 6, 5], [3, -28, 7, 6]];
+  ctx.fillStyle = '#4a9439';
+  spots.forEach(([x, y, w, h]) => ctx.fillRect(x, y, w, h));
+  ctx.fillStyle = '#6cbb52';
+  ctx.fillRect(-8, -54, 5, 6); ctx.fillRect(4, -36, 5, 5);
+
+  /* --- あたま（しかく）--- */
+  ctx.fillStyle = '#5cb247';
+  ctx.fillRect(-18, -96, 36, 34);
+  ctx.fillStyle = '#4a9439';
+  ctx.fillRect(-15, -92, 7, 7); ctx.fillRect(8, -70, 7, 6); ctx.fillRect(-4, -68, 6, 5);
+
+  /* かお：あなの あいた ような め 2つ */
+  ctx.fillStyle = '#182a12';
+  ctx.fillRect(-13, -88, 10, 10);
+  ctx.fillRect(4, -88, 10, 10);
+  /* ぐにゃりと した くち */
+  ctx.fillRect(-6, -78, 12, 8);
+  ctx.fillRect(-11, -74, 6, 12);
+  ctx.fillRect(6, -74, 6, 12);
+  ctx.fillRect(-6, -66, 12, 4);
+
+  /* --- ふくらむ ときの しろい ひかり --- */
+  if (flash > 0) {
+    ctx.fillStyle = 'rgba(255,255,255,' + (flash * 0.55) + ')';
+    ctx.fillRect(-18, -96, 36, 34);
+    ctx.fillRect(-15, -62, 30, 46);
+    legs.forEach(([lx]) => ctx.fillRect(lx - 5, -16, 10, 16));
+  }
+
+  ctx.restore();
+  ctx.restore();
+}
+
+
 /* ---- ずに太：ずにおの しんかけい。3のめ（ななめに 3つ）----
    こうげきりょくは はんぶんに なった かわりに 3れんげき。
    め が 3つ ある ぶん、3ぽんの ビームを だします。            */
@@ -7295,6 +7374,7 @@ const DRAWERS = {
   tatamin: drawTatamin,
   dondoko: drawDondoko,
   irongolem: drawIronGolem,
+  creeper: drawCreeper,
   irongolem_e: drawIronGolem,
   purio: drawPurio,
   puripurio: drawPuripurio,

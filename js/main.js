@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '5.6';
+  const GAME_VERSION = '5.7';
 
 
   /* =================================================
@@ -162,11 +162,15 @@
     const list = [];
     if (typeof TOWER !== 'undefined' && TOWER) list.push(TOWER);
     if (typeof SPACESHIP !== 'undefined' && SPACESHIP) list.push(SPACESHIP);
+    if (typeof GONO !== 'undefined' && GONO) list.push(GONO);
     return list;
   }
-  /* その ちずに ある とくべつステージ */
+  /* その ちずに ある とくべつステージ（ふくすう ある ばあいも）*/
+  function towersOfWorld(world) {
+    return allTowers().filter(t => (t.world || 'earth') === world);
+  }
   function towerOfWorld(world) {
-    return allTowers().find(t => (t.world || 'earth') === world) || null;
+    return towersOfWorld(world)[0] || null;
   }
   let currentTower = (typeof TOWER !== 'undefined') ? TOWER : null;
 
@@ -406,6 +410,7 @@
   }
 
   function openChapters() {
+    if (rarityLimit) { rarityLimit = null; applyParty(); }
     show('screen-chapter');
     requestAnimationFrame(() => { drawMap(); buildMapNodes(); refreshWorldBtn(); });
   }
@@ -413,15 +418,18 @@
   /* せかい ⇄ うちゅう の きりかえボタン */
   /* ちずの みぎうえの とくべつステージ ボタン */
   function refreshTowerBtn() {
-    const b = $('#btn-tower');
-    if (!b) return;
-    const T = towerOfWorld(currentWorld);
-    b.classList.toggle('hidden', !T);
-    if (!T) return;
-    const ico = b.querySelector('.tw-ico');
-    const nm  = b.querySelector('.tw-name');
-    if (ico) ico.textContent = (currentWorld === 'space') ? '🚀' : '🗼';
-    if (nm)  nm.textContent  = T.name;
+    const list = towersOfWorld(currentWorld);
+    [['#btn-tower', 0], ['#btn-tower2', 1]].forEach(([sel, i]) => {
+      const b = $(sel);
+      if (!b) return;
+      const T = list[i];
+      b.classList.toggle('hidden', !T);
+      if (!T) return;
+      const ico = b.querySelector('.tw-ico');
+      const nm  = b.querySelector('.tw-name');
+      if (ico) ico.textContent = T.icon || ((T.world === 'space') ? '🚀' : '🗼');
+      if (nm)  nm.textContent  = T.name;
+    });
   }
 
   function refreshWorldBtn() {
@@ -957,6 +965,17 @@
     const title = $('#tower-title');
     if (title) title.textContent = ((T.world === 'space') ? '🚀 ' : '🗼 ') + T.name;
     $('#tower-lead').textContent = T.desc;
+    /* ★つかえる なかまの レア度が きまって いる ステージなら しらせる */
+    const lim = $('#tower-limit');
+    if (lim) {
+      const rs = (T.courses || []).map(cc => cc.allowRarity).filter(Boolean);
+      if (rs.length) {
+        lim.classList.remove('hidden');
+        lim.textContent = '★ステージごとに つかえる なかまの レア度が きまって います';
+      } else {
+        lim.classList.add('hidden');
+      }
+    }
     $('#tower-reward-name').textContent = T.rewardName;
 
     const box = $('#tower-floors');
@@ -2027,7 +2046,40 @@
     Game.hudTopHeight = (ht && ht > 10) ? ht : 48;
   }
 
+  /* いま たたかって いる ステージの レア度せいげん（なければ null）*/
+  let rarityLimit = null;
+
+  /* ★つかえる なかまだけに へんせいを しぼる。
+     ステージに allowRarity が あれば、その レア度の なかま だけが でられます。 */
+  function applyRarityLimit(course) {
+    rarityLimit = (course && Array.isArray(course.allowRarity) && course.allowRarity.length)
+      ? course.allowRarity.slice() : null;
+    if (!rarityLimit) { applyParty(); return; }
+
+    const s = slot();
+    const owned = (s && Array.isArray(s.owned)) ? s.owned : DEFAULT_PARTY.slice();
+    const inParty = (s && Array.isArray(s.party)) ? s.party.filter(Boolean) : [];
+    const ok = id => UNITS[id] && rarityLimit.indexOf(UNITS[id].rarity) >= 0;
+
+    /* まずは いまの へんせいから つかえる なかまを のこす */
+    let list = inParty.filter(ok);
+    /* たりなければ、もって いる なかまから おぎなう */
+    if (list.length < PARTY_MAX) {
+      owned.filter(id => ok(id) && list.indexOf(id) < 0)
+           .forEach(id => { if (list.length < PARTY_MAX) list.push(id); });
+    }
+
+    PARTY.length = 0;
+    list.forEach(id => PARTY.push(id));
+    Game.levels = s ? effLevelMap(s) : {};
+    Game.evolved = (s && s.evolved) ? s.evolved : {};
+    applyUnitLayout();
+    buildUnitButtons();
+    requestAnimationFrame(redrawIcons);
+  }
+
   function startBattle(course) {
+    applyRarityLimit(course);
     show('screen-battle');
     const canvas = $('#canvas');
     Game.canvas = canvas;
@@ -2248,6 +2300,12 @@
     $('#btn-chapter-back').addEventListener('click', openHome);
     $('#btn-tower').addEventListener('click', () => {
       const T = towerOfWorld(currentWorld);
+      if (!T) { toast('ここには とくべつステージが ありません'); return; }
+      currentTower = T;
+      (openTower)();
+    });
+    $('#btn-tower2').addEventListener('click', () => {
+      const T = towersOfWorld(currentWorld)[1];
       if (!T) { toast('ここには とくべつステージが ありません'); return; }
       currentTower = T;
       (openTower)();

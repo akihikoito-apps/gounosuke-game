@@ -339,6 +339,29 @@ const UNITS = {
     knockbackChance: 0.20,
   },
 
+  /* クリーパー ── マイクラの みどりの モンスター。
+                 て が なく、みじかい あしが 4ほん。かおは あなの あいた
+                 ような め 2つと、ぐにゃりと した くち。
+                 あいてに ちかづくと しろく ひかって ふくらみ、ばくはつする。
+                 ★ばくはつすると じぶんも しんで しまう（1かい かぎり）
+                 ★そのかわり いりょくは とても たかい
+                 ★たどりつける ように たいりょくも たかい            */
+  creeper: {
+    id: 'creeper', name: 'クリーパー', shortName: 'クリーパー',
+    rarity: 'R',                           // レア
+    attr: 'none',                          // むぞくせい
+    cost: 420,  recharge: 24.0,            // さいせいは すこし おそめ
+    hp: 2200,   atk: 1500,  range: 78,   speed: 30,   // たいりょく たかい／いりょく とても たかい
+    attackInterval: 2.0,   attackWindup: 1.2,         // ふくらんでから ドカーン
+    kbCount: 4,
+    scale: 1.15,
+    attackType: 'area',                    // ばくはつ なので はんい
+    areaRadius: 92,
+    projectile: null,
+    /* ★ばくはつすると じぶんも しぬ */
+    suicide: true,
+  },
+
   /* アイアンゴーレム ── マイクラの むらの まもりがみ。
                        しろい てつの からだに みどりの つるが まきつく。
                        うでを ふりあげて あいてを そらへ うちあげる。
@@ -353,7 +376,7 @@ const UNITS = {
     hp: 4200,   atk: 880,  range: 96,   speed: 13,   // たいりょく・こうげき ともに たかい
     attackInterval: 3.2,   attackWindup: 0.75,       // おおきく ふりかぶる
     kbCount: 99,
-    scale: 2.1,                                      // からだが おおきい
+    scale: 1.05,                                     // おおきさは はんぶんに
     attackType: 'single',                            // たんたい こうげき
     projectile: null,
     /* ★かならず ふきとばす */
@@ -1223,6 +1246,20 @@ const ENEMIES = {
     knockbackChance: 1.0,                  // ★かならず ふきとばす
     money: 300,
     isBoss: true,
+  },
+
+  /* クリーパー（てき）── さいごの ステージだけに でて きます。
+                        ちかづいて ばくはつ。じぶんも しにます。      */
+  creeper_e: {
+    id: 'creeper_e', name: 'クリーパー',
+    rarity: 'GR',
+    attr: 'none',
+    hp: 900,    atk: 620,  range: 82,   speed: 34,
+    attackInterval: 2.0,   attackWindup: 1.2,
+    kbCount: 3, scale: 1.15,
+    attackType: 'area', areaRadius: 92, projectile: null,
+    suicide: true,                        // ★ばくはつして じぶんも しぬ
+    money: 150,
   },
 
   /* ============================================================
@@ -2168,6 +2205,14 @@ const BACKGROUNDS = {
     sky: ['#05040a', '#160d22', '#2e1230'],
     hillFar: '#140a1e', hillNear: '#0a050f',
     ground: '#120a18', groundTop: '#241030',
+    deco: 'star',
+  },
+
+  /* 惑星ごーの（じょうけんつきステージ）── むらさきの ふしぎな ほし */
+  gono: {
+    sky: ['#140524', '#341049', '#5d2472'],
+    hillFar: '#3a1550', hillNear: '#1c0930',
+    ground: '#2a1040', groundTop: '#48206a',
     deco: 'star',
   },
 
@@ -3695,6 +3740,7 @@ function enemyPowerOf(stage, rarity) {
    -------------------------------------------------------------------------- */
 const SPACESHIP = {
   name: 'あき坊の宇宙船',
+  icon: '🚀',
   desc: 'どの かいも ボスが はじめから せまって くる！10かい せいはで アイアンゴーレムが なかまに！',
   floors: 10,
   world: 'space',            // うちゅうちずに でます
@@ -3765,7 +3811,7 @@ const SPACESHIP = {
       desc: 'くさの てきばかり。ほのおの なかまが ゆうり',
       bg: 'ship',
       castleHp: 4800,
-      power: 1.11,
+      power: 1.6,
       reward: { coins: 3, exp: 1100 },
       waves: [
         { at: 6,  id: 'gaou',       count: 1 },
@@ -3801,7 +3847,7 @@ const SPACESHIP = {
       desc: 'まじゅつしの てきばかり。けものの なかまが ゆうり',
       bg: 'ship',
       castleHp: 5400,
-      power: 1.5,
+      power: 2.1,
       reward: { coins: 3, exp: 1400 },
       waves: [
         { at: 6,  id: 'sagecharon',  count: 1 },
@@ -3838,7 +3884,7 @@ const SPACESHIP = {
       desc: '2つの ぞくせいを もつ てきばかり。あいしょうが ふくざつ',
       bg: 'ship',
       castleHp: 5800,
-      power: 1.2,
+      power: 2.4,
       reward: { coins: 3, exp: 1700 },
       waves: [
         { at: 6,  id: 'meltgear',   count: 1 },
@@ -3894,6 +3940,105 @@ const SPACESHIP = {
 };
 
 
+
+
+/* --------------------------------------------------------------------------
+   惑星ごーの（宇宙編の じょうけんつきステージ）
+
+   ★つかえる なかまの レア度が きめられて います★
+     1つめ … ノーマル だけ
+     2つめ … レア だけ
+     3つめ … 激レア・スーパーレア・でんせつレア だけ
+   じつりょく Lv.40 くらいまで そだてて、やっと クリアできる むずかしさ。
+   （Lv.40 ＝ けいけんちで Lv.30 ＋ ガチャの じょうげんかいほう ＋10）
+
+   でて くる てきは だい1〜2しょうの てきと、やじるしくん・
+   ウォーターサーバー君・ポチ・アルティメット・ザバーン。
+   さいごの ステージには クリーパーも でます。
+
+   3つ ぜんぶ クリアすると「クリーパー」が なかまに なります。
+   -------------------------------------------------------------------------- */
+const GONO = {
+  name: '惑星ごーの',
+  icon: '🪐',
+  desc: 'つかえる なかまの レア度が きまって いる とくべつステージ！',
+  floors: 3,
+  world: 'space',
+  rewardChar: 'creeper',
+  rewardName: 'クリーパー',
+  courses: [
+
+    /* ---- 1つめ：ノーマルの なかま だけ ---- */
+    {
+      no: 301, floor: 1, chapter: 0, course: 1,
+      name: 'ノーマルの しれん',
+      desc: '★ノーマルの なかま だけで たたかう！ボスは 下手なきりん',
+      bg: 'gono',
+      castleHp: 26000,
+      power: 8.5,
+      allowRarity: ['N'],
+      reward: { coins: 5, exp: 3000 },
+      waves: [
+        { at: 3,  id: 'nyororiinu',  count: 4, gap: 0.7 },
+        { at: 18, id: 'yakipokkuru', count: 3, gap: 0.9 },
+        { at: 34, id: 'honota',      count: 4, gap: 0.7, repeat: 20 },
+        { at: 50, id: 'bakecchin',   count: 2, gap: 1.1, repeat: 24 },
+        { at: 66, id: 'kamomeeru',   count: 3, gap: 0.9, repeat: 22 },
+        /* ★ボス */
+        { atCastleHp: 0.80, id: 'hetakirin', count: 1 },
+      ],
+    },
+
+    /* ---- 2つめ：レアの なかま だけ ---- */
+    {
+      no: 302, floor: 2, chapter: 0, course: 2,
+      name: 'レアの しれん',
+      desc: '★レアの なかま だけで たたかう！ボスは 獄熱オニごん',
+      bg: 'gono',
+      castleHp: 19000,
+      power: 4.0,
+      allowRarity: ['R'],
+      reward: { coins: 5, exp: 3400 },
+      waves: [
+        { at: 3,  id: 'togehaya',    count: 3, gap: 0.9 },
+        { at: 17, id: 'yajirushi',   count: 3, gap: 0.9 },
+        { at: 32, id: 'kumabee',     count: 2, gap: 1.1, repeat: 22 },
+        { at: 48, id: 'waterserver', count: 3, gap: 0.9, repeat: 20 },
+        { at: 64, id: 'usagorilla',  count: 2, gap: 1.1, repeat: 26 },
+        { at: 80, id: 'hoshikun',    count: 2, gap: 1.1, repeat: 24 },
+        /* ★ボス */
+        { atCastleHp: 0.80, id: 'onigon',    count: 1 },
+        { atCastleHp: 0.40, id: 'okashiman', count: 1 },
+      ],
+    },
+
+    /* ---- 3つめ：激レア・スーパーレア・でんせつレア だけ ---- */
+    {
+      no: 303, floor: 3, chapter: 0, course: 3,
+      name: 'きわみの しれん',
+      desc: '★激レア・スーパーレア・でんせつレア だけで たたかう！さいごの しれん',
+      bg: 'boss',
+      castleHp: 34000,
+      power: 5,
+      allowRarity: ['GR', 'SR', 'LR'],
+      reward: { coins: 8, exp: 5000 },
+      waves: [
+        { at: 3,  id: 'jiryu',       count: 2, gap: 1.1 },
+        { at: 18, id: 'kongaragan',  count: 2, gap: 1.1 },
+        { at: 34, id: 'creeper_e',   count: 2, gap: 1.2, repeat: 20 },
+        { at: 50, id: 'waterserver', count: 4, gap: 0.8, repeat: 18 },
+        { at: 66, id: 'jiryu',       count: 2, gap: 1.1, repeat: 24 },
+        { at: 82, id: 'blockwan',    count: 2, gap: 1.1, repeat: 26 },
+        /* ★おおボス */
+        { atCastleHp: 0.85, id: 'pochi',    count: 1 },
+        { atCastleHp: 0.45, id: 'zabaan_u', count: 1 },
+      ],
+    },
+
+  ],
+};
+
+
 const CHAPTERS = {
   1: { name: 'はじまりの のはら',     short: 'のはら',   x: 0.07, y: 0.58, icon: '🌱' },
   2: { name: 'はがねの まち',         short: 'はがね',   x: 0.20, y: 0.34, icon: '⚙️' },
@@ -3922,6 +4067,7 @@ const CHAPTERS = {
    -------------------------------------------------------------------------- */
 const TOWER = {
   name: 'あき坊の塔',
+  icon: '🗼',
   desc: '10かい ぜんぶ のぼると とくべつな なかまが もらえる！',
   floors: 10,                 // ぜんぶで なんかい あるか
   rewardChar: 'steve',        // ぜんぶ クリアで もらえる とくべつキャラ

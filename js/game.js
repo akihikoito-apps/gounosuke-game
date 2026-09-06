@@ -549,6 +549,12 @@ const Game = {
       return;
     }
     if (u.def.noAttack) return;          // かべくん は こうげき しない（たちはだかる だけ）
+
+    /* ★ばくはつして じぶんも しぬ（クリーパー）
+       こうげきは ふつうに あてた あと、じぶんの たいりょくを 0に する。 */
+    if (u.def.suicide) {
+      u.suiciding = true;
+    }
     if (u.def.multiHit) {
       u.burst = { left: u.def.multiHit.count, timer: 0, delay: u.def.multiHit.delay };
     } else {
@@ -595,6 +601,14 @@ const Game = {
 
   /* ---- あたった ときの しょり ---- */
   applyHit(src, target, hx, hy) {
+    /* ★ばくはつした ほんにんは きえる（クリーパー）*/
+    if (src && src.def && src.def.suicide && src.suiciding && !src.dead) {
+      this.addEffect({ type: 'dmg', x: src.x, y: this.groundWorldY() - 96 - (src.lane || 0),
+                       text: 'ドカーン！', color: '#8bc34a', life: 1.0, big: true });
+      src.suiciding = false;
+      src.hp = 0;
+      this.killUnit(src);
+    }
     // めくらまし ちゅうは こうげきが はずれる ことが ある
     if (src && src.blindUntil > this.time && Math.random() < (src.blindRate || 0)) {
       this.addEffect({ type: 'dmg', x: src.x, y: this.groundWorldY() - 90 - (src.lane || 0),
