@@ -72,6 +72,11 @@
         <div class="shelf-legs"><i></i><i></i></div>
       </div>
 
+      <button class="room-btn" id="btn-home-room">
+        <span class="rb-ico">🛋️</span>
+        <span class="rb-label">ごうのすけの<br>へや</span>
+      </button>
+
       <button class="gacha-btn" id="btn-home-gacha">
         <span class="gacha-label">ガチャ🤩</span>
         <span class="gacha-slot"></span>
@@ -111,6 +116,23 @@
       <button class="world-btn hidden" id="btn-world">🚀 うちゅうへ</button>
       <p class="map-hint" id="map-hint">すすみたい ステージを タップしてね</p>
     </div>
+  </section>
+
+  <!-- ============ ごうのすけの へや ============ -->
+  <section id="screen-room" class="screen">
+    <div class="panel-head">
+      <h2 class="sub-title">🛋️ ごうのすけの へや</h2>
+      <button class="mini-btn" id="btn-room-back">もどる</button>
+    </div>
+
+    <div class="room-stage">
+      <canvas id="room-canvas"></canvas>
+      <div class="room-talk hidden" id="room-talk"></div>
+      <p class="room-hint" id="room-hint">かぐを ゆびで うごかせるよ。なかまを タップすると おはなし するよ！</p>
+    </div>
+
+    <div class="room-tabs" id="room-tabs"></div>
+    <div class="room-tray" id="room-tray"></div>
   </section>
 
   <!-- ============ あき坊の塔 ============ -->

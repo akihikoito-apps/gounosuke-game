@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '5.8';
+  const GAME_VERSION = '5.9';
 
 
   /* =================================================
@@ -1763,6 +1763,343 @@
 
   /* キャラボタン・へんせいの わくに つける ちいさな しるし
      （どの ぞくせいで、どのくらい レアか が ひとめで わかる ように）*/
+
+  /* =================================================
+     ごうのすけの へや
+
+     ・かぐは すきな ところに おける（ゆびで つかんで うごかす）
+     ・ばしょは へやの わりあい（0〜1）で セーブに のこす
+     ・なかまを タップすると おしゃべりする
+     ================================================= */
+  let roomTab = 'item';
+  let roomDrag = null;        // うごかして いる かぐ
+  let roomTime = 0;
+  let roomRaf  = null;
+
+  /* セーブの なかの へやの じょうたい（なければ つくる）*/
+  function roomState() {
+    const s = slot();
+    if (!s) return null;
+    if (!s.room) {
+      s.room = {
+        wall: 'wall_cream',
+        placed: {},          // { かぐの id: {x, y} } … おいて ある かぐ
+        char: null,          // へやに いる なかま
+        charPos: { x: 0.52, y: 0.80 },
+      };
+      /* さいしょは ソファ・カーペット・テレビ・しょくぶつを おいて おく */
+      ['carpet_red', 'sofa_green', 'tv', 'plant'].forEach(id => {
+        const it = roomItem(id);
+        if (it) s.room.placed[id] = { x: it.x, y: it.y };
+      });
+      const own = (Array.isArray(s.owned) && s.owned.length) ? s.owned : DEFAULT_PARTY;
+      s.room.char = own[0] || null;
+    }
+    if (!s.room.placed) s.room.placed = {};
+    if (!s.room.charPos) s.room.charPos = { x: 0.52, y: 0.80 };
+    return s.room;
+  }
+  function roomItem(id) { return ROOM_ITEMS.find(x => x.id === id) || null; }
+  function roomWallColors() {
+    const r = roomState();
+    const w = r && roomItem(r.wall);
+    return (w && w.colors) || ROOM_ITEMS[0].colors;
+  }
+
+  function openRoom() {
+    roomState();
+    show('screen-room');
+    buildRoomTabs();
+    buildRoomTray();
+    startRoomLoop();
+    requestAnimationFrame(() => { drawRoom(); });
+  }
+  function closeRoom() { stopRoomLoop(); storeSave(); openHome(); }
+
+  function startRoomLoop() {
+    stopRoomLoop();
+    let last = performance.now();
+    const tick = (now) => {
+      roomTime += Math.min(0.05, (now - last) / 1000); last = now;
+      drawRoom();
+      roomRaf = requestAnimationFrame(tick);
+    };
+    roomRaf = requestAnimationFrame(tick);
+  }
+  function stopRoomLoop() { if (roomRaf) cancelAnimationFrame(roomRaf); roomRaf = null; }
+
+  /* ---- へやを かく ---- */
+  function drawRoom() {
+    const cv = $('#room-canvas');
+    if (!cv || $('#screen-room').classList.contains('active') === false) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = cv.clientWidth || 400, H = cv.clientHeight || 260;
+    if (W < 2 || H < 2) return;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    const col = roomWallColors();
+    const floorY = H * 0.62;
+
+    /* かべ */
+    ctx.fillStyle = col.wall;
+    ctx.fillRect(0, 0, W, floorY);
+    ctx.strokeStyle = col.wallLine; ctx.lineWidth = 2;
+    for (let x = W * 0.08; x < W; x += W * 0.16) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, floorY); ctx.stroke();
+    }
+    /* まど */
+    ctx.fillStyle = 'rgba(129,212,250,.85)';
+    roundRect(ctx, W * 0.60, H * 0.10, W * 0.26, H * 0.30, 8); ctx.fill();
+    ctx.strokeStyle = '#8d6e63'; ctx.lineWidth = 5;
+    roundRect(ctx, W * 0.60, H * 0.10, W * 0.26, H * 0.30, 8); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(W * 0.73, H * 0.10); ctx.lineTo(W * 0.73, H * 0.40);
+    ctx.moveTo(W * 0.60, H * 0.25); ctx.lineTo(W * 0.86, H * 0.25);
+    ctx.stroke();
+
+    /* ゆか */
+    ctx.fillStyle = col.floor;
+    ctx.fillRect(0, floorY, W, H - floorY);
+    ctx.strokeStyle = col.floorLine; ctx.lineWidth = 2;
+    for (let i = 1; i < 7; i++) {
+      const y = floorY + (H - floorY) * (i / 7);
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+    /* はばき */
+    ctx.fillStyle = 'rgba(0,0,0,.15)';
+    ctx.fillRect(0, floorY - 6, W, 6);
+
+    /* かぐ（ゆかに しく ものが さき）*/
+    const r = roomState();
+    if (!r) return;
+    const list = roomPlacedList();
+    list.forEach(o => {
+      const it = o.item;
+      const fn = ROOM_DRAWERS[it.draw];
+      if (!fn) return;
+      const sc = roomScale(W, H, it);
+      ctx.save();
+      ctx.translate(o.px, o.py);
+      ctx.scale(sc, sc);
+      fn(ctx, { t: roomTime });
+      ctx.restore();
+      if (roomDrag && roomDrag.id === it.id) roomOutline(ctx, o, sc, it);
+    });
+
+    /* なかま */
+    if (r.char && UNITS[r.char]) {
+      const px = r.charPos.x * W, py = r.charPos.y * H;
+      const fn = DRAWERS[shownDrawId(r.char)];
+      if (fn) {
+        const sc = Math.min(W, H) / 300;
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.scale(sc, sc);
+        fn(ctx, { t: roomTime, moving: false, atk: -1, hpRatio: 1, hpRate: 1, roll: 0.35 });
+        ctx.restore();
+      }
+      if (roomDrag && roomDrag.id === '__char') {
+        ctx.strokeStyle = 'rgba(255,183,77,.9)'; ctx.lineWidth = 3;
+        ctx.setLineDash([6, 5]);
+        ctx.strokeRect(px - 40, py - 100, 80, 104);
+        ctx.setLineDash([]);
+      }
+    }
+  }
+
+  function roomOutline(ctx, o, sc, it) {
+    ctx.strokeStyle = 'rgba(255,183,77,.9)'; ctx.lineWidth = 3;
+    ctx.setLineDash([6, 5]);
+    ctx.strokeRect(o.px - it.w * sc / 2, o.py - it.h * sc, it.w * sc, it.h * sc);
+    ctx.setLineDash([]);
+  }
+
+  function roomScale(W, H, it) { return Math.min(W / 520, H / 300); }
+
+  /* おいて ある かぐを「ゆかに しく もの → おく もの」の じゅんに */
+  function roomPlacedList() {
+    const cv = $('#room-canvas');
+    const W = cv ? (cv.clientWidth || 400) : 400;
+    const H = cv ? (cv.clientHeight || 260) : 260;
+    const r = roomState();
+    if (!r) return [];
+    const out = [];
+    Object.keys(r.placed).forEach(id => {
+      const it = roomItem(id);
+      if (!it || it.kind === 'wall') return;
+      const pos = r.placed[id];
+      out.push({ id, item: it, px: pos.x * W, py: pos.y * H });
+    });
+    out.sort((a, b) => (a.item.kind === 'floor' ? 0 : 1) - (b.item.kind === 'floor' ? 0 : 1)
+                     || a.py - b.py);
+    return out;
+  }
+
+  /* ---- ゆびで つかんで うごかす ---- */
+  function roomPick(mx, my) {
+    const cv = $('#room-canvas');
+    const W = cv.clientWidth, H = cv.clientHeight;
+    const r = roomState();
+    /* なかま が いちばん てまえ */
+    if (r.char && UNITS[r.char]) {
+      const px = r.charPos.x * W, py = r.charPos.y * H;
+      if (mx > px - 42 && mx < px + 42 && my > py - 104 && my < py + 8) {
+        return { id: '__char', dx: mx - px, dy: my - py };
+      }
+    }
+    const list = roomPlacedList().slice().reverse();   // てまえから
+    for (const o of list) {
+      const sc = roomScale(W, H, o.item);
+      const w = o.item.w * sc, hh = o.item.h * sc;
+      if (mx > o.px - w / 2 && mx < o.px + w / 2 && my > o.py - hh && my < o.py + 10) {
+        return { id: o.id, dx: mx - o.px, dy: my - o.py };
+      }
+    }
+    return null;
+  }
+
+  function roomSay(id) {
+    const lines = (typeof ROOM_TALK !== 'undefined' && ROOM_TALK[id]) ? ROOM_TALK[id]
+                : (typeof ROOM_TALK_ANY !== 'undefined' ? ROOM_TALK_ANY : ['よんだ？']);
+    const box = $('#room-talk');
+    if (!box) return;
+    box.textContent = (UNITS[id] ? UNITS[id].name + '「' : '「')
+                    + lines[Math.floor(Math.random() * lines.length)] + '」';
+    box.classList.remove('hidden');
+    clearTimeout(box._t);
+    box._t = setTimeout(() => box.classList.add('hidden'), 2800);
+  }
+
+  function bindRoomCanvas() {
+    const cv = $('#room-canvas');
+    if (!cv || cv._bound) return;
+    cv._bound = true;
+    let moved = false, startX = 0, startY = 0;
+    const pos = (ev) => {
+      const rect = cv.getBoundingClientRect();
+      const t = ev.touches ? ev.touches[0] : ev;
+      return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+    };
+    const down = (ev) => {
+      const q = pos(ev);
+      roomDrag = roomPick(q.x, q.y);
+      moved = false; startX = q.x; startY = q.y;
+      if (roomDrag) ev.preventDefault();
+    };
+    const move = (ev) => {
+      if (!roomDrag) return;
+      ev.preventDefault();
+      const q = pos(ev);
+      if (Math.abs(q.x - startX) > 6 || Math.abs(q.y - startY) > 6) moved = true;
+      if (!moved) return;
+      const W = cv.clientWidth, H = cv.clientHeight;
+      const nx = Math.min(0.98, Math.max(0.02, (q.x - roomDrag.dx) / W));
+      const ny = Math.min(0.99, Math.max(0.30, (q.y - roomDrag.dy) / H));
+      const r = roomState();
+      if (roomDrag.id === '__char') r.charPos = { x: nx, y: ny };
+      else if (r.placed[roomDrag.id]) r.placed[roomDrag.id] = { x: nx, y: ny };
+    };
+    const up = () => {
+      if (roomDrag) {
+        if (!moved && roomDrag.id === '__char') roomSay(roomState().char);
+        storeSave();
+      }
+      roomDrag = null;
+    };
+    cv.addEventListener('mousedown', down);
+    cv.addEventListener('touchstart', down, { passive: false });
+    document.addEventListener('mousemove', move);
+    document.addEventListener('touchmove', move, { passive: false });
+    document.addEventListener('mouseup', up);
+    document.addEventListener('touchend', up);
+  }
+
+  /* ---- したの タブと もちもの ---- */
+  function buildRoomTabs() {
+    const box = $('#room-tabs');
+    if (!box) return;
+    const tabs = [['item', '🛋️ かぐ'], ['floor', '🟥 カーペット'], ['wall', '🎨 かべがみ'], ['char', '😊 なかま']];
+    box.innerHTML = '';
+    tabs.forEach(([k, label]) => {
+      const b = document.createElement('button');
+      b.className = 'room-tab' + (roomTab === k ? ' on' : '');
+      b.textContent = label;
+      b.addEventListener('click', () => { roomTab = k; buildRoomTabs(); buildRoomTray(); });
+      box.appendChild(b);
+    });
+  }
+
+  function buildRoomTray() {
+    const box = $('#room-tray');
+    if (!box) return;
+    box.innerHTML = '';
+    const r = roomState();
+    const s = slot();
+
+    if (roomTab === 'char') {
+      const own = (s && Array.isArray(s.owned) && s.owned.length) ? s.owned : DEFAULT_PARTY;
+      own.forEach(id => {
+        if (!UNITS[id]) return;
+        const b = document.createElement('button');
+        b.className = 'room-item' + (r.char === id ? ' on' : '');
+        b.innerHTML = '<canvas></canvas><span class="ri-name">' + (shownDef(id) || UNITS[id]).shortName + '</span>';
+        b.addEventListener('click', () => {
+          r.char = (r.char === id) ? null : id;
+          storeSave(); buildRoomTray();
+        });
+        box.appendChild(b);
+        paintCharBust(b.querySelector('canvas'), id);
+      });
+      return;
+    }
+
+    ROOM_ITEMS.filter(it => it.kind === roomTab && it.got === 'start').forEach(it => {
+      const on = (it.kind === 'wall') ? (r.wall === it.id) : !!r.placed[it.id];
+      const b = document.createElement('button');
+      b.className = 'room-item' + (on ? ' on' : '');
+      b.innerHTML = '<canvas></canvas><span class="ri-name">' + it.name + '</span>';
+      b.addEventListener('click', () => {
+        if (it.kind === 'wall') { r.wall = it.id; }
+        else if (r.placed[it.id]) { delete r.placed[it.id]; }
+        else { r.placed[it.id] = { x: it.x, y: it.y }; }
+        storeSave(); buildRoomTray();
+      });
+      box.appendChild(b);
+      paintRoomItem(b.querySelector('canvas'), it);
+    });
+  }
+
+  /* もちものの ちいさな え */
+  function paintRoomItem(canvas, it) {
+    if (!canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth || 60, h = canvas.clientHeight || 40;
+    if (w < 2 || h < 2) return;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    if (it.kind === 'wall') {
+      const c = it.colors;
+      ctx.fillStyle = c.wall;  ctx.fillRect(0, 0, w, h * 0.62);
+      ctx.fillStyle = c.floor; ctx.fillRect(0, h * 0.62, w, h * 0.38);
+      ctx.strokeStyle = c.wallLine; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(w * 0.5, 0); ctx.lineTo(w * 0.5, h * 0.62); ctx.stroke();
+      return;
+    }
+    const fn = ROOM_DRAWERS[it.draw];
+    if (!fn) return;
+    const sc = Math.min(w / (it.w * 1.15), h / (it.h * 1.15));
+    ctx.save();
+    ctx.translate(w / 2, h - 3);
+    ctx.scale(sc, sc);
+    fn(ctx, { t: roomTime });
+    ctx.restore();
+  }
+
   function markHtml(def, cls) {
     const dots = attrList(def.attr).map(x =>
       '<i class="u-dot" style="background:' + (ATTR_COLOR[x] || '#bdbdbd') + '"></i>').join('');
@@ -2385,6 +2722,8 @@
     /* トップがめん */
     $('#btn-home-stage').addEventListener('click', openChapters);
     $('#btn-world').addEventListener('click', switchWorld);
+    $('#btn-home-room').addEventListener('click', () => { openRoom(); bindRoomCanvas(); });
+    $('#btn-room-back').addEventListener('click', closeRoom);
     $('#btn-chapter-back').addEventListener('click', openHome);
     $('#btn-tower').addEventListener('click', () => {
       const T = towerOfWorld(currentWorld);

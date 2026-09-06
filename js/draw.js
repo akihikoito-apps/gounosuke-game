@@ -7833,3 +7833,137 @@ function drawEffect(ctx, e) {
   }
   ctx.restore();
 }
+
+
+/* ==================================================================
+   ごうのすけの へやの かぐ
+
+   どれも（0,0）が「おいた ばしょの ゆかの ちゅうしん」です。
+   おおきさは よびだしがわで きめます。
+   ================================================================== */
+
+/* ---- ソファ（いろを かえて 3しゅるい）---- */
+function sofaBase(ctx, main, dark, light) {
+  ctx.fillStyle = '#6d4c2f';
+  ctx.fillRect(-44, -8, 8, 8);
+  ctx.fillRect(36, -8, 8, 8);
+  ctx.fillStyle = main;
+  roundRect(ctx, -50, -34, 100, 28, 7); ctx.fill();
+  ctx.fillStyle = dark;
+  roundRect(ctx, -50, -66, 100, 36, 9); ctx.fill();
+  ctx.fillStyle = light;
+  roundRect(ctx, -46, -38, 44, 16, 5); ctx.fill();
+  roundRect(ctx, 2, -38, 44, 16, 5); ctx.fill();
+  ctx.fillStyle = dark;
+  roundRect(ctx, -58, -50, 16, 44, 6); ctx.fill();
+  roundRect(ctx, 42, -50, 16, 44, 6); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.18)';
+  roundRect(ctx, -46, -62, 88, 8, 4); ctx.fill();
+}
+function drawSofaGreen(ctx)  { sofaBase(ctx, '#66bb6a', '#43a047', '#a5d6a7'); }
+function drawSofaOrange(ctx) { sofaBase(ctx, '#ffa726', '#f57c00', '#ffcc80'); }
+function drawSofaNavy(ctx)   { sofaBase(ctx, '#5c6bc0', '#3949ab', '#9fa8da'); }
+
+/* ---- カーペット（ゆかに しく・ひらたい）---- */
+function carpetBase(ctx, main, edge, deco) {
+  ctx.fillStyle = main;
+  ctx.beginPath(); ctx.ellipse(0, 0, 120, 26, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = edge; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.ellipse(0, 0, 120, 26, 0, 0, Math.PI * 2); ctx.stroke();
+  if (deco) deco(ctx);
+}
+function drawCarpetRed(ctx) {
+  carpetBase(ctx, '#e57373', '#c62828', (c) => {
+    c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 4;
+    c.beginPath(); c.ellipse(0, 0, 84, 17, 0, 0, Math.PI * 2); c.stroke();
+    c.beginPath(); c.ellipse(0, 0, 48, 10, 0, 0, Math.PI * 2); c.stroke();
+  });
+}
+function drawCarpetBlue(ctx) {
+  carpetBase(ctx, '#64b5f6', '#1565c0', (c) => {
+    c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 4;
+    for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(i * 40, -22); c.lineTo(i * 40, 22); c.stroke(); }
+  });
+}
+function drawCarpetStar(ctx) {
+  carpetBase(ctx, '#9575cd', '#5e35b1', (c) => {
+    c.fillStyle = '#fff59d';
+    for (const [sx, sy, sr] of [[-70, -4, 9], [-24, 7, 7], [22, -7, 8], [68, 5, 9], [0, -12, 6]]) {
+      c.beginPath();
+      for (let k = 0; k < 10; k++) {
+        const an = -Math.PI / 2 + k * Math.PI / 5;
+        const rr = (k % 2 === 0) ? sr : sr * 0.44;
+        const px = sx + Math.cos(an) * rr, py = sy + Math.sin(an) * rr * 0.55;
+        if (k === 0) c.moveTo(px, py); else c.lineTo(px, py);
+      }
+      c.closePath(); c.fill();
+    }
+  });
+}
+
+/* ---- テレビ ---- */
+function drawTv(ctx, s) {
+  const t = (s && s.t) || 0;
+  ctx.fillStyle = '#8d6e63';
+  roundRect(ctx, -46, -26, 92, 26, 4); ctx.fill();
+  ctx.fillStyle = '#6d4c41';
+  roundRect(ctx, -40, -20, 36, 14, 3); ctx.fill();
+  ctx.fillStyle = '#37474f';
+  roundRect(ctx, -42, -84, 84, 58, 6); ctx.fill();
+  const g = ctx.createLinearGradient(0, -78, 0, -34);
+  g.addColorStop(0, '#4fc3f7'); g.addColorStop(1, '#1976d2');
+  ctx.fillStyle = g;
+  roundRect(ctx, -36, -78, 72, 44, 4); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.3)';
+  for (let i = 0; i < 3; i++) {
+    const y = -74 + ((t * 22 + i * 15) % 40);
+    ctx.fillRect(-34, y, 68, 3);
+  }
+  ctx.fillStyle = '#fff59d';
+  ctx.beginPath(); ctx.arc(-14 + Math.sin(t * 2) * 10, -56, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#263238';
+  ctx.fillRect(-8, -30, 16, 6);
+}
+
+/* ---- かんようしょくぶつ ---- */
+function drawPlant(ctx, s) {
+  const t = (s && s.t) || 0;
+  ctx.fillStyle = '#a1887f';
+  ctx.beginPath();
+  ctx.moveTo(-22, -30); ctx.lineTo(22, -30); ctx.lineTo(16, 0); ctx.lineTo(-16, 0);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#8d6e63';
+  roundRect(ctx, -25, -36, 50, 8, 3); ctx.fill();
+  ctx.fillStyle = '#5d4037';
+  roundRect(ctx, -18, -30, 36, 5, 2); ctx.fill();
+  ctx.strokeStyle = '#4caf50'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+  for (let i = -2; i <= 2; i++) {
+    const sway = Math.sin(t * 1.3 + i) * 4;
+    ctx.beginPath();
+    ctx.moveTo(i * 4, -30);
+    ctx.quadraticCurveTo(i * 12 + sway, -62, i * 20 + sway * 1.5, -88 + Math.abs(i) * 6);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#66bb6a';
+  for (let i = -2; i <= 2; i++) {
+    const sway = Math.sin(t * 1.3 + i) * 4;
+    ctx.save();
+    ctx.translate(i * 20 + sway * 1.5, -88 + Math.abs(i) * 6);
+    ctx.rotate(i * 0.35);
+    ellipse(ctx, 0, 0, 16, 9); ctx.fill();
+    ctx.restore();
+  }
+  ctx.fillStyle = '#81c784';
+  ellipse(ctx, 0, -96, 13, 8); ctx.fill();
+}
+
+const ROOM_DRAWERS = {
+  sofaGreen:  drawSofaGreen,
+  sofaOrange: drawSofaOrange,
+  sofaNavy:   drawSofaNavy,
+  carpetRed:  drawCarpetRed,
+  carpetBlue: drawCarpetBlue,
+  carpetStar: drawCarpetStar,
+  tv:         drawTv,
+  plant:      drawPlant,
+};
