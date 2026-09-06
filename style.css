@@ -1061,3 +1061,26 @@ body.dragging-slot #party-slots { touch-action:none; }
   content:'✓'; position:absolute; top:1px; right:3px;
   font-size:calc(13px * var(--ui)); font-weight:bold; color:#e64a19;
 }
+
+
+/* ---------- そざいの ドロップ ---------- */
+.drop-mats { display:inline-flex; gap:calc(4px * var(--ui)); align-items:center; margin-left:calc(6px * var(--ui)); }
+.drop-mats i { font-style:normal; font-size:calc(13px * var(--ui)); }
+.mat-bar {
+  width:96%; max-width:calc(560px * var(--ui));
+  display:flex; gap:calc(5px * var(--ui)); flex-wrap:wrap; justify-content:center;
+  padding:calc(5px * var(--ui)) 0;
+}
+.mat-chip {
+  display:flex; align-items:center; gap:2px;
+  padding:calc(3px * var(--ui)) calc(9px * var(--ui));
+  border-radius:999px; background:rgba(255,255,255,.14); border:1.5px solid rgba(255,255,255,.35);
+  font-size:calc(12px * var(--ui)); font-weight:bold; color:#fff;
+}
+.mat-chip b { color:#ffe082; }
+/* こうさくの ふだ */
+.craft-item { width:calc(86px * var(--ui)); height:calc(96px * var(--ui)); }
+.craft-item .ri-cost { font-size:calc(9px * var(--ui)); line-height:1.1; color:#5d4037; white-space:nowrap; }
+.craft-item.cant { opacity:.5; }
+.craft-item.made { border-color:#66bb6a; }
+.craft-item.made::after { content:'✓'; position:absolute; top:1px; right:3px; color:#2e7d32; font-weight:bold; }

@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '5.9';
+  const GAME_VERSION = '6.0';
 
 
   /* =================================================
@@ -1053,6 +1053,7 @@
             (isNext ? '<span class="next-badge">つぎは ここ！</span>' : '') + '</b>' +
           '<small>' + (open ? st.desc : 'まえの コースを クリアすると あそべます') + '</small>' +
           (open ? '<span class="stage-reward">' +
+              dropHtml(st) +
               (cleared[st.no] ? 'けいけんち+' + gainExp(r.exp, false) + '（しゅうかいは すくなめ）'
                               : 'クリアで Gコイン+' + r.coins + '　けいけんち+' + r.exp) +
             '</span>' : '') +
@@ -1800,6 +1801,51 @@
     return s.room;
   }
   function roomItem(id) { return ROOM_ITEMS.find(x => x.id === id) || null; }
+
+  /* ---- そざい ----
+     s.mats = { wood: 3, iron: 1, … } の かたちで もって います。 */
+  function mats() {
+    const s = slot();
+    if (!s) return {};
+    if (!s.mats) s.mats = {};
+    return s.mats;
+  }
+  function matCount(id) { return mats()[id] || 0; }
+  function addMat(id, n) {
+    const mm = mats();
+    mm[id] = (mm[id] || 0) + n;
+  }
+  /* つくった もの（id の いちらん）*/
+  function madeList() {
+    const s = slot();
+    if (!s) return [];
+    if (!Array.isArray(s.made)) s.made = [];
+    return s.made;
+  }
+
+  /* ★ステージクリアの ドロップ。3しゅるい それぞれ 30%。 */
+  function rollDrops(course) {
+    const list = (course && Array.isArray(course.drops)) ? course.drops : [];
+    const rate = (typeof DROP_RATE === 'number') ? DROP_RATE : 0.3;
+    const got = [];
+    list.forEach(id => { if (MATERIALS[id] && Math.random() < rate) { addMat(id, 1); got.push(id); } });
+    return got;
+  }
+
+  /* つくれるか */
+  function canCraft(pat) {
+    const c = pat.cost || {};
+    return Object.keys(c).every(k => matCount(k) >= c[k]);
+  }
+  function doCraft(pat) {
+    if (!canCraft(pat)) return false;
+    const c = pat.cost || {};
+    Object.keys(c).forEach(k => addMat(k, -c[k]));
+    const made = madeList();
+    if (made.indexOf(pat.id) < 0) made.push(pat.id);
+    storeSave();
+    return true;
+  }
   function roomWallColors() {
     const r = roomState();
     const w = r && roomItem(r.wall);
@@ -1884,7 +1930,7 @@
       ctx.save();
       ctx.translate(o.px, o.py);
       ctx.scale(sc, sc);
-      fn(ctx, { t: roomTime });
+      fn(ctx, { t: roomTime, pal: it.palette });
       ctx.restore();
       if (roomDrag && roomDrag.id === it.id) roomOutline(ctx, o, sc, it);
     });
@@ -2021,7 +2067,8 @@
   function buildRoomTabs() {
     const box = $('#room-tabs');
     if (!box) return;
-    const tabs = [['item', '🛋️ かぐ'], ['floor', '🟥 カーペット'], ['wall', '🎨 かべがみ'], ['char', '😊 なかま']];
+    const tabs = [['item', '🛋️ かぐ'], ['floor', '🟥 カーペット'], ['wall', '🎨 かべがみ'],
+                  ['char', '😊 なかま'], ['craft', '🔨 つくる']];
     box.innerHTML = '';
     tabs.forEach(([k, label]) => {
       const b = document.createElement('button');
@@ -2056,7 +2103,12 @@
       return;
     }
 
-    ROOM_ITEMS.filter(it => it.kind === roomTab && it.got === 'start').forEach(it => {
+    if (roomTab === 'craft') { buildCraftTray(box); return; }
+
+    /* さいしょから もって いる ぶん ＋ つくった ぶん */
+    const made = madeList();
+    ROOM_ITEMS.filter(it => it.kind === roomTab &&
+        (it.got === 'start' || made.indexOf(it.id) >= 0)).forEach(it => {
       const on = (it.kind === 'wall') ? (r.wall === it.id) : !!r.placed[it.id];
       const b = document.createElement('button');
       b.className = 'room-item' + (on ? ' on' : '');
@@ -2069,6 +2121,42 @@
       });
       box.appendChild(b);
       paintRoomItem(b.querySelector('canvas'), it);
+    });
+  }
+
+  /* ★つくる：20しゅるい × 5いろ ＝ 100パターン */
+  function buildCraftTray(box) {
+    /* うえに いま もって いる そざいを ならべる */
+    const bar = document.createElement('div');
+    bar.className = 'mat-bar';
+    MATERIAL_ORDER.forEach(id => {
+      const mt = MATERIALS[id];
+      const chip = document.createElement('span');
+      chip.className = 'mat-chip';
+      chip.innerHTML = mt.icon + mt.name + ' <b>' + matCount(id) + '</b>';
+      bar.appendChild(chip);
+    });
+    box.appendChild(bar);
+
+    const made = madeList();
+    CRAFT_PATTERNS.forEach(pat => {
+      const has = made.indexOf(pat.id) >= 0;
+      const can = canCraft(pat);
+      const b = document.createElement('button');
+      b.className = 'room-item craft-item' + (has ? ' made' : (can ? '' : ' cant'));
+      const cost = Object.keys(pat.cost).map(k => MATERIALS[k].icon + pat.cost[k]).join(' ');
+      b.innerHTML = '<canvas></canvas>' +
+                    '<span class="ri-name">' + pat.name + '</span>' +
+                    '<span class="ri-cost">' + (has ? 'つくった！' : cost) + '</span>';
+      b.addEventListener('click', () => {
+        if (has) { toast('もう つくって あるよ。「かぐ」から おけるよ！'); return; }
+        if (!canCraft(pat)) { toast('そざいが たりないよ…'); return; }
+        doCraft(pat);
+        toast(pat.name + ' が できた！');
+        buildRoomTray();
+      });
+      box.appendChild(b);
+      paintRoomItem(b.querySelector('canvas'), pat);
     });
   }
 
@@ -2096,8 +2184,18 @@
     ctx.save();
     ctx.translate(w / 2, h - 3);
     ctx.scale(sc, sc);
-    fn(ctx, { t: roomTime });
+    fn(ctx, { t: roomTime, pal: it.palette });
     ctx.restore();
+  }
+
+  /* コースに でる そざい（アイコンで ひょうじ）*/
+  function dropHtml(st) {
+    if (!st || !Array.isArray(st.drops) || typeof MATERIALS === 'undefined') return '';
+    const pc = Math.round((typeof DROP_RATE === 'number' ? DROP_RATE : 0.3) * 100);
+    return '<span class="drop-mats" title="それぞれ ' + pc + '% で でます">' +
+      st.drops.map(id => MATERIALS[id]
+        ? '<i>' + MATERIALS[id].icon + '</i>' : '').join('') +
+      '</span>';
   }
 
   function markHtml(def, cls) {
@@ -2604,6 +2702,12 @@
         ? '　／　Gコイン +' + r.coins + '　けいけんち +' + r.exp
         : '　／　けいけんち +' + gainExp(r.exp, false)
           + '（2かいめ いこうは すくなめ・Gコインは しょかいだけ）';
+      /* ★そざいの ドロップ（3しゅるい それぞれ 30%）*/
+      const drops = rollDrops(Game.stage);
+      if (drops.length) {
+        $('#result-sub').textContent += '　／　' +
+          drops.map(id => MATERIALS[id].icon + MATERIALS[id].name).join('・') + ' を てにいれた！';
+      }
       markCleared(Game.stage.no);
       recordSeen();
       const rush = giveBossRushReward();      // ★ボスラッシュ ぜんクリアの ごほうび

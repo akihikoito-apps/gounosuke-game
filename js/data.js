@@ -2309,6 +2309,7 @@ const STAGES = [
     no: 1,
     chapter: 1,  course: 1,       // だい1ステージ の 1コースめ
     power: 1.31,            // てきの つよさ 1.00ばい
+    drops: ['stone', 'cloth', 'wood'],
     reward: { coins: 3, exp: 80 },   // チュートリアルなので Gコイン おおめ
     name: 'はじまりの みち',
     desc: 'トゲハヤさん が でてくるよ',
@@ -2326,6 +2327,7 @@ const STAGES = [
     no: 2,
     chapter: 1,  course: 2,       // だい1ステージ の 2コースめ
     power: 1.34,            // てきの つよさ 1.00ばい
+    drops: ['string', 'stone', 'cloth'],
     reward: { coins: 3, exp: 130 },   // ここまでで ガチャ 2かいぶん
     name: 'ひのたま だいぐんだん',
     desc: 'ほのた の むれが おしよせる',
@@ -2345,6 +2347,7 @@ const STAGES = [
     no: 3,
     chapter: 1,  course: 3,       // だい1ステージ の 3コースめ
     power: 1.38,            // てきの つよさ 1.00ばい
+    drops: ['wood', 'string', 'stone'],
     reward: { coins: 1, exp: 170 },
     name: 'さかなの かわ',
     desc: 'saba が すごい はやさで とっしんしてくる',
@@ -2364,6 +2367,7 @@ const STAGES = [
     no: 5,
     chapter: 1,  course: 4,       // だい1ステージ の 5コースめ
     power: 1.42,            // てきの つよさ 1.05ばい
+    drops: ['wood', 'string', 'stone'],
     reward: { coins: 1, exp: 250 },
     name: 'いわばの みち',
     desc: '字一龍 とうじょう！ ボスでは ないけど つよい',
@@ -2383,6 +2387,7 @@ const STAGES = [
     no: 6,
     chapter: 1,  course: 5,       // だい1ステージ の 6コースめ
     power: 1.46,            // てきの つよさ 1.05ばい
+    drops: ['cloth', 'wood', 'string'],
     reward: { coins: 3, exp: 290 },  // ボスコース
     name: 'よるの もり',
     desc: 'ボス 下手なきりん が まちうける',
@@ -2405,6 +2410,7 @@ const STAGES = [
     no: 9,
     chapter: 1,  course: 6,       // だい1ステージ の 7コースめ
     power: 1.5,            // てきの つよさ 1.10ばい
+    drops: ['stone', 'cloth', 'wood'],
     reward: { coins: 1, exp: 320 },
     name: 'ほしの ひろば',
     desc: 'ほしくん とうじょう！ ほしを とばして ふきとばしてくる',
@@ -2424,6 +2430,7 @@ const STAGES = [
     no: 7,
     chapter: 1,  course: 7,      // だい1ステージ の さいごの コース（ボス）
     power: 1.53,            // てきの つよさ 1.15ばい
+    drops: ['string', 'stone', 'cloth'],
     reward: { coins: 3, exp: 480 },  // ボスコース
     name: 'おかしマンの しろ',
     desc: 'さいご の おおボス お菓子マン。まじゅつし が よく きく！',
@@ -2448,6 +2455,7 @@ const STAGES = [
     no: 8,
     chapter: 2,  course: 1,       // だい2ステージ の 1コースめ
     power: 1.32,            // てきの つよさ 1.20ばい
+    drops: ['iron', 'glue', 'alumi'],
     reward: { coins: 2, exp: 420 },  // ボスコース
     name: 'はがねの ぐんだん',
     desc: 'コンガラガーン とうじょう！ メタルは ほのお・まじゅつし・パワー に よわい',
@@ -2471,6 +2479,7 @@ const STAGES = [
     no: 13,
     chapter: 2,  course: 2,       // だい2ステージ の 3コースめ（ボス）
     power: 1.36,            // てきの つよさ 1.22ばい
+    drops: ['iron', 'glue', 'alumi'],
     reward: { coins: 2, exp: 530 },
     name: 'はがねの よる',
     desc: 'メタルぐんだん と 下手なきりん。くらやみの だいけっせん',
@@ -2494,6 +2503,7 @@ const STAGES = [
     no: 15,
     chapter: 2,  course: 3,       // だい2ステージ の 5コースめ
     power: 1.4,            // てきの つよさ 1.30ばい
+    drops: ['stone', 'iron', 'glue'],
     reward: { coins: 1, exp: 500 },
     name: 'ひのたま あらし',
     desc: 'ほのた の だいぐんだん。みずの なかまが かつやくする',
@@ -2513,6 +2523,7 @@ const STAGES = [
     no: 16,
     chapter: 2,  course: 4,       // だい2ステージ の 6コースめ（ボス）
     power: 1.44,            // てきの つよさ 1.32ばい
+    drops: ['alumi', 'stone', 'iron'],
     reward: { coins: 3, exp: 560 },
     name: 'りゅうの たに',
     desc: '字一龍 の むれ と お菓子マン。なかばの やま',
@@ -2538,6 +2549,7 @@ const STAGES = [
     bg: 'night',
     castleHp: 4200,
     power: 1.48,
+    drops: ['glue', 'alumi', 'stone'],
     reward: { coins: 1, exp: 480 },
     waves: [
       { at: 3,  id: 'nyororiinu', count: 3, gap: 0.7 },
@@ -2559,6 +2571,7 @@ const STAGES = [
     bg: 'rock',
     castleHp: 5200,
     power: 1.52,
+    drops: ['iron', 'glue', 'alumi'],
     reward: { coins: 1, exp: 560 },
     waves: [
       { at: 3,  id: 'ojiinouenchou', count: 1 },
@@ -2582,6 +2595,7 @@ const STAGES = [
     bg: 'boss',
     castleHp: 4200,
     power: 1.56,
+    drops: ['iron', 'glue', 'alumi'],
     reward: { coins: 3, exp: 670 },
     waves: [
       { at: 3,  id: 'kamomeeru',  count: 2, gap: 1.2 },
@@ -2611,6 +2625,7 @@ const STAGES = [
     bg: 'kemono',
     castleHp: 2400,
     power: 1.6,
+    drops: ['string', 'wood', 'cloth'],
     reward: { coins: 1, exp: 450 },
     waves: [
       { at: 3,  id: 'inocchi',    count: 2, gap: 1.2 },
@@ -2630,6 +2645,7 @@ const STAGES = [
     bg: 'mori',
     castleHp: 900,
     power: 1.1,
+    drops: ['glue', 'string', 'wood'],
     reward: { coins: 1, exp: 480 },
     waves: [
       { at: 3,  id: 'yamanemu',   count: 2, gap: 1.6 },
@@ -2650,6 +2666,7 @@ const STAGES = [
     bg: 'mizu',
     castleHp: 1600,
     power: 1.27,
+    drops: ['cloth', 'glue', 'string'],
     reward: { coins: 1, exp: 530 },
     waves: [
       { at: 3,  id: 'tsuyugaeru', count: 1 },
@@ -2669,6 +2686,7 @@ const STAGES = [
     bg: 'night',
     castleHp: 1400,
     power: 1.74,
+    drops: ['wood', 'cloth', 'glue'],
     reward: { coins: 3, exp: 590 },
     waves: [
       { at: 3,  id: 'tanupon',    count: 1 },
@@ -2690,6 +2708,7 @@ const STAGES = [
     bg: 'kemono',
     castleHp: 2100,
     power: 1.15,
+    drops: ['wood', 'cloth', 'glue'],
     reward: { coins: 1, exp: 640 },
     waves: [
       { at: 3,  id: 'moeris',     count: 1 },
@@ -2710,6 +2729,7 @@ const STAGES = [
     bg: 'rock',
     castleHp: 1200,
     power: 0.86,
+    drops: ['string', 'wood', 'cloth'],
     reward: { coins: 1, exp: 670 },
     waves: [
       { at: 3,  id: 'kumabee',    count: 1 },
@@ -2730,6 +2750,7 @@ const STAGES = [
     bg: 'boss',
     castleHp: 1100,
     power: 0.95,
+    drops: ['glue', 'string', 'wood'],
     reward: { coins: 3, exp: 870 },
     waves: [
       { at: 3,  id: 'inocchi',    count: 3, gap: 1.0 },
@@ -2760,6 +2781,7 @@ const STAGES = [
     bg: 'haikoujou',
     castleHp: 9500,
     power: 1.58,
+    drops: ['glue', 'stone', 'alumi'],
     reward: { coins: 1, exp: 780 },
     waves: [
       { at: 3,  id: 'nejiro',     count: 3, gap: 0.8 },
@@ -2777,6 +2799,7 @@ const STAGES = [
     bg: 'steel',
     castleHp: 2100,
     power: 1.63,
+    drops: ['iron', 'glue', 'stone'],
     reward: { coins: 1, exp: 810 },
     waves: [
       { at: 3,  id: 'hakobot',    count: 1 },
@@ -2796,6 +2819,7 @@ const STAGES = [
     bg: 'steel',
     castleHp: 1500,
     power: 1.14,
+    drops: ['iron', 'glue', 'stone'],
     reward: { coins: 1, exp: 870 },
     waves: [
       { at: 3,  id: 'sabinchi',   count: 2, gap: 1.4 },
@@ -2817,6 +2841,7 @@ const STAGES = [
     bg: 'haikoujou',
     castleHp: 2600,
     power: 1.72,
+    drops: ['alumi', 'iron', 'glue'],
     reward: { coins: 3, exp: 950 },
     waves: [
       { at: 3,  id: 'ironkokko',  count: 1 },
@@ -2837,6 +2862,7 @@ const STAGES = [
     bg: 'night',
     castleHp: 2700,
     power: 1.77,
+    drops: ['stone', 'alumi', 'iron'],
     reward: { coins: 1, exp: 980 },
     waves: [
       { at: 3,  id: 'mojacord',   count: 1 },
@@ -2857,6 +2883,7 @@ const STAGES = [
     bg: 'haikoujou',
     castleHp: 2200,
     power: 1.81,
+    drops: ['glue', 'stone', 'alumi'],
     reward: { coins: 1, exp: 1090 },
     waves: [
       { at: 3,  id: 'nejiro',     count: 5, gap: 0.6 },
@@ -2878,6 +2905,7 @@ const STAGES = [
     bg: 'boss',
     castleHp: 1800,
     power: 0.8,
+    drops: ['iron', 'glue', 'stone'],
     reward: { coins: 3, exp: 1400 },
     waves: [
       { at: 3,  id: 'kongaragan', count: 1 },
@@ -2908,6 +2936,7 @@ const STAGES = [
     bg: 'kinkai',
     castleHp: 4400,
     power: 1.5,
+    drops: ['cloth', 'alumi', 'wood'],
     reward: { coins: 1, exp: 900 },
     waves: [
       { at: 3,  id: 'pukakurage', count: 3, gap: 0.9 },
@@ -2926,6 +2955,7 @@ const STAGES = [
     bg: 'mizu',
     castleHp: 4600,
     power: 1.54,
+    drops: ['string', 'cloth', 'alumi'],
     reward: { coins: 1, exp: 950 },
     waves: [
       { at: 3,  id: 'chibisame',  count: 2, gap: 1.2 },
@@ -2945,6 +2975,7 @@ const STAGES = [
     bg: 'kinkai',
     castleHp: 4200,
     power: 1.59,
+    drops: ['wood', 'string', 'cloth'],
     reward: { coins: 1, exp: 1000 },
     waves: [
       { at: 3,  id: 'saba',       count: 3, gap: 1.0 },
@@ -2965,6 +2996,7 @@ const STAGES = [
     bg: 'water',
     castleHp: 3000,
     power: 1.63,
+    drops: ['alumi', 'wood', 'string'],
     reward: { coins: 3, exp: 1100 },
     waves: [
       { at: 3,  id: 'togefugu',   count: 1 },
@@ -2985,6 +3017,7 @@ const STAGES = [
     bg: 'kinkai',
     castleHp: 2800,
     power: 1.67,
+    drops: ['cloth', 'alumi', 'wood'],
     reward: { coins: 1, exp: 1150 },
     waves: [
       { at: 3,  id: 'ikamajin',   count: 1 },
@@ -3005,6 +3038,7 @@ const STAGES = [
     bg: 'water',
     castleHp: 2900,
     power: 1.72,
+    drops: ['cloth', 'alumi', 'wood'],
     reward: { coins: 1, exp: 1250 },
     waves: [
       { at: 3,  id: 'bakecchin',  count: 3, gap: 1.2 },
@@ -3027,6 +3061,7 @@ const STAGES = [
     bg: 'boss',
     castleHp: 3600,
     power: 1.76,
+    drops: ['string', 'cloth', 'alumi'],
     reward: { coins: 3, exp: 1800 },
     waves: [
       { at: 3,  id: 'umihebi',    count: 2, gap: 1.5 },
@@ -3059,6 +3094,7 @@ const STAGES = [
     bg: 'mahou',
     castleHp: 3800,
     power: 1.86,
+    drops: ['string', 'cloth', 'stone'],
     reward: { coins: 1, exp: 1300 },
     waves: [
       { at: 3,  id: 'runrunwisp', count: 3, gap: 0.9 },
@@ -3077,6 +3113,7 @@ const STAGES = [
     bg: 'night',
     castleHp: 4000,
     power: 1.91,
+    drops: ['glue', 'string', 'cloth'],
     reward: { coins: 1, exp: 1350 },
     waves: [
       { at: 3,  id: 'houkigob',     count: 2, gap: 1.2 },
@@ -3097,6 +3134,7 @@ const STAGES = [
     bg: 'sunset',
     castleHp: 2000,
     power: 0.76,
+    drops: ['stone', 'glue', 'string'],
     reward: { coins: 1, exp: 1400 },
     waves: [
       { at: 3,  id: 'icewitch',     count: 2, gap: 1.1 },
@@ -3117,6 +3155,7 @@ const STAGES = [
     bg: 'mahou',
     castleHp: 1700,
     power: 0.73,
+    drops: ['stone', 'glue', 'string'],
     reward: { coins: 1, exp: 1450 },
     waves: [
       { at: 3,  id: 'mandrake',   count: 1 },
@@ -3136,6 +3175,7 @@ const STAGES = [
     bg: 'night',
     castleHp: 2300,
     power: 0.97,
+    drops: ['cloth', 'stone', 'glue'],
     reward: { coins: 3, exp: 1550 },
     waves: [
       { at: 3,  id: 'magicrabbit', count: 1 },
@@ -3157,6 +3197,7 @@ const STAGES = [
     bg: 'mahou',
     castleHp: 2000,
     power: 0.95,
+    drops: ['string', 'cloth', 'stone'],
     reward: { coins: 1, exp: 1650 },
     waves: [
       { at: 3,  id: 'ikamajin',     count: 2, gap: 1.1 },
@@ -3177,6 +3218,7 @@ const STAGES = [
     bg: 'boss',
     castleHp: 2700,
     power: 0.82,
+    drops: ['glue', 'string', 'cloth'],
     reward: { coins: 3, exp: 2200 },
     waves: [
       { at: 3,  id: 'mokomadoushi', count: 2, gap: 1.1 },
@@ -3209,6 +3251,7 @@ const STAGES = [
     bg: 'yami',
     castleHp: 6000,
     power: 1.57,
+    drops: ['iron', 'alumi', 'stone'],
     reward: { coins: 3, exp: 2400 },
     waves: [
       { at: 3,  id: 'togehaya', count: 3, gap: 0.9 },
@@ -3229,6 +3272,7 @@ const STAGES = [
     bg: 'yami',
     castleHp: 5300,
     power: 1.17,
+    drops: ['glue', 'iron', 'alumi'],
     reward: { coins: 3, exp: 2500 },
     waves: [
       { at: 3,  id: 'tanupon',  count: 2, gap: 1.0 },
@@ -3249,6 +3293,7 @@ const STAGES = [
     bg: 'yami',
     castleHp: 6200,
     power: 1.66,
+    drops: ['stone', 'glue', 'iron'],
     reward: { coins: 3, exp: 2600 },
     waves: [
       { at: 3,  id: 'ironkokko', count: 2, gap: 1.0 },
@@ -3269,6 +3314,7 @@ const STAGES = [
     bg: 'yami',
     castleHp: 6400,
     power: 1.71,
+    drops: ['iron', 'stone', 'glue'],
     reward: { coins: 3, exp: 2700 },
     waves: [
       { at: 3,  id: 'umihebi',    count: 2, gap: 1.0 },
@@ -3289,6 +3335,7 @@ const STAGES = [
     bg: 'yami',
     castleHp: 6600,
     power: 1.76,
+    drops: ['alumi', 'iron', 'stone'],
     reward: { coins: 3, exp: 2900 },
     waves: [
       { at: 3,  id: 'houkigob',   count: 3, gap: 0.9 },
@@ -3310,6 +3357,7 @@ const STAGES = [
     bg: 'yami',
     castleHp: 5400,
     power: 1.8,
+    drops: ['iron', 'alumi', 'stone'],
     reward: { coins: 3, exp: 3200 },
     waves: [
       { at: 3,  id: 'kongaragan', count: 2, gap: 1.1 },
@@ -3331,6 +3379,7 @@ const STAGES = [
     bg: 'boss',
     castleHp: 8500,
     power: 1.26,
+    drops: ['glue', 'iron', 'alumi'],
     reward: { coins: 3, exp: 5000 },
     waves: [
       { at: 3,  id: 'kongaragan', count: 2, gap: 1.0 },
@@ -3364,6 +3413,7 @@ const STAGES = [
     bg: 'mars',
     castleHp: 6200,
     power: 3.73,
+    drops: ['iron', 'stone', 'alumi'],
     reward: { coins: 2, exp: 3200 },
     waves: [
       { at: 3,  id: 'yajirushi',   count: 4, gap: 0.8 },
@@ -3381,6 +3431,7 @@ const STAGES = [
     bg: 'mars',
     castleHp: 6500,
     power: 3.82,
+    drops: ['glue', 'iron', 'stone'],
     reward: { coins: 2, exp: 3300 },
     waves: [
       { at: 3,  id: 'ironkokko',  count: 3, gap: 0.9 },
@@ -3399,6 +3450,7 @@ const STAGES = [
     bg: 'mars',
     castleHp: 6700,
     power: 4.89,
+    drops: ['alumi', 'glue', 'iron'],
     reward: { coins: 2, exp: 3400 },
     waves: [
       { at: 3,  id: 'sabinchi',   count: 3, gap: 1.0 },
@@ -3417,6 +3469,7 @@ const STAGES = [
     bg: 'mars',
     castleHp: 7200,
     power: 4,
+    drops: ['stone', 'alumi', 'glue'],
     reward: { coins: 3, exp: 3600 },
     waves: [
       { at: 3,  id: 'burner',     count: 2, gap: 1.1 },
@@ -3437,6 +3490,7 @@ const STAGES = [
     bg: 'mars',
     castleHp: 7400,
     power: 4.09,
+    drops: ['stone', 'alumi', 'glue'],
     reward: { coins: 2, exp: 3800 },
     waves: [
       { at: 3,  id: 'flamemage',  count: 1 },
@@ -3455,6 +3509,7 @@ const STAGES = [
     bg: 'mars',
     castleHp: 7700,
     power: 4.19,
+    drops: ['iron', 'stone', 'alumi'],
     reward: { coins: 2, exp: 4000 },
     waves: [
       { at: 3,  id: 'pressuke',   count: 1 },
@@ -3473,6 +3528,7 @@ const STAGES = [
     bg: 'boss',
     castleHp: 8200,
     power: 2.88,
+    drops: ['glue', 'iron', 'stone'],
     reward: { coins: 3, exp: 5200 },
     waves: [
       /* ★ポチは はじめから。ざこも いっしょ */
@@ -3504,6 +3560,7 @@ const STAGES = [
     bg: 'mercury',
     castleHp: 6400,
     power: 3.3,
+    drops: ['string', 'wood', 'cloth'],
     reward: { coins: 2, exp: 3900 },
     waves: [
       { at: 3,  id: 'waterserver', count: 3, gap: 0.9 },
@@ -3521,6 +3578,7 @@ const STAGES = [
     bg: 'mercury',
     castleHp: 6600,
     power: 3.35,
+    drops: ['alumi', 'string', 'wood'],
     reward: { coins: 2, exp: 4000 },
     waves: [
       { at: 3,  id: 'umihebi',     count: 3, gap: 0.9 },
@@ -3538,6 +3596,7 @@ const STAGES = [
     bg: 'mercury',
     castleHp: 6800,
     power: 2.3,
+    drops: ['alumi', 'string', 'wood'],
     reward: { coins: 2, exp: 4100 },
     waves: [
       { at: 3,  id: 'icewitch',    count: 1 },
@@ -3556,6 +3615,7 @@ const STAGES = [
     bg: 'mercury',
     castleHp: 7200,
     power: 2.8,
+    drops: ['cloth', 'alumi', 'string'],
     reward: { coins: 3, exp: 4300 },
     waves: [
       { at: 3,  id: 'ironkokko',   count: 3, gap: 0.9 },
@@ -3575,6 +3635,7 @@ const STAGES = [
     bg: 'mercury',
     castleHp: 7400,
     power: 2.3,
+    drops: ['wood', 'cloth', 'alumi'],
     reward: { coins: 2, exp: 4500 },
     waves: [
       { at: 3,  id: 'burner',      count: 3, gap: 1.0 },
@@ -3593,6 +3654,7 @@ const STAGES = [
     bg: 'mercury',
     castleHp: 7600,
     power: 1.85,
+    drops: ['string', 'wood', 'cloth'],
     reward: { coins: 2, exp: 4700 },
     waves: [
       { at: 3,  id: 'octocannon',  count: 2, gap: 1.1 },
@@ -3611,6 +3673,7 @@ const STAGES = [
     bg: 'boss',
     castleHp: 8000,
     power: 3.6,
+    drops: ['alumi', 'string', 'wood'],
     reward: { coins: 3, exp: 5600 },
     waves: [
       { at: 3,  id: 'chibisame',   count: 3, gap: 0.9 },
@@ -3757,6 +3820,7 @@ const SPACESHIP = {
       bg: 'ship',
       castleHp: 4200,
       power: 7.2,
+      drops: ['alumi', 'string', 'wood'],
       reward: { coins: 3, exp: 900 },
       waves: [
         /* ★ボスは はじめから いっしょに でて きて、じわじわ せまる */
@@ -3776,6 +3840,7 @@ const SPACESHIP = {
       bg: 'ship',
       castleHp: 4400,
       power: 2.9,
+      drops: ['glue', 'stone', 'alumi'],
       reward: { coins: 3, exp: 950 },
       waves: [
         { at: 6,  id: 'nereid',     count: 1 },
@@ -3794,6 +3859,7 @@ const SPACESHIP = {
       bg: 'ship',
       castleHp: 4600,
       power: 3.2,
+      drops: ['iron', 'cloth', 'glue'],
       reward: { coins: 3, exp: 1000 },
       waves: [
         { at: 6,  id: 'garakutei', count: 1 },
@@ -3812,6 +3878,7 @@ const SPACESHIP = {
       bg: 'ship',
       castleHp: 4800,
       power: 1.6,
+      drops: ['string', 'wood', 'iron'],
       reward: { coins: 3, exp: 1100 },
       waves: [
         { at: 6,  id: 'gaou',       count: 1 },
@@ -3830,6 +3897,7 @@ const SPACESHIP = {
       bg: 'ship',
       castleHp: 5200,
       power: 4.1,
+      drops: ['stone', 'alumi', 'string'],
       reward: { coins: 4, exp: 1300 },
       waves: [
         { at: 6,  id: 'nushinoookami', count: 1 },
@@ -3848,6 +3916,7 @@ const SPACESHIP = {
       bg: 'ship',
       castleHp: 5400,
       power: 2.1,
+      drops: ['cloth', 'glue', 'stone'],
       reward: { coins: 3, exp: 1400 },
       waves: [
         { at: 6,  id: 'sagecharon',  count: 1 },
@@ -3867,6 +3936,7 @@ const SPACESHIP = {
       bg: 'ship',
       castleHp: 5600,
       power: 3.2,
+      drops: ['wood', 'iron', 'cloth'],
       reward: { coins: 3, exp: 1550 },
       waves: [
         { at: 6,  id: 'okashiman',  count: 1 },
@@ -3885,6 +3955,7 @@ const SPACESHIP = {
       bg: 'ship',
       castleHp: 5800,
       power: 2.4,
+      drops: ['alumi', 'string', 'wood'],
       reward: { coins: 3, exp: 1700 },
       waves: [
         { at: 6,  id: 'meltgear',   count: 1 },
@@ -3904,6 +3975,7 @@ const SPACESHIP = {
       bg: 'ship',
       castleHp: 6200,
       power: 1.48,
+      drops: ['glue', 'stone', 'alumi'],
       reward: { coins: 4, exp: 2000 },
       waves: [
         { at: 6,  id: 'zabaan',     count: 1 },
@@ -3923,6 +3995,7 @@ const SPACESHIP = {
       bg: 'boss',
       castleHp: 6800,
       power: 2.1,
+      drops: ['iron', 'cloth', 'glue'],
       reward: { coins: 5, exp: 2600 },
       waves: [
         /* ★おおボス「アイアンゴーレム」は はじめから。たおすと なかまに なる */
@@ -3977,6 +4050,7 @@ const GONO = {
       castleHp: 26000,
       power: 8.5,
       allowRarity: ['N'],
+      drops: ['alumi', 'string', 'wood'],
       reward: { coins: 5, exp: 3000 },
       waves: [
         { at: 3,  id: 'nyororiinu',  count: 4, gap: 0.7 },
@@ -3998,6 +4072,7 @@ const GONO = {
       castleHp: 19000,
       power: 4.0,
       allowRarity: ['R'],
+      drops: ['glue', 'stone', 'alumi'],
       reward: { coins: 5, exp: 3400 },
       waves: [
         { at: 3,  id: 'togehaya',    count: 3, gap: 0.9 },
@@ -4022,6 +4097,7 @@ const GONO = {
       castleHp: 34000,
       power: 5,
       allowRarity: ['GR', 'SR', 'LR'],
+      drops: ['iron', 'cloth', 'glue'],
       reward: { coins: 8, exp: 5000 },
       waves: [
         { at: 3,  id: 'jiryu',       count: 2, gap: 1.1 },
@@ -4061,6 +4137,92 @@ const GONO = {
      got: 'start' は さいしょから もって いる もの。
      あとで 'gacha' や 'clear8-7' の ように ふやせます。
    -------------------------------------------------------------------------- */
+
+
+/* --------------------------------------------------------------------------
+   そざい と こうさく
+
+   ★そざい★
+     ステージを クリアすると、その ステージに きまって いる 3しゅるいの
+     そざいが、それぞれ 30% の かくりつで もらえます。
+     （3つ ぜんぶ もらえる ことも、1つも もらえない ことも あります）
+     どの そざいが でるかは、コースせんたくの がめんで みられます。
+
+   ★こうさく★
+     あつめた そざいで、へやに かざる アイテムを つくれます。
+     20しゅるい × いろ 5つ ＝ 100パターン。
+     つくった ものは そのまま へやに おけます。
+   -------------------------------------------------------------------------- */
+const MATERIALS = {
+  wood:   { id: 'wood',   name: '木材',   icon: '🪵', color: '#a1683a' },
+  stone:  { id: 'stone',  name: '石',     icon: '🪨', color: '#9e9e9e' },
+  iron:   { id: 'iron',   name: '鉄',     icon: '⛓️', color: '#78909c' },
+  alumi:  { id: 'alumi',  name: 'アルミ', icon: '🔩', color: '#b0bec5' },
+  cloth:  { id: 'cloth',  name: '布',     icon: '🧵', color: '#ef9a9a' },
+  string: { id: 'string', name: '紐',     icon: '🪢', color: '#d7ccc8' },
+  glue:   { id: 'glue',   name: '接着剤', icon: '🧴', color: '#ffd54f' },
+};
+const MATERIAL_ORDER = ['wood', 'stone', 'iron', 'alumi', 'cloth', 'string', 'glue'];
+
+/* そざいが でる かくりつ（3しゅるい それぞれ）*/
+const DROP_RATE = 0.30;
+
+/* いろ 5しゅるい（どの アイテムにも つかいます）*/
+const CRAFT_COLORS = [
+  { id: 'red',   name: 'あか',   main: '#e57373', dark: '#c62828', light: '#ffcdd2', accent: '#fff59d' },
+  { id: 'blue',  name: 'あお',   main: '#64b5f6', dark: '#1565c0', light: '#bbdefb', accent: '#fff59d' },
+  { id: 'yellow',name: 'きいろ', main: '#ffd54f', dark: '#f9a825', light: '#fff9c4', accent: '#ffffff' },
+  { id: 'green', name: 'みどり', main: '#81c784', dark: '#2e7d32', light: '#c8e6c9', accent: '#fff59d' },
+  { id: 'white', name: 'しろ',   main: '#eceff1', dark: '#90a4ae', light: '#ffffff', accent: '#ffcc80' },
+];
+
+/* こうさくアイテム 20しゅるい。
+   cost は ひつような そざい。いろ 5つ ぶんは じどうで つくられます。 */
+const CRAFT_ITEMS = [
+  { id: 'bed',      name: 'ベッド',       draw: 'bed',      w: 132, h: 66,  cost: { wood: 4, cloth: 3, string: 1 } },
+  { id: 'table',    name: 'テーブル',     draw: 'table',    w: 104, h: 56,  cost: { wood: 3, glue: 1 } },
+  { id: 'chair',    name: 'いす',         draw: 'chair',    w: 56,  h: 74,  cost: { wood: 2, cloth: 1 } },
+  { id: 'shelf',    name: 'ほんだな',     draw: 'shelf',    w: 92,  h: 108, cost: { wood: 5, glue: 2 } },
+  { id: 'drawer',   name: 'たんす',       draw: 'drawer',   w: 84,  h: 92,  cost: { wood: 4, iron: 1, glue: 1 } },
+  { id: 'clock',    name: 'とけい',       draw: 'clock',    w: 48,  h: 52,  cost: { wood: 1, iron: 2, glue: 1 } },
+  { id: 'lamp',     name: 'ランプ',       draw: 'lamp',     w: 52,  h: 104, cost: { alumi: 2, cloth: 2, string: 1 } },
+  { id: 'picture',  name: 'え',           draw: 'picture',  w: 76,  h: 60,  cost: { wood: 2, cloth: 1, glue: 1 } },
+  { id: 'rug',      name: 'ラグ',         draw: 'rug',      w: 180, h: 40,  cost: { cloth: 4, string: 2 } },
+  { id: 'curtain',  name: 'カーテン',     draw: 'curtain',  w: 90,  h: 116, cost: { cloth: 5, string: 3 } },
+  { id: 'bear',     name: 'くまの ぬいぐるみ', draw: 'bear', w: 52, h: 62,  cost: { cloth: 3, string: 1 } },
+  { id: 'rabbit',   name: 'うさぎの ぬいぐるみ', draw: 'rabbit', w: 48, h: 70, cost: { cloth: 3, string: 2 } },
+  { id: 'ball',     name: 'ボール',       draw: 'ball',     w: 40,  h: 40,  cost: { cloth: 2, glue: 1 } },
+  { id: 'blocks',   name: 'つみき',       draw: 'blocks',   w: 62,  h: 48,  cost: { wood: 3 } },
+  { id: 'drum',     name: 'たいこ',       draw: 'drum',     w: 62,  h: 54,  cost: { wood: 2, cloth: 2, string: 2 } },
+  { id: 'guitar',   name: 'ギター',       draw: 'guitar',   w: 54,  h: 108, cost: { wood: 3, string: 3, glue: 1 } },
+  { id: 'bin',      name: 'ゴミばこ',     draw: 'bin',      w: 44,  h: 52,  cost: { alumi: 3 } },
+  { id: 'tank',     name: 'すいそう',     draw: 'tank',     w: 92,  h: 66,  cost: { alumi: 2, stone: 2, glue: 2 } },
+  { id: 'mirror',   name: 'かがみ',       draw: 'mirror',   w: 50,  h: 96,  cost: { alumi: 2, stone: 1, wood: 1 } },
+  { id: 'statue',   name: 'せきぞう',     draw: 'statue',   w: 56,  h: 88,  cost: { stone: 5, glue: 2 } },
+];
+
+/* 20しゅるい × 5いろ ＝ 100パターンを じどうで つくる */
+const CRAFT_PATTERNS = (function () {
+  const out = [];
+  CRAFT_ITEMS.forEach(it => {
+    CRAFT_COLORS.forEach(cl => {
+      out.push({
+        id: it.id + '_' + cl.id,
+        base: it.id,
+        name: cl.name + 'の ' + it.name,
+        draw: it.draw,
+        kind: (it.id === 'rug') ? 'floor' : 'item',
+        w: it.w, h: it.h,
+        x: 0.5, y: 0.78,
+        cost: it.cost,
+        palette: cl,
+        got: 'craft',
+      });
+    });
+  });
+  return out;
+})();
+
 const ROOM_ITEMS = [
   /* ---- かべがみ 2しゅるい（ばしょは なし）---- */
   { id: 'wall_cream', name: 'クリームの かべ', kind: 'wall', got: 'start',
@@ -4088,6 +4250,9 @@ const ROOM_ITEMS = [
 /* ============================================================
    なかまの おしゃべり（1たい 3つ。タップすると どれかを いいます）
    ============================================================ */
+/* つくった アイテム（100パターン）も へやの かぐ として あつかいます */
+CRAFT_PATTERNS.forEach(x => ROOM_ITEMS.push(x));
+
 const ROOM_TALK = {
   tankun:         ['ぼく、かべに なるのが とくいなんだ。', 'つぎの ステージ いつ いく？', 'せんしゃだけど、じつは のんびりやさん。'],
   purio:          ['ぷりぷり〜。ゼリー たべたい。', 'あいてを おそくするの、とくいだよ。', 'この へや、いごこち いいね！'],
@@ -4162,6 +4327,7 @@ const TOWER = {
       bg: 'rock',
       castleHp: 2000,
       power: 1,
+      drops: ['wood', 'stone', 'iron'],
       reward: { coins: 2, exp: 180 },
       waves: [
         { at: 3,  id: 'nyororiinu', count: 2, gap: 0.8 },
@@ -4183,6 +4349,7 @@ const TOWER = {
       bg: 'sunset',
       castleHp: 1800,
       power: 1.4,
+      drops: ['glue', 'stone', 'alumi'],
       reward: { coins: 2, exp: 210 },
       waves: [
         { at: 3,  id: 'togehaya',    count: 1 },
@@ -4205,6 +4372,7 @@ const TOWER = {
       bg: 'mizu',
       castleHp: 2600,
       power: 1.8,
+      drops: ['iron', 'cloth', 'glue'],
       reward: { coins: 2, exp: 240 },
       waves: [
         { at: 3,  id: 'togehaya',  count: 1 },
@@ -4226,6 +4394,7 @@ const TOWER = {
       bg: 'mori',
       castleHp: 2200,
       power: 2.2,
+      drops: ['string', 'wood', 'iron'],
       reward: { coins: 2, exp: 270 },
       /* かいふくやくを かたく する（ほのおで さきに たおすのが せいかい）*/
       enemyBuff: { momoplant: { hp: 1410 } },
@@ -4250,6 +4419,7 @@ const TOWER = {
       bg: 'steel',
       castleHp: 2600,
       power: 2.6,
+      drops: ['stone', 'alumi', 'string'],
       reward: { coins: 2, exp: 300 },
       /* ウサ・ゴリラを かたく する（まじゅつしの ありがたみ）*/
       enemyBuff: { usagorilla: { hp: 2370 } },
@@ -4273,6 +4443,7 @@ const TOWER = {
       bg: 'mori',
       castleHp: 2800,
       power: 3,
+      drops: ['cloth', 'glue', 'stone'],
       reward: { coins: 2, exp: 330 },
       /* クマべぇを かたく する（パワーの ありがたみ）*/
       enemyBuff: { kumabee: { hp: 2460 } },
@@ -4295,6 +4466,7 @@ const TOWER = {
       bg: 'night',
       castleHp: 3400,
       power: 3.4,
+      drops: ['wood', 'iron', 'cloth'],
       reward: { coins: 2, exp: 360 },
       waves: [
         { at: 3,  id: 'togehaya',     count: 1 },
@@ -4316,6 +4488,7 @@ const TOWER = {
       bg: 'steel',
       castleHp: 2800,
       power: 3.8,
+      drops: ['alumi', 'string', 'wood'],
       reward: { coins: 2, exp: 400 },
       /* アイアン・コッコを かたく する（ほのお・まじゅつし・パワーの ありがたみ）*/
       enemyBuff: { ironkokko: { hp: 2140 } },
@@ -4339,6 +4512,7 @@ const TOWER = {
       bg: 'hoshizora',
       castleHp: 4000,
       power: 4.2,
+      drops: ['glue', 'stone', 'alumi'],
       reward: { coins: 2, exp: 450 },
       waves: [
         { at: 3,   id: 'togehaya',     count: 1 },
@@ -4368,6 +4542,7 @@ const TOWER = {
       bg: 'boss',
       castleHp: 4400,
       power: 4.6,
+      drops: ['iron', 'cloth', 'glue'],
       reward: { coins: 2, exp: 600 },
       waves: [
         { at: 3,   id: 'togehaya',     count: 1 },
