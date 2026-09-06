@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '5.7';
+  const GAME_VERSION = '5.8';
 
 
   /* =================================================
@@ -1108,7 +1108,8 @@
       const def = UNITS[id];
       if (!def) return;
       const b = document.createElement('button');
-      b.className = 'unit-btn';
+      /* ★わくの いろを レア度に すこし よせる（rar-N / rar-R / … ）*/
+      b.className = 'unit-btn rar-' + (def.rarity || 'N');
       b.innerHTML =
         '<canvas class="u-icon"></canvas>' +
         markHtml(def, 'u-mark') +
@@ -1121,7 +1122,8 @@
     });
   }
 
-  function redrawIcons() { unitButtons.forEach(u => drawIcon(u.icon, u.id)); }
+  /* ★せんとうの ボタンは かおが みえる ように、うえはんしんを おおきく だす */
+  function redrawIcons() { unitButtons.forEach(u => paintCharBust(u.icon, u.id)); }
 
 
   /* =================================================
@@ -1155,6 +1157,92 @@
   function shownDrawId(id) {
     const def = shownDef(id);
     return (def && def.drawAs) ? def.drawAs : id;
+  }
+
+  /* ============================================================
+     ★せんとうの キャラボタンは「うえはんしん（かお）」を おおきく だす
+
+     キャラの えは 1たいずつ おおきさも たかさも ちがう ので、
+     きめうちの すうじでは かおが わくから はみだして しまいます。
+     そこで、いちど おおきな キャンバスに かいて、
+     じっさいに えが ある はんいを ピクセルから しらべ、
+     その うえのほう（かお〜むね）が わくに ぴったり はいる ように します。
+     しらべた けっかは おぼえて おく ので、おもく なりません。
+     ============================================================ */
+  const bustBoxCache = {};
+  function bustBox(drawId) {
+    if (bustBoxCache[drawId] !== undefined) return bustBoxCache[drawId];
+    const fn = DRAWERS[drawId];
+    if (!fn || typeof document === 'undefined') { bustBoxCache[drawId] = null; return null; }
+    const S = 240;
+    let box = null;
+    try {
+      const off = document.createElement('canvas');
+      off.width = S; off.height = S;
+      const c = off.getContext('2d', { willReadFrequently: true });
+      c.clearRect(0, 0, S, S);
+      c.save();
+      c.translate(S / 2, S * 0.95);          // あしもとを したの ほうに
+      c.scale(0.75, 0.75);
+      fn(c, { t: 0.7, moving: false, atk: -1, hpRatio: 1, hpRate: 1, roll: 0.35 });
+      c.restore();
+      const d = c.getImageData(0, 0, S, S).data;
+      let x0 = S, y0 = S, x1 = -1, y1 = -1;
+      for (let y = 0; y < S; y++) {
+        for (let x = 0; x < S; x++) {
+          if (d[(y * S + x) * 4 + 3] > 24) {
+            if (x < x0) x0 = x; if (x > x1) x1 = x;
+            if (y < y0) y0 = y; if (y > y1) y1 = y;
+          }
+        }
+      }
+      if (x1 >= x0 && y1 >= y0) {
+        /* かいた ときの ざひょうに もどす */
+        box = {
+          left:   (x0 - S / 2) / 0.75,
+          right:  (x1 - S / 2) / 0.75,
+          top:    (y0 - S * 0.95) / 0.75,
+          bottom: (y1 - S * 0.95) / 0.75,
+        };
+      }
+    } catch (e) { box = null; }
+    bustBoxCache[drawId] = box;
+    return box;
+  }
+
+  function paintCharBust(canvas, id) {
+    if (!canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth || 60, h = canvas.clientHeight || 48;
+    if (w < 2 || h < 2) return;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const drawId = shownDrawId(id);
+    const fn = DRAWERS[drawId];
+    if (!fn) return;
+    const box = bustBox(drawId);
+
+    ctx.save();
+    if (box) {
+      /* えの たての 55% ぶん（うえから）を きりとって わくに あわせる */
+      const bw = Math.max(10, box.right - box.left);
+      const bh = Math.max(10, box.bottom - box.top);
+      const cutH = bh * 0.55;
+      const sc = Math.min(w / (bw * 1.06), h / (cutH * 1.06));
+      const cx = (box.left + box.right) / 2;
+      const cy = box.top + cutH / 2;
+      ctx.translate(w / 2 - cx * sc, h / 2 - cy * sc);
+      ctx.scale(sc, sc);
+    } else {
+      ctx.translate(w / 2, h - 2);
+      const sc = Math.min(w / 110, h / 88);
+      ctx.scale(sc, sc);
+    }
+    fn(ctx, { t: 0.7, moving: false, atk: -1, hpRatio: 1, hpRate: 1, roll: 0.35 });
+    ctx.restore();
   }
 
   function paintChar(canvas, id, opt) {

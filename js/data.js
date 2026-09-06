@@ -3993,7 +3993,7 @@ const GONO = {
     {
       no: 302, floor: 2, chapter: 0, course: 2,
       name: 'レアの しれん',
-      desc: '★レアの なかま だけで たたかう！ボスは 獄熱オニごん',
+      desc: '★レアの なかま だけで たたかう！下手なきりんが 2たいと お菓子マン',
       bg: 'gono',
       castleHp: 19000,
       power: 4.0,
@@ -4006,9 +4006,10 @@ const GONO = {
         { at: 48, id: 'waterserver', count: 3, gap: 0.9, repeat: 20 },
         { at: 64, id: 'usagorilla',  count: 2, gap: 1.1, repeat: 26 },
         { at: 80, id: 'hoshikun',    count: 2, gap: 1.1, repeat: 24 },
-        /* ★ボス */
-        { atCastleHp: 0.80, id: 'onigon',    count: 1 },
-        { atCastleHp: 0.40, id: 'okashiman', count: 1 },
+        /* ★ボス（獄熱オニごんは つかわない ので、下手なきりんを 2たい）*/
+        { atCastleHp: 0.80, id: 'hetakirin', count: 1 },
+        { atCastleHp: 0.45, id: 'hetakirin', count: 1 },
+        { atCastleHp: 0.20, id: 'okashiman', count: 1 },
       ],
     },
 

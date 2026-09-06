@@ -905,10 +905,21 @@ body.dragging-slot #party-slots { touch-action:none; }
 .tag.boss  { background:#ef5350; color:#fff; }
 
 /* せんとうがめんの キャラボタンの すみに つける しるし */
+/* ★せんとうボタンの しるしは たてならび（えと かさならない ように）*/
 .unit-btn .u-mark {
-  position:absolute; top:1px; right:2px;
-  display:flex; gap:1px; align-items:center;
+  position:absolute; top:1px; right:1px;
+  display:flex; flex-direction:column; gap:1px; align-items:center;
   pointer-events:none;
+}
+.unit-btn .u-mark .u-rar {
+  writing-mode:vertical-rl;          /* ★を たてに ならべる */
+  text-orientation:upright;
+  letter-spacing:calc(-2px * var(--ui));
+  line-height:1;
+  text-shadow:0 1px 0 rgba(255,255,255,.9);
+}
+.unit-btn .u-mark .u-dot {
+  width:calc(8px * var(--ui)); height:calc(8px * var(--ui));
 }
 .u-dot {
   width:calc(9px * var(--ui)); height:calc(9px * var(--ui));
@@ -971,3 +982,13 @@ body.dragging-slot #party-slots { touch-action:none; }
 }
 /* へんせいがめん・せんとうがめんで つかえない キャラ */
 .locked-rarity { opacity:.35; filter:grayscale(1); }
+
+
+/* ---------- せんとうボタンの わくを レア度の いろに よせる ---------- */
+.unit-btn.rar-N  { border-color:#b0bec5; background:linear-gradient(180deg,#ffffff,#eceff1); }
+.unit-btn.rar-R  { border-color:#64b5f6; background:linear-gradient(180deg,#f5fbff,#d6ecff); }
+.unit-btn.rar-GR { border-color:#81c784; background:linear-gradient(180deg,#f6fff5,#d7f2d6); }
+.unit-btn.rar-SR { border-color:#ffb74d; background:linear-gradient(180deg,#fffdf3,#ffe6bf); }
+.unit-btn.rar-LR { border-color:#ba68c8; background:linear-gradient(180deg,#fdf6ff,#eddbf5); }
+/* えを おおきく みせる ぶん、なまえと コストは したに ぴったり */
+.unit-btn canvas { flex:1 1 auto; min-height:0; }
