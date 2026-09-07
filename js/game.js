@@ -711,11 +711,17 @@ const Game = {
       if (slow && !v.dead) {
         const chance = (slow.chance === undefined) ? 1 : slow.chance;
         if (Math.random() < chance) {
-          const wasSlow = v.slowUntil > this.time;
-          v.slowUntil = this.time + slow.duration;    // かさねがけ なし（じかんを のばす だけ）
-          v.slowRate = slow.rate;
-          if (!wasSlow) {
-            this.addEffect({ type: 'slowMark', x: v.x, y: this.groundWorldY() - 70, life: 0.9 });
+          if (v.def.slowImmune) {
+            /* ★どんそく むこうか（柔道たたみん）*/
+            this.addEffect({ type: 'dmg', x: v.x, y: this.groundWorldY() - 84 - v.lane,
+                             text: 'きかない！', color: '#ffb74d', life: 0.7 });
+          } else {
+            const wasSlow = v.slowUntil > this.time;
+            v.slowUntil = this.time + slow.duration;  // かさねがけ なし（じかんを のばす だけ）
+            v.slowRate = slow.rate;
+            if (!wasSlow) {
+              this.addEffect({ type: 'slowMark', x: v.x, y: this.groundWorldY() - 70, life: 0.9 });
+            }
           }
         }
       }
@@ -727,8 +733,14 @@ const Game = {
       // 2ぞくせい もちは、どちらか 1つでも あてはまれば こうかが でる
       const stunOkAttr = stun && (!stun.attrs || attrList(v.def.attr).some(x => stun.attrs.indexOf(x) >= 0));
       if (stunOkAttr && !v.dead && Math.random() < ((stun.chance === undefined) ? 1 : stun.chance)) {
-        v.stunUntil = this.time + stun.duration;
-        this.addEffect({ type: 'stunMark', x: v.x, y: this.groundWorldY() - 78, life: 0.9 });
+        if (v.def.stunImmune) {
+          /* ★うごきを とめる こうかを むこうか（柔道たたみん）*/
+          this.addEffect({ type: 'dmg', x: v.x, y: this.groundWorldY() - 84 - v.lane,
+                           text: 'きかない！', color: '#ffb74d', life: 0.7 });
+        } else {
+          v.stunUntil = this.time + stun.duration;
+          this.addEffect({ type: 'stunMark', x: v.x, y: this.groundWorldY() - 78, life: 0.9 });
+        }
       }
       if (burn && !v.dead && Math.random() < ((burn.chance === undefined) ? 1 : burn.chance)) {
         v.burnUntil = this.time + (burn.duration || 3);
@@ -910,6 +922,7 @@ const Game = {
       for (const u of this.units) {
         if (u.dead || u.side === w.side) continue;          // はった がわは とらわれない
         if (Math.abs(u.x - w.x) > w.radius) continue;
+        if (u.def.slowImmune) continue;                    // ★どんそく むこうか（柔道たたみん）
         /* すこし さきまで のこす ように して、巣から でると すぐ もとに もどる */
         u.webSlowUntil = this.time + 0.25;
         u.webSlowRate  = w.slowRate;

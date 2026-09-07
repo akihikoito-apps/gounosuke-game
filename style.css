@@ -1090,3 +1090,49 @@ body.dragging-slot #party-slots { touch-action:none; }
 .craft-item.cant { opacity:.5; }
 .craft-item.made { border-color:#66bb6a; }
 .craft-item.made::after { content:'✓'; position:absolute; top:1px; right:3px; color:#2e7d32; font-weight:bold; }
+
+/* ============ こうしん りれき ============ */
+.log-wrap{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg,#1b2a4a,#0d1730);
+  padding:calc(10px * var(--ui));
+}
+.log-top{ display:flex; align-items:center; gap:calc(10px * var(--ui)); flex:0 0 auto; }
+.log-title{
+  margin:0; color:#fff; font-size:calc(20px * var(--ui)); letter-spacing:1px;
+  text-shadow:0 calc(2px * var(--ui)) 0 rgba(0,0,0,.4);
+}
+.log-list{
+  flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  margin-top:calc(8px * var(--ui)); padding-right:calc(4px * var(--ui));
+}
+.log-card{
+  background:#fff; border-radius:calc(14px * var(--ui));
+  padding:calc(12px * var(--ui)) calc(14px * var(--ui));
+  margin-bottom:calc(10px * var(--ui));
+  box-shadow:0 calc(3px * var(--ui)) 0 rgba(0,0,0,.25);
+}
+.log-card.newest{ border:calc(3px * var(--ui)) solid #ffd54f; }
+.log-head{ display:flex; align-items:center; gap:calc(8px * var(--ui)); flex-wrap:wrap; }
+.log-ver{
+  background:linear-gradient(180deg,#42a5f5,#1565c0); color:#fff;
+  border-radius:999px; padding:calc(2px * var(--ui)) calc(10px * var(--ui));
+  font-size:calc(13px * var(--ui)); font-weight:bold;
+}
+.log-card.newest .log-ver{ background:linear-gradient(180deg,#ffb300,#ef6c00); }
+.log-new{
+  background:#e53935; color:#fff; border-radius:999px;
+  padding:calc(2px * var(--ui)) calc(8px * var(--ui));
+  font-size:calc(11px * var(--ui)); font-weight:bold;
+}
+.log-date{ color:#78909c; font-size:calc(12px * var(--ui)); margin-left:auto; }
+.log-name{
+  display:block; margin-top:calc(4px * var(--ui));
+  color:#1b2a4a; font-size:calc(16px * var(--ui)); font-weight:bold;
+}
+.log-items{ margin:calc(6px * var(--ui)) 0 0; padding-left:calc(18px * var(--ui)); }
+.log-items li{
+  color:#37474f; font-size:calc(13px * var(--ui));
+  line-height:1.6; margin-bottom:calc(4px * var(--ui));
+}

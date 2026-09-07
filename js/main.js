@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.4';
+  const GAME_VERSION = '6.5';
 
 
   /* =================================================
@@ -343,6 +343,37 @@
      ================================================= */
   function show(id) {
     $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  }
+
+  /* =================================================
+     こうしん りれき
+     ================================================= */
+  function openLog() {
+    const box = $('#log-list');
+    if (box) {
+      box.innerHTML = '';
+      const list = (typeof CHANGELOG !== 'undefined') ? CHANGELOG : [];
+      if (!list.length) {
+        box.innerHTML = '<div class="log-card"><span class="log-name">まだ りれきが ありません</span></div>';
+      }
+      list.forEach((e, i) => {
+        const card = document.createElement('div');
+        card.className = 'log-card' + (i === 0 ? ' newest' : '');
+        card.innerHTML =
+          '<div class="log-head">' +
+            '<span class="log-ver">v' + e.ver + '</span>' +
+            (i === 0 ? '<span class="log-new">いま これ</span>' : '') +
+            '<span class="log-date">' + (e.date || '') + '</span>' +
+          '</div>' +
+          '<span class="log-name">' + e.title + '</span>' +
+          '<ul class="log-items">' +
+            (e.items || []).map(t => '<li>' + t + '</li>').join('') +
+          '</ul>';
+        box.appendChild(card);
+      });
+      box.scrollTop = 0;
+    }
+    show('screen-log');
   }
 
 
@@ -2357,6 +2388,8 @@
     if (def.absorb)      L.push('★' + al(def.absorb.attrs) + ' の こうげきを すいとって、そのぶん たいりょくが かいふく する');
     if (def.resist)      L.push('★' + al(def.resist.attrs) + ' の こうげきを ' + pc(def.resist.mult) + ' まで おさえる');
     if (def.kbImmune)    L.push('★ふきとばされない');
+    if (def.slowImmune)  L.push('★どんそくに ならない（クモの巣の なかでも はやさが おちない）');
+    if (def.stunImmune)  L.push('★うごきを とめられない');
     if (def.waveStopper) L.push('★はどうストッパー：はどうの ダメージを うけず、なみを せきとめて うしろの なかまを まもる');
     if (def.crit)        L.push('★' + pc(def.crit.chance) + 'で かいしんの いちげき（ダメージ ' + def.crit.mult + 'ばい'
                                 + (def.crit.ignoreAttr ? '・ぞくせいの あいしょうは けいさんに いれない' : '') + '）');
@@ -2386,8 +2419,11 @@
     if (def.rest)        L.push('★ときどき やすんで うごかなく なる（' + def.rest.duration + 'びょう）。そのあいだは ダメージを うけやすい');
     if (def.leak)        L.push('★すすむほど はやく なるが、たいりょくが へって いく');
     if (def.stagger)     L.push('★おおきな ダメージを うけると こうげきが キャンセル される');
-    if (def.evolve)      L.push('じつりょく Lv.' + (LEVEL.evolveAt || 10) + ' で「' + def.evolve.name + '」に しんか できる');
-    if (def.evolve2)     L.push('さらに じつりょく Lv.' + LEVEL.max + ' で「' + def.evolve2.name + '」に なれる');
+    /* すでに その すがたに なって いる ときは あんないを ださない */
+    if (def.evolve  && def.name !== def.evolve.name)
+      L.push('じつりょく Lv.' + (LEVEL.evolveAt || 10) + ' で「' + def.evolve.name + '」に しんか できる');
+    if (def.evolve2 && def.name !== def.evolve2.name)
+      L.push('さらに じつりょく Lv.' + LEVEL.max + ' で「' + def.evolve2.name + '」に なれる');
     if (def.burn)        L.push('★' + pc(def.burn.chance === undefined ? 1 : def.burn.chance) + 'で えんじょう：'
                                 + (def.burn.dpsRate
                                    ? ('あたえた ダメージの ' + pc(def.burn.dpsRate) + ' を 1びょうごとに ' + def.burn.duration + 'びょう')
@@ -2497,7 +2533,9 @@
     let list = [];
     if (dexSide === 'ally') {
       const owned = (s && s.owned) ? s.owned : DEFAULT_PARTY;
-      list = owned.filter(id => UNITS[id]).map(id => UNITS[id]);
+      /* ★え は もともと しんかごを かいて いたので、すうじと なまえも
+         いまの すがたに そろえます（しんかして いなければ もとの すがた）*/
+      list = owned.filter(id => UNITS[id]).map(id => shownDef(id) || UNITS[id]);
       if (dexLimit && dexLimit.ally) list = list.filter(d => dexLimit.ally.indexOf(d.id) >= 0);
       if (dexRar !== 'all') list = list.filter(d => d.rarity === dexRar);
       const ord = {}; RARITY_ORDER.forEach((k, i) => ord[k] = i);
@@ -2934,6 +2972,8 @@
     $('#btn-home-power').addEventListener('click', openPower);
     $('#btn-home-party').addEventListener('click', openParty);
     $('#btn-home-gacha').addEventListener('click', openGacha);
+    $('#btn-home-log').addEventListener('click', openLog);
+    $('#btn-log-back').addEventListener('click', () => show('screen-home'));
     $('#btn-party-back').addEventListener('click', openHome);
     $('#btn-power-back').addEventListener('click', openHome);
     $('#btn-gacha-back').addEventListener('click', openHome);
