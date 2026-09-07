@@ -26,6 +26,7 @@ const Game = {
   projectiles: [],
   effects: [],
   spawnQueue: [],
+  webs: [],              // ★クモの巣（帝王クモール が はる どんそくの わ）
   waves: [],
   cooldown: {},          // キャラごとの さいせいさん まちじかん
   boss: null,
@@ -66,6 +67,7 @@ const Game = {
     this.shocks = [];        // はどう（まえに すすむ なみ）
     this.effects = [];
     this.spawnQueue = [];
+    this.webs = [];          // クモの巣
     this.boss = null;
     this.cooldown = {};
     PARTY.forEach(id => { this.cooldown[id] = 0; });
@@ -200,6 +202,8 @@ const Game = {
       kbT: 0, kbFrom: 0, kbTo: 0,
       nextKb: def.kbCount - 1,   // つぎに ふきとぶ しきいち（のこり）
       slowUntil: -1, slowRate: 1, roll: 0,
+      webT: def.web ? (def.web.interval || 7) * 0.55 : 0,   // クモの巣を はる タイマー
+      webSlowUntil: -1, webSlowRate: 1,   // クモの巣の なかに いる あいだの どんそく
       restT: 0, resting: false,     // きゅうけい（ひるね・ゼンマイぎれ）
       blindUntil: -1, blindRate: 0, // めくらまし（こうげきが はずれる）
       speedBonus: 0,                // みずもれ などで あがった はやさ
@@ -237,6 +241,7 @@ const Game = {
     }
 
     for (const u of this.units) this.updateUnit(u, dt);
+    this.updateWebs(dt);
     this.updateProjectiles(dt);
     this.updateShocks(dt);
     this.updateEffects(dt);
@@ -386,6 +391,29 @@ const Game = {
       }
     }
 
+    /* --- クモの巣を はる（帝王クモール）---
+       じぶんより まえ（あいての しろの ほう）に、おおきな 巣を はります。
+       巣の なかに はいった あいては ずっと どんそくに なります。      */
+    if (u.def.web && !this.finished && !u.resting) {
+      const wb = u.def.web;
+      u.webT += dt;
+      if (u.webT >= (wb.interval || 7)) {
+        u.webT = 0;
+        const wx = Math.max(60, Math.min(CONFIG.fieldLength - 60,
+                                         u.x + (wb.ahead || 400) * u.forward));
+        this.webs.push({
+          x: wx,
+          radius: wb.radius || 150,
+          slowRate: wb.slowRate || 0.5,
+          side: u.side,                 // この 巣を はった がわ（あいてだけ とらえる）
+          life: wb.duration || 7,
+          age: 0,
+        });
+        this.addEffect({ type: 'dmg', x: wx, y: this.groundWorldY() - 110,
+                         text: 'クモの巣！', color: '#e1bee7', life: 1.0, big: true });
+      }
+    }
+
     /* --- きゅうけい（ひるね／ゼンマイぎれ）--- */
     if (u.def.rest) {
       u.restT += dt;
@@ -437,7 +465,11 @@ const Game = {
     } else {
       u.state = 'walk';
       let sp = u.def.speed;
-      if (u.slowUntil > this.time) sp *= (u.slowRate || 0.5);
+      /* どんそくは かさねがけ しないで、つよい ほう（かずが ちいさい ほう）を つかう */
+      let slowMul = 1;
+      if (u.slowUntil    > this.time) slowMul = Math.min(slowMul, u.slowRate    || 0.5);
+      if (u.webSlowUntil > this.time) slowMul = Math.min(slowMul, u.webSlowRate || 0.5);
+      if (slowMul < 1) sp *= slowMul;
       if (u.def.stationary) { u.state = 'attack'; return; }   // その ばから うごかない
       if (u.blocked) { u.state = 'blocked'; return; }         // ふところに はいられて あわてて いる
       if (u.def.leak) {
@@ -862,6 +894,26 @@ const Game = {
     }
   },
 
+  /* ---- クモの巣：じかんで きえる。なかに いる あいてを どんそくに する ---- */
+  updateWebs(dt) {
+    if (!this.webs.length) return;
+    for (const w of this.webs) w.age += dt;
+    this.webs = this.webs.filter(w => w.age < w.life);
+
+    for (const w of this.webs) {
+      for (const u of this.units) {
+        if (u.dead || u.side === w.side) continue;          // はった がわは とらわれない
+        if (Math.abs(u.x - w.x) > w.radius) continue;
+        /* すこし さきまで のこす ように して、巣から でると すぐ もとに もどる */
+        u.webSlowUntil = this.time + 0.25;
+        u.webSlowRate  = w.slowRate;
+        if (Math.random() < dt * 1.6) {
+          this.addEffect({ type: 'slowMark', x: u.x, y: this.groundWorldY() - 70 - u.lane, life: 0.8 });
+        }
+      }
+    }
+  },
+
   updateProjectiles(dt) {
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const p = this.projectiles[i];
@@ -1004,6 +1056,15 @@ const Game = {
     // しろ
     this.drawCastle(ctx, 0, 'enemy');
     this.drawCastle(ctx, CONFIG.fieldLength, 'player');
+
+    // クモの巣（ユニットの うしろに かく）
+    for (const w of this.webs) {
+      ctx.save();
+      ctx.translate(this.worldToScreenX(w.x), gy);
+      ctx.scale(s, s);
+      drawWebZone(ctx, { radius: w.radius, age: w.age, life: w.life });
+      ctx.restore();
+    }
 
     // ユニット（うしろの レーンから）
     const list = this.units.slice().sort((a, b) => a.lane - b.lane);

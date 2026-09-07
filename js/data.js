@@ -644,7 +644,7 @@ const DEFAULT_PARTY = START_CHARS.slice();
 /* ガチャに でてくる キャラ ぜんぶ */
 const ALL_CHARS = ['tankun', 'purio', 'teruteru',
                    'tokinotabibito', 'zunio', 'kabekun', 'futabappo', 'shadowyamaneko', 'tenmusumaru',
-                   'hiibou', 'shurihen', 'akun', 'tatamin', 'matchkun', 'reitarou',
+                   'hiibou', 'shurihen', 'sakanafighters', 'akun', 'tatamin', 'matchkun', 'reitarou',
                    'dondoko', 'bakegi', 'akibou'];
 let PARTY = DEFAULT_PARTY.slice();   // いま せんとうに つれていく メンバー（へんせいで かわる）
 
@@ -1254,6 +1254,8 @@ const ENEMIES = {
     id: 'creeper_e', name: 'クリーパー',
     rarity: 'GR',
     attr: 'none',
+    drawAs: 'creeper',                    // ★え は みかたの クリーパーと おなじ
+                                          //   （これが ないと すがたが みえない）
     hp: 900,    atk: 620,  range: 82,   speed: 34,
     attackInterval: 2.0,   attackWindup: 1.2,
     kbCount: 3, scale: 1.15,
@@ -2122,6 +2124,68 @@ const ENEMIES = {
     money: 290,
     isBoss: true,
   },
+
+  /* ============================================================
+     ★木星（だい10しょう）の なかまたち
+     ============================================================ */
+
+  /* クモくん ── 木星の こザコ。いとに ぶらさがって おりて きて、
+                 いとを はいて あいてを どんそくに する。
+                 むぞくせい なので あいしょうは なし。
+                 かずで せめて くる ので、はんいこうげきが きく。     */
+  kumokun: {
+    id: 'kumokun', name: 'クモくん',
+    rarity: 'N',
+    attr: 'none',
+    hp: 235,   atk: 60,   range: 130,  speed: 32,
+    attackInterval: 1.8,   attackWindup: 0.32,
+    kbCount: 2,
+    scale: 1.0,
+    attackType: 'single',
+    projectile: 'web',                           // いとを とばす
+    /* とくしゅのうりょく：30%で 2.2びょう どんそく（はやさ 60%）*/
+    slow: { rate: 0.60, duration: 2.2, chance: 0.30 },
+    money: 48,
+  },
+
+  /* 帝王クモール ── 木星の おおボス。まるい からだが いくつも つながった
+                     きょだいな クモの ていおう。むぞくせい。
+
+                     ★いちばんの とくちょうは「クモの巣」★
+                     ときどき まえの ほうに おおきな 巣を はります。
+                     巣の なかに いる みかたは ずっと どんそくに なるので、
+                     まっすぐ つっこむと ボスの まえに たどりつけません。
+
+                     ★こうりゃくの ヒント★
+                     霊太郎（ゆうれい）は むぞくせいの こうげきを すりぬける ので、
+                     クモールの こうげきでは たおせません。巣の ばしょで かべに なって
+                     もらい、そのあいだに うしろから ほかの なかまで せめると いい。 */
+  kumooru: {
+    id: 'kumooru', name: '帝王クモール',
+    rarity: 'LR',
+    attr: 'none',
+    hp: 8800,  atk: 340,  range: 270,  speed: 8,
+    attackInterval: 3.0,   attackWindup: 0.80,
+    kbCount: 99,
+    scale: 1.5,
+    attackType: 'area',  areaRadius: 100,
+    projectile: 'web',
+    kbImmune: true,                              // ふきとばされない
+    /* ★クモの巣：まえの ほうに 巣を はって、なかに いる あいてを どんそくに する */
+    web: {
+      interval: 8.0,      // なんびょうごとに 巣を はるか
+      ahead:    420,      // じぶんから どれくらい まえに はるか
+      radius:   150,      // 巣の おおきさ（この なかに いると どんそく）
+      slowRate: 0.45,     // はやさが なんばいに なるか
+      duration: 5.5,      // 巣が のこる びょうすう
+                          // ★interval > duration に して おくと 巣が きえる
+                          //   「すきま」が できて、そこで まえに おしこめます */
+    },
+    /* たいりょくが へると こうげきが はやく なる */
+    enrage: { below: 0.40, intervalMult: 0.70 },
+    money: 400,
+    isBoss: true,
+  },
 };
 
 /* --------------------------------------------------------------------------
@@ -2222,6 +2286,22 @@ const BACKGROUNDS = {
     hillFar: '#1b5a86', hillNear: '#0b3050',
     ground: '#12496f', groundTop: '#2a7ba8',
     deco: 'star',
+  },
+
+  /* 木星 ── ガスの しま もようと、あかい あらしの いろ */
+  jupiter: {
+    sky: ['#2b1608', '#7a4520', '#c98b4a'],
+    hillFar: '#8d5528', hillNear: '#4f2a11',
+    ground: '#6b3d1a', groundTop: '#a86a30',
+    deco: 'star',
+  },
+
+  /* クモの巣の どうくつ（木星の おくち。むらさきがかった くらい いわば）*/
+  webcave: {
+    sky: ['#1a0f22', '#3a2340', '#6b4160'],
+    hillFar: '#452a4a', hillNear: '#221430',
+    ground: '#33203a', groundTop: '#5a3a5e',
+    deco: 'none',
   },
 
   /* あき坊の宇宙船（うちゅうせんの なか）*/
@@ -3687,6 +3767,169 @@ const STAGES = [
     ],
   },
 
+  /* ==========================================================
+     宇宙編 だい3わく「木星」
+
+     ガスの しまもようと、あかい あらしの ほし。
+     クモくんが あちこちに いて、いとを はいて どんそくに して きます。
+
+     ★でてくる てき★
+       むぞくせい と くさぞくせい が おおめ。すこしだけ ほかの ぞくせいも まざります。
+       くさが おおい ので「ほのお」（ひー坊・マッチくん・隕坊）が よく とおり、
+       むぞくせいが おおい ので「霊太郎」が かべとして とても つよい しょうです。
+
+     ★おおボス「帝王クモール」★
+       まえの ほうに クモの巣を はって、なかに いる みかたを どんそくに します。
+       むぞくせい なので 霊太郎には こうげきが すりぬけます。
+       巣の ばしょで 霊太郎に かべに なって もらい、うしろから せめるのが こつ。
+     ========================================================== */
+
+  /* ---------------- 10-1 いとの かかった もん ---------------- */
+  {
+    no: 88, chapter: 10, course: 1,
+    name: 'いとの かかった もん',
+    desc: 'あたらしい てき「クモくん」が とうじょう。いとで どんそくに される',
+    bg: 'jupiter',
+    castleHp: 8400,
+    power: 2.5,
+    drops: ['string', 'cloth', 'wood'],
+    reward: { coins: 2, exp: 4200 },
+    waves: [
+      { at: 3,  id: 'kumokun',    count: 2, gap: 1.0 },
+      { at: 16, id: 'nyororiinu', count: 4, gap: 0.7 },
+      { at: 30, id: 'kumokun',    count: 3, gap: 0.9, repeat: 15 },
+      { at: 46, id: 'blockwan',   count: 2, gap: 1.1, repeat: 19 },
+      { at: 62, id: 'kumokun',    count: 4, gap: 0.8, repeat: 17 },
+    ],
+  },
+
+  /* ---------------- 10-2 ガスの しまもよう ---------------- */
+  {
+    no: 89, chapter: 10, course: 2,
+    name: 'ガスの しまもよう',
+    desc: 'クモくんと くさの てき。モーモー・プラントが なかまを かいふくする',
+    bg: 'jupiter',
+    castleHp: 8600,
+    power: 2.6,
+    drops: ['wood', 'glue', 'string'],
+    reward: { coins: 2, exp: 4400 },
+    waves: [
+      { at: 3,  id: 'kumokun',    count: 3, gap: 0.9 },
+      { at: 17, id: 'momoplant',  count: 1, repeat: 24 },
+      { at: 32, id: 'kamomeeru',  count: 3, gap: 0.9, repeat: 18 },
+      { at: 48, id: 'kumokun',    count: 4, gap: 0.8, repeat: 16 },
+      { at: 64, id: 'togehaya',   count: 3, gap: 1.0, repeat: 21 },
+    ],
+  },
+
+  /* ---------------- 10-3 みどりの あらし（ちゅうボス コケジカ）---------------- */
+  {
+    no: 90, chapter: 10, course: 3,
+    name: 'みどりの あらし',
+    desc: 'くさの てきが おおい。ほのおの なかまが ゆうり',
+    bg: 'jupiter',
+    castleHp: 8800,
+    power: 2.7,
+    drops: ['cloth', 'wood', 'stone'],
+    reward: { coins: 2, exp: 4600 },
+    waves: [
+      { at: 3,  id: 'kumokun',    count: 3, gap: 0.9 },
+      { at: 18, id: 'mojacord',   count: 2, gap: 1.1 },
+      { at: 33, id: 'momoplant',  count: 1, repeat: 26 },
+      { at: 48, id: 'kumokun',    count: 4, gap: 0.8, repeat: 16 },
+      { at: 64, id: 'kokejika',   count: 1, repeat: 30 },
+      { at: 80, id: 'kumokun',    count: 5, gap: 0.7, repeat: 18 },
+    ],
+  },
+
+  /* ---------------- 10-4 クモの巣の どうくつ ---------------- */
+  {
+    no: 91, chapter: 10, course: 4,
+    name: 'クモの巣の どうくつ',
+    desc: 'クモくんの すみか。とにかく かずが おおい！はんいこうげきが きく',
+    bg: 'webcave',
+    castleHp: 9000,
+    power: 2.6,
+    drops: ['string', 'stone', 'glue'],
+    reward: { coins: 3, exp: 4800 },
+    waves: [
+      { at: 3,  id: 'kumokun',     count: 4, gap: 0.7 },
+      { at: 15, id: 'kumokun',     count: 4, gap: 0.7 },
+      { at: 28, id: 'hakobot',     count: 2, gap: 1.2, repeat: 22 },
+      { at: 42, id: 'kumokun',     count: 5, gap: 0.6, repeat: 13 },
+      { at: 58, id: 'magicrabbit', count: 2, gap: 1.0, repeat: 20 },
+      { at: 74, id: 'kumokun',     count: 6, gap: 0.6, repeat: 15 },
+    ],
+  },
+
+  /* ---------------- 10-5 あかい あらしの め ---------------- */
+  {
+    no: 92, chapter: 10, course: 5,
+    name: 'あかい あらしの め',
+    desc: 'むぞくせいの てきが あばれる。クリーパーの ばくはつに ちゅうい',
+    bg: 'jupiter',
+    castleHp: 9200,
+    power: 2.6,
+    drops: ['iron', 'alumi', 'string'],
+    reward: { coins: 2, exp: 5000 },
+    waves: [
+      { at: 3,  id: 'kumokun',    count: 4, gap: 0.8 },
+      { at: 18, id: 'hoshikun',   count: 2, gap: 1.1, repeat: 26 },
+      { at: 34, id: 'moeris',     count: 2, gap: 0.9, repeat: 24 },
+      { at: 50, id: 'creeper_e',  count: 1, repeat: 34 },
+      { at: 66, id: 'kumokun',    count: 4, gap: 0.7, repeat: 20 },
+    ],
+  },
+
+  /* ---------------- 10-6 まどわしの もり（ちゅうボス 覚醒 下手なきりん）---------------- */
+  {
+    no: 93, chapter: 10, course: 6,
+    name: 'まどわしの もり',
+    desc: 'ちゅうボス「覚醒 下手なきりん」。くさ ぞくせい なので ほのおで やこう',
+    bg: 'webcave',
+    castleHp: 9500,
+    power: 2.5,
+    drops: ['glue', 'cloth', 'iron'],
+    reward: { coins: 2, exp: 5200 },
+    waves: [
+      { at: 3,   id: 'kumokun',    count: 4, gap: 0.8 },
+      /* ★かいふく やくの モーモー・プラントは くりかえさない（2たい だけ）。
+         くりかえすと どんどん たまって、いつまでも たおせなく なります。 */
+      { at: 20,  id: 'momoplant',  count: 1 },
+      { at: 34,  id: 'yamanemu',   count: 2, gap: 1.0, repeat: 46 },
+      { at: 50,  id: 'kumokun',    count: 4, gap: 0.7, repeat: 20 },
+      { at: 68,  id: 'nyororiinu', count: 4, gap: 0.6, repeat: 26 },
+      { at: 96,  id: 'mandrake',   count: 1, repeat: 44 },
+      { at: 130, id: 'momoplant',  count: 1 },
+      /* ★ちゅうボス */
+      { atCastleHp: 0.70, id: 'hetakirin_x', count: 1 },
+    ],
+  },
+
+  /* ---------------- 10-7 帝王の たまざ（おおボス）---------------- */
+  {
+    no: 94, chapter: 10, course: 7,
+    name: '帝王の たまざ',
+    desc: 'おおボス「帝王クモール」。まえに クモの巣を はって どんそくに して くる！',
+    bg: 'boss',
+    castleHp: 9800,
+    power: 3.2,
+    drops: ['iron', 'glue', 'string'],
+    reward: { coins: 3, exp: 6200 },
+    waves: [
+      { at: 3,  id: 'kumokun',    count: 4, gap: 0.8 },
+      { at: 18, id: 'kumokun',    count: 4, gap: 0.7 },
+      { at: 32, id: 'blockwan',   count: 2, gap: 1.0, repeat: 24 },
+      { at: 48, id: 'kumokun',    count: 4, gap: 0.7, repeat: 19 },
+      { at: 64, id: 'hoshikun',   count: 2, gap: 1.1, repeat: 28 },
+      { at: 80, id: 'kumokun',    count: 5, gap: 0.7, repeat: 22 },
+      /* ★ちゅうボス → おおボス の じゅん */
+      { atCastleHp: 0.85, id: 'gaou',    count: 1 },
+      /* ★おおボス 帝王クモール */
+      { atCastleHp: 0.65, id: 'kumooru', count: 1 },
+    ],
+  },
+
 ];
 
 
@@ -4294,6 +4537,7 @@ const CHAPTERS = {
      world: 'space' の しょうは べつの ちず（うちゅうちず）に でます。   */
   8: { name: '火星',  short: 'かせい', x: 0.30, y: 0.42, icon: '🔴', world: 'space' },
   9: { name: '水星',  short: 'すいせい', x: 0.62, y: 0.66, icon: '💧', world: 'space' },
+  10:{ name: '木星',  short: 'もくせい', x: 0.87, y: 0.33, icon: '🕷️', world: 'space' },
 };
 
 

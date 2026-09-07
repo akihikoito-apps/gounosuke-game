@@ -7339,6 +7339,238 @@ function drawOkashiman(ctx, s) {
    なまえ ↔ かんすう の たいおうひょう
    （がぞうに さしかえる ときは ここの さきの かんすうを かきかえる）
    ================================================================== */
+
+/* ============================================================
+   木星の なかまたち（クモくん・帝王クモール）と クモの巣
+   ============================================================ */
+
+/* クモくん ── いとに ぶらさがった 小さい クモ。
+   まるい あたま ＋ しかくい どうたい ＋ したむきの さんかくの おしり ＋ 4ほんあし。 */
+function drawKumokun(ctx, s) {
+  const a = s.atk;
+  const bob = Math.sin(s.t * 2.2) * 4;              // いとで ゆらゆら
+  const swing = Math.sin(s.t * 3.4) * 0.06;
+  ctx.save();
+  ctx.translate(0, -bob);
+  ctx.rotate(swing);
+
+  /* --- ぶらさがって いる いと（うえに のびる）--- */
+  ctx.strokeStyle = 'rgba(240,240,255,.75)';
+  ctx.lineWidth = 1.6;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.moveTo(0, -92);
+  ctx.lineTo(Math.sin(s.t * 1.7) * 3, -190);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  /* --- あし 4ほん（りょうがわに 2ほんずつ）--- */
+  ctx.strokeStyle = '#2b2140';
+  ctx.lineWidth = 3.4;
+  ctx.lineCap = 'round';
+  for (const d of [-1, 1]) {
+    for (let i = 0; i < 2; i++) {
+      const kick = Math.sin(s.t * 3.2 + i * 1.5 + (d > 0 ? 0 : 0.8)) * 4;
+      ctx.beginPath();
+      ctx.moveTo(d * 10, -52 + i * 12);
+      ctx.quadraticCurveTo(d * (30 + kick), -60 + i * 16, d * (24 + kick), -18 + i * 8);
+      ctx.stroke();
+    }
+  }
+
+  /* --- おしり（したむきの さんかく）--- */
+  const bg = ctx.createLinearGradient(0, -40, 0, 2);
+  bg.addColorStop(0, '#6a5a8f'); bg.addColorStop(1, '#332a4d');
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.moveTo(-17, -38);
+  ctx.lineTo(17, -38);
+  ctx.lineTo(0, 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#241c38'; ctx.lineWidth = 2; ctx.stroke();
+  /* おしりの もよう */
+  ctx.fillStyle = 'rgba(255,235,150,.75)';
+  ctx.beginPath();
+  ctx.moveTo(-6, -30); ctx.lineTo(6, -30); ctx.lineTo(0, -12);
+  ctx.closePath(); ctx.fill();
+
+  /* --- どうたい（しかく）--- */
+  ctx.fillStyle = '#4a3f6b';
+  roundRect(ctx, -13, -58, 26, 22, 4); ctx.fill();
+  ctx.strokeStyle = '#241c38'; ctx.lineWidth = 2; ctx.stroke();
+
+  /* --- あたま（たまご がた）--- */
+  const hg = ctx.createLinearGradient(0, -92, 0, -56);
+  hg.addColorStop(0, '#efe8ff'); hg.addColorStop(1, '#b9aede');
+  ctx.fillStyle = hg;
+  ellipse(ctx, 0, -73, 15, 19); ctx.fill();
+  ctx.strokeStyle = '#241c38'; ctx.lineWidth = 2; ctx.stroke();
+
+  /* --- め（まえむき ＝ みぎ より）--- */
+  ctx.fillStyle = '#241c38';
+  ctx.beginPath(); ctx.arc(3,  -79, 2.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(9,  -76, 2.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(1,  -71, 1.8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(8,  -69, 1.6, 0, Math.PI * 2); ctx.fill();
+  /* くち */
+  ctx.strokeStyle = '#241c38'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.arc(6, -63, 3.4, 0.15, Math.PI - 0.4); ctx.stroke();
+
+  /* --- こうげき：くちから いとを はく --- */
+  if (a >= 0) {
+    ctx.strokeStyle = 'rgba(255,255,255,' + (0.35 + a * 0.5) + ')';
+    ctx.lineWidth = 2.2;
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(13, -64);
+      ctx.quadraticCurveTo(24 + a * 12, -64 + i * 5, 32 + a * 20, -60 + i * 10);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+/* 帝王クモール ── まるい からだが いくつも つながった きょだいな クモの ていおう。
+   ごうのすけくんの えを そのまま：まるが 6つ かさなり、うえの 2つに ^ の め、
+   まんなかしたに あいた くち、みぎから ながい あしが のびる。            */
+function drawKumooru(ctx, s) {
+  const a = s.atk;
+  const rage = !!s.enraged;
+  const step = Math.sin(s.t * 1.8) * (s.moving ? 1 : 0);
+  ctx.save();
+  ctx.translate(0, -Math.abs(step) * 2);
+
+  /* --- ながい あし（みぎがわに 3ぼん・ひだりがわに 2ほん）--- */
+  ctx.strokeStyle = rage ? '#4a1030' : '#1d1430';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  const legs = [
+    [ 36, -96,  110, -132,  128,  -6],
+    [ 44, -76,  120,  -80,  132, -34],
+    [ 40, -58,  108,  -30,  100,   0],
+    [-40, -92, -104, -118, -118,  -8],
+    [-38, -62, -100,  -34,  -96,   0],
+  ];
+  legs.forEach((L, i) => {
+    const kick = Math.sin(s.t * 2.4 + i) * (s.moving ? 7 : 3);
+    ctx.beginPath();
+    ctx.moveTo(L[0], L[1]);
+    ctx.quadraticCurveTo(L[2] + kick, L[3], L[4] + kick, L[5]);
+    ctx.stroke();
+  });
+
+  /* --- からだ：まるが かさなった かたまり --- */
+  /* [よこ, たて, おおきさ] */
+  const balls = [
+    [-52, -72, 30],
+    [-20, -96, 32],
+    [ 18, -98, 32],
+    [-16, -50, 30],
+    [ 16, -54, 30],
+    [ 48, -74, 32],
+  ];
+  /* そとがわの ふちを まとめて かく（かたまりに みえる ように）*/
+  ctx.strokeStyle = rage ? '#ffab40' : '#c9a227';
+  ctx.lineWidth = 3.2;
+  balls.forEach(b => {
+    ctx.beginPath(); ctx.arc(b[0], b[1], b[2], 0, Math.PI * 2); ctx.stroke();
+  });
+  balls.forEach(b => {
+    const g = ctx.createRadialGradient(b[0] - b[2] * 0.35, b[1] - b[2] * 0.35, b[2] * 0.15,
+                                       b[0], b[1], b[2]);
+    if (rage) { g.addColorStop(0, '#7e3b6b'); g.addColorStop(1, '#2a0d22'); }
+    else      { g.addColorStop(0, '#6a5c93'); g.addColorStop(1, '#221a38'); }
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(b[0], b[1], b[2], 0, Math.PI * 2); ctx.fill();
+  });
+
+  /* --- め（うえの まる 2つに「へ」の かたち）--- */
+  ctx.strokeStyle = rage ? '#ff5252' : '#150f24';
+  ctx.lineWidth = 4.5;
+  ctx.lineCap = 'round';
+  for (const ex of [-20, 18]) {
+    ctx.beginPath();
+    ctx.moveTo(ex - 11, -92);
+    ctx.lineTo(ex,      -106);
+    ctx.lineTo(ex + 11, -92);
+    ctx.stroke();
+  }
+
+  /* --- くち（まんなかしたの まるに、あいた くち）--- */
+  ctx.fillStyle = '#150f24';
+  ctx.beginPath();
+  ctx.ellipse(-4, -50, 13, 10 + (a >= 0 ? a * 6 : 0), 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = rage ? '#ff8a80' : '#8d6e9c';
+  ctx.beginPath();
+  ctx.ellipse(-4, -47, 6, 4 + (a >= 0 ? a * 3 : 0), 0, 0, Math.PI * 2);
+  ctx.fill();
+  /* きば */
+  ctx.strokeStyle = '#f5f0ff'; ctx.lineWidth = 2.6;
+  ctx.beginPath(); ctx.moveTo(-12, -55); ctx.lineTo(-9,  -46); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(  4, -55); ctx.lineTo(  1,  -46); ctx.stroke();
+
+  /* --- こうげき：くちから いとの かたまりを はく --- */
+  if (a >= 0) {
+    ctx.strokeStyle = 'rgba(240,235,255,' + (0.3 + a * 0.6) + ')';
+    ctx.lineWidth = 3;
+    for (let i = -2; i <= 2; i++) {
+      ctx.beginPath();
+      ctx.moveTo(10, -50);
+      ctx.quadraticCurveTo(40 + a * 24, -50 + i * 9, 62 + a * 40, -44 + i * 20);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+/* クモの巣（じめんに はられた どんそくの わ）*/
+function drawWebZone(ctx, p) {
+  const r  = p.radius || 150;
+  const ry = r * 0.52;
+  /* でて くる ときと きえる ときは うすく */
+  let al = 1;
+  if (p.age < 0.4)          al = p.age / 0.4;
+  if (p.life - p.age < 0.9) al = Math.min(al, (p.life - p.age) / 0.9);
+  al = Math.max(0, Math.min(1, al));
+
+  ctx.save();
+  ctx.globalAlpha = al * 0.85;
+  ctx.translate(0, -ry - 6);
+
+  /* うっすら ひかる ゆか */
+  const g = ctx.createRadialGradient(0, 0, r * 0.1, 0, 0, r);
+  g.addColorStop(0, 'rgba(225,190,231,.30)');
+  g.addColorStop(1, 'rgba(180,140,220,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(0, 0, r, ry, 0, 0, Math.PI * 2); ctx.fill();
+
+  /* すじ（ほうしゃじょう）*/
+  ctx.strokeStyle = 'rgba(255,255,255,.55)';
+  ctx.lineWidth = 1.5;
+  const N = 10;
+  for (let i = 0; i < N; i++) {
+    const th = (i / N) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(th) * r, Math.sin(th) * ry);
+    ctx.stroke();
+  }
+  /* わ（4じゅう）*/
+  for (let k = 1; k <= 4; k++) {
+    const f = k / 4;
+    ctx.beginPath();
+    for (let i = 0; i <= N; i++) {
+      const th = (i / N) * Math.PI * 2;
+      const x = Math.cos(th) * r * f, y = Math.sin(th) * ry * f;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 const DRAWERS = {
   runrunwisp: drawRunrunwisp,
   houkigob: drawHoukigob,
@@ -7367,6 +7599,8 @@ const DRAWERS = {
   matchkun: drawMatchkun,
   akibou: drawAkibou,
   sakanafighters: drawSakanaFighters,
+  kumokun: drawKumokun,
+  kumooru: drawKumooru,
   yajirushi: drawYajirushi,
   pochi: drawPochi,
   bakegi: drawBakegi,
@@ -7764,6 +7998,25 @@ function drawProjectile(ctx, p) {
         ctx.rotate(t * 8 + i * 2.1);
         ctx.beginPath(); ctx.ellipse(5, 0, 3.5, 9, 0, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
+      }
+      break;
+    case 'web':       // クモくん・帝王クモールの いと
+      {
+        ctx.rotate(t * 6 * p.dir);
+        /* まるまった いとの かたまり */
+        ctx.strokeStyle = 'rgba(255,255,255,.9)';
+        ctx.lineWidth = 1.6;
+        for (let i = 0; i < 5; i++) {
+          const th = (i / 5) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.moveTo(-Math.cos(th) * 9, -Math.sin(th) * 9);
+          ctx.lineTo(Math.cos(th) * 9, Math.sin(th) * 9);
+          ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(230,220,255,.85)';
+        ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,.35)';
+        ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
       }
       break;
   }

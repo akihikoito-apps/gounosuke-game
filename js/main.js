@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.0';
+  const GAME_VERSION = '6.1';
 
 
   /* =================================================
@@ -545,19 +545,61 @@
       }
     }
 
+    /* 木星（しまもようの ガスの ほし。あかい あらしが ある）*/
+    const jup = chapterInfo(10);
+    if (typeof jup.x === 'number') {
+      const jx = jup.x * W, jy = jup.y * H, jr = H * 0.155;
+      const jg = ctx.createRadialGradient(jx - jr * 0.3, jy - jr * 0.3, jr * 0.1, jx, jy, jr);
+      jg.addColorStop(0, '#ffe0b2'); jg.addColorStop(0.55, '#e08a3c'); jg.addColorStop(1, '#7b3f10');
+      ctx.fillStyle = jg;
+      ctx.beginPath(); ctx.arc(jx, jy, jr, 0, Math.PI * 2); ctx.fill();
+      /* しまもよう（ほしの まるさで きりぬく）*/
+      ctx.save();
+      ctx.beginPath(); ctx.arc(jx, jy, jr, 0, Math.PI * 2); ctx.clip();
+      const bands = [[-0.62, 0.14, 'rgba(255,236,200,.34)'], [-0.30, 0.18, 'rgba(140,74,26,.34)'],
+                     [ 0.02, 0.15, 'rgba(255,224,178,.30)'], [ 0.34, 0.18, 'rgba(120,60,20,.32)'],
+                     [ 0.66, 0.14, 'rgba(255,236,200,.26)']];
+      for (const [by, bh, bc] of bands) {
+        ctx.fillStyle = bc;
+        ctx.fillRect(jx - jr, jy + jr * by, jr * 2, jr * bh);
+      }
+      /* だいあかはん（おおきな あらし）*/
+      ctx.fillStyle = 'rgba(198,58,40,.75)';
+      ctx.beginPath(); ctx.ellipse(jx + jr * 0.26, jy + jr * 0.24, jr * 0.30, jr * 0.17, -0.15, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,190,150,.5)'; ctx.lineWidth = Math.max(1.5, H * 0.004);
+      ctx.beginPath(); ctx.ellipse(jx + jr * 0.26, jy + jr * 0.24, jr * 0.30, jr * 0.17, -0.15, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+      /* オレンジの ひかり */
+      const jh = ctx.createRadialGradient(jx, jy, jr, jx, jy, jr * 1.6);
+      jh.addColorStop(0, 'rgba(255,167,38,.30)'); jh.addColorStop(1, 'rgba(255,167,38,0)');
+      ctx.fillStyle = jh;
+      ctx.beginPath(); ctx.arc(jx, jy, jr * 1.6, 0, Math.PI * 2); ctx.fill();
+      /* 水星 → 木星の みち */
+      if (typeof merc.x === 'number') {
+        ctx.strokeStyle = 'rgba(255,213,79,.5)';
+        ctx.lineWidth = Math.max(3, H * 0.008);
+        ctx.setLineDash([Math.max(7, H * 0.03), Math.max(6, H * 0.026)]);
+        ctx.beginPath();
+        ctx.moveTo(merc.x * W + H * 0.13, merc.y * H - H * 0.05);
+        ctx.quadraticCurveTo(W * 0.78, H * 0.60, jx - jr * 0.85, jy + jr * 0.6);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
     /* これから いく ほし（まだ ない ぶんは かげだけ）*/
     ctx.fillStyle = 'rgba(255,255,255,.07)';
     ctx.strokeStyle = 'rgba(255,255,255,.16)';
     ctx.lineWidth = 1.6;
     ctx.setLineDash([5, 5]);
-    for (const [px, py, pr] of [[0.86, 0.36, 0.06]]) {
+    for (const [px, py, pr] of [[0.14, 0.31, 0.055]]) {
       ctx.beginPath(); ctx.arc(px * W, py * H, pr * H, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     }
     ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(255,255,255,.35)';
     ctx.font = 'bold ' + Math.round(H * 0.035) + 'px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('？', 0.86 * W, 0.36 * H + H * 0.012);
+    ctx.fillText('？', 0.14 * W, 0.31 * H + H * 0.012);
     ctx.textAlign = 'start';
 
     /* ロケットの みち（ちきゅう → 火星）*/
@@ -2286,6 +2328,9 @@
     if (def.knockbackChance) L.push('★' + pc(def.knockbackChance) + 'で あいてを うしろに ふきとばす');
     if (def.slow)        L.push('★' + pc(def.slow.chance === undefined ? 1 : def.slow.chance) + 'で あいてを '
                                 + def.slow.duration + 'びょう どんそくに する（はやさ ' + pc(def.slow.rate) + '）');
+    if (def.web)         L.push('★クモの巣：' + def.web.interval + 'びょうごとに、じぶんの ' + def.web.ahead
+                                + ' まえに 巣を はる。巣の なかに いる あいては はやさ ' + pc(def.web.slowRate)
+                                + ' に なる（' + def.web.duration + 'びょうで きえる）');
     if (def.stun)        L.push('★' + pc(def.stun.chance === undefined ? 1 : def.stun.chance) + 'で あいてを '
                                 + def.stun.duration + 'びょう とめる' + (def.stun.attrs ? '（' + al(def.stun.attrs) + ' だけ）' : ''));
     if (def.weaken)      L.push('★' + pc(def.weaken.chance === undefined ? 1 : def.weaken.chance) + 'で あいての こうげきりょくを '
