@@ -712,7 +712,7 @@ const Game = {
         const chance = (slow.chance === undefined) ? 1 : slow.chance;
         if (Math.random() < chance) {
           if (v.def.slowImmune) {
-            /* ★どんそく むこうか（柔道たたみん）*/
+            /* ★どんそく むこうか（柔道少年たたみん）*/
             this.addEffect({ type: 'dmg', x: v.x, y: this.groundWorldY() - 84 - v.lane,
                              text: 'きかない！', color: '#ffb74d', life: 0.7 });
           } else {
@@ -734,7 +734,7 @@ const Game = {
       const stunOkAttr = stun && (!stun.attrs || attrList(v.def.attr).some(x => stun.attrs.indexOf(x) >= 0));
       if (stunOkAttr && !v.dead && Math.random() < ((stun.chance === undefined) ? 1 : stun.chance)) {
         if (v.def.stunImmune) {
-          /* ★うごきを とめる こうかを むこうか（柔道たたみん）*/
+          /* ★うごきを とめる こうかを むこうか（柔道少年たたみん）*/
           this.addEffect({ type: 'dmg', x: v.x, y: this.groundWorldY() - 84 - v.lane,
                            text: 'きかない！', color: '#ffb74d', life: 0.7 });
         } else {
@@ -922,7 +922,7 @@ const Game = {
       for (const u of this.units) {
         if (u.dead || u.side === w.side) continue;          // はった がわは とらわれない
         if (Math.abs(u.x - w.x) > w.radius) continue;
-        if (u.def.slowImmune) continue;                    // ★どんそく むこうか（柔道たたみん）
+        if (u.def.slowImmune) continue;                    // ★どんそく むこうか（柔道少年たたみん）
         /* すこし さきまで のこす ように して、巣から でると すぐ もとに もどる */
         u.webSlowUntil = this.time + 0.25;
         u.webSlowRate  = w.slowRate;
