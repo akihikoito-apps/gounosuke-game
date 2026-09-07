@@ -3791,15 +3791,15 @@ const STAGES = [
     desc: 'あたらしい てき「クモくん」が とうじょう。いとで どんそくに される',
     bg: 'jupiter',
     castleHp: 8400,
-    power: 2.5,
+    power: 4.0,
     drops: ['string', 'cloth', 'wood'],
     reward: { coins: 2, exp: 4200 },
     waves: [
       { at: 3,  id: 'kumokun',    count: 2, gap: 1.0 },
       { at: 16, id: 'nyororiinu', count: 4, gap: 0.7 },
-      { at: 30, id: 'kumokun',    count: 3, gap: 0.9, repeat: 15 },
+      { at: 30, id: 'kumokun',    count: 4, gap: 0.9, repeat: 13 },
       { at: 46, id: 'blockwan',   count: 2, gap: 1.1, repeat: 19 },
-      { at: 62, id: 'kumokun',    count: 4, gap: 0.8, repeat: 17 },
+      { at: 62, id: 'kumokun',    count: 5, gap: 0.8, repeat: 15 },
     ],
   },
 
@@ -3810,15 +3810,15 @@ const STAGES = [
     desc: 'クモくんと くさの てき。モーモー・プラントが なかまを かいふくする',
     bg: 'jupiter',
     castleHp: 8600,
-    power: 2.6,
+    power: 4.2,
     drops: ['wood', 'glue', 'string'],
     reward: { coins: 2, exp: 4400 },
     waves: [
       { at: 3,  id: 'kumokun',    count: 3, gap: 0.9 },
       { at: 17, id: 'momoplant',  count: 1, repeat: 24 },
       { at: 32, id: 'kamomeeru',  count: 3, gap: 0.9, repeat: 18 },
-      { at: 48, id: 'kumokun',    count: 4, gap: 0.8, repeat: 16 },
-      { at: 64, id: 'togehaya',   count: 3, gap: 1.0, repeat: 21 },
+      { at: 48, id: 'kumokun',    count: 5, gap: 0.8, repeat: 14 },
+      { at: 64, id: 'togehaya',   count: 3, gap: 1.0, repeat: 18 },
     ],
   },
 
@@ -3829,16 +3829,16 @@ const STAGES = [
     desc: 'くさの てきが おおい。ほのおの なかまが ゆうり',
     bg: 'jupiter',
     castleHp: 8800,
-    power: 2.7,
+    power: 4.2,
     drops: ['cloth', 'wood', 'stone'],
     reward: { coins: 2, exp: 4600 },
     waves: [
       { at: 3,  id: 'kumokun',    count: 3, gap: 0.9 },
-      { at: 18, id: 'mojacord',   count: 2, gap: 1.1 },
+      { at: 18, id: 'mojacord',   count: 2, gap: 1.1, repeat: 26 },
       { at: 33, id: 'momoplant',  count: 1, repeat: 26 },
       { at: 48, id: 'kumokun',    count: 4, gap: 0.8, repeat: 16 },
-      { at: 64, id: 'kokejika',   count: 1, repeat: 30 },
-      { at: 80, id: 'kumokun',    count: 5, gap: 0.7, repeat: 18 },
+      { at: 64, id: 'kokejika',   count: 1, repeat: 24 },
+      { at: 80, id: 'kumokun',    count: 6, gap: 0.7, repeat: 14 },
     ],
   },
 
@@ -3849,7 +3849,7 @@ const STAGES = [
     desc: 'クモくんの すみか。とにかく かずが おおい！はんいこうげきが きく',
     bg: 'webcave',
     castleHp: 9000,
-    power: 2.6,
+    power: 3.7,
     drops: ['string', 'stone', 'glue'],
     reward: { coins: 3, exp: 4800 },
     waves: [
@@ -3869,7 +3869,7 @@ const STAGES = [
     desc: 'むぞくせいの てきが あばれる。クリーパーの ばくはつに ちゅうい',
     bg: 'jupiter',
     castleHp: 9200,
-    power: 2.6,
+    power: 3.5,
     drops: ['iron', 'alumi', 'string'],
     reward: { coins: 2, exp: 5000 },
     waves: [
@@ -3888,7 +3888,7 @@ const STAGES = [
     desc: 'ちゅうボス「覚醒 下手なきりん」。くさ ぞくせい なので ほのおで やこう',
     bg: 'webcave',
     castleHp: 9500,
-    power: 2.5,
+    power: 4.2,
     drops: ['glue', 'cloth', 'iron'],
     reward: { coins: 2, exp: 5200 },
     waves: [
@@ -3896,10 +3896,10 @@ const STAGES = [
       /* ★かいふく やくの モーモー・プラントは くりかえさない（2たい だけ）。
          くりかえすと どんどん たまって、いつまでも たおせなく なります。 */
       { at: 20,  id: 'momoplant',  count: 1 },
-      { at: 34,  id: 'yamanemu',   count: 2, gap: 1.0, repeat: 46 },
-      { at: 50,  id: 'kumokun',    count: 4, gap: 0.7, repeat: 20 },
-      { at: 68,  id: 'nyororiinu', count: 4, gap: 0.6, repeat: 26 },
-      { at: 96,  id: 'mandrake',   count: 1, repeat: 44 },
+      { at: 34,  id: 'yamanemu',   count: 2, gap: 1.0, repeat: 32 },
+      { at: 50,  id: 'kumokun',    count: 5, gap: 0.7, repeat: 17 },
+      { at: 68,  id: 'nyororiinu', count: 5, gap: 0.6, repeat: 22 },
+      { at: 96,  id: 'mandrake',   count: 1, repeat: 32 },
       { at: 130, id: 'momoplant',  count: 1 },
       /* ★ちゅうボス */
       { atCastleHp: 0.70, id: 'hetakirin_x', count: 1 },
@@ -3913,7 +3913,7 @@ const STAGES = [
     desc: 'おおボス「帝王クモール」。まえに クモの巣を はって どんそくに して くる！',
     bg: 'boss',
     castleHp: 9800,
-    power: 3.2,
+    power: 3.45,
     drops: ['iron', 'glue', 'string'],
     reward: { coins: 3, exp: 6200 },
     waves: [
@@ -3922,7 +3922,7 @@ const STAGES = [
       { at: 32, id: 'blockwan',   count: 2, gap: 1.0, repeat: 24 },
       { at: 48, id: 'kumokun',    count: 4, gap: 0.7, repeat: 19 },
       { at: 64, id: 'hoshikun',   count: 2, gap: 1.1, repeat: 28 },
-      { at: 80, id: 'kumokun',    count: 5, gap: 0.7, repeat: 22 },
+      { at: 80, id: 'kumokun',    count: 6, gap: 0.7, repeat: 19 },
       /* ★ちゅうボス → おおボス の じゅん */
       { atCastleHp: 0.85, id: 'gaou',    count: 1 },
       /* ★おおボス 帝王クモール */
