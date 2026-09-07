@@ -35,6 +35,7 @@ const Game = {
   bgImages: null,         // はいけいの しゃしん（なまえごと）
   levels: {},             // みかたキャラの レベル（main.js が セットする）
   evolved: {},            // しんかずみの キャラ（main.js が セットする）
+  evolved2: {},           // だい3けいたいの キャラ（main.js が セットする）
   seen: {},               // この せんとうで でてきた てき（ずかん に つかう）
   canvas: null, ctx: null,
   view: { w: 0, h: 0, scale: 1, groundY: 0 },
@@ -102,10 +103,12 @@ const Game = {
   defOf(id) {
     const base = UNITS[id];
     if (!base) return null;
-    if (this.evolved && this.evolved[id] && base.evolve) {
-      return Object.assign({}, base, base.evolve, { id: id });
-    }
-    return base;
+    /* base → だい2けいたい → だい3けいたい の じゅんに かさねて いきます。
+       かいて ある こうもく だけが さしかわり、かいて いない ものは そのまま。 */
+    let d = null;
+    if (this.evolved  && this.evolved[id]  && base.evolve)  d = Object.assign({}, base, base.evolve);
+    if (this.evolved2 && this.evolved2[id] && base.evolve2) d = Object.assign({}, d || base, base.evolve2);
+    return d ? Object.assign(d, { id: id }) : base;
   },
 
   summon(id) {
@@ -729,7 +732,10 @@ const Game = {
       }
       if (burn && !v.dead && Math.random() < ((burn.chance === undefined) ? 1 : burn.chance)) {
         v.burnUntil = this.time + (burn.duration || 3);
-        v.burnDps   = burn.dps || 50;
+        /* dpsRate を かくと「あたえた ダメージの ◯わり」が 1びょうごとの
+           ダメージに なります（レベルが あがると えんじょうも つよく なる）*/
+        v.burnDps   = burn.dpsRate ? Math.max(1, Math.round(dmg * burn.dpsRate))
+                                   : (burn.dps || 50);
         this.addEffect({ type: 'dmg', x: v.x, y: this.groundWorldY() - 92 - v.lane,
                          text: 'えんじょう！', color: '#ff7043', life: 0.8 });
       }

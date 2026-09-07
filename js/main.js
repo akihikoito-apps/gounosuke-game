@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.2';
+  const GAME_VERSION = '6.3';
 
 
   /* =================================================
@@ -71,7 +71,8 @@
       exp: 0,                            // けいけんち（レベルあげに つかう）
       levels: {},                        // キャラごとの レベル（けいけんちで あがる）
       plus: {},                          // レベルの じょうげんかいほう（ガチャの ダブりで ふえる）
-      evolved: {},                       // しんかずみの キャラ
+      evolved: {},                       // しんかずみの キャラ（だい2けいたい）
+      evolved2: {},                      // だい3けいたいの キャラ
       seenEnemies: {},                   // ずかん：いままで でてきた てき
       owned: START_CHARS.slice(),        // もっている キャラ（はじめは 2たい）
       party: START_CHARS.slice(),        // せんとうに つれていく メンバー
@@ -112,6 +113,7 @@
     if (!s.levels)  s.levels = {};
     if (!s.plus)    s.plus = {};
     if (!s.evolved) s.evolved = {};
+    if (!s.evolved2) s.evolved2 = {};
     if (!s.seenEnemies) s.seenEnemies = {};
     backfillSeen(s);          // まえに クリアした ステージの てきを ずかんに のせる
     if (!Array.isArray(s.owned) || !s.owned.length) s.owned = START_CHARS.slice();
@@ -1157,7 +1159,7 @@
         '<canvas class="u-icon"></canvas>' +
         markHtml(def, 'u-mark') +
         '<span class="u-name">' + (shownDef(id) || def).shortName + '</span>' +
-        '<span class="u-cost">' + def.cost + '</span>' +
+        '<span class="u-cost">' + ((shownDef(id) || def).cost) + '</span>' +
         '<span class="cd-mask" style="display:none"></span>';
       b.addEventListener('click', (ev) => { ev.preventDefault(); Game.summon(id); });
       box.appendChild(b);
@@ -1192,10 +1194,11 @@
     const s = slot();
     const base = UNITS[id];
     if (!base) return null;
-    if (s && s.evolved && s.evolved[id] && base.evolve) {
-      return Object.assign({}, base, base.evolve, { id: id });
-    }
-    return base;
+    /* base → だい2けいたい → だい3けいたい の じゅんに かさねます */
+    let d = null;
+    if (s && s.evolved  && s.evolved[id]  && base.evolve)  d = Object.assign({}, base, base.evolve);
+    if (s && s.evolved2 && s.evolved2[id] && base.evolve2) d = Object.assign({}, d || base, base.evolve2);
+    return d ? Object.assign(d, { id: id }) : base;
   }
   function shownDrawId(id) {
     const def = shownDef(id);
@@ -1653,6 +1656,7 @@
     if (PARTY.length === 0) PARTY.push(DEFAULT_PARTY[0]);
     Game.levels = s ? effLevelMap(s) : {};
     Game.evolved = (s && s.evolved) ? s.evolved : {};
+    Game.evolved2 = (s && s.evolved2) ? s.evolved2 : {};
     applyUnitLayout();
     buildUnitButtons();
     requestAnimationFrame(redrawIcons);
@@ -1686,12 +1690,34 @@
     if (!s || !UNITS[id] || !UNITS[id].evolve) return;
     if (effLevel(s, id) < (LEVEL.evolveAt || 10)) { toast('じつりょく Lv.' + (LEVEL.evolveAt || 10) + ' から しんか できます'); return; }
     if (!s.evolved) s.evolved = {};
+    if (!s.evolved2) s.evolved2 = {};
     const now = !s.evolved[id];
-    if (now) s.evolved[id] = true; else delete s.evolved[id];
+    if (now) s.evolved[id] = true;
+    else { delete s.evolved[id]; delete s.evolved2[id]; }   // もとに もどす ときは だい3も はずす
     storeSave();
     applyParty();
     toast(now ? (UNITS[id].evolve.name + ' に しんかした！')
               : (UNITS[id].name + ' に もどした'));
+    buildPower();
+    requestAnimationFrame(buildPower);
+  }
+
+  /* だい3けいたい ⇄ だい2けいたい を きりかえる（じつりょく Lv.30 から）*/
+  function toggleThird(id) {
+    const s = slot();
+    if (!s || !UNITS[id] || !UNITS[id].evolve2) return;
+    if (effLevel(s, id) < LEVEL.max) {
+      toast('じつりょく Lv.' + LEVEL.max + ' から だい3けいたいに なれます'); return;
+    }
+    if (!s.evolved) s.evolved = {};
+    if (!s.evolved2) s.evolved2 = {};
+    const now = !s.evolved2[id];
+    if (now) { s.evolved2[id] = true; s.evolved[id] = true; }   // だい3は だい2の さきに ある
+    else delete s.evolved2[id];
+    storeSave();
+    applyParty();
+    toast(now ? (UNITS[id].evolve2.name + ' に なった！')
+              : (UNITS[id].evolve.name + ' に もどした'));
     buildPower();
     requestAnimationFrame(buildPower);
   }
@@ -1724,7 +1750,8 @@
       const base = UNITS[id];
       if (!base) return;
       const def  = shownDef(id);          // しんかずみなら しんかごの すがた
-      const isEv = !!(s.evolved && s.evolved[id] && base.evolve);
+      const isEv  = !!(s.evolved  && s.evolved[id]  && base.evolve);
+      const isEv3 = !!(s.evolved2 && s.evolved2[id] && base.evolve2);
       const canEv = !!base.evolve;
       const lv   = s.levels[id] || 1;
       const plus = (s.plus && s.plus[id]) || 0;
@@ -1743,7 +1770,9 @@
       row.innerHTML =
         '<canvas></canvas>' +
         '<span class="pr-info">' +
-          '<span class="pr-name">' + def.name + (isEv ? ' <span class="pr-ev">しんか</span>' : '') + '</span>' +
+          '<span class="pr-name">' + def.name +
+            (isEv3 ? ' <span class="pr-ev">だい3けいたい</span>'
+                   : (isEv ? ' <span class="pr-ev">しんか</span>' : '')) + '</span>' +
           '<span class="pr-lv">Lv.' + lv + ' / ' + LEVEL.max +
             (plus ? ' <span class="pr-plus">＋' + plus + '</span>　じつりょく Lv.' + eff : '') +
             '</span>' +
@@ -1778,14 +1807,20 @@
         }
         row.appendChild(ev);
 
-        /* ★じつりょく Lv.30 に とどくと「だい3けいたい」の けんりを えます。
-           まだ つくって いない ので、いまは じゅんびちゅうと だします。   */
+        /* ★じつりょく Lv.30 で「だい3けいたい」に なれます。
+           evolve2 が かいて ある キャラだけ ほんとうに なれます。      */
         if (canThird) {
           const t3 = document.createElement('button');
-          t3.className = 'pr-btn evolve third';
-          t3.innerHTML = 'だい3けいたい<br><small>じゅんびちゅう</small>';
-          t3.addEventListener('click', () =>
-            toast('Lv.' + LEVEL.max + ' たっせい！　だい3けいたいは じゅんびちゅうです'));
+          t3.className = 'pr-btn evolve third' + (isEv3 ? ' on' : '');
+          if (base.evolve2) {
+            t3.innerHTML = isEv3 ? 'だい2けいたい<br><small>に もどす</small>'
+                                 : 'だい3けいたい<br><small>' + base.evolve2.name + '</small>';
+            t3.addEventListener('click', () => toggleThird(id));
+          } else {
+            t3.innerHTML = 'だい3けいたい<br><small>じゅんびちゅう</small>';
+            t3.addEventListener('click', () =>
+              toast('Lv.' + LEVEL.max + ' たっせい！　この キャラの だい3けいたいは じゅんびちゅうです'));
+          }
           row.appendChild(t3);
         }
       } else if (maxed) {
@@ -2352,6 +2387,12 @@
     if (def.leak)        L.push('★すすむほど はやく なるが、たいりょくが へって いく');
     if (def.stagger)     L.push('★おおきな ダメージを うけると こうげきが キャンセル される');
     if (def.evolve)      L.push('じつりょく Lv.' + (LEVEL.evolveAt || 10) + ' で「' + def.evolve.name + '」に しんか できる');
+    if (def.evolve2)     L.push('さらに じつりょく Lv.' + LEVEL.max + ' で「' + def.evolve2.name + '」に なれる');
+    if (def.burn)        L.push('★' + pc(def.burn.chance === undefined ? 1 : def.burn.chance) + 'で えんじょう：'
+                                + (def.burn.dpsRate
+                                   ? ('あたえた ダメージの ' + pc(def.burn.dpsRate) + ' を 1びょうごとに ' + def.burn.duration + 'びょう')
+                                   : ('1びょうに ' + def.burn.dps + ' を ' + def.burn.duration + 'びょう'))
+                                + '（あわせて ' + (def.burn.dpsRate ? pc(def.burn.dpsRate * def.burn.duration) + 'ぶん' : (def.burn.dps * def.burn.duration)) + '）');
     return L;
   }
 
@@ -2641,6 +2682,7 @@
     list.forEach(id => PARTY.push(id));
     Game.levels = s ? effLevelMap(s) : {};
     Game.evolved = (s && s.evolved) ? s.evolved : {};
+    Game.evolved2 = (s && s.evolved2) ? s.evolved2 : {};
     applyUnitLayout();
     buildUnitButtons();
     requestAnimationFrame(redrawIcons);
@@ -2698,7 +2740,9 @@
     cb.disabled = !Game.chudonReady || Game.finished;
 
     for (const u of unitButtons) {
-      const def = UNITS[u.id];
+      /* ★しんかで コスト／さいせいさんが かわる ことが あるので、
+         いまの すがたの すうじを つかいます（もとの すがたでは ない）*/
+      const def = shownDef(u.id) || UNITS[u.id];
       const cd = Game.cooldown[u.id];
       if (cd > 0) {
         u.mask.style.display = 'flex';
