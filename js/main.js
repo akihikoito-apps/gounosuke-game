@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.1';
+  const GAME_VERSION = '6.2';
 
 
   /* =================================================
@@ -2351,7 +2351,7 @@
     if (def.rest)        L.push('★ときどき やすんで うごかなく なる（' + def.rest.duration + 'びょう）。そのあいだは ダメージを うけやすい');
     if (def.leak)        L.push('★すすむほど はやく なるが、たいりょくが へって いく');
     if (def.stagger)     L.push('★おおきな ダメージを うけると こうげきが キャンセル される');
-    if (def.evolve)      L.push('じつりょく Lv.' + LEVEL.max + ' で「' + def.evolve.name + '」に しんか できる');
+    if (def.evolve)      L.push('じつりょく Lv.' + (LEVEL.evolveAt || 10) + ' で「' + def.evolve.name + '」に しんか できる');
     return L;
   }
 
