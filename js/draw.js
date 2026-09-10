@@ -8137,14 +8137,15 @@ function drawDozle(ctx, s) {
   ctx.fillRect(-9, -71, 8, 5); ctx.fillRect(3, -71, 8, 5);
   ctx.fillStyle = '#161616';                                   // め
   ctx.fillRect(-7, -65, 6, 8); ctx.fillRect(5, -65, 6, 8);
-  /* ★くちを かこむ ひげ（ここが ドズルの めじるし）*/
+  /* ★ひげ（ここが ドズルの めじるし）
+     くちひげの よこバー ＋ ほおの たてバー の「コ」の字。
+     ★あご（した）には ひげが ありません。したは あけて おきます。 */
   ctx.fillStyle = BEARD;
-  ctx.fillRect(-11, -56, 22, 5);      // くちひげ
-  ctx.fillRect(-11, -56, 5, 13);      // ひだりの ほお
-  ctx.fillRect(6, -56, 5, 13);        // みぎの ほお
-  ctx.fillRect(-11, -48, 22, 5);      // あごひげ
+  ctx.fillRect(-12, -58, 24, 6);      // くちひげ（よこ）
+  ctx.fillRect(-12, -58, 6, 14);      // ひだりの ほお（たて）
+  ctx.fillRect(6, -58, 6, 14);        // みぎの ほお（たて）
   ctx.fillStyle = '#7a4a30';
-  ctx.fillRect(-5, -52, 10, (a >= 0) ? 5 : 2);                 // くち
+  ctx.fillRect(-5, -51, 10, (a >= 0) ? 6 : 2);                 // くち（ひげの あいだ）
 
   /* ---- メイス（うえに ふりかぶって、ちゃくちで ふりおろす）---- */
   const mrot = (a >= 0) ? (-2.5 + Math.min(a, 1) * 3.4) : (w.front - 0.5);
@@ -8418,6 +8419,106 @@ function drawOnly(ctx, s) {
   ctx.restore();
 }
 
+/* ================= 覚醒 ドズル社長（だい6ステージの おおボス）=================
+   ★ふつうの ドズルより ひとまわり おおきい
+   ★くろい スーツ すがた（なかは ムキムキ）
+   ★ふとい うでで ぶんなぐって こうげき する
+   かおは ふつうの ドズルと おなじ（きいろい かみ・オリーブの まゆげ・
+   くちを かこむ ひげ。あごには ひげ なし）                              */
+function drawDozleX(ctx, s) {
+  const a = s.atk, w = mcSwing(s);
+  const SKIN = '#e8b48a', SKIN2 = '#cf9968', HAIR = '#f2e63a', BEARD = '#8f9440',
+        SUIT = '#1b1b22', SUIT2 = '#101014', SHIRT = '#f2f2f2', TIE = '#c62828';
+  const punch = (a >= 0) ? Math.min(a, 1) : 0;
+  ctx.save();
+  ctx.scale(1.62, 1.62);                    // ★ふつうの ドズル（1.3）より おおきい
+
+  /* --- あし（スーツの ズボン）--- */
+  mcLeg(ctx, -13 + w.walk * 3, 12, 23, SUIT, SUIT2);
+  mcLeg(ctx,   1 - w.walk * 3, 12, 23, SUIT, SUIT2);
+
+  /* --- うしろの ふとい うで --- */
+  ctx.save();
+  ctx.translate(-15, -47); ctx.rotate((a >= 0) ? 1.9 : w.back);
+  ctx.fillStyle = SUIT2; ctx.fillRect(0, -8, 18, 16);
+  ctx.fillStyle = SKIN2; ctx.fillRect(16, -8, 13, 16);
+  ctx.restore();
+
+  /* --- どうたい（くろい スーツ。ムキムキで はちきれそう）--- */
+  ctx.fillStyle = SUIT;  ctx.fillRect(-17, -52, 34, 30);
+  ctx.fillStyle = SHIRT; ctx.fillRect(-5, -52, 10, 20);       // ワイシャツ
+  ctx.fillStyle = TIE;   ctx.fillRect(-3, -50, 6, 22);        // ネクタイ
+  ctx.fillStyle = SUIT2;
+  ctx.fillRect(-17, -52, 8, 30); ctx.fillRect(9, -52, 8, 30); // えりの かげ
+  ctx.fillStyle = 'rgba(255,255,255,.10)';                     // むねの あつみ
+  ctx.fillRect(-15, -50, 6, 12); ctx.fillRect(11, -50, 6, 12);
+
+  /* --- あたま（ふつうの ドズルと おなじ かお）--- */
+  ctx.fillStyle = SKIN;  ctx.fillRect(-15, -82, 30, 30);
+  ctx.fillStyle = HAIR;  ctx.fillRect(-15, -86, 30, 14);
+  ctx.fillRect(-15, -86, 6, 24);
+  ctx.fillStyle = BEARD;                                       // まゆげ
+  ctx.fillRect(-10, -72, 9, 6); ctx.fillRect(3, -72, 9, 6);
+  ctx.fillStyle = '#161616';                                   // め
+  ctx.fillRect(-8, -65, 7, 9); ctx.fillRect(5, -65, 7, 9);
+  ctx.fillStyle = BEARD;                                       // ★「コ」の字の ひげ
+  ctx.fillRect(-13, -57, 26, 6);
+  ctx.fillRect(-13, -57, 6, 15);
+  ctx.fillRect(7, -57, 6, 15);
+  ctx.fillStyle = '#7a4a30';
+  ctx.fillRect(-5, -50, 11, (a >= 0) ? 7 : 3);                 // くち
+
+  /* --- まえの ふとい うで：ぶんなぐる --- */
+  const parm = (a >= 0) ? (-0.45 + punch * 0.45) : w.front;
+  const plen = 30 + punch * 20;
+  ctx.save();
+  ctx.translate(15, -47); ctx.rotate(parm);
+  ctx.fillStyle = SUIT;  ctx.fillRect(0, -9, plen - 16, 18);
+  ctx.fillStyle = SKIN2; ctx.fillRect(plen - 18, -9, 6, 18);   // そでぐち
+  ctx.fillStyle = SKIN;  ctx.fillRect(plen - 13, -11, 20, 22); // こぶし
+  ctx.fillStyle = SKIN2;
+  for (let k = 0; k < 3; k++) ctx.fillRect(plen + 2, -8 + k * 7, 5, 5);  // ゆびの すじ
+  ctx.restore();
+
+  /* --- なぐった しょうげき ---
+     ★あたる しゅんかん（うでが のびきった とき）が いちばん つよく なる ように、
+       k は 0 → 1 で こく なって いきます。 */
+  if (a >= 0.55) {
+    const k = (a - 0.55) / 0.45;
+    ctx.save();
+    ctx.translate(15, -47); ctx.rotate(parm); ctx.translate(plen + 12, 0);
+    /* ひかりの ほうしゃ */
+    ctx.strokeStyle = 'rgba(255,232,90,' + (0.35 + k * 0.6) + ')';
+    ctx.lineWidth = 4 + k * 4; ctx.lineCap = 'round';
+    for (let i = 0; i < 8; i++) {
+      const th = -1.4 + i * 0.4;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(th) * (10 + k * 6), Math.sin(th) * (10 + k * 6));
+      ctx.lineTo(Math.cos(th) * (22 + k * 40), Math.sin(th) * (22 + k * 40));
+      ctx.stroke();
+    }
+    /* しろい はじけ（ブロック）*/
+    ctx.fillStyle = 'rgba(255,255,255,' + (0.35 + k * 0.6) + ')';
+    const cr = 12 + k * 22;
+    ctx.fillRect(-cr / 2, -cr / 2, cr, cr);
+    ctx.fillStyle = 'rgba(255,214,79,' + (0.3 + k * 0.5) + ')';
+    for (let i = 0; i < 5; i++) {
+      const th = -1.1 + i * 0.55, rr = 30 + k * 40;
+      ctx.fillRect(Math.cos(th) * rr - 5, Math.sin(th) * rr - 5, 10, 10);
+    }
+    ctx.restore();
+    /* スピードせん（うしろに ながれる）*/
+    ctx.strokeStyle = 'rgba(255,255,255,' + (0.25 + k * 0.35) + ')';
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 4; i++) {
+      const y = -68 + i * 14;
+      ctx.beginPath();
+      ctx.moveTo(-32 - i * 5, y); ctx.lineTo(-58 - i * 9 - k * 14, y); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
 /* ================= ネコおじ（4パターン きょうつうの あたま）================= */
 function nekoHead(ctx, s, opt) {
   opt = opt || {};
@@ -8610,6 +8711,7 @@ const DRAWERS = {
   judotatamin: drawJudotatamin,
   /* ★デザインあん（まだ ゲームには でません）*/
   dozle: drawDozle,
+  dozle_x: drawDozleX,
   bonjour: drawBonjour,
   only: drawOnly,
   olaf: drawOlaf,
