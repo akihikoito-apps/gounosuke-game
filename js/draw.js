@@ -8039,6 +8039,487 @@ function drawJudotatamin(ctx, s) {
   ctx.restore();
 }
 
+
+/* ============================================================
+   ★デザインあん★ ドズル社の 6にん（モチーフから つくった オリジナル）
+   まだ ゲームには でて きません（ENEMIES に いれて いない ため）。
+   え を みて もらって、OKが でたら てきとして いれます。
+     ドズル      🦍 ゴリラ
+     ぼんじゅうる 🍆 なす
+     おんりー    🍌 バナナ
+     おらふくん  ⛄ ゆきだるま
+     おおはらMEN 🐷 ぶた
+     ネコおじ    🐱 ねこ
+   ============================================================ */
+
+/* ドズル ── ゴリラの しゃちょう。おおきくて つよそう。むねを たたく */
+function drawDozle(ctx, s) {
+  const a = s.atk;
+  const step = Math.sin(s.t * 2.8) * (s.moving ? 1 : 0);
+  const beat = (a >= 0) ? Math.sin(a * Math.PI * 3) * 6 : 0;
+  ctx.save();
+
+  /* あし */
+  ctx.fillStyle = '#3b3b45';
+  roundRect(ctx, -26 + step * 4, -22, 22, 24, 9); ctx.fill();
+  roundRect(ctx,   6 - step * 4, -22, 22, 24, 9); ctx.fill();
+
+  /* どうたい */
+  const bg = ctx.createLinearGradient(0, -92, 0, -18);
+  bg.addColorStop(0, '#55555f'); bg.addColorStop(1, '#2c2c34');
+  ctx.fillStyle = bg;
+  ellipse(ctx, 0, -56, 40, 40); ctx.fill();
+  /* おなかの あかるい ところ */
+  ctx.fillStyle = '#8d8d99';
+  ellipse(ctx, 2, -48, 24, 26); ctx.fill();
+
+  /* うで（ふとい）*/
+  ctx.fillStyle = '#3b3b45';
+  ctx.save(); ctx.translate(-34, -62 + beat); ctx.rotate(0.5 + step * 0.15);
+  roundRect(ctx, -11, -6, 22, 44, 11); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.translate(34, -62 - beat); ctx.rotate(-0.5 - step * 0.15);
+  roundRect(ctx, -11, -6, 22, 44, 11); ctx.fill(); ctx.restore();
+
+  /* あたま */
+  ctx.fillStyle = '#3b3b45';
+  ellipse(ctx, 6, -102, 28, 26); ctx.fill();
+  /* かお（あかるい）*/
+  ctx.fillStyle = '#9a8f86';
+  ellipse(ctx, 10, -98, 20, 19); ctx.fill();
+  /* まゆ（きりっと）*/
+  ctx.strokeStyle = '#1c1c22'; ctx.lineWidth = 3.4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, -110); ctx.lineTo(10, -107); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(22, -110); ctx.lineTo(14, -107); ctx.stroke();
+  /* め */
+  ctx.fillStyle = '#1c1c22';
+  ctx.beginPath(); ctx.arc(5, -101, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(17, -101, 3.2, 0, Math.PI * 2); ctx.fill();
+  /* はなと くち */
+  ctx.fillStyle = '#5a4f48';
+  ellipse(ctx, 11, -93, 9, 6); ctx.fill();
+  ctx.fillStyle = '#2b2b33';
+  ctx.beginPath(); ctx.arc(9, -94, 1.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(14, -94, 1.6, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#5a4f48'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  if (a >= 0) { ctx.arc(11, -86, 5, 0.1, Math.PI - 0.1); }
+  else { ctx.moveTo(6, -86); ctx.lineTo(16, -86); }
+  ctx.stroke();
+  /* みみ */
+  ctx.fillStyle = '#3b3b45';
+  ctx.beginPath(); ctx.arc(-14, -104, 7, 0, Math.PI * 2); ctx.fill();
+
+  /* しゃちょうの ネクタイ */
+  ctx.fillStyle = '#d32f2f';
+  ctx.beginPath();
+  ctx.moveTo(0, -76); ctx.lineTo(8, -76); ctx.lineTo(6, -70); ctx.lineTo(2, -70);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(2, -70); ctx.lineTo(6, -70); ctx.lineTo(8, -50); ctx.lineTo(4, -46); ctx.lineTo(0, -50);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+/* ぼんじゅうる ── なす。ボンジュール なので ベレーぼう をかぶって いる */
+function drawBonjour(ctx, s) {
+  const a = s.atk;
+  const step = Math.sin(s.t * 5) * (s.moving ? 1 : 0);
+  ctx.save();
+  ctx.scale(1.22, 1.22);          // すこし おおきく（ちいさく みえた ため）
+
+  /* あし */
+  ctx.strokeStyle = '#5d4037'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-7, -18); ctx.lineTo(-10 + step * 5, 0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(7, -18); ctx.lineTo(10 - step * 5, 0); ctx.stroke();
+
+  /* なすの からだ */
+  const g = ctx.createLinearGradient(-18, -70, 18, -10);
+  g.addColorStop(0, '#7e57c2'); g.addColorStop(1, '#3f1f6e');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(0, -74);
+  ctx.bezierCurveTo(26, -70, 26, -34, 14, -16);
+  ctx.bezierCurveTo(6, -4, -6, -4, -14, -16);
+  ctx.bezierCurveTo(-26, -34, -26, -70, 0, -74);
+  ctx.closePath(); ctx.fill();
+  /* つや */
+  ctx.fillStyle = 'rgba(255,255,255,.28)';
+  ctx.beginPath(); ctx.ellipse(-8, -50, 4.5, 13, 0.25, 0, Math.PI * 2); ctx.fill();
+
+  /* へた（みどり）*/
+  ctx.fillStyle = '#43a047';
+  for (let i = -2; i <= 2; i++) {
+    ctx.save(); ctx.translate(0, -72); ctx.rotate(i * 0.42);
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.quadraticCurveTo(5, -8, 0, -16); ctx.quadraticCurveTo(-5, -8, 0, 0);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  /* ★ベレーぼう */
+  ctx.fillStyle = '#c62828';
+  ctx.beginPath(); ctx.ellipse(2, -84, 20, 9, -0.12, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0, -88, 15, 8, -0.12, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#8e0000';
+  ctx.beginPath(); ctx.arc(-2, -95, 3, 0, Math.PI * 2); ctx.fill();
+
+  /* かお */
+  ctx.fillStyle = '#1b1030';
+  ctx.beginPath(); ctx.arc(-6, -48, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(7, -48, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(-7, -49.2, 1.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(6, -49.2, 1.2, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#1b1030'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+  ctx.beginPath();
+  if (a >= 0) ctx.arc(0.5, -39, 5, 0.15, Math.PI - 0.15);
+  else ctx.arc(0.5, -41, 4.5, 0.3, Math.PI - 0.3);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,138,128,.35)';
+  ctx.beginPath(); ctx.arc(-13, -42, 3.4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(14, -42, 3.4, 0, Math.PI * 2); ctx.fill();
+
+  /* て */
+  ctx.strokeStyle = '#5d4037'; ctx.lineWidth = 3.4;
+  ctx.beginPath(); ctx.moveTo(-17, -38); ctx.lineTo(-27, -30 + step * 3); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(17, -38); ctx.lineTo(27 + (a >= 0 ? 6 : 0), -30 - step * 3); ctx.stroke();
+  ctx.restore();
+}
+
+/* おんりー ── バナナ。かわが 3まい おおきく ひらいて、うでの ように なる */
+function drawOnly(ctx, s) {
+  const a = s.atk;
+  const step = Math.sin(s.t * 5.5) * (s.moving ? 1 : 0);
+  ctx.save();
+
+  /* あし */
+  ctx.fillStyle = '#8d6e3a';
+  roundRect(ctx, -15 + step * 5, -13, 13, 14, 5); ctx.fill();
+  roundRect(ctx,   3 - step * 5, -13, 13, 14, 5); ctx.fill();
+
+  /* かわ（うしろがわ 2まい・おおきく ひらく）*/
+  ctx.strokeStyle = '#c69100'; ctx.lineWidth = 1.6;
+  for (const d of [-1, 1]) {
+    ctx.save(); ctx.translate(d * 8, -52); ctx.rotate(d * (1.0 + step * 0.14));
+    const g2 = ctx.createLinearGradient(0, 0, d * 20, 46);
+    g2.addColorStop(0, '#f0cb54'); g2.addColorStop(1, '#c69100');
+    ctx.fillStyle = g2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(d * 24, 20, d * 13, 50);
+    ctx.quadraticCurveTo(d * -3, 24, 0, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* バナナ ほんたい（おおきめ・すこし まがった かたち）*/
+  const g = ctx.createLinearGradient(-22, -104, 22, -14);
+  g.addColorStop(0, '#fff9c4'); g.addColorStop(0.5, '#ffd54f'); g.addColorStop(1, '#e0a100');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(-6, -104);
+  ctx.bezierCurveTo(28, -92, 31, -38, 11, -14);
+  ctx.bezierCurveTo(-3, -3, -20, -12, -23, -34);
+  ctx.bezierCurveTo(-26, -66, -19, -92, -6, -104);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#c69100'; ctx.lineWidth = 2; ctx.stroke();
+  /* かわの すじ */
+  ctx.strokeStyle = 'rgba(198,145,0,.45)'; ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(-2, -98);
+  ctx.bezierCurveTo(16, -84, 18, -40, 4, -20);
+  ctx.stroke();
+
+  /* さきっぽの くろい ところ */
+  ctx.fillStyle = '#6d4c1b';
+  ctx.beginPath(); ctx.ellipse(-6, -105, 5.5, 5, 0, 0, Math.PI * 2); ctx.fill();
+
+  /* かわ（まえがわ 1まい）*/
+  ctx.save(); ctx.translate(2, -50); ctx.rotate(-0.18 + step * 0.12);
+  const g3 = ctx.createLinearGradient(0, 0, 6, 48);
+  g3.addColorStop(0, '#ffe082'); g3.addColorStop(1, '#d9a300');
+  ctx.fillStyle = g3;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.quadraticCurveTo(14, 22, 6, 50);
+  ctx.quadraticCurveTo(-6, 22, 0, 0);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#c69100'; ctx.lineWidth = 1.6; ctx.stroke();
+  ctx.restore();
+
+  /* かお */
+  ctx.fillStyle = '#5d3a12';
+  ctx.beginPath(); ctx.arc(-5, -64, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(11, -66, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(-6.3, -65.6, 1.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(9.7, -67.6, 1.5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#5d3a12'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+  ctx.beginPath();
+  if (a >= 0) ctx.arc(3, -54, 7, 0.1, Math.PI - 0.1);
+  else ctx.arc(3, -56, 6, 0.25, Math.PI - 0.25);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,138,128,.38)';
+  ctx.beginPath(); ctx.arc(-13, -56, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(19, -58, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+/* おらふくん ── ゆきだるま。バケツを かぶり、はなは にんじん */
+function drawOlaf(ctx, s) {
+  const a = s.atk;
+  const step = Math.sin(s.t * 4) * (s.moving ? 1 : 0);
+  ctx.save();
+
+  /* ゆきの あし */
+  ctx.fillStyle = '#e8f4ff';
+  ctx.strokeStyle = '#a8c8dd'; ctx.lineWidth = 1.8;
+  roundRect(ctx, -16 + step * 3, -10, 13, 11, 5); ctx.fill(); ctx.stroke();
+  roundRect(ctx,   4 - step * 3, -10, 13, 11, 5); ctx.fill(); ctx.stroke();
+
+  /* したの たま */
+  const g1 = ctx.createRadialGradient(-8, -34, 4, 0, -28, 28);
+  g1.addColorStop(0, '#ffffff'); g1.addColorStop(1, '#cfe4f5');
+  ctx.fillStyle = g1;
+  ctx.beginPath(); ctx.arc(0, -28, 26, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#a8c8dd'; ctx.lineWidth = 2; ctx.stroke();
+  /* ボタン */
+  ctx.fillStyle = '#455a64';
+  ctx.beginPath(); ctx.arc(2, -34, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(3, -24, 3, 0, Math.PI * 2); ctx.fill();
+
+  /* えだの うで */
+  ctx.strokeStyle = '#795548'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  for (const d of [-1, 1]) {
+    const sw = d * (0.2 + step * 0.2) + (a >= 0 && d > 0 ? -0.5 : 0);
+    ctx.save(); ctx.translate(d * 24, -36); ctx.rotate(sw);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(d * 18, -6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(d * 12, -4); ctx.lineTo(d * 17, -13); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(d * 13, -4.5); ctx.lineTo(d * 20, 2); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* うえの たま */
+  const g2 = ctx.createRadialGradient(-6, -64, 3, 0, -60, 20);
+  g2.addColorStop(0, '#ffffff'); g2.addColorStop(1, '#d8eafa');
+  ctx.fillStyle = g2;
+  ctx.beginPath(); ctx.arc(0, -60, 19, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#a8c8dd'; ctx.lineWidth = 2; ctx.stroke();
+
+  /* ★バケツの ぼうし */
+  ctx.fillStyle = '#90a4ae';
+  ctx.beginPath();
+  ctx.moveTo(-16, -74); ctx.lineTo(16, -74); ctx.lineTo(12, -96); ctx.lineTo(-12, -96);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#546e7a'; ctx.lineWidth = 1.8; ctx.stroke();
+  ctx.fillStyle = '#b0bec5';
+  roundRect(ctx, -18, -78, 36, 6, 3); ctx.fill();
+  ctx.strokeStyle = '#546e7a'; ctx.stroke();
+
+  /* かお */
+  ctx.fillStyle = '#263238';
+  ctx.beginPath(); ctx.arc(-6, -64, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(7, -64, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(-7, -65.2, 1.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(6, -65.2, 1.2, 0, Math.PI * 2); ctx.fill();
+  /* にんじんの はな */
+  ctx.fillStyle = '#fb8c00';
+  ctx.beginPath();
+  ctx.moveTo(2, -60); ctx.lineTo(22 + (a >= 0 ? 4 : 0), -56); ctx.lineTo(2, -53);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#e65100'; ctx.lineWidth = 1.2; ctx.stroke();
+  /* くち（こいし）*/
+  ctx.fillStyle = '#263238';
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.arc(-6 + i * 4.5, -50 + (a >= 0 ? Math.sin(i) * 1.5 : 0), 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  /* ゆき */
+  ctx.fillStyle = 'rgba(255,255,255,.75)';
+  for (let i = 0; i < 4; i++) {
+    const t = s.t * 1.4 + i * 1.7;
+    ctx.beginPath();
+    ctx.arc(-30 + i * 18 + Math.sin(t) * 6, -100 + ((t * 12) % 92), 2.1, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* おおはらMEN ── ぶた。まるくて はなが おおきい。しっぽは くるん */
+function drawOharaMen(ctx, s) {
+  const a = s.atk;
+  const step = Math.sin(s.t * 4.5) * (s.moving ? 1 : 0);
+  ctx.save();
+
+  /* あし */
+  ctx.fillStyle = '#e08fa0';
+  roundRect(ctx, -18 + step * 4, -12, 12, 13, 5); ctx.fill();
+  roundRect(ctx,   6 - step * 4, -12, 12, 13, 5); ctx.fill();
+
+  /* しっぽ（くるん）*/
+  ctx.strokeStyle = '#e08fa0'; ctx.lineWidth = 3.4; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-26, -40);
+  ctx.bezierCurveTo(-36, -44, -36, -32, -28, -33);
+  ctx.stroke();
+
+  /* からだ */
+  const g = ctx.createLinearGradient(0, -76, 0, -10);
+  g.addColorStop(0, '#ffc0cb'); g.addColorStop(1, '#e58ba0');
+  ctx.fillStyle = g;
+  ellipse(ctx, 0, -42, 27, 30); ctx.fill();
+  ctx.strokeStyle = '#c96e83'; ctx.lineWidth = 2; ctx.stroke();
+
+  /* みみ（たれみみ）*/
+  ctx.fillStyle = '#f0a3b4';
+  for (const [ex, r] of [[-13, -0.5], [14, 0.45]]) {
+    ctx.save(); ctx.translate(ex, -66); ctx.rotate(r);
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.quadraticCurveTo(-8, -4, -6, 12);
+    ctx.quadraticCurveTo(2, 6, 0, 0);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  /* かお */
+  ctx.fillStyle = '#3e2723';
+  ctx.beginPath(); ctx.arc(-7, -54, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(9, -54, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(-8, -55.2, 1.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(8, -55.2, 1.2, 0, Math.PI * 2); ctx.fill();
+  /* ★おおきな はな */
+  ctx.fillStyle = '#f4899f';
+  ctx.strokeStyle = '#c96e83'; ctx.lineWidth = 1.6;
+  ellipse(ctx, 2, -42, 13, 10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#b85c72';
+  ctx.beginPath(); ctx.ellipse(-2.5, -42, 2.2, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(6.5, -42, 2.2, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+  /* くち */
+  ctx.strokeStyle = '#b85c72'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+  ctx.beginPath();
+  if (a >= 0) ctx.arc(2, -30, 5.5, 0.15, Math.PI - 0.15);
+  else ctx.arc(2, -32, 4.5, 0.3, Math.PI - 0.3);
+  ctx.stroke();
+
+  /* て */
+  ctx.fillStyle = '#e08fa0';
+  ctx.beginPath(); ctx.arc(-26, -34 + step * 3, 6.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(27 + (a >= 0 ? 7 : 0), -34 - step * 3, 6.5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+/* ネコおじ ── ねこの おじさん。メガネと ヒゲ、ネクタイ。
+   ナレーション（かみさま）やくなので、うっすら ひかって ういて いる */
+function drawNekooji(ctx, s) {
+  const a = s.atk;
+  const fl = Math.sin(s.t * 2.2) * 4;
+  ctx.save();
+  ctx.translate(0, -14 + fl);          // ふわっと ういて いる
+
+  /* ひかり */
+  const hg = ctx.createRadialGradient(0, -52, 6, 0, -52, 62);
+  hg.addColorStop(0, 'rgba(255,241,180,.35)');
+  hg.addColorStop(1, 'rgba(255,241,180,0)');
+  ctx.fillStyle = hg;
+  ctx.beginPath(); ctx.arc(0, -52, 62, 0, Math.PI * 2); ctx.fill();
+
+  /* しっぽ */
+  ctx.strokeStyle = '#6d6155'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-20, -34);
+  ctx.quadraticCurveTo(-40, -34 + Math.sin(s.t * 3) * 8, -36, -56);
+  ctx.stroke();
+
+  /* からだ（スーツ）*/
+  ctx.fillStyle = '#37474f';
+  ctx.beginPath();
+  ctx.moveTo(-20, -58); ctx.lineTo(20, -58);
+  ctx.quadraticCurveTo(24, -22, 16, -14);
+  ctx.lineTo(-16, -14);
+  ctx.quadraticCurveTo(-24, -22, -20, -58);
+  ctx.closePath(); ctx.fill();
+  /* ワイシャツ */
+  ctx.fillStyle = '#eceff1';
+  ctx.beginPath();
+  ctx.moveTo(-8, -58); ctx.lineTo(8, -58); ctx.lineTo(5, -20); ctx.lineTo(-5, -20);
+  ctx.closePath(); ctx.fill();
+  /* ネクタイ */
+  ctx.fillStyle = '#ef6c00';
+  ctx.beginPath();
+  ctx.moveTo(-4, -56); ctx.lineTo(4, -56); ctx.lineTo(3, -50); ctx.lineTo(-3, -50);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-3, -50); ctx.lineTo(3, -50); ctx.lineTo(5, -28); ctx.lineTo(0, -24); ctx.lineTo(-5, -28);
+  ctx.closePath(); ctx.fill();
+
+  /* あたま */
+  const g = ctx.createRadialGradient(-6, -78, 4, 0, -72, 24);
+  g.addColorStop(0, '#a99c8c'); g.addColorStop(1, '#7a6f62');
+  ctx.fillStyle = g;
+  ellipse(ctx, 0, -72, 24, 21); ctx.fill();
+  /* みみ */
+  ctx.fillStyle = '#7a6f62';
+  for (const d of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(d * 8, -88); ctx.lineTo(d * 20, -102); ctx.lineTo(d * 21, -84);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#f2b8c6';
+    ctx.beginPath();
+    ctx.moveTo(d * 11, -88); ctx.lineTo(d * 17, -97); ctx.lineTo(d * 18, -86);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#7a6f62';
+  }
+  /* ★メガネ */
+  ctx.strokeStyle = '#2b2b33'; ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.arc(-8, -74, 8, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(9, -74, 8, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, -74); ctx.lineTo(1, -74); ctx.stroke();
+  ctx.fillStyle = 'rgba(200,235,255,.5)';
+  ctx.beginPath(); ctx.arc(-8, -74, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(9, -74, 7, 0, Math.PI * 2); ctx.fill();
+  /* め（メガネの おくで ひかる）*/
+  ctx.fillStyle = '#1c1c22';
+  ctx.beginPath(); ctx.arc(-7, -74, 2.8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(10, -74, 2.8, 0, Math.PI * 2); ctx.fill();
+  /* はな と くち */
+  ctx.fillStyle = '#e08fa0';
+  ctx.beginPath();
+  ctx.moveTo(-3, -66); ctx.lineTo(3, -66); ctx.lineTo(0, -63);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#3a3a42'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.arc(-3.5, -61, 3.5, -0.2, Math.PI - 0.6); ctx.stroke();
+  ctx.beginPath(); ctx.arc(3.5, -61, 3.5, 0.6, Math.PI + 0.2); ctx.stroke();
+  /* ★ヒゲ */
+  ctx.strokeStyle = 'rgba(240,240,240,.85)'; ctx.lineWidth = 1.5;
+  for (const d of [-1, 1]) {
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(d * 8, -66 + i * 3);
+      ctx.lineTo(d * 30, -70 + i * 7);
+      ctx.stroke();
+    }
+  }
+  /* かみさまの わ */
+  ctx.strokeStyle = 'rgba(255,213,79,.9)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.ellipse(0, -104 + fl * 0.3, 15, 4.5, 0, 0, Math.PI * 2); ctx.stroke();
+
+  /* こうげき：かみの ひかり */
+  if (a >= 0) {
+    ctx.strokeStyle = 'rgba(255,235,120,' + (0.35 + a * 0.55) + ')';
+    ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(24, -60);
+      ctx.lineTo(46 + a * 28, -60 + i * 16);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
 const DRAWERS = {
   runrunwisp: drawRunrunwisp,
   houkigob: drawHoukigob,
@@ -8091,6 +8572,13 @@ const DRAWERS = {
   orematch: drawOrematch,
   matchsama: drawMatchsama,
   judotatamin: drawJudotatamin,
+  /* ★デザインあん（まだ ゲームには でません）*/
+  dozle: drawDozle,
+  bonjour: drawBonjour,
+  only: drawOnly,
+  olaf: drawOlaf,
+  oharamen: drawOharaMen,
+  nekooji: drawNekooji,
   zunio: drawZunio,
   zunita: drawZunita,
   shurihen: drawShurihen,
