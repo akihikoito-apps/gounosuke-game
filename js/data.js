@@ -511,6 +511,25 @@ const UNITS = {
 
   /* たたみん ── たった たたみ。どっしり かまえて みんなを まもる。
                 ★みずの こうげきを 20%に おさえる（ふつうは 60%）      */
+  /* おおはらMEN ── ドズル社プラネットを ぜんぶ クリアすると もらえる。
+     ガチャには でて きません。
+     TNTを なげて はんいで ばくはつ。50%で あいてを ふきとばします。      */
+  oharamen: {
+    id: 'oharamen', name: 'おおはらMEN', shortName: 'おおはら',
+    rarity: 'GR',                          // げきレア
+    attr: 'magic',                         // まじゅつし
+    cost: 700,  recharge: 20.0,
+    hp: 1600,   atk: 420,  range: 200,  speed: 26,
+    attackInterval: 2.6,   attackWindup: 0.50,
+    kbCount: 3,
+    scale: 1.15,
+    attackType: 'area',                    // TNTの ばくはつ
+    areaRadius: 72,
+    projectile: 'stone',
+    /* ★50%で あいてを ふきとばす */
+    knockbackChance: 0.50,
+  },
+
   tatamin: {
     id: 'tatamin', name: 'たたみん', shortName: 'たたみん',
     rarity: 'N',                          // ノーマル
@@ -2248,6 +2267,143 @@ const ENEMIES = {
                      霊太郎（ゆうれい）は むぞくせいの こうげきを すりぬける ので、
                      クモールの こうげきでは たおせません。巣の ばしょで かべに なって
                      もらい、そのあいだに うしろから ほかの なかまで せめると いい。 */
+  /* ============================================================
+     ★ドズル社プラネット（とくせつステージ）の てきたち
+     ============================================================ */
+
+  /* ---- ネコおじ 4パターン（ざこ）----
+     たいりょく・こうげき・こうげきの はやさは どれも「そこそこ」。
+     ちがうのは ★はやさ★ と ★ぞくせい★ です。            */
+  nekooji: {
+    id: 'nekooji', name: 'ネコおじ',
+    rarity: 'R',
+    attr: 'none',
+    hp: 700,   atk: 175,  range: 92,   speed: 44,   // ★いちばん はやい
+    attackInterval: 1.7,   attackWindup: 0.35,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    money: 95,
+  },
+  nekooji_dr: {
+    id: 'nekooji_dr', name: 'ネコおじ博士',
+    rarity: 'R',
+    attr: 'magic',                                  // まじゅつし
+    hp: 690,   atk: 180,  range: 130,  speed: 34,
+    attackInterval: 1.8,   attackWindup: 0.40,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: 'beam',
+    money: 100,
+  },
+  nekooji_suit: {
+    id: 'nekooji_suit', name: 'スーツのネコおじ',
+    rarity: 'R',
+    attr: 'power',                                  // パワー
+    hp: 760,   atk: 195,  range: 88,   speed: 26,
+    attackInterval: 1.9,   attackWindup: 0.40,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    money: 105,
+  },
+  nekooji_old: {
+    id: 'nekooji_old', name: 'おじいちゃんネコおじ',
+    rarity: 'R',
+    attr: 'none',
+    hp: 720,   atk: 165,  range: 100,  speed: 14,   // ★とても おそい
+    attackInterval: 2.0,   attackWindup: 0.45,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    /* ★じゃま：35%で 3びょう どんそくに する */
+    slow: { rate: 0.5, duration: 3.0, chance: 0.35 },
+    money: 100,
+  },
+
+  /* ---- 1ステージめ おらふくん（みず・はんい・こうげきが はやい）---- */
+  olaf: {
+    id: 'olaf', name: 'おらふくん',
+    rarity: 'SR',
+    attr: 'water',
+    hp: 3000,  atk: 210,  range: 132,  speed: 22,
+    attackInterval: 1.4,   attackWindup: 0.30,      // ★たかめの こうげき ひんど
+    kbCount: 6, scale: 1.25,
+    attackType: 'area',  areaRadius: 62,  projectile: null,
+    money: 300,
+    isBoss: true,
+  },
+
+  /* ---- 2ステージめ おおはらMEN（まじゅつし・はんい・50%ふきとばし）---- */
+  oharamen_e: {
+    id: 'oharamen_e', name: 'おおはらMEN',
+    drawAs: 'oharamen',
+    rarity: 'SR',
+    attr: 'magic',
+    hp: 3200,  atk: 265,  range: 195,  speed: 16,
+    attackInterval: 2.6,   attackWindup: 0.60,
+    kbCount: 6, scale: 1.25,
+    attackType: 'area',  areaRadius: 86,  projectile: 'stone',
+    /* ★50%で ふきとばす（TNTの ばくはつ）*/
+    knockbackChance: 0.50,
+    money: 320,
+    isBoss: true,
+  },
+
+  /* ---- 3ステージめ おんりー（ほのお・はんい・えんじょう）---- */
+  only: {
+    id: 'only', name: 'おんりー',
+    rarity: 'SR',
+    attr: 'fire',
+    hp: 3300,  atk: 240,  range: 168,  speed: 18,
+    attackInterval: 2.4,   attackWindup: 0.55,
+    kbCount: 6, scale: 1.25,
+    attackType: 'area',  areaRadius: 72,  projectile: 'flame',
+    /* ★マグマの えんじょう：あたえた ダメージの 20% を 1びょうごとに 4びょう */
+    burn: { chance: 1.0, dpsRate: 0.20, duration: 4.0 },
+    money: 320,
+    isBoss: true,
+  },
+
+  /* ---- 4ステージめ ぼんじゅうる（む・たんたい・こうかりょく・ちょうしゃてい）---- */
+  bonjour: {
+    id: 'bonjour', name: 'ぼんじゅうる',
+    rarity: 'SR',
+    attr: 'none',
+    hp: 2600,  atk: 640,  range: 430,  speed: 20,   // ★かなり ながい しゃてい
+    attackInterval: 3.4,   attackWindup: 0.75,
+    kbCount: 6, scale: 1.25,
+    attackType: 'single', projectile: 'needle',
+    money: 320,
+    isBoss: true,
+  },
+
+  /* ---- 5ステージめ ドズル（パワー・はんい）---- */
+  dozle: {
+    id: 'dozle', name: 'ドズル',
+    rarity: 'LR',
+    attr: 'power',
+    hp: 5600,  atk: 430,  range: 150,  speed: 14,
+    attackInterval: 2.6,   attackWindup: 0.70,
+    kbCount: 99, scale: 1.5,
+    attackType: 'area',  areaRadius: 92,  projectile: null,
+    kbImmune: true,
+    money: 400,
+    isBoss: true,
+  },
+
+  /* ---- 6ステージめ 覚醒 ドズル社長（パワー・たんたい・ちょうぜつ かりょく）---- */
+  dozle_x: {
+    id: 'dozle_x', name: '覚醒 ドズル社長',
+    rarity: 'LR',
+    attr: 'power',
+    hp: 11000, atk: 1100, range: 132,  speed: 10,
+    attackInterval: 3.0,   attackWindup: 0.85,
+    kbCount: 99, scale: 1.5,
+    attackType: 'single', projectile: null,
+    kbImmune: true,
+    /* たいりょくが へると こうげきが はやく なる */
+    enrage: { below: 0.45, intervalMult: 0.7 },
+    money: 520,
+    isBoss: true,
+  },
+
   kumooru: {
     id: 'kumooru', name: '帝王クモール',
     rarity: 'LR',
@@ -2374,6 +2530,22 @@ const BACKGROUNDS = {
     hillFar: '#1b5a86', hillNear: '#0b3050',
     ground: '#12496f', groundTop: '#2a7ba8',
     deco: 'star',
+  },
+
+  /* ドズル社プラネット ── みどりの しばふと あおい そら（マイクラふう）*/
+  dozleplanet: {
+    sky: ['#3d86c6', '#7fc0e8', '#c6e6f7'],
+    hillFar: '#4e8f3a', hillNear: '#3a6b2a',
+    ground: '#6b4a2a', groundTop: '#5d9c3c',
+    deco: 'cloud',
+  },
+
+  /* ドズル社ビル（さいしゅう ステージ）── ゆうやけと くろい ビル */
+  dozletower: {
+    sky: ['#2a1030', '#6b2a48', '#c26a3a'],
+    hillFar: '#3a2038', hillNear: '#1e1020',
+    ground: '#2a2028', groundTop: '#4a3a44',
+    deco: 'none',
   },
 
   /* 木星 ── ガスの しま もようと、あかい あらしの いろ */
@@ -4901,6 +5073,160 @@ const TOWER = {
    7. ぞくせいの あいしょう（さわらなくて OK）
    -------------------------------------------------------------------------- */
 /* 「A は B に つよい」の いちらん（1つでも、いくつでも かけます）*/
+/* --------------------------------------------------------------------------
+   ★ドズル社プラネット（とくせつステージ・うちゅうちず）
+
+   6ステージ。ざこは ネコおじ 4パターン、ステージごとに たんとうの
+   メンバーが ボスとして でて きます。
+
+   ★わきかたの こだわり★
+     メンバーは「しろを こうげき されてから」では なく、
+     ステージが はじまって すぐ 1たい でて きて、そのあとも
+     ときどき また でて きます（at ＋ repeat）。
+     そうしないと、キャラの とくちょうを みる まえに たおれて しまう ため。
+
+   ★ぜんぶ クリアで「おおはらMEN」が なかまに なります（げきレア）★
+   -------------------------------------------------------------------------- */
+const DOZLE_PLANET = {
+  name: 'ドズル社プラネット',
+  icon: '🟩',
+  desc: '6ステージ せいはで「おおはらMEN」が なかまに なる！ムキムキ社長が まっている',
+  floors: 6,
+  world: 'space',
+  rewardChar: 'oharamen',
+  rewardName: 'おおはらMEN',
+  courses: [
+
+    /* ---- 1 おらふくん（みず・はんい・こうげきが はやい）---- */
+    {
+      no: 401, floor: 1, chapter: 0, course: 1,
+      name: 'ゆきの ひろば',
+      desc: 'ボスは おらふくん。いしの けんを はやく ふって くる。みずぞくせい',
+      bg: 'dozleplanet',
+      castleHp: 10000,
+      power: 3.2,
+      drops: ['iron', 'cloth', 'glue'],
+      reward: { coins: 3, exp: 6000 },
+      waves: [
+        { at: 3,  id: 'nekooji',      count: 3, gap: 0.9 },
+        /* ★ボスは はじめから。そのあとも ときどき でて くる */
+        { at: 8,  id: 'olaf',         count: 1, repeat: 85 },
+        { at: 20, id: 'nekooji_dr',   count: 2, gap: 1.0, repeat: 22 },
+        { at: 34, id: 'nekooji',      count: 3, gap: 0.8, repeat: 24 },
+        { at: 52, id: 'nekooji_old',  count: 2, gap: 1.1, repeat: 28 },
+        { at: 68, id: 'nekooji_suit', count: 2, gap: 1.0, repeat: 24 },
+      ],
+    },
+
+    /* ---- 2 おおはらMEN（まじゅつし・はんい・50%ふきとばし）---- */
+    {
+      no: 402, floor: 2, chapter: 0, course: 2,
+      name: 'TNTの さいくつじょう',
+      desc: 'ボスは おおはらMEN。TNTで ふきとばして くる。まじゅつしぞくせい',
+      bg: 'dozleplanet',
+      castleHp: 10500,
+      power: 3.3,
+      drops: ['iron', 'stone', 'string'],
+      reward: { coins: 3, exp: 6300 },
+      waves: [
+        { at: 3,  id: 'nekooji',      count: 3, gap: 0.9 },
+        { at: 8,  id: 'oharamen_e',   count: 1, repeat: 90 },
+        { at: 22, id: 'nekooji_suit', count: 2, gap: 1.0, repeat: 22 },
+        { at: 36, id: 'nekooji',      count: 3, gap: 0.8, repeat: 24 },
+        { at: 54, id: 'nekooji_dr',   count: 2, gap: 1.1, repeat: 26 },
+        { at: 70, id: 'nekooji_old',  count: 2, gap: 1.1, repeat: 30 },
+      ],
+    },
+
+    /* ---- 3 おんりー（ほのお・はんい・えんじょう）---- */
+    {
+      no: 403, floor: 3, chapter: 0, course: 3,
+      name: 'マグマの みずうみ',
+      desc: 'ボスは おんりー。マグマを ぶっかけて じわじわ もやして くる',
+      bg: 'dozleplanet',
+      castleHp: 11000,
+      power: 3.4,
+      drops: ['glue', 'iron', 'alumi'],
+      reward: { coins: 3, exp: 6600 },
+      waves: [
+        { at: 3,  id: 'nekooji',      count: 3, gap: 0.9 },
+        { at: 8,  id: 'only',         count: 1, repeat: 90 },
+        { at: 22, id: 'nekooji_old',  count: 2, gap: 1.1, repeat: 24 },
+        { at: 36, id: 'nekooji',      count: 3, gap: 0.8, repeat: 24 },
+        { at: 54, id: 'nekooji_dr',   count: 3, gap: 1.0, repeat: 26 },
+        { at: 72, id: 'nekooji_suit', count: 2, gap: 1.0, repeat: 24 },
+      ],
+    },
+
+    /* ---- 4 ぼんじゅうる（む・たんたい・ちょうしゃてい）---- */
+    {
+      no: 404, floor: 4, chapter: 0, course: 4,
+      name: 'そげきの とりで',
+      desc: 'ボスは ぼんじゅうる。とおくから ゆみで ひきょうに ねらって くる',
+      bg: 'dozleplanet',
+      castleHp: 11500,
+      power: 3.5,
+      drops: ['string', 'wood', 'iron'],
+      reward: { coins: 3, exp: 6900 },
+      waves: [
+        { at: 3,  id: 'nekooji',      count: 3, gap: 0.9 },
+        { at: 8,  id: 'bonjour',      count: 1, repeat: 85 },
+        { at: 22, id: 'nekooji_suit', count: 3, gap: 1.0, repeat: 22 },
+        { at: 38, id: 'nekooji',      count: 3, gap: 0.8, repeat: 24 },
+        { at: 54, id: 'nekooji_dr',   count: 2, gap: 1.1, repeat: 26 },
+        { at: 70, id: 'nekooji_old',  count: 2, gap: 1.1, repeat: 30 },
+      ],
+    },
+
+    /* ---- 5 ドズル（パワー・はんい）---- */
+    {
+      no: 405, floor: 5, chapter: 0, course: 5,
+      name: '社長室への かいだん',
+      desc: 'ボスは ドズル。メイスで たかく とんで、うえから ドカンと たたきつける',
+      bg: 'dozletower',
+      castleHp: 12000,
+      power: 3.2,
+      drops: ['iron', 'glue', 'alumi'],
+      reward: { coins: 4, exp: 7600 },
+      waves: [
+        { at: 3,  id: 'nekooji',      count: 4, gap: 0.8 },
+        { at: 10, id: 'dozle',        count: 1, repeat: 110 },
+        { at: 24, id: 'nekooji_suit', count: 3, gap: 1.0, repeat: 20 },
+        { at: 40, id: 'nekooji_dr',   count: 3, gap: 1.0, repeat: 22 },
+        { at: 56, id: 'nekooji',      count: 3, gap: 0.8, repeat: 24 },
+        { at: 74, id: 'nekooji_old',  count: 2, gap: 1.1, repeat: 28 },
+      ],
+    },
+
+    /* ---- 6 覚醒 ドズル社長（ぜんいん しゅうごう）---- */
+    {
+      no: 406, floor: 6, chapter: 0, course: 6,
+      name: 'ドズル社 ビル さいじょうかい',
+      desc: 'ドズル社 5にんと ネコおじが ぜんいん しゅうごう！おおボスは 覚醒 ドズル社長',
+      bg: 'dozletower',
+      castleHp: 11500,
+      power: 2.5,
+      drops: ['iron', 'glue', 'string'],
+      reward: { coins: 5, exp: 9000 },
+      waves: [
+        { at: 3,  id: 'nekooji',      count: 4, gap: 0.8 },
+        { at: 12, id: 'olaf',         count: 1, repeat: 150 },
+        { at: 24, id: 'nekooji_dr',   count: 3, gap: 1.0, repeat: 20 },
+        { at: 34, id: 'oharamen_e',   count: 1, repeat: 160 },
+        { at: 46, id: 'nekooji_suit', count: 3, gap: 1.0, repeat: 22 },
+        { at: 56, id: 'only',         count: 1, repeat: 165 },
+        { at: 68, id: 'nekooji',      count: 3, gap: 0.8, repeat: 24 },
+        { at: 78, id: 'bonjour',      count: 1, repeat: 170 },
+        { at: 90, id: 'nekooji_old',  count: 2, gap: 1.1, repeat: 26 },
+        { at: 100, id: 'dozle',       count: 1, repeat: 185 },
+        /* ★おおボス */
+        { atCastleHp: 0.72, id: 'dozle_x', count: 1 },
+      ],
+    },
+
+  ],
+};
+
 const ATTR_BEATS = {
   /* わ その1 */
   water: ['fire'],            // みず   → ほのお
@@ -4993,6 +5319,19 @@ function attrMultiplier(attacker, defender) {
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.7', date: '2026-09-10',
+    title: '★ドズル社プラネット かいまく（6ステージ）',
+    items: [
+      'うちゅうちずに あたらしい とくせつステージ「ドズル社プラネット」が できました。みどりの ボタンから いけます。',
+      'ざこは ネコおじ 4パターン。ふつう（む・いちばん はやい）／博士（まじゅつし）／スーツ（パワー）／おじいちゃん（む・35%で 3びょう どんそく）。つよさは どれも おなじ くらいで、はやさが ちがいます。',
+      'ステージ 1 おらふくん（みず・はんい・こうげきが はやい）／2 おおはらMEN（まじゅつし・はんい・50%ふきとばし）／3 おんりー（ほのお・はんい・えんじょう）／4 ぼんじゅうる（む・たんたい・ちょうしゃてい）／5 ドズル（パワー・はんい）',
+      'さいごの 6ステージめは ドズル社 5にんと ネコおじが ぜんいん しゅうごう。おおボスは「覚醒 ドズル社長」。くろい スーツで、ふとい うでで ぶんなぐって きます。たいりょくも こうげきりょくも けたちがい です。',
+      'ボスは しろを こうげき される まえに でて きます（ステージが はじまって すぐ 1たい）。キャラの とくちょうを ちゃんと みられる ように しました。',
+      '★6ステージ ぜんぶ クリアで「おおはらMEN」が なかまに なります（げきレア）。TNTを なげて はんいで ばくはつ、50%で ふきとばし。ガチャには でません。',
+      'とくべつステージを せいはした ときの メッセージが「あき坊の塔 10かい」で きめうちに なって いた バグを なおしました。',
+    ],
+  },
   {
     ver: '6.6', date: '2026-09-07',
     title: 'なまえの へんこう と トップがめんの みなおし',

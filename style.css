@@ -977,6 +977,7 @@ body.dragging-slot #party-slots { touch-action:none; }
 /* ---- 2つめの とくべつステージ ボタン（惑星ごーの）---- */
 .map-top { flex-wrap:wrap; }
 .tower-btn2 { background:linear-gradient(180deg,#ab47bc,#6a1b9a); box-shadow:0 calc(3px * var(--ui)) 0 #4a148c; }
+.tower-btn3 { background:linear-gradient(180deg,#66bb6a,#2e7d32); box-shadow:0 calc(3px * var(--ui)) 0 #1b5e20; }
 .tower-limit {
   margin:calc(4px * var(--ui)) auto calc(6px * var(--ui));
   padding:calc(6px * var(--ui)) calc(14px * var(--ui));

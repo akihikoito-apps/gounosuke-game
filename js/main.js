@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.6';
+  const GAME_VERSION = '6.7';
 
 
   /* =================================================
@@ -165,6 +165,7 @@
     if (typeof TOWER !== 'undefined' && TOWER) list.push(TOWER);
     if (typeof SPACESHIP !== 'undefined' && SPACESHIP) list.push(SPACESHIP);
     if (typeof GONO !== 'undefined' && GONO) list.push(GONO);
+    if (typeof DOZLE_PLANET !== 'undefined' && DOZLE_PLANET) list.push(DOZLE_PLANET);
     return list;
   }
   /* その ちずに ある とくべつステージ（ふくすう ある ばあいも）*/
@@ -452,7 +453,7 @@
   /* ちずの みぎうえの とくべつステージ ボタン */
   function refreshTowerBtn() {
     const list = towersOfWorld(currentWorld);
-    [['#btn-tower', 0], ['#btn-tower2', 1]].forEach(([sel, i]) => {
+    [['#btn-tower', 0], ['#btn-tower2', 1], ['#btn-tower3', 2]].forEach(([sel, i]) => {
       const b = $(sel);
       if (!b) return;
       const T = list[i];
@@ -2847,10 +2848,14 @@
         $('#result-sub').textContent +=
           '　／　★' + (currentTower ? currentTower.name : '') + ' せいは！　Gコイン +' + coins;
       }
-      const got = giveTowerReward();          // ★あき坊の塔を ぜんぶ のぼった ごほうび
+      const got = giveTowerReward();          // ★とくべつステージを ぜんぶ クリアした ごほうび
       if (got) {
+        /* ★どの とくべつステージでも ただしい なまえが でる ように します
+           （まえは「あき坊の塔 10かい」で きめうちに なって いました）*/
+        const T = currentTower || TOWER;
+        const unit = (T === TOWER) ? 'かい' : 'ステージ';
         $('#result-sub').textContent =
-          'あき坊の塔 10かい せいは！　「' + UNITS[got].name + '」が なかまに なった！';
+          T.name + ' ' + T.floors + unit + ' せいは！　「' + UNITS[got].name + '」が なかまに なった！';
       }
     }
     show('screen-result');
@@ -2964,6 +2969,12 @@
     });
     $('#btn-tower2').addEventListener('click', () => {
       const T = towersOfWorld(currentWorld)[1];
+      if (!T) { toast('ここには とくべつステージが ありません'); return; }
+      currentTower = T;
+      (openTower)();
+    });
+    $('#btn-tower3').addEventListener('click', () => {
+      const T = towersOfWorld(currentWorld)[2];
       if (!T) { toast('ここには とくべつステージが ありません'); return; }
       currentTower = T;
       (openTower)();
