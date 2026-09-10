@@ -5104,7 +5104,7 @@ const DOZLE_PLANET = {
       desc: 'ボスは おらふくん。いしの けんを はやく ふって くる。みずぞくせい',
       bg: 'dozleplanet',
       castleHp: 10000,
-      power: 3.2,
+      power: 4.15,
       drops: ['iron', 'cloth', 'glue'],
       reward: { coins: 3, exp: 6000 },
       waves: [
@@ -5125,7 +5125,7 @@ const DOZLE_PLANET = {
       desc: 'ボスは おおはらMEN。TNTで ふきとばして くる。まじゅつしぞくせい',
       bg: 'dozleplanet',
       castleHp: 10500,
-      power: 3.3,
+      power: 3.6,
       drops: ['iron', 'stone', 'string'],
       reward: { coins: 3, exp: 6300 },
       waves: [
@@ -5145,7 +5145,7 @@ const DOZLE_PLANET = {
       desc: 'ボスは おんりー。マグマを ぶっかけて じわじわ もやして くる',
       bg: 'dozleplanet',
       castleHp: 11000,
-      power: 3.4,
+      power: 3.5,
       drops: ['glue', 'iron', 'alumi'],
       reward: { coins: 3, exp: 6600 },
       waves: [
@@ -5165,7 +5165,7 @@ const DOZLE_PLANET = {
       desc: 'ボスは ぼんじゅうる。とおくから ゆみで ひきょうに ねらって くる',
       bg: 'dozleplanet',
       castleHp: 11500,
-      power: 3.5,
+      power: 4.8,
       drops: ['string', 'wood', 'iron'],
       reward: { coins: 3, exp: 6900 },
       waves: [
@@ -5185,7 +5185,7 @@ const DOZLE_PLANET = {
       desc: 'ボスは ドズル。メイスで たかく とんで、うえから ドカンと たたきつける',
       bg: 'dozletower',
       castleHp: 12000,
-      power: 3.2,
+      power: 3.5,
       drops: ['iron', 'glue', 'alumi'],
       reward: { coins: 4, exp: 7600 },
       waves: [
@@ -5320,12 +5320,21 @@ function attrMultiplier(attacker, defender) {
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
   {
+    ver: '6.7.3', date: '2026-09-10',
+    title: '★ドズル社プラネットは「こうなんど コース」に なりました',
+    items: [
+      '1〜5ステージも まとめて つよく しました。いまは 30かい やって 20かい かてる くらい です。まけても きにせず、なんども いどんで ください。',
+      'とくに 1「ゆきの ひろば」と 4「そげきの とりで」は かんたんすぎた ので、ぐっと つよく なって います。',
+      'おおボスの 6「ドズル社 ビル さいじょうかい」は もっと きびしくて、30かい やって 15かい くらい。かてる ときでも 4〜8ぷん かかる ながい たたかいです。',
+      'キャラの レベルあげと しんかを しっかり やってから いどむのが ちかみち です。',
+    ],
+  },
+  {
     ver: '6.7.2', date: '2026-09-10',
     title: 'ドズル社 ビル さいじょうかい を ほんきの なんいどに',
     items: [
       '6.7.1で よわく しすぎました。30かい やって 29かい かてる のでは かんたんすぎる ので、もどして さらに つよく しました。',
-      'いまは 30かい やって 15かい かてる くらい です。かてる ときも 3〜6ぷん かかる ながい たたかいに なります。おおボスの まえで おされたら、ムリせず もう1かい いどんで ください。',
-      'ほかの 1〜5ステージは かえて いません。',
+      'いまは 30かい やって 15かい かてる くらい です。',
     ],
   },
   {
