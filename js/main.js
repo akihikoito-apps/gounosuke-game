@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.7.4';
+  const GAME_VERSION = '6.8';
 
 
   /* =================================================
@@ -621,20 +621,57 @@
       }
     }
 
-    /* これから いく ほし（まだ ない ぶんは かげだけ）*/
-    ctx.fillStyle = 'rgba(255,255,255,.07)';
-    ctx.strokeStyle = 'rgba(255,255,255,.16)';
-    ctx.lineWidth = 1.6;
-    ctx.setLineDash([5, 5]);
-    for (const [px, py, pr] of [[0.14, 0.31, 0.055]]) {
-      ctx.beginPath(); ctx.arc(px * W, py * H, pr * H, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    /* 小惑星ぷりぷり（ちいさな ほし。まわりに トゲが はえて いる）*/
+    const ast = chapterInfo(11);
+    if (typeof ast.x === 'number') {
+      const ax = ast.x * W, ay = ast.y * H, ar = H * 0.098;   // ★ほかの ほしより ちいさめ
+      /* トゲ（ぐるっと 14ぼん）*/
+      ctx.fillStyle = '#d8b53a';
+      for (let i = 0; i < 14; i++) {
+        const th = (i / 14) * Math.PI * 2 + 0.2;
+        const len = ar * (1.20 + ((i % 3) ? 0.12 : 0.30));
+        const wd = 0.10;
+        ctx.beginPath();
+        ctx.moveTo(ax + Math.cos(th - wd) * ar * 0.96, ay + Math.sin(th - wd) * ar * 0.96);
+        ctx.lineTo(ax + Math.cos(th) * len,            ay + Math.sin(th) * len);
+        ctx.lineTo(ax + Math.cos(th + wd) * ar * 0.96, ay + Math.sin(th + wd) * ar * 0.96);
+        ctx.closePath(); ctx.fill();
+      }
+      /* ほんたい */
+      const ag = ctx.createRadialGradient(ax - ar * 0.3, ay - ar * 0.3, ar * 0.1, ax, ay, ar);
+      ag.addColorStop(0, '#f4dd7a'); ag.addColorStop(0.6, '#e3c245'); ag.addColorStop(1, '#a8801d');
+      ctx.fillStyle = ag;
+      ctx.beginPath(); ctx.arc(ax, ay, ar, 0, Math.PI * 2); ctx.fill();
+      /* ごうのすけくんの えの よこじま（いわの すじ）*/
+      ctx.save();
+      ctx.beginPath(); ctx.arc(ax, ay, ar, 0, Math.PI * 2); ctx.clip();
+      ctx.strokeStyle = 'rgba(70,50,10,.6)';
+      ctx.lineWidth = Math.max(1.4, H * 0.0035);
+      for (let i = -3; i <= 3; i++) {
+        const ly = ay + i * ar * 0.26;
+        ctx.beginPath();
+        ctx.moveTo(ax - ar, ly);
+        ctx.quadraticCurveTo(ax, ly - ar * 0.10, ax + ar, ly + ar * 0.06);
+        ctx.stroke();
+      }
+      ctx.restore();
+      /* きいろい ひかり */
+      const ah = ctx.createRadialGradient(ax, ay, ar, ax, ay, ar * 1.9);
+      ah.addColorStop(0, 'rgba(255,220,90,.26)'); ah.addColorStop(1, 'rgba(255,220,90,0)');
+      ctx.fillStyle = ah;
+      ctx.beginPath(); ctx.arc(ax, ay, ar * 1.9, 0, Math.PI * 2); ctx.fill();
+      /* 木星 → 小惑星ぷりぷり の みち */
+      if (typeof jup.x === 'number') {
+        ctx.strokeStyle = 'rgba(255,213,79,.5)';
+        ctx.lineWidth = Math.max(3, H * 0.008);
+        ctx.setLineDash([Math.max(7, H * 0.03), Math.max(6, H * 0.026)]);
+        ctx.beginPath();
+        ctx.moveTo(jup.x * W, jup.y * H - H * 0.17);
+        ctx.quadraticCurveTo(W * 0.50, H * 0.06, ax + ar * 0.9, ay - ar * 0.7);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
     }
-    ctx.setLineDash([]);
-    ctx.fillStyle = 'rgba(255,255,255,.35)';
-    ctx.font = 'bold ' + Math.round(H * 0.035) + 'px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('？', 0.14 * W, 0.31 * H + H * 0.012);
-    ctx.textAlign = 'start';
 
     /* ロケットの みち（ちきゅう → 火星）*/
     if (typeof mars.x === 'number') {

@@ -241,6 +241,7 @@ const Game = {
         if (this.cooldown[id] > 0) this.cooldown[id] = Math.max(0, this.cooldown[id] - dt);
       }
       this.updateWaves(dt);
+      this.updateEscort();
     }
 
     for (const u of this.units) this.updateUnit(u, dt);
@@ -307,10 +308,43 @@ const Game = {
     }
   },
 
-  spawnEnemy(id) {
+  /* nearX を わたすと、その ばしょの ちかくに でます
+     （ぷりぷりくんが アリの むれを よぶ ときに つかいます）*/
+  /* =====================================================================
+     むれで うごく てき（escort）
+
+     ぷりぷりくんは「アリと むれで こうどうする」ので、じぶんの まわりに
+     ときどき アリを よびます。よばれた アリは しろからでは なく
+     ★ボスの となりに でて きます★。
+     ===================================================================== */
+  updateEscort() {
+    /* よぶ ぶんを さきに あつめてから だします。
+       units を まわしながら units に ついかすると、
+       でて きた こを また しらべて しまう ため。 */
+    let calls = null;
+    for (const u of this.units) {
+      if (u.side !== 'enemy' || u.dead) continue;
+      const e = u.def.escort;
+      if (!e) continue;
+      if (u.escortAt === undefined) {
+        u.escortAt = this.time + ((e.first !== undefined) ? e.first : e.interval);
+        continue;
+      }
+      if (this.time < u.escortAt) continue;
+      u.escortAt = this.time + e.interval;
+      (calls || (calls = [])).push({ id: e.id, n: e.count || 1, x: u.x });
+    }
+    if (!calls) return;
+    for (const c of calls) {
+      for (let i = 0; i < c.n; i++) this.spawnEnemy(c.id, c.x);
+    }
+  },
+
+  spawnEnemy(id, nearX) {
     const def = ENEMIES[id];
     if (!def) return;
     const u = this.makeUnit(def, 'enemy');
+    if (nearX !== undefined) u.x = Math.max(20, nearX - 40 + Math.random() * 80);
     this.units.push(u);
     if (def.isBoss) {
       this.boss = u;

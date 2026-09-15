@@ -8657,6 +8657,211 @@ function drawNekoojiDr(ctx, s) {
   ctx.restore();
 }
 
+/* ==========================================================================
+   ★小惑星ぷりぷりの キャラクター（ごうのすけくんの えを そのまま）
+   ========================================================================== */
+
+/* アリ ── ごうのすけくんの え：
+     あおい ほそながい からだが よこに のび、そこから したに とがった あしが
+     3ぼん。みぎはしに おおきな まるい かお。かおには たてぼうの め 2つと
+     にっこりした くち。トゲありは からだの うえに するどい トゲが 3ぼん。
+
+   toge = true で「トゲありアリ」に なります。                            */
+function drawAntBase(ctx, s, toge) {
+  const a = s.atk;
+  const walk = s.moving ? Math.sin(s.t * 9) : 0;
+  const bob  = s.moving ? Math.abs(Math.sin(s.t * 9)) * 2 : 0;
+  const BLUE = toge ? '#2f93cc' : '#59b6e2';
+  const DARK = toge ? '#2179ab' : '#3f97c2';
+
+  ctx.save();
+  ctx.translate(0, -bob);
+
+  const bodyY = -44;                 // からだの まんなかの たかさ
+  const xL = -62, xR = 4;            // からだの ひだりはし・みぎはし
+  const legX = [xL + 12, xL + 32, xL + 52];
+
+  /* --- あし＝したむきの ふとい さんかく 3ぼん --- */
+  ctx.fillStyle = DARK;
+  for (let i = 0; i < 3; i++) {
+    const kick = Math.sin(s.t * 9 + i * 2.1) * 6;
+    ctx.beginPath();
+    ctx.moveTo(legX[i] - 11, bodyY + 4);
+    ctx.lineTo(legX[i] + 11, bodyY + 4);
+    ctx.lineTo(legX[i] + kick, 0);     // つまさきが ちめんに つく
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  /* --- トゲ＝うわむきの ふとい さんかく 3ぼん（トゲありだけ）--- */
+  if (toge) {
+    ctx.fillStyle = BLUE;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(legX[i] - 12, bodyY - 4);
+      ctx.lineTo(legX[i] + 12, bodyY - 4);
+      ctx.lineTo(legX[i] + 1, bodyY - 66);   // ★するどく ながい
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,.26)';
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(legX[i] - 4, bodyY - 4);
+      ctx.lineTo(legX[i] + 1, bodyY - 4);
+      ctx.lineTo(legX[i] + 1, bodyY - 58);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  /* --- からだ（よこに ながい ふとい ぼう。ひだりはしは しっぽ）--- */
+  ctx.fillStyle = BLUE;
+  ctx.beginPath();
+  ctx.moveTo(xL - 20, bodyY + 1);      // しっぽの さき（とがって いる）
+  ctx.lineTo(xL, bodyY - 13);
+  ctx.lineTo(xR, bodyY - 13);
+  ctx.lineTo(xR, bodyY + 10);
+  ctx.lineTo(xL, bodyY + 10);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.22)';
+  ctx.fillRect(xL, bodyY - 13, xR - xL, 5);
+
+  /* --- かお（おおきな まる。からだに すこし かぶさる）--- */
+  const hx = 26, hy = bodyY - 6, hr = 30;
+  ctx.fillStyle = '#eceaf1';
+  ctx.beginPath(); ctx.arc(hx, hy, hr, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#2b2b33'; ctx.lineWidth = 2.8;
+  ctx.beginPath(); ctx.arc(hx, hy, hr, 0, Math.PI * 2); ctx.stroke();
+
+  /* め（たてぼう 2ほん）*/
+  ctx.strokeStyle = '#2b2b33';
+  ctx.lineWidth = 3.2;
+  ctx.lineCap = 'round';
+  for (const d of [-10, 7]) {
+    ctx.beginPath();
+    ctx.moveTo(hx + d, hy - 13);
+    ctx.lineTo(hx + d, hy - 1);
+    ctx.stroke();
+  }
+  /* くち（ゆるやかな にっこり）。こうげき ちゅうは あける */
+  ctx.lineWidth = 2.8;
+  if (a >= 0) {
+    ctx.fillStyle = '#2b2b33';
+    ctx.beginPath(); ctx.ellipse(hx - 1, hy + 11, 8, 7, 0, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.arc(hx - 1, hy + 2, 13, 0.22 * Math.PI, 0.78 * Math.PI);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawAri(ctx, s)     { drawAntBase(ctx, s, false); }
+function drawAriToge(ctx, s) { drawAntBase(ctx, s, true); }
+
+
+/* ぷりぷりくん ── ごうのすけくんの え：
+     はだいろの おおきな まんまる（まんなかに たての せんが 1ぽん）。
+     そこから ほそい うでが 2ほん よこに のび、したには ほそい あしが 2ほん。
+     かおは ない。みずぞくせいの おおボス。                                 */
+function drawPuripurikun(ctx, s) {
+  const a = s.atk;
+  const step = s.moving ? Math.sin(s.t * 2.6) : 0;
+  const squash = (a >= 0) ? Math.sin(a * Math.PI) : 0;   // こうげきで ぷりんと はねる
+  const bob = Math.abs(step) * 3 + squash * 12;
+
+  ctx.save();
+  ctx.translate(0, -bob);
+
+  const cy = -84;                          // からだの まんなか
+  const R  = 52 * (1 + squash * 0.10);     // ふたつの やまの おおきさ
+  const dx = 27 * (1 + squash * 0.14);     // やまと やまの あいだ
+
+  /* --- あし 2ほん（ほそながい。ちいさな へらの あしさき）--- */
+  ctx.strokeStyle = '#1e1e22';
+  ctx.lineWidth = 4.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  for (const d of [-1, 1]) {
+    const kick = step * d * 8;
+    ctx.beginPath();
+    ctx.moveTo(d * 22, cy + R * 0.70);
+    ctx.quadraticCurveTo(d * 40, cy + R + 30, d * 36 + kick, -8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(d * 36 + kick + d * 7, -4, 11, 5.5, d * 0.32, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e1e22'; ctx.fill();
+  }
+
+  /* --- からだ：まるが ふたつ ならんだ「ぷりぷり」の かたち --- */
+  const bg = ctx.createRadialGradient(-dx, cy - R * 0.45, R * 0.15, 0, cy, R * 2.0);
+  bg.addColorStop(0, '#f7e6c2');
+  bg.addColorStop(0.55, '#e8ce9d');
+  bg.addColorStop(1, '#cdac77');
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.arc(-dx, cy, R, 0, Math.PI * 2);
+  ctx.arc( dx, cy, R, 0, Math.PI * 2);
+  ctx.fill();
+  /* ふたつの まるの あいだを うめる。ただし うえと したは うめない ので、
+     まんなかが すこし へこんだ「ぷりぷり」の かたちに なります */
+  ctx.beginPath();
+  ctx.moveTo(-dx, cy - R * 0.80);
+  ctx.lineTo( dx, cy - R * 0.80);
+  ctx.lineTo( dx, cy + R * 0.74);
+  ctx.lineTo(-dx, cy + R * 0.74);
+  ctx.closePath();
+  ctx.fill();
+
+  /* まんなかの たてせん（ごうのすけくんの えの いちばんの とくちょう）*/
+  ctx.strokeStyle = '#2b2b30';
+  ctx.lineWidth = 4.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(2, cy - R * 0.98);
+  ctx.quadraticCurveTo(-5, cy + R * 0.1, 1, cy + R * 0.86);
+  ctx.stroke();
+
+  /* --- うで 2ほん（ほそくて ひょろっと して いる）--- */
+  ctx.strokeStyle = '#1e1e22';
+  ctx.lineWidth = 4.5;
+  const sw = (a >= 0) ? (1 - squash) : 0;
+  const ax = dx + R * 0.86;
+  /* ひだりうで：そとに のびて さきが ちいさく まがる */
+  ctx.beginPath();
+  ctx.moveTo(-ax + 6, cy - R * 0.35);
+  ctx.quadraticCurveTo(-ax - 40, cy - R * 0.5 + sw * 22, -ax - 34, cy + 18 + sw * 28);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-ax - 34, cy + 18 + sw * 28);
+  ctx.lineTo(-ax - 46, cy + 26 + sw * 28);
+  ctx.stroke();
+  /* みぎうで：さきが ゆび 2ほんに わかれて いる */
+  ctx.beginPath();
+  ctx.moveTo(ax - 6, cy - R * 0.35);
+  ctx.quadraticCurveTo(ax + 42, cy - R * 0.55 + sw * 26, ax + 34, cy + 14 + sw * 32);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(ax + 34, cy + 14 + sw * 32);
+  ctx.lineTo(ax + 48, cy + 8 + sw * 32);
+  ctx.moveTo(ax + 34, cy + 14 + sw * 32);
+  ctx.lineTo(ax + 45, cy + 26 + sw * 32);
+  ctx.stroke();
+
+  /* --- こうげきの えんしゅつ：みずの わが ひろがる --- */
+  if (a >= 0) {
+    ctx.strokeStyle = 'rgba(110,195,240,' + (0.8 * (1 - a)).toFixed(2) + ')';
+    ctx.lineWidth = 6;
+    const rr = 34 + a * 120;
+    ctx.beginPath();
+    ctx.ellipse(0, -6, rr, rr * 0.30, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+
 const DRAWERS = {
   runrunwisp: drawRunrunwisp,
   houkigob: drawHoukigob,
@@ -8687,6 +8892,9 @@ const DRAWERS = {
   sakanafighters: drawSakanaFighters,
   kumokun: drawKumokun,
   kumooru: drawKumooru,
+  ari: drawAri,
+  ari_toge: drawAriToge,
+  puripurikun: drawPuripurikun,
   yajirushi: drawYajirushi,
   pochi: drawPochi,
   bakegi: drawBakegi,
