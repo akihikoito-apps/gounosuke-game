@@ -2323,8 +2323,10 @@ const ENEMIES = {
     attackType: 'area',  areaRadius: 112,
     projectile: null,
     kbImmune: true,                              // ふきとばされない
-    /* ★むれで こうどうする：14びょう ごとに アリを 3びき よぶ */
-    escort: { id: 'ari', count: 3, interval: 14.0, first: 6.0 },
+    /* ★「字一龍と むれで こうどうする」（ごうのすけくんの せっけい）
+         8びょうごに 1かいめ、そのあと 16びょう ごとに 字一龍を よびます。
+         よばれた 字一龍は しろからでは なく ★ぷりぷりくんの となり★ に でます。 */
+    escort: { id: 'jiryu', count: 1, interval: 16.0, first: 8.0 },
     money: 430,
     isBoss: true,
   },
@@ -4286,16 +4288,18 @@ const STAGES = [
     desc: 'パワーぞくせいの アリが かずで おしよせる。まじゅつしが ゆうり',
     bg: 'asteroid',
     castleHp: 9600,
-    power: 5.1,
+    power: 4.8,
     drops: ['stone', 'iron', 'string'],
     reward: { coins: 2, exp: 6400 },
+    /* ★1たいめは「アリ」。すあな なので アリから */
     waves: [
-      { at: 3,  id: 'ari',       count: 5, gap: 0.6 },
-      { at: 12, id: 'ari',       count: 6, gap: 0.5,  repeat: 10 },
-      { at: 22, id: 'ari_toge',  count: 2, gap: 1.0,  repeat: 13 },
-      { at: 40, id: 'hakobot',   count: 2, gap: 1.0,  repeat: 18 },
-      { at: 55, id: 'ari',       count: 7, gap: 0.45, repeat: 9 },
-      { at: 66, id: 'ari_toge',  count: 3, gap: 1.1,  repeat: 16 },
+      { at: 3,  id: 'ari',        count: 5, gap: 0.6 },
+      { at: 11, id: 'ari',        count: 6, gap: 0.5,  repeat: 10 },
+      { at: 20, id: 'ari_toge',   count: 2, gap: 1.0,  repeat: 13 },
+      { at: 34, id: 'usagorilla', count: 1, repeat: 20 },        /* 惑星ごーの より */
+      { at: 50, id: 'ari',        count: 7, gap: 0.45, repeat: 9 },
+      { at: 62, id: 'hoshikun',   count: 2, gap: 1.1,  repeat: 24 },  /* 惑星ごーの より */
+      { at: 72, id: 'ari_toge',   count: 3, gap: 1.1,  repeat: 16 },
     ],
   },
 
@@ -4306,16 +4310,18 @@ const STAGES = [
     desc: 'トゲありアリが たくさん。かたくて おもいので、はんいこうげきで まとめて',
     bg: 'asteroid',
     castleHp: 10200,
-    power: 5.2,
+    power: 4.2,
     drops: ['iron', 'stone', 'alumi'],
     reward: { coins: 2, exp: 6800 },
+    /* ★1たいめは「トゲありアリ」。たにの いりぐちで まちかまえて いる */
     waves: [
-      { at: 3,  id: 'ari',       count: 5, gap: 0.6 },
-      { at: 11, id: 'ari',       count: 6, gap: 0.5,  repeat: 9 },
-      { at: 20, id: 'ari_toge',  count: 2, gap: 1.0,  repeat: 12 },
-      { at: 38, id: 'hakobot',   count: 2, gap: 1.0,  repeat: 17 },
-      { at: 52, id: 'ari',       count: 7, gap: 0.45, repeat: 9 },
-      { at: 63, id: 'ari_toge',  count: 3, gap: 1.1,  repeat: 15 },
+      { at: 3,  id: 'ari_toge',  count: 2, gap: 1.0 },
+      { at: 12, id: 'ari',       count: 6, gap: 0.5,  repeat: 9 },
+      { at: 22, id: 'ari_toge',  count: 2, gap: 1.0,  repeat: 12 },
+      { at: 36, id: 'kumabee',   count: 2, gap: 1.2,  repeat: 22 },  /* 惑星ごーの より */
+      { at: 50, id: 'ari',       count: 7, gap: 0.45, repeat: 9 },
+      { at: 60, id: 'jiryu',     count: 1, repeat: 26 },             /* 字一龍 */
+      { at: 70, id: 'ari_toge',  count: 3, gap: 1.1,  repeat: 15 },
     ],
   },
 
@@ -4331,18 +4337,21 @@ const STAGES = [
     desc: 'おおボス「ぷりぷりくん」。アリの むれを よびながら せまって くる！',
     bg: 'robofactory',
     castleHp: 9000,
-    power: 4.5,
+    power: 3.6,
     drops: ['iron', 'alumi', 'glue'],
     reward: { coins: 3, exp: 8000 },
+    /* ★1たいめは「コンガラガーン」。ロボこうじょう なので メタルの ロボから。
+       ★おおボスは じかんで はやく でます★
+         みかたが たまって からでは ボスが ふりに なる ため、
+         しろの たいりょくでは なく「12びょう」で とうじょうさせます。   */
     waves: [
-      { at: 3,  id: 'ari',       count: 5, gap: 0.6 },
-      { at: 11, id: 'ari',       count: 6, gap: 0.5,  repeat: 9 },
-      { at: 20, id: 'ari_toge',  count: 2, gap: 1.0,  repeat: 12 },
-      { at: 36, id: 'hakobot',   count: 2, gap: 1.0,  repeat: 16 },
-      { at: 50, id: 'ari',       count: 8, gap: 0.4,  repeat: 8 },
-      { at: 60, id: 'ari_toge',  count: 3, gap: 1.1,  repeat: 14 },
-      /* ★おおボス ぷりぷりくん。はやめに でて きて、たちふさがります */
-      { atCastleHp: 0.86, id: 'puripurikun', count: 1 },
+      { at: 3,  id: 'kongaragan', count: 2, gap: 1.0 },              /* 惑星ごーの より */
+      { at: 10, id: 'ari',        count: 6, gap: 0.5,  repeat: 9 },
+      { at: 12, id: 'puripurikun', count: 1 },                       /* ★おおボス */
+      { at: 24, id: 'ari_toge',   count: 2, gap: 1.0,  repeat: 13 },
+      { at: 40, id: 'kongaragan', count: 2, gap: 1.2,  repeat: 22 },
+      { at: 52, id: 'ari',        count: 8, gap: 0.4,  repeat: 8 },
+      { at: 64, id: 'ari_toge',   count: 3, gap: 1.1,  repeat: 15 },
     ],
   },
 
@@ -5477,6 +5486,17 @@ function attrMultiplier(attacker, defender) {
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.8.1', date: '2026-09-15',
+    title: '小惑星ぷりぷり ── 字一龍・惑星ごーのの てき・ボスの とうじょう',
+    items: [
+      '★おわびと しゅうせい★ ぷりぷりくんが むれで こうどうする あいては「アリ」では なく「字一龍」でした。げんがの もじを よみまちがえて いました。いまは ちゃんと 字一龍を よびます（8びょうご、そのあと 16びょう ごと）。',
+      'ボス「ぷりぷりくん」が でて くるのを ★はやく★ しました。しろの たいりょくでは なく、ステージが はじまって 12びょうで でて きます。みかたが たまって からでは ボスが ふりに なる ためです。',
+      '惑星ごーのから なかまの てきを よんで きました。ウサ・ゴリラ／ほしくん（11-1）、クマべぇ／字一龍（11-2）、コンガラガーン（11-3）。',
+      'ステージごとに ★さいしょに でて くる てきを かえました★。11-1は アリ、11-2は トゲありアリ、11-3は コンガラガーン。どの ステージも アリは おおめに でます。',
+      'てきが ふえた ぶん、つよさを ちょうせい しなおしました。30かい やって 25かい かてる くらい は かわりません。',
+    ],
+  },
   {
     ver: '6.8', date: '2026-09-15',
     title: '★11しょう「小惑星ぷりぷり」かいまく（3ステージ）',
