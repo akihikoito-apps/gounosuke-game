@@ -3,10 +3,10 @@
   <script src="http://localhost:8123/js/draw.js"></script>
   <script>
    const ctx = document.getElementById('c').getContext('2d');
-   const set = [['ari',260,-1],['ari',560,0.4],['puripurikun',830,-1]];
+   const set = [['tankun',200,-1],['tankundx',500,-1],['supertankun',800,-1]];
    ctx.font='16px sans-serif';
    for (const [id,x,atk] of set) {
-     ctx.save(); ctx.translate(x, 360); ctx.scale(1.35,1.35);
+     ctx.save(); ctx.translate(x, 330); ctx.scale(2.0,2.0);
      DRAWERS[id](ctx, { t: 1.2, atk: atk, moving: true, enraged:false });
      ctx.restore();
      ctx.fillStyle='#123'; ctx.textAlign='center'; ctx.fillText(id, x, 400);

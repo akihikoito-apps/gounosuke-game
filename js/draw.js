@@ -2649,7 +2649,10 @@ function drawShurihen(ctx, s) {
 /* ---- たんくんDX：タンクンの しんかけい ----
    うえに ぶあつい そうこうばんを のせ、キャタピラも おおきく なりました。
    たいりょく 2ばい・はやさ 2ばい。                                 */
-function drawTankundx(ctx, s) {
+/* たんくんDX と スーパーたんくんは おなじ かたち。
+   sup = true で だい3けいたい「スーパーたんくん」に なります。
+   ちがうのは ★キャタピラの やじるし★ と ★2ほんの しょっかく★ だけ。 */
+function drawTankundxBase(ctx, s, sup) {
   const bob = Math.sin(s.t * 13) * (s.moving ? 1.4 : 0);   // はやいので こまかく ゆれる
   ctx.save();
   ctx.translate(0, bob);
@@ -2671,10 +2674,57 @@ function drawTankundx(ctx, s) {
     }
   }
 
+  /* ★スーパーたんくん：キャタピラの ところの やじるし（りょうむきの ふとい やじるし）*/
+  if (sup) {
+    const AX = 48, sh = 3.2, hd = 11, hw = 9;   // はし・じくの ふとさ・あたまの ながさ・ひろさ
+    const ay = -9;
+    ctx.beginPath();
+    ctx.moveTo(-AX, ay);                       // ひだりの さき
+    ctx.lineTo(-AX + hd, ay - hw);
+    ctx.lineTo(-AX + hd, ay - sh);
+    ctx.lineTo( AX - hd, ay - sh);
+    ctx.lineTo( AX - hd, ay - hw);
+    ctx.lineTo( AX, ay);                       // みぎの さき
+    ctx.lineTo( AX - hd, ay + hw);
+    ctx.lineTo( AX - hd, ay + sh);
+    ctx.lineTo(-AX + hd, ay + sh);
+    ctx.lineTo(-AX + hd, ay + hw);
+    ctx.closePath();
+    ctx.fillStyle = '#12161a';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(236,240,243,.95)'; ctx.lineWidth = 1.8;
+    ctx.stroke();
+  }
+
   /* みみ（つの）*/
   ctx.fillStyle = '#81d4fa';
   ctx.beginPath(); ctx.moveTo(14, -44); ctx.lineTo(20, -62); ctx.lineTo(27, -44); ctx.closePath(); ctx.fill();
   ctx.beginPath(); ctx.moveTo(-24, -44); ctx.lineTo(-18, -61); ctx.lineTo(-11, -44); ctx.closePath(); ctx.fill();
+
+  /* ★スーパーたんくん：2ほんの しょっかく（さきが くるんと まるまって いる）*/
+  if (sup) {
+    const w1 = Math.sin(s.t * 3.1) * 2.6;      // ゆらゆら
+    const w2 = Math.sin(s.t * 3.1 + 1.1) * 2.6;
+    ctx.strokeStyle = '#111418';
+    ctx.lineWidth = 2.6;
+    ctx.lineCap = 'round';
+    /* うしろ（ひだり）の しょっかく */
+    ctx.beginPath();
+    ctx.moveTo(-6, -46);
+    ctx.bezierCurveTo(-14, -60, -18, -68, -11 + w1, -78);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(-13.5 + w1, -80.5, 3.4, -0.5, Math.PI * 1.55);   // さきの まる
+    ctx.stroke();
+    /* まえ（みぎ）の しょっかく */
+    ctx.beginPath();
+    ctx.moveTo(6, -46);
+    ctx.bezierCurveTo(0, -60, 2, -70, 9 + w2, -79);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(11.5 + w2, -81.5, 3.4, -0.5, Math.PI * 1.55);
+    ctx.stroke();
+  }
 
   /* からだ */
   const g = ctx.createLinearGradient(0, -48, 0, -12);
@@ -2715,6 +2765,8 @@ function drawTankundx(ctx, s) {
 
   ctx.restore();
 }
+function drawTankundx(ctx, s)    { drawTankundxBase(ctx, s, false); }
+function drawSupertankun(ctx, s) { drawTankundxBase(ctx, s, true); }
 
 
 /* ---- デルテル君（怒り）：テルテル君の しんかけい ----
@@ -8907,6 +8959,7 @@ const DRAWERS = {
   puripurio: drawPuripurio,
   tankun: drawTankun,
   tankundx: drawTankundx,
+  supertankun: drawSupertankun,
   teruteru: drawTeruteru,
   deruteru: drawDeruteru,
   tokinotabibito: drawTokinotabibito,
