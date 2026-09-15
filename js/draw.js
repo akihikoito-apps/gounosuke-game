@@ -2701,29 +2701,29 @@ function drawTankundxBase(ctx, s, sup) {
   ctx.beginPath(); ctx.moveTo(14, -44); ctx.lineTo(20, -62); ctx.lineTo(27, -44); ctx.closePath(); ctx.fill();
   ctx.beginPath(); ctx.moveTo(-24, -44); ctx.lineTo(-18, -61); ctx.lineTo(-11, -44); ctx.closePath(); ctx.fill();
 
-  /* ★スーパーたんくん：2ほんの しょっかく（さきが くるんと まるまって いる）*/
+  /* ★スーパーたんくん：2ほんの しょっかく
+       ごうのすけくんの えの とおり、2ほん とも ★うしろ（ひだり）に ながれて★ いて、
+       さきの まるは その ひだりうえに つきます。
+       ねもとは からだの うしろに かくれます（からだは この あとに かくので）。   */
   if (sup) {
-    const w1 = Math.sin(s.t * 3.1) * 2.6;      // ゆらゆら
-    const w2 = Math.sin(s.t * 3.1 + 1.1) * 2.6;
+    const w1 = Math.sin(s.t * 3.1) * 2.4;      // ゆらゆら
+    const w2 = Math.sin(s.t * 3.1 + 1.1) * 2.4;
     ctx.strokeStyle = '#111418';
     ctx.lineWidth = 2.6;
     ctx.lineCap = 'round';
-    /* うしろ（ひだり）の しょっかく */
-    ctx.beginPath();
-    ctx.moveTo(-6, -46);
-    ctx.bezierCurveTo(-14, -60, -18, -68, -11 + w1, -78);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(-13.5 + w1, -80.5, 3.4, -0.5, Math.PI * 1.55);   // さきの まる
-    ctx.stroke();
-    /* まえ（みぎ）の しょっかく */
-    ctx.beginPath();
-    ctx.moveTo(6, -46);
-    ctx.bezierCurveTo(0, -60, 2, -70, 9 + w2, -79);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(11.5 + w2, -81.5, 3.4, -0.5, Math.PI * 1.55);
-    ctx.stroke();
+    /* しょっかく 1ぽん ぶんを かく（ねもと → うしろうえへ そる → さきの まる）*/
+    const feeler = (bx, tx, ty, w) => {
+      ctx.beginPath();
+      ctx.moveTo(bx, -46);
+      ctx.bezierCurveTo(bx + 2, -58, bx - 4, -66, tx + w, ty);
+      ctx.stroke();
+      /* さきの まる。ひだりうえに つき、みぎしたの くきの ところが あいて いる */
+      ctx.beginPath();
+      ctx.arc(tx - 2.6 + w, ty - 2.4, 3.4, 0.7, Math.PI * 2 + 0.2);
+      ctx.stroke();
+    };
+    feeler(10, -2, -70, w1);     // うしろがわの しょっかく
+    feeler(23,  11, -72, w2);    // まえがわの しょっかく
   }
 
   /* からだ */
