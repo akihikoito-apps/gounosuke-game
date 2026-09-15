@@ -2274,36 +2274,22 @@ const ENEMIES = {
      ★小惑星ぷりぷり（11しょう）の てきたち
      ============================================================ */
 
-  /* ---- アリ（トゲ無し）────────────────────────────────
-       あおい からだに まるい かお。ぞくせいは パワー。
-       とても はやくて、かずで おしよせて きます。          */
+  /* ---- トゲありトゲなしアリ ──────────────────────────
+       ごうのすけくんの えの とおり、これで ★1しゅるい★ の てきです。
+       あおい からだに まるい かお、せなかに するどい トゲが 3ぼん。
+       ぞくせいは パワーなので、まじゅつしの なかまが とても ゆうり。
+       この ほしでは どの ステージでも かずが おおく でて きます。   */
   ari: {
-    id: 'ari', name: 'アリ',
-    rarity: 'N',
-    attr: 'power',
-    hp: 250,   atk: 58,   range: 86,   speed: 48,      // ★とても はやい
-    attackInterval: 1.5,   attackWindup: 0.26,
-    kbCount: 2,
-    scale: 0.92,
-    attackType: 'single',
-    projectile: null,
-    money: 50,
-  },
-
-  /* ---- トゲありアリ ──────────────────────────────────
-       せなかに 3ぼんの トゲ。おなじ アリでも こちらは
-       かたくて おもい。トゲで つきさすので いちげきが つよい。 */
-  ari_toge: {
-    id: 'ari_toge', name: 'トゲありアリ',
+    id: 'ari', name: 'トゲありトゲなしアリ', shortName: 'トゲアリ',
     rarity: 'R',
     attr: 'power',
-    hp: 980,   atk: 215,  range: 98,   speed: 20,      // ★おそいが かたい
-    attackInterval: 2.1,   attackWindup: 0.45,
+    hp: 640,   atk: 152,  range: 92,   speed: 32,
+    attackInterval: 1.8,   attackWindup: 0.35,
     kbCount: 3,
-    scale: 1.12,
+    scale: 1.0,
     attackType: 'single',
     projectile: null,
-    money: 115,
+    money: 88,
   },
 
   /* ---- ぷりぷりくん（小惑星ぷりぷりの おおボス）──────────
@@ -4285,21 +4271,19 @@ const STAGES = [
   {
     no: 95, chapter: 11, course: 1,
     name: 'アリの すあな',
-    desc: 'パワーぞくせいの アリが かずで おしよせる。まじゅつしが ゆうり',
+    desc: 'トゲありトゲなしアリが かずで おしよせる。まじゅつしが ゆうり',
     bg: 'asteroid',
     castleHp: 9600,
-    power: 4.8,
+    power: 3.3,
     drops: ['stone', 'iron', 'string'],
     reward: { coins: 2, exp: 6400 },
-    /* ★1たいめは「アリ」。すあな なので アリから */
+    /* ★1たいめは「トゲありトゲなしアリ」。すあな なので アリから */
     waves: [
-      { at: 3,  id: 'ari',        count: 5, gap: 0.6 },
-      { at: 11, id: 'ari',        count: 6, gap: 0.5,  repeat: 10 },
-      { at: 20, id: 'ari_toge',   count: 2, gap: 1.0,  repeat: 13 },
-      { at: 34, id: 'usagorilla', count: 1, repeat: 20 },        /* 惑星ごーの より */
-      { at: 50, id: 'ari',        count: 7, gap: 0.45, repeat: 9 },
-      { at: 62, id: 'hoshikun',   count: 2, gap: 1.1,  repeat: 24 },  /* 惑星ごーの より */
-      { at: 72, id: 'ari_toge',   count: 3, gap: 1.1,  repeat: 16 },
+      { at: 3,  id: 'ari',        count: 4, gap: 0.7 },
+      { at: 13, id: 'ari',        count: 5, gap: 0.6, repeat: 12 },
+      { at: 34, id: 'usagorilla', count: 1, repeat: 20 },            /* 惑星ごーの より */
+      { at: 50, id: 'ari',        count: 6, gap: 0.5, repeat: 11 },
+      { at: 62, id: 'hoshikun',   count: 2, gap: 1.1, repeat: 24 },  /* 惑星ごーの より */
     ],
   },
 
@@ -4307,21 +4291,19 @@ const STAGES = [
   {
     no: 96, chapter: 11, course: 2,
     name: 'トゲの たに',
-    desc: 'トゲありアリが たくさん。かたくて おもいので、はんいこうげきで まとめて',
+    desc: 'たにの ぬしと アリの むれ。パワーぞくせい なので まじゅつしが ゆうり',
     bg: 'asteroid',
     castleHp: 10200,
-    power: 4.2,
+    power: 3.6,
     drops: ['iron', 'stone', 'alumi'],
     reward: { coins: 2, exp: 6800 },
-    /* ★1たいめは「トゲありアリ」。たにの いりぐちで まちかまえて いる */
+    /* ★1たいめは「クマべぇ」。たにの いりぐちで まちかまえて いる */
     waves: [
-      { at: 3,  id: 'ari_toge',  count: 2, gap: 1.0 },
-      { at: 12, id: 'ari',       count: 6, gap: 0.5,  repeat: 9 },
-      { at: 22, id: 'ari_toge',  count: 2, gap: 1.0,  repeat: 12 },
-      { at: 36, id: 'kumabee',   count: 2, gap: 1.2,  repeat: 22 },  /* 惑星ごーの より */
-      { at: 50, id: 'ari',       count: 7, gap: 0.45, repeat: 9 },
-      { at: 60, id: 'jiryu',     count: 1, repeat: 26 },             /* 字一龍 */
-      { at: 70, id: 'ari_toge',  count: 3, gap: 1.1,  repeat: 15 },
+      { at: 3,  id: 'kumabee',  count: 2, gap: 1.2 },               /* 惑星ごーの より */
+      { at: 12, id: 'ari',      count: 5, gap: 0.6, repeat: 11 },
+      { at: 36, id: 'kumabee',  count: 2, gap: 1.2, repeat: 22 },
+      { at: 50, id: 'ari',      count: 6, gap: 0.5, repeat: 10 },
+      { at: 60, id: 'jiryu',    count: 1, repeat: 26 },             /* 字一龍 */
     ],
   },
 
@@ -4337,7 +4319,7 @@ const STAGES = [
     desc: 'おおボス「ぷりぷりくん」。アリの むれを よびながら せまって くる！',
     bg: 'robofactory',
     castleHp: 9000,
-    power: 3.6,
+    power: 2.1,
     drops: ['iron', 'alumi', 'glue'],
     reward: { coins: 3, exp: 8000 },
     /* ★1たいめは「コンガラガーン」。ロボこうじょう なので メタルの ロボから。
@@ -4346,12 +4328,10 @@ const STAGES = [
          しろの たいりょくでは なく「12びょう」で とうじょうさせます。   */
     waves: [
       { at: 3,  id: 'kongaragan', count: 2, gap: 1.0 },              /* 惑星ごーの より */
-      { at: 10, id: 'ari',        count: 6, gap: 0.5,  repeat: 9 },
+      { at: 10, id: 'ari',        count: 5, gap: 0.6, repeat: 11 },
       { at: 12, id: 'puripurikun', count: 1 },                       /* ★おおボス */
-      { at: 24, id: 'ari_toge',   count: 2, gap: 1.0,  repeat: 13 },
-      { at: 40, id: 'kongaragan', count: 2, gap: 1.2,  repeat: 22 },
-      { at: 52, id: 'ari',        count: 8, gap: 0.4,  repeat: 8 },
-      { at: 64, id: 'ari_toge',   count: 3, gap: 1.1,  repeat: 15 },
+      { at: 40, id: 'kongaragan', count: 2, gap: 1.2, repeat: 22 },
+      { at: 52, id: 'ari',        count: 6, gap: 0.5, repeat: 10 },
     ],
   },
 
@@ -5486,6 +5466,17 @@ function attrMultiplier(attacker, defender) {
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.8.2', date: '2026-09-15',
+    title: 'アリを「トゲありトゲなしアリ」1しゅるいに まとめました',
+    items: [
+      '★おわびと しゅうせい★ 「トゲありトゲ無しアリ」は 1しゅるいの てき でした。2しゅるいに わけて しまって いたので、1たいに まとめました。',
+      'え は トゲありの ほう（せなかに するどい トゲが 3ぼん）を つかいます。ぞくせいは パワーの まま。',
+      'つよさは 2たいの まんなかに しました。たいりょく 640／こうげき 152／はやさ 32。かずも おおく でます。',
+      '1たいめに でて くる てきも かえました。11-1は トゲありトゲなしアリ、11-2は クマべぇ、11-3は コンガラガーン。',
+      'てきが 1しゅるいに なった ぶん、3ステージとも つよさを ちょうせい しなおしました。',
+    ],
+  },
   {
     ver: '6.8.1', date: '2026-09-15',
     title: '小惑星ぷりぷり ── 字一龍・惑星ごーのの てき・ボスの とうじょう',

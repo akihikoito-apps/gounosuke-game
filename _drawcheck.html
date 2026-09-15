@@ -1,0 +1,16 @@
+<body style="margin:0;background:#dfe8ef">
+  <canvas id="c" width="1000" height="420"></canvas>
+  <script src="http://localhost:8123/js/draw.js"></script>
+  <script>
+   const ctx = document.getElementById('c').getContext('2d');
+   const set = [['ari',260,-1],['ari',560,0.4],['puripurikun',830,-1]];
+   ctx.font='16px sans-serif';
+   for (const [id,x,atk] of set) {
+     ctx.save(); ctx.translate(x, 360); ctx.scale(1.35,1.35);
+     DRAWERS[id](ctx, { t: 1.2, atk: atk, moving: true, enraged:false });
+     ctx.restore();
+     ctx.fillStyle='#123'; ctx.textAlign='center'; ctx.fillText(id, x, 400);
+   }
+   // じめん
+   ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.moveTo(0,360); ctx.lineTo(1000,360); ctx.stroke();
+  </script></body>

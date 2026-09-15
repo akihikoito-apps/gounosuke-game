@@ -8757,8 +8757,8 @@ function drawAntBase(ctx, s, toge) {
   }
   ctx.restore();
 }
-function drawAri(ctx, s)     { drawAntBase(ctx, s, false); }
-function drawAriToge(ctx, s) { drawAntBase(ctx, s, true); }
+/* ★「トゲありトゲなしアリ」は 1しゅるい。え は トゲありの ほうを つかいます */
+function drawAri(ctx, s) { drawAntBase(ctx, s, true); }
 
 
 /* ぷりぷりくん ── ごうのすけくんの え：
@@ -8893,7 +8893,6 @@ const DRAWERS = {
   kumokun: drawKumokun,
   kumooru: drawKumooru,
   ari: drawAri,
-  ari_toge: drawAriToge,
   puripurikun: drawPuripurikun,
   yajirushi: drawYajirushi,
   pochi: drawPochi,
