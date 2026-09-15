@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.8.3';
+  const GAME_VERSION = '6.8.4';
 
 
   /* =================================================
@@ -666,8 +666,9 @@
         ctx.lineWidth = Math.max(3, H * 0.008);
         ctx.setLineDash([Math.max(7, H * 0.03), Math.max(6, H * 0.026)]);
         ctx.beginPath();
-        ctx.moveTo(jup.x * W, jup.y * H - H * 0.17);
-        ctx.quadraticCurveTo(W * 0.50, H * 0.06, ax + ar * 0.9, ay - ar * 0.7);
+        /* 木星の したから、すぐ となりの 小惑星へ みじかく つなぐ */
+        ctx.moveTo(jup.x * W, jup.y * H + H * 0.16);
+        ctx.quadraticCurveTo(ax + ar * 0.6, ay - ar * 2.3, ax + ar * 0.1, ay - ar * 1.05);
         ctx.stroke();
         ctx.setLineDash([]);
       }
@@ -1161,7 +1162,8 @@
       b.className = 'stage-card' + (open ? '' : ' locked') + (isNext ? ' next' : '');
       const r = st.reward || { coins: 1, exp: 100 };
       b.innerHTML =
-        '<span class="stage-no">' + st.chapter + '-' + (st.course || st.no) + '</span>' +
+        /* label が かいて あれば それを つかう（れい：小惑星ぷりぷりは 10-A・10-B・10-C）*/
+        '<span class="stage-no">' + (st.label || (st.chapter + '-' + (st.course || st.no))) + '</span>' +
         '<span class="stage-info"><b>' + (open ? st.name : '？？？') +
             (isNext ? '<span class="next-badge">つぎは ここ！</span>' : '') + '</b>' +
           '<small>' + (open ? st.desc : 'まえの コースを クリアすると あそべます') + '</small>' +
