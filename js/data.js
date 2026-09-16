@@ -2637,6 +2637,14 @@ const BACKGROUNDS = {
     deco: 'none',
   },
 
+  /* 太陽 ── もえさかる ほのおの ひょうめん。ボスラッシュの ぶたい */
+  sunsurface: {
+    sky: ['#3a0d02', '#8e2a04', '#e8730c'],
+    hillFar: '#c2540a', hillNear: '#6e2404',
+    ground: '#8a3205', groundTop: '#d96a10',
+    deco: 'none',
+  },
+
   /* 小惑星ぷりぷり ── きいろい いわの ちいさな ほし。そらは うちゅう */
   asteroid: {
     sky: ['#120a20', '#2e1c3e', '#5b3a52'],
@@ -4384,6 +4392,79 @@ const STAGES = [
     ],
   },
 
+
+  /* ==========================================================================
+     12しょう ★太陽★ ボス＆中ボスラッシュ（ぜんぶで 3コース）
+
+     ここには ★ざこが 1たいも でません★。
+     いままでの ボスと 中ボスが、つぎつぎに でて くる だけの コースです。
+
+     ★しくみ★
+       ボスは じかんでは なく「しろの たいりょく」で よびだします。
+         { atCastleHp: 0.70, ... } ＝ しろが 70% まで へったら つぎの ボス
+       こう すると ボスが かさなって でて こないので、
+       ★1たいずつ じゅんばんに たおして いく★ かたちに なります。
+       （holdBossFloor が、まだ でて いない ボスの ラインより したに
+         しろの たいりょくが へらない ように ささえて います）
+
+     ★おかねに ちゅうい★
+       ざこが いない ので、おかねは おさいふ君と ボスを たおした ぶん だけ。
+       さいしょに おさいふ君を そだてるか、はやく ボスを たおしに いくか、
+       えらびかたが だいじに なります。
+     ========================================================================== */
+
+  /* ---------------- 12-1 ほのおの もん ---------------- */
+  {
+    no: 98, chapter: 12, course: 1,
+    name: 'ほのおの もん',
+    desc: '中ボス 2たい → おおボス「お菓子マン」。ざこは でません',
+    bg: 'sunsurface',
+    castleHp: 12000,
+    power: 18,
+    drops: ['iron', 'stone', 'glue'],
+    reward: { coins: 4, exp: 12000 },
+    waves: [
+      { at: 3,            id: 'hetakirin', count: 1 },   /* 中ボス1 くさ */
+      { atCastleHp: 0.70, id: 'garakutei', count: 1 },   /* 中ボス2 メタル */
+      { atCastleHp: 0.40, id: 'okashiman', count: 1 },   /* ★おおボス パワー */
+    ],
+  },
+
+  /* ---------------- 12-2 ひかりの かいろう ---------------- */
+  {
+    no: 99, chapter: 12, course: 2,
+    name: 'ひかりの かいろう',
+    desc: '中ボス 2たい → おおボス「終焉の大魔導士ゼノス」',
+    bg: 'sunsurface',
+    castleHp: 13000,
+    power: 10.3,
+    drops: ['alumi', 'iron', 'string'],
+    reward: { coins: 4, exp: 14000 },
+    waves: [
+      { at: 3,            id: 'nushinoookami_x', count: 1 },  /* 中ボス1 けもの・はやい */
+      { atCastleHp: 0.70, id: 'meltgear_x',      count: 1 },  /* 中ボス2 メタル・ほのお */
+      { atCastleHp: 0.40, id: 'zenos',           count: 1 },  /* ★おおボス まじゅつし */
+    ],
+  },
+
+  /* ---------------- 12-3 太陽の いただき（さいしゅう）---------------- */
+  {
+    no: 100, chapter: 12, course: 3,
+    name: '太陽の いただき',
+    desc: '中ボス 2たい → 帝王クモール → ラスボス「闇堕ちあき坊」',
+    bg: 'sunsurface',
+    castleHp: 15000,
+    power: 5.4,
+    drops: ['iron', 'alumi', 'glue'],
+    reward: { coins: 6, exp: 20000 },
+    waves: [
+      { at: 3,            id: 'gaou_x',       count: 1 },  /* 中ボス1 けもの・くさ */
+      { atCastleHp: 0.76, id: 'sagecharon_x', count: 1 },  /* 中ボス2 まじゅつし */
+      { atCastleHp: 0.52, id: 'kumooru',      count: 1 },  /* おおボス クモの巣 */
+      { atCastleHp: 0.26, id: 'yamiakibou',   count: 1 },  /* ★★ラスボス */
+    ],
+  },
+
 ];
 
 
@@ -4896,6 +4977,28 @@ const CRAFT_ITEMS = [
   { id: 'tank',     name: 'すいそう',     draw: 'tank',     w: 92,  h: 66,  cost: { alumi: 2, stone: 2, glue: 2 } },
   { id: 'mirror',   name: 'かがみ',       draw: 'mirror',   w: 50,  h: 96,  cost: { alumi: 2, stone: 1, wood: 1 } },
   { id: 'statue',   name: 'せきぞう',     draw: 'statue',   w: 56,  h: 88,  cost: { stone: 5, glue: 2 } },
+
+  /* ---- ここから v6.11 で ふえた 20しゅるい（いろ 5つで 100パターン）---- */
+  { id: 'fridge',   name: 'れいぞうこ',   draw: 'fridge',   w: 68,  h: 120, cost: { alumi: 5, iron: 3, glue: 2 } },
+  { id: 'kitchen',  name: 'キッチン',     draw: 'kitchen',  w: 120, h: 84,  cost: { wood: 5, alumi: 4, iron: 2 } },
+  { id: 'piano',    name: 'ピアノ',       draw: 'piano',    w: 124, h: 102, cost: { wood: 7, iron: 4, glue: 3 } },
+  { id: 'bunkbed',  name: '2だんベッド',  draw: 'bunkbed',  w: 132, h: 122, cost: { wood: 8, cloth: 5, string: 3 } },
+  { id: 'desk',     name: 'べんきょうづくえ', draw: 'desk',  w: 112, h: 80,  cost: { wood: 5, iron: 2, glue: 2 } },
+  { id: 'pc',       name: 'パソコン',     draw: 'pc',       w: 68,  h: 64,  cost: { alumi: 4, iron: 3, glue: 2 } },
+  { id: 'gameset',  name: 'ゲームき',     draw: 'gameset',  w: 68,  h: 50,  cost: { alumi: 3, iron: 2, string: 2 } },
+  { id: 'bookpile', name: 'つみあげた ほん', draw: 'bookpile', w: 58, h: 58, cost: { wood: 2, cloth: 2, glue: 1 } },
+  { id: 'cactus',   name: 'サボテン',     draw: 'cactus',   w: 54,  h: 96,  cost: { wood: 2, stone: 3 } },
+  { id: 'vase',     name: 'はなびん',     draw: 'vase',     w: 42,  h: 76,  cost: { stone: 3, glue: 1 } },
+  { id: 'globe',    name: 'ちきゅうぎ',   draw: 'globe',    w: 54,  h: 80,  cost: { wood: 2, alumi: 2, glue: 2 } },
+  { id: 'swing',    name: 'ブランコ',     draw: 'swing',    w: 96,  h: 124, cost: { wood: 6, string: 4, iron: 2 } },
+  { id: 'slide',    name: 'すべりだい',   draw: 'slide',    w: 122, h: 102, cost: { wood: 7, alumi: 4, iron: 3 } },
+  { id: 'tent',     name: 'テント',       draw: 'tent',     w: 138, h: 94,  cost: { cloth: 7, string: 4, wood: 2 } },
+  { id: 'hammock',  name: 'ハンモック',   draw: 'hammock',  w: 140, h: 86,  cost: { cloth: 5, string: 6, wood: 4 } },
+  { id: 'hoop',     name: 'バスケゴール', draw: 'hoop',     w: 84,  h: 136, cost: { iron: 5, alumi: 3, string: 3 } },
+  { id: 'goal',     name: 'サッカーゴール', draw: 'goal',   w: 118, h: 66,  cost: { alumi: 5, string: 5, cloth: 2 } },
+  { id: 'robotoy',  name: 'ロボットの おもちゃ', draw: 'robotoy', w: 62, h: 92, cost: { iron: 4, alumi: 3, glue: 2 } },
+  { id: 'dino',     name: 'きょうりゅうの ぬいぐるみ', draw: 'dino', w: 92, h: 68, cost: { cloth: 4, string: 3, glue: 1 } },
+  { id: 'cake',     name: 'おおきな ケーキ', draw: 'cake',  w: 68,  h: 86,  cost: { cloth: 3, glue: 3, wood: 1 } },
 ];
 
 /* 20しゅるい × 5いろ ＝ 100パターンを じどうで つくる */
@@ -4919,6 +5022,23 @@ const CRAFT_PATTERNS = (function () {
   });
   return out;
 })();
+
+/* --------------------------------------------------------------------------
+   へやの ひろさ（かくちょう）
+
+   へやは そざいを つかって 3だんかい まで ひろげられます。
+   ひろげると かぐが すこし ちいさく かかれる ように なり、
+   そのぶん ★たくさん おける★ ように なります。
+
+     size … へやの よこはば（かぐの おおきさの めやす。おおきいほど ひろい）
+     cost … ひろげる のに ひつような そざい
+   -------------------------------------------------------------------------- */
+const ROOM_SIZES = [
+  { lv: 0, name: 'ふつうの へや',   size: 520,  cost: null },
+  { lv: 1, name: 'ひろい へや',     size: 720,  cost: { wood: 12, stone: 8,  iron: 4,  glue: 4 } },
+  { lv: 2, name: 'とても ひろい へや', size: 960,  cost: { wood: 20, stone: 14, iron: 10, alumi: 6, glue: 6 } },
+  { lv: 3, name: 'おおひろま',      size: 1240, cost: { wood: 30, stone: 22, iron: 18, alumi: 14, cloth: 10, glue: 10 } },
+];
 
 const ROOM_ITEMS = [
   /* ---- かべがみ 2しゅるい（ばしょは なし）---- */
@@ -4996,6 +5116,9 @@ const CHAPTERS = {
   /* 木星の となりに ある ちいさな 小惑星。木星の えんちょう あつかい なので
      コースばんごうは 10-A・10-B・10-C（stage.label で だして います）*/
   11:{ name: '小惑星ぷりぷり', short: 'ぷりぷり', x: 0.90, y: 0.67, icon: '🐜', world: 'space' },
+  /* ---- ここから 太陽ちず。うちゅうの ほしを ぜんぶ クリアすると
+         うちゅうちずの みぎの やじるしから いけます ---- */
+  12:{ name: '太陽', short: 'たいよう', x: 0.80, y: 0.48, icon: '☀️', world: 'sun' },
 };
 
 
@@ -5517,6 +5640,22 @@ function attrMultiplier(attacker, defender) {
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.11', date: '2026-09-16',
+    title: '★あたらしい ちず「太陽」ボス＆中ボスラッシュ ＋ へやの かくちょう',
+    items: [
+      '★うちゅうちずの みぎに やじるしが でます。おすと よこに スライドして「太陽 ちず」に いけます。うちゅうの ほしを ぜんぶ クリアすると あらわれます。',
+      '太陽には 3コース。★ざこが 1たいも でません★。いままでの ボスと 中ボスが つぎつぎに でて くる だけの「ボスラッシュ」です。',
+      '12-1 ほのおの もん … 下手なきりん → ガラク帝 → お菓子マン',
+      '12-2 ひかりの かいろう … 覚醒 ヌシノオオカミ → 覚醒 メルトギア → 終焉の大魔導士ゼノス',
+      '12-3 太陽の いただき … 覚醒 ガオウ → 覚醒 賢者カロン → 帝王クモール → ★闇堕ちあき坊★',
+      'とても むずかしい です。30かい やって 12〜19かい くらいしか かてません。かてる ときも 8ぷんちかく かかります。けいけんちと Gコインは たっぷり もらえます。',
+      'ボスは「しろの たいりょく」が へると つぎが でて くるので、1たいずつ じゅんばんに たおして いく かたちに なります。ざこが いない ぶん、おさいふ君を そだてるか ボスに つっこむかの えらびかたが だいじ です。',
+      '★ごうのすけの へやを ひろげられる ように なりました。「📐 ひろげる」タブから、そざいを つかって 3だんかい まで。ひろげると かぐが ちいさく かかれて、そのぶん たくさん おけます。',
+      '★へやの かぐを 100パターン ふやしました（20しゅるい × 5いろ）。れいぞうこ・キッチン・ピアノ・2だんベッド・べんきょうづくえ・パソコン・ゲームき・つみあげた ほん・サボテン・はなびん・ちきゅうぎ・ブランコ・すべりだい・テント・ハンモック・バスケゴール・サッカーゴール・ロボットの おもちゃ・きょうりゅうの ぬいぐるみ・おおきな ケーキ。',
+      'ぜんぶで 40しゅるい × 5いろ ＝ 200パターンに なりました。',
+    ],
+  },
   {
     ver: '6.10', date: '2026-09-16',
     title: '★たたみんの だい3けいたい「柔道師範たたみん」',

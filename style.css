@@ -960,6 +960,45 @@ body.dragging-slot #party-slots { touch-action:none; }
 .world-btn.space  { background:linear-gradient(180deg,#43a047,#1b5e20); box-shadow:0 calc(4px * var(--ui)) 0 #0b3d10; }
 
 
+/* ---- ちずの よこの やじるし（うちゅう ⇄ 太陽）----
+   ごうのすけくんの えの とおり、きいろい さんかくの やじるしです。 */
+.map-arrow {
+  position:absolute; top:50%; transform:translateY(-50%);
+  z-index:4;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:calc(2px * var(--ui));
+  width:calc(48px * var(--ui)); height:calc(92px * var(--ui));
+  padding:0; border:none; cursor:pointer;
+  /* ほしに かさなっても よめる ように、うすい くろい したじきを しく */
+  background:rgba(8,4,26,.55);
+  border-radius:calc(14px * var(--ui));
+  box-shadow:0 0 0 calc(2px * var(--ui)) rgba(255,213,79,.35) inset;
+  color:#ffd54f;
+  filter:drop-shadow(0 0 calc(8px * var(--ui)) rgba(255,213,79,.55));
+  animation:mapArrowPulse 1.6s ease-in-out infinite;
+}
+.map-arrow.right { right:calc(4px * var(--ui)); }
+.map-arrow.left  { left:calc(4px * var(--ui)); }
+.map-arrow .ma-tri { font-size:calc(28px * var(--ui)); line-height:1; }
+.map-arrow .ma-ico { font-size:calc(24px * var(--ui)); line-height:1; }
+.map-arrow:active { filter:none; }
+@keyframes mapArrowPulse {
+  0%,100% { opacity:.75; }
+  50%     { opacity:1; }
+}
+
+/* ---- ちずの スワイプ（よこに すべる うごき）---- */
+.map-wrap { overflow:hidden; }
+.map-slide-out-left  { animation:mapSlideOutLeft  .22s ease-in forwards; }
+.map-slide-out-right { animation:mapSlideOutRight .22s ease-in forwards; }
+.map-slide-in-left   { animation:mapSlideInLeft   .26s ease-out; }
+.map-slide-in-right  { animation:mapSlideInRight  .26s ease-out; }
+@keyframes mapSlideOutLeft  { to { transform:translateX(-100%); opacity:.2; } }
+@keyframes mapSlideOutRight { to { transform:translateX(100%);  opacity:.2; } }
+@keyframes mapSlideInLeft   { from { transform:translateX(-100%); opacity:.2; } to { transform:none; opacity:1; } }
+@keyframes mapSlideInRight  { from { transform:translateX(100%);  opacity:.2; } to { transform:none; opacity:1; } }
+
+
 /* ---- Lv.30 で なれる だい3けいたい ---- */
 .pr-btn.evolve.third {
   background:linear-gradient(180deg,#ab47bc,#6a1b9a);
@@ -1145,3 +1184,13 @@ body.dragging-slot #party-slots { touch-action:none; }
   color:#37474f; font-size:calc(13px * var(--ui));
   line-height:1.6; margin-bottom:calc(4px * var(--ui));
 }
+
+
+/* ---- へやを ひろげる（📐 ひろげる タブ）---- */
+.size-lead {
+  flex-basis:100%; margin:calc(4px * var(--ui)) 0;
+  font-size:calc(11px * var(--ui)); color:#5d4037; line-height:1.5;
+}
+.room-item.size-item { min-width:calc(104px * var(--ui)); }
+.room-item.size-item .si-mark { font-size:calc(26px * var(--ui)); line-height:1.1; }
+.room-item.size-item.made { opacity:.7; }

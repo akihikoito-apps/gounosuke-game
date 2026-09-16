@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.10';
+  const GAME_VERSION = '6.11';
 
 
   /* =================================================
@@ -415,7 +415,12 @@
   function chapterOpen(ch) {
     /* うちゅうの さいしょの ほしは、せかいちずを ぜんぶ クリアしたら あそべる */
     const list = allChapters().filter(c => worldOf(c) === worldOf(ch));
-    if (ch <= list[0]) return (worldOf(ch) === 'earth') ? true : earthAllCleared();
+    if (ch <= list[0]) {
+      const w = worldOf(ch);
+      if (w === 'earth') return true;
+      if (w === 'sun')   return spaceAllCleared();   // 太陽は うちゅうを ぜんぶ クリアしてから
+      return earthAllCleared();                      // うちゅうは せかいを ぜんぶ クリアしてから
+    }
     const cleared = (slot() && slot().cleared) || {};
     const prev = coursesOf(ch - 1);
     return prev.length > 0 && prev.every(st => cleared[st.no]);
@@ -466,21 +471,123 @@
     });
   }
 
+  /* うちゅうの ほしを ぜんぶ クリアしたか（＝太陽へ いけるか）*/
+  function spaceAllCleared() {
+    const cleared = (slot() && slot().cleared) || {};
+    const space = allChapters().filter(ch => worldOf(ch) === 'space');
+    return space.length > 0 && space.every(ch => coursesOf(ch).every(st => cleared[st.no]));
+  }
+
+  const WORLD_TITLE = { earth: 'せかい ちず', space: 'うちゅう ちず', sun: '太陽 ちず' };
+
   function refreshWorldBtn() {
     const b = $('#btn-world');
-    if (!b) return;
-    const canGo = earthAllCleared();
-    b.classList.toggle('hidden', !canGo);
-    b.classList.toggle('space', currentWorld === 'space');
-    b.textContent = (currentWorld === 'earth') ? '🚀 うちゅうへ' : '🌍 ちきゅうへ';
+    if (b) {
+      /* 太陽ちずでは ちきゅう ⇄ うちゅう の ボタンは ださない */
+      const canGo = earthAllCleared() && currentWorld !== 'sun';
+      b.classList.toggle('hidden', !canGo);
+      b.classList.toggle('space', currentWorld === 'space');
+      b.textContent = (currentWorld === 'earth') ? '🚀 うちゅうへ' : '🌍 ちきゅうへ';
+    }
+    /* よこの やじるし。うちゅう →（太陽）／ 太陽 →（うちゅう）*/
+    const r = $('#btn-map-right'), l = $('#btn-map-left');
+    if (r) r.classList.toggle('hidden', !(currentWorld === 'space' && spaceAllCleared()));
+    if (l) l.classList.toggle('hidden', currentWorld !== 'sun');
     refreshTowerBtn();
     const t = $('.map-title');
-    if (t) t.textContent = (currentWorld === 'earth') ? 'せかい ちず' : 'うちゅう ちず';
+    if (t) t.textContent = WORLD_TITLE[currentWorld] || 'ちず';
+  }
+
+  /* ちずを かきなおす。dir を わたすと よこに すべる うごきが つきます
+       dir = 'left'  … あたらしい ちずが みぎから はいって くる（＝みぎへ すすむ）
+       dir = 'right' … あたらしい ちずが ひだりから はいって くる（＝ひだりへ もどる）*/
+  function redrawMap(dir) {
+    drawMap(); buildMapNodes(); refreshWorldBtn();
+    if (!dir) return;
+    const wrap = document.querySelector('.map-wrap');
+    if (!wrap) return;
+    const cls = (dir === 'left') ? 'map-slide-in-right' : 'map-slide-in-left';
+    wrap.classList.remove('map-slide-in-right', 'map-slide-in-left');
+    void wrap.offsetWidth;                 // アニメを やりなおさせる
+    wrap.classList.add(cls);
+    setTimeout(() => wrap.classList.remove(cls), 320);
   }
 
   function switchWorld() {
     currentWorld = (currentWorld === 'earth') ? 'space' : 'earth';
-    drawMap(); buildMapNodes(); refreshWorldBtn();
+    redrawMap();
+  }
+
+  /* うちゅう ⇄ 太陽（よこに スワイプ）*/
+  function goSunMap()   { if (!spaceAllCleared()) { toast('うちゅうの ほしを ぜんぶ クリアすると いけます'); return; }
+                          currentWorld = 'sun';   redrawMap('left'); }
+  function backToSpace() { currentWorld = 'space'; redrawMap('right'); }
+
+  /* --- 太陽ちずの え（ごうのすけくんの えの とおり）---
+       むらさきの そら、ひだりから みぎへ つづく とびいしの みち、
+       そして みぎに おおきな オレンジの 太陽。                     */
+  function drawSunMap(ctx, W, H) {
+    /* むらさきの そら */
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, '#2a13a8');
+    g.addColorStop(0.55, '#3a1ad0');
+    g.addColorStop(1, '#2510a0');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    /* とおくの ほし */
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    for (let i = 0; i < 40; i++) {
+      const sx = ((i * 97) % 100) / 100 * W;
+      const sy = ((i * 61) % 100) / 100 * H;
+      ctx.fillRect(sx, sy, 1.6, 1.6);
+    }
+
+    /* ★太陽（みぎに おおきく。オレンジの まるに あかい もよう）*/
+    const sx = W * 0.80, sy = H * 0.48, sr = Math.min(W * 0.30, H * 0.56);
+    /* まわりの ひかり */
+    const halo = ctx.createRadialGradient(sx, sy, sr * 0.9, sx, sy, sr * 1.5);
+    halo.addColorStop(0, 'rgba(255,160,40,.45)');
+    halo.addColorStop(1, 'rgba(255,160,40,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(sx, sy, sr * 1.5, 0, Math.PI * 2); ctx.fill();
+    /* ほんたい */
+    ctx.fillStyle = '#f9a01b';
+    ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+    /* あかい もよう 3つ（えの とおりの ばしょ）*/
+    ctx.save();
+    ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.clip();
+    ctx.fillStyle = '#f4421d';
+    ctx.beginPath(); ctx.arc(sx - sr * 0.42, sy - sr * 0.06, sr * 0.22, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(sx + sr * 0.42, sy - sr * 0.56, sr * 0.19, sr * 0.13, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(sx + sr * 0.05, sy + sr * 0.72, sr * 0.38, sr * 0.14, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    /* ★とびいしの みち（ひだりの はしから 太陽へ）*/
+    const stones = [[0.09, 0.66], [0.14, 0.63], [0.20, 0.65], [0.26, 0.62],
+                    [0.32, 0.66], [0.38, 0.62], [0.44, 0.60], [0.49, 0.63]];
+    ctx.fillStyle = 'rgba(60,20,110,.85)';
+    stones.forEach(([px, py], i) => {
+      const bx = px * W, by = py * H;
+      if (i % 2) { ctx.beginPath(); ctx.ellipse(bx, by, H * 0.030, H * 0.011, 0, 0, Math.PI * 2); ctx.fill(); }
+      else       { roundRectPath(ctx, bx - H * 0.024, by - H * 0.022, H * 0.048, H * 0.044, H * 0.008); ctx.fill(); }
+    });
+
+    /* ★ひだりの きいろい ぼう（えの「火星とか」へ もどる めじるし）*/
+    ctx.fillStyle = '#ffd54f';
+    roundRectPath(ctx, W * 0.055, H * 0.28, Math.max(5, W * 0.009), H * 0.40, 4);
+    ctx.fill();
+  }
+
+  /* まるい かどの しかくを パスに する（ぬりは よびだしがわで）*/
+  function roundRectPath(ctx, x, y, w, h, r) {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y,     x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x,     y + h, rr);
+    ctx.arcTo(x,     y + h, x,     y,     rr);
+    ctx.arcTo(x,     y,     x + w, y,     rr);
+    ctx.closePath();
   }
 
   /* --- うちゅうちずの え（ほしぞらと わくせい）--- */
@@ -701,6 +808,7 @@
 
     /* うちゅうちずの ときは そちらを かいて おわり */
     if (currentWorld === 'space') { drawSpaceMap(ctx, W, H); return; }
+    if (currentWorld === 'sun')   { drawSunMap(ctx, W, H); return; }
 
     /* そら */
     const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -1946,7 +2054,14 @@
     }
     if (!s.room.placed) s.room.placed = {};
     if (!s.room.charPos) s.room.charPos = { x: 0.52, y: 0.80 };
+    if (typeof s.room.size !== 'number') s.room.size = 0;   // へやの ひろさ（0〜3）
     return s.room;
+  }
+  /* いまの へやの ひろさ（かぐを かく ときの めやすの よこはば）*/
+  function roomSizeInfo(lv) {
+    const list = (typeof ROOM_SIZES !== 'undefined') ? ROOM_SIZES : null;
+    if (!list) return { lv: 0, name: 'へや', size: 520, cost: null };
+    return list[Math.max(0, Math.min(list.length - 1, lv | 0))];
   }
   function roomItem(id) { return ROOM_ITEMS.find(x => x.id === id) || null; }
 
@@ -2111,7 +2226,14 @@
     ctx.setLineDash([]);
   }
 
-  function roomScale(W, H, it) { return Math.min(W / 520, H / 300); }
+  /* ★へやを ひろげると、かぐは そのぶん ちいさく かかれます。
+       がめんの おおきさは かわらない ので、ちいさく なった ぶんだけ
+       たくさん おける ように なります。                          */
+  function roomScale(W, H, it) {
+    const r = roomState();
+    const base = roomSizeInfo(r ? r.size : 0).size;
+    return Math.min(W / base, H / (300 * base / 520));
+  }
 
   /* おいて ある かぐを「ゆかに しく もの → おく もの」の じゅんに */
   function roomPlacedList() {
@@ -2216,7 +2338,7 @@
     const box = $('#room-tabs');
     if (!box) return;
     const tabs = [['item', '🛋️ かぐ'], ['floor', '🟥 カーペット'], ['wall', '🎨 かべがみ'],
-                  ['char', '😊 なかま'], ['craft', '🔨 つくる']];
+                  ['char', '😊 なかま'], ['craft', '🔨 つくる'], ['size', '📐 ひろげる']];
     box.innerHTML = '';
     tabs.forEach(([k, label]) => {
       const b = document.createElement('button');
@@ -2252,6 +2374,7 @@
     }
 
     if (roomTab === 'craft') { buildCraftTray(box); return; }
+    if (roomTab === 'size')  { buildSizeTray(box); return; }
 
     /* さいしょから もって いる ぶん ＋ つくった ぶん */
     const made = madeList();
@@ -2305,6 +2428,57 @@
       });
       box.appendChild(b);
       paintRoomItem(b.querySelector('canvas'), pat);
+    });
+  }
+
+  /* ★へやを ひろげる がめん
+       そざいを はらって へやを おおきく します。
+       ひろげると かぐが ちいさく かかれる ので、たくさん おけます。 */
+  function buildSizeTray(box) {
+    const r = roomState();
+    const list = (typeof ROOM_SIZES !== 'undefined') ? ROOM_SIZES : [];
+    const now = r ? (r.size | 0) : 0;
+
+    /* いま もって いる そざい */
+    const bar = document.createElement('div');
+    bar.className = 'mat-bar';
+    MATERIAL_ORDER.forEach(id => {
+      const mt = MATERIALS[id];
+      const chip = document.createElement('span');
+      chip.className = 'mat-chip';
+      chip.innerHTML = mt.icon + mt.name + ' <b>' + matCount(id) + '</b>';
+      bar.appendChild(chip);
+    });
+    box.appendChild(bar);
+
+    const lead = document.createElement('p');
+    lead.className = 'size-lead';
+    lead.textContent = 'いまの へや：' + list[now].name +
+      '　ひろげると かぐが ちいさく なって、たくさん おけるよ！';
+    box.appendChild(lead);
+
+    list.forEach((sz, i) => {
+      if (i === 0) return;                            // さいしょの ひろさは ボタンに しない
+      const done = now >= i;
+      const next = (now === i - 1);
+      const can  = next && Object.keys(sz.cost).every(k => matCount(k) >= sz.cost[k]);
+      const b = document.createElement('button');
+      b.className = 'room-item size-item' + (done ? ' made' : (can ? '' : ' cant'));
+      const cost = Object.keys(sz.cost).map(k => MATERIALS[k].icon + sz.cost[k]).join(' ');
+      b.innerHTML = '<span class="si-mark">' + (done ? '✅' : (next ? '📐' : '🔒')) + '</span>' +
+                    '<span class="ri-name">' + sz.name + '</span>' +
+                    '<span class="ri-cost">' + (done ? 'ひろげた！' : cost) + '</span>';
+      b.addEventListener('click', () => {
+        if (done) { toast('もう ひろげて あるよ！'); return; }
+        if (!next) { toast('ひとつ まえの ひろさから じゅんばんに ひろげてね'); return; }
+        if (!can) { toast('そざいが たりないよ…'); return; }
+        Object.keys(sz.cost).forEach(k => addMat(k, -sz.cost[k]));
+        r.size = i;
+        storeSave();
+        toast('へやが 「' + sz.name + '」に なった！');
+        buildRoomTray(); drawRoom();
+      });
+      box.appendChild(b);
     });
   }
 
@@ -2997,6 +3171,8 @@
     /* トップがめん */
     $('#btn-home-stage').addEventListener('click', openChapters);
     $('#btn-world').addEventListener('click', switchWorld);
+    const mr = $('#btn-map-right'); if (mr) mr.addEventListener('click', goSunMap);
+    const ml = $('#btn-map-left');  if (ml) ml.addEventListener('click', backToSpace);
     $('#btn-home-room').addEventListener('click', () => { openRoom(); bindRoomCanvas(); });
     $('#btn-room-back').addEventListener('click', closeRoom);
     $('#btn-chapter-back').addEventListener('click', openHome);

@@ -9864,3 +9864,274 @@ Object.assign(ROOM_DRAWERS, {
   bear: drawBear, rabbit: drawRabbit, ball: drawBall, blocks: drawBlocks, drum: drawDrum,
   guitar: drawGuitar, bin: drawBin, tank: drawTank, mirror: drawMirror, statue: drawStatue,
 });
+
+/* ==== こうさくアイテム もう 20しゅるい（v6.11）====
+   かきかたは うえの 20こと おなじ。(0,0) が ゆかに つく ところ。 */
+
+/* 21 れいぞうこ */
+function drawFridge(ctx, s) { const p = P(s);
+  ctx.fillStyle = p.dark;  roundRect(ctx, -34, -120, 68, 120, 7); ctx.fill();
+  ctx.fillStyle = p.main;  roundRect(ctx, -30, -116, 60, 112, 5); ctx.fill();
+  ctx.fillStyle = p.dark;  ctx.fillRect(-30, -74, 60, 4);
+  ctx.fillStyle = p.light; roundRect(ctx, 16, -108, 6, 26, 3); ctx.fill();
+  roundRect(ctx, 16, -66, 6, 26, 3); ctx.fill();
+  ctx.fillStyle = p.accent; roundRect(ctx, -22, -108, 18, 14, 3); ctx.fill();
+}
+/* 22 キッチン */
+function drawKitchen(ctx, s) { const p = P(s);
+  ctx.fillStyle = p.dark;  roundRect(ctx, -58, -60, 116, 60, 5); ctx.fill();
+  ctx.fillStyle = p.main;  roundRect(ctx, -54, -56, 108, 52, 4); ctx.fill();
+  ctx.fillStyle = METAL;   roundRect(ctx, -60, -70, 120, 12, 4); ctx.fill();
+  ctx.fillStyle = METALD;  roundRect(ctx, -44, -68, 30, 8, 3); ctx.fill();   // シンク
+  ctx.fillStyle = '#455a64';
+  for (const x of [8, 30]) { ctx.beginPath(); ctx.arc(x, -64, 5, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = p.light; ctx.fillRect(-46, -40, 30, 4); ctx.fillRect(4, -40, 30, 4);
+  ctx.fillStyle = METAL;   roundRect(ctx, -16, -82, 5, 14, 2); ctx.fill();   // じゃぐち
+  roundRect(ctx, -30, -84, 16, 4, 2); ctx.fill();
+}
+/* 23 ピアノ */
+function drawPiano(ctx, s) { const p = P(s);
+  ctx.fillStyle = p.dark;  roundRect(ctx, -62, -102, 124, 102, 6); ctx.fill();
+  ctx.fillStyle = p.main;  roundRect(ctx, -58, -98, 116, 60, 5); ctx.fill();
+  ctx.fillStyle = '#fafafa'; roundRect(ctx, -56, -38, 112, 16, 3); ctx.fill();
+  ctx.fillStyle = '#222';
+  for (let i = -50; i < 52; i += 8) ctx.fillRect(i, -38, 4, 10);
+  ctx.fillStyle = p.light; roundRect(ctx, -46, -90, 92, 8, 4); ctx.fill();
+  ctx.fillStyle = p.accent; ctx.beginPath(); ctx.arc(0, -70, 7, 0, Math.PI * 2); ctx.fill();
+}
+/* 24 2だんベッド */
+function drawBunkbed(ctx, s) { const p = P(s);
+  ctx.fillStyle = WOODD;
+  ctx.fillRect(-64, -122, 9, 122); ctx.fillRect(55, -122, 9, 122);
+  ctx.fillStyle = WOODC; roundRect(ctx, -66, -34, 132, 16, 4); ctx.fill();
+  roundRect(ctx, -66, -92, 132, 16, 4); ctx.fill();
+  ctx.fillStyle = p.main;  roundRect(ctx, -60, -46, 120, 13, 4); ctx.fill();
+  roundRect(ctx, -60, -104, 120, 13, 4); ctx.fill();
+  ctx.fillStyle = p.light; roundRect(ctx, -56, -56, 36, 12, 5); ctx.fill();
+  roundRect(ctx, -56, -114, 36, 12, 5); ctx.fill();
+  ctx.fillStyle = WOODD;   // はしご
+  for (let y = -110; y < -20; y += 22) roundRect(ctx, 30, y, 30, 5, 2), ctx.fill();
+}
+/* 25 べんきょうづくえ */
+function drawDesk(ctx, s) { const p = P(s);
+  ctx.fillStyle = WOODD; ctx.fillRect(-52, -52, 10, 52); ctx.fillRect(42, -52, 10, 52);
+  ctx.fillStyle = p.main; roundRect(ctx, -56, -66, 112, 15, 4); ctx.fill();
+  ctx.fillStyle = p.dark; roundRect(ctx, 4, -50, 48, 34, 3); ctx.fill();     // ひきだし
+  ctx.fillStyle = p.light; roundRect(ctx, 14, -42, 28, 5, 2); ctx.fill();
+  roundRect(ctx, 14, -28, 28, 5, 2); ctx.fill();
+  ctx.fillStyle = p.accent; roundRect(ctx, -46, -78, 26, 12, 3); ctx.fill(); // ほん
+}
+/* 26 パソコン */
+function drawPc(ctx, s) { const p = P(s);
+  ctx.fillStyle = METALD; roundRect(ctx, -12, -18, 24, 8, 3); ctx.fill();
+  ctx.fillStyle = p.dark; roundRect(ctx, -34, -62, 68, 46, 5); ctx.fill();
+  ctx.fillStyle = '#26c6da'; roundRect(ctx, -29, -57, 58, 36, 3); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.45)'; roundRect(ctx, -26, -54, 22, 8, 2); ctx.fill();
+  ctx.fillStyle = p.main; roundRect(ctx, -30, -10, 60, 10, 3); ctx.fill();   // キーボード
+  ctx.fillStyle = p.light;
+  for (let i = -26; i < 26; i += 7) ctx.fillRect(i, -8, 5, 3);
+}
+/* 27 ゲームき */
+function drawGameset(ctx, s) { const p = P(s);
+  ctx.fillStyle = p.dark;  roundRect(ctx, -34, -26, 68, 26, 5); ctx.fill();
+  ctx.fillStyle = p.main;  roundRect(ctx, -30, -22, 60, 18, 4); ctx.fill();
+  ctx.fillStyle = p.accent; ctx.beginPath(); ctx.arc(-18, -13, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = p.light; roundRect(ctx, -6, -17, 30, 8, 3); ctx.fill();
+  /* コントローラー */
+  ctx.fillStyle = p.dark; roundRect(ctx, -26, -46, 52, 18, 8); ctx.fill();
+  ctx.fillStyle = p.light; ctx.beginPath(); ctx.arc(-14, -37, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = p.accent; ctx.beginPath(); ctx.arc(14, -37, 4, 0, Math.PI * 2); ctx.fill();
+}
+/* 28 つみあげた ほん */
+function drawBookpile(ctx, s) { const p = P(s);
+  const cols = [p.main, p.dark, p.light, p.accent, p.main];
+  let y = 0;
+  for (let i = 0; i < 5; i++) {
+    const w = 50 - i * 3, h = 11;
+    ctx.fillStyle = cols[i];
+    roundRect(ctx, -w / 2 + (i % 2 ? 4 : -4), y - h, w, h - 1, 2); ctx.fill();
+    y -= h;
+  }
+}
+/* 29 サボテン */
+function drawCactus(ctx, s) { const p = P(s);
+  ctx.fillStyle = WOODD; roundRect(ctx, -20, -26, 40, 26, 5); ctx.fill();
+  ctx.fillStyle = p.dark; roundRect(ctx, -22, -32, 44, 10, 4); ctx.fill();
+  ctx.fillStyle = '#4caf50';
+  roundRect(ctx, -10, -88, 20, 62, 10); ctx.fill();
+  roundRect(ctx, -26, -70, 14, 30, 7); ctx.fill();
+  roundRect(ctx, 12, -62, 14, 24, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.35)';
+  for (let i = 0; i < 5; i++) ctx.fillRect(-2, -84 + i * 12, 2, 6);
+  ctx.fillStyle = p.accent; ctx.beginPath(); ctx.arc(0, -92, 6, 0, Math.PI * 2); ctx.fill();
+}
+/* 30 はなびん */
+function drawVase(ctx, s) { const p = P(s);
+  ctx.fillStyle = p.main;
+  ctx.beginPath(); ctx.moveTo(-14, 0); ctx.quadraticCurveTo(-20, -24, -9, -34);
+  ctx.lineTo(9, -34); ctx.quadraticCurveTo(20, -24, 14, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = p.light; roundRect(ctx, -10, -38, 20, 6, 3); ctx.fill();
+  ctx.strokeStyle = '#4caf50'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  for (const [dx, dy] of [[-12, -60], [0, -68], [13, -58]]) {
+    ctx.beginPath(); ctx.moveTo(0, -36); ctx.quadraticCurveTo(dx * 0.5, -50, dx, dy); ctx.stroke();
+  }
+  ctx.fillStyle = p.accent;
+  for (const [dx, dy] of [[-12, -60], [0, -68], [13, -58]]) {
+    for (let i = 0; i < 5; i++) {
+      const a = i / 5 * Math.PI * 2;
+      ctx.beginPath(); ctx.arc(dx + Math.cos(a) * 5, dy + Math.sin(a) * 5, 3.4, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+}
+/* 31 ちきゅうぎ */
+function drawGlobe(ctx, s) { const p = P(s);
+  ctx.fillStyle = WOODD; roundRect(ctx, -16, -10, 32, 10, 4); ctx.fill();
+  ctx.fillStyle = METALD; ctx.fillRect(-3, -30, 6, 22);
+  ctx.fillStyle = '#42a5f5'; ctx.beginPath(); ctx.arc(0, -50, 22, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#66bb6a';
+  ctx.beginPath(); ctx.ellipse(-7, -56, 9, 6, 0.3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(8, -44, 7, 5, -0.2, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = p.main; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.arc(0, -50, 26, -0.4, Math.PI + 0.4); ctx.stroke();
+}
+/* 32 ブランコ */
+function drawSwing(ctx, s) { const p = P(s);
+  ctx.strokeStyle = WOODD; ctx.lineWidth = 7; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-42, 0); ctx.lineTo(-20, -116); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(42, 0);  ctx.lineTo(20, -116); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-26, -116); ctx.lineTo(26, -116); ctx.stroke();
+  const sw = Math.sin((s && s.t || 0) * 1.6) * 6;
+  ctx.strokeStyle = METALD; ctx.lineWidth = 2.6;
+  ctx.beginPath(); ctx.moveTo(-14, -112); ctx.lineTo(-14 + sw, -44); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(14, -112);  ctx.lineTo(14 + sw, -44); ctx.stroke();
+  ctx.fillStyle = p.main; roundRect(ctx, -22 + sw, -46, 44, 10, 4); ctx.fill();
+  ctx.fillStyle = p.light; roundRect(ctx, -18 + sw, -44, 36, 3, 2); ctx.fill();
+}
+/* 33 すべりだい */
+function drawSlide(ctx, s) { const p = P(s);
+  ctx.fillStyle = WOODD;
+  ctx.fillRect(28, -92, 8, 92); ctx.fillRect(48, -92, 8, 92);
+  ctx.fillStyle = p.dark;
+  ctx.beginPath(); ctx.moveTo(-56, 0); ctx.lineTo(-40, 0);
+  ctx.lineTo(40, -84); ctx.lineTo(22, -84); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = p.main;
+  ctx.beginPath(); ctx.moveTo(-52, 0); ctx.lineTo(-42, 0);
+  ctx.lineTo(38, -80); ctx.lineTo(26, -80); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = p.light; roundRect(ctx, 20, -96, 40, 10, 3); ctx.fill();
+  ctx.fillStyle = WOODD;
+  for (let y = -78; y < -6; y += 18) { roundRect(ctx, 34, y, 26, 5, 2); ctx.fill(); }
+}
+/* 34 テント */
+function drawTent(ctx, s) { const p = P(s);
+  ctx.fillStyle = p.dark;
+  ctx.beginPath(); ctx.moveTo(-58, 0); ctx.lineTo(0, -92); ctx.lineTo(58, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = p.main;
+  ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(0, -84); ctx.lineTo(50, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = p.light;
+  ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(0, -56); ctx.lineTo(16, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = p.accent; ctx.beginPath(); ctx.arc(0, -90, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = WOODD; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-58, 0); ctx.lineTo(-68, -8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(58, 0);  ctx.lineTo(68, -8); ctx.stroke();
+}
+/* 35 ハンモック */
+function drawHammock(ctx, s) { const p = P(s);
+  ctx.fillStyle = WOODD;
+  roundRect(ctx, -68, -80, 9, 80, 4); ctx.fill();
+  roundRect(ctx, 59, -80, 9, 80, 4); ctx.fill();
+  const sag = 26 + Math.sin((s && s.t || 0) * 1.3) * 3;
+  ctx.fillStyle = p.main;
+  ctx.beginPath();
+  ctx.moveTo(-60, -72);
+  ctx.quadraticCurveTo(0, -72 + sag + 16, 60, -72);
+  ctx.quadraticCurveTo(0, -72 + sag, -60, -72);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = p.dark; ctx.lineWidth = 2;
+  for (let i = -48; i <= 48; i += 12) {
+    ctx.beginPath(); ctx.moveTo(i, -72 + sag * (1 - (i / 60) * (i / 60)) * 0.55);
+    ctx.lineTo(i, -72 + (sag + 16) * (1 - (i / 60) * (i / 60)) * 0.95); ctx.stroke();
+  }
+  ctx.fillStyle = p.light; roundRect(ctx, -20, -76, 26, 8, 4); ctx.fill();   // まくら
+}
+/* 36 バスケゴール */
+function drawHoop(ctx, s) { const p = P(s);
+  ctx.fillStyle = METALD; roundRect(ctx, -6, -110, 12, 110, 4); ctx.fill();
+  ctx.fillStyle = p.dark; roundRect(ctx, -30, -12, 60, 12, 5); ctx.fill();
+  ctx.fillStyle = p.light; roundRect(ctx, -40, -132, 80, 46, 4); ctx.fill();
+  ctx.strokeStyle = p.dark; ctx.lineWidth = 3;
+  roundRect(ctx, -18, -112, 36, 20, 2); ctx.stroke();
+  ctx.strokeStyle = '#ef6c00'; ctx.lineWidth = 3.4;
+  ctx.beginPath(); ctx.ellipse(0, -88, 18, 5, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1.6;
+  for (let i = -14; i <= 14; i += 7) { ctx.beginPath(); ctx.moveTo(i, -86); ctx.lineTo(i * 0.5, -68); ctx.stroke(); }
+}
+/* 37 サッカーゴール */
+function drawGoal(ctx, s) { const p = P(s);
+  ctx.strokeStyle = p.light; ctx.lineWidth = 7; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(-56, 0); ctx.lineTo(-56, -62); ctx.lineTo(56, -62); ctx.lineTo(56, 0); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.4;
+  for (let i = -50; i <= 50; i += 10) { ctx.beginPath(); ctx.moveTo(i, -60); ctx.lineTo(i, 0); ctx.stroke(); }
+  for (let y = -54; y < 0; y += 10) { ctx.beginPath(); ctx.moveTo(-54, y); ctx.lineTo(54, y); ctx.stroke(); }
+  ctx.fillStyle = p.main; ctx.beginPath(); ctx.arc(34, -12, 12, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = p.dark;
+  for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2;
+    ctx.beginPath(); ctx.arc(34 + Math.cos(a) * 6, -12 + Math.sin(a) * 6, 2.6, 0, Math.PI * 2); ctx.fill(); }
+}
+/* 38 ロボットの おもちゃ */
+function drawRobotoy(ctx, s) { const p = P(s);
+  ctx.fillStyle = METALD; roundRect(ctx, -18, -14, 12, 14, 3); ctx.fill();
+  roundRect(ctx, 6, -14, 12, 14, 3); ctx.fill();
+  ctx.fillStyle = p.main; roundRect(ctx, -20, -52, 40, 40, 6); ctx.fill();
+  ctx.fillStyle = p.dark; roundRect(ctx, -12, -44, 24, 14, 3); ctx.fill();
+  ctx.fillStyle = METAL;  roundRect(ctx, -30, -48, 10, 26, 4); ctx.fill();
+  roundRect(ctx, 20, -48, 10, 26, 4); ctx.fill();
+  ctx.fillStyle = p.light; roundRect(ctx, -18, -78, 36, 28, 6); ctx.fill();
+  ctx.fillStyle = '#263238';
+  ctx.beginPath(); ctx.arc(-7, -66, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(7, -66, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillRect(-8, -58, 16, 3);
+  ctx.strokeStyle = METALD; ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.moveTo(0, -78); ctx.lineTo(0, -88); ctx.stroke();
+  ctx.fillStyle = p.accent; ctx.beginPath(); ctx.arc(0, -91, 4, 0, Math.PI * 2); ctx.fill();
+}
+/* 39 きょうりゅうの ぬいぐるみ */
+function drawDino(ctx, s) { const p = P(s);
+  ctx.fillStyle = p.dark;
+  ctx.beginPath(); ctx.moveTo(-14, -14); ctx.quadraticCurveTo(-48, -20, -40, -2);
+  ctx.quadraticCurveTo(-28, -8, -12, -6); ctx.closePath(); ctx.fill();   // しっぽ
+  ctx.fillStyle = p.main;
+  ctx.beginPath(); ctx.ellipse(0, -30, 26, 24, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = p.light; ctx.beginPath(); ctx.ellipse(2, -24, 15, 14, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = p.main;
+  ctx.beginPath(); ctx.ellipse(20, -56, 17, 14, 0.2, 0, Math.PI * 2); ctx.fill();   // あたま
+  ctx.fillStyle = p.dark;
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath(); ctx.moveTo(-18 + i * 9, -48 + i * 3);
+    ctx.lineTo(-13 + i * 9, -62 + i * 3); ctx.lineTo(-8 + i * 9, -47 + i * 3); ctx.closePath(); ctx.fill();
+  }
+  ctx.fillStyle = '#263238'; ctx.beginPath(); ctx.arc(27, -60, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = p.dark; roundRect(ctx, -16, -12, 12, 12, 4); ctx.fill();
+  roundRect(ctx, 6, -12, 12, 12, 4); ctx.fill();
+}
+/* 40 おおきな ケーキ */
+function drawCake(ctx, s) { const p = P(s);
+  ctx.fillStyle = '#fafafa'; roundRect(ctx, -34, -12, 68, 12, 5); ctx.fill();
+  ctx.fillStyle = p.dark;  roundRect(ctx, -30, -34, 60, 24, 5); ctx.fill();
+  ctx.fillStyle = p.light; roundRect(ctx, -30, -40, 60, 10, 5); ctx.fill();
+  ctx.fillStyle = p.main;  roundRect(ctx, -22, -58, 44, 20, 5); ctx.fill();
+  ctx.fillStyle = p.light; roundRect(ctx, -22, -63, 44, 8, 4); ctx.fill();
+  ctx.fillStyle = p.accent;
+  for (const x of [-14, 0, 14]) { ctx.beginPath(); ctx.arc(x, -68, 4.4, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = '#fff59d'; ctx.fillRect(-1.5, -82, 3, 14);      // ろうそく
+  ctx.fillStyle = '#ff7043';
+  ctx.beginPath(); ctx.ellipse(0, -86, 3.4, 5, 0, 0, Math.PI * 2); ctx.fill();
+}
+
+Object.assign(ROOM_DRAWERS, {
+  fridge: drawFridge, kitchen: drawKitchen, piano: drawPiano, bunkbed: drawBunkbed,
+  desk: drawDesk, pc: drawPc, gameset: drawGameset, bookpile: drawBookpile,
+  cactus: drawCactus, vase: drawVase, globe: drawGlobe, swing: drawSwing,
+  slide: drawSlide, tent: drawTent, hammock: drawHammock, hoop: drawHoop,
+  goal: drawGoal, robotoy: drawRobotoy, dino: drawDino, cake: drawCake,
+});
+
