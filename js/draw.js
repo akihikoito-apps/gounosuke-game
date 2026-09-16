@@ -7965,7 +7965,10 @@ function drawMatchsama(ctx, s) {
    しろい じゅうどうぎを きて、オレンジの おびを しめて います。
    かおつきも すこし りりしく（まゆが きりっと・くちは への字）。
    ふきとばし・どんそく・うごきとめ が きかない、たよれる かべやく。   */
-function drawJudotatamin(ctx, s) {
+/* 柔道少年たたみん（だい2）と 柔道師範たたみん（だい3）は おなじ かたち。
+   shihan = true で だい3けいたい「柔道師範たたみん」に なります。
+   ちがうのは ★おびが あか★ と ★かおが もっと こわい★ ところ です。 */
+function drawTataminGiBase(ctx, s, shihan) {
   const a = s.atk;
   const step = Math.sin(s.t * 4) * (s.moving ? 1 : 0);
   const lean = (a >= 0) ? (a < 0.6 ? -a * 4 : (a - 0.6) * 22) : 0;
@@ -8029,27 +8032,42 @@ function drawJudotatamin(ctx, s) {
   ctx.strokeStyle = '#dcd6c6'; ctx.lineWidth = 2.2;
   ctx.beginPath(); ctx.moveTo(-9, -36); ctx.lineTo(3, -14); ctx.stroke();
 
-  /* ★オレンジの おび（ほそめに して、えりを かくさない ように）*/
-  ctx.fillStyle = '#f57c00';
-  roundRect(ctx, -23, -15, 46, 7, 2); ctx.fill();
-  ctx.strokeStyle = '#bf5b06'; ctx.lineWidth = 1.3;
-  roundRect(ctx, -23, -15, 46, 7, 2); ctx.stroke();
+  /* ★おび。だい2は オレンジ、★だい3（師範）は あか★
+       あかおびは じゅうどうの いちばん うえの くらい です。
+       師範は おびも ふとく、たれも ながく します。               */
+  const B  = shihan ? '#e53935' : '#f57c00';   // おび
+  const BD = shihan ? '#8e1010' : '#bf5b06';   // ふちどり
+  const BK = shihan ? '#ef5350' : '#fb8c00';   // むすびめ
+  const BT = shihan ? '#d32f2f' : '#ef6c00';   // たれ
+  const bh = shihan ? 9 : 7;                   // おびの ふとさ
+  ctx.fillStyle = B;
+  roundRect(ctx, -23, -16, 46, bh, 2); ctx.fill();
+  ctx.strokeStyle = BD; ctx.lineWidth = 1.3;
+  roundRect(ctx, -23, -16, 46, bh, 2); ctx.stroke();
   /* むすびめ */
-  ctx.fillStyle = '#fb8c00';
-  roundRect(ctx, -5.5, -16.5, 11, 10, 3); ctx.fill();
-  ctx.strokeStyle = '#bf5b06'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.fillStyle = BK;
+  roundRect(ctx, -5.5, -17.5, 11, 10 + (shihan ? 2 : 0), 3); ctx.fill();
+  ctx.strokeStyle = BD; ctx.lineWidth = 1.2; ctx.stroke();
   /* たれた おびの はし（2ほん）*/
-  ctx.fillStyle = '#ef6c00';
-  ctx.strokeStyle = '#bf5b06'; ctx.lineWidth = 1.1;
+  ctx.fillStyle = BT;
+  ctx.strokeStyle = BD; ctx.lineWidth = 1.1;
   const sw = step * 1.6;
-  roundRect(ctx, -6 + sw, -8, 4.5, 11, 2); ctx.fill(); ctx.stroke();
-  roundRect(ctx,  2 - sw, -8, 4.5, 9, 2); ctx.fill(); ctx.stroke();
+  const tl = shihan ? 6 : 0;                   // 師範は たれが ながい
+  roundRect(ctx, -6 + sw, -8, 4.5, 11 + tl, 2); ctx.fill(); ctx.stroke();
+  roundRect(ctx,  2 - sw, -8, 4.5, 9 + tl, 2); ctx.fill(); ctx.stroke();
 
-  /* --- かお（りりしく）--- */
+  /* --- かお（りりしく。師範は もっと こわい かお）--- */
   /* まゆ：うちがわが さがった きりっとした かたち */
-  ctx.strokeStyle = '#3a2a18'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(-11, -54); ctx.lineTo(-2.5, -50); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo( 12, -54); ctx.lineTo( 3.5, -50); ctx.stroke();
+  ctx.strokeStyle = '#3a2a18';
+  ctx.lineWidth = shihan ? 4.6 : 2.6;          // 師範は ふとくて するどい まゆ
+  ctx.lineCap = 'round';
+  if (shihan) {
+    ctx.beginPath(); ctx.moveTo(-13, -56.5); ctx.lineTo(-1.5, -49.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( 14, -56.5); ctx.lineTo( 2.5, -49.5); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(-11, -54); ctx.lineTo(-2.5, -50); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( 12, -54); ctx.lineTo( 3.5, -50); ctx.stroke();
+  }
   /* め */
   ctx.fillStyle = '#1b1b1b';
   ctx.beginPath(); ctx.arc(-6, -45, 3.2, 0, Math.PI * 2); ctx.fill();
@@ -8058,10 +8076,17 @@ function drawJudotatamin(ctx, s) {
   ctx.beginPath(); ctx.arc(-7, -46.3, 1.2, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(6, -46.3, 1.2, 0, Math.PI * 2); ctx.fill();
   /* くち：への字（こうげきの ときは かけごえ）*/
-  ctx.strokeStyle = '#7d3a20'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  ctx.strokeStyle = shihan ? '#9c2b1c' : '#7d3a20';
+  ctx.lineWidth = shihan ? 3.4 : 2.2;
+  ctx.lineCap = 'round';
   if (a >= 0) {
-    ctx.fillStyle = '#7d3a20';
-    ctx.beginPath(); ctx.ellipse(0.5, -38, 4.6, 4.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = shihan ? '#9c2b1c' : '#7d3a20';
+    ctx.beginPath(); ctx.ellipse(0.5, -38, shihan ? 5.6 : 4.6, shihan ? 5.0 : 4.2, 0, 0, Math.PI * 2); ctx.fill();
+  } else if (shihan) {
+    /* ★への字が きつい、おこった くち */
+    ctx.beginPath();
+    ctx.moveTo(-7, -36.5); ctx.quadraticCurveTo(0.5, -41.5, 8, -36.5);
+    ctx.stroke();
   } else {
     ctx.beginPath();
     ctx.moveTo(-5, -37.5); ctx.quadraticCurveTo(0.5, -40.5, 6, -37.5);
@@ -8090,6 +8115,8 @@ function drawJudotatamin(ctx, s) {
   }
   ctx.restore();
 }
+function drawJudotatamin(ctx, s)  { drawTataminGiBase(ctx, s, false); }
+function drawShihantatamin(ctx, s){ drawTataminGiBase(ctx, s, true); }
 
 
 /* ============================================================
@@ -8969,6 +8996,7 @@ const DRAWERS = {
   orematch: drawOrematch,
   matchsama: drawMatchsama,
   judotatamin: drawJudotatamin,
+  shihantatamin: drawShihantatamin,
   /* ★デザインあん（まだ ゲームには でません）*/
   dozle: drawDozle,
   dozle_x: drawDozleX,
