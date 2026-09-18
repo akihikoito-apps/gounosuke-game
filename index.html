@@ -157,6 +157,30 @@
       <p class="room-hint" id="room-hint">かぐを ゆびで うごかせるよ。なかまを タップすると おはなし するよ！</p>
     </div>
 
+    <!-- ============ ものおき（おしいれ と そうこ が つながって いる ばしょ）============ -->
+    <div id="store-modal" class="modal hidden">
+      <div class="modal-box store-box">
+        <p class="modal-text">🚪 ものおき<br><small id="store-sub">おしいれと そうこは ここで つながって います</small></p>
+        <div class="store-grid" id="store-grid"></div>
+        <div class="modal-btns">
+          <button id="btn-store-close" class="modal-btn keep">とじる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 「ほんとうに つくる？」の かくにん ============ -->
+    <div id="craft-modal" class="modal hidden">
+      <div class="modal-box">
+        <p class="modal-text" id="craft-ask">ほんとうに つくりますか？</p>
+        <canvas id="craft-preview" class="craft-preview"></canvas>
+        <p class="craft-need" id="craft-need"></p>
+        <div class="modal-btns">
+          <button id="btn-craft-yes" class="modal-btn quit">つくる！</button>
+          <button id="btn-craft-no"  class="modal-btn keep">やめる</button>
+        </div>
+      </div>
+    </div>
+
     <div class="room-tabs" id="room-tabs"></div>
     <!-- そざいの かず。スクロールしても かくれない ように、
          したの もちものの そとに おいて あります -->

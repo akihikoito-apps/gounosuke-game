@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.13.1';
+  const GAME_VERSION = '6.14';
 
 
   /* =================================================
@@ -2188,7 +2188,7 @@
     startRoomLoop();
     requestAnimationFrame(() => { drawRoom(); });
   }
-  function closeRoom() { stopRoomLoop(); storeSave(); openHome(); }
+  function closeRoom() { closeStore(); closeCraftAsk(); stopRoomLoop(); storeSave(); openHome(); }
 
   /* ★へや ⇄ にわ（よこに すべる）*/
   function switchScene() {
@@ -2519,14 +2519,24 @@
       const t = ev.touches ? ev.touches[0] : ev;
       return { x: t.clientX - rect.left, y: t.clientY - rect.top };
     };
+    let downOnStore = false;
     const down = (ev) => {
       const q = pos(ev);
+      /* ★そうこ／おしいれを タップしたか（かぐを つかんで いない ときだけ）*/
+      const R = storageRect(cv.clientWidth, cv.clientHeight);
       roomDrag = roomPick(q.x, q.y);
+      downOnStore = !roomDrag && q.x > R.x && q.x < R.x + R.w && q.y > R.y - 12 && q.y < R.y + R.h;
       moved = false; startX = q.x; startY = q.y;
-      if (roomDrag) ev.preventDefault();
+      if (roomDrag || downOnStore) ev.preventDefault();
     };
     const move = (ev) => {
-      if (!roomDrag) return;
+      if (!roomDrag) {
+        if (downOnStore) {
+          const q2 = pos(ev);
+          if (Math.abs(q2.x - startX) > 8 || Math.abs(q2.y - startY) > 8) moved = true;
+        }
+        return;
+      }
       ev.preventDefault();
       const q = pos(ev);
       if (Math.abs(q.x - startX) > 6 || Math.abs(q.y - startY) > 6) moved = true;
@@ -2541,6 +2551,8 @@
       else if (r.placed[roomDrag.id]) r.placed[roomDrag.id] = { x: nx, y: ny };
     };
     const up = (ev) => {
+      if (!roomDrag && downOnStore && !moved) { downOnStore = false; openStore(); return; }
+      downOnStore = false;
       if (roomDrag) {
         const r = roomState();
         if (!moved && roomDrag.id === '__char') roomSay(r.char);
@@ -2654,7 +2666,9 @@
       const on = (it.kind === 'wall') ? (r.wall === it.id) : !!r.placed[it.id];
       const b = document.createElement('button');
       b.className = 'room-item' + (on ? ' on' : '');
-      b.innerHTML = '<canvas></canvas><span class="ri-name">' + it.name + '</span>';
+      b.innerHTML = '<canvas></canvas>' +
+                    (it.kind === 'wall' ? '' : whereTag(it.id)) +
+                    '<span class="ri-name">' + it.name + '</span>';
       b.addEventListener('click', () => {
         if (it.kind === 'wall') { r.wall = it.id; }
         else if (r.placed[it.id]) { delete r.placed[it.id]; }
@@ -2688,14 +2702,13 @@
       b.className = 'room-item craft-item' + (has ? ' made' : (can ? '' : ' cant'));
       const cost = Object.keys(pat.cost).map(k => MATERIALS[k].icon + pat.cost[k]).join(' ');
       b.innerHTML = '<canvas></canvas>' +
+                    (has ? whereTag(pat.id) : '') +
                     '<span class="ri-name">' + pat.name + '</span>' +
                     '<span class="ri-cost">' + (has ? 'つくった！' : cost) + '</span>';
       b.addEventListener('click', () => {
         if (has) { toast('もう つくって あるよ。「かぐ」から おけるよ！'); return; }
         if (!canCraft(pat)) { toast('そざいが たりないよ…'); return; }
-        doCraft(pat);
-        toast(pat.name + ' が できた！');
-        buildRoomTray();
+        askCraft(pat);        /* ★まちがって つくらない ように かくにんする */
       });
       box.appendChild(b);
       paintRoomItem(b.querySelector('canvas'), pat);
@@ -2740,6 +2753,88 @@
       });
       box.appendChild(b);
     });
+  }
+
+  /* ★その かぐが いま どこに あるか（へや / にわ / ものおき）*/
+  function whereIs(id) {
+    const s = slot();
+    if (s && s.room   && s.room.placed   && s.room.placed[id])   return 'room';
+    if (s && s.garden && s.garden.placed && s.garden.placed[id]) return 'grdn';
+    return 'store';
+  }
+  const WHERE_LABEL = { room: 'へや', grdn: 'にわ', store: 'ものおき' };
+  function whereTag(id) {
+    const w = whereIs(id);
+    return '<span class="ri-where ' + w + '">' + WHERE_LABEL[w] + '</span>';
+  }
+
+  /* ★ものおき（おしいれ と そうこ が つながって いる ばしょ）
+       へやにも にわにも おいて いない かぐが、ここに ならびます。
+       タップすると、いま みて いる ばしょ（へや／にわ）に でて きます。 */
+  function storeList() {
+    const made = madeList();
+    return ROOM_ITEMS.filter(it =>
+      it.kind !== 'wall' &&
+      (it.got === 'start' || made.indexOf(it.id) >= 0) &&
+      whereIs(it.id) === 'store');
+  }
+  function openStore() {
+    const box = $('#store-grid');
+    const sub = $('#store-sub');
+    if (!box) return;
+    if (sub) sub.textContent = 'タップすると ' + (isGarden() ? 'にわ' : 'へや') + ' に だせるよ';
+    box.innerHTML = '';
+    const list = storeList();
+    if (!list.length) {
+      const e = document.createElement('p');
+      e.className = 'store-empty';
+      e.textContent = 'いまは からっぽ です。かぐを つかんで おしいれ／そうこに いれると ここに はいります。';
+      box.appendChild(e);
+    } else {
+      list.forEach(it => {
+        const b = document.createElement('button');
+        b.className = 'room-item';
+        b.innerHTML = '<canvas></canvas><span class="ri-name">' + it.name + '</span>';
+        b.addEventListener('click', () => {
+          const r = roomState();
+          const y0 = isGarden() ? Math.max(it.y, GARDEN_FLOOR + 0.12) : it.y;
+          r.placed[it.id] = { x: it.x, y: y0 };
+          storeSave();
+          toast(it.name + ' を ' + (isGarden() ? 'にわ' : 'へや') + ' に だした！');
+          openStore(); buildRoomTray();
+        });
+        box.appendChild(b);
+        paintRoomItem(b.querySelector('canvas'), it);
+      });
+    }
+    $('#store-modal').classList.remove('hidden');
+  }
+  function closeStore() { $('#store-modal').classList.add('hidden'); }
+
+  /* ★「ほんとうに つくる？」の かくにん
+       そざいを つかう ので、まちがって タップしても つくられない ように。 */
+  let craftPending = null;
+  function askCraft(pat) {
+    craftPending = pat;
+    const ask = $('#craft-ask');
+    if (ask) ask.innerHTML = 'ほんとうに<br>「' + pat.name + '」を つくりますか？';
+    const need = $('#craft-need');
+    if (need) {
+      need.innerHTML = 'つかう そざい：' +
+        Object.keys(pat.cost).map(k => MATERIALS[k].icon + MATERIALS[k].name + '×' + pat.cost[k]).join('　');
+    }
+    paintRoomItem($('#craft-preview'), pat);
+    $('#craft-modal').classList.remove('hidden');
+  }
+  function closeCraftAsk() { craftPending = null; $('#craft-modal').classList.add('hidden'); }
+  function doCraftConfirmed() {
+    const pat = craftPending;
+    closeCraftAsk();
+    if (!pat) return;
+    if (!canCraft(pat)) { toast('そざいが たりないよ…'); return; }
+    doCraft(pat);
+    toast(pat.name + ' が できた！');
+    buildRoomTray();
   }
 
   /* もちものの ちいさな え */
@@ -3440,6 +3535,9 @@
     });
     $('#btn-room-back').addEventListener('click', closeRoom);
     const sb = $('#btn-room-scene'); if (sb) sb.addEventListener('click', switchScene);
+    const sc = $('#btn-store-close'); if (sc) sc.addEventListener('click', closeStore);
+    const cy2 = $('#btn-craft-yes');  if (cy2) cy2.addEventListener('click', doCraftConfirmed);
+    const cn  = $('#btn-craft-no');   if (cn)  cn.addEventListener('click', closeCraftAsk);
     $('#btn-chapter-back').addEventListener('click', openHome);
     $('#btn-tower').addEventListener('click', () => {
       const T = towerOfWorld(currentWorld);
