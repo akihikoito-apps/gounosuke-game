@@ -3,7 +3,7 @@
   <script src="http://localhost:8123/js/draw.js"></script>
   <script>
    const ctx = document.getElementById('c').getContext('2d');
-   const set = [['purio',180,-1],['puripurio',450,-1],['puriking',760,-1]];
+   const set = [['purio',180,-1],['puripurio',450,-1],['puriking',720,-1],['puriking',900,0.45]];
    ctx.font='16px sans-serif';
    for (const [id,x,atk] of set) {
      ctx.save(); ctx.translate(x, 330); ctx.scale(2.0,2.0);

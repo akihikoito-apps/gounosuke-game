@@ -456,7 +456,18 @@ CSSアニメーションです。
 
 **大きさ（v6.15で修正）**：最初は第2形態の1.77倍もあって浮いていたので、
 **1.17倍**（ひとまわり大きい）に直しました。比率は `PURIKING_STYLES` に
-3案（slim / chibi / round）を置き、`PURIKING_PICK` で選びます。
+3案（slim / chibi / round）を置き、`PURIKING_PICK` で選びます。作者の選択は `chibi`。
+
+**絵のタッチとデザイン**：作者に見せて選んでもらえるよう、切り替え式にしてあります。
+
+| 定数 | 中身 |
+|---|---|
+| `PURIKING_STYLES` | 体つき3案（slim / **chibi** / round） |
+| `PURIKING_TEX` | 塗りと質感5案（**ink** / anime / jelly / fluff / royal） |
+| `PURIKING_DESIGNS` | 顔の造作と付属パーツ6案（hand / anime / cute / real / myst / **tidy**） |
+
+太字が採用。`PURIKING_DESIGN_PICK = 'tidy'`（v6.16）＝もとの味を残したまま
+左右をそろえて引き直した顔。デザインを変えたくなったら定数を1つ書き換えるだけ。
 `k` が全体の大きさで、第2形態（実測で高さ90px）に対して105px前後になるよう
 合わせてあります。実際の高さはピクセルで測って確認すること（座標からの
 目算は当たりません）。

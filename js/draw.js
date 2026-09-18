@@ -9270,7 +9270,8 @@ const PURIKING_DESIGNS = {
   myst:  { label: 'ふしぎな いきもの',  tex: 'jelly', face: pkFaceMyst,  aura: true },
   tidy:  { label: 'かおを ととのえた',  tex: 'ink',   face: pkFaceTidy },
 };
-const PURIKING_DESIGN_PICK = 'hand';
+/* ★さくしゃが えらんだ デザイン（v6.16）＝ かおを ととのえた もの */
+const PURIKING_DESIGN_PICK = 'tidy';
 
 
 function drawPurikingStyled(ctx, s, P, T, D) {
