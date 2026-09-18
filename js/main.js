@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.17';
+  const GAME_VERSION = '6.18';
 
 
   /* =================================================
@@ -426,6 +426,7 @@
       const w = worldOf(ch);
       if (w === 'earth') return true;
       if (w === 'sun')   return spaceAllCleared();   // 太陽は うちゅうを ぜんぶ クリアしてから
+      if (w === 'storm') return sunAllCleared();     // 竜巻編は 太陽を ぜんぶ クリアしてから
       return earthAllCleared();                      // うちゅうは せかいを ぜんぶ クリアしてから
     }
     const cleared = (slot() && slot().cleared) || {};
@@ -485,13 +486,75 @@
     return space.length > 0 && space.every(ch => coursesOf(ch).every(st => cleared[st.no]));
   }
 
-  const WORLD_TITLE = { earth: 'せかい ちず', space: 'うちゅう ちず', sun: '太陽 ちず' };
+  /* 太陽を ぜんぶ クリアしたか（＝竜巻編へ いけるか）*/
+  function sunAllCleared() {
+    const cleared = (slot() && slot().cleared) || {};
+    const sun = allChapters().filter(ch => worldOf(ch) === 'sun');
+    return sun.length > 0 && sun.every(ch => coursesOf(ch).every(st => cleared[st.no]));
+  }
+
+  const WORLD_TITLE = { earth: 'せかい ちず', space: 'うちゅう ちず', sun: '太陽 ちず', storm: 'たつまき ちず' };
+
+  /* =================================================
+     へん（編）えらび － ちずが ふえたので さいしょに えらびます
+     ================================================= */
+  const ARCS = [
+    { name: 'ちきゅうへん', sub: 'だい1しょう', icon: '🌍', world: 'earth',
+      desc: 'はじまりの みちから、せかいじゅうを ぼうけん！',
+      worlds: ['earth'], open: () => true,
+      lock: '' },
+    { name: 'うちゅうへん', sub: 'だい2しょう', icon: '🚀', world: 'space',
+      desc: 'ロケットで ほしから ほしへ。さいごは 太陽 ボスラッシュ。',
+      worlds: ['space', 'sun'], open: () => earthAllCleared(),
+      lock: 'せかい ちずを ぜんぶ クリアすると あそべます' },
+    { name: 'たつまきへん', sub: 'だい3しょう', icon: '🌪️', world: 'storm',
+      desc: 'ターツーマーキーが ちきゅうに もどって きた！ しろから たつまきほうが とんで くる。',
+      worlds: ['storm'], open: () => sunAllCleared(),
+      lock: '太陽を ぜんぶ クリアすると あそべます' },
+  ];
+
+  function arcProgress(arc) {
+    const cleared = (slot() && slot().cleared) || {};
+    let done = 0, all = 0;
+    allChapters().forEach(ch => {
+      if (arc.worlds.indexOf(worldOf(ch)) < 0) return;
+      coursesOf(ch).forEach(st => { all++; if (cleared[st.no]) done++; });
+    });
+    return { done: done, all: all };
+  }
+
+  function openArcs() {
+    if (rarityLimit) { rarityLimit = null; applyParty(); }
+    const box = $('#arc-list');
+    if (box) {
+      box.innerHTML = '';
+      ARCS.forEach(arc => {
+        const open = arc.open();
+        const pg = arcProgress(arc);
+        const el = document.createElement('button');
+        el.className = 'arc-card' + (open ? '' : ' locked');
+        el.innerHTML =
+          '<span class="arc-ico">' + (open ? arc.icon : '🔒') + '</span>' +
+          '<span class="arc-body">' +
+            '<span class="arc-name">' + arc.name + '</span>' +
+            '<span class="arc-sub">' + arc.sub + '</span>' +
+            '<span class="arc-desc">' + (open ? arc.desc : arc.lock) + '</span>' +
+          '</span>' +
+          '<span class="arc-prog">' + (open ? (pg.done + '/' + pg.all) : 'ロック') + '</span>';
+        if (open) el.addEventListener('click', () => { currentWorld = arc.world; openChapters(); });
+        else      el.addEventListener('click', () => toast(arc.lock));
+        box.appendChild(el);
+      });
+      box.scrollTop = 0;
+    }
+    show('screen-arc');
+  }
 
   function refreshWorldBtn() {
     const b = $('#btn-world');
     if (b) {
       /* 太陽ちずでは ちきゅう ⇄ うちゅう の ボタンは ださない */
-      const canGo = earthAllCleared() && currentWorld !== 'sun';
+      const canGo = earthAllCleared() && currentWorld !== 'sun' && currentWorld !== 'storm';
       b.classList.toggle('hidden', !canGo);
       b.classList.toggle('space', currentWorld === 'space');
       b.textContent = (currentWorld === 'earth') ? '🚀 うちゅうへ' : '🌍 ちきゅうへ';
@@ -816,6 +879,8 @@
     /* うちゅうちずの ときは そちらを かいて おわり */
     if (currentWorld === 'space') { drawSpaceMap(ctx, W, H); return; }
     if (currentWorld === 'sun')   { drawSunMap(ctx, W, H); return; }
+    /* 竜巻編は ちきゅうの ちずの まま。さいごに あかい もんを かきたす */
+    const stormMap = (currentWorld === 'storm');
 
     /* そら */
     const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -1143,6 +1208,86 @@
       ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo(mx, my, bx, by); ctx.stroke();
       ctx.setLineDash([]);
     }
+    if (stormMap) drawStormGate(ctx, W, H);
+  }
+
+  /* --- 竜巻編の「あたらしい もん」（ごうのすけくんの えの とおり）---
+       あかい とりいの ような もん。うえに はたが 1りゅう。
+       たつまきが ふいて いる ので、そらも すこし くらく します。   */
+  function drawStormGate(ctx, W, H) {
+    const sk = ctx.createLinearGradient(0, 0, 0, H);
+    sk.addColorStop(0, 'rgba(46,38,66,.62)');
+    sk.addColorStop(0.55, 'rgba(46,38,66,.30)');
+    sk.addColorStop(1, 'rgba(46,38,66,.16)');
+    ctx.fillStyle = sk; ctx.fillRect(0, 0, W, H);
+
+    /* とおくの たつまき 2ほん（ちずの おくに ゆらゆら）*/
+    ctx.save();
+    ctx.strokeStyle = 'rgba(70,62,95,.55)';
+    [[0.60, 0.52], [0.86, 0.44]].forEach(([fx, fh], k) => {
+      const cx = W * fx, yTop = H * 0.02, yBot = H * fh;
+      const ww = W * 0.11;
+      ctx.lineWidth = Math.max(2, H * 0.006);
+      for (let j = 0; j < 2; j++) {
+        ctx.beginPath();
+        for (let i = 0; i <= 34; i++) {
+          const t = i / 34;
+          const y = yTop + (yBot - yTop) * t;
+          const rad = ww * (1 - t * 0.85) * 0.5;
+          const a = t * Math.PI * 6 + j * 2.4 + k;
+          const x = cx + Math.cos(a) * rad;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+    });
+    ctx.restore();
+
+    const info = chapterInfo(13);
+    const gx = (typeof info.x === 'number' ? info.x : 0.16) * W;
+    const gy = (typeof info.y === 'number' ? info.y : 0.55) * H;
+    const w = Math.min(W * 0.20, H * 0.40);
+    const h = w * 1.05;
+    const pw = w * 0.22;
+    const RED = '#dc3f22', INK = '#1b1b1b';
+
+    /* まわりを まう たつまきの かぜ（もんの うしろ）*/
+    ctx.strokeStyle = 'rgba(190,175,225,.55)';
+    ctx.lineWidth = Math.max(2, H * 0.006);
+    for (let k = 0; k < 3; k++) {
+      ctx.beginPath();
+      for (let i = 0; i <= 30; i++) {
+        const t = i / 30;
+        const ang = t * Math.PI * 4 + k * 2.1;
+        const rad = w * (0.10 + t * 0.58);
+        const xx = gx + Math.cos(ang) * rad;
+        const yy = gy - h * 0.15 - t * h * 0.95;
+        if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
+      }
+      ctx.stroke();
+    }
+
+    ctx.save();
+    ctx.translate(gx, gy + h * 0.55);
+    ctx.fillStyle = RED; ctx.strokeStyle = INK; ctx.lineWidth = Math.max(3, w * 0.035);
+    /* はしら 2ほん */
+    for (const d of [-1, 1]) {
+      const x = d * (w / 2) - (d > 0 ? pw : 0);
+      ctx.fillRect(x, -h * 0.60, pw, h * 0.60);
+      ctx.strokeRect(x, -h * 0.60, pw, h * 0.60);
+    }
+    /* かさぎ（うえの よこぼう）*/
+    roundRect(ctx, -w / 2 - pw * 0.20, -h * 0.84, w + pw * 0.40, h * 0.26, h * 0.10);
+    ctx.fill(); ctx.stroke();
+    /* まんなかの ポールと はた */
+    ctx.fillRect(-pw * 0.24, -h * 1.18, pw * 0.48, h * 0.36);
+    ctx.strokeRect(-pw * 0.24, -h * 1.18, pw * 0.48, h * 0.36);
+    ctx.beginPath();
+    ctx.moveTo(pw * 0.24, -h * 1.16);
+    ctx.lineTo(pw * 0.24 + w * 0.30, -h * 1.01);
+    ctx.lineTo(pw * 0.24, -h * 0.86);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
   }
 
   /* --- ちずの うえの ステージボタン --- */
@@ -3451,6 +3596,283 @@
     return Math.max(1, Math.round(base * rate));
   }
 
+  /* =================================================
+     ストーリー（コマおくり）
+     ================================================= */
+  let storyList = null, storyIdx = 0, storyDone = null;
+
+  /* --- コマの え を かくための どうぐ --- */
+  function stStars(ctx, W, H, n) {
+    ctx.save();
+    for (let i = 0; i < n; i++) {
+      const x = ((i * 9301 + 49297) % 233280) / 233280 * W;
+      const y = ((i * 4021 + 12345) % 100003) / 100003 * H * 0.9;
+      const r = 0.6 + ((i * 7) % 5) * 0.35;
+      ctx.globalAlpha = 0.35 + ((i * 13) % 7) / 10;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function stSpaceBg(ctx, W, H, c0, c1) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, c0 || '#0a0a28'); g.addColorStop(1, c1 || '#1a0d3a');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    stStars(ctx, W, H, 90);
+  }
+  function stFieldBg(ctx, W, H, dark) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    if (dark) { g.addColorStop(0, '#2b2740'); g.addColorStop(1, '#4a4a55'); }
+    else      { g.addColorStop(0, '#8fd6ff'); g.addColorStop(1, '#d9f2ff'); }
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = dark ? '#3f5c3a' : '#7ec850';
+    ctx.fillRect(0, H * 0.74, W, H * 0.26);
+    ctx.fillStyle = dark ? '#345030' : '#6cb844';
+    ctx.fillRect(0, H * 0.74, W, H * 0.03);
+  }
+  function stPlanet(ctx, cx, cy, r, kind) {
+    ctx.save();
+    if (kind === 'sun') {
+      const g = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r);
+      g.addColorStop(0, '#fff3a8'); g.addColorStop(0.6, '#ffb32e'); g.addColorStop(1, '#ff6a1e');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,200,80,.45)'; ctx.lineWidth = r * 0.10;
+      for (let i = 0; i < 12; i++) {
+        const a = i / 12 * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(a) * r * 1.06, cy + Math.sin(a) * r * 1.06);
+        ctx.lineTo(cx + Math.cos(a) * r * 1.28, cy + Math.sin(a) * r * 1.28);
+        ctx.stroke();
+      }
+    } else {
+      const g = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r);
+      g.addColorStop(0, '#7fc7ff'); g.addColorStop(1, '#1b5fa8');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#4caf50';
+      [[-0.35, -0.2, 0.42, 0.26], [0.2, 0.25, 0.4, 0.3], [0.32, -0.42, 0.3, 0.2]].forEach(b => {
+        ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+        ctx.beginPath();
+        ctx.ellipse(cx + b[0] * r, cy + b[1] * r, b[2] * r, b[3] * r, 0.4, 0, Math.PI * 2);
+        ctx.fill(); ctx.restore();
+      });
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = Math.max(1, r * 0.05);
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function stTornado(ctx, cx, yTop, yBot, w, color) {
+    ctx.save();
+    ctx.strokeStyle = color || 'rgba(40,36,60,.85)';
+    for (let k = 0; k < 3; k++) {
+      ctx.lineWidth = Math.max(2, w * 0.05);
+      ctx.beginPath();
+      for (let i = 0; i <= 40; i++) {
+        const t = i / 40;
+        const y = yTop + (yBot - yTop) * t;
+        const rad = w * (1 - t * 0.82) * 0.5;
+        const a = t * Math.PI * 6 + k * 2.1;
+        const x = cx + Math.cos(a) * rad;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  /* キャラの えが あしもとから どれだけ うえに のびるか（ピクセルで はかった あたい）*/
+  const STORY_ART_UP = { tatsumarky: 152 };
+  function stChar(ctx, id, x, yBase, h, st) {
+    const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS[id] : null;
+    if (!fn) return;
+    ctx.save();
+    ctx.translate(x, yBase);
+    const sc = h / (STORY_ART_UP[id] || 110);
+    ctx.scale(sc, sc);
+    fn(ctx, st || { t: 0.7, moving: false, atk: -1, hpRatio: 1, roll: 0.35 });
+    ctx.restore();
+  }
+  function stCastle(ctx, cx, yBase, w) {
+    const h = w * 1.05;
+    ctx.save();
+    ctx.fillStyle = '#e9e2cf'; ctx.strokeStyle = '#2b2b2b';
+    ctx.lineWidth = Math.max(2, w * 0.035);
+    ctx.fillRect(cx - w / 2, yBase - h * 0.62, w, h * 0.62);
+    ctx.strokeRect(cx - w / 2, yBase - h * 0.62, w, h * 0.62);
+    for (let i = 0; i < 4; i++) {
+      const bw = w / 7;
+      ctx.fillRect(cx - w / 2 + i * (w / 4) + bw * 0.2, yBase - h * 0.74, bw, h * 0.13);
+      ctx.strokeRect(cx - w / 2 + i * (w / 4) + bw * 0.2, yBase - h * 0.74, bw, h * 0.13);
+    }
+    ctx.fillStyle = '#c94f3a';
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.30, yBase - h * 0.74);
+    ctx.lineTo(cx, yBase - h * 1.02);
+    ctx.lineTo(cx + w * 0.30, yBase - h * 0.74);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#6b4b2a';
+    ctx.fillRect(cx - w * 0.12, yBase - h * 0.32, w * 0.24, h * 0.32);
+    ctx.strokeRect(cx - w * 0.12, yBase - h * 0.32, w * 0.24, h * 0.32);
+    ctx.restore();
+  }
+  function stGate(ctx, cx, yBase, w, alpha) {
+    const h = w * 1.05, pw = w * 0.22;
+    ctx.save();
+    if (alpha !== undefined) ctx.globalAlpha = alpha;
+    ctx.translate(cx, yBase);
+    ctx.fillStyle = '#dc3f22'; ctx.strokeStyle = '#1b1b1b';
+    ctx.lineWidth = Math.max(3, w * 0.035);
+    for (const d of [-1, 1]) {
+      const x = d * (w / 2) - (d > 0 ? pw : 0);
+      ctx.fillRect(x, -h * 0.60, pw, h * 0.60);
+      ctx.strokeRect(x, -h * 0.60, pw, h * 0.60);
+    }
+    roundRect(ctx, -w / 2 - pw * 0.20, -h * 0.84, w + pw * 0.40, h * 0.26, h * 0.10);
+    ctx.fill(); ctx.stroke();
+    ctx.fillRect(-pw * 0.24, -h * 1.18, pw * 0.48, h * 0.36);
+    ctx.strokeRect(-pw * 0.24, -h * 1.18, pw * 0.48, h * 0.36);
+    ctx.beginPath();
+    ctx.moveTo(pw * 0.24, -h * 1.16);
+    ctx.lineTo(pw * 0.24 + w * 0.30, -h * 1.01);
+    ctx.lineTo(pw * 0.24, -h * 0.86);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+  function stFlash(ctx, W, H, color) {
+    ctx.save();
+    ctx.globalAlpha = 0.28; ctx.fillStyle = color || '#ff2b2b';
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+  function stTitle(ctx, W, H, text, color) {
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const fs = Math.min(W * 0.11, H * 0.16);
+    ctx.font = '900 ' + fs + 'px system-ui, sans-serif';
+    ctx.lineWidth = fs * 0.18; ctx.strokeStyle = '#11121c';
+    ctx.strokeText(text, W / 2, H * 0.5);
+    ctx.fillStyle = color || '#ffd54f';
+    ctx.fillText(text, W / 2, H * 0.5);
+    ctx.restore();
+  }
+
+  /* --- だい3しょう「竜巻編」の はじまりの おはなし --- */
+  const STORY_STORM_INTRO = [
+    { text: '太陽の いただきを クリア！　ごうのすけたちは、ついに うちゅうの はてまで たどりついた。',
+      art: (c, W, H) => { stSpaceBg(c, W, H, '#2a13a8', '#4a1a70');
+        stPlanet(c, W * 0.74, H * 0.36, Math.min(W, H) * 0.20, 'sun');
+        stCastle(c, W * 0.26, H * 0.86, Math.min(W, H) * 0.24); } },
+    { text: '……そのころ。うちゅうの ずっと ずっと はてで、ながい ねむりから めを さます ものが いた。',
+      art: (c, W, H) => { stSpaceBg(c, W, H);
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.88, H * 0.52); } },
+    { text: 'うちゅうの しはいしゃ、けんじゃ「ターツーマーキー」。むかし、ちきゅうを おさめて いた たつまきの ぬしである。',
+      art: (c, W, H) => { stSpaceBg(c, W, H, '#150a35', '#301060');
+        stTornado(c, W * 0.5, H * 0.04, H * 0.42, W * 0.5);
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.90, H * 0.56); } },
+    { text: '「なんじゃと……？　ちきゅうの こどもが、太陽まで のぼって きた じゃと！？」',
+      art: (c, W, H) => { stSpaceBg(c, W, H, '#3a0a1a', '#6a1020');
+        stFlash(c, W, H, '#ff2b2b');
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.90, H * 0.58, { t: 0.2, moving: false, atk: 0.3, hpRatio: 1, roll: 0.35 }); } },
+    { text: '「ゆるさん。この うちゅうの ぬしは わしじゃ。もういちど、ちきゅうを せいふく して くれる！」',
+      art: (c, W, H) => { stSpaceBg(c, W, H, '#20103a', '#3a1060');
+        stTornado(c, W * 0.5, H * 0.02, H * 0.50, W * 0.7, 'rgba(180,160,230,.9)');
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.90, H * 0.56); } },
+    { text: 'ターツーマーキーは おおきな たつまきに なって、ちきゅうへ とんで いった。',
+      art: (c, W, H) => { stSpaceBg(c, W, H);
+        stPlanet(c, W * 0.30, H * 0.52, Math.min(W, H) * 0.22, 'earth');
+        stTornado(c, W * 0.66, H * 0.06, H * 0.62, W * 0.34, 'rgba(200,190,240,.9)'); } },
+    { text: 'そして「はじまりの みち」に、みたことの ない あかい もんが あらわれた——。',
+      art: (c, W, H) => { stFieldBg(c, W, H, true);
+        stTornado(c, W * 0.5, H * 0.00, H * 0.30, W * 0.9, 'rgba(120,110,150,.45)');
+        stGate(c, W * 0.5, H * 0.80, Math.min(W * 0.34, H * 0.42)); } },
+    { text: 'だい3しょう「たつまきへん」、かいまく！　あたらしい ちずが あそべる ように なりました。',
+      art: (c, W, H) => { stFieldBg(c, W, H, true);
+        stGate(c, W * 0.5, H * 0.86, Math.min(W * 0.30, H * 0.38), 0.45);
+        stTitle(c, W, H, 'たつまきへん', '#ffd54f'); } },
+  ];
+
+  /* --- 「新・始まりの道」を クリアした あとの おはなし --- */
+  const STORY_STORM_FLEE = [
+    { text: 'たつまきほうを かいくぐり、ごうのすけたちは あかい もんを こえた。',
+      art: (c, W, H) => { stFieldBg(c, W, H, true);
+        stGate(c, W * 0.5, H * 0.82, Math.min(W * 0.32, H * 0.40));
+        stCastle(c, W * 0.14, H * 0.90, Math.min(W, H) * 0.16); } },
+    { text: '「……ほう。わしの たつまきほうを たえきる とはな。」　もんの むこうに、あの すがたが あった。',
+      art: (c, W, H) => { stFieldBg(c, W, H, true);
+        stGate(c, W * 0.22, H * 0.86, Math.min(W * 0.24, H * 0.30), 0.55);
+        stChar(c, 'tatsumarky', W * 0.62, H * 0.88, H * 0.54); } },
+    { text: '「だが、これは ほんの あいさつ じゃ。ほんきの わしは、こんな ものでは ない。」',
+      art: (c, W, H) => { stFieldBg(c, W, H, true);
+        stTornado(c, W * 0.62, H * 0.02, H * 0.40, W * 0.5, 'rgba(150,140,190,.8)');
+        stChar(c, 'tatsumarky', W * 0.62, H * 0.88, H * 0.56); } },
+    { text: 'ターツーマーキーは たつまきに なって、あっという まに きえて しまった。……つづきは、また こんど。',
+      art: (c, W, H) => { stFieldBg(c, W, H, true);
+        stTornado(c, W * 0.58, H * 0.02, H * 0.78, W * 0.42, 'rgba(60,55,80,.85)');
+        stGate(c, W * 0.20, H * 0.86, Math.min(W * 0.22, H * 0.28), 0.5); } },
+  ];
+
+  function playStory(list, onDone) {
+    if (!list || !list.length) { if (onDone) onDone(); return; }
+    storyList = list; storyIdx = 0; storyDone = onDone || null;
+    show('screen-story');
+    requestAnimationFrame(storyRender);
+  }
+  function storyRender() {
+    if (!storyList) return;
+    const c = $('#story-canvas');
+    if (!c) return;
+    const w = c.clientWidth, h = c.clientHeight;
+    if (w < 2 || h < 2) { requestAnimationFrame(storyRender); return; }
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    const ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const p = storyList[storyIdx];
+    if (p.art) p.art(ctx, w, h);
+    $('#story-text').textContent = p.text;
+    $('#story-page').textContent = (storyIdx + 1) + ' / ' + storyList.length;
+    $('#btn-story-next').textContent = (storyIdx === storyList.length - 1) ? 'はじめる ▶' : 'つぎへ ▶';
+  }
+  function storyNext() {
+    if (!storyList) return;
+    storyIdx++;
+    if (storyIdx >= storyList.length) { storyEnd(); return; }
+    storyRender();
+  }
+  function storyEnd() {
+    const cb = storyDone;
+    storyList = null; storyDone = null; storyIdx = 0;
+    if (cb) cb();
+  }
+
+  /* おはなしは 1かいだけ ながれます（セーブに おぼえて おく）*/
+  function storySeen(key) {
+    const s = slot();
+    return !!(s && s.story && s.story[key]);
+  }
+  function markStory(key) {
+    const s = slot();
+    if (!s) return;
+    if (!s.story) s.story = {};
+    s.story[key] = true;
+    storeSave();
+  }
+  /* クリアした ステージに あわせて おはなしを ながす */
+  function maybeStory(stageNo) {
+    if (stageNo === 100 && sunAllCleared() && !storySeen('storm_intro')) {
+      markStory('storm_intro');
+      playStory(STORY_STORM_INTRO, () => show('screen-result'));
+      return true;
+    }
+    if (stageNo === 120 && !storySeen('storm_flee')) {
+      markStory('storm_flee');
+      playStory(STORY_STORM_FLEE, () => show('screen-result'));
+      return true;
+    }
+    return false;
+  }
+
   function showResult() {
     resultShown = true;
     recordSeen();                 // まけても「でてきた てき」は ずかんに のこす
@@ -3506,6 +3928,7 @@
       }
     }
     show('screen-result');
+    if (win) maybeStory(Game.stage.no);
   }
 
   function loop(now) {
@@ -3603,7 +4026,7 @@
     });
 
     /* トップがめん */
-    $('#btn-home-stage').addEventListener('click', openChapters);
+    $('#btn-home-stage').addEventListener('click', openArcs);
     $('#btn-world').addEventListener('click', switchWorld);
     const mr = $('#btn-map-right'); if (mr) mr.addEventListener('click', goSunMap);
     const ml = $('#btn-map-left');  if (ml) ml.addEventListener('click', backToSpace);
@@ -3624,7 +4047,10 @@
     const mp = $('#mix-plus');  if (mp) mp.addEventListener('click', () => { mixN = Math.min(99, mixN + 1); refreshMix(); });
     const cy2 = $('#btn-craft-yes');  if (cy2) cy2.addEventListener('click', doCraftConfirmed);
     const cn  = $('#btn-craft-no');   if (cn)  cn.addEventListener('click', closeCraftAsk);
-    $('#btn-chapter-back').addEventListener('click', openHome);
+    $('#btn-chapter-back').addEventListener('click', openArcs);
+    $('#btn-arc-back').addEventListener('click', openHome);
+    $('#btn-story-next').addEventListener('click', storyNext);
+    $('#btn-story-skip').addEventListener('click', storyEnd);
     $('#btn-tower').addEventListener('click', () => {
       const T = towerOfWorld(currentWorld);
       if (!T) { toast('ここには とくべつステージが ありません'); return; }

@@ -69,6 +69,8 @@ const Game = {
     this.effects = [];
     this.spawnQueue = [];
     this.webs = [];          // クモの巣
+    this.tornadoAt = undefined;   // たつまきほうの タイマー
+    this.tornadoWarn = false;
     this.boss = null;
     this.cooldown = {};
     PARTY.forEach(id => { this.cooldown[id] = 0; });
@@ -242,6 +244,7 @@ const Game = {
       }
       this.updateWaves(dt);
       this.updateEscort();
+      this.updateTornado(dt);
     }
 
     for (const u of this.units) this.updateUnit(u, dt);
@@ -310,6 +313,67 @@ const Game = {
 
   /* nearX を わたすと、その ばしょの ちかくに でます
      （ぷりぷりくんが アリの むれを よぶ ときに つかいます）*/
+  /* =====================================================================
+     ★たつまきほう（竜巻砲）── 13しょう「竜巻編」の しかけ
+
+     てきの しろから ときどき たつまきが うちだされ、
+     ★そのとき ばに いる みかた ぜんいん★ が ねらわれます。
+     1たいずつ 67% で あたり、あたった こは その ばで きえます（そくし）。
+     へいきんすると 6〜7わりの みかたが いなく なる、という ことです。
+
+     ステージに こう かきます：
+       tornado: { interval: 18, chance: 0.67, first: 12 }
+     ===================================================================== */
+  updateTornado(dt) {
+    const t = this.stage && this.stage.tornado;
+    if (!t) return;
+    if (this.tornadoAt === undefined) {
+      this.tornadoAt = (t.first !== undefined) ? t.first : t.interval;
+      this.tornadoWarn = false;
+    }
+    /* うちだす 1.2びょう まえに よこくの えんしゅつ */
+    if (!this.tornadoWarn && this.time >= this.tornadoAt - 1.2) {
+      this.tornadoWarn = true;
+      /* がめんの まんなかに だす（カメラが どこを みて いても みえる ように）*/
+      this.addEffect({ type: 'dmg', x: this.camera.x, y: this.groundWorldY() - 200,
+                       text: 'たつまきほう！', color: '#b39ddb', life: 1.4, big: true });
+    }
+    if (this.time < this.tornadoAt) return;
+    this.tornadoAt = this.time + t.interval;
+    this.tornadoWarn = false;
+    this.fireTornado(t.chance === undefined ? 0.67 : t.chance);
+  },
+
+  fireTornado(chance) {
+    let hit = 0, alive = 0;
+    for (const u of this.units) {
+      if (u.side !== 'ally' || u.dead) continue;
+      alive++;
+      /* たつまきの え（あたっても はずれても 1たいずつ でる）*/
+      this.addEffect({ type: 'boom', x: u.x, y: this.groundWorldY() - 40,
+                       radius: 46, color: 'rgba(179,157,219,.85)', life: 0.55 });
+      /* かさなって よめなく ならない ように、1たいごとに たかさを ずらす */
+      const ty = this.groundWorldY() - 110 - (alive % 4) * 26;
+      if (Math.random() < chance) {
+        /* ★あたったら そくし */
+        u.hp = 0; u.dead = true; hit++;
+        this.addEffect({ type: 'dmg', x: u.x, y: ty,
+                         text: 'とばされた！', color: '#ce93d8', life: 0.9 });
+      } else {
+        this.addEffect({ type: 'dmg', x: u.x, y: ty,
+                         text: 'たえた！', color: '#fff59d', life: 0.9 });
+      }
+    }
+    /* てきの しろ（ひだりはし）から みぎへ はしって いく たつまきの えんしゅつ */
+    for (let i = 0; i < 10; i++) {
+      this.addEffect({ type: 'boom', x: 60 + i * (CONFIG.fieldLength / 11),
+                       y: this.groundWorldY() - 60 - Math.random() * 60,
+                       radius: 40 + Math.random() * 34, color: 'rgba(149,117,205,.7)',
+                       life: 0.5 + Math.random() * 0.3, delay: i * 0.05 });
+    }
+    return { hit, alive };
+  },
+
   /* =====================================================================
      むれで うごく てき（escort）
 

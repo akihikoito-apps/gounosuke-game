@@ -9471,6 +9471,102 @@ function drawPurikingStyled(ctx, s, P, T, D) {
 function drawPuriking(ctx, s) { drawPurikingStyled(ctx, s, PURIKING_STYLES[PURIKING_PICK]); }
 
 
+/* 賢者ターツーマーキー ── 竜巻編の あくやく。
+   ごうのすけくんの えの とおり：
+     ・はいいろの たてながの まるい しかくの からだ
+     ・そのうえに くろい たつまきが ぐるぐると まいて いる
+     ・きみどりの め 2つと くち（かおは からだの うえの ほう）
+     ・りょうわきから ほそい くろい うでが カーブして のびる
+   「あたまの うえに たつまきが ある ことを きに して いる」ので、
+   ときどき ちらっと うえを みます。                                   */
+function drawTatsumarky(ctx, s) {
+  const a = s.atk;
+  const t = s.t || 0;
+  const sway = Math.sin(t * 1.6) * 2.4;
+  const look = Math.sin(t * 0.7) > 0.86 ? 1 : 0;      // ときどき うえを きに する
+
+  ctx.save();
+  ctx.translate(sway * 0.3, 0);
+
+  /* --- あたまの うえの たつまき（ぐるぐる）--- */
+  ctx.strokeStyle = '#15151a';
+  ctx.lineWidth = 3.2;
+  ctx.lineCap = 'round';
+  for (let k = 0; k < 3; k++) {
+    ctx.beginPath();
+    for (let i = 0; i <= 44; i++) {
+      const p = i / 44;
+      const ang = p * Math.PI * 5.2 + t * 2.2 + k * 2.1;
+      const rad = 6 + p * 30;                       // うえに いくほど ひろがる
+      const yy = -104 - p * 46;
+      const xx = Math.cos(ang) * rad;
+      if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
+    }
+    ctx.stroke();
+  }
+
+  /* --- うで（りょうわきに カーブ）--- */
+  ctx.strokeStyle = '#15151a'; ctx.lineWidth = 3.4;
+  const aw = (a >= 0) ? 10 : 0;
+  for (const d of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(d * 20, -78);
+    ctx.quadraticCurveTo(d * (40 + aw), -66, d * (34 + aw), -34 + sway);
+    ctx.stroke();
+  }
+
+  /* --- からだ（はいいろの たてながの まるい しかく）--- */
+  const g = ctx.createLinearGradient(-22, -104, 22, -8);
+  g.addColorStop(0, '#c9c9cf'); g.addColorStop(1, '#a9a9b2');
+  ctx.fillStyle = g;
+  roundRect(ctx, -22, -104, 44, 96, 12); ctx.fill();
+  ctx.strokeStyle = 'rgba(90,90,100,.55)'; ctx.lineWidth = 2;
+  roundRect(ctx, -22, -104, 44, 96, 12); ctx.stroke();
+
+  /* --- かお（きみどりの せん）--- */
+  const fy = -78 + (look ? -2 : 0);
+  ctx.strokeStyle = '#b5c22a'; ctx.lineWidth = 3;
+  ctx.lineJoin = 'round';
+  /* め（しかくい ふたつ。まゆの ような よこぼう つき）*/
+  for (const d of [-1, 1]) {
+    ctx.beginPath();
+    roundRect(ctx, d < 0 ? -15 : 3, fy, 12, 11, 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(d < 0 ? -16 : 2, fy - 3);
+    ctx.lineTo(d < 0 ? -2 : 16, fy - 3);
+    ctx.stroke();
+  }
+  /* ひとみ（うえを きに する とき だけ うえを みる）*/
+  ctx.fillStyle = '#7d8a10';
+  for (const d of [-1, 1]) {
+    ctx.beginPath();
+    ctx.arc(d * 9 + (d < 0 ? 0 : 0), fy + (look ? 3 : 6), 2.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  /* くち（したに ひらいた しかく）*/
+  ctx.strokeStyle = '#b5c22a'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(-8, fy + 16);
+  ctx.lineTo(-7, fy + 26 + (a >= 0 ? 5 : 0));
+  ctx.lineTo(7, fy + 26 + (a >= 0 ? 5 : 0));
+  ctx.lineTo(8, fy + 16);
+  ctx.stroke();
+
+  /* --- こうげきの とき：あしもとに かぜが うずまく --- */
+  if (a >= 0) {
+    ctx.strokeStyle = 'rgba(160,140,210,' + (0.8 * (1 - a)).toFixed(2) + ')';
+    ctx.lineWidth = 4;
+    for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      ctx.ellipse(0, -10, 26 + i * 16 + a * 22, 8 + i * 4, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+
 const DRAWERS = {
   runrunwisp: drawRunrunwisp,
   houkigob: drawHoukigob,
@@ -9515,6 +9611,7 @@ const DRAWERS = {
   purio: drawPurio,
   puripurio: drawPuripurio,
   puriking: drawPuriking,
+  tatsumarky: drawTatsumarky,
   tankun: drawTankun,
   tankundx: drawTankundx,
   supertankun: drawSupertankun,
