@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.14';
+  const GAME_VERSION = '6.15';
 
 
   /* =================================================
@@ -2188,7 +2188,7 @@
     startRoomLoop();
     requestAnimationFrame(() => { drawRoom(); });
   }
-  function closeRoom() { closeStore(); closeCraftAsk(); stopRoomLoop(); storeSave(); openHome(); }
+  function closeRoom() { closeStore(); closeCraftAsk(); closeMix(); closeMixAsk(); stopRoomLoop(); storeSave(); openHome(); }
 
   /* ★へや ⇄ にわ（よこに すべる）*/
   function switchScene() {
@@ -2392,10 +2392,13 @@
       ctx.setLineDash([]);
     }
     /* なまえ */
+    /* なまえは そうこの はばに おさまる おおきさに する */
+    const label = garden ? 'そうこ' : 'おしいれ';
     ctx.fillStyle = '#fff8e1';
-    ctx.font = 'bold ' + Math.round(H * 0.055) + 'px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(garden ? 'そうこ' : 'おしいれ', R.x + R.w / 2, R.y + R.h * 0.22);
+    const fs = Math.max(8, Math.min(Math.round(H * 0.055), Math.floor(R.w / label.length) - 1));
+    ctx.font = 'bold ' + fs + 'px sans-serif';
+    ctx.fillText(label, R.x + R.w / 2, R.y + R.h * 0.22);
     ctx.textAlign = 'start';
   }
 
@@ -2835,6 +2838,82 @@
     doCraft(pat);
     toast(pat.name + ' が できた！');
     buildRoomTray();
+  }
+
+  /* ★そざい ごうせい（2こ → 1こ の こうかんじょ）
+       ひだりで えらんだ そざいを 2こ つかうと、
+       みぎで えらんだ そざいが 1こ もらえます。               */
+  const MIX_RATE = 2;                 // なんこで 1こに なるか
+  let mixFrom = 'wood', mixTo = 'stone', mixN = 1;
+
+  function mixMax() {
+    return Math.max(1, Math.floor(matCount(mixFrom) / MIX_RATE));
+  }
+  function buildMixPick(boxId, side) {
+    const box = $(boxId);
+    if (!box) return;
+    box.innerHTML = '';
+    MATERIAL_ORDER.forEach(id => {
+      const mt = MATERIALS[id];
+      const cur = (side === 'from') ? mixFrom : mixTo;
+      const other = (side === 'from') ? mixTo : mixFrom;
+      const b = document.createElement('button');
+      b.className = 'mix-chip' + (cur === id ? ' on' : '') + (other === id ? ' dim' : '');
+      b.innerHTML = '<i>' + mt.icon + '</i>' + mt.name +
+                    (side === 'from' ? '<span>' + matCount(id) + '</span>' : '');
+      b.addEventListener('click', () => {
+        if (other === id) { toast('おなじ そざい どうしは こうかん できません'); return; }
+        if (side === 'from') { mixFrom = id; mixN = Math.min(mixN, mixMax()); }
+        else mixTo = id;
+        refreshMix();
+      });
+      box.appendChild(b);
+    });
+  }
+  function refreshMix() {
+    buildMixPick('#mix-from', 'from');
+    buildMixPick('#mix-to', 'to');
+    const need = mixN * MIX_RATE;
+    const have = matCount(mixFrom);
+    const ok = have >= need;
+    const n = $('#mix-n'); if (n) n.textContent = mixN;
+    const sum = $('#mix-sum');
+    if (sum) {
+      sum.className = 'mix-sum' + (ok ? '' : ' ng');
+      sum.innerHTML = MATERIALS[mixFrom].icon + MATERIALS[mixFrom].name + '×' + need +
+        '　→　' + MATERIALS[mixTo].icon + MATERIALS[mixTo].name + '×' + mixN +
+        (ok ? '' : '　（' + MATERIALS[mixFrom].name + 'が ' + (need - have) + 'こ たりません）');
+    }
+  }
+  function openMix() {
+    /* もって いる そざいが いちばん おおい ものを はじめに えらんで おく */
+    const sorted = MATERIAL_ORDER.slice().sort((a, b) => matCount(b) - matCount(a));
+    mixFrom = sorted[0]; mixTo = sorted[sorted.length - 1];
+    mixN = 1;
+    refreshMix();
+    $('#mix-modal').classList.remove('hidden');
+  }
+  function closeMix() { $('#mix-modal').classList.add('hidden'); }
+  function askMix() {
+    const need = mixN * MIX_RATE;
+    if (matCount(mixFrom) < need) { toast('そざいが たりないよ…'); return; }
+    const t = $('#mix-ask-text');
+    if (t) t.innerHTML = 'ほんとうに ごうせい しますか？<br><small>' +
+      MATERIALS[mixFrom].icon + MATERIALS[mixFrom].name + '×' + need + ' が なくなり、' +
+      MATERIALS[mixTo].icon + MATERIALS[mixTo].name + '×' + mixN + ' に なります</small>';
+    $('#mix-ask').classList.remove('hidden');
+  }
+  function closeMixAsk() { $('#mix-ask').classList.add('hidden'); }
+  function doMix() {
+    closeMixAsk();
+    const need = mixN * MIX_RATE;
+    if (matCount(mixFrom) < need) { toast('そざいが たりないよ…'); return; }
+    addMat(mixFrom, -need);
+    addMat(mixTo, mixN);
+    storeSave();
+    toast(MATERIALS[mixTo].name + ' を ' + mixN + 'こ てに いれた！');
+    mixN = Math.min(mixN, mixMax());
+    refreshMix(); buildMatBar(); buildRoomTray();
   }
 
   /* もちものの ちいさな え */
@@ -3536,6 +3615,13 @@
     $('#btn-room-back').addEventListener('click', closeRoom);
     const sb = $('#btn-room-scene'); if (sb) sb.addEventListener('click', switchScene);
     const sc = $('#btn-store-close'); if (sc) sc.addEventListener('click', closeStore);
+    const mb = $('#btn-room-mix');   if (mb) mb.addEventListener('click', openMix);
+    const mc = $('#btn-mix-close');  if (mc) mc.addEventListener('click', closeMix);
+    const mg = $('#btn-mix-go');     if (mg) mg.addEventListener('click', askMix);
+    const my = $('#btn-mixask-yes'); if (my) my.addEventListener('click', doMix);
+    const mn = $('#btn-mixask-no');  if (mn) mn.addEventListener('click', closeMixAsk);
+    const mm = $('#mix-minus'); if (mm) mm.addEventListener('click', () => { mixN = Math.max(1, mixN - 1); refreshMix(); });
+    const mp = $('#mix-plus');  if (mp) mp.addEventListener('click', () => { mixN = Math.min(99, mixN + 1); refreshMix(); });
     const cy2 = $('#btn-craft-yes');  if (cy2) cy2.addEventListener('click', doCraftConfirmed);
     const cn  = $('#btn-craft-no');   if (cn)  cn.addEventListener('click', closeCraftAsk);
     $('#btn-chapter-back').addEventListener('click', openHome);

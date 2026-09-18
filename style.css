@@ -1245,3 +1245,53 @@ body.dragging-slot #party-slots { touch-action:none; }
 .ri-where.room  { background:#8d6e63; }
 .ri-where.grdn  { background:#43a047; }
 .ri-where.store { background:#607d8b; }
+
+
+/* ============ そざい ごうせい（v6.15）============ */
+.mini-btn.mix-btn { background:linear-gradient(180deg,#ba68c8,#6a1b9a); border-color:#4a148c; color:#fff; }
+.modal-box.mix-box { width:min(94%, calc(480px * var(--ui))); }
+.mix-row { display:flex; align-items:center; justify-content:center; gap:calc(8px * var(--ui)); }
+.mix-side { flex:1 1 0; min-width:0; }
+.mix-cap { font-size:calc(11.5px * var(--ui)); font-weight:bold; color:#455a64; margin-bottom:calc(4px * var(--ui)); }
+.mix-arrow { font-size:calc(20px * var(--ui)); color:#6a1b9a; font-weight:bold; }
+.mix-pick { display:flex; flex-wrap:wrap; gap:calc(3px * var(--ui)); justify-content:center; }
+.mix-chip {
+  display:flex; flex-direction:column; align-items:center;
+  padding:calc(3px * var(--ui)) calc(5px * var(--ui));
+  border-radius:calc(8px * var(--ui)); border:2px solid #b0bec5;
+  background:#fff; color:#37474f; font-family:inherit;
+  font-size:calc(10px * var(--ui)); font-weight:bold; line-height:1.25; cursor:pointer;
+}
+.mix-chip i { font-style:normal; font-size:calc(15px * var(--ui)); }
+.mix-chip.on { border-color:#8e24aa; background:#f3e5f5; color:#4a148c; }
+.mix-chip.dim { opacity:.35; }
+.mix-count {
+  display:flex; align-items:center; justify-content:center; gap:calc(8px * var(--ui));
+  margin:calc(10px * var(--ui)) 0 calc(4px * var(--ui));
+  font-size:calc(13px * var(--ui)); font-weight:bold; color:#37474f;
+}
+.mix-count b { font-size:calc(20px * var(--ui)); min-width:calc(38px * var(--ui)); color:#4a148c; }
+.mix-pm {
+  width:calc(34px * var(--ui)); height:calc(34px * var(--ui));
+  border-radius:50%; border:none; font-family:inherit;
+  font-size:calc(19px * var(--ui)); font-weight:bold; cursor:pointer;
+  color:#fff; background:linear-gradient(180deg,#ab47bc,#6a1b9a); box-shadow:0 3px 0 #4a148c;
+}
+.mix-pm:active { transform:translateY(2px); box-shadow:none; }
+.mix-sum { font-size:calc(12.5px * var(--ui)); font-weight:bold; color:#4e342e; margin-bottom:calc(12px * var(--ui)); }
+.mix-sum.ng { color:#c62828; }
+
+
+/* へやの ヘッダーは ボタンが 3つ あるので、なまえは ちぢんで よい */
+#screen-room .panel-head .sub-title {
+  flex:0 1 auto; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+#screen-room .panel-head .mini-btn { white-space:nowrap; flex:0 0 auto; }
+@media (max-width: 520px) {
+  #screen-room .panel-head .sub-title { font-size:calc(14px * var(--ui)); }
+  #screen-room .panel-head .mini-btn  {
+    padding-left:calc(6px * var(--ui)); padding-right:calc(6px * var(--ui));
+    font-size:calc(11px * var(--ui));
+  }
+}

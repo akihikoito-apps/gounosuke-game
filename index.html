@@ -147,6 +147,7 @@
   <section id="screen-room" class="screen">
     <div class="panel-head">
       <h2 class="sub-title" id="room-title">🛋️ ごうのすけの へや</h2>
+      <button class="mini-btn mix-btn" id="btn-room-mix">⚗️ ごうせい</button>
       <button class="mini-btn scene-btn" id="btn-room-scene">🌳 にわへ</button>
       <button class="mini-btn" id="btn-room-back">もどる</button>
     </div>
@@ -164,6 +165,46 @@
         <div class="store-grid" id="store-grid"></div>
         <div class="modal-btns">
           <button id="btn-store-close" class="modal-btn keep">とじる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ そざい ごうせい（2こ → 1こ の こうかんじょ）============ -->
+    <div id="mix-modal" class="modal hidden">
+      <div class="modal-box mix-box">
+        <p class="modal-text">⚗️ そざい ごうせい<br><small>ひだりの そざい 2こ で みぎの そざい 1こ</small></p>
+        <div class="mix-row">
+          <div class="mix-side">
+            <p class="mix-cap">つかう そざい</p>
+            <div class="mix-pick" id="mix-from"></div>
+          </div>
+          <span class="mix-arrow">▶</span>
+          <div class="mix-side">
+            <p class="mix-cap">もらえる そざい</p>
+            <div class="mix-pick" id="mix-to"></div>
+          </div>
+        </div>
+        <div class="mix-count">
+          <span>なんかい？</span>
+          <button class="mix-pm" id="mix-minus">−</button>
+          <b id="mix-n">1</b>
+          <button class="mix-pm" id="mix-plus">＋</button>
+        </div>
+        <p class="mix-sum" id="mix-sum"></p>
+        <div class="modal-btns">
+          <button id="btn-mix-go" class="modal-btn quit">ごうせい する</button>
+          <button id="btn-mix-close" class="modal-btn keep">とじる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 「ほんとうに ごうせいする？」の かくにん ============ -->
+    <div id="mix-ask" class="modal hidden">
+      <div class="modal-box">
+        <p class="modal-text" id="mix-ask-text">ほんとうに ごうせい しますか？</p>
+        <div class="modal-btns">
+          <button id="btn-mixask-yes" class="modal-btn quit">ごうせい する！</button>
+          <button id="btn-mixask-no"  class="modal-btn keep">やめる</button>
         </div>
       </div>
     </div>
