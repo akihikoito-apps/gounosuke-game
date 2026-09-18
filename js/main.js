@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.11.1';
+  const GAME_VERSION = '6.12';
 
 
   /* =================================================
@@ -127,11 +127,18 @@
   }
 
   /* じつりょくレベル ＝ けいけんちで あげた レベル ＋ じょうげんかいほう(＋) */
+  /* にわで あがった ぶん（1たい ＋10 まで。ガチャの ＋とは べつわく）*/
+  function gardenPlus(s, id) {
+    if (!s || !s.gardenPlus) return 0;
+    const max = (typeof GARDEN !== 'undefined') ? GARDEN.maxPlus : 10;
+    return Math.min(max, s.gardenPlus[id] || 0);
+  }
   function effLevel(s, id) {
     if (!s) return 1;
     const base = s.levels[id] || 1;
     const plus = (s.plus && s.plus[id]) || 0;
-    return Math.min(LEVEL.max + GACHA.plusMax, base + plus);
+    /* ガチャの ＋は Lv.30＋30 が じょうげん。にわの ＋は その うえに のります */
+    return Math.min(LEVEL.max + GACHA.plusMax, base + plus) + gardenPlus(s, id);
   }
 
   /* せんとうに わたす レベルひょう を つくる */
@@ -2032,9 +2039,55 @@
   let roomDrag = null;        // うごかして いる かぐ
   let roomTime = 0;
   let roomRaf  = null;
+  /* ★いま みて いる ばしょ。'room'＝へや / 'garden'＝にわ
+       おなじ がめんを つかいまわして、じょうたいだけ きりかえます。 */
+  let roomScene = 'room';
+  const isGarden = () => roomScene === 'garden';
+  /* にわの じめんの たかさ（がめんの たかさに たいする わりあい）。
+     かぐと なかまは この したに おきます。 */
+  const GARDEN_FLOOR = 0.62;
+
+  /* セーブの なかの にわの じょうたい（なければ つくる）*/
+  function gardenState() {
+    const s = slot();
+    if (!s) return null;
+    if (!s.garden) {
+      s.garden = { placed: {}, char: null, charPos: { x: 0.50, y: 0.88 }, since: 0, size: 0 };
+    }
+    const g = s.garden;
+    if (!g.placed) g.placed = {};
+    if (!g.charPos) g.charPos = { x: 0.50, y: 0.86 };
+    if (typeof g.since !== 'number') g.since = 0;
+    if (typeof g.size !== 'number') g.size = 0;
+    if (!s.gardenPlus) s.gardenPlus = {};
+    return g;
+  }
+
+  /* ★にわに いた ぶんの レベルを けいさんして たす
+       えらんでから 24じかん ごとに ＋1。1たい ＋10 まで。
+       24じかん たって いない ぶんは since に のこして おくので、
+       とちゅうで べつの こに かえると その ぶんは きえます。      */
+  function gardenTick() {
+    const s = slot(); if (!s) return 0;
+    const g = gardenState(); if (!g || !g.char) return 0;
+    const day = (typeof GARDEN !== 'undefined') ? GARDEN.dayMs : 86400000;
+    const max = (typeof GARDEN !== 'undefined') ? GARDEN.maxPlus : 10;
+    if (!g.since) { g.since = Date.now(); return 0; }
+    const now = Date.now();
+    let days = Math.floor((now - g.since) / day);
+    if (days <= 0) return 0;
+    const have = s.gardenPlus[g.char] || 0;
+    const add = Math.max(0, Math.min(days, max - have));
+    /* あがった ぶんだけ じかんを すすめる（あまった じかんは のこす）*/
+    g.since += days * day;
+    if (add > 0) { s.gardenPlus[g.char] = have + add; storeSave(); }
+    else storeSave();
+    return add;
+  }
 
   /* セーブの なかの へやの じょうたい（なければ つくる）*/
   function roomState() {
+    if (isGarden()) return gardenState();
     const s = slot();
     if (!s) return null;
     if (!s.room) {
@@ -2115,15 +2168,53 @@
     return (w && w.colors) || ROOM_ITEMS[0].colors;
   }
 
+  function refreshSceneUi() {
+    const t = $('#room-title');
+    if (t) t.textContent = isGarden() ? '🌳 ごうのすけの にわ' : '🛋️ ごうのすけの へや';
+    const b = $('#btn-room-scene');
+    if (b) b.textContent = isGarden() ? '🏠 へやへ' : '🌳 にわへ';
+    const h = $('#room-hint');
+    if (h) h.textContent = isGarden()
+      ? 'なかまを にわに おくと 24じかんで レベルが 1つ あがるよ（1たい ＋10まで）'
+      : 'かぐを ゆびで うごかせるよ。なかまを タップすると おはなし するよ！';
+  }
+
   function openRoom() {
     roomState();
     show('screen-room');
+    refreshSceneUi();
     buildRoomTabs();
     buildRoomTray();
     startRoomLoop();
     requestAnimationFrame(() => { drawRoom(); });
   }
   function closeRoom() { stopRoomLoop(); storeSave(); openHome(); }
+
+  /* ★へや ⇄ にわ（よこに すべる）*/
+  function switchScene() {
+    roomScene = isGarden() ? 'room' : 'garden';
+    if (isGarden()) {
+      const got = gardenTick();
+      if (got > 0) {
+        const g = gardenState();
+        toast((UNITS[g.char] ? UNITS[g.char].name : 'なかま') + ' が にわで ＋' + got + ' レベル あがった！');
+      }
+    }
+    /* にわに かべがみ・カーペットの タブは ない ので もどす */
+    if (isGarden() && (roomTab === 'wall' || roomTab === 'floor')) roomTab = 'item';
+    refreshSceneUi();
+    buildRoomTabs();
+    buildRoomTray();
+    drawRoom();
+    const st = document.querySelector('.room-stage');
+    if (st) {
+      const cls = isGarden() ? 'map-slide-in-right' : 'map-slide-in-left';
+      st.classList.remove('map-slide-in-right', 'map-slide-in-left');
+      void st.offsetWidth;
+      st.classList.add(cls);
+      setTimeout(() => st.classList.remove(cls), 320);
+    }
+  }
 
   function startRoomLoop() {
     stopRoomLoop();
@@ -2149,6 +2240,14 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
 
+    if (isGarden()) { drawGardenBg(ctx, W, H); }
+    else { drawRoomBg(ctx, W, H); }
+    drawStorage(ctx, W, H);
+    drawRoomStuff(ctx, W, H);
+  }
+
+  /* ---- へやの はいけい（かべ・まど・ゆか）---- */
+  function drawRoomBg(ctx, W, H) {
     const col = roomWallColors();
     const floorY = H * 0.62;
 
@@ -2180,7 +2279,128 @@
     /* はばき */
     ctx.fillStyle = 'rgba(0,0,0,.15)';
     ctx.fillRect(0, floorY - 6, W, 6);
+  }
 
+  /* ---- にわの はいけい（ごうのすけくんの えの とおり）----
+       あおい そら、あかい たいよう と ひかり、みどりの いけがき、
+       そして したは すなの じめん。                              */
+  function drawGardenBg(ctx, W, H) {
+    /* そら */
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#5fc6ef'); sky.addColorStop(1, '#9fdcf6');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+
+    /* ★たいよう（うえの まんなか。はんぶんだけ みえて いる）*/
+    const sx = W * 0.50, sy = -H * 0.06, sr = Math.min(W * 0.15, H * 0.30);
+    ctx.fillStyle = '#e8401f';
+    ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+    /* ひかり（まるい ぼうが 7ほん）*/
+    ctx.strokeStyle = '#e8401f';
+    ctx.lineWidth = Math.max(7, H * 0.035);
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 7; i++) {
+      const a = Math.PI * (0.10 + i * 0.133);              // した がわに ひろがる
+      const r0 = sr * 1.22, r1 = sr * 1.62;
+      ctx.beginPath();
+      ctx.moveTo(sx + Math.cos(a) * r0, sy + Math.sin(a) * r0);
+      ctx.lineTo(sx + Math.cos(a) * r1, sy + Math.sin(a) * r1);
+      ctx.stroke();
+    }
+
+    /* ★すなの じめん。ここが「にわの ゆか」で、かぐも なかまも ここに たちます。
+         えの とおり、ひだりはしと みぎはしが たかく、まんなかが ひくい かたち。 */
+    const gy = GARDEN_FLOOR;          // まんなかの じめんの たかさ（わりあい）
+    const ey = 0.34;                  // はしの じめんの たかさ（わりあい）
+    ctx.fillStyle = '#ddd5c4';
+    ctx.beginPath();
+    ctx.moveTo(0, H * ey);
+    ctx.lineTo(W * 0.20, H * gy);
+    ctx.lineTo(W * 0.80, H * gy);
+    ctx.lineTo(W, H * ey);
+    ctx.lineTo(W, H); ctx.lineTo(0, H);
+    ctx.closePath(); ctx.fill();
+    /* すなの もよう */
+    ctx.strokeStyle = 'rgba(160,145,115,.35)'; ctx.lineWidth = 1.6;
+    for (let i = 1; i < 5; i++) {
+      const y = H * gy + (H - H * gy) * (i / 5);
+      ctx.beginPath(); ctx.moveTo(W * 0.04, y); ctx.lineTo(W * 0.96, y); ctx.stroke();
+    }
+
+    /* ★みどりの いけがき（そらと じめんの さかいめ）*/
+    ctx.strokeStyle = '#6ec92e';
+    ctx.lineWidth = Math.max(9, H * 0.045);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, H * ey);
+    ctx.lineTo(W * 0.20, H * gy);
+    ctx.lineTo(W * 0.80, H * gy);
+    ctx.lineTo(W, H * ey);
+    ctx.stroke();
+
+    /* とおくの くも */
+    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    for (let i = 0; i < 3; i++) {
+      const cx = W * (0.12 + i * 0.34), cy = H * (0.16 + (i % 2) * 0.10), r = H * 0.045;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(cx + r * 0.9, cy + r * 0.2, r * 0.7, 0, Math.PI * 2);
+      ctx.arc(cx - r * 0.9, cy + r * 0.2, r * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  /* ---- はしっこの 「おしいれ」／「そうこ」----
+       ここに かぐを スワイプして いれると、おいて ある ぶんから はずれます。
+       ★おしいれと そうこは うらで つながって いる★ ので、
+       へやで しまった ものは にわの そうこからも だせます
+       （おいて いない かぐは、どちらの「かぐ」タブにも でて きます）。 */
+  function storageRect(W, H) {
+    return { x: W * 0.898, y: H * 0.34, w: W * 0.096, h: H * 0.56 };
+  }
+  function drawStorage(ctx, W, H) {
+    const R = storageRect(W, H);
+    const garden = isGarden();
+    const body = garden ? '#8d6e63' : '#c8a06a';
+    const dark = garden ? '#5d4037' : '#8d6e63';
+    /* ほんたい */
+    ctx.fillStyle = body;
+    roundRect(ctx, R.x, R.y, R.w, R.h, 6); ctx.fill();
+    ctx.strokeStyle = dark; ctx.lineWidth = 3;
+    roundRect(ctx, R.x, R.y, R.w, R.h, 6); ctx.stroke();
+    /* やね（そうこ だけ）*/
+    if (garden) {
+      ctx.fillStyle = '#5d4037';
+      ctx.beginPath();
+      ctx.moveTo(R.x - 6, R.y);
+      ctx.lineTo(R.x + R.w / 2, R.y - H * 0.07);
+      ctx.lineTo(R.x + R.w + 6, R.y);
+      ctx.closePath(); ctx.fill();
+    }
+    /* ★いりぐち（くらい あな）*/
+    const ix = R.x + R.w * 0.16, iy = R.y + R.h * 0.30;
+    const iw = R.w * 0.68, ih = R.h * 0.62;
+    ctx.fillStyle = 'rgba(30,20,10,.82)';
+    roundRect(ctx, ix, iy, iw, ih, 5); ctx.fill();
+    /* とびらの わく */
+    ctx.strokeStyle = dark; ctx.lineWidth = 2.5;
+    roundRect(ctx, ix, iy, iw, ih, 5); ctx.stroke();
+    /* ドラッグちゅうは ひかって しらせる */
+    if (roomDrag && roomDrag.id !== '__char') {
+      ctx.strokeStyle = 'rgba(255,213,79,.95)'; ctx.lineWidth = 4;
+      ctx.setLineDash([7, 5]);
+      roundRect(ctx, R.x - 3, R.y - 3, R.w + 6, R.h + 6, 8); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    /* なまえ */
+    ctx.fillStyle = '#fff8e1';
+    ctx.font = 'bold ' + Math.round(H * 0.055) + 'px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(garden ? 'そうこ' : 'おしいれ', R.x + R.w / 2, R.y + R.h * 0.22);
+    ctx.textAlign = 'start';
+  }
+
+  /* ---- かぐと なかまを かく ---- */
+  function drawRoomStuff(ctx, W, H) {
     /* かぐ（ゆかに しく ものが さき）*/
     const r = roomState();
     if (!r) return;
@@ -2313,14 +2533,30 @@
       if (!moved) return;
       const W = cv.clientWidth, H = cv.clientHeight;
       const nx = Math.min(0.98, Math.max(0.02, (q.x - roomDrag.dx) / W));
-      const ny = Math.min(0.99, Math.max(0.30, (q.y - roomDrag.dy) / H));
+      /* にわでは いけがきより したの「じめん」に しか おけません */
+      const minY = isGarden() ? (GARDEN_FLOOR + 0.04) : 0.30;
+      const ny = Math.min(0.99, Math.max(minY, (q.y - roomDrag.dy) / H));
       const r = roomState();
       if (roomDrag.id === '__char') r.charPos = { x: nx, y: ny };
       else if (r.placed[roomDrag.id]) r.placed[roomDrag.id] = { x: nx, y: ny };
     };
-    const up = () => {
+    const up = (ev) => {
       if (roomDrag) {
-        if (!moved && roomDrag.id === '__char') roomSay(roomState().char);
+        const r = roomState();
+        if (!moved && roomDrag.id === '__char') roomSay(r.char);
+        /* ★そうこ／おしいれの うえで はなしたら しまう */
+        if (moved && roomDrag.id !== '__char' && r.placed[roomDrag.id]) {
+          const W = cv.clientWidth, H = cv.clientHeight;
+          const R = storageRect(W, H);
+          const pos = r.placed[roomDrag.id];
+          const px = pos.x * W, py = pos.y * H;
+          if (px > R.x - 10 && px < R.x + R.w + 10 && py > R.y - 10 && py < R.y + R.h + 30) {
+            const it = roomItem(roomDrag.id);
+            delete r.placed[roomDrag.id];
+            toast((it ? it.name : 'かぐ') + ' を ' + (isGarden() ? 'そうこ' : 'おしいれ') + ' に しまった！');
+            buildRoomTray();
+          }
+        }
         storeSave();
       }
       roomDrag = null;
@@ -2337,8 +2573,11 @@
   function buildRoomTabs() {
     const box = $('#room-tabs');
     if (!box) return;
-    const tabs = [['item', '🛋️ かぐ'], ['floor', '🟥 カーペット'], ['wall', '🎨 かべがみ'],
-                  ['char', '😊 なかま'], ['craft', '🔨 つくる'], ['size', '📐 ひろげる']];
+    /* にわには かべも ゆかも ない ので、その 2つは ださない */
+    const tabs = isGarden()
+      ? [['item', '🛋️ かぐ'], ['char', '😊 なかま'], ['craft', '🔨 つくる'], ['size', '📐 ひろげる']]
+      : [['item', '🛋️ かぐ'], ['floor', '🟥 カーペット'], ['wall', '🎨 かべがみ'],
+         ['char', '😊 なかま'], ['craft', '🔨 つくる'], ['size', '📐 ひろげる']];
     box.innerHTML = '';
     tabs.forEach(([k, label]) => {
       const b = document.createElement('button');
@@ -2381,9 +2620,22 @@
         if (!UNITS[id]) return;
         const b = document.createElement('button');
         b.className = 'room-item' + (r.char === id ? ' on' : '');
-        b.innerHTML = '<canvas></canvas><span class="ri-name">' + (shownDef(id) || UNITS[id]).shortName + '</span>';
+        const gp = gardenPlus(s, id);
+        b.innerHTML = '<canvas></canvas><span class="ri-name">' + (shownDef(id) || UNITS[id]).shortName + '</span>' +
+          (isGarden() ? '<span class="ri-cost">にわ ＋' + gp + '</span>' : '');
         b.addEventListener('click', () => {
+          const was = r.char;
           r.char = (r.char === id) ? null : id;
+          if (isGarden() && r.char !== was) {
+            /* ★べつの こに かえたら、24じかんの かぞえを 0から やりなおし。
+               とちゅうまで たまって いた ぶんは きえます。 */
+            r.since = r.char ? Date.now() : 0;
+            const max = (typeof GARDEN !== 'undefined') ? GARDEN.maxPlus : 10;
+            if (r.char) {
+              const now = gardenPlus(s, r.char);
+              toast(UNITS[r.char].name + ' を にわに おいた！　いま ＋' + now + ' ／ ＋' + max + 'まで');
+            }
+          }
           storeSave(); buildRoomTray();
         });
         box.appendChild(b);
@@ -2406,7 +2658,17 @@
       b.addEventListener('click', () => {
         if (it.kind === 'wall') { r.wall = it.id; }
         else if (r.placed[it.id]) { delete r.placed[it.id]; }
-        else { r.placed[it.id] = { x: it.x, y: it.y }; }
+        else {
+          /* ★おなじ かぐは 1つ だけ。へやと にわの りょうほうには おけません。
+             もういっぽうに おいて あったら、そちらから はずします。      */
+          const other = isGarden() ? (s && s.room) : (s && s.garden);
+          if (other && other.placed && other.placed[it.id]) {
+            delete other.placed[it.id];
+            toast(it.name + ' を ' + (isGarden() ? 'へや' : 'にわ') + ' から もって きた！');
+          }
+          const y0 = isGarden() ? Math.max(it.y, GARDEN_FLOOR + 0.12) : it.y;
+          r.placed[it.id] = { x: it.x, y: y0 };
+        }
         storeSave(); buildRoomTray();
       });
       box.appendChild(b);
@@ -3171,8 +3433,13 @@
     $('#btn-world').addEventListener('click', switchWorld);
     const mr = $('#btn-map-right'); if (mr) mr.addEventListener('click', goSunMap);
     const ml = $('#btn-map-left');  if (ml) ml.addEventListener('click', backToSpace);
-    $('#btn-home-room').addEventListener('click', () => { openRoom(); bindRoomCanvas(); });
+    $('#btn-home-room').addEventListener('click', () => {
+      roomScene = 'room';
+      gardenTick();                       // ホームから きた ときに にわの ぶんを けいさん
+      openRoom(); bindRoomCanvas();
+    });
     $('#btn-room-back').addEventListener('click', closeRoom);
+    const sb = $('#btn-room-scene'); if (sb) sb.addEventListener('click', switchScene);
     $('#btn-chapter-back').addEventListener('click', openHome);
     $('#btn-tower').addEventListener('click', () => {
       const T = towerOfWorld(currentWorld);

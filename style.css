@@ -1203,3 +1203,11 @@ body.dragging-slot #party-slots { touch-action:none; }
 .room-item.size-item { min-width:calc(104px * var(--ui)); }
 .room-item.size-item .si-mark { font-size:calc(26px * var(--ui)); line-height:1.1; }
 .room-item.size-item.made { opacity:.7; }
+
+
+/* ---- へや ⇄ にわ の きりかえボタン ---- */
+.mini-btn.scene-btn {
+  background:linear-gradient(180deg,#66bb6a,#2e7d32);
+  border-color:#1b5e20; color:#fff;
+}
+.room-stage { overflow:hidden; }
