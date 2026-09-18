@@ -8969,14 +8969,144 @@ const PURIKING_STYLES = {
 /* ★いま つかって いる かたち */
 const PURIKING_PICK = 'chibi';
 
-function drawPurikingStyled(ctx, s, P) {
+/* ==== ぷり王の「え の タッチ」5パターン ====
+   かたちは おなじ（chibi）の まま、ぬりかたと しつかんだけを かえて います。
+     ink   … てがき。やわらかい グラデに インクの せん（6.13〜6.15 の もの）
+     anime … アニメの セル画。ふとい フチどり、ベタぬり、はっきりした かげ
+     jelly … だい1けいたいの ような つやつやの はんとうめい ゼリー
+     fluff … ふわふわの けなみ。ふちが もこもこ、いろは パステル
+     royal … きらきらの おうさま。こい グラデに きんいろの フチと キラキラ    */
+const PURIKING_TEX = {
+  ink:   { label: 'てがき',        ink: '#1b1b1b', lw: 1.00 },
+  anime: { label: 'アニメ',        ink: '#2b1703', lw: 1.10, outline: '#3a2004', ow: 3.6, flat: true, shade: true, gloss: 'small' },
+  jelly: { label: 'つやつやゼリー', ink: '#6b3a10', lw: 0.85, alpha: 0.9, gloss: 'big', glow: true },
+  fluff: { label: 'ふわふわ',      ink: '#6b4526', lw: 0.95, fur: true, pastel: true, belly: true },
+  royal: { label: 'きらきら王さま', ink: '#3a2408', lw: 1.00, outline: '#b8860b', ow: 3.0, rich: true, sparkle: true },
+};
+const PURIKING_TEX_PICK = 'ink';
+
+/* まるや かたちを、えらんだ タッチで ぬる */
+function purikingPaint(ctx, path, cx, cy, r, T, s) {
+  const ORANGE = '#e08a2a';
+  ctx.save();
+  if (T.alpha) ctx.globalAlpha = T.alpha;
+
+  /* --- そとに ひろがる ひかり（ゼリー）--- */
+  if (T.glow) {
+    const go = ctx.createRadialGradient(cx, cy, r * 0.8, cx, cy, r * 1.45);
+    go.addColorStop(0, 'rgba(255,170,60,.30)'); go.addColorStop(1, 'rgba(255,170,60,0)');
+    ctx.fillStyle = go;
+    ctx.beginPath(); ctx.arc(cx, cy, r * 1.45, 0, Math.PI * 2); ctx.fill();
+  }
+
+  /* --- ふわふわの けなみ（ふちを もこもこに）--- */
+  if (T.fur) {
+    ctx.fillStyle = '#f6c98c';
+    for (let i = 0; i < 26; i++) {
+      const a = i / 26 * Math.PI * 2;
+      const rr = r * (1.02 + ((i % 3) ? 0.03 : 0.07));
+      ctx.beginPath();
+      ctx.arc(cx + Math.cos(a) * r * 0.96, cy + Math.sin(a) * r * 0.96, rr * 0.13, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  /* --- ほんたい --- */
+  path();
+  if (T.flat)      ctx.fillStyle = '#f0a23c';
+  else if (T.pastel) {
+    const g = ctx.createLinearGradient(cx, cy - r, cx, cy + r);
+    g.addColorStop(0, '#fbd6a4'); g.addColorStop(1, '#eeae63');
+    ctx.fillStyle = g;
+  } else if (T.rich) {
+    const g = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.45, r * 0.05, cx, cy, r * 1.05);
+    g.addColorStop(0, '#ffe7a8'); g.addColorStop(0.45, '#eda23a'); g.addColorStop(1, '#c06d0c');
+    ctx.fillStyle = g;
+  } else if (T.alpha) {
+    const g = ctx.createLinearGradient(cx, cy - r, cx, cy + r);
+    g.addColorStop(0, 'rgba(255,214,140,.92)');
+    g.addColorStop(0.55, 'rgba(240,160,55,.86)');
+    g.addColorStop(1, 'rgba(214,110,18,.92)');
+    ctx.fillStyle = g;
+  } else {
+    const g = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.35, 3, cx, cy, r);
+    g.addColorStop(0, '#f2ad4d'); g.addColorStop(1, ORANGE);
+    ctx.fillStyle = g;
+  }
+  ctx.fill();
+
+  /* --- かげ（セル画）--- */
+  if (T.shade) {
+    ctx.save(); path(); ctx.clip();
+    ctx.fillStyle = 'rgba(176,92,10,.62)';
+    ctx.beginPath();
+    ctx.arc(cx + r * 0.55, cy + r * 0.45, r * 1.05, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  /* --- おなかの あかるい ところ（ふわふわ）--- */
+  if (T.belly) {
+    ctx.save(); path(); ctx.clip();
+    ctx.fillStyle = 'rgba(255,245,225,.55)';
+    ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.32, r * 0.62, r * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  /* --- フチどり --- */
+  if (T.outline) {
+    path();
+    ctx.strokeStyle = T.outline; ctx.lineWidth = T.ow; ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+
+  /* --- つや --- */
+  if (T.gloss) {
+    ctx.save(); path(); ctx.clip();
+    if (T.gloss === 'big') {
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      ctx.beginPath();
+      ctx.ellipse(cx - r * 0.34, cy - r * 0.40, r * 0.34, r * 0.24, -0.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.30)';
+      ctx.beginPath();
+      ctx.ellipse(cx + r * 0.30, cy + r * 0.40, r * 0.18, r * 0.11, -0.4, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,.45)';
+      ctx.beginPath();
+      ctx.ellipse(cx - r * 0.38, cy - r * 0.46, r * 0.26, r * 0.13, -0.6, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /* --- キラキラ（おうさま）--- */
+  if (T.sparkle) {
+    const tw = (s && s.t) || 0;
+    ctx.fillStyle = 'rgba(255,245,180,.95)';
+    for (let i = 0; i < 3; i++) {
+      /* ★かおに かぶらない ように、かならず そとがわに だす */
+      const a = tw * 0.8 + i * 2.1;
+      const px = cx + Math.cos(a) * r * 1.32, py = cy + Math.sin(a * 1.3) * r * 1.22;
+      const k = 3.4 + Math.sin(tw * 3 + i) * 1.2;
+      ctx.beginPath();
+      ctx.moveTo(px, py - k * 2); ctx.lineTo(px + k * 0.6, py - k * 0.6);
+      ctx.lineTo(px + k * 2, py); ctx.lineTo(px + k * 0.6, py + k * 0.6);
+      ctx.lineTo(px, py + k * 2); ctx.lineTo(px - k * 0.6, py + k * 0.6);
+      ctx.lineTo(px - k * 2, py); ctx.lineTo(px - k * 0.6, py - k * 0.6);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+function drawPurikingStyled(ctx, s, P, T) {
+  T = T || PURIKING_TEX[PURIKING_TEX_PICK];
   const a = s.atk;
   const step = Math.sin(s.t * 7) * (s.moving ? 1 : 0);
   const bob  = Math.abs(step) * 1.4;
   const raise = (a >= 0) ? Math.sin(a * Math.PI) : 0;   // こうげきで うでを あげる
 
   const ORANGE = '#e08a2a';
-  const INK    = '#1b1b1b';
+  const INK    = T.ink;
+  const LW     = T.lw;
   const hy = P.hy, hr = P.hr, f = P.face;
 
   ctx.save();
@@ -8984,7 +9114,7 @@ function drawPurikingStyled(ctx, s, P) {
   if (P.k && P.k !== 1) ctx.scale(P.k, P.k);
 
   /* --- あし（ギザギザの W が 3つ）--- */
-  ctx.strokeStyle = INK; ctx.lineWidth = 3.2;
+  ctx.strokeStyle = INK; ctx.lineWidth = 3.2 * LW;
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const fw = P.bw * 0.95;
   for (let i = 0; i < 3; i++) {
@@ -8999,20 +9129,15 @@ function drawPurikingStyled(ctx, s, P) {
   }
 
   /* --- からだ --- */
-  const bh = P.bBot - P.bTop;
-  const bg = ctx.createLinearGradient(-P.bw, P.bTop, P.bw, P.bBot);
-  bg.addColorStop(0, '#eda344'); bg.addColorStop(1, ORANGE);
-  ctx.fillStyle = bg;
-  if (P.egg) {
-    ctx.beginPath();
-    ctx.ellipse(0, (P.bTop + P.bBot) / 2, P.bw, Math.abs(bh) / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-  } else {
-    roundRect(ctx, -P.bw, P.bTop, P.bw * 2, Math.abs(bh), 8); ctx.fill();
-  }
+  const bh = Math.abs(P.bBot - P.bTop);
+  const bcy = (P.bTop + P.bBot) / 2;
+  const bodyPath = P.egg
+    ? () => { ctx.beginPath(); ctx.ellipse(0, bcy, P.bw, bh / 2, 0, 0, Math.PI * 2); }
+    : () => { roundRect(ctx, -P.bw, P.bTop, P.bw * 2, bh, 8); };
+  purikingPaint(ctx, bodyPath, 0, bcy, Math.max(P.bw, bh / 2), T, s);
 
   /* --- うで（ひろげた つめ）--- */
-  ctx.strokeStyle = INK; ctx.lineWidth = 3;
+  ctx.strokeStyle = INK; ctx.lineWidth = 3 * LW;
   for (const d of [-1, 1]) {
     const ex = d * (P.armX + raise * 5);
     const ey = P.armDown - raise * 18;
@@ -9020,7 +9145,7 @@ function drawPurikingStyled(ctx, s, P) {
     ctx.moveTo(d * P.bw, P.armY);
     ctx.quadraticCurveTo(d * (P.armX * 0.75), P.armY - 2, ex, ey);
     ctx.stroke();
-    ctx.lineWidth = 3.2;
+    ctx.lineWidth = 3.2 * LW;
     for (let i = 0; i < 4; i++) {
       const th = -0.78 + i * 0.52;
       const len = (i === 1 || i === 2) ? P.claw * 1.3 : P.claw;
@@ -9030,42 +9155,43 @@ function drawPurikingStyled(ctx, s, P) {
                            ex + d * Math.cos(th) * len,       ey + Math.sin(th) * len + 3);
       ctx.stroke();
     }
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 3 * LW;
   }
 
   /* --- くびわ と ふだ --- */
-  ctx.strokeStyle = INK; ctx.lineWidth = 2.8;
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.8 * LW;
   ctx.beginPath();
   ctx.moveTo(-P.bw, P.bTop + 2); ctx.quadraticCurveTo(0, P.bTop + 7, P.bw, P.bTop + 2);
   ctx.stroke();
   ctx.fillStyle = ORANGE;
   roundRect(ctx, -4.5, P.bTop + 3, 9, 9, 2); ctx.fill();
-  ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  ctx.strokeStyle = T.outline || INK; ctx.lineWidth = 2.2 * LW;
   roundRect(ctx, -4.5, P.bTop + 3, 9, 9, 2); ctx.stroke();
 
   /* --- みみ --- */
-  ctx.fillStyle = ORANGE;
-  ctx.strokeStyle = INK; ctx.lineWidth = 2.8; ctx.lineJoin = 'round';
+  ctx.lineJoin = 'round';
   for (const d of [-1, 1]) {
-    ctx.beginPath();
-    ctx.moveTo(d * hr * 0.92, hy - hr * 0.36);
-    ctx.lineTo(d * hr * 0.82, hy - hr * 0.36 - P.earLen);
-    ctx.lineTo(d * hr * 0.21, hy - hr * 0.85);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
+    const earPath = () => {
+      ctx.beginPath();
+      ctx.moveTo(d * hr * 0.92, hy - hr * 0.36);
+      ctx.lineTo(d * hr * 0.82, hy - hr * 0.36 - P.earLen);
+      ctx.lineTo(d * hr * 0.21, hy - hr * 0.85);
+      ctx.closePath();
+    };
+    purikingPaint(ctx, earPath, d * hr * 0.6, hy - hr * 0.6 - P.earLen * 0.4, P.earLen * 0.5,
+                  { ink: T.ink, lw: T.lw, flat: T.flat, pastel: T.pastel, rich: T.rich, alpha: T.alpha,
+                    outline: T.outline || (T.alpha ? null : INK), ow: T.ow || 2.8 }, s);
   }
 
   /* --- あたま --- */
-  const hg = ctx.createRadialGradient(-hr * 0.3, hy - hr * 0.35, 3, 0, hy, hr);
-  hg.addColorStop(0, '#f2ad4d'); hg.addColorStop(1, ORANGE);
-  ctx.fillStyle = hg;
-  ctx.beginPath(); ctx.arc(0, hy, hr, 0, Math.PI * 2); ctx.fill();
+  purikingPaint(ctx, () => { ctx.beginPath(); ctx.arc(0, hy, hr, 0, Math.PI * 2); }, 0, hy, hr, T, s);
 
   /* --- かお（ほっぺ・め・はな・くち）--- */
   ctx.fillStyle = 'rgba(232,110,60,.22)';
   ctx.beginPath(); ctx.ellipse(-20 * f, hy + 9 * f, 8.5 * f, 5.5 * f, 0, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse( 20 * f, hy + 9 * f, 8.5 * f, 5.5 * f, 0, 0, Math.PI * 2); ctx.fill();
 
-  ctx.strokeStyle = INK; ctx.lineWidth = 4.2 * f; ctx.lineCap = 'round';
+  ctx.strokeStyle = INK; ctx.lineWidth = 4.2 * f * LW; ctx.lineCap = 'round';
   for (const d of [-1, 1]) {
     ctx.beginPath();
     ctx.moveTo(d * 10.5 * f, hy - 15 * f);
@@ -9073,7 +9199,7 @@ function drawPurikingStyled(ctx, s, P) {
     ctx.stroke();
   }
 
-  ctx.lineWidth = 3.1 * f;
+  ctx.lineWidth = 3.1 * f * LW;
   ctx.beginPath();
   ctx.moveTo(-2.5 * f, hy + 8 * f);
   ctx.quadraticCurveTo(-1.5 * f, hy + 16 * f, 1.5 * f, hy + 17 * f);
@@ -9082,7 +9208,7 @@ function drawPurikingStyled(ctx, s, P) {
   ctx.stroke();
 
   const gape = (a >= 0) ? 6 * f : 0;
-  ctx.lineWidth = 3.1 * f;
+  ctx.lineWidth = 3.1 * f * LW;
   ctx.beginPath();
   ctx.moveTo(-14 * f, hy + 19 * f);
   ctx.quadraticCurveTo(-6 * f, hy + 29 * f + gape, 4 * f, hy + 28 * f + gape);
