@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.19';
+  const GAME_VERSION = '6.20';
 
 
   /* =================================================
@@ -3860,7 +3860,9 @@
   }
   /* クリアした ステージに あわせて おはなしを ながす */
   function maybeStory(stageNo) {
-    if (stageNo === 100 && sunAllCleared() && !storySeen('storm_intro')) {
+    /* ★太陽の ボスラッシュ（12-3）を クリアした ときは まいかい ながします。
+         ながくても「とばす」で いつでも すぐ ぬけられます。 */
+    if (stageNo === 100 && sunAllCleared()) {
       markStory('storm_intro');
       playStory(STORY_STORM_INTRO, () => show('screen-result'));
       return true;
