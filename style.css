@@ -1132,6 +1132,15 @@ body.dragging-slot #party-slots { touch-action:none; }
   font-size:calc(12px * var(--ui)); font-weight:bold; color:#fff;
 }
 .mat-chip b { color:#ffe082; }
+/* ★そざいバーは もちものの そとに あるので、スクロールしても かくれません。
+     したの もちものと くっつきすぎない ように すこし すきまを あけます。 */
+.mat-bar-fixed {
+  margin:calc(2px * var(--ui)) auto 0;
+  padding:calc(6px * var(--ui)) calc(6px * var(--ui)) calc(5px * var(--ui));
+  border-radius:calc(12px * var(--ui));
+  background:rgba(0,0,0,.22);
+  border:1.5px solid rgba(255,255,255,.18);
+}
 /* こうさくの ふだ */
 .craft-item { width:calc(86px * var(--ui)); height:calc(96px * var(--ui)); }
 .craft-item .ri-cost { font-size:calc(9px * var(--ui)); line-height:1.1; color:#5d4037; white-space:nowrap; }

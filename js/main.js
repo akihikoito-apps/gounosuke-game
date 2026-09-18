@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.11';
+  const GAME_VERSION = '6.11.1';
 
 
   /* =================================================
@@ -2349,9 +2349,28 @@
     });
   }
 
+  /* ★そざいの かず（スクロールしても かくれない ばしょに かく）
+       「つくる」と「ひろげる」の ときだけ だします。            */
+  function buildMatBar() {
+    const bar = $('#room-mats');
+    if (!bar) return;
+    const show = (roomTab === 'craft' || roomTab === 'size');
+    bar.classList.toggle('hidden', !show);
+    if (!show) { bar.innerHTML = ''; return; }
+    bar.innerHTML = '';
+    MATERIAL_ORDER.forEach(id => {
+      const mt = MATERIALS[id];
+      const chip = document.createElement('span');
+      chip.className = 'mat-chip';
+      chip.innerHTML = mt.icon + mt.name + ' <b>' + matCount(id) + '</b>';
+      bar.appendChild(chip);
+    });
+  }
+
   function buildRoomTray() {
     const box = $('#room-tray');
     if (!box) return;
+    buildMatBar();
     box.innerHTML = '';
     const r = roomState();
     const s = slot();
@@ -2397,18 +2416,8 @@
 
   /* ★つくる：20しゅるい × 5いろ ＝ 100パターン */
   function buildCraftTray(box) {
-    /* うえに いま もって いる そざいを ならべる */
-    const bar = document.createElement('div');
-    bar.className = 'mat-bar';
-    MATERIAL_ORDER.forEach(id => {
-      const mt = MATERIALS[id];
-      const chip = document.createElement('span');
-      chip.className = 'mat-chip';
-      chip.innerHTML = mt.icon + mt.name + ' <b>' + matCount(id) + '</b>';
-      bar.appendChild(chip);
-    });
-    box.appendChild(bar);
-
+    /* そざいの かずは buildMatBar() が がめんの うえの ほうに かきます
+       （ここに いれると スクロールで かくれて しまう ため）*/
     const made = madeList();
     CRAFT_PATTERNS.forEach(pat => {
       const has = made.indexOf(pat.id) >= 0;
@@ -2439,18 +2448,7 @@
     const list = (typeof ROOM_SIZES !== 'undefined') ? ROOM_SIZES : [];
     const now = r ? (r.size | 0) : 0;
 
-    /* いま もって いる そざい */
-    const bar = document.createElement('div');
-    bar.className = 'mat-bar';
-    MATERIAL_ORDER.forEach(id => {
-      const mt = MATERIALS[id];
-      const chip = document.createElement('span');
-      chip.className = 'mat-chip';
-      chip.innerHTML = mt.icon + mt.name + ' <b>' + matCount(id) + '</b>';
-      bar.appendChild(chip);
-    });
-    box.appendChild(bar);
-
+    /* そざいの かずは buildMatBar() が がめんの うえの ほうに かきます */
     const lead = document.createElement('p');
     lead.className = 'size-lead';
     lead.textContent = 'いまの へや：' + list[now].name +
