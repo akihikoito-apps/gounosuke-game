@@ -70,6 +70,7 @@ const Game = {
     this.spawnQueue = [];
     this.webs = [];          // クモの巣
     this.tornadoAt = undefined;   // たつまきほうの タイマー
+    this.tornadoBlast = null;     // とんで いる さいちゅうの たつまき
     this.tornadoWarn = false;
     this.boss = null;
     this.cooldown = {};
@@ -338,25 +339,38 @@ const Game = {
       this.addEffect({ type: 'dmg', x: this.camera.x, y: this.groundWorldY() - 200,
                        text: 'たつまきほう！', color: '#b39ddb', life: 1.4, big: true });
     }
-    if (this.time < this.tornadoAt) return;
-    this.tornadoAt = this.time + t.interval;
-    this.tornadoWarn = false;
-    this.fireTornado(t.chance === undefined ? 0.67 : t.chance);
+    if (this.time >= this.tornadoAt) {
+      this.tornadoAt = this.time + t.interval;
+      this.tornadoWarn = false;
+      this.fireTornado(t.chance === undefined ? 0.67 : t.chance);
+    }
+    this.updateTornadoBlast(dt);
   },
 
+  /* ★てきの しろから おおきな たつまきを うちだす。
+       たつまきは ひだりから みぎへ はしり、とおりすぎた みかたを
+       じゅんばんに はんていします（ぜんいんが たいしょう・あたれば そくし）。*/
   fireTornado(chance) {
-    let hit = 0, alive = 0;
+    this.tornadoBlast = { x: -70, chance: chance, n: 0 };
+  },
+
+  updateTornadoBlast(dt) {
+    const b = this.tornadoBlast;
+    if (!b) return;
+    /* ばを 0.9びょうで わたりきる はやさ */
+    b.x += (CONFIG.fieldLength + 140) / 0.9 * dt;
+
     for (const u of this.units) {
-      if (u.side !== 'ally' || u.dead) continue;
-      alive++;
-      /* たつまきの え（あたっても はずれても 1たいずつ でる）*/
-      this.addEffect({ type: 'boom', x: u.x, y: this.groundWorldY() - 40,
-                       radius: 46, color: 'rgba(179,157,219,.85)', life: 0.55 });
+      if (u.side !== 'ally' || u.dead || u.tornadoMark === b) continue;
+      if (u.x > b.x) continue;                 // まだ たつまきが きて いない
+      u.tornadoMark = b;
       /* かさなって よめなく ならない ように、1たいごとに たかさを ずらす */
-      const ty = this.groundWorldY() - 110 - (alive % 4) * 26;
-      if (Math.random() < chance) {
+      const ty = this.groundWorldY() - 110 - (b.n++ % 4) * 26;
+      this.addEffect({ type: 'boom', x: u.x, y: this.groundWorldY() - 40,
+                       radius: 46, color: 'rgba(200,198,190,.8)', life: 0.5 });
+      if (Math.random() < b.chance) {
         /* ★あたったら そくし */
-        u.hp = 0; u.dead = true; hit++;
+        u.hp = 0; u.dead = true;
         this.addEffect({ type: 'dmg', x: u.x, y: ty,
                          text: 'とばされた！', color: '#ce93d8', life: 0.9 });
       } else {
@@ -364,14 +378,7 @@ const Game = {
                          text: 'たえた！', color: '#fff59d', life: 0.9 });
       }
     }
-    /* てきの しろ（ひだりはし）から みぎへ はしって いく たつまきの えんしゅつ */
-    for (let i = 0; i < 10; i++) {
-      this.addEffect({ type: 'boom', x: 60 + i * (CONFIG.fieldLength / 11),
-                       y: this.groundWorldY() - 60 - Math.random() * 60,
-                       radius: 40 + Math.random() * 34, color: 'rgba(149,117,205,.7)',
-                       life: 0.5 + Math.random() * 0.3, delay: i * 0.05 });
-    }
-    return { hit, alive };
+    if (b.x > CONFIG.fieldLength + 120) this.tornadoBlast = null;
   },
 
   /* =====================================================================
@@ -1187,6 +1194,18 @@ const Game = {
     const list = this.units.slice().sort((a, b) => a.lane - b.lane);
     for (const u of list) this.drawUnit(ctx, u);
 
+    // ★たつまきほうの たつまき（みかたの まえを とおって いく）
+    if (this.tornadoBlast) {
+      const bx = this.worldToScreenX(this.tornadoBlast.x);
+      if (bx > -260 && bx < V.w + 260) {
+        ctx.save();
+        ctx.translate(bx, gy);
+        ctx.scale(s, s);
+        drawStormTornado(ctx, { h: 250, t: this.time });
+        ctx.restore();
+      }
+    }
+
     // はどう（あき坊）
     for (const w of this.shocks) {
       ctx.save();
@@ -1380,6 +1399,18 @@ const Game = {
 
     const ratio = (who === 'enemy' ? this.enemyCastle.hp / this.enemyCastle.maxHp
                                    : this.playerCastle.hp / this.playerCastle.maxHp);
+
+    /* ★ステージ せんようの しろ（stage.castleArt）。
+         てきの しろは かがみに して あるので、いちど もとに もどして
+         「みぎむき」の えを そのまま かきます。 */
+    const artKey = (who === 'enemy' && this.stage) ? this.stage.castleArt : null;
+    const art = (artKey && typeof CASTLE_DRAWERS !== 'undefined') ? CASTLE_DRAWERS[artKey] : null;
+    if (art) {
+      ctx.scale(-1, 1);
+      art(ctx, { ratio: ratio, t: this.time });
+      ctx.restore();
+      return;
+    }
     const base = who === 'enemy' ? '#b0464b' : '#4a7fb5';
     const light = who === 'enemy' ? '#e57373' : '#90caf9';
 

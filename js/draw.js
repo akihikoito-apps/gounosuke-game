@@ -9567,6 +9567,128 @@ function drawTatsumarky(ctx, s) {
 }
 
 
+/* =====================================================================
+   竜巻編（だい3しょう）の え
+
+   ★たつまき ── ごうのすけくんが もって きた しゃしんの とおり、
+     うえが おおきく ふくらんで、したへ いくほど ほそく なる うずまき。
+     しろと はいいろの しまもようが かさなって みえる ように、
+     ひらたい わっかを したから うえへ つみあげて かいて います。
+     (0,0) は じめん。うえが マイナス。                                */
+function drawStormTornado(ctx, st) {
+  const h = (st && st.h) || 200;             // ぜんたいの たかさ
+  const t = (st && st.t) || 0;
+  const topR = h * 0.40;                     // いちばん うえの はんけい
+  const N = 11;
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+
+  /* じめんの うずまき（かぜが まわって いる あと）*/
+  ctx.strokeStyle = 'rgba(90,88,84,.55)';
+  ctx.lineWidth = h * 0.012;
+  for (let k = 0; k < 2; k++) {
+    const rr = h * (0.16 + k * 0.10);
+    ctx.beginPath();
+    ctx.ellipse(-rr * 0.35 + Math.sin(t * 3 + k) * h * 0.02, -h * 0.01 - k * h * 0.02,
+                rr, rr * 0.20, 0, 0.3, Math.PI * 1.75);
+    ctx.stroke();
+  }
+
+  /* したから うえへ わっかを つみあげる */
+  for (let i = 0; i < N; i++) {
+    const f  = i / (N - 1);                  // 0＝した 1＝うえ
+    const rx = h * 0.035 + (topR - h * 0.035) * Math.pow(f, 1.15);
+    const ry = rx * 0.34;
+    const y  = -h * (0.03 + Math.pow(f, 1.35) * 0.93);
+    const sw = Math.sin(t * 5 - i * 0.55) * rx * 0.16;   // うずの ゆれ
+    ctx.beginPath();
+    ctx.ellipse(sw, y, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fillStyle = (i % 2 === 0) ? '#efeeea' : '#8e8b84';
+    ctx.fill();
+    ctx.strokeStyle = '#35332f';
+    ctx.lineWidth = Math.max(1, h * 0.009);
+    ctx.stroke();
+  }
+
+  /* いちばん うえの おおきな うずの くち（ドーナツを 3じゅう）*/
+  const cy = -h * 0.97, cs = Math.sin(t * 5 - (N - 1) * 0.55) * topR * 0.16;
+  for (let k = 0; k < 3; k++) {
+    const rr = topR * (1 - k * 0.27);
+    ctx.beginPath();
+    ctx.ellipse(cs + topR * 0.10 * k, cy - topR * 0.05 * k, rr, rr * 0.34, 0, 0, Math.PI * 2);
+    ctx.fillStyle = (k % 2 === 0) ? '#efeeea' : '#8e8b84';
+    ctx.fill();
+    ctx.strokeStyle = '#35332f';
+    ctx.lineWidth = Math.max(1, h * 0.009);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* --- 竜巻編の てきの しろ「竜巻の とりで」---
+     ごうのすけくんの えの とおり。うえに めが 1つと くちばしの ついた
+     ほそながい あたま、したに「竜巻」と かいた ひろい だいと くろい もん。
+     ★この えは みぎむき（せんじょうの ほうを むいて いる）で かきます。 */
+function drawStormCastle(ctx, st) {
+  const ratio = (st && st.ratio !== undefined) ? st.ratio : 1;
+  const t = (st && st.t) || 0;
+  const GREY = '#c9c7bf', INK = '#1b1b1b';
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 5;
+
+  /* した の だい（「竜巻」と もん）*/
+  ctx.fillStyle = GREY;
+  roundRect(ctx, -114, -96, 108, 96, 12); ctx.fill(); ctx.stroke();
+
+  /* あたま（ほそながい とう）*/
+  roundRect(ctx, -99, -200, 74, 106, 14); ctx.fill(); ctx.stroke();
+
+  /* くちばし（せんじょうの ほうを むいて とがって いる）*/
+  ctx.beginPath();
+  ctx.moveTo(-25, -146);
+  ctx.lineTo(-4,  -134);
+  ctx.lineTo(-25, -122);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  /* め（しろめと くろめ。ときどき きょろきょろ する）*/
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(-52, -170, 16, 16, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INK;
+  const ex = -48 + Math.sin(t * 1.3) * 2;
+  ctx.beginPath(); ctx.ellipse(ex, -168, 7, 9, 0, 0, Math.PI * 2); ctx.fill();
+
+  /* 「竜巻」の もじ */
+  ctx.save();
+  ctx.fillStyle = INK;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '900 30px system-ui, "Hiragino Sans", sans-serif';
+  ctx.fillText('竜巻', -60, -72);
+  ctx.restore();
+
+  /* もん（くろい いりぐち）*/
+  ctx.fillStyle = INK;
+  ctx.beginPath(); ctx.rect(-80, -52, 40, 52); ctx.fill();
+
+  /* ひび（たいりょくが へると ふえる）*/
+  ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 3;
+  if (ratio < 0.7) {
+    ctx.beginPath(); ctx.moveTo(-90, -184); ctx.lineTo(-78, -162); ctx.lineTo(-88, -144); ctx.stroke();
+  }
+  if (ratio < 0.35) {
+    ctx.beginPath(); ctx.moveTo(-108, -78); ctx.lineTo(-94, -56); ctx.lineTo(-104, -34); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ステージごとの てきの しろ（stage.castleArt で えらぶ）*/
+const CASTLE_DRAWERS = {
+  storm: drawStormCastle,
+};
+
 const DRAWERS = {
   runrunwisp: drawRunrunwisp,
   houkigob: drawHoukigob,
