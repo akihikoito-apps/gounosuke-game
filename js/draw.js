@@ -9037,25 +9037,41 @@ function drawPuriking(ctx, s) {
   ctx.fillStyle = hg;
   ctx.beginPath(); ctx.arc(0, hy, hr, 0, Math.PI * 2); ctx.fill();
 
-  /* --- め（たてぼう 2ほん）--- */
-  ctx.strokeStyle = INK; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(-9, hy - 18); ctx.lineTo(-7, hy - 3); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo( 5, hy - 19); ctx.lineTo( 4, hy - 4); ctx.stroke();
+  /* --- ほっぺ（うっすら あかい。かわいく みえる おまじない）--- */
+  ctx.fillStyle = 'rgba(232,110,60,.22)';
+  ctx.beginPath(); ctx.ellipse(-20, hy + 9, 8.5, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse( 20, hy + 9, 8.5, 5.5, 0, 0, Math.PI * 2); ctx.fill();
 
-  /* --- はな（えの「ひ」のような かたち）--- */
-  ctx.lineWidth = 3;
+  /* --- め（えの とおり たてぼう。ただし ふとく、そとがわに やわらかく そらせて
+         まるい さきに する ことで、きつく みえない ように して います）--- */
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 4.4;
+  ctx.lineCap = 'round';
+  for (const d of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(d * 10.5, hy - 15);
+    ctx.quadraticCurveTo(d * 12.5, hy - 7, d * 10.5, hy + 1);
+    ctx.stroke();
+  }
+
+  /* --- はな（えの「ひ」の かたち。かどを まるめて やわらかく）--- */
+  ctx.lineWidth = 3.2;
   ctx.beginPath();
-  ctx.moveTo(-2, hy + 2);
-  ctx.lineTo(-1, hy + 16);
-  ctx.quadraticCurveTo(4, hy + 20, 7, hy + 12);
-  ctx.lineTo(9, hy + 17);
+  ctx.moveTo(-2.5, hy + 8);
+  ctx.quadraticCurveTo(-1.5, hy + 16, 1.5, hy + 17);
+  ctx.quadraticCurveTo(6, hy + 18, 6.5, hy + 12);
+  ctx.quadraticCurveTo(7.5, hy + 16, 9.5, hy + 18);
   ctx.stroke();
 
-  /* --- くち（みぎに ながく のびた ニヤリ）--- */
-  ctx.lineWidth = 3;
+  /* --- くち（みぎに ながく のびる にっこり）---
+       りょうはしが きゅっと うえを むく ように して、
+       ニヤリでは なく「にっこり」に みえる ように しました。 */
+  ctx.lineWidth = 3.2;
+  const gape = (a >= 0) ? 7 : 0;
   ctx.beginPath();
-  ctx.moveTo(-6, hy + 24);
-  ctx.quadraticCurveTo(14, hy + 34 + (a >= 0 ? 6 : 0), 34, hy + 20);
+  ctx.moveTo(-14, hy + 19);
+  ctx.quadraticCurveTo(-6, hy + 29 + gape, 4, hy + 28 + gape);
+  ctx.quadraticCurveTo(22, hy + 27 + gape, 36, hy + 11);   /* えの とおり あたまの そとまで のびる */
   ctx.stroke();
 
   /* --- こうげきの えんしゅつ（ゼリーを なげる まえの ひかり）--- */
