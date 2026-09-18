@@ -8941,6 +8941,134 @@ function drawPuripurikun(ctx, s) {
 }
 
 
+/* ぷり王プーリッチ ── ぷりおぷりねこの だい3けいたい。
+   ごうのすけくんの えの とおり：
+     ・オレンジの おおきな まるい あたま、とがった みみ 2つ
+     ・たてぼうの め 2つ、その したに「ひ」のような はな
+     ・みぎに ながく のびる ニヤリとした くち
+     ・くびには くびわ と しかくい ふだ
+     ・からだは たてながの まるい しかく
+     ・りょううでを おおきく ひろげ、さきは とがった つめ
+     ・あしは ギザギザ（Wのかたち）                             */
+function drawPuriking(ctx, s) {
+  const a = s.atk;
+  const step = Math.sin(s.t * 7) * (s.moving ? 1 : 0);
+  const bob  = Math.abs(step) * 1.6;
+  /* こうげきの ときは うでを ふりあげる */
+  const raise = (a >= 0) ? Math.sin(a * Math.PI) : 0;
+
+  const ORANGE = '#e08a2a';
+  const ODARK  = '#b96b17';
+  const INK    = '#1b1b1b';
+
+  ctx.save();
+  ctx.translate(0, -bob);
+
+  /* --- あし（ギザギザの W が 3つ）--- */
+  ctx.strokeStyle = INK; ctx.lineWidth = 3.4;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (let i = 0; i < 3; i++) {
+    const bx = -17 + i * 17 + step * (i - 1) * 1.2;
+    ctx.beginPath();
+    ctx.moveTo(bx - 6, -16);
+    ctx.lineTo(bx - 3, -1);
+    ctx.lineTo(bx,     -11);
+    ctx.lineTo(bx + 3, -1);
+    ctx.lineTo(bx + 6, -16);
+    ctx.stroke();
+  }
+
+  /* --- からだ（たてながの まるい しかく）--- */
+  const bg = ctx.createLinearGradient(-20, -60, 20, -14);
+  bg.addColorStop(0, '#eda344'); bg.addColorStop(1, ORANGE);
+  ctx.fillStyle = bg;
+  roundRect(ctx, -19, -62, 38, 50, 9); ctx.fill();
+
+  /* --- うで（りょうがわに おおきく ひろげる。さきは とがった つめ）--- */
+  ctx.strokeStyle = INK; ctx.lineWidth = 3.2;
+  for (const d of [-1, 1]) {
+    const sy = -56 - raise * 12;                 // かたの たかさ
+    const ex = d * (46 + raise * 6);             // てさきの よこ
+    const ey = -34 - raise * 22;                 // てさきの たかさ
+    ctx.beginPath();
+    ctx.moveTo(d * 17, -54);
+    ctx.quadraticCurveTo(d * 36, sy + 2, ex, ey);
+    ctx.stroke();
+    /* ★て：おおきく ひらいた つめ。えの とおり ゆびが 4ほん、
+         ねもとから さきに むかって ひろがる かたち。          */
+    ctx.lineWidth = 3.4;
+    for (let i = 0; i < 4; i++) {
+      const th = -0.78 + i * 0.52;
+      const len = (i === 1 || i === 2) ? 26 : 20;      // まんなかの ゆびが ながい
+      const tx = ex + d * Math.cos(th) * len;
+      const ty = ey + Math.sin(th) * len + 4;
+      ctx.beginPath();
+      ctx.moveTo(ex - d * 3, ey);
+      ctx.quadraticCurveTo(ex + d * Math.cos(th) * len * 0.6, ey + Math.sin(th) * len * 0.5, tx, ty);
+      ctx.stroke();
+    }
+    ctx.lineWidth = 3.2;
+  }
+
+  /* --- くびわ と ふだ --- */
+  ctx.strokeStyle = INK; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(-19, -60); ctx.quadraticCurveTo(0, -54, 19, -60);
+  ctx.stroke();
+  ctx.fillStyle = ORANGE;
+  roundRect(ctx, -5, -58, 11, 11, 2); ctx.fill();
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  roundRect(ctx, -5, -58, 11, 11, 2); ctx.stroke();
+
+  /* --- みみ（とがった さんかく。くろい ふちどり）--- */
+  const hy = -98, hr = 33;
+  ctx.fillStyle = ORANGE;
+  ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-30, hy - 12); ctx.lineTo(-27, hy - 44); ctx.lineTo(-7, hy - 28);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(30, hy - 12); ctx.lineTo(27, hy - 44); ctx.lineTo(7, hy - 28);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  /* --- あたま（おおきな まる）--- */
+  const hg = ctx.createRadialGradient(-10, hy - 12, 4, 0, hy, hr);
+  hg.addColorStop(0, '#f2ad4d'); hg.addColorStop(1, ORANGE);
+  ctx.fillStyle = hg;
+  ctx.beginPath(); ctx.arc(0, hy, hr, 0, Math.PI * 2); ctx.fill();
+
+  /* --- め（たてぼう 2ほん）--- */
+  ctx.strokeStyle = INK; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-9, hy - 18); ctx.lineTo(-7, hy - 3); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo( 5, hy - 19); ctx.lineTo( 4, hy - 4); ctx.stroke();
+
+  /* --- はな（えの「ひ」のような かたち）--- */
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(-2, hy + 2);
+  ctx.lineTo(-1, hy + 16);
+  ctx.quadraticCurveTo(4, hy + 20, 7, hy + 12);
+  ctx.lineTo(9, hy + 17);
+  ctx.stroke();
+
+  /* --- くち（みぎに ながく のびた ニヤリ）--- */
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(-6, hy + 24);
+  ctx.quadraticCurveTo(14, hy + 34 + (a >= 0 ? 6 : 0), 34, hy + 20);
+  ctx.stroke();
+
+  /* --- こうげきの えんしゅつ（ゼリーを なげる まえの ひかり）--- */
+  if (a >= 0) {
+    ctx.strokeStyle = 'rgba(255,214,120,' + (0.75 * (1 - a)).toFixed(2) + ')';
+    ctx.lineWidth = 4;
+    const rr = 16 + a * 34;
+    ctx.beginPath(); ctx.arc(52, -56, rr, -0.9, 0.9); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+
 const DRAWERS = {
   runrunwisp: drawRunrunwisp,
   houkigob: drawHoukigob,
@@ -8984,6 +9112,7 @@ const DRAWERS = {
   irongolem_e: drawIronGolem,
   purio: drawPurio,
   puripurio: drawPuripurio,
+  puriking: drawPuriking,
   tankun: drawTankun,
   tankundx: drawTankundx,
   supertankun: drawSupertankun,
