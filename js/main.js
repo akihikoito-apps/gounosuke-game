@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.20';
+  const GAME_VERSION = '6.21';
 
 
   /* =================================================
@@ -1546,12 +1546,31 @@
      その うえのほう（かお〜むね）が わくに ぴったり はいる ように します。
      しらべた けっかは おぼえて おく ので、おもく なりません。
      ============================================================ */
+  /* いちど かいて みて、かおが はいる「きりとりわく」を きめます。
+
+     ★v6.21 の なおし
+       まえは「えの たての 55%」を きりとって いました。でも キャラの
+       せの たかさは バラバラで、せの たかい こ（スティーブ・ゴーレム・
+       ドンドコ力士・あき坊 など）は 55%でも からだばかりに なって
+       しまい、かおが とても ちいさく なって いました。
+       そこで、
+         ・きりとる たかさは「えの 55%」と「62（かおが ちょうど はいる
+           おおきさ）」の ちいさい ほう
+         ・うえの はしは、うすい オーラでは なく ★しっかり ぬられた
+           ところ★（アルファ 180ごえ）から はかる
+         ・よこの まんなかは、きりとった ところの うえ 45%（＝かお）の
+           まんなかに あわせる
+         ・よこはばも、からだ ぜんぶでは なく ★きりとった ところだけ★
+           で はかる（ひろげた うでや しっぽに ひっぱられない）
+       に しました。                                                   */
+  const BUST_CUT_MAX = 52;    // かおが ちょうど はいる たかさ
+  const BUST_CUT_MIN = 28;
   const bustBoxCache = {};
   function bustBox(drawId) {
     if (bustBoxCache[drawId] !== undefined) return bustBoxCache[drawId];
     const fn = DRAWERS[drawId];
     if (!fn || typeof document === 'undefined') { bustBoxCache[drawId] = null; return null; }
-    const S = 240;
+    const S = 240, OY = S * 0.95, K = 0.75;
     let box = null;
     try {
       const off = document.createElement('canvas');
@@ -1559,27 +1578,45 @@
       const c = off.getContext('2d', { willReadFrequently: true });
       c.clearRect(0, 0, S, S);
       c.save();
-      c.translate(S / 2, S * 0.95);          // あしもとを したの ほうに
-      c.scale(0.75, 0.75);
+      c.translate(S / 2, OY);                // あしもとを したの ほうに
+      c.scale(K, K);
       fn(c, { t: 0.7, moving: false, atk: -1, hpRatio: 1, hpRate: 1, roll: 0.35 });
       c.restore();
       const d = c.getImageData(0, 0, S, S).data;
-      let x0 = S, y0 = S, x1 = -1, y1 = -1;
+      let softTop = S, solidTop = S, bot = -1;
       for (let y = 0; y < S; y++) {
         for (let x = 0; x < S; x++) {
-          if (d[(y * S + x) * 4 + 3] > 24) {
-            if (x < x0) x0 = x; if (x > x1) x1 = x;
-            if (y < y0) y0 = y; if (y > y1) y1 = y;
-          }
+          const a = d[(y * S + x) * 4 + 3];
+          if (a > 24)  { if (y < softTop) softTop = y; if (y > bot) bot = y; }
+          if (a > 180 && y < solidTop) solidTop = y;
         }
       }
-      if (x1 >= x0 && y1 >= y0) {
+      if (bot >= 0) {
+        const rowTop = (solidTop < S) ? solidTop : softTop;
+        const topA = (rowTop - OY) / K, botA = (bot - OY) / K;
+        const cutH = Math.max(BUST_CUT_MIN, Math.min((botA - topA) * 0.55, BUST_CUT_MAX));
+        const rowBot  = Math.min(S - 1, Math.round(OY + (topA + cutH) * K));
+        /* よこの まんなかは、かおの ぶぶんの ★ぬられた ピクセルの おもさ★
+           で きめます（はしの ほそい ゆみや つえに ひっぱられない ため）。*/
+        const headBot = rowTop + Math.max(4, Math.round((rowBot - rowTop) * 0.45));
+        let x0 = S, x1 = -1, sum = 0, cnt = 0;
+        for (let y = rowTop; y <= rowBot; y++) {
+          for (let x = 0; x < S; x++) {
+            if (d[(y * S + x) * 4 + 3] > 24) {
+              if (x < x0) x0 = x; if (x > x1) x1 = x;
+              if (y <= headBot) { sum += x; cnt++; }
+            }
+          }
+        }
+        if (x1 < x0) { x0 = 0; x1 = S - 1; }
+        const cxPx = cnt ? (sum / cnt) : ((x0 + x1) / 2);
         /* かいた ときの ざひょうに もどす */
         box = {
-          left:   (x0 - S / 2) / 0.75,
-          right:  (x1 - S / 2) / 0.75,
-          top:    (y0 - S * 0.95) / 0.75,
-          bottom: (y1 - S * 0.95) / 0.75,
+          left:  (x0 - S / 2) / K,
+          right: (x1 - S / 2) / K,
+          cx:    (cxPx - S / 2) / K,
+          top:   topA,
+          cutH:  cutH,
         };
       }
     } catch (e) { box = null; }
@@ -1604,12 +1641,11 @@
 
     ctx.save();
     if (box) {
-      /* えの たての 55% ぶん（うえから）を きりとって わくに あわせる */
+      /* かおが はいる ぶんだけ きりとって わくに あわせる */
       const bw = Math.max(10, box.right - box.left);
-      const bh = Math.max(10, box.bottom - box.top);
-      const cutH = bh * 0.55;
-      const sc = Math.min(w / (bw * 1.06), h / (cutH * 1.06));
-      const cx = (box.left + box.right) / 2;
+      const cutH = box.cutH;
+      const sc = Math.min(w / (bw * 1.06), h / (cutH * 1.10));
+      const cx = box.cx;
       const cy = box.top + cutH / 2;
       ctx.translate(w / 2 - cx * sc, h / 2 - cy * sc);
       ctx.scale(sc, sc);

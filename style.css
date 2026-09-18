@@ -335,7 +335,7 @@ html, body {
   background:linear-gradient(180deg,#fffde7,#ffe0b2);
   color:#4e2600; font-family:inherit; cursor:pointer; overflow:hidden;
 }
-.unit-btn canvas { width:100%; flex:1 1 auto; min-height:0; display:block; }
+.unit-btn canvas { width:100%; flex:1 1 0; min-height:0; display:block; }
 .unit-btn .u-name { font-size:calc(11px * var(--ui)); font-weight:bold; line-height:1.1; white-space:nowrap; }
 .unit-btn .u-cost { font-size:calc(12.5px * var(--ui)); font-weight:bold; color:#00695c; line-height:1.1; }
 .unit-btn .cd-mask {
@@ -475,7 +475,7 @@ html, body {
 }
 .pslot.filled { border-style:solid; border-color:#ffd54f; background:linear-gradient(180deg,#fffde7,#ffe0b2); color:#4e2600; }
 .pslot.sel { border-color:#4fc3f7; box-shadow:0 0 0 3px rgba(79,195,247,.6); }
-.pslot canvas { width:100%; flex:1 1 auto; min-height:0; display:block; }
+.pslot canvas { width:100%; flex:1 1 0; min-height:0; display:block; }
 .pslot .ps-no {
   position:absolute; top:2px; left:calc(5px * var(--ui));
   font-size:calc(10px * var(--ui)); font-weight:bold; opacity:.65;
@@ -1037,7 +1037,7 @@ body.dragging-slot #party-slots { touch-action:none; }
 .unit-btn.rar-SR { border-color:#ffb74d; background:linear-gradient(180deg,#fffdf3,#ffe6bf); }
 .unit-btn.rar-LR { border-color:#ba68c8; background:linear-gradient(180deg,#fdf6ff,#eddbf5); }
 /* えを おおきく みせる ぶん、なまえと コストは したに ぴったり */
-.unit-btn canvas { flex:1 1 auto; min-height:0; }
+.unit-btn canvas { flex:1 1 0; min-height:0; }
 
 
 /* ================= ごうのすけの へや ================= */
@@ -1107,7 +1107,7 @@ body.dragging-slot #party-slots { touch-action:none; }
   background:linear-gradient(180deg,#fffdf7,#efe4d6); color:#4e342e;
   font-family:inherit; cursor:pointer; overflow:hidden; padding-bottom:2px;
 }
-.room-item canvas { width:100%; flex:1 1 auto; min-height:0; display:block; }
+.room-item canvas { width:100%; flex:1 1 0; min-height:0; display:block; }
 .room-item .ri-name { font-size:calc(9.5px * var(--ui)); font-weight:bold; line-height:1.05;
                       white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:96%; }
 .room-item.on { border-color:#ff7043; background:linear-gradient(180deg,#fff3e0,#ffccbc); }
