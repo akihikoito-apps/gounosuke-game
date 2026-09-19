@@ -61,6 +61,9 @@
         <button class="home-btn b5" id="btn-home-movie">
           <span class="hb-label">ムービー</span><span class="hb-ico">🎬</span>
         </button>
+        <button class="home-btn b6" id="btn-home-attr">
+          <span class="hb-label">あいしょうひょう</span><span class="hb-ico">⚖️</span>
+        </button>
       </div>
 
       <div class="home-speech">
@@ -117,6 +120,55 @@
         <h2 class="arc-title">どの へんに いく？ 🗺️</h2>
       </div>
       <div class="arc-list" id="arc-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ ぞくせいの あいしょうひょう ============ -->
+  <section id="screen-attr" class="screen">
+    <div class="attr-wrap">
+      <div class="attr-top">
+        <button class="mini-btn" id="btn-attr-back">もどる</button>
+        <h2 class="attr-title">ぞくせいの あいしょう ⚖️</h2>
+      </div>
+
+      <div class="attr-body">
+        <div class="attr-legend">
+          <span class="al-arrow">➡</span>
+          <span>やじるしの さきに <b>つよい</b>。ダメージ <b class="al-up">2.5ばい</b>。<br>
+                ぎゃくむきは <b class="al-down">0.6ばい</b> に なって しまいます。</span>
+        </div>
+
+        <div class="attr-card">
+          <h3>① 2つの わ</h3>
+          <canvas class="attr-canvas" id="attr-rings"></canvas>
+          <p>あいしょうは <b>2つの わ</b>に わかれて います。わの なかで ぐるぐる まわって いて、
+             ちがう わの あいだには あいしょうが ありません。</p>
+        </div>
+
+        <div class="attr-card">
+          <h3>② メタル</h3>
+          <canvas class="attr-canvas" id="attr-metal"></canvas>
+          <p><b>メタルには とくいな あいてが いません。</b>
+             そのかわり ほのお・まじゅつし・パワーの 3つに ねらわれます。
+             メタルの てきが でたら、この 3つを だしましょう。<br>
+             （ただし <b>かみにだけは つよい</b>です。③を みてね）</p>
+        </div>
+
+        <div class="attr-card">
+          <h3>③ かみ（あき坊）</h3>
+          <canvas class="attr-canvas" id="attr-god"></canvas>
+          <p>かみは とくべつ。<b>ぜんぶの あいてに 1.2ばい</b>、<b>うける ダメージは 0.8ばい</b>。
+             ……ただし <b>メタルにだけは よわい</b>ので きを つけて。</p>
+        </div>
+
+        <div class="attr-card">
+          <h3>④ あいしょうの ない ぞくせい</h3>
+          <div class="attr-plain" id="attr-plain"></div>
+          <p><b>む（むぞくせい）</b>は ゆうりも ふりも なし。どこでも おなじ ちからで たたかえます。<br>
+             <b>ゆうれい</b>も あいしょうは ありませんが、そのかわり
+             きめられた こうげきを まるごと <b>むこうか</b>する ちからを もって います。</p>
+        </div>
+      </div>
     </div>
   </section>
 

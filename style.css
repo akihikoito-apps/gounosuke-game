@@ -151,19 +151,19 @@ html, body {
 }
 .home-topbar .mini-btn { margin-left:auto; background:rgba(13,48,80,.55); }
 
-/* ★ボタンが 5つに ふえた ので、すきまと よはくを すこし つめて
+/* ★ボタンが 6つに ふえた ので、すきまと よはくを つめて
    たなや ガチャが がめんの したに はみださない ように します */
-.home-menu { grid-column:1; grid-row:2; display:flex; flex-direction:column; gap:calc(8px * var(--ui)); justify-content:flex-start; min-height:0; }
+.home-menu { grid-column:1; grid-row:2; display:flex; flex-direction:column; gap:calc(6px * var(--ui)); justify-content:flex-start; min-height:0; }
 .home-btn {
   display:flex; align-items:center; gap:calc(10px * var(--ui));
-  padding:calc(10px * var(--ui)) calc(16px * var(--ui));
+  padding:calc(7px * var(--ui)) calc(14px * var(--ui));
   border:none; border-radius:calc(14px * var(--ui));
   font-family:inherit; color:#0d3050; cursor:pointer; text-align:left;
   box-shadow:0 calc(4px * var(--ui)) 0 rgba(0,0,0,.18);
 }
 .home-btn:active { transform:translateY(3px); box-shadow:none; }
-.home-btn .hb-label { flex:1; font-size:calc(16px * var(--ui)); font-weight:bold; }
-.home-btn .hb-ico { font-size:calc(20px * var(--ui)); }
+.home-btn .hb-label { flex:1; font-size:calc(15px * var(--ui)); font-weight:bold; white-space:nowrap; }
+.home-btn .hb-ico { font-size:calc(18px * var(--ui)); }
 .home-btn.b1 { background:linear-gradient(180deg,#7fb8dd,#5a9ecb); }
 .home-btn.b2 { background:linear-gradient(180deg,#a8d8ef,#86c5e6); }
 .home-btn.b3 { background:linear-gradient(180deg,#c9e6f5,#a9d6ee); }
@@ -1475,3 +1475,61 @@ body.dragging-slot #party-slots { touch-action:none; }
   color:#8a6a3a; font-size:calc(12px * var(--ui)); font-weight:bold;
 }
 .shop-next:empty{ margin:0; }
+
+/* ============ ぞくせいの あいしょうひょう ============ */
+.home-btn.b6 { background:linear-gradient(180deg,#ffe7c2,#ffd39b); }
+
+.attr-wrap{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg,#132b3f,#081420);
+  padding:calc(8px * var(--ui));
+  padding-top:calc(8px * var(--ui) + var(--safe-top));
+}
+.attr-top{ display:flex; align-items:center; gap:calc(10px * var(--ui)); flex:0 0 auto; }
+.attr-title{
+  margin:0; color:#fff; font-size:calc(19px * var(--ui)); letter-spacing:1px;
+  text-shadow:0 calc(2px * var(--ui)) 0 rgba(0,0,0,.45);
+}
+.attr-body{
+  flex:1 1 0; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  margin-top:calc(8px * var(--ui)); padding-right:calc(4px * var(--ui));
+  display:flex; flex-direction:column; gap:calc(10px * var(--ui));
+}
+.attr-legend{
+  display:flex; align-items:center; gap:calc(10px * var(--ui));
+  background:rgba(255,255,255,.10);
+  border:2px solid rgba(255,255,255,.22);
+  border-radius:calc(14px * var(--ui));
+  padding:calc(9px * var(--ui)) calc(12px * var(--ui));
+  color:#e6f1ff; font-size:calc(13px * var(--ui)); line-height:1.6;
+}
+.al-arrow{ font-size:calc(26px * var(--ui)); line-height:1; color:#ffd54f; }
+.al-up{ color:#ffd54f; }
+.al-down{ color:#90caf9; }
+
+.attr-card{
+  background:linear-gradient(180deg,#fff,#eef5fc);
+  border-radius:calc(16px * var(--ui));
+  padding:calc(10px * var(--ui));
+  box-shadow:0 calc(4px * var(--ui)) 0 rgba(0,0,0,.3);
+}
+.attr-card h3{
+  margin:0 0 calc(6px * var(--ui));
+  font-size:calc(16px * var(--ui)); color:#14375c;
+}
+.attr-card p{
+  margin:calc(8px * var(--ui)) 0 0;
+  font-size:calc(13px * var(--ui)); line-height:1.65; color:#2b3b52;
+}
+.attr-canvas{
+  width:100%; display:block; border-radius:calc(12px * var(--ui));
+  background:linear-gradient(180deg,#1b3350,#0e1e30);
+}
+.attr-plain{
+  display:flex; gap:calc(10px * var(--ui)); justify-content:center;
+  background:linear-gradient(180deg,#1b3350,#0e1e30);
+  border-radius:calc(12px * var(--ui));
+  padding:calc(12px * var(--ui));
+}
+.attr-plain canvas{ width:calc(96px * var(--ui)); height:calc(96px * var(--ui)); display:block; }

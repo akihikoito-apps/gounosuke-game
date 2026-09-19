@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.26';
+  const GAME_VERSION = '6.27';
 
 
   /* =================================================
@@ -4534,6 +4534,266 @@
   }
 
   /* =================================================
+     ぞくせいの あいしょうひょう（ホームの「あいしょうひょう」）
+
+     しくみは data.js の ATTR_BEATS / CONFIG.attrStrong などと
+     おなじ ないようを、え で みせて います。
+     ================================================= */
+  const ATTR_ICON = {
+    water: '💧', fire: '🔥', grass: '🌿',
+    magic: '🪄', power: '💪', beast: '🐾',
+    metal: '⚙️', god: '✨', ghost: '👻', none: '⬜',
+  };
+
+  /* ぞくせいの たま（まるの なかに アイコン、したに なまえ）*/
+  function attrNode(ctx, x, y, r, key, dir) {
+    const col = (typeof ATTR_COLOR !== 'undefined' && ATTR_COLOR[key]) || '#bdbdbd';
+    const name = (typeof ATTR_LABEL !== 'undefined' && ATTR_LABEL[key]) || key;
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    /* かげ */
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.beginPath(); ctx.ellipse(x, y + r * 0.96, r * 0.86, r * 0.20, 0, 0, Math.PI * 2); ctx.fill();
+    /* たま */
+    const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.35, r * 0.1, x, y, r);
+    g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, col); g.addColorStop(1, col);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.lineWidth = Math.max(2, r * 0.13); ctx.strokeStyle = '#ffffff'; ctx.stroke();
+    ctx.lineWidth = Math.max(1.5, r * 0.06); ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.stroke();
+    /* アイコン */
+    ctx.font = (r * 0.95) + 'px system-ui, "Apple Color Emoji", sans-serif';
+    ctx.fillText(ATTR_ICON[key] || '', x, y + r * 0.04);
+    /* なまえ（たまの そとがわ。dir を わたすと その むきに おきます）
+       ★もじの はばを はかって おいて、たまに かぶらない ところに おきます */
+    const fs = Math.max(11, r * 0.54);
+    const dx = (dir && dir.x) || 0, dy = (dir && dir.y !== undefined) ? dir.y : 1;
+    ctx.font = '900 ' + fs + 'px system-ui, "Hiragino Sans", sans-serif';
+    const tw = ctx.measureText(name).width;
+    const d = r * 1.20 + Math.abs(dx) * (tw / 2) + Math.abs(dy) * (fs * 0.70) + fs * 0.20;
+    const lx = x + dx * d, ly = y + dy * d;
+    ctx.lineWidth = fs * 0.42; ctx.strokeStyle = '#0b1a28'; ctx.lineJoin = 'round';
+    ctx.strokeText(name, lx, ly);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(name, lx, ly);
+    ctx.restore();
+  }
+
+  /* 「つよい」むきの やじるし（すこし そとに ふくらむ）*/
+  function attrArrow(ctx, x1, y1, x2, y2, r, color, bow) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const L = Math.hypot(dx, dy) || 1;
+    const ux = dx / L, uy = dy / L;
+    const gap1 = r * 1.16, gap2 = r * 1.34;
+    const sx = x1 + ux * gap1, sy = y1 + uy * gap1;
+    const ex = x2 - ux * gap2, ey = y2 - uy * gap2;
+    const b = (bow === undefined) ? 0.14 : bow;
+    const cx = (sx + ex) / 2 - uy * L * b, cy = (sy + ey) / 2 + ux * L * b;
+    const w = Math.max(4, r * 0.24);
+    ctx.save();
+    ctx.strokeStyle = color; ctx.fillStyle = color;
+    ctx.lineWidth = w; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(sx, sy); ctx.quadraticCurveTo(cx, cy, ex, ey);
+    ctx.stroke();
+    /* やじり（さいごの むきに あわせる）*/
+    const hx = ex - cx, hy = ey - cy, HL = Math.hypot(hx, hy) || 1;
+    const hu = hx / HL, hv = hy / HL;
+    const hs = w * 2.1;
+    ctx.beginPath();
+    ctx.moveTo(ex + hu * hs * 0.9, ey + hv * hs * 0.9);
+    ctx.lineTo(ex - hu * hs * 0.4 - hv * hs * 0.8, ey - hv * hs * 0.4 + hu * hs * 0.8);
+    ctx.lineTo(ex - hu * hs * 0.4 + hv * hs * 0.8, ey - hv * hs * 0.4 - hu * hs * 0.8);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  /* まるい みだし（わの なまえ）*/
+  function attrRingTitle(ctx, x, y, text, size) {
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '900 ' + size + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.lineWidth = size * 0.36; ctx.strokeStyle = '#0b1a28'; ctx.lineJoin = 'round';
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = '#ffe082';
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  /* 3つの ぞくせいを わに ならべて、じゅんばんに やじるしを ひく */
+  /* 1つの わを「わく（x0,y0,はば,たかさ）」の なかに おさめて かきます。
+     ・うえに わの なまえ
+     ・まんなかに さんかくに ならべた 3つの たま
+     ・なまえは たまの そとがわ（まんなかから とおい ほう）          */
+  function attrRing(ctx, x0, y0, cw, ch, keys, color, title) {
+    /* よこに ならべた とき、となりの わの なまえと ぶつからない ように
+       よこはばは すこし ひかえめに つかいます */
+    const c = Math.min(cw * 0.84, ch);
+    const r = c * 0.105, rad = c * 0.24;
+    const cx = x0 + cw / 2, cy = y0 + ch * 0.63;
+    attrRingTitle(ctx, cx, y0 + ch * 0.09, title, Math.max(12, c * 0.080));
+    const pts = keys.map((k, i) => {
+      const a = -Math.PI / 2 + (i / keys.length) * Math.PI * 2;
+      return { x: cx + Math.cos(a) * rad, y: cy + Math.sin(a) * rad, key: k,
+               dir: { x: Math.cos(a), y: Math.sin(a) } };
+    });
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length];
+      attrArrow(ctx, a.x, a.y, b.x, b.y, r, color);
+    }
+    pts.forEach(p => attrNode(ctx, p.x, p.y, r, p.key, p.dir));
+  }
+
+  /* --- ① 2つの わ --- */
+  function drawAttrRings(ctx, W, H) {
+    const wide = (W / H) > 1.3;
+    if (wide) {
+      attrRing(ctx, 0,     0, W / 2, H, ['water', 'fire', 'grass'], '#4fc3f7', 'しぜんの わ');
+      attrRing(ctx, W / 2, 0, W / 2, H, ['magic', 'power', 'beast'], '#ffb74d', 'ちからの わ');
+    } else {
+      attrRing(ctx, 0, 0,     W, H / 2, ['water', 'fire', 'grass'], '#4fc3f7', 'しぜんの わ');
+      attrRing(ctx, 0, H / 2, W, H / 2, ['magic', 'power', 'beast'], '#ffb74d', 'ちからの わ');
+    }
+    /* わの あいだには あいしょうが ない しるし */
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,.26)';
+    ctx.lineWidth = Math.max(2, Math.min(W, H) * 0.010);
+    ctx.setLineDash([Math.min(W, H) * 0.045, Math.min(W, H) * 0.04]);
+    ctx.beginPath();
+    if (wide) { ctx.moveTo(W * 0.5, H * 0.08); ctx.lineTo(W * 0.5, H * 0.92); }
+    else      { ctx.moveTo(W * 0.06, H * 0.5); ctx.lineTo(W * 0.94, H * 0.5); }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ちいさな ふだ（「2.5ばい」など）*/
+  function attrChip(ctx, x, y, text, color, size) {
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '900 ' + size + 'px system-ui, "Hiragino Sans", sans-serif';
+    const w = ctx.measureText(text).width + size * 0.9, h = size * 1.6;
+    roundRectPath(ctx, x - w / 2, y - h / 2, w, h, h * 0.45);
+    ctx.fillStyle = '#0b1a28'; ctx.fill();
+    ctx.lineWidth = Math.max(1.5, size * 0.12); ctx.strokeStyle = color; ctx.stroke();
+    ctx.fillStyle = color; ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  /* --- ② メタル --- */
+  function drawAttrMetal(ctx, W, H) {
+    const u = Math.min(W, H);
+    const r = u * 0.105;
+    const mx = W * 0.76, my = H * 0.46;
+    const from = ['fire', 'magic', 'power'];
+    from.forEach((k, i) => {
+      const y = H * (0.18 + i * 0.30);
+      attrArrow(ctx, W * 0.34, y, mx, my, r, '#ff8a65', 0.04);
+    });
+    from.forEach((k, i) => {
+      const y = H * (0.18 + i * 0.30);
+      attrNode(ctx, W * 0.34, y, r, k, { x: -1, y: 0 });
+    });
+    attrNode(ctx, mx, my, u * 0.125, 'metal', { x: 0, y: 1 });
+    attrChip(ctx, W * 0.55, H * 0.46, '2.5ばい', '#ffab91', Math.max(11, u * 0.062));
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const fs = Math.max(11, u * 0.072);
+    ctx.font = '900 ' + fs + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.lineWidth = fs * 0.40; ctx.strokeStyle = '#0b1a28'; ctx.lineJoin = 'round';
+    ctx.strokeText('とくいな あいて なし', mx, H * 0.90);
+    ctx.fillStyle = '#b0bec5';
+    ctx.fillText('とくいな あいて なし', mx, H * 0.90);
+    ctx.restore();
+  }
+
+  /* --- ③ かみ --- */
+  function drawAttrGod(ctx, W, H) {
+    const u = Math.min(W, H);
+    const r = u * 0.125;
+    const gx = W * 0.30, gy = H * 0.52;
+    /* ひかり */
+    ctx.save();
+    const gl = ctx.createRadialGradient(gx, gy, r * 0.3, gx, gy, r * 2.4);
+    gl.addColorStop(0, 'rgba(255,224,130,.40)');
+    gl.addColorStop(1, 'rgba(255,224,130,0)');
+    ctx.fillStyle = gl;
+    ctx.beginPath(); ctx.arc(gx, gy, r * 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    const mx = W * 0.76, my = H * 0.52;
+    /* メタル → かみ は つよい（うえがわ）／ かみ → メタル は よわい（したがわ）*/
+    attrArrow(ctx, mx, my, gx, gy, r, '#ff8a65', 0.22);
+    attrArrow(ctx, gx, gy, mx, my, r, '#78909c', 0.22);
+    attrNode(ctx, gx, gy, r, 'god',   { x: 0, y: 1 });
+    attrNode(ctx, mx, my, r * 0.92, 'metal', { x: 0, y: 1 });
+    const cs = Math.max(10, u * 0.058);
+    attrChip(ctx, (gx + mx) / 2, my - u * 0.20, '2.5ばい', '#ffab91', cs);
+    attrChip(ctx, (gx + mx) / 2, my + u * 0.20, '0.6ばい', '#90a4ae', cs);
+
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const fs = Math.max(10, u * 0.070);
+    ctx.font = '900 ' + fs + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.lineWidth = fs * 0.40; ctx.strokeStyle = '#0b1a28'; ctx.lineJoin = 'round';
+    [['ぜんぶの あいてに 1.2ばい', '#ffe082', H * 0.11],
+     ['うける ダメージは 0.8ばい', '#a5d6a7', H * 0.22]].forEach(([t, c, y]) => {
+      ctx.strokeText(t, W * 0.5, y);
+      ctx.fillStyle = c; ctx.fillText(t, W * 0.5, y);
+    });
+    ctx.restore();
+  }
+
+  /* あいしょうの ない ぞくせい（む・ゆうれい）*/
+  function drawAttrPlain() {
+    const box = $('#attr-plain');
+    if (!box) return;
+    box.innerHTML = '';
+    ['none', 'ghost'].forEach(k => {
+      const cv = document.createElement('canvas');
+      box.appendChild(cv);
+      const w = cv.clientWidth, h = cv.clientHeight;
+      if (w < 2 || h < 2) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+      const ctx = cv.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      attrNode(ctx, w / 2, h * 0.40, Math.min(w, h) * 0.30, k);
+    });
+  }
+
+  /* キャンバス 1まいを かく（よこはばに あわせて たかさを きめる）*/
+  function paintAttrCanvas(id, fn, ratio) {
+    const cv = $(id);
+    if (!cv) return;
+    const w = cv.clientWidth;
+    if (w < 2) { requestAnimationFrame(() => paintAttrCanvas(id, fn, ratio)); return; }
+    /* よこに ひろい ときは ひくく、たてながの ときは たかく します */
+    const rt = (typeof ratio === 'function') ? ratio(w) : ratio;
+    const h = Math.max(200, Math.min(w * rt, window.innerHeight * 0.78));
+    cv.style.height = h + 'px';
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    fn(ctx, w, h);
+  }
+
+  function drawAttrAll() {
+    paintAttrCanvas('#attr-rings', drawAttrRings, w => (w < 520 ? 1.45 : 0.52));
+    paintAttrCanvas('#attr-metal', drawAttrMetal, w => (w < 520 ? 0.95 : 0.48));
+    paintAttrCanvas('#attr-god',   drawAttrGod,   w => (w < 520 ? 0.90 : 0.44));
+    drawAttrPlain();
+  }
+
+  function openAttr() {
+    show('screen-attr');
+    const body = $('.attr-body');
+    if (body) body.scrollTop = 0;
+    requestAnimationFrame(() => { drawAttrAll(); requestAnimationFrame(drawAttrAll); });
+  }
+
+  /* =================================================
      ムービー えらび（ホームの「ムービー」ボタン）
      ================================================= */
   /* いちど ながれた ムービーは、ここから いつでも みられます。*/
@@ -4871,6 +5131,8 @@
     /* ずかん */
     $('#btn-home-dex').addEventListener('click', () => openDex({ back: 'home' }));
     $('#btn-home-movie').addEventListener('click', openMovies);
+    $('#btn-home-attr').addEventListener('click', openAttr);
+    $('#btn-attr-back').addEventListener('click', openHome);
     $('#btn-movie-back').addEventListener('click', openHome);
     $('#btn-shop-back').addEventListener('click', () => { show('screen-chapter'); redrawMap(); });
     $('#btn-shop-talk').addEventListener('click', nekosTalk);
