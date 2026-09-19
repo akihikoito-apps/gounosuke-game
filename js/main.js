@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.31';
+  const GAME_VERSION = '6.32';
 
 
   /* =================================================
@@ -4555,18 +4555,47 @@
     if (!s.mini) s.mini = { at: 0 };
     return s.mini;
   }
-  function miniLeftMs() {
+  /* ★ごほうびの タイマーは ゲームごとに べつべつ。
+       むかしの セーブは s.mini.at だけ もって いる ので、
+       1つめの シューティングは そのまま at を つかいます。      */
+  const MINI_AT = { bugshoot: 'at', foodcatch: 'catchAt' };
+  function miniAtKey(key) { return MINI_AT[key] || 'at'; }
+  function miniLeftMs(key) {
     const m = miniState();
     if (!m) return 0;
-    return Math.max(0, m.at + MINI.dayMs - Date.now());
+    return Math.max(0, (m[miniAtKey(key)] || 0) + MINI.dayMs - Date.now());
   }
-  function miniRewardReady() { return miniLeftMs() <= 0; }
-  function miniLeftText() {
-    const ms = miniLeftMs();
+  function miniRewardReady(key) { return miniLeftMs(key) <= 0; }
+  function miniMarkGot(key) {
+    const m = miniState();
+    if (m) m[miniAtKey(key)] = Date.now();
+  }
+  function miniLeftText(key) {
+    const ms = miniLeftMs(key);
     const h = Math.floor(ms / 3600000), mi = Math.floor((ms % 3600000) / 60000);
     if (h > 0) return 'あと ' + h + 'じかん ' + mi + 'ふん';
     if (mi > 0) return 'あと ' + mi + 'ふん';
     return 'もうすぐ';
+  }
+  /* ごほうびの そざいを ランダムに n こ くばって、なにが でたか かえします */
+  function miniGiveMats(n, key) {
+    const count = {};
+    for (let i = 0; i < n; i++) {
+      const id = MATERIAL_ORDER[Math.floor(Math.random() * MATERIAL_ORDER.length)];
+      addMat(id, 1); count[id] = (count[id] || 0) + 1;
+    }
+    miniMarkGot(key);
+    storeSave();
+    return count;
+  }
+  function miniShowGot(box, count) {
+    if (!box) return;
+    box.innerHTML = '';
+    MATERIAL_ORDER.filter(id => count[id]).forEach(id => {
+      const el = document.createElement('span');
+      el.textContent = MATERIALS[id].icon + MATERIALS[id].name + ' ×' + count[id];
+      box.appendChild(el);
+    });
   }
 
   const MINIGAMES = [
@@ -4574,15 +4603,18 @@
       desc: 'えらんだ キャラで、そらから せめて くる むしを うちおとそう！　3かい ダメージを うける まえに ぜんぶ たおせば かち。',
       when: '「虫に支配された町」を ぜんぶ クリアすると あそべます',
       open: () => chapterAllCleared(15),
-      go: () => openShootPick() },
+      go: () => openCharPick(startShoot) },
+    { key: 'foodcatch', icon: '🍎', name: 'たべもの あつめ',
+      desc: 'そらから おちて くる たべもの 30こを ひろおう！　がれきに あたると すこし うごけなく なります。ぜんぶで そざい 5こ、70%（21こ）でも 3こ もらえます。',
+      when: '「秩序が失われた村」を ぜんぶ クリアすると あそべます',
+      open: () => chapterAllCleared(16),
+      go: () => openCharPick(startCatch) },
   ];
 
   function openMinigames() {
     const note = $('#minigame-note');
     if (note) {
-      note.textContent = miniRewardReady()
-        ? 'かつと そざいが 5こ もらえます（ごほうびは 1日に 1かいまで）。'
-        : 'きょうの ごほうびは もらいました（つぎは ' + miniLeftText() + '）。ゲームは なんかいでも あそべます。';
+      note.textContent = 'ごほうびの そざいは ★ゲームごとに 1日 1かいまで★。ゲームじたいは なんかいでも あそべます。';
     }
     const box = $('#minigame-list');
     if (box) {
@@ -4591,11 +4623,15 @@
         const ok = g.open();
         const el = document.createElement('button');
         el.className = 'mini-card' + (ok ? '' : ' locked');
+        let desc = ok ? g.desc : g.when;
+        if (ok && !miniRewardReady(g.key)) {
+          desc += '<br>（きょうの ごほうびは もらいました。つぎは ' + miniLeftText(g.key) + '）';
+        }
         el.innerHTML =
           '<span class="mc-ico">' + (ok ? g.icon : '🔒') + '</span>' +
           '<span class="mc-body">' +
             '<span class="mc-name">' + (ok ? g.name : '？？？') + '</span>' +
-            '<span class="mc-desc">' + (ok ? g.desc : g.when) + '</span>' +
+            '<span class="mc-desc">' + desc + '</span>' +
           '</span>' +
           '<span class="mc-go">' + (ok ? '▶ あそぶ' : '🔒') + '</span>';
         if (ok) el.addEventListener('click', g.go);
@@ -4607,8 +4643,10 @@
     show('screen-minigame');
   }
 
-  /* --- キャラえらび（もっている こ ぜんぶ）--- */
-  function openShootPick() {
+  /* --- キャラえらび（もっている こ ぜんぶ）---
+       ミニゲームは どれも おなじ がめんを つかいます。
+       えらんだ あとに なにを するかを onPick で わたします。      */
+  function openCharPick(onPick) {
     const s = slot();
     const box = $('#shoot-pick');
     if (box) {
@@ -4619,7 +4657,7 @@
         const el = document.createElement('button');
         el.className = 'pick-item';
         el.innerHTML = '<canvas></canvas><span>' + (shownDef(id) || UNITS[id]).shortName + '</span>';
-        el.addEventListener('click', () => startShoot(id));
+        el.addEventListener('click', () => onPick(id));
         box.appendChild(el);
         paintCharBust(el.querySelector('canvas'), id);
       });
@@ -4892,26 +4930,12 @@
     let msg;
     if (!win) {
       msg = 'むしたちに やられて しまった。もういちど ちょうせん しよう！';
-    } else if (miniRewardReady()) {
+    } else if (miniRewardReady('bugshoot')) {
       /* ★ごほうび：そざい 5こ（1日に 1かいまで）*/
-      const m = miniState();
-      const count = {};
-      for (let i = 0; i < MINI.give; i++) {
-        const id = MATERIAL_ORDER[Math.floor(Math.random() * MATERIAL_ORDER.length)];
-        addMat(id, 1); count[id] = (count[id] || 0) + 1;
-      }
-      if (m) m.at = Date.now();
-      storeSave();
+      miniShowGot(got, miniGiveMats(MINI.give, 'bugshoot'));
       msg = 'むしを ぜんぶ やっつけた！　そざい 5こパック を てに いれた！';
-      if (got) {
-        MATERIAL_ORDER.filter(id => count[id]).forEach(id => {
-          const el = document.createElement('span');
-          el.textContent = MATERIALS[id].icon + MATERIALS[id].name + ' ×' + count[id];
-          got.appendChild(el);
-        });
-      }
     } else {
-      msg = 'むしを ぜんぶ やっつけた！　きょうの ごほうびは もう もらって いるので、つぎは ' + miniLeftText() + ' です。';
+      msg = 'むしを ぜんぶ やっつけた！　きょうの ごほうびは もう もらって いるので、つぎは ' + miniLeftText('bugshoot') + ' です。';
     }
     const tx = $('#shoot-over-text');
     if (tx) tx.textContent = msg;
@@ -5059,6 +5083,409 @@
   function quitShoot() {
     SG = null;
     if (shootRaf) { cancelAnimationFrame(shootRaf); shootRaf = null; }
+    openMinigames();
+  }
+
+  /* =================================================
+     ミニゲーム その2「たべもの あつめ」
+
+     ・だい16しょう「秩序が失われた村」を ぜんぶ クリアすると あそべます。
+     ・ゆびで よこに うごいて、そらから おちて くる たべものを ひろいます。
+     ・たべものは ★ぜんぶで 30こ★ しか おちて きません。
+     ・がれきに あたると すこしの あいだ うごけなく なります（やられは しません）。
+     ・30こ ぜんぶ ひろうと そざい 5こ、70%（21こ）いじょうでも そざい 3こ。
+       ごほうびは 1日に 1かいまで（シューティングとは べつの タイマー）。
+     ・おちる はやさは たべものも がれきも 1つずつ バラバラです。
+     ================================================= */
+  const CATCH = {
+    foods: 30,                 // ★おちて くる たべものの かず
+    pass: 0.7,                 // ごうかくの わりあい（70%）
+    giveAll: 5, givePass: 3,   // ぜんぶ ひろった とき／ごうかくの とき
+    stun: 1.1,                 // がれきに あたって うごけない びょうすう
+    foodGap: [0.55, 1.15],     // たべものが おちて くる かんかく（びょう）
+    rockGap: [0.75, 1.55],     // がれきが おちて くる かんかく（びょう）
+    foodV:   [0.22, 0.46],     // おちる はやさ（がめんの たかさ ÷ びょう）
+    rockV:   [0.26, 0.64],
+    follow: 13,                // ゆびを おいかける はやさ
+  };
+
+  /* たべものの しゅるい（え は したの drawCatchFood で かいて います）*/
+  const CATCH_FOODS = ['apple', 'pine', 'banana', 'onigiri', 'berry', 'melon'];
+
+  let CG = null;              // ゲームの じょうたい
+  let catchRaf = null, catchLast = 0;
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  function startCatch(charId) {
+    CG = {
+      char: charId,
+      px: 0.5, target: 0.5,
+      t: 0, stun: 0, hitFlash: 0,
+      foods: [], rocks: [], pops: [],
+      spawned: 0, caught: 0, lost: 0,
+      foodT: rnd(0.3, 0.7), rockT: rnd(0.9, 1.6),
+      over: null, W: 0, H: 0,
+    };
+    const ov = $('#catch-over');
+    if (ov) ov.classList.add('hidden');
+    refreshCatchHud();
+    show('screen-catch');
+    setupCatchDrag();
+    if (catchRaf) cancelAnimationFrame(catchRaf);
+    catchLast = 0;
+    catchRaf = requestAnimationFrame(catchLoop);
+  }
+
+  function refreshCatchHud() {
+    const sc = $('#catch-score');
+    if (sc) sc.textContent = '🍎 ひろった ' + (CG ? CG.caught : 0) + ' ／ ' + CATCH.foods;
+    const st = $('#catch-state');
+    if (st) {
+      const stunned = CG && CG.stun > 0;
+      st.textContent = stunned ? '😵 ふらふら…' : '🧺 ひろって！';
+      st.classList.toggle('catch-stun', !!stunned);
+    }
+  }
+
+  function setupCatchDrag() {
+    const c = $('#catch-canvas');
+    if (!c || c.dataset.bound) return;
+    c.dataset.bound = '1';
+    const move = (clientX) => {
+      if (!CG) return;
+      const r = c.getBoundingClientRect();
+      CG.target = Math.max(0.06, Math.min(0.94, (clientX - r.left) / r.width));
+    };
+    c.addEventListener('pointerdown', e => { move(e.clientX); c.setPointerCapture(e.pointerId); });
+    c.addEventListener('pointermove', e => move(e.clientX));
+    c.addEventListener('touchmove', e => { if (e.touches[0]) { move(e.touches[0].clientX); e.preventDefault(); } },
+                       { passive: false });
+  }
+
+  function catchLoop(now) {
+    if (!CG || !$('#screen-catch').classList.contains('active')) { catchRaf = null; return; }
+    catchRaf = requestAnimationFrame(catchLoop);
+    const dt = catchLast ? Math.min(0.05, (now - catchLast) / 1000) : 0;
+    catchLast = now;
+    if (!CG.over) updateCatch(dt);
+    renderCatch();
+  }
+
+  function updateCatch(dt) {
+    const W = CG.W || 360, H = CG.H || 480;
+    CG.t += dt;
+    if (CG.hitFlash > 0) CG.hitFlash -= dt;
+
+    /* ★がれきに あたって いる あいだは ゆびに ついて いかない */
+    if (CG.stun > 0) {
+      CG.stun -= dt;
+      if (CG.stun <= 0) { CG.stun = 0; refreshCatchHud(); }
+    } else {
+      CG.px += (CG.target - CG.px) * Math.min(1, dt * CATCH.follow);
+    }
+    const pxr = CG.px * W, pyr = H - H * 0.13;
+
+    /* --- たべものを だす（ぜんぶで CATCH.foods こ だけ）--- */
+    if (CG.spawned < CATCH.foods) {
+      CG.foodT -= dt;
+      if (CG.foodT <= 0) {
+        CG.foodT = rnd(CATCH.foodGap[0], CATCH.foodGap[1]);
+        CG.spawned++;
+        CG.foods.push({
+          kind: CATCH_FOODS[Math.floor(Math.random() * CATCH_FOODS.length)],
+          x: rnd(0.10, 0.90) * W, y: -H * 0.06,
+          v: rnd(CATCH.foodV[0], CATCH.foodV[1]) * H,
+          spin: rnd(-1.6, 1.6), rot: rnd(0, 6.28),
+        });
+      }
+    }
+    /* --- がれきを だす（こちらは かずの せいげん なし）--- */
+    if (CG.spawned < CATCH.foods || CG.foods.length > 0) {
+      CG.rockT -= dt;
+      if (CG.rockT <= 0) {
+        CG.rockT = rnd(CATCH.rockGap[0], CATCH.rockGap[1]);
+        CG.rocks.push({
+          seed: Math.floor(Math.random() * 1000),
+          x: rnd(0.08, 0.92) * W, y: -H * 0.07,
+          v: rnd(CATCH.rockV[0], CATCH.rockV[1]) * H,
+          spin: rnd(-2.4, 2.4), rot: rnd(0, 6.28),
+          big: Math.random() < 0.35,
+        });
+      }
+    }
+
+    /* --- あたりはんてい（キャラの からだの あたり）--- */
+    const halfW = H * 0.075, top = pyr - H * 0.145, bottom = pyr + H * 0.015;
+    const inBody = (o) => (Math.abs(o.x - pxr) < halfW && o.y > top && o.y < bottom);
+
+    for (let i = CG.foods.length - 1; i >= 0; i--) {
+      const f = CG.foods[i];
+      f.y += f.v * dt; f.rot += f.spin * dt;
+      if (inBody(f)) {
+        CG.foods.splice(i, 1); CG.caught++;
+        CG.pops.push({ x: f.x, y: f.y, t: 0, text: '＋1', color: '#ffeb3b' });
+        refreshCatchHud();
+      } else if (f.y > H + H * 0.08) {
+        CG.foods.splice(i, 1); CG.lost++;
+      }
+    }
+    for (let i = CG.rocks.length - 1; i >= 0; i--) {
+      const r = CG.rocks[i];
+      r.y += r.v * dt; r.rot += r.spin * dt;
+      /* うごけない あいだは かさなっても なんども あたらない */
+      if (CG.stun <= 0 && inBody(r)) {
+        CG.rocks.splice(i, 1);
+        CG.stun = CATCH.stun; CG.hitFlash = 0.3;
+        CG.pops.push({ x: r.x, y: r.y, t: 0, text: 'いたっ！', color: '#ff8a65' });
+        refreshCatchHud();
+      } else if (r.y > H + H * 0.08) {
+        CG.rocks.splice(i, 1);
+      }
+    }
+    for (let i = CG.pops.length - 1; i >= 0; i--) {
+      CG.pops[i].t += dt;
+      if (CG.pops[i].t > 0.8) CG.pops.splice(i, 1);
+    }
+
+    /* --- おわり：30こ ぜんぶ でて、がめんに 1つも のこって いない --- */
+    if (CG.spawned >= CATCH.foods && CG.foods.length === 0) endCatch();
+  }
+
+  function endCatch() {
+    const got = CG.caught, need = Math.ceil(CATCH.foods * CATCH.pass);
+    const perfect = (got >= CATCH.foods);
+    const pass = (got >= need);
+    CG.over = pass ? 'win' : 'lose';
+
+    const t = $('#catch-over-title');
+    if (t) {
+      t.textContent = perfect ? 'パーフェクト！' : (pass ? 'ごうかく！' : 'ざんねん…');
+      t.className = 'so-title ' + (pass ? 'win' : 'lose');
+    }
+    const box = $('#catch-got');
+    if (box) box.innerHTML = '';
+
+    const head = 'たべものを ' + got + ' ／ ' + CATCH.foods + ' こ ひろった！　';
+    let msg;
+    if (!pass) {
+      msg = head + need + 'こ（70%）ひろえたら ごうかく です。もういちど ちょうせん しよう！';
+    } else if (miniRewardReady('foodcatch')) {
+      const n = perfect ? CATCH.giveAll : CATCH.givePass;
+      miniShowGot(box, miniGiveMats(n, 'foodcatch'));
+      msg = head + (perfect ? 'ぜんぶ ひろえた ので' : 'ごうかく なので') + ' そざい ' + n + 'こ を てに いれた！';
+    } else {
+      msg = head + 'きょうの ごほうびは もう もらって いるので、つぎは ' + miniLeftText('foodcatch') + ' です。';
+    }
+    const tx = $('#catch-over-text');
+    if (tx) tx.textContent = msg;
+    const ov = $('#catch-over');
+    if (ov) ov.classList.remove('hidden');
+  }
+
+  /* --- え --- */
+  function renderCatch() {
+    const cv = $('#catch-canvas');
+    if (!cv || !CG) return;
+    const w = cv.clientWidth, h = cv.clientHeight;
+    if (w < 2 || h < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    }
+    CG.W = w; CG.H = h;
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    /* そら（きいろ）*/
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#f2dc5c'); g.addColorStop(0.55, '#e9cb45'); g.addColorStop(1, '#d9b63a');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    /* すなぼこり */
+    ctx.fillStyle = 'rgba(255,255,255,.18)';
+    for (let i = 0; i < 4; i++) {
+      const cy = ((i * 0.27 + CG.t * 0.05) % 1.2 - 0.1) * h;
+      const cx = ((i * 211) % 100) / 100 * w;
+      ctx.beginPath(); ctx.ellipse(cx, cy, w * 0.16, h * 0.028, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    /* じめん */
+    ctx.fillStyle = 'rgba(120,95,40,.35)';
+    ctx.fillRect(0, h - h * 0.055, w, h * 0.055);
+
+    /* たべもの */
+    for (const f of CG.foods) {
+      ctx.save();
+      /* たべものは くるくる まわらず、ゆらゆら かたむく だけ */
+      ctx.translate(f.x, f.y); ctx.rotate(Math.sin(f.rot) * 0.30);
+      drawCatchFood(ctx, f.kind, h * 0.042);
+      ctx.restore();
+    }
+    /* がれき */
+    for (const r of CG.rocks) {
+      ctx.save();
+      ctx.translate(r.x, r.y); ctx.rotate(r.rot);
+      drawCatchRock(ctx, r.seed, h * (r.big ? 0.052 : 0.038));
+      ctx.restore();
+    }
+
+    /* じぶん */
+    const px = CG.px * w, py = h - h * 0.13;
+    const fn = DRAWERS[shownDrawId(CG.char)];
+    if (fn) {
+      ctx.save();
+      ctx.translate(px, py);
+      if (CG.stun > 0 && Math.floor(CG.t * 14) % 2 === 0) ctx.globalAlpha = 0.45;
+      const size = h * 0.14;
+      const sc = size / storyArtUp(shownDrawId(CG.char));
+      ctx.scale(sc, sc);
+      try { fn(ctx, { t: CG.t, moving: CG.stun <= 0, atk: -1, hpRatio: 1, hpRate: 1, roll: 0.3 }); } catch (er) {}
+      ctx.restore();
+      /* ふらふら の ほし */
+      if (CG.stun > 0) {
+        ctx.save();
+        ctx.fillStyle = '#fff176'; ctx.strokeStyle = '#6d4c00'; ctx.lineWidth = 2;
+        for (let i = 0; i < 3; i++) {
+          const a = CG.t * 6 + i * 2.1;
+          starPath(ctx, px + Math.cos(a) * h * 0.055, py - h * 0.165 + Math.sin(a) * h * 0.012, h * 0.016);
+          ctx.fill(); ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+    /* あたった ときの あかい ひかり */
+    if (CG.hitFlash > 0) {
+      ctx.fillStyle = 'rgba(255,82,82,' + (CG.hitFlash * 0.6).toFixed(2) + ')';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    /* ＋1 などの もじ */
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const p of CG.pops) {
+      const k = p.t / 0.8;
+      ctx.save();
+      ctx.globalAlpha = 1 - k;
+      const fs = h * 0.040;
+      ctx.font = '900 ' + fs + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.lineWidth = fs * 0.28; ctx.strokeStyle = '#3a2a00'; ctx.lineJoin = 'round';
+      ctx.strokeText(p.text, p.x, p.y - k * h * 0.06);
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.text, p.x, p.y - k * h * 0.06);
+      ctx.restore();
+    }
+
+    /* のこりの かず（がめんの うえ）*/
+    const left = CATCH.foods - CG.caught - CG.lost;
+    ctx.save();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    const fs2 = h * 0.034;
+    ctx.font = '800 ' + fs2 + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.lineWidth = fs2 * 0.30; ctx.strokeStyle = 'rgba(70,52,0,.55)'; ctx.lineJoin = 'round';
+    const txt = 'のこり ' + left + 'こ';
+    ctx.strokeText(txt, w * 0.03, h * 0.025);
+    ctx.fillStyle = '#5b4300';
+    ctx.fillText(txt, w * 0.03, h * 0.025);
+    ctx.restore();
+  }
+
+  /* ほしの かたち（ふらふら の え に つかいます）*/
+  function starPath(ctx, cx, cy, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5;
+      const rr = (i % 2 === 0) ? r : r * 0.45;
+      const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+  }
+
+  /* たべもの（まんなかが 0,0）
+       ★そらが きいろい ので、かげを つけて うきあがらせて います */
+  function drawCatchFood(ctx, kind, r) {
+    ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(1.6, r * 0.13);
+    ctx.strokeStyle = '#3a2a12';
+    ctx.shadowColor = 'rgba(60,40,0,.35)';
+    ctx.shadowBlur = r * 0.55; ctx.shadowOffsetY = r * 0.22;
+    if (kind === 'apple') {
+      ctx.fillStyle = '#e8453c';
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#5d3a1a'; ctx.beginPath();
+      ctx.moveTo(0, -r * 0.9); ctx.lineTo(r * 0.15, -r * 1.35); ctx.stroke();
+      ctx.fillStyle = '#5fbf4a';
+      ctx.beginPath(); ctx.ellipse(r * 0.55, -r * 1.15, r * 0.42, r * 0.22, -0.5, 0, Math.PI * 2); ctx.fill();
+    } else if (kind === 'pine') {
+      ctx.fillStyle = '#f2d626';
+      ctx.beginPath(); ctx.ellipse(0, r * 0.12, r * 0.78, r * 1.05, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#3aa03a';
+      starPath(ctx, 0, -r * 1.05, r * 0.72); ctx.fill(); ctx.stroke();
+    } else if (kind === 'banana') {
+      ctx.fillStyle = '#f0a81e';
+      ctx.beginPath();
+      ctx.moveTo(-r * 1.00, -r * 0.55);
+      ctx.quadraticCurveTo(0, r * 1.35, r * 1.00, -r * 0.45);
+      ctx.lineTo(r * 0.72, -r * 0.72);
+      ctx.quadraticCurveTo(0, r * 0.55, -r * 0.72, -r * 0.80);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      /* へた（りょうはし）*/
+      ctx.fillStyle = '#6d4c1e';
+      ctx.beginPath(); ctx.arc(-r * 0.90, -r * 0.66, r * 0.16, 0, Math.PI * 2); ctx.fill();
+    } else if (kind === 'onigiri') {
+      ctx.fillStyle = '#fdfbf2';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.0); ctx.lineTo(r * 0.95, r * 0.75); ctx.lineTo(-r * 0.95, r * 0.75);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#2f3a2a';
+      ctx.fillRect(-r * 0.55, r * 0.05, r * 1.1, r * 0.62);
+    } else if (kind === 'berry') {
+      ctx.fillStyle = '#e0364f';
+      ctx.beginPath();
+      ctx.moveTo(0, r * 1.05);
+      ctx.quadraticCurveTo(-r * 1.0, r * 0.1, -r * 0.6, -r * 0.7);
+      ctx.quadraticCurveTo(0, -r * 1.05, r * 0.6, -r * 0.7);
+      ctx.quadraticCurveTo(r * 1.0, r * 0.1, 0, r * 1.05);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#4aa83a';
+      ctx.beginPath(); ctx.ellipse(0, -r * 0.82, r * 0.62, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.fillStyle = '#9fd06a';
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#3f7a2a'; ctx.lineWidth = Math.max(1.2, r * 0.10);
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * (0.30 + i * 0.28), r, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  }
+
+  /* がれき（まんなかが 0,0）*/
+  function drawCatchRock(ctx, seed, r) {
+    const rr = (i) => 0.62 + (((seed * 37 + i * 91) % 100) / 100) * 0.55;
+    ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(1.8, r * 0.14);
+    ctx.strokeStyle = '#1d2127'; ctx.fillStyle = '#5c636c';
+    ctx.shadowColor = 'rgba(40,30,0,.35)';
+    ctx.shadowBlur = r * 0.5; ctx.shadowOffsetY = r * 0.20;
+    ctx.beginPath();
+    const N = 7;
+    for (let i = 0; i < N; i++) {
+      const a = i / N * Math.PI * 2;
+      const x = Math.cos(a) * r * rr(i), y = Math.sin(a) * r * rr(i + 3);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    /* いたの かけら */
+    ctx.fillStyle = '#9a6b34';
+    ctx.save(); ctx.rotate(0.5 + (seed % 7) * 0.2);
+    ctx.fillRect(-r * 0.18, -r * 1.05, r * 0.36, r * 1.5);
+    ctx.strokeRect(-r * 0.18, -r * 1.05, r * 0.36, r * 1.5);
+    ctx.restore();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  }
+
+  function quitCatch() {
+    CG = null;
+    if (catchRaf) { cancelAnimationFrame(catchRaf); catchRaf = null; }
     openMinigames();
   }
 
@@ -5667,6 +6094,9 @@
     $('#btn-shoot-back').addEventListener('click', quitShoot);
     $('#btn-shoot-exit').addEventListener('click', quitShoot);
     $('#btn-shoot-again').addEventListener('click', () => { if (SG) startShoot(SG.char); });
+    $('#btn-catch-back').addEventListener('click', quitCatch);
+    $('#btn-catch-exit').addEventListener('click', quitCatch);
+    $('#btn-catch-again').addEventListener('click', () => { if (CG) startCatch(CG.char); });
     $('#btn-attr-back').addEventListener('click', openHome);
     $('#btn-movie-back').addEventListener('click', openHome);
     $('#btn-shop-back').addEventListener('click', () => { show('screen-chapter'); redrawMap(); });

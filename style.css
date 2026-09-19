@@ -1629,6 +1629,14 @@ body.dragging-slot #party-slots { touch-action:none; }
   flex:0 0 auto; margin:calc(6px * var(--ui)) 0 0;
   color:#9fd8c0; font-size:calc(12px * var(--ui)); text-align:center;
 }
+
+/* たべもの あつめ（シューティングと おなじ ならびを つかいます）*/
+.catch-wrap{ background:#2a2213; }
+#catch-canvas{
+  width:100%; height:100%; display:block; touch-action:none;
+  border-radius:calc(12px * var(--ui)); background:#e8c94a;
+}
+.catch-stun{ color:#ff8a65 !important; }
 .shoot-over{
   position:absolute; inset:0; border-radius:calc(12px * var(--ui));
   background:rgba(6,19,28,.90);
