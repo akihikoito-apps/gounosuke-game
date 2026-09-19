@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.23';
+  const GAME_VERSION = '6.24';
 
 
   /* =================================================
@@ -4061,6 +4061,28 @@
     ctx.restore();
   }
 
+  /* なまえの ふだ（3大王の しょうかい に つかいます）*/
+  function stNamePlate(ctx, W, H, name, sub, color) {
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const fs = Math.min(W * 0.075, H * 0.11);
+    const y = H * 0.16;
+    ctx.font = '900 ' + fs + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.lineWidth = fs * 0.20; ctx.strokeStyle = '#11121c';
+    ctx.strokeText(name, W / 2, y);
+    ctx.fillStyle = color || '#ffd54f';
+    ctx.fillText(name, W / 2, y);
+    if (sub) {
+      const fs2 = fs * 0.45;
+      ctx.font = '700 ' + fs2 + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.lineWidth = fs2 * 0.26; ctx.strokeStyle = '#11121c';
+      ctx.strokeText(sub, W / 2, y + fs * 0.78);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(sub, W / 2, y + fs * 0.78);
+    }
+    ctx.restore();
+  }
+
   /* --- だい3しょう「竜巻編」の はじまりの おはなし --- */
   const STORY_STORM_INTRO = [
     /* 1 うちゅうの はてまで きた */
@@ -4182,6 +4204,7 @@
 
   /* --- 「新・始まりの道」を クリアした あとの おはなし --- */
   const STORY_STORM_FLEE = [
+    /* 1 もんを こえた */
     { text: 'たつまきほうを かいくぐり、ごうのすけたちは あかい もんを こえた。',
       art: (c, W, H) => {
         stFieldBg(c, W, H, true);
@@ -4191,23 +4214,67 @@
         stChar(c, 'tankun',  W * 0.26, H * 0.92, H * 0.14);
         stChar(c, 'kabekun', W * 0.34, H * 0.92, H * 0.19);
       } },
-    { text: '「……ほう。わしの たつまきほうを たえきる とはな。」　もんの むこうに、あの すがたが あった。',
+
+    /* 2 ターツーマーキーが みとめる */
+    { text: '「……ほう。わしの たつまきほうを たえきる とはな。なかなか やるでは ないか。」',
       art: (c, W, H) => {
         stFieldBg(c, W, H, true);
         stFlash(c, W, H, '#2b2440');
-        stGate(c, W * 0.20, H * 0.88, Math.min(W * 0.22, H * 0.28), 0.55);
+        stGate(c, W * 0.18, H * 0.88, Math.min(W * 0.20, H * 0.26), 0.55);
         stChar(c, 'tatsumarky', W * 0.64, H * 0.90, H * 0.56);
         stChar(c, 'tankun', W * 0.30, H * 0.94, H * 0.13);
       } },
-    { text: '「だが、これは ほんの あいさつ じゃ。ほんきの わしは、こんな ものでは ない。」',
+
+    /* 3 3大王が いる */
+    { text: '「だがな。わしには ★ちゅうじつな しもべが 3たい★ おる。3大王じゃ。」',
       art: (c, W, H) => {
         stFieldBg(c, W, H, true);
-        stTornado(c, W * 0.64, H * 0.00, H * 0.44, W * 0.52, 'rgba(150,140,190,.8)');
+        stFlash(c, W, H, '#1d1830');
+        stTornado(c, W * 0.5, H * 0.00, H * 0.34, W * 0.9, 'rgba(120,110,150,.45)');
+        stChar(c, 'kedamaru', W * 0.20, H * 0.92, H * 0.40);
+        stChar(c, 'gaoudou',  W * 0.50, H * 0.92, H * 0.46);
+        stChar(c, 'chuchu',   W * 0.80, H * 0.92, H * 0.42);
+      } },
+
+    /* 4 ケダマール */
+    { text: '「けの かたまり ── ケダマール。ぞくせいは パワー。ちかづく ものは みな ふきとばされる。」',
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
+        stFlash(c, W, H, '#241c30');
+        stChar(c, 'kedamaru', W * 0.5, H * 0.94, H * 0.62);
+        stNamePlate(c, W, H, 'ケダマール', '3大王 その1　ぞくせい：パワー', '#cfcabb');
+      } },
+
+    /* 5 ガオウドウ */
+    { text: '「2つの くちで かみくだく ── ガオウドウ。むぞくせい。どんそくも スタンも きかん。」',
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
+        stFlash(c, W, H, '#2a1a10');
+        stChar(c, 'gaoudou', W * 0.5, H * 0.94, H * 0.66);
+        stNamePlate(c, W, H, 'ガオウドウ', '3大王 その2　ぞくせい：むぞくせい', '#ffb74d');
+      } },
+
+    /* 6 チューチュー（つぎの まちの ボス）*/
+    { text: '「ちを すう もの ── チューチュー。つぎの まちは、すでに こいつと むしどもの ものじゃ。」',
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
+        stFlash(c, W, H, '#152a1e');
+        stChar(c, 'chuchu', W * 0.5, H * 0.94, H * 0.64);
+        stNamePlate(c, W, H, 'チューチュー', '3大王 その3　ぞくせい：けもの', '#80e0b0');
+      } },
+
+    /* 7 3たいを たおして みせろ */
+    { text: '「この 3たいを たおして みせろ。そのときは ── わしが じきじきに あいてを して やろう。」',
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
+        stTornado(c, W * 0.64, H * 0.00, H * 0.42, W * 0.52, 'rgba(150,140,190,.8)');
         stBolt(c, W * 0.18, H * 0.06, H * 0.26);
         stDebris(c, W, H, 8);
         stChar(c, 'tatsumarky', W * 0.64, H * 0.90, H * 0.58);
       } },
-    { text: 'ターツーマーキーは たつまきに なって、あっという まに きえて しまった。……つづきは、また こんど。',
+
+    /* 8 きえて いく */
+    { text: 'そう いいのこして、ターツーマーキーは たつまきに なって きえて しまった。……つぎの まちへ、いそごう。',
       art: (c, W, H) => {
         stFieldBg(c, W, H, true);
         stTornado(c, W * 0.60, H * 0.02, H * 0.80, W * 0.42, 'rgba(60,55,80,.85)');
@@ -4456,8 +4523,8 @@
       desc: 'だい3しょう「たつまきへん」の はじまり。うちゅうの しはいしゃが ちきゅうを せいふく しに もどって くるまで。',
       when: '太陽の いただき（12-3）を クリアすると みられます',
       list: () => STORY_STORM_INTRO },
-    { key: 'storm_flee', name: 'ターツーマーキー、すがたを みせる',
-      desc: '「新・始まりの道」を クリアした あと。すがただけ みせて、たつまきに なって きえて しまう。',
+    { key: 'storm_flee', name: '3大王、あらわる',
+      desc: '「新・始まりの道」を クリアした あと。ターツーマーキーが ちゅうじつな しもべ「3大王」を しょうかいして きえて いく。',
       when: '新・始まりの道（13-1）を クリアすると みられます',
       list: () => STORY_STORM_FLEE },
   ];

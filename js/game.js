@@ -407,7 +407,15 @@ const Game = {
     }
     if (!calls) return;
     for (const c of calls) {
-      for (let i = 0; i < c.n; i++) this.spawnEnemy(c.id, c.x);
+      /* ★id は 1つでも、リストでも かけます。リストの ときは
+         でて くる たびに その なかから ランダムに えらびます
+         （チューチューは 3しゅるいの ざこと いっしょに うごきます）。
+         まだ つくって いない id は しずかに とばします。 */
+      const pool = Array.isArray(c.id) ? c.id.filter(id => ENEMIES[id]) : [c.id];
+      if (!pool.length) continue;
+      for (let i = 0; i < c.n; i++) {
+        this.spawnEnemy(pool[Math.floor(Math.random() * pool.length)], c.x);
+      }
     }
   },
 
@@ -813,6 +821,20 @@ const Game = {
         isCrit = true;
       }
       this.damageUnit(v, dmg, attr, mult, false, isCrit);
+      /* ★きゅうけつ：あたえた ダメージの ぶんだけ じぶんが かいふく する
+           （チューチューは ちを すって こうげきします）*/
+      const drain = src.def ? (src.def.drain || null) : (src.drain || null);
+      if (drain && src && !src.dead && src.maxHp) {
+        const heal = Math.max(1, Math.round(dmg * (drain.rate === undefined ? 0.5 : drain.rate)));
+        const room = Math.max(0, src.maxHp - src.hp);
+        const got  = Math.min(room, heal);
+        if (got > 0) {
+          src.hp += got;
+          this.addEffect({ type: 'healMark', x: src.x, y: this.groundWorldY() - 74 - (src.lane || 0), life: 0.7 });
+          this.addEffect({ type: 'dmg', x: src.x, y: this.groundWorldY() - 58 - (src.lane || 0),
+                           text: 'すいとった ＋' + got, color: '#ff8a80', life: 0.75 });
+        }
+      }
       if (slow && !v.dead) {
         const chance = (slow.chance === undefined) ? 1 : slow.chance;
         if (Math.random() < chance) {
@@ -872,6 +894,13 @@ const Game = {
   /* ---- ダメージ ---- */
   damageUnit(u, dmg, attr, mult, noNumber, isCrit) {
     if (u.dead) return;
+
+    /* ★かいひ：きめられた かくりつで こうげきを かわす（チューチュー）*/
+    if (u.def.dodge && Math.random() < u.def.dodge) {
+      this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 62 - u.lane,
+                       text: 'かわした！', color: '#80deea', life: 0.7 });
+      return;
+    }
 
     /* ★むこうか：きめられた ぞくせいの こうげきを ダメージ 0 に する（霊太郎）
        ただし 2つの ぞくせいを もつ こうげきは すりぬけ できず、
