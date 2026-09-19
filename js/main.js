@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.32';
+  const GAME_VERSION = '6.33';
 
 
   /* =================================================
@@ -4290,11 +4290,44 @@
      ネコスの店（たたかいの ない ばしょ）
 
      ネコスは、ターツーマーキーに おそわれても いきのこった
-     にんげんの ひとり。1にちに 1かい、そざいを 5つ わけて くれます。
+     にんげんの ひとり。1にちに 1かい、そざいを 5つ わけて くれます
+     （よる 0じで リセット）。
      ================================================= */
+  /* =================================================
+     ★「1日 1かい」の かぞえかた（v6.33 で かえました）
+
+     まえは「もらってから 24じかん」でした。それだと よる おそくに
+     もらうと つぎの 日は よる まで もらえない、と わかりにくい ので、
+     ★まいにち よる 0じ 0ふんに リセット★ に しました。
+     なんじに あそんでも「その日の ぶん」を 1かい もらえます。
+
+     ・gotToday(at)  … その とけいが「きょう」なら true（もう もらった）
+     ・nextDayText() … 「あした 0じ（あと ○じかん ○ふん）」
+
+     ※ ばしょの じかん（タイムゾーン）で かぞえます。
+        Date の つき は 0はじまり なので +1 して います。
+     ================================================= */
+  function dayKeyOf(ts) {
+    const d = new Date(ts);
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  }
+  function gotToday(at) {
+    return !!at && dayKeyOf(at) === dayKeyOf(Date.now());
+  }
+  function untilNextDayMs() {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1, 0, 0, 0, 0) - n;
+  }
+  function nextDayText() {
+    const ms = untilNextDayMs();
+    const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+    if (h > 0) return 'あした 0じ（あと ' + h + 'じかん ' + m + 'ふん）';
+    if (m > 0) return 'あした 0じ（あと ' + m + 'ふん）';
+    return 'もうすぐ あした 0じ';
+  }
+
   const NEKOS = {
     give: 5,                 // 1かいに もらえる そざいの かず
-    dayMs: 86400000,         // つぎに もらえるまで（24じかん）
   };
 
   /* おしゃべりを 1つ えらぶ。おなじ はなしが 2かい つづかない ように します */
@@ -4315,22 +4348,12 @@
     if (!s.nekos) s.nekos = { at: 0 };
     return s.nekos;
   }
-  function nekosLeftMs() {
+  /* ★きょう まだ もらって いなければ わたせます（よる 0じで リセット）*/
+  function nekosReady() {
     const n = nekosState();
-    if (!n) return 0;
-    return Math.max(0, n.at + NEKOS.dayMs - Date.now());
+    return !!n && !gotToday(n.at);
   }
-  function nekosReady() { return nekosLeftMs() <= 0; }
-
-  /* のこり じかんを「あと ○じかん ○ふん」に */
-  function nekosLeftText() {
-    const ms = nekosLeftMs();
-    const h = Math.floor(ms / 3600000);
-    const m = Math.floor((ms % 3600000) / 60000);
-    if (h > 0) return 'あと ' + h + 'じかん ' + m + 'ふん';
-    if (m > 0) return 'あと ' + m + 'ふん';
-    return 'もうすぐ';
-  }
+  function nekosLeftText() { return nextDayText(); }
 
   function openShop() {
     shopSay(nekosReady()
@@ -4540,9 +4563,9 @@
      ・1つめは「むしたいじ シューティング」。
        だい15しょう「虫に支配された町」を ぜんぶ クリアすると あそべます。
      ・かつと そざいが 5こ もらえますが、★ごほうびは 1日に 1かいまで★。
-       （ゲームじたいは なんかいでも あそべます）
+       （よる 0じで リセット。ゲームじたいは なんかいでも あそべます）
      ================================================= */
-  const MINI = { give: 5, dayMs: 86400000 };
+  const MINI = { give: 5 };
 
   function chapterAllCleared(ch) {
     const cleared = (slot() && slot().cleared) || {};
@@ -4560,23 +4583,16 @@
        1つめの シューティングは そのまま at を つかいます。      */
   const MINI_AT = { bugshoot: 'at', foodcatch: 'catchAt' };
   function miniAtKey(key) { return MINI_AT[key] || 'at'; }
-  function miniLeftMs(key) {
+  /* ★きょう まだ もらって いなければ ごほうびが でます（よる 0じで リセット）*/
+  function miniRewardReady(key) {
     const m = miniState();
-    if (!m) return 0;
-    return Math.max(0, (m[miniAtKey(key)] || 0) + MINI.dayMs - Date.now());
+    return !!m && !gotToday(m[miniAtKey(key)]);
   }
-  function miniRewardReady(key) { return miniLeftMs(key) <= 0; }
   function miniMarkGot(key) {
     const m = miniState();
     if (m) m[miniAtKey(key)] = Date.now();
   }
-  function miniLeftText(key) {
-    const ms = miniLeftMs(key);
-    const h = Math.floor(ms / 3600000), mi = Math.floor((ms % 3600000) / 60000);
-    if (h > 0) return 'あと ' + h + 'じかん ' + mi + 'ふん';
-    if (mi > 0) return 'あと ' + mi + 'ふん';
-    return 'もうすぐ';
-  }
+  function miniLeftText() { return nextDayText(); }
   /* ごほうびの そざいを ランダムに n こ くばって、なにが でたか かえします */
   function miniGiveMats(n, key) {
     const count = {};
@@ -4614,7 +4630,7 @@
   function openMinigames() {
     const note = $('#minigame-note');
     if (note) {
-      note.textContent = 'ごほうびの そざいは ★ゲームごとに 1日 1かいまで★。ゲームじたいは なんかいでも あそべます。';
+      note.textContent = 'ごほうびの そざいは ★ゲームごとに 1日 1かいまで★（よる 0じで リセット）。ゲームじたいは なんかいでも あそべます。';
     }
     const box = $('#minigame-list');
     if (box) {
@@ -5094,7 +5110,7 @@
      ・たべものは ★ぜんぶで 30こ★ しか おちて きません。
      ・がれきに あたると すこしの あいだ うごけなく なります（やられは しません）。
      ・30こ ぜんぶ ひろうと そざい 5こ、70%（21こ）いじょうでも そざい 3こ。
-       ごほうびは 1日に 1かいまで（シューティングとは べつの タイマー）。
+       ごほうびは 1日に 1かいまで（よる 0じで リセット・シューティングとは べつ）。
      ・おちる はやさは たべものも がれきも 1つずつ バラバラです。
      ================================================= */
   const CATCH = {
