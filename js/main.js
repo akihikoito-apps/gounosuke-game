@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.29';
+  const GAME_VERSION = '6.30';
 
 
   /* =================================================
@@ -4640,8 +4640,14 @@
     life: 3,
     fireCd: 0.28,            // たまの かんかく（びょう）
     bulletSpeed: 620,
+    /* ★ボスの たつまきほう */
+    torEvery: 8,             // なんびょうごとに うつか
+    torWarn: 1.0,            // なんびょう まえに「あぶない！」を だすか
+    torFirst: 5,             // ボスがが でてから 1ぱつめまで
+    torHold: 0.6,            // たつまきが のこる びょうすう
     waves: [
-      { label: 'ウェーブ 1／3', id: 'togehaya_t', n: 6, hp: 2, speed: 62,  swing: 34, fire: 0,   gap: 0.9 },
+      /* dash: true … ときどき きゅうに プレイヤーめがけて とつげきして くる */
+      { label: 'ウェーブ 1／3', id: 'togehaya_t', n: 6, hp: 2, speed: 62,  swing: 34, fire: 0,   gap: 0.9, dash: true },
       { label: 'ウェーブ 2／3', id: 'hatchie',    n: 9, hp: 1, speed: 118, swing: 78, fire: 0,   gap: 0.6 },
       { label: 'ウェーブ 3／3', id: 'kamajirou',  n: 5, hp: 5, speed: 52,  swing: 22, fire: 2.6, gap: 1.2 },
       { label: '★ボス チューチュー', id: 'chuchu', n: 1, hp: 40, speed: 0, swing: 0, fire: 1.0, gap: 0, boss: true },
@@ -4659,7 +4665,7 @@
       pend: [],           // まだ でて いない てき
       enemies: [], bullets: [], ebullets: [], booms: [],
       px: 0.5, target: 0.5,
-      t: 0, fire: 0, inv: 0, over: null, spawnT: 0,
+      t: 0, fire: 0, inv: 0, over: null, spawnT: 0, tor: null,
       W: 0, H: 0,
     };
     const ov = $('#shoot-over');
@@ -4743,6 +4749,8 @@
             id: e.id, hp: e.hp, maxHp: e.hp, speed: e.speed, swing: e.swing,
             fire: e.fire, fireCd: e.fire ? (0.8 + Math.random() * e.fire) : 0,
             boss: !!e.boss, seed: Math.random() * 10,
+            dash: e.dash ? 0 : -1, dashCd: e.dash ? (1.5 + Math.random() * 2.5) : -1,
+            dvx: 0, dvy: 0,
             x: e.boss ? W * 0.5 : (0.1 + Math.random() * 0.8) * W,
             y: e.boss ? -H * 0.18 : -40,
             t: 0,
@@ -4758,11 +4766,27 @@
         /* ボスは よこに いったりきたり */
         if (e.y < H * 0.20) e.y += 70 * dt;
         e.x = W * (0.5 + Math.sin(e.t * 0.8) * 0.33);
+      } else if (e.dash > 0) {
+        /* ★とつげき ちゅう（トゲハヤさん タツマキ）*/
+        e.dash -= dt;
+        e.x += e.dvx * dt; e.y += e.dvy * dt;
+        if (e.x < 20) { e.x = 20; e.dvx = Math.abs(e.dvx); }
+        if (e.x > W - 20) { e.x = W - 20; e.dvx = -Math.abs(e.dvx); }
+        if (e.y > H + 40) { e.y = -40; e.dash = 0; e.x = (0.1 + Math.random() * 0.8) * W; }
       } else {
         e.y += e.speed * dt;
         e.x += Math.sin(e.t * 2.2 + e.seed) * e.swing * dt;
         if (e.x < 20) e.x = 20;
         if (e.x > W - 20) e.x = W - 20;
+        /* ★ときどき きゅうに プレイヤーめがけて とつげき */
+        if (e.dash === 0) {
+          e.dashCd -= dt;
+          if (e.dashCd <= 0 && e.y > 30 && e.y < H * 0.66) {
+            e.dash = 0.85; e.dashCd = 2.6 + Math.random() * 3.0;
+            const dx = pxr - e.x, dy = (pyr - 10) - e.y, L = Math.hypot(dx, dy) || 1;
+            e.dvx = dx / L * 330; e.dvy = dy / L * 330;
+          }
+        }
         /* したまで いったら うえから もういちど（にげられない）*/
         if (e.y > H + 40) { e.y = -40; e.x = (0.1 + Math.random() * 0.8) * W; }
       }
@@ -4824,6 +4848,26 @@
     for (let i = SG.booms.length - 1; i >= 0; i--) {
       SG.booms[i].t += dt;
       if (SG.booms[i].t > 0.4) SG.booms.splice(i, 1);
+    }
+
+    /* ★ボスの たつまきほう（8びょうごと。1びょう まえに「あぶない！」）*/
+    const boss = SG.enemies.find(e => e.boss);
+    if (boss) {
+      if (!SG.tor) SG.tor = { at: SG.t + SHOOT.torFirst, warn: false, x: W / 2, w: W * 0.34, fireT: -1 };
+      const T = SG.tor;
+      if (T.fireT >= 0) { T.fireT += dt; if (T.fireT > SHOOT.torHold) T.fireT = -1; }
+      if (!T.warn && SG.t >= T.at - SHOOT.torWarn) {
+        /* よこくの しゅんかんの ばしょで ねらいを かためる（うごけば よけられる）*/
+        T.warn = true; T.x = pxr; T.w = W * 0.34;
+      }
+      if (SG.t >= T.at) {
+        T.at = SG.t + SHOOT.torEvery; T.warn = false; T.fireT = 0;
+        if (Math.abs(pxr - T.x) < T.w / 2) hurtShoot(pxr, pyr);
+        /* おびの なかの たまは かき消される */
+        SG.bullets = SG.bullets.filter(b => Math.abs(b.x - T.x) >= T.w / 2);
+      }
+    } else if (SG.tor) {
+      SG.tor = null;
     }
 
     /* ウェーブ クリア */
@@ -4948,6 +4992,56 @@
       ctx.scale(sc, sc);
       try { fn(ctx, { t: SG.t, moving: false, atk: -1, hpRatio: 1, hpRate: 1, roll: 0.3 }); } catch (er) {}
       ctx.restore();
+    }
+
+    /* ★ボスの たつまきほう（よこく と はっしゃ）*/
+    if (SG.tor) {
+      const T = SG.tor;
+      if (T.warn && T.fireT < 0) {
+        /* よこく：おびが てんめつ ＋「あぶない！」*/
+        const blink = 0.22 + 0.30 * Math.abs(Math.sin(SG.t * 12));
+        ctx.save();
+        ctx.fillStyle = 'rgba(179,157,219,' + blink.toFixed(2) + ')';
+        ctx.fillRect(T.x - T.w / 2, 0, T.w, h);
+        ctx.strokeStyle = 'rgba(255,255,255,.85)';
+        ctx.setLineDash([10, 8]); ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(T.x - T.w / 2, 0); ctx.lineTo(T.x - T.w / 2, h);
+        ctx.moveTo(T.x + T.w / 2, 0); ctx.lineTo(T.x + T.w / 2, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const fs = Math.min(w * 0.12, h * 0.09) * (1 + 0.08 * Math.sin(SG.t * 14));
+        ctx.font = '900 ' + fs + 'px system-ui, "Hiragino Sans", sans-serif';
+        ctx.lineWidth = fs * 0.20; ctx.strokeStyle = '#3a0a1a'; ctx.lineJoin = 'round';
+        const tx = Math.max(w * 0.30, Math.min(w * 0.70, T.x));
+        ctx.strokeText('あぶない！', tx, h * 0.42);
+        ctx.fillStyle = '#ff5252';
+        ctx.fillText('あぶない！', tx, h * 0.42);
+        ctx.restore();
+      }
+      if (T.fireT >= 0) {
+        /* はっしゃ：おびいっぱいの たつまき */
+        const k = T.fireT / SHOOT.torHold;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - k * 0.85);
+        ctx.fillStyle = 'rgba(224,214,246,.55)';
+        ctx.fillRect(T.x - T.w / 2, 0, T.w, h);
+        /* うずまく はしら（したから うえへ わっかを つみあげる）*/
+        const N = 12, rx = T.w / 2;
+        for (let i = 0; i < N; i++) {
+          const f = i / (N - 1);
+          const y = h * (1.02 - f * 1.06);
+          const sw = Math.sin(SG.t * 14 - i * 0.7) * rx * 0.16;
+          ctx.beginPath();
+          ctx.ellipse(T.x + sw, y, rx * (0.72 + f * 0.28), h * 0.030, 0, 0, Math.PI * 2);
+          ctx.fillStyle = (i % 2 === 0) ? 'rgba(245,244,240,.95)' : 'rgba(140,136,128,.92)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(53,51,47,.85)';
+          ctx.lineWidth = 2; ctx.stroke();
+        }
+        ctx.restore();
+      }
     }
 
     /* ばくはつ */
