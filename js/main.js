@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.24';
+  const GAME_VERSION = '6.25';
 
 
   /* =================================================
@@ -4295,6 +4295,18 @@
     dayMs: 86400000,         // つぎに もらえるまで（24じかん）
   };
 
+  /* おしゃべりを 1つ えらぶ。おなじ はなしが 2かい つづかない ように します */
+  let nekosLastTalk = -1;
+  function nekosPickTalk() {
+    const list = (typeof NEKOS_TALKS !== 'undefined') ? NEKOS_TALKS : [];
+    if (!list.length) return '';
+    if (list.length === 1) return list[0];
+    let i = nekosLastTalk;
+    while (i === nekosLastTalk) i = Math.floor(Math.random() * list.length);
+    nekosLastTalk = i;
+    return list[i];
+  }
+
   function nekosState() {
     const s = slot();
     if (!s) return null;
@@ -4321,7 +4333,7 @@
   function openShop() {
     shopSay(nekosReady()
       ? 'いらっしゃい！　ぼくは ネコス。あの たつまきから にげのびた にんげんさ。　はなしかけて くれたら、ひろって おいた そざいを わけて あげるよ。'
-      : 'きょうの ぶんは わたしちゃったよ。また あした おいでよ。（' + nekosLeftText() + '）', []);
+      : 'やあ、また きて くれたんだね。きょうの そざいは わたしちゃった けど、はなしなら いくらでも するよ。', []);
     refreshShopBtn();
     show('screen-shop');
     requestAnimationFrame(drawShop);
@@ -4332,7 +4344,9 @@
     if (!b) return;
     const ok = nekosReady();
     b.disabled = false;
-    b.textContent = ok ? 'ネコスに はなしかける 💬' : 'また あした（' + nekosLeftText() + '）';
+    b.textContent = ok ? 'ネコスに はなしかける 💬' : 'ネコスと おしゃべり 💬';
+    const n = $('#shop-next');
+    if (n) n.textContent = ok ? '' : 'つぎの そざい：' + nekosLeftText();
   }
 
   function shopSay(text, got) {
@@ -4351,8 +4365,11 @@
 
   /* はなしかける → 1にちに 1かい、そざいを 5つ */
   function nekosTalk() {
+    /* ★きょうの こうかんが おわって いたら、そのかわりに
+         ずかんや ちずの まめちしき／ざつだんを して くれます（20パターン）*/
     if (!nekosReady()) {
-      shopSay('きょうの ぶんは もう わたしたよ。また あした おいでよ。（' + nekosLeftText() + '）', []);
+      shopSay(nekosPickTalk(), []);
+      refreshShopBtn();
       return;
     }
     const n = nekosState();

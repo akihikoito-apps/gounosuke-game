@@ -1470,3 +1470,8 @@ body.dragging-slot #party-slots { touch-action:none; }
 .shop-talk .big-btn:disabled{ opacity:.55; }
 /* ちずの おみせノード */
 .map-node.shop .mn-sub{ color:#6b4a00; }
+.shop-next{
+  margin:calc(6px * var(--ui)) 0 0;
+  color:#8a6a3a; font-size:calc(12px * var(--ui)); font-weight:bold;
+}
+.shop-next:empty{ margin:0; }
