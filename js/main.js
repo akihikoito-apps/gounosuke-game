@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.22';
+  const GAME_VERSION = '6.23';
 
 
   /* =================================================
@@ -402,6 +402,14 @@
   function allChapters() {
     const chs = [];
     STAGES.forEach(st => { const c = st.chapter || 1; if (chs.indexOf(c) < 0) chs.push(c); });
+    /* ★たたかいの ない ばしょ（ネコスの店 など）は STAGES に コースが ないので、
+         CHAPTERS の ほうからも ひろって おきます。 */
+    if (typeof CHAPTERS !== 'undefined') {
+      Object.keys(CHAPTERS).forEach(k => {
+        const c = +k;
+        if (!isNaN(c) && chs.indexOf(c) < 0) chs.push(c);
+      });
+    }
     return chs.sort((a, b) => a - b);
   }
 
@@ -430,7 +438,10 @@
       return earthAllCleared();                      // うちゅうは せかいを ぜんぶ クリアしてから
     }
     const cleared = (slot() && slot().cleared) || {};
-    const prev = coursesOf(ch - 1);
+    /* コースの ない しょう（ネコスの店）を とばして、ひとつ まえの
+       「たたかいが ある しょう」を さがします */
+    let p = ch - 1, prev = coursesOf(p);
+    while (prev.length === 0 && p > list[0]) { p--; prev = coursesOf(p); }
     return prev.length > 0 && prev.every(st => cleared[st.no]);
   }
 
@@ -1302,27 +1313,35 @@
     let nowCh = chs[chs.length - 1];
     for (const ch of chs) {
       const list = coursesOf(ch);
+      if (list.length === 0) continue;               // おみせは かぞえない
       if (chapterOpen(ch) && !list.every(st => cleared[st.no])) { nowCh = ch; break; }
     }
 
     chs.forEach((ch, i) => {
       const p = chapterPos(i, chs.length, ch);
+      const info = chapterInfo(ch);
       const list = coursesOf(ch);
       const done = list.filter(st => cleared[st.no]).length;
-      const all  = done === list.length;
+      const all  = list.length > 0 && done === list.length;
       const open = chapterOpen(ch);
+      const shop = !!info.shop;                 // ★たたかいの ない ばしょ
 
       const el = document.createElement('button');
-      el.className = 'map-node' + (open ? (all ? ' done' : (ch === nowCh ? ' now' : '')) : ' locked');
+      el.className = 'map-node' + (shop ? ' shop' : '') +
+        (open ? (all ? ' done' : (ch === nowCh ? ' now' : '')) : ' locked');
       el.style.left = (p.x * 100) + '%';
       el.style.top  = (p.y * 100) + '%';
       el.innerHTML =
-        '<span class="mn-no">' + (chapterInfo(ch).icon || ch) + '</span>' +
-        '<span class="mn-sub">' + (open ? done + '/' + list.length : 'ロック') + '</span>' +
-        (all ? '<span class="mn-badge">⭐</span>' : (open ? '' : '<span class="mn-badge">🔒</span>')) +
-        '<span class="mn-label">' + (open ? (chapterInfo(ch).name || ('だい' + ch + 'ステージ')) : ('だい' + ch + 'ステージ')) + '</span>';
-      if (open) el.addEventListener('click', () => { currentChapter = ch; buildStageList(); show('screen-stage'); });
-      else      el.addEventListener('click', () => toast('まえの ステージを ぜんぶ クリアしてね'));
+        '<span class="mn-no">' + (info.icon || ch) + '</span>' +
+        '<span class="mn-sub">' + (!open ? 'ロック' : (shop ? 'おみせ' : done + '/' + list.length)) + '</span>' +
+        (shop ? '' : (all ? '<span class="mn-badge">⭐</span>' : (open ? '' : '<span class="mn-badge">🔒</span>'))) +
+        (shop && !open ? '<span class="mn-badge">🔒</span>' : '') +
+        '<span class="mn-label">' +
+          (open ? (info.name || ('だい' + ch + 'ステージ'))
+                : (shop ? '？？？' : ('だい' + ch + 'ステージ'))) + '</span>';
+      if (open && shop) el.addEventListener('click', openShop);
+      else if (open)    el.addEventListener('click', () => { currentChapter = ch; buildStageList(); show('screen-stage'); });
+      else              el.addEventListener('click', () => toast('まえの ステージを ぜんぶ クリアしてね'));
       box.appendChild(el);
     });
 
@@ -4199,6 +4218,236 @@
   ];
 
   /* =================================================
+     ネコスの店（たたかいの ない ばしょ）
+
+     ネコスは、ターツーマーキーに おそわれても いきのこった
+     にんげんの ひとり。1にちに 1かい、そざいを 5つ わけて くれます。
+     ================================================= */
+  const NEKOS = {
+    give: 5,                 // 1かいに もらえる そざいの かず
+    dayMs: 86400000,         // つぎに もらえるまで（24じかん）
+  };
+
+  function nekosState() {
+    const s = slot();
+    if (!s) return null;
+    if (!s.nekos) s.nekos = { at: 0 };
+    return s.nekos;
+  }
+  function nekosLeftMs() {
+    const n = nekosState();
+    if (!n) return 0;
+    return Math.max(0, n.at + NEKOS.dayMs - Date.now());
+  }
+  function nekosReady() { return nekosLeftMs() <= 0; }
+
+  /* のこり じかんを「あと ○じかん ○ふん」に */
+  function nekosLeftText() {
+    const ms = nekosLeftMs();
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    if (h > 0) return 'あと ' + h + 'じかん ' + m + 'ふん';
+    if (m > 0) return 'あと ' + m + 'ふん';
+    return 'もうすぐ';
+  }
+
+  function openShop() {
+    shopSay(nekosReady()
+      ? 'いらっしゃい！　ぼくは ネコス。あの たつまきから にげのびた にんげんさ。　はなしかけて くれたら、ひろって おいた そざいを わけて あげるよ。'
+      : 'きょうの ぶんは わたしちゃったよ。また あした おいでよ。（' + nekosLeftText() + '）', []);
+    refreshShopBtn();
+    show('screen-shop');
+    requestAnimationFrame(drawShop);
+  }
+
+  function refreshShopBtn() {
+    const b = $('#btn-shop-talk');
+    if (!b) return;
+    const ok = nekosReady();
+    b.disabled = false;
+    b.textContent = ok ? 'ネコスに はなしかける 💬' : 'また あした（' + nekosLeftText() + '）';
+  }
+
+  function shopSay(text, got) {
+    const p = $('#shop-speech');
+    if (p) p.textContent = text;
+    const box = $('#shop-got');
+    if (box) {
+      box.innerHTML = '';
+      (got || []).forEach(g => {
+        const el = document.createElement('span');
+        el.textContent = MATERIALS[g.id].icon + MATERIALS[g.id].name + ' ×' + g.n;
+        box.appendChild(el);
+      });
+    }
+  }
+
+  /* はなしかける → 1にちに 1かい、そざいを 5つ */
+  function nekosTalk() {
+    if (!nekosReady()) {
+      shopSay('きょうの ぶんは もう わたしたよ。また あした おいでよ。（' + nekosLeftText() + '）', []);
+      return;
+    }
+    const n = nekosState();
+    if (!n) return;
+    const count = {};
+    for (let i = 0; i < NEKOS.give; i++) {
+      const id = MATERIAL_ORDER[Math.floor(Math.random() * MATERIAL_ORDER.length)];
+      addMat(id, 1);
+      count[id] = (count[id] || 0) + 1;
+    }
+    n.at = Date.now();
+    storeSave();
+    const got = MATERIAL_ORDER.filter(id => count[id]).map(id => ({ id: id, n: count[id] }));
+    shopSay('はい どうぞ！　きょうの ぶんの そざい 5こ だよ。　また あした おいでね。', got);
+    refreshShopBtn();
+    drawShop();
+  }
+
+  /* --- おみせの え（カフェ／バーの カウンター）--- */
+  function drawShop() {
+    const cv = $('#shop-canvas');
+    if (!cv) return;
+    const w = cv.clientWidth, h = cv.clientHeight;
+    if (w < 2 || h < 2) { requestAnimationFrame(drawShop); return; }
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    drawShopScene(ctx, w, h);
+  }
+
+  function drawShopScene(ctx, W, H) {
+    const u = Math.min(W, H);
+    /* かべ（あたたかい きの いろ）*/
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#4a2f1b'); g.addColorStop(1, '#6b452a');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    /* かべの いたの つぎめ */
+    ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = Math.max(1, H * 0.004);
+    for (let x = 0; x < W; x += u * 0.13) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H * 0.72); ctx.stroke();
+    }
+
+    /* うしろの たな（びんと カップ）*/
+    const shelfY = [H * 0.24, H * 0.40];
+    shelfY.forEach((sy, si) => {
+      ctx.fillStyle = '#3a2416';
+      ctx.fillRect(W * 0.06, sy, W * 0.88, H * 0.022);
+      for (let i = 0; i < 9; i++) {
+        const x = W * (0.10 + i * 0.095) + (si % 2) * W * 0.02;
+        const bh = u * (0.07 + ((i * 7 + si * 3) % 4) * 0.014);
+        const bw = u * 0.035;
+        ctx.fillStyle = ['#8fb98a', '#c98a5a', '#9aa7d6', '#d6b45a'][(i + si) % 4];
+        roundRectPath(ctx, x, sy - bh, bw, bh, bw * 0.3); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,.35)';
+        ctx.fillRect(x + bw * 0.32, sy - bh - u * 0.018, bw * 0.36, u * 0.018);
+      }
+    });
+
+    /* ランプ（つりさげ）*/
+    for (const fx of [0.20, 0.80]) {
+      ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = Math.max(1.5, H * 0.006);
+      ctx.beginPath(); ctx.moveTo(W * fx, 0); ctx.lineTo(W * fx, H * 0.10); ctx.stroke();
+      ctx.fillStyle = '#f5c95a';
+      ctx.beginPath();                          // かさ（うえが せまい だいけい）
+      ctx.moveTo(W * fx - u * 0.075, H * 0.16);
+      ctx.lineTo(W * fx - u * 0.028, H * 0.10);
+      ctx.lineTo(W * fx + u * 0.028, H * 0.10);
+      ctx.lineTo(W * fx + u * 0.075, H * 0.16);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fff3c4';                // でんきゅう
+      ctx.beginPath(); ctx.arc(W * fx, H * 0.175, u * 0.022, 0, Math.PI * 2); ctx.fill();
+      const lg = ctx.createRadialGradient(W * fx, H * 0.17, 1, W * fx, H * 0.17, u * 0.22);
+      lg.addColorStop(0, 'rgba(255,224,130,.35)'); lg.addColorStop(1, 'rgba(255,224,130,0)');
+      ctx.fillStyle = lg;
+      ctx.beginPath(); ctx.arc(W * fx, H * 0.17, u * 0.22, 0, Math.PI * 2); ctx.fill();
+    }
+
+    /* かんばん */
+    ctx.save();
+    ctx.translate(W * 0.5, H * 0.115);
+    ctx.fillStyle = '#26170e'; ctx.strokeStyle = '#d6b45a';
+    ctx.lineWidth = Math.max(2, u * 0.008);
+    roundRectPath(ctx, -u * 0.20, -u * 0.055, u * 0.40, u * 0.11, u * 0.02);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ffe0b2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '900 ' + (u * 0.055) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText('ネコスの店', 0, 0);
+    ctx.restore();
+
+    /* ネコス（カウンターの むこうがわ）*/
+    const nekosFeet = H * 0.90;
+    const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS.nekos : null;
+    if (fn) {
+      ctx.save();
+      ctx.translate(W * 0.5, nekosFeet);
+      const sc = (H * 0.62) / 190;              // ネコスは たて 190 くらい
+      ctx.scale(sc, sc);
+      fn(ctx, { t: (Date.now() % 100000) / 1000 });
+      ctx.restore();
+    }
+
+    /* カウンター（バーの ように よこに ながく）*/
+    const cy = H * 0.72;
+    ctx.fillStyle = '#7b4e2a';
+    ctx.fillRect(0, cy + H * 0.05, W, H - cy - H * 0.05);
+    ctx.fillStyle = '#5a3418';
+    for (let x = 0; x < W; x += u * 0.10) {
+      ctx.fillRect(x, cy + H * 0.05, Math.max(1, u * 0.004), H);
+    }
+    ctx.fillStyle = '#9c6534';
+    roundRectPath(ctx, -W * 0.02, cy, W * 1.04, H * 0.075, H * 0.02);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.18)';
+    ctx.fillRect(0, cy + H * 0.006, W, H * 0.012);
+
+    /* カウンターの うえの もの */
+    /* コーヒーカップ */
+    ctx.save();
+    ctx.translate(W * 0.20, cy);
+    ctx.fillStyle = '#f5f0e6'; ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = Math.max(1.5, u * 0.006);
+    roundRectPath(ctx, -u * 0.035, -u * 0.055, u * 0.07, u * 0.055, u * 0.012);
+    ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(u * 0.045, -u * 0.030, u * 0.018, -1.2, 1.2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.5)';
+    ctx.beginPath();
+    ctx.moveTo(-u * 0.01, -u * 0.07);
+    ctx.quadraticCurveTo(u * 0.012, -u * 0.095, -u * 0.006, -u * 0.115);
+    ctx.stroke();
+    ctx.restore();
+    /* かんようしょくぶつ */
+    ctx.save();
+    ctx.translate(W * 0.83, cy);
+    ctx.fillStyle = '#b25b3a';
+    roundRectPath(ctx, -u * 0.035, -u * 0.05, u * 0.07, u * 0.05, u * 0.008); ctx.fill();
+    ctx.fillStyle = '#4f9a3d';
+    for (const d of [-1, 0, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(d * u * 0.022, -u * 0.075, u * 0.016, u * 0.035, d * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    /* まえの いす（バースツール）*/
+    ctx.fillStyle = '#3a2416';
+    for (const fx of [0.30, 0.70]) {
+      ctx.fillRect(W * fx - u * 0.008, H * 0.86, u * 0.016, H * 0.14);
+      ctx.beginPath();
+      ctx.ellipse(W * fx, H * 0.86, u * 0.055, u * 0.016, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#8a3f3f'; ctx.fill();
+      ctx.fillStyle = '#3a2416';
+    }
+
+    /* あたたかい あかり（ぜんたいに）*/
+    const warm = ctx.createRadialGradient(W * 0.5, H * 0.30, u * 0.05, W * 0.5, H * 0.55, Math.max(W, H) * 0.75);
+    warm.addColorStop(0, 'rgba(255,214,140,.16)');
+    warm.addColorStop(1, 'rgba(0,0,0,.30)');
+    ctx.fillStyle = warm; ctx.fillRect(0, 0, W, H);
+  }
+
+  /* =================================================
      ムービー えらび（ホームの「ムービー」ボタン）
      ================================================= */
   /* いちど ながれた ムービーは、ここから いつでも みられます。*/
@@ -4537,6 +4786,9 @@
     $('#btn-home-dex').addEventListener('click', () => openDex({ back: 'home' }));
     $('#btn-home-movie').addEventListener('click', openMovies);
     $('#btn-movie-back').addEventListener('click', openHome);
+    $('#btn-shop-back').addEventListener('click', () => { show('screen-chapter'); redrawMap(); });
+    $('#btn-shop-talk').addEventListener('click', nekosTalk);
+    $('#btn-shop-nekos').addEventListener('click', nekosTalk);
     $('#btn-dex-back').addEventListener('click', () => {
       if (dexBackTo === 'battle') {
         show('screen-battle');

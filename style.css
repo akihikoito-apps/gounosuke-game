@@ -1418,3 +1418,55 @@ body.dragging-slot #party-slots { touch-action:none; }
   padding:calc(6px * var(--ui)) calc(10px * var(--ui));
 }
 .movie-card.locked .movie-play{ color:#666; background:#ddd; }
+
+/* ============ ネコスの店 ============ */
+.shop-wrap{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:#1b1209;
+  padding:calc(8px * var(--ui));
+  padding-top:calc(8px * var(--ui) + var(--safe-top));
+}
+.shop-top{ display:flex; align-items:center; gap:calc(10px * var(--ui)); flex:0 0 auto; }
+.shop-title{
+  margin:0; color:#ffe0b2; font-size:calc(19px * var(--ui)); letter-spacing:1px;
+  text-shadow:0 calc(2px * var(--ui)) 0 rgba(0,0,0,.5);
+}
+.shop-stage{ position:relative; flex:1 1 0; min-height:0; margin-top:calc(6px * var(--ui)); }
+#shop-canvas{
+  width:100%; height:100%; display:block;
+  border-radius:calc(12px * var(--ui));
+}
+/* ネコスの うえを タップしても はなしかけられます */
+.shop-hit{
+  position:absolute; left:34%; top:8%; width:32%; height:62%;
+  background:none; border:none; padding:0; cursor:pointer;
+}
+.shop-talk{
+  flex:0 0 auto; margin-top:calc(8px * var(--ui));
+  background:rgba(255,248,235,.96);
+  border-radius:calc(14px * var(--ui));
+  padding:calc(10px * var(--ui));
+}
+.shop-speech{
+  margin:0; color:#3a2410; font-size:calc(13.5px * var(--ui)); line-height:1.55;
+  min-height:calc(40px * var(--ui));
+}
+.shop-got{
+  display:flex; flex-wrap:wrap; gap:calc(6px * var(--ui));
+  margin:calc(6px * var(--ui)) 0 0;
+}
+.shop-got:empty{ margin:0; }
+.shop-got span{
+  background:#fff3d6; border:2px solid #e0b431; border-radius:999px;
+  padding:calc(3px * var(--ui)) calc(9px * var(--ui));
+  font-size:calc(13px * var(--ui)); font-weight:bold; color:#6b4a00;
+}
+.shop-talk .big-btn{
+  margin-top:calc(8px * var(--ui)); width:100%;
+  font-size:calc(17px * var(--ui)); white-space:nowrap;
+  padding:calc(10px * var(--ui)) calc(10px * var(--ui));
+}
+.shop-talk .big-btn:disabled{ opacity:.55; }
+/* ちずの おみせノード */
+.map-node.shop .mn-sub{ color:#6b4a00; }

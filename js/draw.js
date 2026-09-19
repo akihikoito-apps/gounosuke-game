@@ -9689,7 +9689,119 @@ const CASTLE_DRAWERS = {
   storm: drawStormCastle,
 };
 
+/* =====================================================================
+   ネコス ── ターツーマーキーに おそわれても いきのこった にんげんの ひとり。
+   「ネコスの店」で なかまたちに そざいを わけて くれます。
+
+   ごうのすけくんの えの とおり、
+     ・まるい はいいろの あたま、うえに くろい もじゃもじゃの かみ
+     ・たてぼう 2ほんの め、にっこりの くち
+     ・ほそながい からだ、りょうての かわりに ★やじるし★
+     ・したは ひろがった すそから 2ほんの とがった あし
+   (0,0) は あしもと。うえが マイナス。                                */
+function drawNekos(ctx, st) {
+  const t = (st && st.t) || 0;
+  const GREY = '#c9c7bf', INK = '#20201e';
+  const wobble = Math.sin(t * 2) * 1.2;
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 2.2;
+  ctx.fillStyle = GREY;
+
+  /* --- あし（ひろがった すそ → 2ほんの とがった あし）--- */
+  ctx.beginPath();
+  ctx.moveTo(-17, -62);
+  ctx.lineTo(-30, -38);
+  ctx.lineTo(-13, 0);          // ひだりあしの さき
+  ctx.lineTo(-4, -16);
+  ctx.lineTo(4, -16);
+  ctx.lineTo(13, 0);           // みぎあしの さき
+  ctx.lineTo(30, -38);
+  ctx.lineTo(17, -62);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  /* --- からだ（ほそながい かどまる）--- */
+  roundRect(ctx, -19, -125, 38, 66, 8);
+  ctx.fill(); ctx.stroke();
+
+  /* --- りょうての やじるし --- */
+  for (const d of [-1, 1]) {
+    ctx.save();
+    ctx.scale(d, 1);
+    ctx.translate(0, wobble * (d > 0 ? 1 : -1));
+    ctx.beginPath();
+    ctx.moveTo(17, -111);        // しゃふとの うえ
+    ctx.lineTo(40, -111);
+    ctx.lineTo(40, -119);        // やじりの かた
+    ctx.lineTo(62, -104);        // やじりの さき
+    ctx.lineTo(40, -89);
+    ctx.lineTo(40, -97);
+    ctx.lineTo(17, -97);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* --- あたま --- */
+  ctx.beginPath();
+  ctx.arc(0, -158, 35, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  /* --- め（たてぼう 2ほん）--- */
+  ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-9, -171); ctx.lineTo(-8, -149);
+  ctx.moveTo(9, -171);  ctx.lineTo(10, -149);
+  ctx.stroke();
+
+  /* --- くち（にっこり）--- */
+  ctx.beginPath();
+  ctx.arc(0, -142, 14, 0.24 * Math.PI, 0.76 * Math.PI);
+  ctx.stroke();
+
+  /* --- かみ（くろい もじゃもじゃ）--- */
+  ctx.save();
+  ctx.fillStyle = '#141414'; ctx.strokeStyle = '#141414';
+  ctx.lineWidth = 3.0; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  /* あたまの うえを おおう くろい かたまり（したの ふちは ぎざぎざ）*/
+  ctx.beginPath();
+  for (let i = 0; i <= 26; i++) {
+    const a = Math.PI + (i / 26) * Math.PI;
+    const r = 35.5;
+    const x = Math.cos(a) * r, y = -158 + Math.sin(a) * r;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  /* まえがみの ぎざぎざ（みぎ → ひだり）*/
+  [[32, -182], [24, -170], [17, -184], [8, -169], [1, -183],
+   [-8, -170], [-16, -184], [-24, -171], [-32, -181]].forEach(pt => ctx.lineTo(pt[0], pt[1]));
+  ctx.closePath();
+  ctx.fill();
+  /* もじゃもじゃの せん（ぐるぐる）*/
+  for (let k = 0; k < 5; k++) {
+    ctx.beginPath();
+    for (let i = 0; i <= 44; i++) {
+      const a = Math.PI * (1.02 + k * 0.19) + (i / 44) * Math.PI * 0.40;
+      const r = 17 + k * 3.4 + Math.sin(i * 2.1 + k * 1.3) * 10;
+      ctx.lineTo(Math.cos(a) * r, -180 + Math.sin(a) * r * 0.66);
+    }
+    ctx.stroke();
+  }
+  /* よこに はねた けさき */
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(29, -177); ctx.quadraticCurveTo(43, -175, 49, -182);
+  ctx.moveTo(-31, -172); ctx.quadraticCurveTo(-42, -172, -46, -178);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.restore();
+}
+
 const DRAWERS = {
+  nekos: drawNekos,
   runrunwisp: drawRunrunwisp,
   houkigob: drawHoukigob,
   magicrabbit: drawMagicrabbit,
