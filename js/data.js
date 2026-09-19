@@ -2545,6 +2545,57 @@ const ENEMIES = {
   },
 
   /* ==========================================================================
+     ★ だい15しょう「虫に しはいされた まち」の ざこ 3しゅるい
+     ========================================================================== */
+
+  /* --- トゲハヤさん（タツマキ）---
+       もとの トゲハヤさんの あたまの トゲが、おおきな たつまきに なった すがた。
+       まわりに かぜを まきちらして、なかまを ときどき ふきとばす。          */
+  togehaya_t: {
+    id: 'togehaya_t', name: 'トゲハヤさん（タツマキ）',
+    rarity: 'R',
+    attr: 'none',                         // むぞくせい
+    hp: 900,    atk: 150,  range: 80,   speed: 26,
+    attackInterval: 1.7,   attackWindup: 0.32,
+    kbCount: 4, scale: 1.0,
+    attackType: 'single', projectile: null,
+    knockbackChance: 0.20,                // かぜで ふきとばす
+    money: 110,
+  },
+
+  /* --- ハッチー ---
+       みずいろの ちゅうしゃきの むし。そらを とんで きて、はやい はやさで
+       ちくちく さして くる。すこしだけ ちを すう。                        */
+  hatchie: {
+    id: 'hatchie', name: 'ハッチー',
+    rarity: 'R',
+    attr: 'beast',                        // けもの
+    hp: 520,    atk: 190,  range: 96,   speed: 52,
+    attackInterval: 1.2,   attackWindup: 0.25,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    flying: true,
+    drain: { rate: 0.25 },                // すこしだけ すいとる
+    money: 120,
+  },
+
+  /* --- カマジロウ ---
+       みどりの カマキリ。あしは おそくて かたい。りょうての かまを
+       ふりおろす いちげきが おもい。まえせんを くずしに くる やくです。   */
+  kamajirou: {
+    id: 'kamajirou', name: 'カマジロウ',
+    rarity: 'GR',
+    attr: 'beast',                        // けもの
+    hp: 2100,   atk: 300,  range: 130,  speed: 22,
+    attackInterval: 2.6,   attackWindup: 0.60,
+    kbCount: 3, scale: 1.15,
+    /* ★はんいは せまめ。たつまきほうと かさなると まえせんが
+         いつまでも たてなおせなく なる ため（v6.28 で ちょうせい）*/
+    attackType: 'area',  areaRadius: 70,   projectile: null,
+    money: 200,
+  },
+
+  /* ==========================================================================
      ★★★ 3大王 ★★★
      ターツーマーキーの ちゅうじつな しもべ 3たい。
      これから でて くる エリアの ボスとして 1たいずつ たちはだかります。
@@ -2564,7 +2615,7 @@ const ENEMIES = {
     attr: 'power',                        // パワー（けものに つよい／まじゅつしに よわい）
     hp: 24000,  atk: 620,  range: 205,  speed: 22,
     attackInterval: 2.2,   attackWindup: 0.50,
-    kbCount: 99, scale: 2.1,
+    kbCount: 99, scale: 1.7,
     attackType: 'area',  areaRadius: 175,  projectile: null,
     knockbackChance: 0.35,                // けの かたまりで ふきとばす
     kbImmune: true,
@@ -2582,7 +2633,7 @@ const ENEMIES = {
     attr: 'none',                         // むぞくせい（あいしょうの ゆうり・ふりが ない）
     hp: 34000,  atk: 780,  range: 190,  speed: 18,
     attackInterval: 2.6,   attackWindup: 0.60,
-    kbCount: 99, scale: 2.3,
+    kbCount: 99, scale: 1.8,
     attackType: 'single',  projectile: null,
     multiHit: { count: 2, delay: 0.22 },  // あたまの くちと どうの くちで 2かい
     kbImmune: true, slowImmune: true, stunImmune: true,
@@ -2610,17 +2661,15 @@ const ENEMIES = {
     attr: 'beast',                        // けもの（まじゅつしに つよい／パワーに よわい）
     hp: 15300,  atk: 371,  range: 185,  speed: 30,
     attackInterval: 1.5,   attackWindup: 0.35,
-    kbCount: 99, scale: 1.9,
+    kbCount: 99, scale: 1.45,
     attackType: 'area',  areaRadius: 150,  projectile: null,
     flying: true,                         // かなので とんで いる
     drain: { rate: 0.5 },                 // ちを すって かいふく
     stun:  { chance: 0.40, duration: 1.0 },
     dodge: 0.50,                          // こうげきを 50% かわす
     kbImmune: true,
-    /* ★3しゅるいの ざこと いっしょに うごきます。
-         ざこキャラは これから つくるので、できたら ここに id を 3つ ならべます。
-         （id が なければ なにも よばれません）                              */
-    escort: { id: [], count: 1, interval: 11, first: 7 },
+    /* ★3しゅるいの ざこと いっしょに うごきます（でる たびに ランダム）*/
+    escort: { id: ['togehaya_t', 'hatchie', 'kamajirou'], count: 1, interval: 11, first: 7 },
     money: 1200,
     isBoss: true,
   },
@@ -2758,6 +2807,23 @@ const BACKGROUNDS = {
     deco: 'star',
   },
 
+  /* 虫に しはいされた まち（だい15しょう 1〜6面）── くさはらは そのままだが
+     そらが すこし どんよりして いて、とおくに むしの かげが みえる */
+  mushitown: {
+    sky: ['#7bbad6', '#bcd9c6', '#e7e7bd'],
+    hillFar: '#93b06a', hillNear: '#6f9a44',
+    ground: '#7d6536', groundTop: '#9a8047',
+    deco: 'bugs',
+  },
+
+  /* チューチューの す（だい15しょう 7面）── ★そらいっぱいに むしが とんで いる★ */
+  bugsky: {
+    sky: ['#5ec8f5', '#bde8fb', '#f3f7c9'],
+    hillFar: '#9ccc65', hillNear: '#7cb342',
+    ground: '#8d6e3a', groundTop: '#a1874a',
+    deco: 'bugswarm',
+  },
+
   /* ロボこうじょう ── 小惑星ぷりぷりの ボスステージ（3面）。しゃしんの はいけい */
   robofactory: {
     photo: 'robofactory',
@@ -2879,6 +2945,154 @@ const STAGES = [
       { at: 16, id: 'togehaya', count: 1 },
       { at: 30, id: 'togehaya', count: 2, gap: 2.0 },
       { at: 50, id: 'togehaya', count: 2, gap: 2.5, repeat: 22 },
+    ],
+  },
+
+  /* ==========================================================================
+     15しょう ★虫に しはいされた まち★（ぜんぶで 7コース）
+
+     ネコスの店の さきに ある まち。3大王の ひとり「チューチュー」と
+     その てしたの むしたちに のっとられて います。
+     ★7コース とも たつまきほうが とんで きます★（18びょうごと・67%）。
+
+     でて くる ざこは 3しゅるい。
+       ・トゲハヤさん（タツマキ）… かべ やくで、ときどき なかまを ふきとばす
+       ・ハッチー              … そらを とぶ。はやくて さして くる
+       ・カマジロウ            … おそくて かたい。かまの いちげきが おもい
+     7コースめで 大ボス「チューチュー」が まって います。
+     ========================================================================== */
+  {
+    no: 121, chapter: 15, course: 1,
+    name: 'むしの いりぐち',
+    desc: 'トゲハヤさんが たつまきを かぶって いる。まずは かべを きらさない ように。',
+    bg: 'mushitown',
+    castleHp: 2200,
+    power: 3.6,
+    /* ★たつまきほう：この しょうは 1コースずつ きびしく なって いきます */
+    tornado: { interval: 34, chance: 0.40, first: 22 },
+    drops: ['wood', 'stone', 'cloth'],
+    reward: { coins: 4, exp: 5200 },
+    waves: [
+      { at: 3,  id: 'togehaya_t', count: 1 },
+      { at: 14, id: 'togehaya_t', count: 1 },
+      { at: 26, id: 'togehaya_t', count: 2, gap: 2.5 },
+      { at: 44, id: 'togehaya_t', count: 2, gap: 3, repeat: 16 },
+    ],
+  },
+  {
+    no: 122, chapter: 15, course: 2,
+    name: 'ブンブン どおり',
+    desc: 'そらから ハッチーが とんで くる。はやいので とおくから たおしたい。',
+    bg: 'mushitown',
+    castleHp: 2800,
+    power: 3.6,
+    tornado: { interval: 32, chance: 0.45, first: 21 },
+    drops: ['wood', 'iron', 'cloth'],
+    reward: { coins: 4, exp: 5600 },
+    waves: [
+      { at: 3,  id: 'togehaya_t', count: 1 },
+      { at: 12, id: 'hatchie',    count: 1 },
+      { at: 22, id: 'hatchie',    count: 2, gap: 1.6 },
+      { at: 34, id: 'togehaya_t', count: 1 },
+      { at: 44, id: 'hatchie',    count: 2, gap: 2, repeat: 14 },
+      { at: 52, id: 'togehaya_t', count: 1, repeat: 16 },
+    ],
+  },
+  {
+    no: 123, chapter: 15, course: 3,
+    name: 'かまの こうえん',
+    desc: 'おおきな カマジロウが あらわれる。おもい かまの いちげきに きを つけて！',
+    bg: 'mushitown',
+    castleHp: 2600,
+    power: 2.2,
+    tornado: { interval: 30, chance: 0.50, first: 20 },
+    drops: ['stone', 'iron', 'string'],
+    reward: { coins: 5, exp: 6000 },
+    waves: [
+      { at: 3,  id: 'togehaya_t', count: 2, gap: 2 },
+      { at: 18, id: 'kamajirou',  count: 1 },
+      { at: 34, id: 'hatchie',    count: 2, gap: 1.8 },
+      { at: 48, id: 'togehaya_t', count: 2, gap: 2.5, repeat: 22 },
+      { at: 60, id: 'kamajirou',  count: 1, repeat: 46 },
+    ],
+  },
+  {
+    no: 124, chapter: 15, course: 4,
+    name: 'はりの ろじ',
+    desc: 'ハッチーの むれ。かずが おおいので、はんい こうげきが ほしい。',
+    bg: 'mushitown',
+    castleHp: 2900,
+    power: 3.0,
+    tornado: { interval: 27, chance: 0.53, first: 19 },
+    drops: ['iron', 'cloth', 'glue'],
+    reward: { coins: 5, exp: 6400 },
+    waves: [
+      { at: 3,  id: 'hatchie',    count: 2, gap: 1.4 },
+      { at: 16, id: 'togehaya_t', count: 1 },
+      { at: 26, id: 'hatchie',    count: 3, gap: 1.2 },
+      { at: 42, id: 'kamajirou',  count: 1 },
+      { at: 52, id: 'hatchie',    count: 3, gap: 1.4, repeat: 13 },
+      { at: 66, id: 'togehaya_t', count: 1, repeat: 15 },
+    ],
+  },
+  {
+    no: 125, chapter: 15, course: 5,
+    name: 'むしの ひろば',
+    desc: '3しゅるいが いっぺんに おしよせて くる。たつまきほうにも きを つけて。',
+    bg: 'mushitown',
+    castleHp: 2900,
+    power: 1.8,
+    tornado: { interval: 26, chance: 0.56, first: 18 },
+    drops: ['stone', 'alumi', 'string'],
+    reward: { coins: 6, exp: 6800 },
+    waves: [
+      { at: 3,  id: 'togehaya_t', count: 2, gap: 2 },
+      { at: 14, id: 'hatchie',    count: 2, gap: 1.4 },
+      { at: 28, id: 'kamajirou',  count: 1 },
+      { at: 42, id: 'hatchie',    count: 3, gap: 1.3, repeat: 16 },
+      { at: 50, id: 'togehaya_t', count: 2, gap: 2.2, repeat: 20 },
+      { at: 64, id: 'kamajirou',  count: 1, repeat: 44 },
+    ],
+  },
+  {
+    no: 126, chapter: 15, course: 6,
+    name: 'よるの すづくり',
+    desc: 'カマジロウが なんびきも。おもい こうげきを かべで うけとめよう。',
+    bg: 'mushitown',
+    castleHp: 3100,
+    power: 1.7,
+    tornado: { interval: 25, chance: 0.58, first: 17 },
+    drops: ['iron', 'alumi', 'glue'],
+    reward: { coins: 6, exp: 7200 },
+    waves: [
+      { at: 3,  id: 'kamajirou',  count: 1 },
+      { at: 16, id: 'togehaya_t', count: 2, gap: 2 },
+      { at: 30, id: 'kamajirou',  count: 2, gap: 4 },
+      { at: 46, id: 'hatchie',    count: 3, gap: 1.3, repeat: 18 },
+      { at: 60, id: 'kamajirou',  count: 1, repeat: 42 },
+    ],
+  },
+  {
+    no: 127, chapter: 15, course: 7,
+    name: 'チューチューの す',
+    desc: '★大ボス★ 3大王の ひとり「チューチュー」。ちを すい、うごきを とめ、こうげきを かわす。',
+    bg: 'bugsky',
+    castleHp: 3000,
+    power: 1.9,
+    /* ★7コースめは 竜巻編と おなじ フルスペック */
+    tornado: { interval: 24, chance: 0.60, first: 16 },
+    drops: ['alumi', 'cloth', 'glue'],
+    reward: { coins: 10, exp: 12000 },
+    waves: [
+      { at: 3,            id: 'togehaya_t', count: 2, gap: 2 },
+      { at: 16,           id: 'hatchie',    count: 3, gap: 1.3 },
+      { at: 32,           id: 'kamajirou',  count: 1 },
+      { atCastleHp: 0.82, id: 'chuchu',     count: 1 },   /* ★大ボス */
+      /* ★チューチュー じしんも 11びょうごとに ざこを よぶ ので、
+           ここの てきの でかたは ひかえめに して あります */
+      { at: 52,           id: 'hatchie',    count: 2, gap: 1.6, repeat: 22 },
+      { at: 64,           id: 'togehaya_t', count: 2, gap: 2.4, repeat: 26 },
+      { at: 80,           id: 'kamajirou',  count: 1, repeat: 52 },
     ],
   },
 
@@ -4663,6 +4877,7 @@ function starRate(kind, value) {
    ★じぐざぐに ならべて、コースの ないようと じめんが あう ように して います。
        うえの れつ … はがね（まち）・こうじょう・まどうしの さと
        したの れつ … のはら・けものみち（もり）・きんかい（うみ）・闇の頂  */
+
 /* ボスラッシュ（だい7しょう）を ぜんぶ クリアした ときの ごほうび */
 const BOSSRUSH = {
   chapter: 7,
@@ -5282,6 +5497,7 @@ const CHAPTERS = {
   13:{ name: '新・始まりの門', short: 'あたらしいもん', x: 0.16, y: 0.55, icon: '⛩️', world: 'storm' },
   /* ★たたかいの ない ばしょ（shop: true）。タップすると おみせに はいります */
   14:{ name: 'ネコスの店', short: 'ネコスのみせ', x: 0.37, y: 0.70, icon: '☕', world: 'storm', shop: true },
+  15:{ name: '虫に支配された町', short: 'むしのまち', x: 0.66, y: 0.38, icon: '🦟', world: 'storm' },
 };
 
 
@@ -5841,6 +6057,17 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.28', date: '2026-09-19',
+    title: '★だい15しょう「虫に支配された町」（ぜんぶで 7コース）',
+    items: [
+      'ネコスの店の さきに、あたらしい まちが できました。3大王の ひとり「チューチュー」と その てしたの むしたちに のっとられて います。',
+      '★ざこキャラ 3しゅるい★ ── トゲハヤさん（タツマキ）… あたまが たつまきに なった すがた。20%で なかまを ふきとばす。／ ハッチー … みずいろの ちゅうしゃきの むし。そらを とんで きて はやい。すこし ちを すう。／ カマジロウ … みどりの カマキリ。おそくて かたく、かまの いちげきが おもい。',
+      '7コースめ「チューチューの す」で 大ボス チューチューが まって います。はいけいは ★そらいっぱいに むしが とんで いる★ ばしょ です。',
+      '★たつまきほうは 7コース ぜんぶに あります★。ただし 1コースずつ きびしく なる ように しました（34びょう/40% → 24びょう/60%）。',
+      'クリアまでの じかんは 103・97・131・117・169・223・166びょう（30せん ずつ はかりました）。7コースめだけ 26/30の かちで、いちばん てごわい です。',
+    ],
+  },
   {
     ver: '6.27', date: '2026-09-19',
     title: '★あいしょうひょう（ホームに あたらしい ボタン）',

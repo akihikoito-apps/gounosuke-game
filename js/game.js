@@ -1356,6 +1356,51 @@ const Game = {
   },
 
   /* そらの かざり（ステージごとに かわる）*/
+  /* そらを とんで いる ちいさな むし（はいけいの かざり）*/
+  drawSkyBug(ctx, x, y, s, kind, t) {
+    const flap = Math.sin(t * 16) * 0.35;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(s / 10, s / 10);
+    ctx.globalAlpha = 0.85;
+    if (kind === 'hatchie') {
+      /* みずいろの ちゅうしゃき */
+      ctx.fillStyle = '#5bb6e8';
+      ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillRect(5, -3, 16, 6);
+      ctx.fillStyle = '#e05a86'; ctx.fillRect(20, -5, 2.5, 10);
+      ctx.fillStyle = '#fff';
+      for (let i = 0; i < 3; i++) ctx.fillRect(8 + i * 4, -2, 1.2, 4);
+      ctx.beginPath(); ctx.moveTo(-2, 4); ctx.lineTo(-20, 14); ctx.lineTo(-4, 8); ctx.closePath();
+      ctx.fillStyle = '#5bb6e8'; ctx.fill();
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-2, -6); ctx.lineTo(-2, -2); ctx.moveTo(2, -6); ctx.lineTo(2, -2); ctx.stroke();
+    } else {
+      /* か（グレーの からだ・はね・ながい くち）*/
+      ctx.fillStyle = '#8d8d8d';
+      ctx.beginPath(); ctx.ellipse(0, 0, 8, 5, 0.25, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#4a4a4a';
+      for (let i = 0; i < 3; i++) ctx.fillRect(-2 + i * 4, -3, 1.8, 7);
+      ctx.fillStyle = '#e8e8e8';
+      ctx.save(); ctx.rotate(-0.5 + flap);
+      ctx.beginPath(); ctx.ellipse(-6, -6, 9, 3.2, -0.35, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      ctx.save(); ctx.rotate(-0.1 + flap);
+      ctx.beginPath(); ctx.ellipse(-7, -7, 8, 3.0, -0.15, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(7, 1); ctx.lineTo(18, 3); ctx.stroke();
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(-2 + i * 3, 4); ctx.lineTo(-6 + i * 3, 11);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(7, -3, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(8, -3, 1.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  },
+
   drawDeco(ctx, kind) {
     const V = this.view, t = this.time;
     if (!kind || kind === 'none') return;
@@ -1371,6 +1416,30 @@ const Game = {
         ctx.arc(cx + r * 0.9, cy + r * 0.2, r * 0.75, 0, Math.PI * 2);
         ctx.arc(cx - r * 0.9, cy + r * 0.25, r * 0.65, 0, Math.PI * 2);
         ctx.fill();
+      }
+    } else if (kind === 'bugs' || kind === 'bugswarm') {
+      /* ★そらを とんで いる むしたち（だい15しょう「虫に しはいされた まち」）
+           bugs      … ときどき とおくを よこぎる ていど
+           bugswarm  … そらいっぱいに むれて いる（チューチューの す）  */
+      const n = (kind === 'bugswarm') ? 11 : 5;
+      /* くもも すこし だす */
+      ctx.fillStyle = 'rgba(255,255,255,0.70)';
+      for (let i = 0; i < 3; i++) {
+        const cx = ((i * 0.37 + t * 0.005) % 1.25 - 0.12) * V.w;
+        const cy = V.groundY * (0.16 + (i % 2) * 0.16);
+        const r = V.groundY * 0.075;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.arc(cx + r * 0.9, cy + r * 0.2, r * 0.72, 0, Math.PI * 2);
+        ctx.arc(cx - r * 0.9, cy + r * 0.25, r * 0.62, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (let i = 0; i < n; i++) {
+        const sp = 0.020 + (i % 4) * 0.007;
+        const bx = ((i * 0.171 + t * sp) % 1.2 - 0.1) * V.w;
+        const by = V.groundY * (0.10 + ((i * 37) % 55) / 100) + Math.sin(t * 2 + i) * V.groundY * 0.02;
+        const bs = V.groundY * (0.030 + (i % 3) * 0.008);
+        this.drawSkyBug(ctx, bx, by, bs, (i % 3 === 0) ? 'hatchie' : 'mosquito', t + i);
       }
     } else if (kind === 'sun') {
       const cx = V.w * 0.5, cy = V.groundY * 0.82, r = V.groundY * 0.20;
