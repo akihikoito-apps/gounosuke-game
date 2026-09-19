@@ -151,10 +151,12 @@ html, body {
 }
 .home-topbar .mini-btn { margin-left:auto; background:rgba(13,48,80,.55); }
 
-.home-menu { grid-column:1; grid-row:2; display:flex; flex-direction:column; gap:calc(12px * var(--ui)); justify-content:flex-start; }
+/* ★ボタンが 5つに ふえた ので、すきまと よはくを すこし つめて
+   たなや ガチャが がめんの したに はみださない ように します */
+.home-menu { grid-column:1; grid-row:2; display:flex; flex-direction:column; gap:calc(8px * var(--ui)); justify-content:flex-start; min-height:0; }
 .home-btn {
   display:flex; align-items:center; gap:calc(10px * var(--ui));
-  padding:calc(14px * var(--ui)) calc(18px * var(--ui));
+  padding:calc(10px * var(--ui)) calc(16px * var(--ui));
   border:none; border-radius:calc(14px * var(--ui));
   font-family:inherit; color:#0d3050; cursor:pointer; text-align:left;
   box-shadow:0 calc(4px * var(--ui)) 0 rgba(0,0,0,.18);
@@ -185,11 +187,11 @@ html, body {
   border-top:calc(15px * var(--ui)) solid #e0b431;
 }
 
-.home-shelf { grid-column:1; grid-row:3; position:relative; width:calc(120px * var(--ui)); }
-.shelf-items { display:flex; gap:calc(6px * var(--ui)); justify-content:center; font-size:calc(24px * var(--ui)); line-height:1; }
+.home-shelf { grid-column:1; grid-row:3; position:relative; width:calc(110px * var(--ui)); align-self:end; }
+.shelf-items { display:flex; gap:calc(6px * var(--ui)); justify-content:center; font-size:calc(20px * var(--ui)); line-height:1; }
 .shelf-top { height:calc(12px * var(--ui)); background:#6b4a2a; border-radius:3px; margin-top:calc(2px * var(--ui)); }
 .shelf-legs { display:flex; justify-content:space-between; padding:0 calc(14px * var(--ui)); }
-.shelf-legs i { display:block; width:calc(16px * var(--ui)); height:calc(30px * var(--ui)); background:#6b4a2a; }
+.shelf-legs i { display:block; width:calc(15px * var(--ui)); height:calc(24px * var(--ui)); background:#6b4a2a; }
 
 .gacha-btn {
   grid-column:2; grid-row:3;
@@ -1365,3 +1367,54 @@ body.dragging-slot #party-slots { touch-action:none; }
 .story-btns{ display:flex; align-items:center; gap:calc(10px * var(--ui)); }
 .story-page{ color:#9fb0d0; font-size:calc(13px * var(--ui)); }
 .story-btns .big-btn{ margin-left:auto; }
+
+/* ============ ムービー えらび ============ */
+.home-btn.b5 { background:linear-gradient(180deg,#efe0fa,#d9c2f0); }
+
+.movie-wrap{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg,#241a3e,#0c0818);
+  padding:calc(10px * var(--ui));
+}
+.movie-top{ display:flex; align-items:center; gap:calc(10px * var(--ui)); flex:0 0 auto; }
+.movie-title{
+  margin:0; color:#fff; font-size:calc(20px * var(--ui)); letter-spacing:1px;
+  text-shadow:0 calc(2px * var(--ui)) 0 rgba(0,0,0,.4);
+}
+.movie-note{
+  margin:calc(6px * var(--ui)) 0 0; flex:0 0 auto;
+  color:#c6b8e6; font-size:calc(12px * var(--ui));
+}
+.movie-list{
+  flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  margin-top:calc(8px * var(--ui)); padding-right:calc(4px * var(--ui));
+  display:flex; flex-direction:column; gap:calc(10px * var(--ui));
+}
+.movie-card{
+  display:flex; align-items:center; gap:calc(12px * var(--ui));
+  width:100%; text-align:left;
+  background:linear-gradient(180deg,#fff,#ece4fb);
+  border:none; border-radius:calc(16px * var(--ui));
+  padding:calc(10px * var(--ui));
+  box-shadow:0 calc(4px * var(--ui)) 0 rgba(0,0,0,.3);
+  cursor:pointer;
+}
+.movie-card:active{ transform:translateY(calc(2px * var(--ui))); }
+.movie-card.locked{ filter:grayscale(.85) brightness(.85); }
+.movie-card canvas{
+  flex:0 0 auto; width:calc(104px * var(--ui)); height:calc(62px * var(--ui));
+  border-radius:calc(10px * var(--ui)); background:#120c22; display:block;
+}
+.movie-body{ flex:1 1 auto; min-width:0; }
+.movie-name{ display:block; font-size:calc(17px * var(--ui)); font-weight:800; color:#33215c; }
+.movie-desc{
+  display:block; font-size:calc(12px * var(--ui)); color:#4a3b66;
+  margin-top:calc(4px * var(--ui)); line-height:1.4;
+}
+.movie-play{
+  flex:0 0 auto; font-size:calc(13px * var(--ui)); font-weight:800; color:#5b2ea8;
+  background:#e4d7fb; border-radius:calc(10px * var(--ui));
+  padding:calc(6px * var(--ui)) calc(10px * var(--ui));
+}
+.movie-card.locked .movie-play{ color:#666; background:#ddd; }

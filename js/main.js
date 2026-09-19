@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.21';
+  const GAME_VERSION = '6.22';
 
 
   /* =================================================
@@ -3716,14 +3716,39 @@
     }
     ctx.restore();
   }
-  /* キャラの えが あしもとから どれだけ うえに のびるか（ピクセルで はかった あたい）*/
-  const STORY_ART_UP = { tatsumarky: 152 };
+  /* キャラの えが あしもとから どれだけ うえに のびるかを、いちど かいて
+     ピクセルから はかります（きめうちの すうじだと あたまが きれます）。
+     れい：ターツーマーキーは あたまの うえの たつまきまで いれて 152。 */
+  const storyUpCache = {};
+  function storyArtUp(drawId) {
+    if (storyUpCache[drawId] !== undefined) return storyUpCache[drawId];
+    const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS[drawId] : null;
+    if (!fn || typeof document === 'undefined') { storyUpCache[drawId] = 110; return 110; }
+    const S = 320, OY = S * 0.92, K = 0.6;
+    let up = 110;
+    try {
+      const off = document.createElement('canvas');
+      off.width = S; off.height = S;
+      const c = off.getContext('2d', { willReadFrequently: true });
+      c.save(); c.translate(S / 2, OY); c.scale(K, K);
+      fn(c, { t: 0.7, moving: false, atk: -1, hpRatio: 1, hpRate: 1, roll: 0.35 });
+      c.restore();
+      const d = c.getImageData(0, 0, S, S).data;
+      let top = S;
+      for (let y = 0; y < S && top === S; y++) {
+        for (let x = 0; x < S; x++) { if (d[(y * S + x) * 4 + 3] > 24) { top = y; break; } }
+      }
+      if (top < S) up = Math.max(30, (OY - top) / K);
+    } catch (e) { /* はかれなければ めやすの 110 */ }
+    storyUpCache[drawId] = up;
+    return up;
+  }
   function stChar(ctx, id, x, yBase, h, st) {
     const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS[id] : null;
     if (!fn) return;
     ctx.save();
     ctx.translate(x, yBase);
-    const sc = h / (STORY_ART_UP[id] || 110);
+    const sc = h / storyArtUp(id);
     ctx.scale(sc, sc);
     fn(ctx, st || { t: 0.7, moving: false, atk: -1, hpRatio: 1, roll: 0.35 });
     ctx.restore();
@@ -3792,60 +3817,449 @@
     ctx.restore();
   }
 
+  /* --- ばめんを かざる どうぐ（v6.22 で ふやしました）--- */
+
+  /* ちいさな いえ。tilt を つけると かぜで かたむいて みえます */
+  function stHouse(ctx, x, yBase, w, tilt, wall, roof) {
+    const h = w * 0.78;
+    ctx.save();
+    ctx.translate(x, yBase);
+    ctx.rotate(tilt || 0);
+    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = Math.max(1.5, w * 0.045);
+    ctx.fillStyle = wall || '#f3e6c8';
+    ctx.fillRect(-w / 2, -h, w, h); ctx.strokeRect(-w / 2, -h, w, h);
+    ctx.fillStyle = roof || '#c25b3f';
+    ctx.beginPath();
+    ctx.moveTo(-w * 0.60, -h);
+    ctx.lineTo(0, -h - w * 0.42);
+    ctx.lineTo(w * 0.60, -h);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#7a5230';
+    ctx.fillRect(-w * 0.13, -h * 0.46, w * 0.26, h * 0.46);
+    ctx.strokeRect(-w * 0.13, -h * 0.46, w * 0.26, h * 0.46);
+    ctx.restore();
+  }
+
+  /* き。bend を つけると かぜに あおられます */
+  function stTree(ctx, x, yBase, h, bend) {
+    ctx.save();
+    ctx.translate(x, yBase);
+    ctx.strokeStyle = '#6d4c2f'; ctx.lineWidth = Math.max(2, h * 0.09);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo((bend || 0) * h * 0.30, -h * 0.55, (bend || 0) * h * 0.75, -h * 0.82);
+    ctx.stroke();
+    ctx.fillStyle = '#4f9a3d'; ctx.strokeStyle = '#2f5f24'; ctx.lineWidth = Math.max(1.5, h * 0.035);
+    ctx.beginPath();
+    ctx.ellipse((bend || 0) * h * 0.80, -h * 0.90, h * 0.36, h * 0.28, (bend || 0) * 0.5, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ちいさな ひと。pose は 'stand' / 'bow'（ひれふす）/ 'run'（にげる）*/
+  function stPerson(ctx, x, yBase, h, pose, color) {
+    ctx.save();
+    ctx.translate(x, yBase);
+    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = Math.max(1.5, h * 0.09);
+    ctx.lineCap = 'round';
+    if (pose === 'bow') {
+      /* ひれふす すがた（あたまを じめんに つけて、おじぎ）。
+         くらい じめんでも わかる ように、ふとく あかるい いろで かきます。*/
+      ctx.strokeStyle = '#efe7d4'; ctx.lineWidth = Math.max(2, h * 0.15);
+      ctx.beginPath();                       // おりまげた あし（うしろ）
+      ctx.moveTo(-h * 0.50, -h * 0.07);
+      ctx.lineTo(-h * 0.20, -h * 0.07);
+      ctx.stroke();
+      ctx.beginPath();                       // せなか（もりあがった アーチ）
+      ctx.moveTo(-h * 0.30, -h * 0.10);
+      ctx.quadraticCurveTo(-h * 0.02, -h * 0.46, h * 0.18, -h * 0.26);
+      ctx.stroke();
+      ctx.beginPath();                       // まえに のばした うで
+      ctx.moveTo(h * 0.16, -h * 0.28);
+      ctx.lineTo(h * 0.46, -h * 0.06);
+      ctx.stroke();
+      ctx.fillStyle = color || '#ffd9b3';    // あたま（じめんの ちかく）
+      ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = Math.max(1.5, h * 0.06);
+      ctx.beginPath(); ctx.arc(h * 0.30, -h * 0.14, h * 0.17, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+    /* あし */
+    /* あし */
+    ctx.beginPath();
+    if (pose === 'run') { ctx.moveTo(-h * 0.16, 0); ctx.lineTo(0, -h * 0.40); ctx.lineTo(h * 0.20, -h * 0.05); }
+    else { ctx.moveTo(-h * 0.11, 0); ctx.lineTo(0, -h * 0.40); ctx.lineTo(h * 0.11, 0); }
+    ctx.stroke();
+    /* からだ */
+    ctx.beginPath(); ctx.moveTo(0, -h * 0.40); ctx.lineTo(0, -h * 0.70); ctx.stroke();
+    /* うで */
+    ctx.beginPath();
+    if (pose === 'run') { ctx.moveTo(-h * 0.22, -h * 0.80); ctx.lineTo(0, -h * 0.62); ctx.lineTo(h * 0.20, -h * 0.80); }
+    else { ctx.moveTo(-h * 0.20, -h * 0.48); ctx.lineTo(0, -h * 0.62); ctx.lineTo(h * 0.20, -h * 0.48); }
+    ctx.stroke();
+    /* あたま */
+    ctx.fillStyle = color || '#ffd9b3';
+    ctx.beginPath(); ctx.arc(0, -h * 0.82, h * 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* まちなみ（じめん＋いえ＋き）。bend を あげると あらしに なります */
+  function stTownScape(ctx, W, H, bend, dark) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    if (dark) { g.addColorStop(0, '#3a3450'); g.addColorStop(1, '#6b6478'); }
+    else      { g.addColorStop(0, '#9fd8f5'); g.addColorStop(1, '#e6f6ff'); }
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = dark ? '#43603c' : '#79c64c';
+    ctx.fillRect(0, H * 0.78, W, H * 0.22);
+    ctx.fillStyle = dark ? '#37502f' : '#68b23f';
+    ctx.fillRect(0, H * 0.78, W, H * 0.02);
+    const gy = H * 0.80, u = Math.min(W, H);
+    stTree(ctx, W * 0.08, gy, u * 0.20, bend);
+    stHouse(ctx, W * 0.24, gy, u * 0.20, bend * 0.16);
+    stHouse(ctx, W * 0.42, gy + H * 0.02, u * 0.15, bend * 0.10, '#e8dcd0', '#8a5b9c');
+    stTree(ctx, W * 0.57, gy, u * 0.16, bend);
+    stHouse(ctx, W * 0.80, gy, u * 0.18, bend * 0.13, '#f0e8d2', '#3f7fa8');
+    stTree(ctx, W * 0.94, gy + H * 0.02, u * 0.18, bend);
+  }
+
+  /* かぜに とばされる かけら */
+  function stDebris(ctx, W, H, n) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(70,62,88,.7)'; ctx.fillStyle = 'rgba(120,108,140,.75)';
+    for (let i = 0; i < n; i++) {
+      const x = ((i * 9301 + 49297) % 233280) / 233280 * W;
+      const y = ((i * 4021 + 12345) % 100003) / 100003 * H * 0.72;
+      const s = 3 + ((i * 7) % 5) * 2;
+      ctx.save(); ctx.translate(x, y); ctx.rotate(i * 1.1);
+      ctx.fillRect(-s, -s * 0.4, s * 2, s * 0.8);
+      ctx.restore();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 3, y + s); ctx.lineTo(x + s * 4, y - s * 0.6);
+      ctx.lineWidth = 1.4; ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* うちゅうに うかぶ いわ（ねむって いた ばしょ）*/
+  function stRock(ctx, cx, cy, w) {
+    const h = w * 0.34;
+    ctx.save();
+    ctx.fillStyle = '#5a5468'; ctx.strokeStyle = '#2a2634'; ctx.lineWidth = Math.max(2, w * 0.02);
+    ctx.beginPath();
+    ctx.moveTo(-w / 2 + cx, cy);
+    ctx.lineTo(cx - w * 0.30, cy + h * 0.9);
+    ctx.lineTo(cx + w * 0.16, cy + h * 1.15);
+    ctx.lineTo(cx + w / 2, cy);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#76708a';
+    ctx.beginPath(); ctx.ellipse(cx, cy, w / 2, h * 0.22, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ねむって いる しるし */
+  function stZzz(ctx, x, y, s) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let i = 0; i < 3; i++) {
+      ctx.font = '900 ' + (s * (0.6 + i * 0.28)) + 'px system-ui, sans-serif';
+      ctx.fillText('Z', x + i * s * 0.55, y - i * s * 0.62);
+    }
+    ctx.restore();
+  }
+
+  /* かみなり */
+  function stBolt(ctx, x, yTop, h, color) {
+    ctx.save();
+    ctx.fillStyle = color || '#ffe066'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    const w = h * 0.22;
+    ctx.beginPath();
+    ctx.moveTo(x, yTop);
+    ctx.lineTo(x - w * 0.55, yTop + h * 0.46);
+    ctx.lineTo(x + w * 0.10, yTop + h * 0.46);
+    ctx.lineTo(x - w * 0.30, yTop + h);
+    ctx.lineTo(x + w * 0.60, yTop + h * 0.40);
+    ctx.lineTo(x - w * 0.02, yTop + h * 0.40);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* たまざ（うちゅうの しはいしゃ の いす）。seatY は ざめんの うえ。
+     この うえに stChar を おなじ y で かくと、すわって いる ように みえます。*/
+  function stThrone(ctx, cx, seatY, w) {
+    const backH = w * 1.15;
+    ctx.save();
+    ctx.strokeStyle = '#1e1930'; ctx.lineWidth = Math.max(2, w * 0.035);
+    /* せもたれ */
+    ctx.fillStyle = '#4a3f6e';
+    roundRectPath(ctx, cx - w * 0.46, seatY - backH, w * 0.92, backH, w * 0.10);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#6a5c96';
+    roundRectPath(ctx, cx - w * 0.34, seatY - backH * 0.92, w * 0.68, backH * 0.80, w * 0.08);
+    ctx.fill(); ctx.stroke();
+    /* せなかの とげ */
+    ctx.fillStyle = '#b9a6f0';
+    for (let i = -2; i <= 2; i++) {
+      const sx = cx + i * w * 0.21;
+      const sh = w * (i === 0 ? 0.34 : 0.24 - Math.abs(i) * 0.04);
+      ctx.beginPath();
+      ctx.moveTo(sx - w * 0.07, seatY - backH);
+      ctx.lineTo(sx, seatY - backH - sh);
+      ctx.lineTo(sx + w * 0.07, seatY - backH);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    /* ひじかけ */
+    ctx.fillStyle = '#4a3f6e';
+    for (const d of [-1, 1]) {
+      roundRectPath(ctx, cx + d * w * 0.52 - w * 0.09, seatY - w * 0.44, w * 0.18, w * 0.46, w * 0.06);
+      ctx.fill(); ctx.stroke();
+    }
+    /* ざめん */
+    ctx.fillStyle = '#5a4d80';
+    roundRectPath(ctx, cx - w * 0.62, seatY, w * 1.24, w * 0.18, w * 0.07);
+    ctx.fill(); ctx.stroke();
+    /* あし */
+    ctx.fillStyle = '#3b3158';
+    for (const d of [-1, 1]) {
+      ctx.fillRect(cx + d * w * 0.45 - w * 0.07, seatY + w * 0.18, w * 0.14, w * 0.24);
+      ctx.strokeRect(cx + d * w * 0.45 - w * 0.07, seatY + w * 0.18, w * 0.14, w * 0.24);
+    }
+    ctx.restore();
+  }
+
+  /* まぼろし（まるい わくの なかに ばめんを うつす）*/
+  function stVision(ctx, cx, cy, r, inner) {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(20,12,40,.92)'; ctx.fill();
+    ctx.save(); ctx.clip();
+    ctx.translate(cx - r, cy - r);
+    inner(ctx, r * 2, r * 2);
+    ctx.restore();
+    ctx.lineWidth = Math.max(3, r * 0.08); ctx.strokeStyle = '#b39ddb';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+
   /* --- だい3しょう「竜巻編」の はじまりの おはなし --- */
   const STORY_STORM_INTRO = [
+    /* 1 うちゅうの はてまで きた */
     { text: '太陽の いただきを クリア！　ごうのすけたちは、ついに うちゅうの はてまで たどりついた。',
-      art: (c, W, H) => { stSpaceBg(c, W, H, '#2a13a8', '#4a1a70');
-        stPlanet(c, W * 0.74, H * 0.36, Math.min(W, H) * 0.20, 'sun');
-        stCastle(c, W * 0.26, H * 0.86, Math.min(W, H) * 0.24); } },
-    { text: '……そのころ。うちゅうの ずっと ずっと はてで、ながい ねむりから めを さます ものが いた。',
-      art: (c, W, H) => { stSpaceBg(c, W, H);
-        stChar(c, 'tatsumarky', W * 0.5, H * 0.88, H * 0.52); } },
-    { text: 'うちゅうの しはいしゃ、けんじゃ「ターツーマーキー」。むかし、ちきゅうを おさめて いた たつまきの ぬしである。',
-      art: (c, W, H) => { stSpaceBg(c, W, H, '#150a35', '#301060');
-        stTornado(c, W * 0.5, H * 0.04, H * 0.42, W * 0.5);
-        stChar(c, 'tatsumarky', W * 0.5, H * 0.90, H * 0.56); } },
-    { text: '「なんじゃと……？　ちきゅうの こどもが、太陽まで のぼって きた じゃと！？」',
-      art: (c, W, H) => { stSpaceBg(c, W, H, '#3a0a1a', '#6a1020');
+      art: (c, W, H) => {
+        stSpaceBg(c, W, H, '#2a13a8', '#4a1a70');
+        stPlanet(c, W * 0.76, H * 0.32, Math.min(W, H) * 0.19, 'sun');
+        stCastle(c, W * 0.20, H * 0.88, Math.min(W, H) * 0.22);
+        stChar(c, 'tankun',  W * 0.42, H * 0.90, H * 0.16);
+        stChar(c, 'kabekun', W * 0.53, H * 0.90, H * 0.22);
+        stChar(c, 'purio',   W * 0.63, H * 0.90, H * 0.18);
+      } },
+
+    /* 2 うちゅうの はてで ねむって いた */
+    { text: '……そのころ。うちゅうの ずっと ずっと はてに、ながい ながい あいだ ねむって いる ものが いた。',
+      art: (c, W, H) => {
+        stSpaceBg(c, W, H, '#05041a', '#14092e');
+        stRock(c, W * 0.5, H * 0.80, Math.min(W * 0.62, H * 0.90));
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.80, H * 0.44,
+               { t: 0.0, moving: false, atk: -1, hpRatio: 1, roll: 0.35 });
+        stZzz(c, W * 0.66, H * 0.40, Math.min(W, H) * 0.09);
+      } },
+
+    /* 3 うちゅうの しはいしゃ */
+    { text: 'うちゅうの しはいしゃ、けんじゃ「ターツーマーキー」。ほしという ほしを したがえて きた たつまきの ぬしである。',
+      art: (c, W, H) => {
+        stSpaceBg(c, W, H, '#150a35', '#301060');
+        const u = Math.min(W, H);
+        stPlanet(c, W * 0.13, H * 0.22, u * 0.10, 'earth');
+        stPlanet(c, W * 0.87, H * 0.26, u * 0.08, 'sun');
+        stPlanet(c, W * 0.24, H * 0.62, u * 0.06, 'earth');
+        stThrone(c, W * 0.5, H * 0.80, Math.min(W * 0.20, H * 0.26));
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.80, H * 0.52);
+      } },
+
+    /* 4 むかし、ちきゅうを あらしまわって いた */
+    { text: 'むかしむかし、ターツーマーキーは たつまきで ちきゅうじゅうを あらしまわり、この ほしを おさめて いた。',
+      art: (c, W, H) => {
+        stTownScape(c, W, H, 1.0, true);
+        stTornado(c, W * 0.30, H * 0.00, H * 0.80, W * 0.30, 'rgba(50,44,70,.85)');
+        stTornado(c, W * 0.74, H * 0.04, H * 0.72, W * 0.22, 'rgba(70,62,95,.7)');
+        stDebris(c, W, H, 16);
+        stPerson(c, W * 0.50, H * 0.84, H * 0.16, 'run');
+        stPerson(c, W * 0.60, H * 0.86, H * 0.13, 'run');
+        stChar(c, 'tatsumarky', W * 0.52, H * 0.44, H * 0.40);
+      } },
+
+    /* 5 だれも さからえなかった */
+    { text: 'だれも さからえなかった。ひとも どうぶつも、ただ あたまを さげる しか なかったのだ。',
+      art: (c, W, H) => {
+        stTownScape(c, W, H, 0.35, true);
+        stFlash(c, W, H, '#2b2440');
+        stChar(c, 'tatsumarky', W * 0.76, H * 0.80, H * 0.60);
+        /* てまえに ひれふす ひとびと */
+        for (let i = 0; i < 5; i++) {
+          stPerson(c, W * (0.08 + i * 0.115), H * (0.93 + (i % 2) * 0.04), H * 0.22, 'bow');
+        }
+      } },
+
+    /* 6 いまの ちきゅうを しる */
+    { text: '目を さました ターツーマーキーは、とおくの ほしを のぞきこんだ。……そして、みて しまった。',
+      art: (c, W, H) => {
+        stSpaceBg(c, W, H, '#0d0826', '#241048');
+        const r = Math.min(W * 0.24, H * 0.36);
+        stVision(c, W * 0.70, H * 0.42, r, (cc, w2, h2) => {
+          stPlanet(cc, w2 * 0.62, h2 * 0.44, Math.min(w2, h2) * 0.26, 'sun');
+          stCastle(cc, w2 * 0.30, h2 * 0.88, Math.min(w2, h2) * 0.26);
+        });
+        stChar(c, 'tatsumarky', W * 0.26, H * 0.92, H * 0.56);
+      } },
+
+    /* 7 いかり */
+    { text: '「なんじゃと……！？　ちきゅうの こどもが、太陽まで のぼって きた じゃと！？」',
+      art: (c, W, H) => {
+        stSpaceBg(c, W, H, '#3a0a1a', '#6a1020');
         stFlash(c, W, H, '#ff2b2b');
-        stChar(c, 'tatsumarky', W * 0.5, H * 0.90, H * 0.58, { t: 0.2, moving: false, atk: 0.3, hpRatio: 1, roll: 0.35 }); } },
+        stBolt(c, W * 0.22, H * 0.06, H * 0.42);
+        stBolt(c, W * 0.80, H * 0.02, H * 0.36);
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.92, H * 0.60,
+               { t: 0.2, moving: false, atk: 0.3, hpRatio: 1, roll: 0.35 });
+      } },
+
+    /* 8 もういちど せいふく して くれる */
     { text: '「ゆるさん。この うちゅうの ぬしは わしじゃ。もういちど、ちきゅうを せいふく して くれる！」',
-      art: (c, W, H) => { stSpaceBg(c, W, H, '#20103a', '#3a1060');
-        stTornado(c, W * 0.5, H * 0.02, H * 0.50, W * 0.7, 'rgba(180,160,230,.9)');
-        stChar(c, 'tatsumarky', W * 0.5, H * 0.90, H * 0.56); } },
+      art: (c, W, H) => {
+        stSpaceBg(c, W, H, '#20103a', '#3a1060');
+        stTornado(c, W * 0.5, H * 0.00, H * 0.56, W * 0.74, 'rgba(180,160,230,.9)');
+        stDebris(c, W, H, 10);
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.92, H * 0.58);
+      } },
+
+    /* 9 ちきゅうへ */
     { text: 'ターツーマーキーは おおきな たつまきに なって、ちきゅうへ とんで いった。',
-      art: (c, W, H) => { stSpaceBg(c, W, H);
-        stPlanet(c, W * 0.30, H * 0.52, Math.min(W, H) * 0.22, 'earth');
-        stTornado(c, W * 0.66, H * 0.06, H * 0.62, W * 0.34, 'rgba(200,190,240,.9)'); } },
+      art: (c, W, H) => {
+        stSpaceBg(c, W, H);
+        stPlanet(c, W * 0.28, H * 0.50, Math.min(W, H) * 0.22, 'earth');
+        stTornado(c, W * 0.68, H * 0.04, H * 0.64, W * 0.32, 'rgba(200,190,240,.9)');
+        stDebris(c, W, H, 8);
+      } },
+
+    /* 10 あかい もんが あらわれた */
     { text: 'そして「はじまりの みち」に、みたことの ない あかい もんが あらわれた——。',
-      art: (c, W, H) => { stFieldBg(c, W, H, true);
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
         stTornado(c, W * 0.5, H * 0.00, H * 0.30, W * 0.9, 'rgba(120,110,150,.45)');
-        stGate(c, W * 0.5, H * 0.80, Math.min(W * 0.34, H * 0.42)); } },
+        stTree(c, W * 0.10, H * 0.80, Math.min(W, H) * 0.16, 0.5);
+        stTree(c, W * 0.90, H * 0.82, Math.min(W, H) * 0.14, 0.5);
+        stGate(c, W * 0.5, H * 0.80, Math.min(W * 0.34, H * 0.42));
+      } },
+
+    /* 11 タイトル */
     { text: 'だい3しょう「たつまきへん」、かいまく！　あたらしい ちずが あそべる ように なりました。',
-      art: (c, W, H) => { stFieldBg(c, W, H, true);
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
         stGate(c, W * 0.5, H * 0.86, Math.min(W * 0.30, H * 0.38), 0.45);
-        stTitle(c, W, H, 'たつまきへん', '#ffd54f'); } },
+        stTitle(c, W, H, 'たつまきへん', '#ffd54f');
+      } },
   ];
 
   /* --- 「新・始まりの道」を クリアした あとの おはなし --- */
   const STORY_STORM_FLEE = [
     { text: 'たつまきほうを かいくぐり、ごうのすけたちは あかい もんを こえた。',
-      art: (c, W, H) => { stFieldBg(c, W, H, true);
-        stGate(c, W * 0.5, H * 0.82, Math.min(W * 0.32, H * 0.40));
-        stCastle(c, W * 0.14, H * 0.90, Math.min(W, H) * 0.16); } },
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
+        stTree(c, W * 0.88, H * 0.82, Math.min(W, H) * 0.15, 0.4);
+        stGate(c, W * 0.52, H * 0.82, Math.min(W * 0.30, H * 0.38));
+        stCastle(c, W * 0.12, H * 0.92, Math.min(W, H) * 0.15);
+        stChar(c, 'tankun',  W * 0.26, H * 0.92, H * 0.14);
+        stChar(c, 'kabekun', W * 0.34, H * 0.92, H * 0.19);
+      } },
     { text: '「……ほう。わしの たつまきほうを たえきる とはな。」　もんの むこうに、あの すがたが あった。',
-      art: (c, W, H) => { stFieldBg(c, W, H, true);
-        stGate(c, W * 0.22, H * 0.86, Math.min(W * 0.24, H * 0.30), 0.55);
-        stChar(c, 'tatsumarky', W * 0.62, H * 0.88, H * 0.54); } },
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
+        stFlash(c, W, H, '#2b2440');
+        stGate(c, W * 0.20, H * 0.88, Math.min(W * 0.22, H * 0.28), 0.55);
+        stChar(c, 'tatsumarky', W * 0.64, H * 0.90, H * 0.56);
+        stChar(c, 'tankun', W * 0.30, H * 0.94, H * 0.13);
+      } },
     { text: '「だが、これは ほんの あいさつ じゃ。ほんきの わしは、こんな ものでは ない。」',
-      art: (c, W, H) => { stFieldBg(c, W, H, true);
-        stTornado(c, W * 0.62, H * 0.02, H * 0.40, W * 0.5, 'rgba(150,140,190,.8)');
-        stChar(c, 'tatsumarky', W * 0.62, H * 0.88, H * 0.56); } },
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
+        stTornado(c, W * 0.64, H * 0.00, H * 0.44, W * 0.52, 'rgba(150,140,190,.8)');
+        stBolt(c, W * 0.18, H * 0.06, H * 0.26);
+        stDebris(c, W, H, 8);
+        stChar(c, 'tatsumarky', W * 0.64, H * 0.90, H * 0.58);
+      } },
     { text: 'ターツーマーキーは たつまきに なって、あっという まに きえて しまった。……つづきは、また こんど。',
-      art: (c, W, H) => { stFieldBg(c, W, H, true);
-        stTornado(c, W * 0.58, H * 0.02, H * 0.78, W * 0.42, 'rgba(60,55,80,.85)');
-        stGate(c, W * 0.20, H * 0.86, Math.min(W * 0.22, H * 0.28), 0.5); } },
+      art: (c, W, H) => {
+        stFieldBg(c, W, H, true);
+        stTornado(c, W * 0.60, H * 0.02, H * 0.80, W * 0.42, 'rgba(60,55,80,.85)');
+        stDebris(c, W, H, 10);
+        stGate(c, W * 0.18, H * 0.88, Math.min(W * 0.20, H * 0.26), 0.5);
+        stChar(c, 'tankun', W * 0.32, H * 0.94, H * 0.13);
+      } },
   ];
+
+  /* =================================================
+     ムービー えらび（ホームの「ムービー」ボタン）
+     ================================================= */
+  /* いちど ながれた ムービーは、ここから いつでも みられます。*/
+  const MOVIES = [
+    { key: 'storm_intro', name: 'ターツーマーキー、めざめる',
+      desc: 'だい3しょう「たつまきへん」の はじまり。うちゅうの しはいしゃが ちきゅうを せいふく しに もどって くるまで。',
+      when: '太陽の いただき（12-3）を クリアすると みられます',
+      list: () => STORY_STORM_INTRO },
+    { key: 'storm_flee', name: 'ターツーマーキー、すがたを みせる',
+      desc: '「新・始まりの道」を クリアした あと。すがただけ みせて、たつまきに なって きえて しまう。',
+      when: '新・始まりの道（13-1）を クリアすると みられます',
+      list: () => STORY_STORM_FLEE },
+  ];
+
+  function openMovies() {
+    const box = $('#movie-list');
+    if (box) {
+      box.innerHTML = '';
+      MOVIES.forEach(mv => {
+        const open = storySeen(mv.key);
+        const el = document.createElement('button');
+        el.className = 'movie-card' + (open ? '' : ' locked');
+        el.innerHTML =
+          '<canvas></canvas>' +
+          '<span class="movie-body">' +
+            '<span class="movie-name">' + (open ? mv.name : '？？？') + '</span>' +
+            '<span class="movie-desc">' + (open ? mv.desc : mv.when) + '</span>' +
+          '</span>' +
+          '<span class="movie-play">' + (open ? '▶ みる' : '🔒') + '</span>';
+        if (open) el.addEventListener('click', () => playStory(mv.list(), openMovies));
+        else      el.addEventListener('click', () => toast(mv.when));
+        box.appendChild(el);
+        paintMovieThumb(el.querySelector('canvas'), mv, open);
+      });
+      box.scrollTop = 0;
+    }
+    show('screen-movie');
+  }
+
+  /* さいしょの コマを ちいさく かいて、みほんに します */
+  function paintMovieThumb(canvas, mv, open) {
+    if (!canvas) return;
+    requestAnimationFrame(() => {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      if (w < 2 || h < 2) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      if (!open) {
+        ctx.fillStyle = '#2a2140'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#8d7fb5'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = '900 ' + Math.round(h * 0.42) + 'px system-ui, sans-serif';
+        ctx.fillText('？', w / 2, h / 2);
+        return;
+      }
+      const panel = mv.list()[0];
+      if (panel && panel.art) panel.art(ctx, w, h);
+    });
+  }
 
   function playStory(list, onDone) {
     if (!list || !list.length) { if (onDone) onDone(); return; }
@@ -4121,6 +4535,8 @@
 
     /* ずかん */
     $('#btn-home-dex').addEventListener('click', () => openDex({ back: 'home' }));
+    $('#btn-home-movie').addEventListener('click', openMovies);
+    $('#btn-movie-back').addEventListener('click', openHome);
     $('#btn-dex-back').addEventListener('click', () => {
       if (dexBackTo === 'battle') {
         show('screen-battle');
