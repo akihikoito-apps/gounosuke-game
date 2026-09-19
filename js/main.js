@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.25';
+  const GAME_VERSION = '6.26';
 
 
   /* =================================================
@@ -2220,7 +2220,9 @@
         row.appendChild(ev);
       }
       box.appendChild(row);
-      paintChar(row.querySelector('canvas'), id);
+      /* ★パワーアップの ならびも、たたかいの ボタンと おなじ
+           「かおが うつる きりとり」に します（v6.26）*/
+      paintCharBust(row.querySelector('canvas'), id);
     });
   }
 
