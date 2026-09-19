@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.28';
+  const GAME_VERSION = '6.29';
 
 
   /* =================================================
@@ -4534,6 +4534,441 @@
   }
 
   /* =================================================
+     ミニゲーム
+
+     ・ホームの「ミニゲーム 🎮」から えらびます。
+     ・1つめは「むしたいじ シューティング」。
+       だい15しょう「虫に支配された町」を ぜんぶ クリアすると あそべます。
+     ・かつと そざいが 5こ もらえますが、★ごほうびは 1日に 1かいまで★。
+       （ゲームじたいは なんかいでも あそべます）
+     ================================================= */
+  const MINI = { give: 5, dayMs: 86400000 };
+
+  function chapterAllCleared(ch) {
+    const cleared = (slot() && slot().cleared) || {};
+    const list = coursesOf(ch);
+    return list.length > 0 && list.every(st => cleared[st.no]);
+  }
+  function miniState() {
+    const s = slot();
+    if (!s) return null;
+    if (!s.mini) s.mini = { at: 0 };
+    return s.mini;
+  }
+  function miniLeftMs() {
+    const m = miniState();
+    if (!m) return 0;
+    return Math.max(0, m.at + MINI.dayMs - Date.now());
+  }
+  function miniRewardReady() { return miniLeftMs() <= 0; }
+  function miniLeftText() {
+    const ms = miniLeftMs();
+    const h = Math.floor(ms / 3600000), mi = Math.floor((ms % 3600000) / 60000);
+    if (h > 0) return 'あと ' + h + 'じかん ' + mi + 'ふん';
+    if (mi > 0) return 'あと ' + mi + 'ふん';
+    return 'もうすぐ';
+  }
+
+  const MINIGAMES = [
+    { key: 'bugshoot', icon: '🦟', name: 'むしたいじ シューティング',
+      desc: 'えらんだ キャラで、そらから せめて くる むしを うちおとそう！　3かい ダメージを うける まえに ぜんぶ たおせば かち。',
+      when: '「虫に支配された町」を ぜんぶ クリアすると あそべます',
+      open: () => chapterAllCleared(15),
+      go: () => openShootPick() },
+  ];
+
+  function openMinigames() {
+    const note = $('#minigame-note');
+    if (note) {
+      note.textContent = miniRewardReady()
+        ? 'かつと そざいが 5こ もらえます（ごほうびは 1日に 1かいまで）。'
+        : 'きょうの ごほうびは もらいました（つぎは ' + miniLeftText() + '）。ゲームは なんかいでも あそべます。';
+    }
+    const box = $('#minigame-list');
+    if (box) {
+      box.innerHTML = '';
+      MINIGAMES.forEach(g => {
+        const ok = g.open();
+        const el = document.createElement('button');
+        el.className = 'mini-card' + (ok ? '' : ' locked');
+        el.innerHTML =
+          '<span class="mc-ico">' + (ok ? g.icon : '🔒') + '</span>' +
+          '<span class="mc-body">' +
+            '<span class="mc-name">' + (ok ? g.name : '？？？') + '</span>' +
+            '<span class="mc-desc">' + (ok ? g.desc : g.when) + '</span>' +
+          '</span>' +
+          '<span class="mc-go">' + (ok ? '▶ あそぶ' : '🔒') + '</span>';
+        if (ok) el.addEventListener('click', g.go);
+        else    el.addEventListener('click', () => toast(g.when));
+        box.appendChild(el);
+      });
+      box.scrollTop = 0;
+    }
+    show('screen-minigame');
+  }
+
+  /* --- キャラえらび（もっている こ ぜんぶ）--- */
+  function openShootPick() {
+    const s = slot();
+    const box = $('#shoot-pick');
+    if (box) {
+      box.innerHTML = '';
+      const owned = (s && s.owned && s.owned.length) ? s.owned : DEFAULT_PARTY;
+      owned.forEach(id => {
+        if (!UNITS[id]) return;
+        const el = document.createElement('button');
+        el.className = 'pick-item';
+        el.innerHTML = '<canvas></canvas><span>' + (shownDef(id) || UNITS[id]).shortName + '</span>';
+        el.addEventListener('click', () => startShoot(id));
+        box.appendChild(el);
+        paintCharBust(el.querySelector('canvas'), id);
+      });
+      box.scrollTop = 0;
+    }
+    show('screen-shootpick');
+  }
+
+  /* =================================================
+     むしたいじ シューティング
+
+     ・ゆびで よこに うごかす。たまは じどうで でる。
+     ・キャラは みための ちがい だけ（つよさは みんな おなじ）。
+     ・3ウェーブ ＋ ボス（チューチュー）を たおせば かち。
+     ・3かい ダメージを うけたら まけ。
+     ================================================= */
+  const SHOOT = {
+    life: 3,
+    fireCd: 0.28,            // たまの かんかく（びょう）
+    bulletSpeed: 620,
+    waves: [
+      { label: 'ウェーブ 1／3', id: 'togehaya_t', n: 6, hp: 2, speed: 62,  swing: 34, fire: 0,   gap: 0.9 },
+      { label: 'ウェーブ 2／3', id: 'hatchie',    n: 9, hp: 1, speed: 118, swing: 78, fire: 0,   gap: 0.6 },
+      { label: 'ウェーブ 3／3', id: 'kamajirou',  n: 5, hp: 5, speed: 52,  swing: 22, fire: 2.6, gap: 1.2 },
+      { label: '★ボス チューチュー', id: 'chuchu', n: 1, hp: 40, speed: 0, swing: 0, fire: 1.0, gap: 0, boss: true },
+    ],
+  };
+
+  let SG = null;          // ゲームの じょうたい
+  let shootRaf = null;
+
+  function startShoot(charId) {
+    SG = {
+      char: charId,
+      life: SHOOT.life,
+      wave: -1,
+      pend: [],           // まだ でて いない てき
+      enemies: [], bullets: [], ebullets: [], booms: [],
+      px: 0.5, target: 0.5,
+      t: 0, fire: 0, inv: 0, over: null, spawnT: 0,
+      W: 0, H: 0,
+    };
+    const ov = $('#shoot-over');
+    if (ov) ov.classList.add('hidden');
+    nextShootWave();
+    refreshShootHud();
+    show('screen-shoot');
+    setupShootDrag();
+    if (shootRaf) cancelAnimationFrame(shootRaf);
+    shootLast = 0;
+    shootRaf = requestAnimationFrame(shootLoop);
+  }
+
+  function nextShootWave() {
+    SG.wave++;
+    const w = SHOOT.waves[SG.wave];
+    if (!w) { endShoot(true); return; }
+    SG.pend = [];
+    for (let i = 0; i < w.n; i++) {
+      SG.pend.push({ at: i * w.gap, w: w });
+    }
+    SG.spawnT = 0;
+    const el = $('#shoot-wave');
+    if (el) el.textContent = w.label;
+  }
+
+  function refreshShootHud() {
+    const el = $('#shoot-life');
+    if (el) el.textContent = '❤️'.repeat(Math.max(0, SG ? SG.life : 0)) +
+                             '🖤'.repeat(Math.max(0, SHOOT.life - (SG ? SG.life : 0)));
+  }
+
+  function setupShootDrag() {
+    const c = $('#shoot-canvas');
+    if (!c || c.dataset.bound) return;
+    c.dataset.bound = '1';
+    const move = (clientX) => {
+      if (!SG) return;
+      const r = c.getBoundingClientRect();
+      SG.target = Math.max(0.05, Math.min(0.95, (clientX - r.left) / r.width));
+    };
+    c.addEventListener('pointerdown', e => { move(e.clientX); c.setPointerCapture(e.pointerId); });
+    c.addEventListener('pointermove', e => move(e.clientX));
+    c.addEventListener('touchmove', e => { if (e.touches[0]) { move(e.touches[0].clientX); e.preventDefault(); } },
+                       { passive: false });
+  }
+
+  let shootLast = 0;
+  function shootLoop(now) {
+    if (!SG || !$('#screen-shoot').classList.contains('active')) { shootRaf = null; return; }
+    shootRaf = requestAnimationFrame(shootLoop);
+    const dt = shootLast ? Math.min(0.05, (now - shootLast) / 1000) : 0;
+    shootLast = now;
+    if (!SG.over) updateShoot(dt);
+    renderShoot();
+  }
+
+  function updateShoot(dt) {
+    const W = SG.W || 360, H = SG.H || 480;
+    SG.t += dt;
+    if (SG.inv > 0) SG.inv -= dt;          // ダメージの あとの むてき じかん
+    /* プレイヤーは ゆびを おいかける */
+    SG.px += (SG.target - SG.px) * Math.min(1, dt * 12);
+    const pxr = SG.px * W, pyr = H - H * 0.13;
+
+    /* たまを じどうで うつ */
+    SG.fire -= dt;
+    if (SG.fire <= 0) {
+      SG.fire = SHOOT.fireCd;
+      SG.bullets.push({ x: pxr, y: pyr - 24 });
+    }
+
+    /* てきを だす */
+    const w = SHOOT.waves[SG.wave];
+    if (w) {
+      SG.spawnT += dt;
+      for (let i = SG.pend.length - 1; i >= 0; i--) {
+        if (SG.spawnT >= SG.pend[i].at) {
+          const e = SG.pend.splice(i, 1)[0].w;
+          SG.enemies.push({
+            id: e.id, hp: e.hp, maxHp: e.hp, speed: e.speed, swing: e.swing,
+            fire: e.fire, fireCd: e.fire ? (0.8 + Math.random() * e.fire) : 0,
+            boss: !!e.boss, seed: Math.random() * 10,
+            x: e.boss ? W * 0.5 : (0.1 + Math.random() * 0.8) * W,
+            y: e.boss ? -H * 0.18 : -40,
+            t: 0,
+          });
+        }
+      }
+    }
+
+    /* てきの うごき */
+    for (const e of SG.enemies) {
+      e.t += dt;
+      if (e.boss) {
+        /* ボスは よこに いったりきたり */
+        if (e.y < H * 0.20) e.y += 70 * dt;
+        e.x = W * (0.5 + Math.sin(e.t * 0.8) * 0.33);
+      } else {
+        e.y += e.speed * dt;
+        e.x += Math.sin(e.t * 2.2 + e.seed) * e.swing * dt;
+        if (e.x < 20) e.x = 20;
+        if (e.x > W - 20) e.x = W - 20;
+        /* したまで いったら うえから もういちど（にげられない）*/
+        if (e.y > H + 40) { e.y = -40; e.x = (0.1 + Math.random() * 0.8) * W; }
+      }
+      if (e.fire) {
+        e.fireCd -= dt;
+        if (e.fireCd <= 0) {
+          e.fireCd = e.fire * (0.7 + Math.random() * 0.6);
+          if (e.boss) {
+            for (const d of [-0.35, 0, 0.35]) SG.ebullets.push({ x: e.x, y: e.y + 24, vx: d * 120, vy: 210 });
+          } else {
+            SG.ebullets.push({ x: e.x, y: e.y + 18, vx: 0, vy: 240 });
+          }
+        }
+      }
+    }
+
+    /* じぶんの たま */
+    for (let i = SG.bullets.length - 1; i >= 0; i--) {
+      const b = SG.bullets[i];
+      b.y -= SHOOT.bulletSpeed * dt;
+      if (b.y < -20) { SG.bullets.splice(i, 1); continue; }
+      for (const e of SG.enemies) {
+        const r = e.boss ? 54 : 26;
+        if (Math.abs(b.x - e.x) < r && Math.abs(b.y - e.y) < r) {
+          e.hp--; SG.bullets.splice(i, 1);
+          SG.booms.push({ x: b.x, y: b.y, t: 0, big: false });
+          break;
+        }
+      }
+    }
+    /* たおれた てき */
+    for (let i = SG.enemies.length - 1; i >= 0; i--) {
+      if (SG.enemies[i].hp <= 0) {
+        const e = SG.enemies.splice(i, 1)[0];
+        SG.booms.push({ x: e.x, y: e.y, t: 0, big: true });
+      }
+    }
+
+    /* てきの たま */
+    for (let i = SG.ebullets.length - 1; i >= 0; i--) {
+      const b = SG.ebullets[i];
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      if (b.y > H + 20 || b.x < -20 || b.x > W + 20) { SG.ebullets.splice(i, 1); continue; }
+      if (Math.abs(b.x - pxr) < 22 && Math.abs(b.y - pyr + 20) < 26) {
+        SG.ebullets.splice(i, 1); hurtShoot(pxr, pyr);
+      }
+    }
+    /* てきと ぶつかった */
+    for (let i = SG.enemies.length - 1; i >= 0; i--) {
+      const e = SG.enemies[i];
+      if (e.boss) continue;
+      if (Math.abs(e.x - pxr) < 34 && Math.abs(e.y - pyr + 18) < 38) {
+        SG.enemies.splice(i, 1);
+        SG.booms.push({ x: e.x, y: e.y, t: 0, big: true });
+        hurtShoot(pxr, pyr);
+      }
+    }
+
+    for (let i = SG.booms.length - 1; i >= 0; i--) {
+      SG.booms[i].t += dt;
+      if (SG.booms[i].t > 0.4) SG.booms.splice(i, 1);
+    }
+
+    /* ウェーブ クリア */
+    if (!SG.over && SG.enemies.length === 0 && SG.pend.length === 0) nextShootWave();
+  }
+
+  function hurtShoot(px, py) {
+    if (SG.inv > 0) return;
+    SG.life--;
+    SG.inv = 0.8;
+    SG.booms.push({ x: px, y: py - 20, t: 0, big: true });
+    refreshShootHud();
+    if (SG.life <= 0) endShoot(false);
+  }
+
+  function endShoot(win) {
+    SG.over = win ? 'win' : 'lose';
+    const t = $('#shoot-over-title');
+    if (t) { t.textContent = win ? 'かった！' : 'まけた…'; t.className = 'so-title ' + (win ? 'win' : 'lose'); }
+    const got = $('#shoot-got');
+    if (got) got.innerHTML = '';
+    let msg;
+    if (!win) {
+      msg = 'むしたちに やられて しまった。もういちど ちょうせん しよう！';
+    } else if (miniRewardReady()) {
+      /* ★ごほうび：そざい 5こ（1日に 1かいまで）*/
+      const m = miniState();
+      const count = {};
+      for (let i = 0; i < MINI.give; i++) {
+        const id = MATERIAL_ORDER[Math.floor(Math.random() * MATERIAL_ORDER.length)];
+        addMat(id, 1); count[id] = (count[id] || 0) + 1;
+      }
+      if (m) m.at = Date.now();
+      storeSave();
+      msg = 'むしを ぜんぶ やっつけた！　そざい 5こパック を てに いれた！';
+      if (got) {
+        MATERIAL_ORDER.filter(id => count[id]).forEach(id => {
+          const el = document.createElement('span');
+          el.textContent = MATERIALS[id].icon + MATERIALS[id].name + ' ×' + count[id];
+          got.appendChild(el);
+        });
+      }
+    } else {
+      msg = 'むしを ぜんぶ やっつけた！　きょうの ごほうびは もう もらって いるので、つぎは ' + miniLeftText() + ' です。';
+    }
+    const tx = $('#shoot-over-text');
+    if (tx) tx.textContent = msg;
+    const ov = $('#shoot-over');
+    if (ov) ov.classList.remove('hidden');
+  }
+
+  /* --- え --- */
+  function renderShoot() {
+    const cv = $('#shoot-canvas');
+    if (!cv || !SG) return;
+    const w = cv.clientWidth, h = cv.clientHeight;
+    if (w < 2 || h < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    }
+    SG.W = w; SG.H = h;
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    /* そら */
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#3a7fb5'); g.addColorStop(0.6, '#8fc9e8'); g.addColorStop(1, '#cfeaf5');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    /* ながれる くも */
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    for (let i = 0; i < 5; i++) {
+      const cy = ((i * 0.23 + SG.t * 0.06) % 1.2 - 0.1) * h;
+      const cx = ((i * 137) % 100) / 100 * w;
+      const r = h * 0.045;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(cx + r * 0.9, cy + r * 0.2, r * 0.7, 0, Math.PI * 2);
+      ctx.arc(cx - r * 0.9, cy + r * 0.25, r * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    /* てき */
+    for (const e of SG.enemies) {
+      const fn = DRAWERS[e.id];
+      if (!fn) continue;
+      const size = e.boss ? h * 0.20 : h * 0.105;
+      ctx.save();
+      ctx.translate(e.x, e.y + size * 0.5);
+      const sc = size / storyArtUp(e.id);
+      ctx.scale(sc, sc);
+      try { fn(ctx, { t: e.t, moving: true, atk: -1, hpRatio: e.hp / e.maxHp, hpRate: 1, roll: 0.3 }); } catch (er) {}
+      ctx.restore();
+      if (e.boss) {
+        ctx.fillStyle = 'rgba(0,0,0,.45)';
+        ctx.fillRect(w * 0.12, 8, w * 0.76, 10);
+        ctx.fillStyle = '#ff7043';
+        ctx.fillRect(w * 0.12, 8, w * 0.76 * (e.hp / e.maxHp), 10);
+      }
+    }
+
+    /* じぶんの たま */
+    ctx.fillStyle = '#ffd54f';
+    for (const b of SG.bullets) {
+      ctx.beginPath(); ctx.ellipse(b.x, b.y, 5, 10, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    /* てきの たま */
+    ctx.fillStyle = '#b39ddb';
+    for (const b of SG.ebullets) {
+      ctx.beginPath(); ctx.arc(b.x, b.y, 7, 0, Math.PI * 2); ctx.fill();
+    }
+
+    /* じぶん */
+    const px = SG.px * w, py = h - h * 0.13;
+    const fn = DRAWERS[shownDrawId(SG.char)];
+    if (fn) {
+      ctx.save();
+      ctx.translate(px, py);
+      if (SG.inv > 0 && Math.floor(SG.t * 20) % 2 === 0) ctx.globalAlpha = 0.35;
+      const size = h * 0.14;
+      const sc = size / storyArtUp(shownDrawId(SG.char));
+      ctx.scale(sc, sc);
+      try { fn(ctx, { t: SG.t, moving: false, atk: -1, hpRatio: 1, hpRate: 1, roll: 0.3 }); } catch (er) {}
+      ctx.restore();
+    }
+
+    /* ばくはつ */
+    for (const b of SG.booms) {
+      const k = b.t / 0.4;
+      ctx.globalAlpha = 1 - k;
+      ctx.fillStyle = b.big ? '#ff8a65' : '#fff59d';
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, (b.big ? 30 : 14) * (0.4 + k), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function quitShoot() {
+    SG = null;
+    if (shootRaf) { cancelAnimationFrame(shootRaf); shootRaf = null; }
+    openMinigames();
+  }
+
+  /* =================================================
      ぞくせいの あいしょうひょう（ホームの「あいしょうひょう」）
 
      しくみは data.js の ATTR_BEATS / CONFIG.attrStrong などと
@@ -5132,6 +5567,12 @@
     $('#btn-home-dex').addEventListener('click', () => openDex({ back: 'home' }));
     $('#btn-home-movie').addEventListener('click', openMovies);
     $('#btn-home-attr').addEventListener('click', openAttr);
+    $('#btn-home-mini').addEventListener('click', openMinigames);
+    $('#btn-minigame-back').addEventListener('click', openHome);
+    $('#btn-shootpick-back').addEventListener('click', openMinigames);
+    $('#btn-shoot-back').addEventListener('click', quitShoot);
+    $('#btn-shoot-exit').addEventListener('click', quitShoot);
+    $('#btn-shoot-again').addEventListener('click', () => { if (SG) startShoot(SG.char); });
     $('#btn-attr-back').addEventListener('click', openHome);
     $('#btn-movie-back').addEventListener('click', openHome);
     $('#btn-shop-back').addEventListener('click', () => { show('screen-chapter'); redrawMap(); });

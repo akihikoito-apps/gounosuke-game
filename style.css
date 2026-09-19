@@ -153,10 +153,15 @@ html, body {
 
 /* ★ボタンが 6つに ふえた ので、すきまと よはくを つめて
    たなや ガチャが がめんの したに はみださない ように します */
-.home-menu { grid-column:1; grid-row:2; display:flex; flex-direction:column; gap:calc(6px * var(--ui)); justify-content:flex-start; min-height:0; }
+.home-menu {
+  grid-column:1; grid-row:2; display:flex; flex-direction:column;
+  gap:calc(5px * var(--ui)); justify-content:flex-start;
+  min-height:0; overflow-y:auto;          /* ★ちいさい がめんでも あふれない */
+}
 .home-btn {
+  flex:0 0 auto;
   display:flex; align-items:center; gap:calc(10px * var(--ui));
-  padding:calc(7px * var(--ui)) calc(14px * var(--ui));
+  padding:calc(6px * var(--ui)) calc(14px * var(--ui));
   border:none; border-radius:calc(14px * var(--ui));
   font-family:inherit; color:#0d3050; cursor:pointer; text-align:left;
   box-shadow:0 calc(4px * var(--ui)) 0 rgba(0,0,0,.18);
@@ -1533,3 +1538,123 @@ body.dragging-slot #party-slots { touch-action:none; }
   padding:calc(12px * var(--ui));
 }
 .attr-plain canvas{ width:calc(96px * var(--ui)); height:calc(96px * var(--ui)); display:block; }
+
+/* ============ ミニゲーム ============ */
+.home-btn.b7 { background:linear-gradient(180deg,#d8f5e0,#b6e8c6); }
+
+.mini-wrap{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg,#123a2c,#06170f);
+  padding:calc(8px * var(--ui));
+  padding-top:calc(8px * var(--ui) + var(--safe-top));
+}
+.mini-top{ display:flex; align-items:center; gap:calc(10px * var(--ui)); flex:0 0 auto; }
+.mini-title{
+  margin:0; color:#fff; font-size:calc(19px * var(--ui)); letter-spacing:1px;
+  text-shadow:0 calc(2px * var(--ui)) 0 rgba(0,0,0,.45);
+}
+.mini-note{
+  margin:calc(6px * var(--ui)) 0 0; flex:0 0 auto;
+  color:#b6e8c6; font-size:calc(12px * var(--ui)); line-height:1.5;
+}
+.mini-list{
+  flex:1 1 0; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  margin-top:calc(8px * var(--ui)); padding-right:calc(4px * var(--ui));
+  display:flex; flex-direction:column; gap:calc(10px * var(--ui));
+}
+.mini-card{
+  display:flex; align-items:center; gap:calc(12px * var(--ui));
+  width:100%; text-align:left;
+  background:linear-gradient(180deg,#fff,#e7f6ec);
+  border:none; border-radius:calc(16px * var(--ui));
+  padding:calc(12px * var(--ui));
+  box-shadow:0 calc(4px * var(--ui)) 0 rgba(0,0,0,.3);
+  cursor:pointer;
+}
+.mini-card:active{ transform:translateY(calc(2px * var(--ui))); }
+.mini-card.locked{ filter:grayscale(.85) brightness(.85); }
+.mc-ico{ font-size:calc(34px * var(--ui)); line-height:1; flex:0 0 auto; }
+.mc-body{ flex:1 1 auto; min-width:0; }
+.mc-name{ display:block; font-size:calc(17px * var(--ui)); font-weight:800; color:#17402c; }
+.mc-desc{
+  display:block; font-size:calc(12px * var(--ui)); color:#33553f;
+  margin-top:calc(4px * var(--ui)); line-height:1.45;
+}
+.mc-go{
+  flex:0 0 auto; font-size:calc(13px * var(--ui)); font-weight:800; color:#1b6b3a;
+  background:#cdeed9; border-radius:calc(10px * var(--ui));
+  padding:calc(6px * var(--ui)) calc(10px * var(--ui));
+}
+.mini-card.locked .mc-go{ color:#666; background:#ddd; }
+
+/* キャラえらび */
+.pick-grid{
+  flex:1 1 0; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  margin-top:calc(8px * var(--ui)); padding-right:calc(4px * var(--ui));
+  display:grid; gap:calc(8px * var(--ui));
+  grid-template-columns:repeat(auto-fill, minmax(calc(84px * var(--ui)), 1fr));
+  align-content:start;
+}
+.pick-item{
+  display:flex; flex-direction:column; align-items:center;
+  background:linear-gradient(180deg,#fff,#e7f6ec);
+  border:2px solid #b6e8c6; border-radius:calc(12px * var(--ui));
+  padding:calc(4px * var(--ui)); cursor:pointer; min-width:0;
+}
+.pick-item:active{ transform:translateY(calc(2px * var(--ui))); }
+.pick-item canvas{ width:100%; flex:1 1 0; min-height:calc(46px * var(--ui)); display:block; }
+.pick-item span{
+  font-size:calc(11px * var(--ui)); font-weight:bold; color:#17402c;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+}
+
+/* シューティング */
+.shoot-wrap{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:#06131c;
+  padding:calc(8px * var(--ui));
+  padding-top:calc(8px * var(--ui) + var(--safe-top));
+}
+.shoot-top{ display:flex; align-items:center; gap:calc(10px * var(--ui)); flex:0 0 auto; }
+.shoot-wave{ color:#ffe082; font-size:calc(15px * var(--ui)); font-weight:800; }
+.shoot-life{ margin-left:auto; font-size:calc(19px * var(--ui)); letter-spacing:2px; }
+.shoot-stage{ position:relative; flex:1 1 0; min-height:0; margin-top:calc(6px * var(--ui)); }
+#shoot-canvas{
+  width:100%; height:100%; display:block; touch-action:none;
+  border-radius:calc(12px * var(--ui)); background:#0d2233;
+}
+.shoot-hint{
+  flex:0 0 auto; margin:calc(6px * var(--ui)) 0 0;
+  color:#9fd8c0; font-size:calc(12px * var(--ui)); text-align:center;
+}
+.shoot-over{
+  position:absolute; inset:0; border-radius:calc(12px * var(--ui));
+  background:rgba(6,19,28,.90);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:calc(8px * var(--ui)); padding:calc(14px * var(--ui));
+}
+.shoot-over.hidden{ display:none; }
+.so-title{ margin:0; font-size:calc(28px * var(--ui)); font-weight:900; }
+.so-title.win{ color:#ffd54f; }
+.so-title.lose{ color:#90caf9; }
+.so-text{ margin:0; color:#e6f1ff; font-size:calc(14px * var(--ui)); text-align:center; line-height:1.6; }
+.so-btns{ display:flex; align-items:center; gap:calc(10px * var(--ui)); margin-top:calc(4px * var(--ui)); }
+.shoot-got{ display:flex; flex-wrap:wrap; gap:calc(6px * var(--ui)); justify-content:center; }
+.shoot-got span{
+  background:#fff3d6; border:2px solid #e0b431; border-radius:999px;
+  padding:calc(3px * var(--ui)) calc(9px * var(--ui));
+  font-size:calc(13px * var(--ui)); font-weight:bold; color:#6b4a00;
+}
+
+/* ★せの ひくい がめん（iPhone よこもち など）では、
+   ホームの ボタン 7つが ぜんぶ みえる ように もっと つめます */
+@media (max-height: 470px) {
+  .home-menu { gap:calc(4px * var(--ui)); }
+  .home-btn  { padding:calc(4px * var(--ui)) calc(12px * var(--ui)); }
+  .home-btn .hb-label { font-size:calc(13.5px * var(--ui)); }
+  .home-btn .hb-ico   { font-size:calc(16px * var(--ui)); }
+  .shelf-items { font-size:calc(17px * var(--ui)); }
+  .shelf-legs i { height:calc(18px * var(--ui)); }
+}

@@ -64,6 +64,9 @@
         <button class="home-btn b6" id="btn-home-attr">
           <span class="hb-label">あいしょうひょう</span><span class="hb-ico">⚖️</span>
         </button>
+        <button class="home-btn b7" id="btn-home-mini">
+          <span class="hb-label">ミニゲーム</span><span class="hb-ico">🎮</span>
+        </button>
       </div>
 
       <div class="home-speech">
@@ -120,6 +123,54 @@
         <h2 class="arc-title">どの へんに いく？ 🗺️</h2>
       </div>
       <div class="arc-list" id="arc-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ ミニゲーム ============ -->
+  <section id="screen-minigame" class="screen">
+    <div class="mini-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-minigame-back">もどる</button>
+        <h2 class="mini-title">ミニゲーム 🎮</h2>
+      </div>
+      <p class="mini-note" id="minigame-note"></p>
+      <div class="mini-list" id="minigame-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ ミニゲーム：キャラえらび ============ -->
+  <section id="screen-shootpick" class="screen">
+    <div class="mini-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-shootpick-back">もどる</button>
+        <h2 class="mini-title">だれで たたかう？</h2>
+      </div>
+      <p class="mini-note">どの キャラでも つよさは おなじ です。すきな こを えらんでね。</p>
+      <div class="pick-grid" id="shoot-pick"></div>
+    </div>
+  </section>
+
+  <!-- ============ ミニゲーム：むしたいじ シューティング ============ -->
+  <section id="screen-shoot" class="screen">
+    <div class="shoot-wrap">
+      <div class="shoot-top">
+        <button class="mini-btn" id="btn-shoot-back">やめる</button>
+        <span class="shoot-wave" id="shoot-wave"></span>
+        <span class="shoot-life" id="shoot-life"></span>
+      </div>
+      <div class="shoot-stage">
+        <canvas id="shoot-canvas"></canvas>
+        <div class="shoot-over hidden" id="shoot-over">
+          <p class="so-title" id="shoot-over-title"></p>
+          <p class="so-text"  id="shoot-over-text"></p>
+          <div class="shoot-got" id="shoot-got"></div>
+          <div class="so-btns">
+            <button class="big-btn" id="btn-shoot-again">もういちど</button>
+            <button class="mini-btn" id="btn-shoot-exit">やめる</button>
+          </div>
+        </div>
+      </div>
+      <p class="shoot-hint">ゆびで よこに うごかそう。たまは じどうで でます。</p>
     </div>
   </section>
 
