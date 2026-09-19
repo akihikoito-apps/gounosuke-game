@@ -10282,8 +10282,202 @@ function drawKamajirou(ctx, s) {
   ctx.restore();
 }
 
+/* =====================================================================
+   ★16しょう「秩序が うしなわれた 村」の てき
+   ===================================================================== */
+
+/* --- ガオウ（ガオウドウの こども）---
+     きいろの しかくい からだに「I ♥ ガオウドウ」。
+     あたまは あおい さんかくで、たてぼう 2ほんの めと への字の くち。
+     てあしは ほそい らくがきの ような せん。
+     ★はどうストッパー：あき坊の はどうを ここで とめて しまいます。   */
+function drawGaouKo(ctx, s) {
+  const t = (s && s.t) || 0;
+  const step = Math.sin(t * 7) * (s && s.moving ? 1.6 : 0);
+  const YEL = '#e2d24a', INK = '#1b1b1b', BLU = '#6fb6df';
+
+  ctx.save();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+
+  /* てあし（ほそい らくがきの せん）*/
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  for (const d of [-1, 1]) {          /* あし */
+    ctx.beginPath();
+    ctx.moveTo(d * 14, -34);
+    ctx.lineTo(d * 20 + step * d, -16);
+    ctx.lineTo(d * 14 + step * d, 0);
+    ctx.stroke();
+  }
+  for (const d of [-1, 1]) {          /* うで */
+    ctx.beginPath();
+    ctx.moveTo(d * 30, -74);
+    ctx.lineTo(d * 44, -66 + Math.sin(t * 5 + d) * 3);
+    ctx.lineTo(d * 40, -52);
+    ctx.stroke();
+  }
+
+  /* からだ（きいろの しかく）*/
+  ctx.fillStyle = YEL; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  roundRect(ctx, -31, -88, 62, 54, 4); ctx.fill(); ctx.stroke();
+
+  /* 「I ♥ ガオウドウ」*/
+  ctx.save();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = INK;
+  ctx.font = '900 12px system-ui, sans-serif';
+  ctx.fillText('I', -8, -74);
+  ctx.fillStyle = '#e53935';
+  ctx.beginPath();                    /* ハート */
+  ctx.moveTo(8, -70);
+  ctx.bezierCurveTo(8, -78, 19, -78, 19, -71);
+  ctx.bezierCurveTo(19, -66, 8, -62, 8, -62);
+  ctx.bezierCurveTo(8, -62, -3, -66, -3, -71);
+  ctx.bezierCurveTo(-3, -78, 8, -78, 8, -70);
+  ctx.fill();
+  ctx.fillStyle = INK;
+  ctx.font = '900 9.5px system-ui, "Hiragino Sans", sans-serif';
+  ctx.fillText('ガオウドウ', 0, -48);
+  ctx.restore();
+
+  /* あたま（あおい さんかく）と みみ */
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.0;
+  ctx.beginPath();                    /* みみ 2ほん */
+  ctx.moveTo(-9, -96); ctx.quadraticCurveTo(-20, -116, -13, -130);
+  ctx.moveTo(9, -96);  ctx.quadraticCurveTo(20, -116, 13, -130);
+  ctx.stroke();
+  ctx.fillStyle = BLU; ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(-21, -88); ctx.lineTo(0, -124); ctx.lineTo(21, -88);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  /* め（たてぼう 2ほん）と くち（への字）*/
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(-6, -108); ctx.lineTo(-6, -99);
+  ctx.moveTo(6, -108);  ctx.lineTo(6, -99);
+  ctx.moveTo(-9, -93);  ctx.lineTo(9, -93);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+/* --- イノチチ ── とにかく はやい ---
+     オレンジの ながい よこぼうの からだ。みぎの はしに かお。
+     したに はしる ための ブロックと とがった あし 2ほん。
+     うしろに スピードせん。                                             */
+function drawInochichi(ctx, s) {
+  const t = (s && s.t) || 0;
+  const run = Math.sin(t * 18) * (s && s.moving ? 3 : 0.6);
+  const OR = '#e08a2e', OR2 = '#c9761f', INK = '#1b1b1b';
+
+  ctx.save();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+
+  /* スピードせん（うしろ＝ひだり）*/
+  ctx.strokeStyle = 'rgba(40,40,40,.55)'; ctx.lineWidth = 2.2;
+  for (let i = 0; i < 4; i++) {
+    const y = -62 + i * 12;
+    const len = 26 + ((i * 7) % 3) * 12 + Math.abs(run) * 2;
+    ctx.beginPath();
+    ctx.moveTo(-34 - len, y); ctx.lineTo(-34, y);
+    ctx.stroke();
+  }
+
+  /* あし 2ほん（とがって いる）*/
+  ctx.fillStyle = OR2; ctx.strokeStyle = INK; ctx.lineWidth = 2.0;
+  ctx.beginPath(); ctx.moveTo(-20, -26); ctx.lineTo(-13 + run, 0); ctx.lineTo(-6, -26); ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(2, -26); ctx.lineTo(9 - run, 0); ctx.lineTo(16, -26); ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  /* こしの ブロック */
+  ctx.fillStyle = OR;
+  roundRect(ctx, -24, -62, 44, 38, 3); ctx.fill(); ctx.stroke();
+
+  /* ながい よこぼう（みぎへ のびる）*/
+  roundRect(ctx, -24, -84, 88, 24, 11); ctx.fill(); ctx.stroke();
+
+  /* かお（みぎの はし）*/
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(44, -79); ctx.lineTo(44, -71);
+  ctx.moveTo(54, -79); ctx.lineTo(54, -71);
+  ctx.moveTo(42, -66); ctx.lineTo(57, -66);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+/* --- ガレキマル ── くずれた 村の がれきの やま ---
+     いたや いしが つみあがった かたまり。ふたつの めが のぞいて いて、
+     がれきを なげて くる（とおくから はんいこうげき）。                 */
+function drawGarekimaru(ctx, s) {
+  const t = (s && s.t) || 0;
+  const atk = (s && s.atk !== undefined) ? s.atk : -1;
+  const lift = (atk >= 0) ? (1 - Math.abs(atk - 0.5) * 2) : 0;
+  /* ★はいけい（こわれた むら）も ちゃいろい ので、いわは あおみの ある
+       こい はいいろに して、うもれて 見えない ように して います */
+  const ROCK = '#6b7078', ROCK2 = '#4b5057', WOOD = '#b07a3d', INK = '#22262b';
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+
+  /* やまの ほんたい */
+  ctx.fillStyle = ROCK;
+  ctx.beginPath();
+  ctx.moveTo(-42, 0);
+  ctx.lineTo(-34, -40);
+  ctx.lineTo(-12, -58);
+  ctx.lineTo(16, -54);
+  ctx.lineTo(38, -30);
+  ctx.lineTo(44, 0);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  /* つきでた いた 3まい */
+  ctx.fillStyle = WOOD;
+  ctx.save(); ctx.translate(-20, -44); ctx.rotate(-0.55);
+  ctx.fillRect(-6, -26, 12, 34); ctx.strokeRect(-6, -26, 12, 34);
+  ctx.restore();
+  ctx.save(); ctx.translate(20, -44); ctx.rotate(0.42);
+  ctx.fillRect(-6, -24, 12, 30); ctx.strokeRect(-6, -24, 12, 30);
+  ctx.restore();
+  ctx.save(); ctx.translate(2, -58); ctx.rotate(0.10);
+  ctx.fillRect(-18, -8, 36, 10); ctx.strokeRect(-18, -8, 36, 10);
+  ctx.restore();
+
+  /* いし */
+  ctx.fillStyle = ROCK2;
+  ctx.beginPath(); ctx.ellipse(-24, -14, 10, 8, 0.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(26, -12, 9, 7, -0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+  /* め（やまの すきまから）*/
+  ctx.fillStyle = '#fff59d';
+  ctx.beginPath(); ctx.ellipse(-6, -36, 7, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(12, -34, 6.5, 5.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INK;
+  ctx.beginPath(); ctx.arc(-4 + lift * 2, -36, 2.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(14 + lift * 2, -34, 2.4, 0, Math.PI * 2); ctx.fill();
+
+  /* なげる がれき（こうげきの とき うえに もちあげる）*/
+  if (atk >= 0) {
+    ctx.save();
+    ctx.translate(30 + lift * 12, -70 - lift * 26);
+    ctx.rotate(t * 6);
+    ctx.fillStyle = ROCK2;
+    ctx.beginPath();
+    ctx.moveTo(-11, -6); ctx.lineTo(3, -12); ctx.lineTo(12, 2); ctx.lineTo(-2, 11); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
 const DRAWERS = {
   nekos: drawNekos,
+  gaou_ko: drawGaouKo,
+  inochichi: drawInochichi,
+  garekimaru: drawGarekimaru,
   togehaya_t: drawTogehayaT,
   hatchie: drawHatchie,
   kamajirou: drawKamajirou,

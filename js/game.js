@@ -1441,6 +1441,51 @@ const Game = {
         const bs = V.groundY * (0.030 + (i % 3) * 0.008);
         this.drawSkyBug(ctx, bx, by, bs, (i % 3 === 0) ? 'hatchie' : 'mosquito', t + i);
       }
+    } else if (kind === 'ruins') {
+      /* ★こわれた いえが ならんだ むら（だい16しょう「ちつじょが うしなわれた むら」）
+           かたむいた やねと、おれた はしらの シルエット。うえには すなぼこり。 */
+      const gy = V.groundY;
+      for (let i = 0; i < 6; i++) {
+        const hx = ((i * 0.178 + 0.04) % 1) * V.w;
+        const hw = gy * (0.20 + (i % 3) * 0.06);
+        const hh = gy * (0.17 + ((i * 7) % 4) * 0.045);
+        const tilt = ((i % 2) ? 1 : -1) * 0.10 - ((i % 3) * 0.02);
+        ctx.save();
+        ctx.translate(hx, gy);
+        ctx.rotate(tilt);
+        /* かべ */
+        ctx.fillStyle = 'rgba(104,88,66,0.80)';
+        ctx.fillRect(-hw / 2, -hh, hw, hh);
+        /* やねは かたっぽうだけ のこって いる */
+        ctx.fillStyle = 'rgba(78,60,44,0.85)';
+        ctx.beginPath();
+        ctx.moveTo(-hw * 0.62, -hh);
+        ctx.lineTo(0, -hh - gy * 0.085);
+        ctx.lineTo(hw * 0.20, -hh - gy * 0.02);
+        ctx.closePath();
+        ctx.fill();
+        /* われた まど */
+        ctx.fillStyle = 'rgba(38,30,24,0.75)';
+        ctx.fillRect(-hw * 0.24, -hh * 0.68, hw * 0.22, hh * 0.28);
+        /* おれた はしら */
+        ctx.strokeStyle = 'rgba(70,54,38,0.8)';
+        ctx.lineWidth = Math.max(2, gy * 0.014);
+        ctx.beginPath();
+        ctx.moveTo(hw * 0.58, 0);
+        ctx.lineTo(hw * 0.72, -hh * 0.55);
+        ctx.stroke();
+        ctx.restore();
+      }
+      /* すなぼこりが よこに ながれる */
+      ctx.fillStyle = 'rgba(214,196,160,0.35)';
+      for (let i = 0; i < 4; i++) {
+        const dx = ((i * 0.31 + t * 0.030) % 1.3 - 0.15) * V.w;
+        const dy = gy * (0.30 + (i % 3) * 0.12);
+        const dr = gy * (0.05 + (i % 2) * 0.025);
+        ctx.beginPath();
+        ctx.ellipse(dx, dy, dr * 2.1, dr * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
     } else if (kind === 'sun') {
       const cx = V.w * 0.5, cy = V.groundY * 0.82, r = V.groundY * 0.20;
       const g = ctx.createRadialGradient(cx, cy, r * 0.4, cx, cy, r * 2.4);

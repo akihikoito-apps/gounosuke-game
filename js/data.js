@@ -2637,6 +2637,8 @@ const ENEMIES = {
     attackType: 'single',  projectile: null,
     multiHit: { count: 2, delay: 0.22 },  // あたまの くちと どうの くちで 2かい
     kbImmune: true, slowImmune: true, stunImmune: true,
+    /* ★こどもの「ガオウ」が つぎつぎ でて きて おやを まもります */
+    escort: { id: 'gaou_ko', count: 2, interval: 16, first: 3 },
     money: 2000,
     isBoss: true,
   },
@@ -2672,6 +2674,55 @@ const ENEMIES = {
     escort: { id: ['togehaya_t', 'hatchie', 'kamajirou'], count: 1, interval: 11, first: 7 },
     money: 1200,
     isBoss: true,
+  },
+
+  /* ==========================================================================
+     ★ 16しょう「ちつじょが うしなわれた むら」の ざこキャラ 3しゅるい
+     ========================================================================== */
+
+  /* --- ガオウ ---
+       ガオウドウの こども。きいろい しかくい からだに
+       「I ♥ ガオウドウ」と かいて あって、あたまは あおい さんかく。
+       ★はどう ストッパー：あき坊の はどうを ここで とめて しまう。
+         ガオウドウの まわりに たくさん ならんで、おやを まもります。      */
+  gaou_ko: {
+    id: 'gaou_ko', name: 'ガオウ',
+    rarity: 'R',
+    attr: 'none',                         // むぞくせい（おやと おなじ）
+    hp: 1500,   atk: 175,  range: 92,   speed: 20,
+    attackInterval: 1.8,   attackWindup: 0.35,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    waveStopper: true,                    // ★はどうを とめる
+    money: 140,
+  },
+
+  /* --- イノチチ ---
+       オレンジの ながい どうを した、いのししの ような むらの あばれもの。
+       とにかく はやい。まえせんを とびこえる いきおいで つっこんで くる。 */
+  inochichi: {
+    id: 'inochichi', name: 'イノチチ',
+    rarity: 'R',
+    attr: 'beast',                        // けもの
+    hp: 640,    atk: 245,  range: 72,   speed: 98,
+    attackInterval: 1.0,   attackWindup: 0.18,
+    kbCount: 2, scale: 1.0,
+    attackType: 'single', projectile: null,
+    money: 130,
+  },
+
+  /* --- ガレキマル ---
+       こわれた いえの がれきが あつまって うごきだした もの。
+       とおくから いしを なげて くる。あしは とても おそい。            */
+  garekimaru: {
+    id: 'garekimaru', name: 'ガレキマル',
+    rarity: 'GR',
+    attr: 'none',                         // むぞくせい
+    hp: 2300,   atk: 300,  range: 165,  speed: 14,
+    attackInterval: 3.0,   attackWindup: 0.55,
+    kbCount: 3, scale: 1.15,
+    attackType: 'area',  areaRadius: 68,  projectile: 'stone',
+    money: 220,
   },
 };
 
@@ -2822,6 +2873,24 @@ const BACKGROUNDS = {
     hillFar: '#9ccc65', hillNear: '#7cb342',
     ground: '#8d6e3a', groundTop: '#a1874a',
     deco: 'bugswarm',
+  },
+
+  /* ちつじょが うしなわれた むら（だい16しょう 1〜6面）──
+     こわれた いえが ならび、すなぼこりが まう かわいた むら */
+  ruinvillage: {
+    sky: ['#9fb6c4', '#d3d2bb', '#efe3c2'],
+    hillFar: '#a09070', hillNear: '#7a6a4c',
+    ground: '#8a7549', groundTop: '#ab9560',
+    deco: 'ruins',
+  },
+
+  /* むらの ひろば（だい16しょう 7面）── ゆうやけの なか、がれきの まんなかで
+     ガオウドウが まちかまえる */
+  ruinsquare: {
+    sky: ['#c2603a', '#e5945a', '#f6d7a0'],
+    hillFar: '#8b6a4a', hillNear: '#5a4530',
+    ground: '#6f5a38', groundTop: '#93794c',
+    deco: 'ruins',
   },
 
   /* ロボこうじょう ── 小惑星ぷりぷりの ボスステージ（3面）。しゃしんの はいけい */
@@ -3093,6 +3162,164 @@ const STAGES = [
       { at: 52,           id: 'hatchie',    count: 2, gap: 1.6, repeat: 22 },
       { at: 64,           id: 'togehaya_t', count: 2, gap: 2.4, repeat: 26 },
       { at: 80,           id: 'kamajirou',  count: 1, repeat: 52 },
+    ],
+  },
+
+
+  /* ==========================================================================
+     16しょう ★ちつじょが うしなわれた むら★（ぜんぶで 7コース）
+
+     むしの まちの さきに ある、こわれた いえだらけの むら。
+     3大王の ひとり「ガオウドウ」と その こどもたちが あばれて います。
+     ★7コース とも たつまきほうが とんで きます★
+
+     でて くる ざこは 3しゅるい。
+       ・ガオウ        … ガオウドウの こども。★はどう ストッパー★ を もつ！
+                         あき坊の はどうが ここで とまって しまう。
+       ・イノチチ      … とにかく はやい。あっという まに まえせんを こえて くる
+       ・ガレキマル    … がれきの かたまり。とおくから いしを なげて くる
+     7コースめで 大ボス「ガオウドウ」が まって います。
+     ★ガオウドウは しろが こわされる まえに でて きます（atCastleHp: 0.98）。
+     ========================================================================== */
+  {
+    no: 128, chapter: 16, course: 1,
+    name: 'むらの いりぐち',
+    desc: 'ガオウは あき坊の はどうを とめて しまう。はどう だのみは つうじない！',
+    bg: 'ruinvillage',
+    castleHp: 2200,
+    power: 3.0,
+    tornado: { interval: 32, chance: 0.45, first: 21 },
+    drops: ['wood', 'stone', 'cloth'],
+    reward: { coins: 5, exp: 7600 },
+    waves: [
+      { at: 3,  id: 'gaou_ko',   count: 1 },
+      { at: 14, id: 'gaou_ko',   count: 2, gap: 2.4 },
+      { at: 28, id: 'inochichi', count: 1 },
+      { at: 42, id: 'gaou_ko',   count: 2, gap: 3, repeat: 21 },
+      { at: 54, id: 'inochichi', count: 1, repeat: 19 },
+    ],
+  },
+  {
+    no: 129, chapter: 16, course: 2,
+    name: 'かけぬける つじ',
+    desc: 'イノチチが すごい はやさで つっこんで くる。とおくから とめよう。',
+    bg: 'ruinvillage',
+    castleHp: 2900,
+    power: 3.4,
+    tornado: { interval: 30, chance: 0.48, first: 20 },
+    drops: ['wood', 'iron', 'cloth'],
+    reward: { coins: 5, exp: 8000 },
+    waves: [
+      { at: 3,  id: 'gaou_ko',   count: 1 },
+      { at: 12, id: 'inochichi', count: 2, gap: 1.8 },
+      { at: 26, id: 'gaou_ko',   count: 2, gap: 2.4 },
+      { at: 40, id: 'inochichi', count: 3, gap: 1.6, repeat: 14 },
+      { at: 54, id: 'gaou_ko',   count: 2, gap: 3, repeat: 18 },
+    ],
+  },
+  {
+    no: 130, chapter: 16, course: 3,
+    name: 'がれきの ひろば',
+    desc: 'ガレキマルが とおくから いしを なげて くる。ちかづく までが たいへん。',
+    bg: 'ruinvillage',
+    castleHp: 2400,
+    power: 2.0,
+    tornado: { interval: 28, chance: 0.52, first: 19 },
+    drops: ['stone', 'iron', 'string'],
+    reward: { coins: 6, exp: 8400 },
+    /* ★ガレキマルの くりかえし わきは おかない こと。
+         とおくから なげて くる かたい てきが なんども わくと、
+         たつまきほうと あわさって いつまでも おしきれなく なります
+         （はかったら 330びょう かかりました）*/
+    waves: [
+      { at: 3,  id: 'gaou_ko',    count: 2, gap: 2.2 },
+      { at: 18, id: 'garekimaru', count: 1 },
+      { at: 32, id: 'inochichi',  count: 2, gap: 1.6 },
+      { at: 46, id: 'gaou_ko',    count: 2, gap: 2.6, repeat: 26 },
+      { at: 62, id: 'inochichi',  count: 2, gap: 1.6, repeat: 22 },
+    ],
+  },
+  {
+    no: 131, chapter: 16, course: 4,
+    name: 'こわれた とおり',
+    desc: 'ガオウの かべが ならぶ。はどうが とまるので、まっすぐな こうげきで けずろう。',
+    bg: 'ruinvillage',
+    castleHp: 3000,
+    power: 2.5,
+    tornado: { interval: 26, chance: 0.55, first: 18 },
+    drops: ['iron', 'cloth', 'glue'],
+    reward: { coins: 6, exp: 8800 },
+    waves: [
+      { at: 3,  id: 'gaou_ko',    count: 3, gap: 2.2 },
+      { at: 18, id: 'inochichi',  count: 2, gap: 1.5 },
+      { at: 32, id: 'garekimaru', count: 1 },
+      { at: 46, id: 'gaou_ko',    count: 2, gap: 2.4, repeat: 22 },
+      { at: 60, id: 'inochichi',  count: 2, gap: 1.6, repeat: 20 },
+    ],
+  },
+  {
+    no: 132, chapter: 16, course: 5,
+    name: 'むらの いど',
+    desc: '3しゅるいが いっぺんに。たつまきほうにも きを つけて。',
+    bg: 'ruinvillage',
+    castleHp: 2700,
+    power: 1.8,
+    tornado: { interval: 25, chance: 0.58, first: 17 },
+    drops: ['stone', 'alumi', 'string'],
+    reward: { coins: 7, exp: 9200 },
+    waves: [
+      { at: 3,  id: 'gaou_ko',    count: 2, gap: 2.2 },
+      { at: 14, id: 'inochichi',  count: 2, gap: 1.5 },
+      { at: 28, id: 'garekimaru', count: 1 },
+      { at: 42, id: 'inochichi',  count: 3, gap: 1.5, repeat: 18 },
+      { at: 52, id: 'gaou_ko',    count: 2, gap: 2.4, repeat: 22 },
+    ],
+  },
+  {
+    no: 133, chapter: 16, course: 6,
+    name: 'くずれた やしき',
+    desc: 'ガレキマルが なんたいも。とおくの いしを うちかえせ！',
+    bg: 'ruinvillage',
+    castleHp: 3200,
+    power: 1.7,
+    tornado: { interval: 24, chance: 0.60, first: 16 },
+    drops: ['iron', 'alumi', 'glue'],
+    reward: { coins: 7, exp: 9600 },
+    waves: [
+      { at: 3,  id: 'garekimaru', count: 1 },
+      { at: 16, id: 'gaou_ko',    count: 3, gap: 2.2 },
+      { at: 30, id: 'garekimaru', count: 2, gap: 4 },
+      { at: 46, id: 'inochichi',  count: 3, gap: 1.5, repeat: 17 },
+      { at: 60, id: 'garekimaru', count: 1, repeat: 40 },
+    ],
+  },
+  {
+    no: 134, chapter: 16, course: 7,
+    name: 'ガオウドウの ひろば',
+    desc: '★大ボス★ 3大王の ひとり「ガオウドウ」。こどもの ガオウを つぎつぎ よぶ。',
+    bg: 'ruinsquare',
+    castleHp: 2600,
+    power: 1.3,
+    /* ★大ボスだけ さらに ひかえめに（ガオウドウは たいりょく 34000 と
+         もともと 3大王で いちばん おおい ので、LR だけ 0.75ばい）*/
+    powerBy: { LR: 0.75 },
+    /* ★7コースめの たつまきほうは わざと 5・6コースめより ゆるめ（26びょう/55%）。
+         ガオウドウが こどもを よびつづける ので、23びょう/62% と かさねると
+         ずっと おしきれなく なりました（428びょう・くわしくは README）*/
+    tornado: { interval: 26, chance: 0.55, first: 16 },
+    drops: ['alumi', 'cloth', 'glue'],
+    reward: { coins: 12, exp: 14000 },
+    waves: [
+      { at: 3,            id: 'gaou_ko',    count: 2, gap: 2.2 },
+      { at: 16,           id: 'inochichi',  count: 2, gap: 1.5 },
+      { at: 30,           id: 'garekimaru', count: 1 },
+      /* ★大ボス。しろが こわされる まえに でて きます（0.98 ＝ ひとたたき）*/
+      { atCastleHp: 0.98, id: 'gaoudou',    count: 1 },
+      /* ★ガオウドウ じしんが 9びょうごとに こどもを 2たい よぶ ので、
+           ここの てきの でかたは ひかえめに して あります */
+      { at: 52,           id: 'inochichi',  count: 2, gap: 1.6, repeat: 24 },
+      { at: 66,           id: 'gaou_ko',    count: 2, gap: 2.4, repeat: 32 },
+      { at: 84,           id: 'garekimaru', count: 1 },
     ],
   },
 
@@ -5498,6 +5725,7 @@ const CHAPTERS = {
   /* ★たたかいの ない ばしょ（shop: true）。タップすると おみせに はいります */
   14:{ name: 'ネコスの店', short: 'ネコスのみせ', x: 0.37, y: 0.70, icon: '☕', world: 'storm', shop: true },
   15:{ name: '虫に支配された町', short: 'むしのまち', x: 0.66, y: 0.38, icon: '🦟', world: 'storm' },
+  16:{ name: '秩序が失われた村', short: 'むら', x: 0.88, y: 0.64, icon: '🏚️', world: 'storm' },
 };
 
 
@@ -6057,6 +6285,18 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.31', date: '2026-09-19',
+    title: '★だい16しょう「秩序が失われた村」（ぜんぶで 7コース）',
+    items: [
+      '虫に支配された町の さきに、こわれた いえだらけの むらが できました。3大王の ひとり「ガオウドウ」と その こどもたちの すみかです。',
+      '★ざこキャラ 3しゅるい★ ── ガオウ … ガオウドウの こども。きいろい からだに「I ♥ ガオウドウ」。／ イノチチ … オレンジの ながい どう。とにかく はやい（はやさ 98）。／ ガレキマル … がれきの かたまり。とおくから いしを なげて くる。',
+      '★ガオウは「はどう ストッパー」★ ── あき坊の はどうが ガオウに あたると、ダメージ 0で そこで とまります。はどう だのみの たたかいかたが つうじません。',
+      '7コースめ「ガオウドウの ひろば」で 大ボス ガオウドウが まって います。★しろを ひとたたきした しゅんかんに でて きます★（おそく でて こないように しました）。ガオウドウは 16びょうごとに こどもの ガオウを 2たいずつ よびつづけます。',
+      '★たつまきほうは 7コース ぜんぶに あります★（32びょう/45% → 24びょう/60%）。7コースめだけ 26びょう/55% に もどして あります。ガオウドウが こどもを よびつづける ので、いちばん きつい たつまきほうと かさねると おしきれなく なった ためです。',
+      'クリアまでの じかんは 134・110・147・198・162・206・221びょう（30せん ずつ はかりました）。だい15しょうより すこしだけ てごわい つくりです。',
+    ],
+  },
   {
     ver: '6.30', date: '2026-09-19',
     title: 'ミニゲーム ── ボスの たつまきほうと、とつげきする トゲハヤさん',
