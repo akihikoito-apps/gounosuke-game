@@ -2664,11 +2664,22 @@ const ENEMIES = {
     hp: 15300,  atk: 371,  range: 185,  speed: 30,
     attackInterval: 1.5,   attackWindup: 0.35,
     kbCount: 99, scale: 1.45,
-    attackType: 'area',  areaRadius: 150,  projectile: null,
+    /* ★v6.35 で はんい 150 → 95 に せまく しました。
+         まえせんで たたかう ように なって、150 の ままだと
+         1.85びょうごとに みかたが まとめて きえて、
+         どうやっても おしきれません でした（カマジロウと おなじ わな）。*/
+    attackType: 'area',  areaRadius: 95,   projectile: null,
     flying: true,                         // かなので とんで いる
+    /* ★とんでは いるが、みかたを とびこえて いかない。
+         まえに いる あいてから じゅんばんに たおして いく ボス。   */
+    flyOver: false,
     drain: { rate: 0.5 },                 // ちを すって かいふく
     stun:  { chance: 0.40, duration: 1.0 },
-    dodge: 0.50,                          // こうげきを 50% かわす
+    /* ★v6.35 で 50% → 30% に さげました。
+         とんで いかずに まえせんで たたかう ように なった ので、
+         50% の ままだと たいりょくが じっしつ 2ばい に なって
+         どうやっても たおせない かべに なって しまいました。      */
+    dodge: 0.30,                          // こうげきを 30% かわす
     kbImmune: true,
     /* ★3しゅるいの ざこと いっしょに うごきます（でる たびに ランダム）*/
     escort: { id: ['togehaya_t', 'hatchie', 'kamajirou'], count: 1, interval: 11, first: 7 },
@@ -3147,21 +3158,24 @@ const STAGES = [
     desc: '★大ボス★ 3大王の ひとり「チューチュー」。ちを すい、うごきを とめ、こうげきを かわす。',
     bg: 'bugsky',
     castleHp: 3000,
-    power: 1.9,
+    power: 1.5,
     /* ★7コースめは 竜巻編と おなじ フルスペック */
     tornado: { interval: 24, chance: 0.60, first: 16 },
     drops: ['alumi', 'cloth', 'glue'],
     reward: { coins: 10, exp: 12000 },
     waves: [
-      { at: 3,            id: 'togehaya_t', count: 2, gap: 2 },
-      { at: 16,           id: 'hatchie',    count: 3, gap: 1.3 },
-      { at: 32,           id: 'kamajirou',  count: 1 },
-      { atCastleHp: 0.82, id: 'chuchu',     count: 1 },   /* ★大ボス */
+      { at: 3,  id: 'togehaya_t', count: 2, gap: 2 },
+      { at: 16, id: 'hatchie',    count: 3, gap: 1.3 },
+      { at: 32, id: 'kamajirou',  count: 1 },
+      /* ★大ボス。しろの まえで いきなり でて くる のでは なく、
+           44びょうで まんなかまで でて きて たたかいます。
+           hold: 0.55 ＝ ボスが でる まで しろは 55% までしか けずれません。*/
+      { at: 44, id: 'chuchu',     count: 1, hold: 0.55 },
       /* ★チューチュー じしんも 11びょうごとに ざこを よぶ ので、
            ここの てきの でかたは ひかえめに して あります */
-      { at: 52,           id: 'hatchie',    count: 2, gap: 1.6, repeat: 22 },
-      { at: 64,           id: 'togehaya_t', count: 2, gap: 2.4, repeat: 26 },
-      { at: 80,           id: 'kamajirou',  count: 1, repeat: 52 },
+      { at: 56, id: 'hatchie',    count: 2, gap: 1.6, repeat: 22 },
+      { at: 68, id: 'togehaya_t', count: 2, gap: 2.4, repeat: 26 },
+      { at: 84, id: 'kamajirou',  count: 1, repeat: 52 },
     ],
   },
 
@@ -3299,10 +3313,7 @@ const STAGES = [
     desc: '★大ボス★ 3大王の ひとり「ガオウドウ」。こどもの ガオウを つぎつぎ よぶ。',
     bg: 'ruinsquare',
     castleHp: 2600,
-    power: 1.3,
-    /* ★大ボスだけ さらに ひかえめに（ガオウドウは たいりょく 34000 と
-         もともと 3大王で いちばん おおい ので、LR だけ 0.75ばい）*/
-    powerBy: { LR: 0.75 },
+    power: 1.6,
     /* ★7コースめの たつまきほうは わざと 5・6コースめより ゆるめ（26びょう/55%）。
          ガオウドウが こどもを よびつづける ので、23びょう/62% と かさねると
          ずっと おしきれなく なりました（428びょう・くわしくは README）*/
@@ -3310,16 +3321,20 @@ const STAGES = [
     drops: ['alumi', 'cloth', 'glue'],
     reward: { coins: 12, exp: 14000 },
     waves: [
-      { at: 3,            id: 'gaou_ko',    count: 2, gap: 2.2 },
-      { at: 16,           id: 'inochichi',  count: 2, gap: 1.5 },
-      { at: 30,           id: 'garekimaru', count: 1 },
-      /* ★大ボス。しろが こわされる まえに でて きます（0.98 ＝ ひとたたき）*/
-      { atCastleHp: 0.98, id: 'gaoudou',    count: 1 },
-      /* ★ガオウドウ じしんが 9びょうごとに こどもを 2たい よぶ ので、
-           ここの てきの でかたは ひかえめに して あります */
-      { at: 52,           id: 'inochichi',  count: 2, gap: 1.6, repeat: 24 },
-      { at: 66,           id: 'gaou_ko',    count: 2, gap: 2.4, repeat: 32 },
-      { at: 84,           id: 'garekimaru', count: 1 },
+      { at: 3,  id: 'gaou_ko',    count: 2, gap: 2.2 },
+      { at: 16, id: 'inochichi',  count: 2, gap: 1.5 },
+      { at: 30, id: 'garekimaru', count: 1 },
+      /* ★大ボス。★しろの ところで いきなり でて くる のでは なく★、
+           40びょうで こどもを ひきつれて でて きます。
+           hold: 0.62 ＝ ボスが でる まで しろは 62% までしか けずれません。
+           （まえは しろの まえで でて きて、なにも できずに たおされて
+             いました。v6.35 で かえました）                          */
+      { at: 40, id: 'gaoudou',    count: 1, hold: 0.62 },
+      { at: 40, id: 'gaou_ko',    count: 4, gap: 1.1 },   /* ★ボスを まもる こどもたち */
+      /* ★ガオウドウ じしんも 16びょうごとに こどもを 2たい よびます */
+      { at: 56, id: 'inochichi',  count: 2, gap: 1.6, repeat: 24 },
+      { at: 70, id: 'gaou_ko',    count: 2, gap: 2.4, repeat: 30 },
+      { at: 88, id: 'garekimaru', count: 1 },
     ],
   },
 
@@ -6285,6 +6300,17 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.35', date: '2026-09-20',
+    title: 'チューチューが しろを まもるように／ボスは はやめに とうじょう',
+    items: [
+      '★チューチューが みかたを とびこえて いかなく なりました★。そらは とんで いますが、まえに いる キャラから じゅんばんに あいてを します。しろを ほうりだして とんで いって しまう ことは もう ありません。',
+      'まえせんで たたかう ように なった ぶん、チューチューは つよすぎた ので ちょうせい しました ── かいひ 50%→30%、はんい 150→95、コースの つよさ 1.9→1.5。このままだと どうやっても たおせない かべに なって いました（30せん して 0かち でした）。',
+      '★きゅうけつは「1かいの こうげきに つき 1たいぶん」まで★ に なりました。はんい こうげきで たくさん あてた ぶん だけ まとめて かいふく して、ぜったいに たおせなく なる のを なおしました。',
+      '★大ボスは しろの まえで いきなり でて くる のでは なく、はやめに でて きて ざこと いっしょに しろを まもります★（チューチュー 44びょう／ガオウドウ 40びょう）。ボスが でて くる まで しろは それいじょう けずれません。',
+      'ガオウドウは こどもの ガオウ 4たいを つれて でて きます。「なにも できずに たおされる」ことが なくなり、16-7 は 221びょう → 301びょう に なりました。',
+    ],
+  },
   {
     ver: '6.34', date: '2026-09-20',
     title: 'ネコスの店に「そざい入れ」が でるように',

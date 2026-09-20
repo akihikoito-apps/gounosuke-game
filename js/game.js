@@ -269,8 +269,16 @@ const Game = {
   holdBossFloor() {
     let floor = 0;
     for (const w of this.waves) {
-      if (w.done || w.atCastleHp === undefined) continue;
-      floor = Math.max(floor, w.atCastleHp * this.enemyCastle.maxHp);
+      if (w.done) continue;
+      /* atCastleHp … しろの たいりょくが ここまで へったら でて くる */
+      if (w.atCastleHp !== undefined) {
+        floor = Math.max(floor, w.atCastleHp * this.enemyCastle.maxHp);
+      /* ★hold … じかんで でて くる ボス。でて くる まで しろを ここまでしか
+           けずらせない。これで ボスが「しろの まえで いきなり でて きて
+           なにも できずに たおされる」ことが なくなります。          */
+      } else if (w.hold !== undefined) {
+        floor = Math.max(floor, w.hold * this.enemyCastle.maxHp);
+      }
     }
     if (floor > 0 && this.enemyCastle.hp < floor) this.enemyCastle.hp = floor;
     return floor;
@@ -604,8 +612,13 @@ const Game = {
     const range = u.def.range;
 
     /* --- そらを とぶ あいて（カモメェル）は かべを こえて
-           いちばん おくに いる あいてを ねらう --- */
-    if (u.def.flying) {
+           いちばん おくに いる あいてを ねらう ---
+
+       ★ただし flyOver: false と かいて ある こ は べつ。
+         そらは とんで いる（え も うかんで いる）けれど、
+         まえに いる あいてを 1たいずつ たおして いきます。
+         ボスが しろを ほうりだして とんで いって しまわない ように。 */
+    if (u.def.flying && u.def.flyOver !== false) {
       let far = null, farDepth = -Infinity;
       for (const o of this.units) {
         if (o.dead || o.side === u.side) continue;
@@ -825,6 +838,20 @@ const Game = {
            （チューチューは ちを すって こうげきします）*/
       const drain = src.def ? (src.def.drain || null) : (src.drain || null);
       if (drain && src && !src.dead && src.maxHp) {
+        /* ★すいとれるのは「1かいの こうげきに つき 1たいぶん」だけ。
+
+           これが ないと、はんい こうげきの きゅうけつもちが みかたに
+           かこまれた とき、あてた かず ぶん まとめて かいふく して
+           ぜったいに たおせなく なります。
+           （チューチューを まえせんで たたかわせたら 600びょう たっても
+             たいりょくが ほとんど へりませんでした。v6.35 で なおしました）
+
+           ぜんいん ぶん すいとらせたい ときは drain.all: true と かきます。 */
+        const once = (drain.all !== true);
+        if (once && src.drainT === this.time) {
+          /* この こうげきでは もう すいとって いる */
+        } else {
+        if (once) src.drainT = this.time;
         const heal = Math.max(1, Math.round(dmg * (drain.rate === undefined ? 0.5 : drain.rate)));
         const room = Math.max(0, src.maxHp - src.hp);
         const got  = Math.min(room, heal);
@@ -833,6 +860,7 @@ const Game = {
           this.addEffect({ type: 'healMark', x: src.x, y: this.groundWorldY() - 74 - (src.lane || 0), life: 0.7 });
           this.addEffect({ type: 'dmg', x: src.x, y: this.groundWorldY() - 58 - (src.lane || 0),
                            text: 'すいとった ＋' + got, color: '#ff8a80', life: 0.75 });
+        }
         }
       }
       if (slow && !v.dead) {

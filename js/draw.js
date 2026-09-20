@@ -10473,8 +10473,156 @@ function drawGarekimaru(ctx, s) {
   ctx.restore();
 }
 
+
+/* --- ススベエ（だい17しょう「ほこりに まみれた 都市」）---
+     すすで まっくろに なった、ガスマスクの いきのこり。
+     トタンの いたを たてに して すすんで くる。
+     ★はどう ストッパー：あき坊の はどうは この いたで とまる。        */
+function drawSusube(ctx, s) {
+  const t = (s && s.t) || 0;
+  const atk = (s && s.atk !== undefined) ? s.atk : -1;
+  const push = (atk >= 0) ? (1 - Math.abs(atk - 0.5) * 2) * 8 : 0;
+  const step = Math.sin(t * 6) * (s && s.moving ? 2.0 : 0);
+  const INK = '#1a1a1a', COAT = '#4c4a46', COAT2 = '#332f2b';
+  const TIN = '#8e969c', LENS = '#ffe082';
+
+  ctx.save();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+
+  /* あしもとの ほこり */
+  ctx.fillStyle = 'rgba(180,165,135,.55)';
+  ctx.beginPath(); ctx.ellipse(-6, -4, 30, 8, 0, 0, Math.PI * 2); ctx.fill();
+
+  /* あし */
+  ctx.strokeStyle = INK; ctx.lineWidth = 6;
+  for (const d of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(d * 7, -30);
+    ctx.lineTo(d * 9 + step * d, -2);
+    ctx.stroke();
+  }
+
+  /* コート（したが ひろい だいけい）*/
+  ctx.fillStyle = COAT; ctx.lineWidth = 2.4; ctx.strokeStyle = INK;
+  ctx.beginPath();
+  ctx.moveTo(-19, -74);
+  ctx.lineTo(19, -74);
+  ctx.lineTo(25, -24);
+  ctx.lineTo(-25, -24);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  /* コートの すその すすよごれ */
+  ctx.fillStyle = COAT2;
+  ctx.beginPath();
+  ctx.moveTo(-24, -34); ctx.lineTo(24, -34); ctx.lineTo(25, -24); ctx.lineTo(-25, -24);
+  ctx.closePath(); ctx.fill();
+
+  /* あたま（まるい）*/
+  ctx.fillStyle = '#5a5751';
+  ctx.beginPath(); ctx.arc(2, -90, 17, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+  /* ガスマスクの レンズ 2つ */
+  ctx.fillStyle = LENS; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.arc(-3, -95, 6.0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(11, -95, 5.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INK;
+  ctx.beginPath(); ctx.arc(-1.5, -95, 2.0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(12.5, -95, 1.8, 0, Math.PI * 2); ctx.fill();
+
+  /* フィルター（みぎに つきでた つつ）*/
+  ctx.fillStyle = '#6f6a62';
+  roundRect(ctx, 8, -86, 16, 11, 3); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.4;
+  for (const x of [12, 16, 20]) {
+    ctx.beginPath(); ctx.moveTo(x, -85); ctx.lineTo(x, -76); ctx.stroke();
+  }
+
+  /* ★トタンの いた（はどうを とめる たて）*/
+  ctx.save();
+  ctx.translate(28 + push, -52);
+  ctx.rotate(0.06);
+  ctx.fillStyle = TIN; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  roundRect(ctx, -7, -34, 14, 68, 3); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1.6;
+  for (let y = -28; y <= 26; y += 9) {
+    ctx.beginPath(); ctx.moveTo(-6, y); ctx.lineTo(6, y); ctx.stroke();
+  }
+  /* さびの てん */
+  ctx.fillStyle = 'rgba(150,80,40,.55)';
+  ctx.beginPath(); ctx.arc(-2, -14, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(3, 12, 2.4, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  /* いたを もつ うで */
+  ctx.strokeStyle = INK; ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(14, -64);
+  ctx.lineTo(24 + push, -56);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+/* --- チリマイマイ（だい17しょう）---
+     まちに たまった ほこりが うずを まいて うごきだした もの。
+     まわりに かみくずを まきあげて、めに ごみを いれて くる。        */
+function drawChirimaimai(ctx, s) {
+  const t = (s && s.t) || 0;
+  const INK = '#43392c', D1 = '#cdbb93', D2 = '#a8956e', D3 = '#8a7752';
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+
+  /* うずの だん（したが ほそく、うえが ふとい）*/
+  /* [y, よこはば, たてはば]。たてはばを ふとめに して、
+     わっかと わっかの あいだが あかない ように して います */
+  const RINGS = [
+    [-6, 9, 4.6], [-19, 14, 6.4], [-33, 19, 7.8], [-48, 24, 8.6],
+    [-63, 27, 9.0], [-78, 25, 8.4], [-92, 20, 7.2],
+  ];
+  RINGS.forEach((r, i) => {
+    const sw = Math.sin(t * 5 - i * 0.8) * (3 + i * 0.8);
+    ctx.fillStyle = [D1, D2, D3][i % 3];
+    ctx.strokeStyle = INK; ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.ellipse(sw, r[0], r[1], r[2], 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+  });
+
+  /* まいあがる かみくず */
+  ctx.strokeStyle = INK; ctx.lineWidth = 1.8;
+  ctx.fillStyle = '#f0e6cf';
+  for (let i = 0; i < 3; i++) {
+    const a = t * 3 + i * 2.1;
+    const x = Math.cos(a) * (26 + i * 5);
+    const y = -24 - i * 26 + Math.sin(a * 1.3) * 5;
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(a);
+    ctx.fillRect(-6, -4, 12, 8); ctx.strokeRect(-6, -4, 12, 8);
+    ctx.restore();
+  }
+
+  /* め（うずの うえの ほう）*/
+  const eb = Math.sin(t * 5 - 5 * 0.8) * (3 + 5 * 0.8);
+  ctx.fillStyle = '#fffde7'; ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.ellipse(eb - 5, -80, 6.4, 7.4, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(eb + 9, -80, 5.8, 6.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INK;
+  ctx.beginPath(); ctx.arc(eb - 3.6, -79, 2.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(eb + 10.2, -79, 2.4, 0, Math.PI * 2); ctx.fill();
+  /* への字の くち */
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(eb - 4, -68); ctx.quadraticCurveTo(eb + 2, -72, eb + 8, -68);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 const DRAWERS = {
   nekos: drawNekos,
+  susube: drawSusube,
+  chirimaimai: drawChirimaimai,
   gaou_ko: drawGaouKo,
   inochichi: drawInochichi,
   garekimaru: drawGarekimaru,
