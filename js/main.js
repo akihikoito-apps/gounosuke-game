@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.39';
+  const GAME_VERSION = '6.40';
 
 
   /* =================================================
@@ -5719,14 +5719,20 @@
     soulSpeed: 440,           // たましいの はやさ（1びょうに すすむ ドット）
     stickDead: 0.16,          // これより かたむきが ちいさい ときは うごかない
     dirCount: 16,             // ★うごける むきは 16ほうい に そろえる
+    /* ★たましいが あおい ときの じゅうりょく（わくの たかさ を 1と した とき）*/
+    gravA: 4.6,               // おちる いきおい（1びょうに この ぶんだけ はやく なる）
+    jumpV: 2.25,              // ジャンプの いきおい（たかさは わくの やく 55%）
     aimSpeed: 1.45,           // 「たたかう」の はりの はやさ（おうふく／びょう）
     /* ★あいての こうげき。じゅんばんに くりかえし、1しゅうごとに きつく なる */
     waves: [
       { kind: 'rain',    dur: 7.0, label: 'けだまの あめ' },
       { kind: 'spike',   dur: 7.5, label: 'けの とげ' },
       { kind: 'blaster', dur: 8.0, label: 'ケダマール・ビーム' },
-      { kind: 'blue',    dur: 7.5, label: 'あおい け（うごくと いたい）' },
+      { kind: 'blue',    dur: 9.0, label: 'あおい け＝とまる／しろい け＝よける' },
       { kind: 'sweep',   dur: 8.0, label: 'けの かべ' },
+      /* ★ここから たましいが あおく なって、じゅうりょくが かかります */
+      { kind: 'gravity', dur: 9.0, label: 'あおい たましい ── ジャンプで とびこえろ！', blue: true },
+      { kind: 'flip',    dur: 9.5, label: 'あおい たましい ── ★じゅうりょくが ひっくりかえる★', blue: true },
     ],
   };
 
@@ -5755,6 +5761,7 @@
       sx: 0.5, sy: 0.5,       // たましいの ばしょ（わくの なかの 0〜1）
       vx: 0, vy: 0,           // スティックの かたむき（-1〜1）
       moved: false,           // ★あおい け の はんてい に つかう
+      grav: 0, vyG: 0, onGround: false, jumpReq: false, flipT: 0, flipFlash: 0,
       inv: 0, shake: 0, flash: 0,
       bullets: [], beams: [], pops: [],
       aim: 0, aimDir: 1,      // 「たたかう」の はり
@@ -5776,7 +5783,7 @@
     const t = $('#duel-turn');
     if (t) {
       t.textContent = !DG ? '' :
-        (DG.phase === 'enemy') ? '★あいての ターン★'
+        (DG.phase === 'enemy') ? (DG.grav ? '★あおい たましい★' : '★あいての ターン★')
         : (DG.phase === 'aim') ? 'まんなかで とめろ！'
         : 'じぶんの ターン';
     }
@@ -5791,6 +5798,9 @@
     ['#btn-duel-guard', '#btn-duel-act'].forEach(id => {
       const b = $(id); if (b) b.disabled = !menu;
     });
+    /* ★ジャンプは「あおい たましい」の ターンだけ */
+    const j = $('#btn-duel-jump');
+    if (j) j.disabled = !(DG && DG.grav && DG.phase === 'enemy' && !DG.over);
   }
 
   /* --- ゆびで うごかす スティック --- */
@@ -5875,6 +5885,12 @@
     DG.waveDur = w.dur * (DG.guard ? 0.75 : 1);
     DG.bullets = []; DG.beams = []; DG.spawnT = 0; DG.gap = Math.random();
     DG.sx = 0.5; DG.sy = 0.5; DG.moved = false;
+    DG.blueTurn = false;
+    /* ★あおい たましいの ターンは じゅうりょくが かかる */
+    DG.grav = w.blue ? 1 : 0;
+    DG.vyG = 0; DG.onGround = false; DG.jumpReq = false;
+    DG.flipT = 0; DG.flipFlash = 0;
+    if (DG.grav) DG.sy = 0.5;
     refreshDuelHud();
   }
 
@@ -5918,12 +5934,38 @@
     const box = duelBox(W, H);
     /* --- たましいを うごかす --- */
     const sp = DUEL.soulSpeed * dt;
-    const mx = DG.vx * sp / box.w, my = DG.vy * sp / box.h;
     /* ★あおい け の はんてい。スティックが しんでる ぶん（stickDead）は
          setFrom で 0に して ある ので、0で なければ「うごいて いる」*/
     if (DG.vx !== 0 || DG.vy !== 0) DG.moved = true;
-    DG.sx = Math.max(0.03, Math.min(0.97, DG.sx + mx));
-    DG.sy = Math.max(0.04, Math.min(0.96, DG.sy + my));
+
+    if (DG.grav) {
+      /* ★あおい たましい：よこは スティック、たては じゅうりょくと ジャンプ */
+      if (DG.flipFlash > 0) DG.flipFlash -= dt;
+      const wv = DUEL.waves[DG.wave];
+      if (wv && wv.kind === 'flip') {
+        DG.flipT += dt;
+        if (DG.flipT > 3.0) {
+          DG.flipT = 0; DG.grav *= -1; DG.vyG = 0; DG.onGround = false;
+          DG.flipFlash = 0.45;
+        }
+      }
+      DG.sx = Math.max(0.03, Math.min(0.97, DG.sx + DG.vx * sp / box.w));
+      /* ジャンプ（ゆかに ついて いる ときだけ）*/
+      if (DG.jumpReq && DG.onGround) { DG.vyG = -DUEL.jumpV * DG.grav; DG.onGround = false; }
+      DG.jumpReq = false;
+      DG.vyG += DUEL.gravA * DG.grav * dt;
+      DG.sy += DG.vyG * dt;
+      const floor = (DG.grav > 0) ? 0.95 : 0.05;
+      if (DG.grav > 0 ? (DG.sy >= floor) : (DG.sy <= floor)) {
+        DG.sy = floor; DG.vyG = 0; DG.onGround = true;
+      } else if (DG.grav > 0 ? (DG.sy < 0.05) : (DG.sy > 0.95)) {
+        DG.sy = (DG.grav > 0) ? 0.05 : 0.95; DG.vyG = 0;   // てんじょうに ぶつかる
+      }
+    } else {
+      const mx = DG.vx * sp / box.w, my = DG.vy * sp / box.h;
+      DG.sx = Math.max(0.03, Math.min(0.97, DG.sx + mx));
+      DG.sy = Math.max(0.04, Math.min(0.96, DG.sy + my));
+    }
 
     spawnDuelAttack(dt, box);
 
@@ -5933,12 +5975,20 @@
     for (let i = DG.bullets.length - 1; i >= 0; i--) {
       const b = DG.bullets[i];
       b.x += b.vx * dt; b.y += b.vy * dt;
-      const out = (b.x < box.x - 90 || b.x > box.x + box.w + 90 ||
-                   b.y < box.y - 90 || b.y > box.y + box.h + 90);
+      const out = b.rect
+        ? (b.x < box.x - 120 || b.x > box.x + box.w + 120)
+        : (b.x < box.x - 90 || b.x > box.x + box.w + 90 ||
+           b.y < box.y - 90 || b.y > box.y + box.h + 90);
       if (out) { DG.bullets.splice(i, 1); continue; }
       /* ★あおい け は「うごいて いなければ」あたらない */
       if (b.blue && !DG.moved) continue;
-      const near = (Math.abs(b.x - px) < b.r + SR * 0.7 && Math.abs(b.y - py) < b.r + SR * 0.7);
+      let near;
+      if (b.rect) {
+        near = (px + SR * 0.55 > b.x - b.w / 2 && px - SR * 0.55 < b.x + b.w / 2 &&
+                py + SR * 0.55 > b.y && py - SR * 0.55 < b.y + b.h);
+      } else {
+        near = (Math.abs(b.x - px) < b.r + SR * 0.7 && Math.abs(b.y - py) < b.r + SR * 0.7);
+      }
       if (near) hurtDuel();
     }
     for (let i = DG.beams.length - 1; i >= 0; i--) {
@@ -6015,14 +6065,59 @@
         warn: 0.85 / hard, fire: 0.45, t: 0,
       });
     } else if (w.kind === 'blue') {
-      DG.spawnT = 0.75 / hard;
-      /* ★あおい け。うごいて いなければ あたらない */
+      /* ★あおい け と しろい け を かわりばんこに だします。
+           ・あおい け … よこいっぱい。うごかなければ あたらない
+           ・しろい け … すきまが 1か所。うごいて よけないと あたる
+         まえの ぐみが がめんから でるまで つぎは ださない ので、
+         「とまる」と「よける」が かさなって りふじんに なりません。     */
+      if (DG.bullets.length > 0) { DG.spawnT = 0.05; return; }
+      DG.spawnT = 0.50 / hard;
+      DG.blueTurn = !DG.blueTurn;
       const fromLeft = Math.random() < 0.5;
-      const y = box.y + (0.1 + Math.random() * 0.8) * box.h;
+      const x0 = fromLeft ? box.x - 20 : box.x + box.w + 20;
+      const vx = (fromLeft ? 1 : -1) * 195 * hard;
+      if (DG.blueTurn) {
+        /* あおい け ── 3ほん、すきま なし */
+        for (let i = 0; i < 3; i++) {
+          DG.bullets.push({
+            x: x0, y: box.y + (i + 0.5) / 3 * box.h,
+            vx: vx, vy: 0, r: box.h * 0.075, kind: 'bar', blue: true,
+          });
+        }
+      } else {
+        /* しろい け ── すきまが 1か所 */
+        DG.gap = 0.12 + Math.random() * 0.76;
+        const n = 5;
+        for (let i = 0; i < n; i++) {
+          const fy = (i + 0.5) / n;
+          if (Math.abs(fy - DG.gap) < 0.22) continue;
+          DG.bullets.push({
+            x: x0, y: box.y + fy * box.h,
+            vx: vx, vy: 0, r: box.h * 0.055, kind: 'spike',
+          });
+        }
+      }
+    } else if (w.kind === 'gravity' || w.kind === 'flip') {
+      /* ★あおい たましいの ターン。
+           ゆかから はえる ほねを ジャンプで とびこえ、
+           てんじょうから さがる ほねは ジャンプせずに くぐります。     */
+      DG.spawnT = 1.20 / hard;
+      const fromLeft = Math.random() < 0.5;
+      const vx = (fromLeft ? 1 : -1) * 150 * hard;
+      const x0 = fromLeft ? box.x - 26 : box.x + box.w + 26;
+      const down = DG.grav > 0;                    // ゆかは した か うえ か
+      /* 7かいに 2かいは「くぐる」ほう */
+      const duck = Math.random() < 0.28;
+      /* とびこえる ほねは ジャンプの たかさ（やく 55%）より ひくく する */
+      const hgt = duck ? (0.34 + Math.random() * 0.14) : (0.15 + Math.random() * 0.18);
+      const fromFloor = !duck;                     // ゆかから はえる ＝ とびこえる
+      const atBottom = (down === fromFloor);       // したから はえるか どうか
       DG.bullets.push({
-        x: fromLeft ? box.x - 18 : box.x + box.w + 18, y: y,
-        vx: (fromLeft ? 1 : -1) * 190 * hard, vy: 0,
-        r: box.h * 0.075, kind: 'bar', blue: true,
+        rect: true,
+        x: x0, w: box.h * 0.085,
+        y: atBottom ? box.y + box.h * (1 - hgt) : box.y,
+        h: box.h * hgt,
+        vx: vx, vy: 0, r: 0, kind: 'bone',
       });
     } else {                                      /* sweep */
       DG.spawnT = 1.15 / hard;
@@ -6136,7 +6231,17 @@
 
       /* たま */
       for (const b of DG.bullets) {
-        if (b.blue) {
+        if (b.rect) {                        /* ★ほね（ジャンプで こえる）*/
+          ctx.fillStyle = '#fff'; ctx.strokeStyle = '#bdbdbd'; ctx.lineWidth = 2;
+          roundRectPath(ctx, b.x - b.w / 2, b.y, b.w, b.h, b.w * 0.35);
+          ctx.fill(); ctx.stroke();
+          /* ほねの りょうはし の こぶ */
+          ctx.fillStyle = '#fff';
+          for (const ey of [b.y, b.y + b.h]) {
+            ctx.beginPath(); ctx.arc(b.x - b.w * 0.42, ey, b.w * 0.44, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(b.x + b.w * 0.42, ey, b.w * 0.44, 0, Math.PI * 2); ctx.fill();
+          }
+        } else if (b.blue) {
           ctx.fillStyle = '#4fc3f7'; ctx.strokeStyle = '#e1f5fe';
           ctx.lineWidth = 2;
           roundRectPath(ctx, b.x - b.r * 1.9, b.y - b.r * 0.5, b.r * 3.8, b.r, b.r * 0.4);
@@ -6171,15 +6276,43 @@
         }
       }
 
-      /* たましい（あかい ハート）*/
+      /* ★あおい たましいの ターンは ゆかを ひからせる */
+      if (DG.grav) {
+        const fy = (DG.grav > 0) ? box.y + box.h - 3 : box.y;
+        ctx.fillStyle = 'rgba(79,195,247,.55)';
+        ctx.fillRect(box.x, fy, box.w, 3);
+      }
+
+      /* たましい（あかい ハート／あおい たましいの ときは あお）*/
       const px = box.x + DG.sx * box.w, py = box.y + DG.sy * box.h;
       const SR = Math.max(6, box.h * 0.055);
       if (!(DG.inv > 0 && Math.floor(DG.t * 22) % 2 === 0)) {
-        ctx.fillStyle = '#ff2b2b';
+        ctx.fillStyle = DG.grav ? '#3fa9ff' : '#ff2b2b';
         heartPath(ctx, px, py, SR);
         ctx.fill();
       }
       ctx.restore();
+
+      /* じゅうりょくが ひっくりかえった ときの ひかり */
+      if (DG.flipFlash > 0) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, DG.flipFlash * 2);
+        ctx.fillStyle = '#4fc3f7';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        /* ★わくの はばに おさまる おおきさに する */
+        const ft = 'じゅうりょく ぎゃくてん！';
+        let fs = h * 0.050;
+        ctx.font = '900 ' + fs + 'px system-ui, "Hiragino Sans", sans-serif';
+        const tw = ctx.measureText(ft).width;
+        if (tw > box.w * 0.92) {
+          fs = fs * (box.w * 0.92) / tw;
+          ctx.font = '900 ' + fs + 'px system-ui, "Hiragino Sans", sans-serif';
+        }
+        ctx.lineWidth = fs * 0.28; ctx.strokeStyle = '#002333'; ctx.lineJoin = 'round';
+        ctx.strokeText(ft, box.x + box.w / 2, box.y + box.h * 0.5);
+        ctx.fillText(ft, box.x + box.w / 2, box.y + box.h * 0.5);
+        ctx.restore();
+      }
 
       /* のこり じかんの バー */
       const left = Math.max(0, 1 - DG.phaseT / DG.waveDur);
@@ -6877,6 +7010,12 @@
       else if (DG.phase === 'aim') duelStrike();
     });
     $('#btn-duel-guard').addEventListener('click', duelGuard);
+    /* ジャンプは おした しゅんかんに はんのう させる（クリックだと おそい）*/
+    const jb = $('#btn-duel-jump');
+    if (jb) {
+      const jump = e => { if (DG && DG.grav) DG.jumpReq = true; e.preventDefault(); };
+      jb.addEventListener('pointerdown', jump);
+    }
     $('#btn-duel-act').addEventListener('click', duelAct);
     $('#btn-attr-back').addEventListener('click', openHome);
     $('#btn-movie-back').addEventListener('click', openHome);

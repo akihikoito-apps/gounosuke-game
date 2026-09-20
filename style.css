@@ -1666,6 +1666,21 @@ body.dragging-slot #party-slots { touch-action:none; }
   border:calc(2px * var(--ui)) solid #ffd9d9;
   transition:none;
 }
+/* ★ジャンプ ボタン（たましいが あおい ときだけ つかえます）*/
+.duel-jump{
+  flex:0 0 auto; touch-action:none; cursor:pointer;
+  width:calc(68px * var(--ui)); height:calc(68px * var(--ui));
+  border-radius:50%;
+  font-size:calc(13px * var(--ui)); font-weight:900; color:#04212c;
+  background:radial-gradient(circle at 42% 34%, #b3ecff, #29b6f6);
+  border:calc(3px * var(--ui)) solid #e1f5fe;
+  box-shadow:0 calc(4px * var(--ui)) 0 rgba(0,0,0,.45);
+}
+.duel-jump:active{ transform:translateY(calc(3px * var(--ui))); box-shadow:none; }
+.duel-jump:disabled{
+  color:#5b6472; background:#1b212b; border-color:#39414e; box-shadow:none;
+}
+
 .duel-menu{
   flex:1 1 auto; min-width:0;
   display:flex; flex-direction:column; gap:calc(6px * var(--ui));
@@ -1684,6 +1699,7 @@ body.dragging-slot #party-slots { touch-action:none; }
   .duel-stick i{ width:calc(32px * var(--ui)); height:calc(32px * var(--ui));
                  margin:calc(-16px * var(--ui)) 0 0 calc(-16px * var(--ui)); }
   .duel-cmd{ padding:calc(4px * var(--ui)) calc(10px * var(--ui)); font-size:calc(13px * var(--ui)); }
+  .duel-jump{ width:calc(56px * var(--ui)); height:calc(56px * var(--ui)); font-size:calc(11px * var(--ui)); }
 }
 .shoot-over{
   position:absolute; inset:0; border-radius:calc(12px * var(--ui));
