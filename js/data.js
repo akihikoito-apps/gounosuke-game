@@ -2613,11 +2613,16 @@ const ENEMIES = {
     id: 'kedamaru', name: 'ケダマール',
     rarity: 'LR',
     attr: 'power',                        // パワー（けものに つよい／まじゅつしに よわい）
-    hp: 24000,  atk: 620,  range: 205,  speed: 22,
+    /* ★v6.36 で しゃていを 205 → 150 に。205 だと みかたの ほとんどが
+         とどかず、ボスが 200びょう ちかく むきずの まま でした。       */
+    hp: 24000,  atk: 620,  range: 150,  speed: 22,
     attackInterval: 2.2,   attackWindup: 0.50,
     kbCount: 99, scale: 1.7,
-    attackType: 'area',  areaRadius: 175,  projectile: null,
-    knockbackChance: 0.35,                // けの かたまりで ふきとばす
+    /* ★v6.36 で はんい 175 → 115 に せまく しました。
+         175 ＋ ふきとばし 35% だと、まえせんが ずっと おしもどされて
+         ボスに ダメージが とおらず 400びょう こえの ながびきに なりました。*/
+    attackType: 'area',  areaRadius: 115,  projectile: null,
+    knockbackChance: 0.30,                // けの かたまりで ふきとばす
     kbImmune: true,
     money: 1500,
     isBoss: true,
@@ -2687,6 +2692,73 @@ const ENEMIES = {
     isBoss: true,
   },
 
+
+  /* ==========================================================================
+     ★ 17しょう「埃にまみれた都市」の ざこキャラ 4しゅるい
+     ========================================================================== */
+
+  /* --- ハネネコ ---
+       ちゃとらの ねこに コウモリの はねが はえた もの。
+       ★そらを とぶ ので、かべを こえて おくまで きて しまいます。      */
+  haneneko: {
+    id: 'haneneko', name: 'ハネネコ',
+    rarity: 'R',
+    attr: 'beast',                        // けもの
+    hp: 720,    atk: 215,  range: 100,  speed: 60,
+    attackInterval: 1.2,   attackWindup: 0.25,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    flying: true,                         // ★かべを こえて とんで いく
+    money: 135,
+  },
+
+  /* --- キョーダイ ---
+       おしばいの おめんを かぶった ふたりぐみ。★これで 1たいの てき です★。
+       あかい ほうが わらいめん、あおい ほうが なきめん。
+       ★たいりょくが はんぶんに なると なきめんが ないて、
+         ふたりとも あばれだします（こうげき 1.4ばい・かんかく 0.75ばい）。 */
+  kyoudai: {
+    id: 'kyoudai', name: 'キョーダイ',
+    rarity: 'GR',
+    attr: 'magic',                        // まじゅつし
+    hp: 2600,   atk: 320,  range: 120,  speed: 24,
+    attackInterval: 2.0,   attackWindup: 0.45,
+    kbCount: 3, scale: 1.15,
+    attackType: 'area',  areaRadius: 75,  projectile: null,
+    enrage: { below: 0.5, atkMult: 1.4, intervalMult: 0.75 },
+    money: 230,
+  },
+
+  /* --- ススベエ ---
+       すすで まっくろに なった ガスマスクの いきのこり。
+       トタンの いたを たてに して すすんで きます。
+       ★はどう ストッパー：あき坊の はどうは この いたで とまります。    */
+  susube: {
+    id: 'susube', name: 'ススベエ',
+    rarity: 'R',
+    attr: 'metal',                        // メタル（ほのお・まじゅつし・パワーに よわい）
+    hp: 2100,   atk: 150,  range: 95,   speed: 16,
+    attackInterval: 2.0,   attackWindup: 0.40,
+    kbCount: 4, scale: 1.0,
+    attackType: 'single', projectile: null,
+    waveStopper: true,                    // ★はどうを とめる
+    money: 150,
+  },
+
+  /* --- チリマイマイ ---
+       まちに たまった ほこりが うずを まいて うごきだした もの。
+       とおくから ほこりの かたまりを なげて、めに ごみを いれて きます。 */
+  chirimaimai: {
+    id: 'chirimaimai', name: 'チリマイマイ',
+    rarity: 'GR',
+    attr: 'none',                         // むぞくせい
+    hp: 1500,   atk: 230,  range: 175,  speed: 20,
+    attackInterval: 2.4,   attackWindup: 0.50,
+    kbCount: 3, scale: 1.1,
+    attackType: 'area',  areaRadius: 66,  projectile: 'wool',
+    blind: { chance: 0.35, duration: 3.0, missRate: 0.35 },   // ★めつぶし
+    money: 200,
+  },
   /* ==========================================================================
      ★ 16しょう「ちつじょが うしなわれた むら」の ざこキャラ 3しゅるい
      ========================================================================== */
@@ -2902,6 +2974,24 @@ const BACKGROUNDS = {
     hillFar: '#8b6a4a', hillNear: '#5a4530',
     ground: '#6f5a38', groundTop: '#93794c',
     deco: 'ruins',
+  },
+
+  /* 埃に まみれた 都市（だい17しょう 1〜6面）──
+     たかい ビルが ならび、ほこりで そらが しろく かすんで いる */
+  dustcity: {
+    sky: ['#b9b2a2', '#d2c9b4', '#e6dcc4'],
+    hillFar: '#8d8779', hillNear: '#6b665b',
+    ground: '#7a7264', groundTop: '#9a9184',
+    deco: 'dust',
+  },
+
+  /* まちの ちゅうおう（だい17しょう 7面）── ケダマールが まちかまえる。
+     ほこりが こく、そらが ちゃいろい */
+  dustsquare: {
+    sky: ['#8a7f6a', '#b5a78c', '#d8c9a6'],
+    hillFar: '#6f695c', hillNear: '#4e4a42',
+    ground: '#5f584c', groundTop: '#847b6c',
+    deco: 'dust',
   },
 
   /* ロボこうじょう ── 小惑星ぷりぷりの ボスステージ（3面）。しゃしんの はいけい */
@@ -3335,6 +3425,159 @@ const STAGES = [
       { at: 56, id: 'inochichi',  count: 2, gap: 1.6, repeat: 24 },
       { at: 70, id: 'gaou_ko',    count: 2, gap: 2.4, repeat: 30 },
       { at: 88, id: 'garekimaru', count: 1 },
+    ],
+  },
+
+
+  /* ==========================================================================
+     17しょう ★埃に まみれた 都市★（ぜんぶで 7コース）
+
+     むらの さきに ある、ほこりを かぶった おおきな まち。
+     3大王の さいご の ひとり「ケダマール」が まちかまえて います。
+     ★7コース とも たつまきほうが とんで きます★
+
+     でて くる ざこは 4しゅるい。
+       ・ススベエ      … トタンの たてを もつ かべ やく。★はどう ストッパー★
+       ・ハネネコ      … ★そらを とんで かべを こえて くる★。はやい
+       ・チリマイマイ  … とおくから ほこりを なげる。★めつぶし★ で こうげきが はずれる
+       ・キョーダイ    … おめんの ふたりぐみ（1たい）。はんぶん けずると あばれだす
+     7コースめで 大ボス「ケダマール」が まって います。
+     ★ケダマールは 38びょうで ススベエを つれて でて きます（hold）。
+     ========================================================================== */
+  {
+    no: 135, chapter: 17, course: 1,
+    name: 'まちの いりぐち',
+    desc: 'ススベエの たては あき坊の はどうを とめる。まっすぐな こうげきで けずろう。',
+    bg: 'dustcity',
+    castleHp: 2400,
+    power: 2.8,
+    tornado: { interval: 30, chance: 0.48, first: 20 },
+    drops: ['wood', 'stone', 'cloth'],
+    reward: { coins: 7, exp: 10000 },
+    waves: [
+      { at: 3,  id: 'susube',   count: 1 },
+      { at: 15, id: 'susube',   count: 2, gap: 2.6 },
+      { at: 30, id: 'haneneko', count: 1 },
+      { at: 44, id: 'susube',   count: 2, gap: 3, repeat: 22 },
+      { at: 56, id: 'haneneko', count: 1, repeat: 20 },
+    ],
+  },
+  {
+    no: 136, chapter: 17, course: 2,
+    name: 'ビルの すきま',
+    desc: 'ハネネコは そらを とんで かべを こえて くる。とおくから おとそう。',
+    bg: 'dustcity',
+    castleHp: 2900,
+    power: 2.8,
+    tornado: { interval: 28, chance: 0.51, first: 19 },
+    drops: ['wood', 'iron', 'cloth'],
+    reward: { coins: 7, exp: 10400 },
+    waves: [
+      { at: 3,  id: 'susube',   count: 1 },
+      { at: 12, id: 'haneneko', count: 2, gap: 1.8 },
+      { at: 26, id: 'susube',   count: 2, gap: 2.6 },
+      { at: 40, id: 'haneneko', count: 3, gap: 1.6, repeat: 18 },
+      { at: 54, id: 'susube',   count: 2, gap: 3, repeat: 24 },
+    ],
+  },
+  {
+    no: 137, chapter: 17, course: 3,
+    name: 'ほこりの ひろば',
+    desc: 'チリマイマイの めつぶしに ちゅうい。こうげきが はずれる ように なる。',
+    bg: 'dustcity',
+    castleHp: 2500,
+    power: 2.0,
+    tornado: { interval: 26, chance: 0.54, first: 18 },
+    drops: ['stone', 'iron', 'string'],
+    reward: { coins: 8, exp: 10800 },
+    waves: [
+      { at: 3,  id: 'susube',      count: 2, gap: 2.4 },
+      { at: 18, id: 'chirimaimai', count: 1 },
+      { at: 32, id: 'haneneko',    count: 2, gap: 1.7 },
+      { at: 46, id: 'susube',      count: 2, gap: 2.8, repeat: 26 },
+      { at: 62, id: 'haneneko',    count: 2, gap: 1.7, repeat: 22 },
+    ],
+  },
+  {
+    no: 138, chapter: 17, course: 4,
+    name: 'おめんの とおり',
+    desc: 'キョーダイが あらわれる。はんぶん けずると ないて あばれだす！',
+    bg: 'dustcity',
+    castleHp: 3000,
+    power: 2.4,
+    tornado: { interval: 25, chance: 0.57, first: 17 },
+    drops: ['iron', 'cloth', 'glue'],
+    reward: { coins: 8, exp: 11200 },
+    waves: [
+      { at: 3,  id: 'susube',      count: 2, gap: 2.4 },
+      { at: 16, id: 'kyoudai',     count: 1 },
+      { at: 30, id: 'haneneko',    count: 2, gap: 1.7 },
+      { at: 44, id: 'chirimaimai', count: 1 },
+      { at: 56, id: 'susube',      count: 2, gap: 2.6, repeat: 24 },
+      { at: 70, id: 'haneneko',    count: 2, gap: 1.7, repeat: 22 },
+    ],
+  },
+  {
+    no: 139, chapter: 17, course: 5,
+    name: 'すすけた こうさてん',
+    desc: '4しゅるいが いっぺんに おしよせる。たつまきほうにも きを つけて。',
+    bg: 'dustcity',
+    castleHp: 2800,
+    power: 1.8,
+    tornado: { interval: 24, chance: 0.60, first: 16 },
+    drops: ['stone', 'alumi', 'string'],
+    reward: { coins: 9, exp: 11600 },
+    waves: [
+      { at: 3,  id: 'susube',      count: 2, gap: 2.4 },
+      { at: 14, id: 'haneneko',    count: 2, gap: 1.6 },
+      { at: 28, id: 'chirimaimai', count: 1 },
+      { at: 40, id: 'kyoudai',     count: 1 },
+      { at: 54, id: 'haneneko',    count: 3, gap: 1.6, repeat: 20 },
+      { at: 66, id: 'susube',      count: 2, gap: 2.6, repeat: 26 },
+    ],
+  },
+  {
+    no: 140, chapter: 17, course: 6,
+    name: 'はいいろの おくがい',
+    desc: 'キョーダイが ２くみ。あばれだす まえに いっきに かたづけたい。',
+    bg: 'dustcity',
+    castleHp: 3100,
+    power: 1.6,
+    tornado: { interval: 23, chance: 0.62, first: 16 },
+    drops: ['iron', 'alumi', 'glue'],
+    reward: { coins: 9, exp: 12000 },
+    waves: [
+      { at: 3,  id: 'kyoudai',     count: 1 },
+      { at: 16, id: 'susube',      count: 2, gap: 2.4 },
+      { at: 30, id: 'kyoudai',     count: 1 },
+      { at: 44, id: 'chirimaimai', count: 1 },
+      { at: 56, id: 'haneneko',    count: 3, gap: 1.6, repeat: 20 },
+      { at: 72, id: 'susube',      count: 2, gap: 2.6, repeat: 28 },
+    ],
+  },
+  {
+    no: 141, chapter: 17, course: 7,
+    name: 'ケダマールの おおどおり',
+    desc: '★大ボス★ 3大王 さいごの ひとり「ケダマール」。ふとい けを まきちらして ふきとばす。',
+    bg: 'dustsquare',
+    castleHp: 2700,
+    /* ★3大王 さいごの ボス。わざと たかめ（まける ことも ある つよさ）*/
+    power: 2.2,
+    tornado: { interval: 25, chance: 0.58, first: 16 },
+    drops: ['alumi', 'cloth', 'glue'],
+    reward: { coins: 14, exp: 16000 },
+    waves: [
+      { at: 3,  id: 'susube',      count: 2, gap: 2.4 },
+      { at: 16, id: 'haneneko',    count: 2, gap: 1.6 },
+      { at: 28, id: 'kyoudai',     count: 1 },
+      /* ★大ボス。しろの ところで いきなり でて くる のでは なく、
+           38びょうで かべの ススベエを つれて でて きます。
+           hold: 0.65 ＝ ボスが でる まで しろは 65% までしか けずれません。*/
+      { at: 38, id: 'kedamaru',    count: 1, hold: 0.65 },
+      { at: 38, id: 'susube',      count: 4, gap: 1.2 },   /* ★ボスを まもる かべ */
+      { at: 56, id: 'haneneko',    count: 3, gap: 1.6, repeat: 22 },
+      { at: 70, id: 'chirimaimai', count: 1, repeat: 46 },
+      { at: 86, id: 'susube',      count: 2, gap: 2.6, repeat: 30 },
     ],
   },
 
@@ -5741,6 +5984,7 @@ const CHAPTERS = {
   14:{ name: 'ネコスの店', short: 'ネコスのみせ', x: 0.37, y: 0.70, icon: '☕', world: 'storm', shop: true },
   15:{ name: '虫に支配された町', short: 'むしのまち', x: 0.66, y: 0.38, icon: '🦟', world: 'storm' },
   16:{ name: '秩序が失われた村', short: 'むら', x: 0.88, y: 0.64, icon: '🏚️', world: 'storm' },
+  17:{ name: '埃にまみれた都市', short: 'ほこりのまち', x: 0.22, y: 0.20, icon: '🏙️', world: 'storm' },
 };
 
 
@@ -6300,6 +6544,18 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.36', date: '2026-09-20',
+    title: '★だい17しょう「埃にまみれた都市」（ぜんぶで 7コース）',
+    items: [
+      '秩序が失われた村の さきに、ほこりを かぶった おおきな まちが できました。3大王 さいごの ひとり「ケダマール」が まちかまえて います。',
+      '★ざこキャラ 4しゅるい★ ── ススベエ … すすまみれの ガスマスク。トタンの たてで ★はどうを とめる★。／ ハネネコ … コウモリの はねが はえた ちゃとら。★そらを とんで かべを こえて くる★。／ チリマイマイ … ほこりの うず。とおくから なげて ★めつぶし★ して くる。／ キョーダイ … おしばいの おめんの ふたりぐみ（これで 1たい）。',
+      '★キョーダイは たいりょくが はんぶんに なると、なきめんが ないて ふたりとも あばれだします★（こうげき 1.4ばい・かんかく 0.75ばい）。',
+      '7コースめ「ケダマールの おおどおり」で 大ボス ケダマール。38びょうで かべの ススベエ 4たいを つれて でて きます。3大王の なかで いちばん てごわい つくりです（30せんして 4かい くらい まけます）。',
+      'ケダマールも しゃていを 205 → 150、はんいを 175 → 115 に しました。とおすぎて みかたが とどかず、200びょう ちかく むきずの まま でした。',
+      'クリアまでの じかんは 128・121・166・220・191・210・405びょう（30せん ずつ はかりました）。7コースめは 26/30 の かちで、いままでで いちばん てごわい です。',
+    ],
+  },
   {
     ver: '6.35', date: '2026-09-20',
     title: 'チューチューが しろを まもるように／ボスは はやめに とうじょう',

@@ -10619,8 +10619,286 @@ function drawChirimaimai(ctx, s) {
   ctx.restore();
 }
 
+
+/* --- ハネネコ（だい17しょう「ほこりに まみれた 都市」）---
+     ちゃとらの ねこに コウモリの はねが はえた もの。
+     そらを とんで、かべを こえて おくまで きて しまう。               */
+function drawHaneneko(ctx, s) {
+  const t = (s && s.t) || 0;
+  const flap = Math.sin(t * 7) * 0.30;
+  const step = Math.sin(t * 6) * (s && s.moving ? 2.4 : 0);
+  const INK = '#3b2a1c';
+  const ORA = '#e09a4e', ORA2 = '#c97d33', CRE = '#f3e3cd', GRY = '#dcd6cc';
+  const WING = '#7a6f68', WING2 = '#5d544e';
+
+  ctx.save();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+
+  /* はね（コウモリの はね・2まい。おくの 1まいを こい いろで）*/
+  for (const [w, col, dx, dr] of [[0.88, WING2, -12, -0.12], [1.00, WING, 0, 0]]) {
+    ctx.save();
+    ctx.translate(-2 + dx, -58);
+    ctx.rotate(-0.30 + dr + flap);
+    ctx.scale(w, w);
+    ctx.fillStyle = col; ctx.strokeStyle = INK; ctx.lineWidth = 2.4 / w;
+    ctx.beginPath();
+    ctx.moveTo(0, 6);                       // つけね
+    ctx.lineTo(-4, -20);                    // まえの ほね
+    ctx.lineTo(4, -44);                     // いちばん うえの つめ
+    /* うしろがわは ほねの あいだが たれさがる（コウモリらしい かたち）*/
+    ctx.quadraticCurveTo(12, -34, 20, -40);
+    ctx.quadraticCurveTo(26, -28, 34, -32);
+    ctx.quadraticCurveTo(36, -18, 42, -20);
+    ctx.quadraticCurveTo(30, -4, 12, 2);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    /* ゆびの ほね */
+    ctx.lineWidth = 1.8 / w;
+    ctx.beginPath();
+    ctx.moveTo(1, 2); ctx.lineTo(4, -44);
+    ctx.moveTo(1, 2); ctx.lineTo(20, -40);
+    ctx.moveTo(1, 2); ctx.lineTo(34, -32);
+    ctx.moveTo(1, 2); ctx.lineTo(42, -20);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /* しっぽ（うしろで くるんと うえに まく）*/
+  ctx.strokeStyle = ORA; ctx.lineWidth = 9; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-34, -44);
+  ctx.bezierCurveTo(-56, -52, -58, -86, -34, -88);
+  ctx.stroke();
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.0;
+  ctx.beginPath();
+  ctx.moveTo(-34, -44);
+  ctx.bezierCurveTo(-56, -52, -58, -86, -34, -88);
+  ctx.stroke();
+
+  /* あし 4ほん（さきは しろい くつした）*/
+  for (const [x, d] of [[-24, 1], [-14, -1], [20, -1], [30, 1]]) {
+    ctx.strokeStyle = CRE; ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(x, -28);
+    ctx.lineTo(x + step * d, -4);
+    ctx.stroke();
+    ctx.fillStyle = GRY;
+    ctx.beginPath(); ctx.ellipse(x + step * d, -3, 6, 4, 0, 0, Math.PI * 2); ctx.fill();
+  }
+
+  /* どう（うえが ちゃとら・したが しろ）*/
+  ctx.fillStyle = ORA; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.ellipse(-2, -46, 38, 19, 0, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.save();
+  ctx.beginPath(); ctx.ellipse(-2, -46, 38, 19, 0, 0, Math.PI * 2); ctx.clip();
+  ctx.fillStyle = CRE;
+  ctx.fillRect(-42, -44, 82, 24);
+  /* とらの しま */
+  ctx.strokeStyle = ORA2; ctx.lineWidth = 3.4;
+  for (const x of [-22, -10, 2, 14, 26]) {
+    ctx.beginPath(); ctx.moveTo(x, -64); ctx.lineTo(x - 5, -46); ctx.stroke();
+  }
+  ctx.restore();
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.ellipse(-2, -46, 38, 19, 0, 0, Math.PI * 2); ctx.stroke();
+
+  /* くび */
+  ctx.fillStyle = CRE; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.ellipse(34, -54, 13, 12, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+  /* みみ 2つ（あたまの まえに かいて、つけねを あたまで かくす）*/
+  for (const [ex, ey, lean] of [[34, -78, -0.20], [50, -80, 0.10]]) {
+    ctx.fillStyle = CRE;
+    ctx.save(); ctx.translate(ex, ey); ctx.rotate(lean);
+    ctx.beginPath();
+    ctx.moveTo(-7, 8); ctx.lineTo(0, -14); ctx.lineTo(7, 8);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#e8b9a6';                 // みみの なか
+    ctx.beginPath();
+    ctx.moveTo(-3.4, 6); ctx.lineTo(0, -7); ctx.lineTo(3.4, 6);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  /* あたま */
+  ctx.fillStyle = CRE; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.ellipse(43, -70, 18, 16, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  /* あたまの とらしま */
+  ctx.save();
+  ctx.beginPath(); ctx.ellipse(43, -70, 18, 16, 0, 0, Math.PI * 2); ctx.clip();
+  ctx.strokeStyle = ORA2; ctx.lineWidth = 3;
+  for (const x of [38, 45]) { ctx.beginPath(); ctx.moveTo(x, -88); ctx.lineTo(x - 2, -76); ctx.stroke(); }
+  ctx.restore();
+
+  /* はなさき（みぎに すこし つきでる）*/
+  ctx.fillStyle = CRE; ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.ellipse(56, -65, 8, 6.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+  /* め・はな・くち */
+  ctx.fillStyle = INK;
+  ctx.beginPath(); ctx.ellipse(48, -73, 3.4, 4.2, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#c4756b';
+  ctx.beginPath();
+  ctx.moveTo(59, -68); ctx.lineTo(63, -66); ctx.lineTo(59, -64); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = INK; ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(60, -64); ctx.quadraticCurveTo(57, -60, 53, -62);
+  ctx.stroke();
+  /* ひげ */
+  ctx.lineWidth = 1.4;
+  for (const dy of [-3, 1]) {
+    ctx.beginPath(); ctx.moveTo(60, -66 + dy); ctx.lineTo(74, -68 + dy * 2.2); ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+/* --- キョーダイ（だい17しょう）---
+     おしばいの おめんを かぶった ふたりぐみ。★1たいの てき です★。
+     あかい ほうが わらいめん、あおい ほうが なきめん。
+     ★たいりょくが へると なきめんが ないて、ふたりとも あばれだす
+       （enrage）。                                                   */
+function drawKyoudai(ctx, s) {
+  const t = (s && s.t) || 0;
+  const mad = !!(s && s.enraged);
+  const sway = Math.sin(t * 4) * 2.2;
+  const INK = '#23303a', MASK = '#6fc0e4', MASK2 = '#8ed3f0';
+  const RED = '#c0392f', BLU = '#4f9fd0';
+
+  /* おめん 1まい（cx, cy が おめんの まんなか）*/
+  function mask(cx, cy, sc, smile) {
+    ctx.save();
+    ctx.translate(cx, cy); ctx.scale(sc, sc);
+    /* たまごを さかさに した ような かたち */
+    const g = ctx.createLinearGradient(0, -30, 0, 30);
+    g.addColorStop(0, MASK2); g.addColorStop(1, MASK);
+    ctx.fillStyle = g; ctx.strokeStyle = INK; ctx.lineWidth = 2.6 / sc;
+    ctx.beginPath();
+    ctx.moveTo(-24, -22);
+    ctx.quadraticCurveTo(-24, -34, -8, -33);
+    ctx.quadraticCurveTo(0, -32, 8, -33);
+    ctx.quadraticCurveTo(24, -34, 24, -22);
+    ctx.quadraticCurveTo(24, 20, 0, 33);
+    ctx.quadraticCurveTo(-24, 20, -24, -22);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = '#ffffff'; ctx.lineWidth = 1.6 / sc;
+    /* まゆ */
+    for (const d of [-1, 1]) {
+      ctx.beginPath();
+      if (smile) {
+        ctx.moveTo(d * 4, -20); ctx.quadraticCurveTo(d * 11, -26, d * 18, -18);
+        ctx.quadraticCurveTo(d * 11, -22, d * 4, -17);
+      } else {
+        ctx.moveTo(d * 4, -24); ctx.quadraticCurveTo(d * 12, -20, d * 17, -10);
+        ctx.quadraticCurveTo(d * 12, -16, d * 4, -21);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    /* め */
+    for (const d of [-1, 1]) {
+      ctx.beginPath();
+      if (smile) {
+        ctx.moveTo(d * 4, -8); ctx.quadraticCurveTo(d * 11, -14, d * 17, -7);
+        ctx.quadraticCurveTo(d * 11, -10, d * 4, -6);
+      } else {
+        ctx.moveTo(d * 4, -11); ctx.quadraticCurveTo(d * 11, -4, d * 17, -9);
+        ctx.quadraticCurveTo(d * 11, -8, d * 4, -9);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    /* くち */
+    ctx.beginPath();
+    if (smile) {
+      ctx.moveTo(-15, 6);
+      ctx.quadraticCurveTo(0, 26, 15, 6);
+      ctx.quadraticCurveTo(0, 14, -15, 6);
+    } else {
+      ctx.moveTo(-13, 20);
+      ctx.quadraticCurveTo(0, 4, 13, 20);
+      ctx.quadraticCurveTo(0, 12, -13, 20);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    /* ほおの せん */
+    ctx.lineWidth = 1.6 / sc;
+    for (const d of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(d * 20, -4);
+      ctx.quadraticCurveTo(d * 17, 10, d * 11, 18);
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3 / sc; ctx.stroke();
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.2 / sc; ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+
+  /* ---- あおい なきめんの ほう（うしろ・ひだり）---- */
+  ctx.save();
+  ctx.translate(-32 - sway * 0.4, 0);
+  ctx.fillStyle = BLU; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  /* どう */
+  ctx.fillRect(-15, -52, 30, 32);
+  /* うでは よこに たらす */
+  ctx.fillRect(-29, -48, 15, 10);
+  ctx.fillRect(14, -48, 15, 10);
+  /* あし */
+  ctx.beginPath();
+  ctx.moveTo(-13, -22); ctx.lineTo(-4, -22); ctx.lineTo(-6, 0); ctx.lineTo(-13, -4);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(4, -22); ctx.lineTo(13, -22); ctx.lineTo(13, -4); ctx.lineTo(6, 0);
+  ctx.closePath(); ctx.fill();
+  mask(0, -68, 0.86, false);
+  /* ★ないて いる（ピンチの とき）*/
+  if (mad) {
+    ctx.fillStyle = '#4fc3f7';
+    for (const d of [-1, 1]) {
+      const dy = ((t * 60) % 22);
+      ctx.beginPath();
+      ctx.ellipse(d * 10, -70 + dy, 2.6, 4.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  /* ---- あかい わらいめんの ほう（まえ・みぎ）---- */
+  ctx.save();
+  ctx.translate(28 + sway, 0);
+  ctx.fillStyle = RED; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  /* どう（したが ひろがった ほしの ような かたち）*/
+  ctx.beginPath();
+  ctx.moveTo(-16, -56);
+  ctx.lineTo(16, -56);
+  ctx.lineTo(19, -12);
+  ctx.lineTo(7, -20);
+  ctx.lineTo(0, -2);
+  ctx.lineTo(-7, -20);
+  ctx.lineTo(-19, -12);
+  ctx.closePath(); ctx.fill();
+  /* うでを ばんざい */
+  const up = mad ? 6 : 0;
+  for (const d of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(d * 12, -54);
+    ctx.lineTo(d * 30, -76 - up);
+    ctx.lineTo(d * 22, -80 - up);
+    ctx.lineTo(d * 8, -60);
+    ctx.closePath(); ctx.fill();
+  }
+  mask(0, -74, 0.92, true);
+  ctx.restore();
+
+  ctx.restore();
+}
+
 const DRAWERS = {
   nekos: drawNekos,
+  haneneko: drawHaneneko,
+  kyoudai: drawKyoudai,
   susube: drawSusube,
   chirimaimai: drawChirimaimai,
   gaou_ko: drawGaouKo,

@@ -1469,6 +1469,45 @@ const Game = {
         const bs = V.groundY * (0.030 + (i % 3) * 0.008);
         this.drawSkyBug(ctx, bx, by, bs, (i % 3 === 0) ? 'hatchie' : 'mosquito', t + i);
       }
+    } else if (kind === 'dust') {
+      /* ★ほこりに まみれた 都市（だい17しょう）
+           たかい ビルの シルエットと、よこに ながれる ほこり。 */
+      const gy = V.groundY;
+      /* とおくの ビル（うすい）*/
+      ctx.fillStyle = 'rgba(120,114,100,0.40)';
+      for (let i = 0; i < 7; i++) {
+        const bx = ((i * 0.152 + 0.01) % 1) * V.w;
+        const bw = gy * (0.11 + ((i * 5) % 3) * 0.035);
+        const bh = gy * (0.34 + ((i * 11) % 5) * 0.10);
+        ctx.fillRect(bx, gy - bh, bw, bh);
+      }
+      /* てまえの ビル（こい・まどつき）*/
+      for (let i = 0; i < 5; i++) {
+        const bx = ((i * 0.213 + 0.09) % 1) * V.w;
+        const bw = gy * (0.14 + ((i * 7) % 3) * 0.04);
+        const bh = gy * (0.22 + ((i * 13) % 4) * 0.08);
+        ctx.fillStyle = 'rgba(92,86,74,0.72)';
+        ctx.fillRect(bx, gy - bh, bw, bh);
+        ctx.fillStyle = 'rgba(214,202,176,0.30)';
+        for (let r = 0; r < 4; r++) {
+          for (let c = 0; c < 3; c++) {
+            const wx = bx + bw * (0.16 + c * 0.30);
+            const wy = gy - bh + gy * (0.045 + r * 0.055);
+            if (wy > gy - gy * 0.03) continue;
+            ctx.fillRect(wx, wy, bw * 0.17, gy * 0.030);
+          }
+        }
+      }
+      /* ながれる ほこり */
+      ctx.fillStyle = 'rgba(226,214,186,0.40)';
+      for (let i = 0; i < 5; i++) {
+        const dx = ((i * 0.24 + t * 0.042) % 1.3 - 0.15) * V.w;
+        const dy = gy * (0.22 + (i % 4) * 0.16);
+        const dr = gy * (0.055 + (i % 2) * 0.03);
+        ctx.beginPath();
+        ctx.ellipse(dx, dy, dr * 2.4, dr * 0.65, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
     } else if (kind === 'ruins') {
       /* ★こわれた いえが ならんだ むら（だい16しょう「ちつじょが うしなわれた むら」）
            かたむいた やねと、おれた はしらの シルエット。うえには すなぼこり。 */
