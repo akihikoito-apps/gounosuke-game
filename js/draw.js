@@ -10625,7 +10625,10 @@ function drawChirimaimai(ctx, s) {
      そらを とんで、かべを こえて おくまで きて しまう。               */
 function drawHaneneko(ctx, s) {
   const t = (s && s.t) || 0;
-  const flap = Math.sin(t * 7) * 0.30;
+  const atk = (s && s.atk !== undefined) ? s.atk : -1;
+  /* こうげきの とちゅうで 0 → 1 → 0 に なる（はねを おおきく ひらく）*/
+  const swing = (atk >= 0) ? (1 - Math.abs(atk - 0.5) * 2) : 0;
+  const flap = Math.sin(t * 7) * 0.30 - swing * 0.50;
   const step = Math.sin(t * 6) * (s && s.moving ? 2.4 : 0);
   const INK = '#3b2a1c';
   const ORA = '#e09a4e', ORA2 = '#c97d33', CRE = '#f3e3cd', GRY = '#dcd6cc';
@@ -10640,7 +10643,7 @@ function drawHaneneko(ctx, s) {
     ctx.save();
     ctx.translate(-2 + dx, -58);
     ctx.rotate(-0.30 + dr + flap);
-    ctx.scale(w, w);
+    ctx.scale(w * (1 + swing * 0.18), w * (1 + swing * 0.18));
     ctx.fillStyle = col; ctx.strokeStyle = INK; ctx.lineWidth = 2.4 / w;
     ctx.beginPath();
     ctx.moveTo(0, 6);                       // つけね
@@ -10750,6 +10753,19 @@ function drawHaneneko(ctx, s) {
   ctx.lineWidth = 1.4;
   for (const dy of [-3, 1]) {
     ctx.beginPath(); ctx.moveTo(60, -66 + dy); ctx.lineTo(74, -68 + dy * 2.2); ctx.stroke();
+  }
+
+  /* こうげきの とき、まえに つめの きりあとを だす */
+  if (swing > 0.15) {
+    ctx.save();
+    ctx.globalAlpha = swing;
+    ctx.strokeStyle = '#fff3d6'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc(74, -64 + i * 13, 16 + swing * 8, -1.05, 1.05);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   ctx.restore();

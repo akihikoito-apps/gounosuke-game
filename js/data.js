@@ -2699,17 +2699,31 @@ const ENEMIES = {
 
   /* --- ハネネコ ---
        ちゃとらの ねこに コウモリの はねが はえた もの。
-       ★そらを とぶ ので、かべを こえて おくまで きて しまいます。      */
+
+       ★v6.37 で「とおくから うつ タイプ」に かえました★
+         まえは かべを こえて まっすぐ つっこんで いく タイプ でしたが、
+         それだと みかたの むれの まんなかに とびこんで、なにも できずに
+         おちて しまって いました（flying の もとの うごきは
+         「いちばん おくの あいてを ねらって とまらずに すすむ」ため）。
+
+         いまは flyOver: false を つけて、まえに いる あいてを
+         はやめに みつけて、とおく（150）から はんいこうげきを します。
+         そらに うかんだ ままの「たいほう」の ような やくです。         */
   haneneko: {
     id: 'haneneko', name: 'ハネネコ',
     rarity: 'R',
     attr: 'beast',                        // けもの
-    hp: 720,    atk: 215,  range: 100,  speed: 60,
-    attackInterval: 1.2,   attackWindup: 0.25,
+    hp: 760,    atk: 265,  range: 150,  speed: 46,
+    attackInterval: 2.4,   attackWindup: 0.45,
     kbCount: 3, scale: 1.0,
-    attackType: 'single', projectile: null,
-    flying: true,                         // ★かべを こえて とんで いく
-    money: 135,
+    attackType: 'area',  areaRadius: 60,  projectile: 'needle',
+    flying: true,                         // そらに うかんで いる（え も うく）
+    flyOver: false,                       // ★みかたを とびこえては いかない
+    /* ★たおすと もらえる おかねは おおめ。
+         このゲームは「てきを たおす ＝ しゅうにゅう」なので、
+         たおしにくい てきほど おかねを おおく しないと
+         あそぶ ほうの おかねが まわらず、しあいが ながびきます。 */
+    money: 240,
   },
 
   /* --- キョーダイ ---
@@ -3449,8 +3463,8 @@ const STAGES = [
     name: 'まちの いりぐち',
     desc: 'ススベエの たては あき坊の はどうを とめる。まっすぐな こうげきで けずろう。',
     bg: 'dustcity',
-    castleHp: 2400,
-    power: 2.8,
+    castleHp: 2000,
+    power: 1.9,
     tornado: { interval: 30, chance: 0.48, first: 20 },
     drops: ['wood', 'stone', 'cloth'],
     reward: { coins: 7, exp: 10000 },
@@ -3459,7 +3473,7 @@ const STAGES = [
       { at: 15, id: 'susube',   count: 2, gap: 2.6 },
       { at: 30, id: 'haneneko', count: 1 },
       { at: 44, id: 'susube',   count: 2, gap: 3, repeat: 22 },
-      { at: 56, id: 'haneneko', count: 1, repeat: 20 },
+      { at: 56, id: 'haneneko', count: 1 },
     ],
   },
   {
@@ -3467,8 +3481,8 @@ const STAGES = [
     name: 'ビルの すきま',
     desc: 'ハネネコは そらを とんで かべを こえて くる。とおくから おとそう。',
     bg: 'dustcity',
-    castleHp: 2900,
-    power: 2.8,
+    castleHp: 2400,
+    power: 1.7,
     tornado: { interval: 28, chance: 0.51, first: 19 },
     drops: ['wood', 'iron', 'cloth'],
     reward: { coins: 7, exp: 10400 },
@@ -3476,7 +3490,7 @@ const STAGES = [
       { at: 3,  id: 'susube',   count: 1 },
       { at: 12, id: 'haneneko', count: 2, gap: 1.8 },
       { at: 26, id: 'susube',   count: 2, gap: 2.6 },
-      { at: 40, id: 'haneneko', count: 3, gap: 1.6, repeat: 18 },
+      { at: 40, id: 'haneneko', count: 2, gap: 1.8, repeat: 26 },
       { at: 54, id: 'susube',   count: 2, gap: 3, repeat: 24 },
     ],
   },
@@ -3485,8 +3499,8 @@ const STAGES = [
     name: 'ほこりの ひろば',
     desc: 'チリマイマイの めつぶしに ちゅうい。こうげきが はずれる ように なる。',
     bg: 'dustcity',
-    castleHp: 2500,
-    power: 2.0,
+    castleHp: 2200,
+    power: 1.6,
     tornado: { interval: 26, chance: 0.54, first: 18 },
     drops: ['stone', 'iron', 'string'],
     reward: { coins: 8, exp: 10800 },
@@ -3495,7 +3509,7 @@ const STAGES = [
       { at: 18, id: 'chirimaimai', count: 1 },
       { at: 32, id: 'haneneko',    count: 2, gap: 1.7 },
       { at: 46, id: 'susube',      count: 2, gap: 2.8, repeat: 26 },
-      { at: 62, id: 'haneneko',    count: 2, gap: 1.7, repeat: 22 },
+      { at: 62, id: 'haneneko',    count: 2, gap: 1.8, repeat: 28 },
     ],
   },
   {
@@ -3503,8 +3517,8 @@ const STAGES = [
     name: 'おめんの とおり',
     desc: 'キョーダイが あらわれる。はんぶん けずると ないて あばれだす！',
     bg: 'dustcity',
-    castleHp: 3000,
-    power: 2.4,
+    castleHp: 2500,
+    power: 1.7,
     tornado: { interval: 25, chance: 0.57, first: 17 },
     drops: ['iron', 'cloth', 'glue'],
     reward: { coins: 8, exp: 11200 },
@@ -3514,7 +3528,7 @@ const STAGES = [
       { at: 30, id: 'haneneko',    count: 2, gap: 1.7 },
       { at: 44, id: 'chirimaimai', count: 1 },
       { at: 56, id: 'susube',      count: 2, gap: 2.6, repeat: 24 },
-      { at: 70, id: 'haneneko',    count: 2, gap: 1.7, repeat: 22 },
+      { at: 70, id: 'haneneko',    count: 2, gap: 1.8, repeat: 28 },
     ],
   },
   {
@@ -3522,8 +3536,8 @@ const STAGES = [
     name: 'すすけた こうさてん',
     desc: '4しゅるいが いっぺんに おしよせる。たつまきほうにも きを つけて。',
     bg: 'dustcity',
-    castleHp: 2800,
-    power: 1.8,
+    castleHp: 2400,
+    power: 1.5,
     tornado: { interval: 24, chance: 0.60, first: 16 },
     drops: ['stone', 'alumi', 'string'],
     reward: { coins: 9, exp: 11600 },
@@ -3532,7 +3546,7 @@ const STAGES = [
       { at: 14, id: 'haneneko',    count: 2, gap: 1.6 },
       { at: 28, id: 'chirimaimai', count: 1 },
       { at: 40, id: 'kyoudai',     count: 1 },
-      { at: 54, id: 'haneneko',    count: 3, gap: 1.6, repeat: 20 },
+      { at: 54, id: 'haneneko',    count: 2, gap: 1.8, repeat: 26 },
       { at: 66, id: 'susube',      count: 2, gap: 2.6, repeat: 26 },
     ],
   },
@@ -3541,7 +3555,7 @@ const STAGES = [
     name: 'はいいろの おくがい',
     desc: 'キョーダイが ２くみ。あばれだす まえに いっきに かたづけたい。',
     bg: 'dustcity',
-    castleHp: 3100,
+    castleHp: 2600,
     power: 1.6,
     tornado: { interval: 23, chance: 0.62, first: 16 },
     drops: ['iron', 'alumi', 'glue'],
@@ -3551,7 +3565,7 @@ const STAGES = [
       { at: 16, id: 'susube',      count: 2, gap: 2.4 },
       { at: 30, id: 'kyoudai',     count: 1 },
       { at: 44, id: 'chirimaimai', count: 1 },
-      { at: 56, id: 'haneneko',    count: 3, gap: 1.6, repeat: 20 },
+      { at: 56, id: 'haneneko',    count: 2, gap: 1.8, repeat: 26 },
       { at: 72, id: 'susube',      count: 2, gap: 2.6, repeat: 28 },
     ],
   },
@@ -3560,9 +3574,9 @@ const STAGES = [
     name: 'ケダマールの おおどおり',
     desc: '★大ボス★ 3大王 さいごの ひとり「ケダマール」。ふとい けを まきちらして ふきとばす。',
     bg: 'dustsquare',
-    castleHp: 2700,
+    castleHp: 2300,
     /* ★3大王 さいごの ボス。わざと たかめ（まける ことも ある つよさ）*/
-    power: 2.2,
+    power: 1.9,
     tornado: { interval: 25, chance: 0.58, first: 16 },
     drops: ['alumi', 'cloth', 'glue'],
     reward: { coins: 14, exp: 16000 },
@@ -3575,7 +3589,7 @@ const STAGES = [
            hold: 0.65 ＝ ボスが でる まで しろは 65% までしか けずれません。*/
       { at: 38, id: 'kedamaru',    count: 1, hold: 0.65 },
       { at: 38, id: 'susube',      count: 4, gap: 1.2 },   /* ★ボスを まもる かべ */
-      { at: 56, id: 'haneneko',    count: 3, gap: 1.6, repeat: 22 },
+      { at: 56, id: 'haneneko',    count: 2, gap: 1.8, repeat: 28 },
       { at: 70, id: 'chirimaimai', count: 1, repeat: 46 },
       { at: 86, id: 'susube',      count: 2, gap: 2.6, repeat: 30 },
     ],
@@ -6544,6 +6558,17 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.37', date: '2026-09-20',
+    title: 'ハネネコが「とおくから うつ」タイプに',
+    items: [
+      '★ハネネコが なにも できずに おちて しまう のを なおしました★。まえは「いちばん おくの あいてを ねらって とまらずに すすむ」うごき だった ので、みかたの むれの まんなかに とびこんで やられて いました。',
+      'いまは まえに いる あいてを はやめに みつけて、★とおく（しゃてい 150）から はんいこうげき★ を します。こうげきりょくも 215 → 265 に あげました。そらに うかんだ ままの「たいほう」の ような やくです。',
+      'こうげきの ときは はねを おおきく ひろげて、つめの きりあとが とびます。',
+      'つよく なった ぶん、だい17しょうの 7コース ぜんぶ を ちょうせい しなおしました（コースの つよさ・しろの たいりょく・でて くる かず）。',
+      'クリアまでの じかんは 340・269・311・303・298・336・344びょう（30せん ずつ）。まえより ながく なって いますが、これは「とおくから うつ てきは、おなじ てじゅんで たたかう ロボットに とくに つよい」ため です。あき坊（しゃてい 210）や おおはらMEN（200）、テルテル君 を だせば もっと はやく かたづきます。',
+    ],
+  },
   {
     ver: '6.36', date: '2026-09-20',
     title: '★だい17しょう「埃にまみれた都市」（ぜんぶで 7コース）',
