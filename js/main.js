@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.37';
+  const GAME_VERSION = '6.38';
 
 
   /* =================================================
@@ -4685,7 +4685,7 @@
   /* ★ごほうびの タイマーは ゲームごとに べつべつ。
        むかしの セーブは s.mini.at だけ もって いる ので、
        1つめの シューティングは そのまま at を つかいます。      */
-  const MINI_AT = { bugshoot: 'at', foodcatch: 'catchAt' };
+  const MINI_AT = { bugshoot: 'at', foodcatch: 'catchAt', duel: 'duelAt' };
   function miniAtKey(key) { return MINI_AT[key] || 'at'; }
   /* ★きょう まだ もらって いなければ ごほうびが でます（よる 0じで リセット）*/
   function miniRewardReady(key) {
@@ -4729,6 +4729,11 @@
       when: '「秩序が失われた村」を ぜんぶ クリアすると あそべます',
       open: () => chapterAllCleared(16),
       go: () => openCharPick(startCatch) },
+    { key: 'duel', icon: '💀', name: 'ケダマールとの たいけつ',
+      desc: 'ましかくの わくの なかで、スティックで あかい ハートを うごかして こうげきを よけよう！　よけきったら じぶんの ターン。「たたかう」で はりを まんなかに とめるほど つよい。かつと そざい 5こ。',
+      when: '「埃にまみれた都市」を ぜんぶ クリアすると あそべます',
+      open: () => chapterAllCleared(17),
+      go: () => openCharPick(startDuel) },
   ];
 
   function openMinigames() {
@@ -5610,6 +5615,556 @@
   }
 
   /* =================================================
+     ミニゲーム その3「ケダマールとの たいけつ」
+
+     ・だい17しょう「埃にまみれた都市」を ぜんぶ クリアすると あそべます。
+     ・「アンダーテイル」の サンズ戦の ような たたかいかたです。
+         1. ★あいての ターン★ … ましかくの わくの なかで、あかい ハート
+            （じぶんの たましい）を スティックで うごかして こうげきを よける。
+         2. ★じぶんの ターン★ … 「たたかう／みを まもる／しらべる」を えらぶ。
+            「たたかう」は うごく はりを まんなかで とめるほど ダメージが おおきい。
+       これを くりかえして、ケダマールの たいりょくを 0に したら かち。
+       じぶんの たいりょくが 0に なったら まけ。
+     ・かつと そざいが 5こ（1日 1かいまで・ほかの ミニゲームとは べつ）。
+     ================================================= */
+  const DUEL = {
+    life: 20,                 // じぶんの たいりょく
+    bossHp: 120,              // ケダマールの たいりょく（1かい 3〜16 ダメージ）
+    hit: 1,                   // 1かい あたると へる ぶん
+    invul: 0.80,              // あたった あとの むてき じかん
+    guardHeal: 2,             // 「みを まもる」で かいふくする ぶん
+    soulSpeed: 250,           // たましいの はやさ（がめんの たかさ ÷ びょう）
+    aimSpeed: 1.45,           // 「たたかう」の はりの はやさ（おうふく／びょう）
+    /* ★あいての こうげき。じゅんばんに くりかえし、1しゅうごとに きつく なる */
+    waves: [
+      { kind: 'rain',    dur: 7.0, label: 'けだまの あめ' },
+      { kind: 'spike',   dur: 7.5, label: 'けの とげ' },
+      { kind: 'blaster', dur: 8.0, label: 'ケダマール・ビーム' },
+      { kind: 'blue',    dur: 7.5, label: 'あおい け（うごくと いたい）' },
+      { kind: 'sweep',   dur: 8.0, label: 'けの かべ' },
+    ],
+  };
+
+  /* ケダマールの セリフ（「しらべる」で でます）*/
+  const DUEL_TALKS = [
+    'ケダマールは けを ふるわせて いる。……なんだか たのしそうだ。',
+    'ケダマールの け は 1ぽん 1ぽんが かたい。さわると いたそう。',
+    'ケダマールは 3大王の ひとり。ターツーマーキーの いちばんの おきにいり らしい。',
+    'ケダマールを よく みると、まんなかに「3」の しるしが ある。3大王の 3 だろうか。',
+    'ケダマールは ほこりを すいこんで、もっと おおきく なろうと して いる。',
+    'ケダマールは あきぼうの はどうを こわがって いない ようだ。',
+    'ケダマールが わらった。きばが ぎらりと ひかった。',
+  ];
+
+  let DG = null;              // ゲームの じょうたい
+  let duelRaf = null, duelLast = 0;
+
+  function startDuel(charId) {
+    DG = {
+      char: charId,
+      life: DUEL.life, boss: DUEL.bossHp,
+      phase: 'menu',          // menu / aim / enemy / over
+      msg: 'ケダマールが たちはだかった！',
+      wave: -1, lap: 0,       // lap = なんしゅうめ（まわるほど きつい）
+      t: 0, phaseT: 0, waveDur: 0,
+      sx: 0.5, sy: 0.5,       // たましいの ばしょ（わくの なかの 0〜1）
+      vx: 0, vy: 0,           // スティックの かたむき（-1〜1）
+      moved: false,           // ★あおい け の はんてい に つかう
+      inv: 0, shake: 0, flash: 0,
+      bullets: [], beams: [], pops: [],
+      aim: 0, aimDir: 1,      // 「たたかう」の はり
+      swing: -1,              // ボスを なぐった えんしゅつ
+      guard: false,           // つぎの ターンは やさしく なる
+      over: null, W: 0, H: 0,
+    };
+    const ov = $('#duel-over');
+    if (ov) ov.classList.add('hidden');
+    setupDuelStick();
+    refreshDuelHud();
+    show('screen-duel');
+    if (duelRaf) cancelAnimationFrame(duelRaf);
+    duelLast = 0;
+    duelRaf = requestAnimationFrame(duelLoop);
+  }
+
+  function refreshDuelHud() {
+    const t = $('#duel-turn');
+    if (t) {
+      t.textContent = !DG ? '' :
+        (DG.phase === 'enemy') ? '★あいての ターン★'
+        : (DG.phase === 'aim') ? 'まんなかで とめろ！'
+        : 'じぶんの ターン';
+    }
+    const l = $('#duel-life');
+    if (l) l.textContent = DG ? ('❤️' + Math.max(0, DG.life) + '/' + DUEL.life) : '';
+    /* メニューの ボタンは じぶんの ターンの ときだけ おせる。
+       ただし「たたかう」は はりを とめる ため、aim の あいだも おせる。 */
+    const menu = !!DG && DG.phase === 'menu' && !DG.over;
+    const aim  = !!DG && DG.phase === 'aim'  && !DG.over;
+    const f = $('#btn-duel-fight');
+    if (f) { f.disabled = !(menu || aim); f.textContent = aim ? '🎯 いま とめる！' : '⚔️ たたかう'; }
+    ['#btn-duel-guard', '#btn-duel-act'].forEach(id => {
+      const b = $(id); if (b) b.disabled = !menu;
+    });
+  }
+
+  /* --- ゆびで うごかす スティック --- */
+  function setupDuelStick() {
+    const pad = $('#duel-stick'), knob = $('#duel-knob');
+    if (!pad || pad.dataset.bound) return;
+    pad.dataset.bound = '1';
+    let id = null;
+    const setFrom = (clientX, clientY) => {
+      const r = pad.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const max = r.width * 0.34;
+      let dx = clientX - cx, dy = clientY - cy;
+      const d = Math.hypot(dx, dy);
+      if (d > max) { dx = dx / d * max; dy = dy / d * max; }
+      if (knob) knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      if (DG) { DG.vx = dx / max; DG.vy = dy / max; }
+    };
+    const clear = () => {
+      id = null;
+      if (knob) knob.style.transform = '';
+      if (DG) { DG.vx = 0; DG.vy = 0; }
+    };
+    pad.addEventListener('pointerdown', e => {
+      id = e.pointerId; pad.setPointerCapture(e.pointerId); setFrom(e.clientX, e.clientY);
+      e.preventDefault();
+    });
+    pad.addEventListener('pointermove', e => { if (id === e.pointerId) setFrom(e.clientX, e.clientY); });
+    pad.addEventListener('pointerup', clear);
+    pad.addEventListener('pointercancel', clear);
+    pad.addEventListener('lostpointercapture', clear);
+  }
+
+  /* --- じぶんの ターンの えらびかた --- */
+  function duelFight() {
+    if (!DG || DG.phase !== 'menu') return;
+    DG.phase = 'aim'; DG.aim = 0; DG.aimDir = 1; DG.phaseT = 0;
+    DG.msg = 'はりが まんなかに きたら もういちど おして！';
+    refreshDuelHud();
+  }
+  function duelStrike() {
+    if (!DG || DG.phase !== 'aim') return;
+    /* aim は -1〜1。0に ちかいほど つよい */
+    const acc = 1 - Math.min(1, Math.abs(DG.aim));
+    const dmg = Math.round(3 + acc * acc * 13);          // 3〜16
+    DG.boss = Math.max(0, DG.boss - dmg);
+    DG.swing = 0;
+    DG.pops.push({ x: 0.5, y: 0.22, t: 0, text: '-' + dmg, color: acc > 0.85 ? '#fff176' : '#ff8a80' });
+    DG.msg = (acc > 0.85 ? '★クリティカル★ ' : '') + 'ケダマールに ' + dmg + ' ダメージ！';
+    if (DG.boss <= 0) { endDuel(true); return; }
+    nextDuelWave();
+  }
+
+  function duelGuard() {
+    if (!DG || DG.phase !== 'menu') return;
+    DG.life = Math.min(DUEL.life, DG.life + DUEL.guardHeal);
+    DG.guard = true;
+    DG.msg = 'みを まもった！　たいりょくが ' + DUEL.guardHeal + ' もどった。';
+    nextDuelWave();
+  }
+  function duelAct() {
+    if (!DG || DG.phase !== 'menu') return;
+    DG.msg = DUEL_TALKS[Math.floor(Math.random() * DUEL_TALKS.length)];
+    DG.guard = true;                 // ようすを みた ぶん、つぎは よみやすい
+    nextDuelWave();
+  }
+
+  function nextDuelWave() {
+    DG.wave++;
+    if (DG.wave >= DUEL.waves.length) { DG.wave = 0; DG.lap++; }
+    const w = DUEL.waves[DG.wave];
+    DG.phase = 'enemy'; DG.phaseT = 0;
+    DG.waveDur = w.dur * (DG.guard ? 0.75 : 1);
+    DG.bullets = []; DG.beams = []; DG.spawnT = 0; DG.gap = Math.random();
+    DG.sx = 0.5; DG.sy = 0.5; DG.moved = false;
+    refreshDuelHud();
+  }
+
+  function duelLoop(now) {
+    if (!DG || !$('#screen-duel').classList.contains('active')) { duelRaf = null; return; }
+    duelRaf = requestAnimationFrame(duelLoop);
+    const dt = duelLast ? Math.min(0.05, (now - duelLast) / 1000) : 0;
+    duelLast = now;
+    if (!DG.over) updateDuel(dt);
+    renderDuel();
+  }
+
+  /* わくの おおきさ（がめんに たいする わりあい）*/
+  function duelBox(W, H) {
+    const w = Math.min(W * 0.80, H * 0.62), h = Math.min(H * 0.42, w * 0.78);
+    return { x: (W - w) / 2, y: H * 0.50, w: w, h: h };
+  }
+
+  function updateDuel(dt) {
+    const W = DG.W || 360, H = DG.H || 480;
+    DG.t += dt; DG.phaseT += dt;
+    if (DG.inv > 0) DG.inv -= dt;
+    if (DG.shake > 0) DG.shake -= dt;
+    if (DG.flash > 0) DG.flash -= dt;
+    if (DG.swing >= 0) { DG.swing += dt; if (DG.swing > 0.6) DG.swing = -1; }
+    for (let i = DG.pops.length - 1; i >= 0; i--) {
+      DG.pops[i].t += dt; if (DG.pops[i].t > 0.9) DG.pops.splice(i, 1);
+    }
+
+    if (DG.phase === 'aim') {
+      /* はりが -1 → 1 → -1 と おうふく する */
+      DG.aim += DG.aimDir * DUEL.aimSpeed * 2 * dt;
+      if (DG.aim > 1) { DG.aim = 1; DG.aimDir = -1; }
+      if (DG.aim < -1) { DG.aim = -1; DG.aimDir = 1; }
+      /* 4びょう たったら じどうで うつ（とまらない ように）*/
+      if (DG.phaseT > 4.0) duelStrike();
+      return;
+    }
+    if (DG.phase !== 'enemy') return;
+
+    const box = duelBox(W, H);
+    /* --- たましいを うごかす --- */
+    const sp = DUEL.soulSpeed * dt;
+    const mx = DG.vx * sp / box.w, my = DG.vy * sp / box.h;
+    if (Math.abs(DG.vx) > 0.12 || Math.abs(DG.vy) > 0.12) DG.moved = true;
+    DG.sx = Math.max(0.03, Math.min(0.97, DG.sx + mx));
+    DG.sy = Math.max(0.04, Math.min(0.96, DG.sy + my));
+
+    spawnDuelAttack(dt, box);
+
+    /* --- たま を すすめる／あたり はんてい --- */
+    const px = box.x + DG.sx * box.w, py = box.y + DG.sy * box.h;
+    const SR = Math.max(6, box.h * 0.055);
+    for (let i = DG.bullets.length - 1; i >= 0; i--) {
+      const b = DG.bullets[i];
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      const out = (b.x < box.x - 90 || b.x > box.x + box.w + 90 ||
+                   b.y < box.y - 90 || b.y > box.y + box.h + 90);
+      if (out) { DG.bullets.splice(i, 1); continue; }
+      /* ★あおい け は「うごいて いなければ」あたらない */
+      if (b.blue && !DG.moved) continue;
+      const near = (Math.abs(b.x - px) < b.r + SR * 0.7 && Math.abs(b.y - py) < b.r + SR * 0.7);
+      if (near) hurtDuel();
+    }
+    for (let i = DG.beams.length - 1; i >= 0; i--) {
+      const bm = DG.beams[i];
+      bm.t += dt;
+      if (bm.t > bm.warn + bm.fire) { DG.beams.splice(i, 1); continue; }
+      if (bm.t > bm.warn) {
+        const inLane = bm.vertical
+          ? Math.abs(px - bm.p) < bm.w / 2 + SR * 0.5
+          : Math.abs(py - bm.p) < bm.w / 2 + SR * 0.5;
+        if (inLane) hurtDuel();
+      }
+    }
+    /* ★あおい け の はんてい は 1フレームごとに リセット */
+    DG.moved = (Math.abs(DG.vx) > 0.12 || Math.abs(DG.vy) > 0.12);
+
+    if (DG.phaseT >= DG.waveDur && DG.bullets.length === 0 && DG.beams.length === 0) {
+      DG.phase = 'menu'; DG.guard = false;
+      DG.msg = 'よけきった！　つぎは じぶんの ターン。';
+      refreshDuelHud();
+    }
+  }
+
+  function hurtDuel() {
+    if (DG.inv > 0) return;
+    DG.inv = DUEL.invul;
+    DG.life -= DUEL.hit;
+    DG.shake = 0.3; DG.flash = 0.25;
+    refreshDuelHud();
+    if (DG.life <= 0) { DG.life = 0; endDuel(false); }
+  }
+
+  /* --- あいての こうげきを だす --- */
+  function spawnDuelAttack(dt, box) {
+    const w = DUEL.waves[DG.wave];
+    if (!w || DG.phaseT > DG.waveDur) return;
+    const hard = 1 + DG.lap * 0.18;              // しゅうを かさねるほど はやい
+    DG.spawnT -= dt;
+    if (DG.spawnT > 0) return;
+
+    if (w.kind === 'rain') {
+      DG.spawnT = 0.42 / hard;
+      const n = 1 + (Math.random() < 0.35 ? 1 : 0);
+      for (let i = 0; i < n; i++) {
+        DG.bullets.push({
+          x: box.x + (0.06 + Math.random() * 0.88) * box.w, y: box.y - 14,
+          vx: 0, vy: (120 + Math.random() * 80) * hard,
+          r: box.h * 0.045, kind: 'ball',
+        });
+      }
+    } else if (w.kind === 'spike') {
+      DG.spawnT = 0.95 / hard;
+      /* うえ か した から とげの かべ。すきまが 1か所 あく */
+      const up = Math.random() < 0.5;
+      DG.gap = 0.12 + Math.random() * 0.76;
+      const n = 7;
+      for (let i = 0; i < n; i++) {
+        const fx = (i + 0.5) / n;
+        if (Math.abs(fx - DG.gap) < 0.17) continue;
+        DG.bullets.push({
+          x: box.x + fx * box.w, y: up ? box.y - 16 : box.y + box.h + 16,
+          vx: 0, vy: (up ? 1 : -1) * 150 * hard,
+          r: box.h * 0.055, kind: 'spike',
+        });
+      }
+    } else if (w.kind === 'blaster') {
+      DG.spawnT = 1.7 / hard;
+      const vertical = Math.random() < 0.5;
+      DG.beams.push({
+        vertical: vertical,
+        p: vertical ? box.x + (0.15 + Math.random() * 0.7) * box.w
+                    : box.y + (0.15 + Math.random() * 0.7) * box.h,
+        w: (vertical ? box.w : box.h) * 0.20,
+        warn: 0.85 / hard, fire: 0.45, t: 0,
+      });
+    } else if (w.kind === 'blue') {
+      DG.spawnT = 0.75 / hard;
+      /* ★あおい け。うごいて いなければ あたらない */
+      const fromLeft = Math.random() < 0.5;
+      const y = box.y + (0.1 + Math.random() * 0.8) * box.h;
+      DG.bullets.push({
+        x: fromLeft ? box.x - 18 : box.x + box.w + 18, y: y,
+        vx: (fromLeft ? 1 : -1) * 190 * hard, vy: 0,
+        r: box.h * 0.075, kind: 'bar', blue: true,
+      });
+    } else {                                      /* sweep */
+      DG.spawnT = 1.15 / hard;
+      const fromLeft = Math.random() < 0.5;
+      DG.gap = 0.12 + Math.random() * 0.76;
+      const n = 6;
+      for (let i = 0; i < n; i++) {
+        const fy = (i + 0.5) / n;
+        if (Math.abs(fy - DG.gap) < 0.19) continue;
+        DG.bullets.push({
+          x: fromLeft ? box.x - 16 : box.x + box.w + 16,
+          y: box.y + fy * box.h,
+          vx: (fromLeft ? 1 : -1) * 165 * hard, vy: 0,
+          r: box.h * 0.052, kind: 'spike',
+        });
+      }
+    }
+  }
+
+  function endDuel(win) {
+    DG.over = win ? 'win' : 'lose';
+    DG.phase = 'over';
+    refreshDuelHud();
+    const t = $('#duel-over-title');
+    if (t) { t.textContent = win ? 'かった！' : 'まけた…'; t.className = 'so-title ' + (win ? 'win' : 'lose'); }
+    const box = $('#duel-got');
+    if (box) box.innerHTML = '';
+    let msg;
+    if (!win) {
+      msg = 'ケダマールの けに やられて しまった。もういちど ちょうせん しよう！';
+    } else if (miniRewardReady('duel')) {
+      miniShowGot(box, miniGiveMats(MINI.give, 'duel'));
+      msg = 'ケダマールを たおした！　そざい 5こパック を てに いれた！';
+    } else {
+      msg = 'ケダマールを たおした！　きょうの ごほうびは もう もらって いるので、つぎは ' + miniLeftText() + ' です。';
+    }
+    const tx = $('#duel-over-text');
+    if (tx) tx.textContent = msg;
+    const ov = $('#duel-over');
+    if (ov) ov.classList.remove('hidden');
+  }
+
+  /* --- え --- */
+  function renderDuel() {
+    const cv = $('#duel-canvas');
+    if (!cv || !DG) return;
+    const w = cv.clientWidth, h = cv.clientHeight;
+    if (w < 2 || h < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    }
+    DG.W = w; DG.H = h;
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    if (DG.shake > 0) ctx.translate((Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8);
+
+    /* --- ケダマール（うえ）--- */
+    const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS.kedamaru : null;
+    if (fn) {
+      ctx.save();
+      const size = h * 0.30;
+      const sc = size / storyArtUp('kedamaru');
+      const hop = (DG.swing >= 0) ? Math.sin(DG.swing / 0.6 * Math.PI) * h * 0.02 : 0;
+      ctx.translate(w * 0.5, h * 0.36 + hop);
+      if (DG.swing >= 0 && Math.floor(DG.swing * 24) % 2 === 0) ctx.globalAlpha = 0.45;
+      ctx.scale(sc, sc);
+      try { fn(ctx, { t: DG.t, moving: false, atk: -1, hpRatio: DG.boss / DUEL.bossHp, hpRate: 1, roll: 0.3 }); } catch (e) {}
+      ctx.restore();
+    }
+    /* ボスの たいりょく */
+    ctx.fillStyle = 'rgba(255,255,255,.22)';
+    ctx.fillRect(w * 0.16, h * 0.045, w * 0.68, h * 0.018);
+    ctx.fillStyle = '#ff7043';
+    ctx.fillRect(w * 0.16, h * 0.045, w * 0.68 * (DG.boss / DUEL.bossHp), h * 0.018);
+    ctx.fillStyle = '#ffe082'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.font = '800 ' + (h * 0.030) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText('ケダマール', w * 0.5, h * 0.008);
+
+    /* --- メッセージ --- */
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '700 ' + (h * 0.030) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillStyle = '#fff';
+    wrapDuelText(ctx, DG.msg, w * 0.5, h * 0.455, w * 0.88, h * 0.036);
+
+    /* --- わく --- */
+    const box = duelBox(w, h);
+    if (DG.phase === 'enemy') {
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(3, h * 0.008);
+      ctx.strokeRect(box.x, box.y, box.w, box.h);
+      ctx.save();
+      ctx.beginPath(); ctx.rect(box.x, box.y, box.w, box.h); ctx.clip();
+
+      /* ビーム（よこく → はっしゃ）*/
+      for (const bm of DG.beams) {
+        const firing = bm.t > bm.warn;
+        if (!firing) {
+          const bl = 0.25 + 0.45 * Math.abs(Math.sin(DG.t * 16));
+          ctx.fillStyle = 'rgba(255,255,255,' + bl.toFixed(2) + ')';
+        } else {
+          ctx.fillStyle = 'rgba(255,241,118,0.92)';
+        }
+        const th = firing ? bm.w : Math.max(2, bm.w * 0.16);
+        if (bm.vertical) ctx.fillRect(bm.p - th / 2, box.y, th, box.h);
+        else             ctx.fillRect(box.x, bm.p - th / 2, box.w, th);
+      }
+
+      /* たま */
+      for (const b of DG.bullets) {
+        if (b.blue) {
+          ctx.fillStyle = '#4fc3f7'; ctx.strokeStyle = '#e1f5fe';
+          ctx.lineWidth = 2;
+          roundRectPath(ctx, b.x - b.r * 1.9, b.y - b.r * 0.5, b.r * 3.8, b.r, b.r * 0.4);
+          ctx.fill(); ctx.stroke();
+        } else if (b.kind === 'spike') {
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          if (b.vy !== 0) {                      // たて
+            const d = b.vy > 0 ? 1 : -1;
+            ctx.moveTo(b.x, b.y + b.r * 1.5 * d);
+            ctx.lineTo(b.x - b.r * 0.7, b.y - b.r * d);
+            ctx.lineTo(b.x + b.r * 0.7, b.y - b.r * d);
+          } else {                                // よこ
+            const d = b.vx > 0 ? 1 : -1;
+            ctx.moveTo(b.x + b.r * 1.5 * d, b.y);
+            ctx.lineTo(b.x - b.r * d, b.y - b.r * 0.7);
+            ctx.lineTo(b.x - b.r * d, b.y + b.r * 0.7);
+          }
+          ctx.closePath(); ctx.fill();
+        } else {
+          ctx.fillStyle = '#e0e0e0'; ctx.strokeStyle = '#9e9e9e'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          /* けだま らしい とげ */
+          ctx.strokeStyle = '#bdbdbd';
+          for (let i = 0; i < 6; i++) {
+            const a = DG.t * 2 + i * Math.PI / 3;
+            ctx.beginPath();
+            ctx.moveTo(b.x + Math.cos(a) * b.r, b.y + Math.sin(a) * b.r);
+            ctx.lineTo(b.x + Math.cos(a) * b.r * 1.6, b.y + Math.sin(a) * b.r * 1.6);
+            ctx.stroke();
+          }
+        }
+      }
+
+      /* たましい（あかい ハート）*/
+      const px = box.x + DG.sx * box.w, py = box.y + DG.sy * box.h;
+      const SR = Math.max(6, box.h * 0.055);
+      if (!(DG.inv > 0 && Math.floor(DG.t * 22) % 2 === 0)) {
+        ctx.fillStyle = '#ff2b2b';
+        heartPath(ctx, px, py, SR);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      /* のこり じかんの バー */
+      const left = Math.max(0, 1 - DG.phaseT / DG.waveDur);
+      ctx.fillStyle = 'rgba(255,255,255,.20)';
+      ctx.fillRect(box.x, box.y + box.h + h * 0.018, box.w, h * 0.012);
+      ctx.fillStyle = '#80deea';
+      ctx.fillRect(box.x, box.y + box.h + h * 0.018, box.w * left, h * 0.012);
+      /* こうげきの なまえ */
+      const wv = DUEL.waves[DG.wave];
+      if (wv) {
+        ctx.fillStyle = '#80deea'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.font = '800 ' + (h * 0.026) + 'px system-ui, "Hiragino Sans", sans-serif';
+        ctx.fillText(wv.label, box.x + box.w / 2, box.y + box.h + h * 0.036);
+      }
+    } else if (DG.phase === 'aim') {
+      /* 「たたかう」の はり */
+      const bx = w * 0.10, bw = w * 0.80, by = box.y + box.h * 0.35, bh = h * 0.055;
+      ctx.fillStyle = '#212121'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+      ctx.fillRect(bx, by, bw, bh); ctx.strokeRect(bx, by, bw, bh);
+      /* まんなかの あたり */
+      ctx.fillStyle = 'rgba(255,241,118,.35)';
+      ctx.fillRect(bx + bw * 0.42, by, bw * 0.16, bh);
+      ctx.fillStyle = 'rgba(255,241,118,.18)';
+      ctx.fillRect(bx + bw * 0.30, by, bw * 0.40, bh);
+      /* はり */
+      const hx = bx + bw * (0.5 + DG.aim * 0.5);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(hx - 3, by - 6, 6, bh + 12);
+    }
+
+    /* ＋ダメージの もじ */
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const p of DG.pops) {
+      const k = p.t / 0.9;
+      ctx.save();
+      ctx.globalAlpha = 1 - k;
+      const fs = h * 0.048;
+      ctx.font = '900 ' + fs + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.lineWidth = fs * 0.26; ctx.strokeStyle = '#000'; ctx.lineJoin = 'round';
+      ctx.strokeText(p.text, p.x * w, p.y * h - k * h * 0.06);
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.text, p.x * w, p.y * h - k * h * 0.06);
+      ctx.restore();
+    }
+    ctx.restore();
+
+    if (DG.flash > 0) {
+      ctx.fillStyle = 'rgba(255,60,60,' + (DG.flash * 1.6).toFixed(2) + ')';
+      ctx.fillRect(0, 0, w, h);
+    }
+  }
+
+  /* ハートの かたち（たましい）*/
+  function heartPath(ctx, cx, cy, r) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + r);
+    ctx.bezierCurveTo(cx - r * 1.5, cy - r * 0.3, cx - r * 0.6, cy - r * 1.3, cx, cy - r * 0.45);
+    ctx.bezierCurveTo(cx + r * 0.6, cy - r * 1.3, cx + r * 1.5, cy - r * 0.3, cx, cy + r);
+    ctx.closePath();
+  }
+
+  /* ながい もじを おりかえして かく */
+  function wrapDuelText(ctx, text, cx, cy, maxW, lineH) {
+    const lines = [];
+    let line = '';
+    for (const ch of String(text || '')) {
+      if (ctx.measureText(line + ch).width > maxW && line) { lines.push(line); line = ch; }
+      else line += ch;
+    }
+    if (line) lines.push(line);
+    const top = cy - (lines.length - 1) * lineH / 2;
+    lines.forEach((l, i) => ctx.fillText(l, cx, top + i * lineH));
+  }
+
+  function quitDuel() {
+    DG = null;
+    if (duelRaf) { cancelAnimationFrame(duelRaf); duelRaf = null; }
+    openMinigames();
+  }
+
+  /* =================================================
      ぞくせいの あいしょうひょう（ホームの「あいしょうひょう」）
 
      しくみは data.js の ATTR_BEATS / CONFIG.attrStrong などと
@@ -6217,6 +6772,16 @@
     $('#btn-catch-back').addEventListener('click', quitCatch);
     $('#btn-catch-exit').addEventListener('click', quitCatch);
     $('#btn-catch-again').addEventListener('click', () => { if (CG) startCatch(CG.char); });
+    $('#btn-duel-back').addEventListener('click', quitDuel);
+    $('#btn-duel-exit').addEventListener('click', quitDuel);
+    $('#btn-duel-again').addEventListener('click', () => { if (DG) startDuel(DG.char); });
+    $('#btn-duel-fight').addEventListener('click', () => {
+      if (!DG) return;
+      if (DG.phase === 'menu') duelFight();
+      else if (DG.phase === 'aim') duelStrike();
+    });
+    $('#btn-duel-guard').addEventListener('click', duelGuard);
+    $('#btn-duel-act').addEventListener('click', duelAct);
     $('#btn-attr-back').addEventListener('click', openHome);
     $('#btn-movie-back').addEventListener('click', openHome);
     $('#btn-shop-back').addEventListener('click', () => { show('screen-chapter'); redrawMap(); });

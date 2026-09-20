@@ -198,6 +198,37 @@
     </div>
   </section>
 
+  <!-- ============ ミニゲーム：ケダマールとの たいけつ ============ -->
+  <section id="screen-duel" class="screen">
+    <div class="shoot-wrap duel-wrap">
+      <div class="shoot-top">
+        <button class="mini-btn" id="btn-duel-back">やめる</button>
+        <span class="shoot-wave" id="duel-turn"></span>
+        <span class="shoot-life" id="duel-life"></span>
+      </div>
+      <div class="shoot-stage">
+        <canvas id="duel-canvas"></canvas>
+        <div class="shoot-over hidden" id="duel-over">
+          <p class="so-title" id="duel-over-title"></p>
+          <p class="so-text"  id="duel-over-text"></p>
+          <div class="shoot-got" id="duel-got"></div>
+          <div class="so-btns">
+            <button class="big-btn" id="btn-duel-again">もういちど</button>
+            <button class="mini-btn" id="btn-duel-exit">やめる</button>
+          </div>
+        </div>
+      </div>
+      <div class="duel-ctl">
+        <div class="duel-stick" id="duel-stick"><i id="duel-knob"></i></div>
+        <div class="duel-menu" id="duel-menu">
+          <button class="duel-cmd" id="btn-duel-fight">⚔️ たたかう</button>
+          <button class="duel-cmd" id="btn-duel-guard">🛡️ みを まもる</button>
+          <button class="duel-cmd" id="btn-duel-act">👀 しらべる</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ ぞくせいの あいしょうひょう ============ -->
   <section id="screen-attr" class="screen">
     <div class="attr-wrap">

@@ -1637,6 +1637,54 @@ body.dragging-slot #party-slots { touch-action:none; }
   border-radius:calc(12px * var(--ui)); background:#e8c94a;
 }
 .catch-stun{ color:#ff8a65 !important; }
+
+/* ケダマールとの たいけつ（アンダーテイルふうの よけゲーム）*/
+.duel-wrap{ background:#08080c; }
+#duel-canvas{
+  width:100%; height:100%; display:block; touch-action:none;
+  border-radius:calc(12px * var(--ui)); background:#000;
+}
+.duel-ctl{
+  flex:0 0 auto; display:flex; align-items:center; gap:calc(10px * var(--ui));
+  margin-top:calc(8px * var(--ui));
+}
+/* ★ゆびで うごかす スティック */
+.duel-stick{
+  position:relative; flex:0 0 auto; touch-action:none;
+  width:calc(96px * var(--ui)); height:calc(96px * var(--ui));
+  border-radius:50%;
+  background:radial-gradient(circle at 50% 42%, #2b3340, #141922);
+  border:calc(3px * var(--ui)) solid #4b5a6e;
+  box-shadow:inset 0 calc(3px * var(--ui)) calc(8px * var(--ui)) rgba(0,0,0,.6);
+}
+.duel-stick i{
+  position:absolute; left:50%; top:50%; display:block;
+  width:calc(40px * var(--ui)); height:calc(40px * var(--ui));
+  margin:calc(-20px * var(--ui)) 0 0 calc(-20px * var(--ui));
+  border-radius:50%;
+  background:radial-gradient(circle at 42% 34%, #ff8a8a, #d33a3a);
+  border:calc(2px * var(--ui)) solid #ffd9d9;
+  transition:none;
+}
+.duel-menu{
+  flex:1 1 auto; min-width:0;
+  display:flex; flex-direction:column; gap:calc(6px * var(--ui));
+}
+.duel-cmd{
+  width:100%; text-align:left; cursor:pointer;
+  font-size:calc(15px * var(--ui)); font-weight:800; color:#ffe082;
+  background:#141922; border:calc(2px * var(--ui)) solid #ffe082;
+  border-radius:calc(10px * var(--ui));
+  padding:calc(7px * var(--ui)) calc(12px * var(--ui));
+}
+.duel-cmd:active{ transform:translateY(calc(2px * var(--ui))); }
+.duel-cmd:disabled{ color:#5b6472; border-color:#39414e; }
+@media (max-height: 470px) {
+  .duel-stick{ width:calc(74px * var(--ui)); height:calc(74px * var(--ui)); }
+  .duel-stick i{ width:calc(32px * var(--ui)); height:calc(32px * var(--ui));
+                 margin:calc(-16px * var(--ui)) 0 0 calc(-16px * var(--ui)); }
+  .duel-cmd{ padding:calc(4px * var(--ui)) calc(10px * var(--ui)); font-size:calc(13px * var(--ui)); }
+}
 .shoot-over{
   position:absolute; inset:0; border-radius:calc(12px * var(--ui));
   background:rgba(6,19,28,.90);
