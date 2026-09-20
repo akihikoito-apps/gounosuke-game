@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.33';
+  const GAME_VERSION = '6.34';
 
 
   /* =================================================
@@ -4361,7 +4361,24 @@
       : 'やあ、また きて くれたんだね。きょうの そざいは わたしちゃった けど、はなしなら いくらでも するよ。', []);
     refreshShopBtn();
     show('screen-shop');
-    requestAnimationFrame(drawShop);
+    startShopLoop();
+  }
+
+  /* そざい入れの キラキラを うごかす ため、おみせの がめんの あいだだけ
+     えを かきなおします。1びょうに 8かい くらいで じゅうぶん です。   */
+  let shopRaf = null, shopLastFrame = 0;
+  function startShopLoop() {
+    if (shopRaf) cancelAnimationFrame(shopRaf);
+    shopLastFrame = 0;
+    shopRaf = requestAnimationFrame(shopLoop);
+  }
+  function shopLoop(now) {
+    const sc = $('#screen-shop');
+    if (!sc || !sc.classList.contains('active')) { shopRaf = null; return; }
+    shopRaf = requestAnimationFrame(shopLoop);
+    if (shopLastFrame && now - shopLastFrame < 125) return;
+    shopLastFrame = now;
+    drawShop();
   }
 
   function refreshShopBtn() {
@@ -4418,7 +4435,7 @@
     const cv = $('#shop-canvas');
     if (!cv) return;
     const w = cv.clientWidth, h = cv.clientHeight;
-    if (w < 2 || h < 2) { requestAnimationFrame(drawShop); return; }
+    if (w < 2 || h < 2) return;      // まだ おおきさが きまって いない（つぎの フレームで かきます）
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
     const ctx = cv.getContext('2d');
@@ -4515,7 +4532,7 @@
     /* カウンターの うえの もの */
     /* コーヒーカップ */
     ctx.save();
-    ctx.translate(W * 0.20, cy);
+    ctx.translate(W * 0.22, cy);
     ctx.fillStyle = '#f5f0e6'; ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = Math.max(1.5, u * 0.006);
     roundRectPath(ctx, -u * 0.035, -u * 0.055, u * 0.07, u * 0.055, u * 0.012);
     ctx.fill(); ctx.stroke();
@@ -4528,7 +4545,7 @@
     ctx.restore();
     /* かんようしょくぶつ */
     ctx.save();
-    ctx.translate(W * 0.83, cy);
+    ctx.translate(W * 0.09, cy);
     ctx.fillStyle = '#b25b3a';
     roundRectPath(ctx, -u * 0.035, -u * 0.05, u * 0.07, u * 0.05, u * 0.008); ctx.fill();
     ctx.fillStyle = '#4f9a3d';
@@ -4538,6 +4555,11 @@
       ctx.fill();
     }
     ctx.restore();
+
+    /* ★そざい入れ（きょう まだ もらって いない ときだけ）*/
+    if (nekosReady()) {
+      drawMatBasket(ctx, u, W * 0.76, cy, (Date.now() % 100000) / 1000);
+    }
 
     /* まえの いす（バースツール）*/
     ctx.fillStyle = '#3a2416';
@@ -4554,6 +4576,88 @@
     warm.addColorStop(0, 'rgba(255,214,140,.16)');
     warm.addColorStop(1, 'rgba(0,0,0,.30)');
     ctx.fillStyle = warm; ctx.fillRect(0, 0, W, H);
+  }
+
+  /* --- ★そざい入れ（きょうの ぶんを まだ もらって いない ときだけ でます）---
+       ネコスの となりの カウンターの うえに おいて あります。
+       これが おいて あれば「いま もらえる！」が ひとめで わかります。
+       cx, cy … かごの したの まんなか（カウンターの うえ）              */
+  function drawMatBasket(ctx, u, cx, cy, t) {
+    const bw = u * 0.240, bh = u * 0.140;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.lineJoin = 'round';
+    const ink = '#4a2b12';
+
+    /* かごの なかみ（ふちから すこし かおを だす そざい）*/
+    const ICONS = ['🪵', '⛓️', '🧵'];
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.font = (u * 0.066) + 'px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+    ICONS.forEach((ic, i) => {
+      /* ふちの うえに かおを だす たかさ（ふちの うえは -bh - u*0.020）*/
+      ctx.fillText(ic, (i - 1) * bw * 0.30, -bh - u * 0.018 + (i === 1 ? -u * 0.016 : 0));
+    });
+
+    /* かごの ほんたい（したが すこし せまい だいけい）*/
+    ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1.6, u * 0.0065);
+    ctx.fillStyle = '#c4873f';
+    ctx.beginPath();
+    ctx.moveTo(-bw * 0.50, -bh);
+    ctx.lineTo(bw * 0.50, -bh);
+    ctx.lineTo(bw * 0.39, 0);
+    ctx.lineTo(-bw * 0.39, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    /* あみめ（ななめの こうし）*/
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(-bw * 0.50, -bh); ctx.lineTo(bw * 0.50, -bh);
+    ctx.lineTo(bw * 0.39, 0); ctx.lineTo(-bw * 0.39, 0);
+    ctx.closePath(); ctx.clip();
+    ctx.strokeStyle = 'rgba(90,50,18,.45)'; ctx.lineWidth = Math.max(1, u * 0.004);
+    for (let i = -6; i <= 6; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * bw * 0.11, -bh); ctx.lineTo(i * bw * 0.11 + bw * 0.12, 0); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(i * bw * 0.11, -bh); ctx.lineTo(i * bw * 0.11 - bw * 0.12, 0); ctx.stroke();
+    }
+    ctx.restore();
+
+    /* ふち */
+    ctx.fillStyle = '#e0a860'; ctx.strokeStyle = ink;
+    roundRectPath(ctx, -bw * 0.54, -bh - u * 0.020, bw * 1.08, u * 0.026, u * 0.012);
+    ctx.fill(); ctx.stroke();
+
+    /* まえの ふだ「そざい入れ」*/
+    const lw = bw * 0.80, lh = u * 0.050;
+    ctx.fillStyle = '#fff3d6'; ctx.strokeStyle = ink;
+    ctx.lineWidth = Math.max(1.4, u * 0.005);
+    roundRectPath(ctx, -lw / 2, -bh * 0.66, lw, lh, u * 0.010);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#5b3a10';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '900 ' + (u * 0.032) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText('そざい入れ', 0, -bh * 0.66 + lh / 2);
+
+    /* ★キラキラ（いま もらえる よ、の あいず）*/
+    const SP = [[-0.72, -1.30, 1.00], [0.70, -1.45, 0.85], [0.92, -0.70, 0.70]];
+    SP.forEach((p, i) => {
+      const k = 0.45 + 0.55 * Math.abs(Math.sin(t * 2.4 + i * 1.9));
+      const r = u * 0.030 * p[2] * k;
+      ctx.save();
+      ctx.globalAlpha = 0.45 + 0.55 * k;
+      ctx.fillStyle = '#fff59d';
+      ctx.beginPath();
+      const x0 = p[0] * bw * 0.55, y0 = p[1] * bh;
+      ctx.moveTo(x0, y0 - r);
+      ctx.quadraticCurveTo(x0 + r * 0.18, y0 - r * 0.18, x0 + r, y0);
+      ctx.quadraticCurveTo(x0 + r * 0.18, y0 + r * 0.18, x0, y0 + r);
+      ctx.quadraticCurveTo(x0 - r * 0.18, y0 + r * 0.18, x0 - r, y0);
+      ctx.quadraticCurveTo(x0 - r * 0.18, y0 - r * 0.18, x0, y0 - r);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    });
+    ctx.restore();
   }
 
   /* =================================================
