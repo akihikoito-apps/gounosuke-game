@@ -515,6 +515,15 @@ function gotToday(at) { return !!at && dayKeyOf(at) === dayKeyOf(Date.now()); }
 | 落ちる速さ | `CATCH.foodV` / `CATCH.rockV`（**画面の高さ÷秒**・1つずつランダム） |
 | 食べ物の種類 | `CATCH_FOODS`（りんご・パイナップル・バナナ・おにぎり・いちご・すいか） |
 
+**背景のガオウドウ（v6.39）**：遠くの丘をゆっくり左右に歩きながら、1〜1.6秒ごとに
+食べ物や瓦礫を空へ放り投げています（`updateCatchGaoudou()` / `drawCatchGaoudou()`）。
+投げたものは演出専用で、実際に降ってくる `CG.foods` / `CG.rocks` とは別物です。
+`globalAlpha 0.66` ＋ かすんだ丘で遠近を出し、`CG.gaoDir < 0` のときは
+`ctx.scale(-1, 1)` で左向きにします。
+
+これで**3大王が全員ミニゲームに登場**します ── チューチュー＝むしたいじシューティング、
+ガオウドウ＝たべもの あつめ（背景）、ケダマール＝たいけつ。
+
 食べ物と瓦礫の絵は `drawCatchFood()` / `drawCatchRock()` で描いています。
 **空が黄色いので、どちらも `shadowColor` で影を付けて浮かせています**（付けないと
 黄色い食べ物が背景に溶けて見えません ── バナナで一度それをやりました）。
@@ -541,9 +550,34 @@ function gotToday(at) { return !!at && dayKeyOf(at) === dayKeyOf(Date.now()); }
 ```
 
 **仮想スティック**（`#duel-stick`）は `pointerdown` → `pointermove` でノブを追わせ、
-中心からのずれを `DG.vx / DG.vy`（-1〜1）にしています。`setPointerCapture` を使うので
+中心からのずれを `DG.vx / DG.vy` にしています。`setPointerCapture` を使うので
 指が枠の外に出ても追従します。`pointerup` / `pointercancel` / `lostpointercapture` の
 3つ全部で中立に戻さないと、指を離しても動き続けます。
+
+**16方向スナップ（v6.39）**：倒した「向き」だけを 22.5°刻みに丸め、「強さ」
+（中心からの距離 0〜1）はそのまま使います。
+
+```js
+const mag = Math.min(1, Math.hypot(dx, dy) / max);
+if (mag < DUEL.stickDead) { DG.vx = 0; DG.vy = 0; return; }   // 中心16%は無反応
+const step = Math.PI * 2 / DUEL.dirCount;                      // 16方向
+const ang  = Math.round(Math.atan2(dy, dx) / step) * step;
+DG.vx = Math.cos(ang) * mag;
+DG.vy = Math.sin(ang) * mag;
+```
+
+実測（実際に指を動かして `DG.vx/vy` を読んだもの）:
+
+| 入れた角度 | 出た角度 |
+|---|---|
+| 0° / 8° | **0°**（真横） |
+| 14° / 24° / 33° | 22.5° |
+| 45° | 45° |
+| 70° | 67.5° |
+| 90° / 100° | **90°**（真上・真下） |
+
+少しくらい斜めでも真横に走るので、狙った位置で止めやすくなります。
+中心の無反応域は **青い毛のターンでうっかり動かないため**にも効きます。
 
 | 攻撃 | 中身 | 元ネタ |
 |---|---|---|
@@ -561,6 +595,7 @@ function gotToday(at) { return !!at && dayKeyOf(at) === dayKeyOf(Date.now()); }
 | 設定 | 場所 |
 |---|---|
 | 体力・ダメージ | `DUEL.life`(20) / `DUEL.bossHp`(120) / `DUEL.hit`(1) / `DUEL.invul`(0.8) |
+| スティック | `DUEL.soulSpeed`(440px/秒) / `DUEL.stickDead`(0.16) / `DUEL.dirCount`(16) |
 | 攻撃の順番と長さ | `DUEL.waves`（`kind` / `dur` / `label`） |
 | 針の速さ | `DUEL.aimSpeed` |
 | 「しらべる」のセリフ | `DUEL_TALKS`（7種） |

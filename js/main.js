@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.38';
+  const GAME_VERSION = '6.39';
 
 
   /* =================================================
@@ -5250,6 +5250,8 @@
       foods: [], rocks: [], pops: [],
       spawned: 0, caught: 0, lost: 0,
       foodT: rnd(0.3, 0.7), rockT: rnd(0.9, 1.6),
+      /* ★とおくで なげて いる ガオウドウ（はいけい）*/
+      gaoX: 0.5, gaoDir: 1, gaoThrow: -1, gaoT: 0.8, tosses: [],
       over: null, W: 0, H: 0,
     };
     const ov = $('#catch-over');
@@ -5373,8 +5375,86 @@
       if (CG.pops[i].t > 0.8) CG.pops.splice(i, 1);
     }
 
+    updateCatchGaoudou(dt, W, H);
+
     /* --- おわり：30こ ぜんぶ でて、がめんに 1つも のこって いない --- */
     if (CG.spawned >= CATCH.foods && CG.foods.length === 0) endCatch();
+  }
+
+  /* ★とおくの ガオウドウ。ゆっくり よこに あるきながら、
+       ときどき たべものや がれきを そらへ ほうりなげます。
+       （3大王の うち ガオウドウだけ ミニゲームに でて いなかった ため）  */
+  function updateCatchGaoudou(dt, W, H) {
+    /* よこに ゆっくり いったりきたり */
+    CG.gaoX += CG.gaoDir * 0.035 * dt;
+    if (CG.gaoX > 0.74) { CG.gaoX = 0.74; CG.gaoDir = -1; }
+    if (CG.gaoX < 0.26) { CG.gaoX = 0.26; CG.gaoDir = 1; }
+    /* なげる うごき */
+    if (CG.gaoThrow >= 0) { CG.gaoThrow += dt; if (CG.gaoThrow > 0.7) CG.gaoThrow = -1; }
+    CG.gaoT -= dt;
+    if (CG.gaoT <= 0) {
+      CG.gaoT = rnd(0.9, 1.6);
+      CG.gaoThrow = 0;
+      const gx = CG.gaoX * W, gy = H * 0.215;
+      const toLeft = Math.random() < 0.5;
+      CG.tosses.push({
+        x: gx, y: gy - H * 0.03,
+        vx: (toLeft ? -1 : 1) * rnd(0.10, 0.22) * W,
+        vy: -rnd(0.16, 0.26) * H,
+        rot: 0, spin: rnd(-4, 4), t: 0,
+        rock: Math.random() < 0.45,
+        kind: CATCH_FOODS[Math.floor(Math.random() * CATCH_FOODS.length)],
+        seed: Math.floor(Math.random() * 1000),
+      });
+    }
+    /* なげた ものは うえへ とんで いって きえる（えんしゅつ だけ）*/
+    for (let i = CG.tosses.length - 1; i >= 0; i--) {
+      const o = CG.tosses[i];
+      o.t += dt;
+      o.x += o.vx * dt; o.y += o.vy * dt;
+      o.vy += H * 0.10 * dt;            // すこしだけ おちる
+      o.rot += o.spin * dt;
+      if (o.t > 1.5 || o.y < -H * 0.05) CG.tosses.splice(i, 1);
+    }
+  }
+
+  /* はいけいの ガオウドウを かく（とおくなので うすく・ちいさく）*/
+  function drawCatchGaoudou(ctx, w, h) {
+    const gy = h * 0.215;
+    /* とおくの おか（ほこりで かすんで いる）*/
+    ctx.fillStyle = 'rgba(176,152,88,0.42)';
+    ctx.beginPath();
+    ctx.moveTo(-10, gy + h * 0.02);
+    ctx.quadraticCurveTo(w * 0.5, gy - h * 0.035, w + 10, gy + h * 0.02);
+    ctx.lineTo(w + 10, gy + h * 0.055);
+    ctx.lineTo(-10, gy + h * 0.055);
+    ctx.closePath(); ctx.fill();
+
+    const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS.gaoudou : null;
+    if (fn) {
+      ctx.save();
+      ctx.globalAlpha = 0.66;
+      const size = h * 0.185;
+      const sc = size / storyArtUp('gaoudou');
+      ctx.translate(CG.gaoX * w, gy);
+      /* なげる とき すこし のけぞって → まえに ふる */
+      const k = (CG.gaoThrow >= 0) ? CG.gaoThrow / 0.7 : -1;
+      if (k >= 0) ctx.rotate((k < 0.4 ? -k * 0.5 : (k - 0.4) * 0.6 - 0.2) * 0.5);
+      ctx.scale(sc * (CG.gaoDir < 0 ? -1 : 1), sc);
+      try { fn(ctx, { t: CG.t, moving: true, atk: (k >= 0 && k < 0.5) ? 0.2 : -1,
+                      hpRatio: 1, hpRate: 1, roll: 0 }); } catch (e) {}
+      ctx.restore();
+    }
+
+    /* なげた もの（うえへ とんで いく）*/
+    for (const o of CG.tosses) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 0.75 - o.t * 0.45);
+      ctx.translate(o.x, o.y); ctx.rotate(o.rot);
+      if (o.rock) drawCatchRock(ctx, o.seed, h * 0.030);
+      else        drawCatchFood(ctx, o.kind, h * 0.028);
+      ctx.restore();
+    }
   }
 
   function endCatch() {
@@ -5433,6 +5513,9 @@
       const cx = ((i * 211) % 100) / 100 * w;
       ctx.beginPath(); ctx.ellipse(cx, cy, w * 0.16, h * 0.028, 0, 0, Math.PI * 2); ctx.fill();
     }
+    /* ★とおくで なげて いる ガオウドウ */
+    drawCatchGaoudou(ctx, w, h);
+
     /* じめん */
     ctx.fillStyle = 'rgba(120,95,40,.35)';
     ctx.fillRect(0, h - h * 0.055, w, h * 0.055);
@@ -5633,7 +5716,9 @@
     hit: 1,                   // 1かい あたると へる ぶん
     invul: 0.80,              // あたった あとの むてき じかん
     guardHeal: 2,             // 「みを まもる」で かいふくする ぶん
-    soulSpeed: 250,           // たましいの はやさ（がめんの たかさ ÷ びょう）
+    soulSpeed: 440,           // たましいの はやさ（1びょうに すすむ ドット）
+    stickDead: 0.16,          // これより かたむきが ちいさい ときは うごかない
+    dirCount: 16,             // ★うごける むきは 16ほうい に そろえる
     aimSpeed: 1.45,           // 「たたかう」の はりの はやさ（おうふく／びょう）
     /* ★あいての こうげき。じゅんばんに くりかえし、1しゅうごとに きつく なる */
     waves: [
@@ -5722,7 +5807,16 @@
       const d = Math.hypot(dx, dy);
       if (d > max) { dx = dx / d * max; dy = dy / d * max; }
       if (knob) knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
-      if (DG) { DG.vx = dx / max; DG.vy = dy / max; }
+      if (!DG) return;
+      /* ★うごく むきは 16ほうい（22.5どごと）に そろえます。
+           すこしだけ ななめに たおした ときは まよこ／まうえに うごきます。
+           はやさ（かたむきの おおきさ）は そのまま つかいます。        */
+      const mag = Math.min(1, Math.hypot(dx, dy) / max);
+      if (mag < DUEL.stickDead) { DG.vx = 0; DG.vy = 0; return; }
+      const step = Math.PI * 2 / DUEL.dirCount;
+      const ang = Math.round(Math.atan2(dy, dx) / step) * step;
+      DG.vx = Math.cos(ang) * mag;
+      DG.vy = Math.sin(ang) * mag;
     };
     const clear = () => {
       id = null;
@@ -5825,7 +5919,9 @@
     /* --- たましいを うごかす --- */
     const sp = DUEL.soulSpeed * dt;
     const mx = DG.vx * sp / box.w, my = DG.vy * sp / box.h;
-    if (Math.abs(DG.vx) > 0.12 || Math.abs(DG.vy) > 0.12) DG.moved = true;
+    /* ★あおい け の はんてい。スティックが しんでる ぶん（stickDead）は
+         setFrom で 0に して ある ので、0で なければ「うごいて いる」*/
+    if (DG.vx !== 0 || DG.vy !== 0) DG.moved = true;
     DG.sx = Math.max(0.03, Math.min(0.97, DG.sx + mx));
     DG.sy = Math.max(0.04, Math.min(0.96, DG.sy + my));
 
@@ -5857,7 +5953,7 @@
       }
     }
     /* ★あおい け の はんてい は 1フレームごとに リセット */
-    DG.moved = (Math.abs(DG.vx) > 0.12 || Math.abs(DG.vy) > 0.12);
+    DG.moved = (DG.vx !== 0 || DG.vy !== 0);
 
     if (DG.phaseT >= DG.waveDur && DG.bullets.length === 0 && DG.beams.length === 0) {
       DG.phase = 'menu'; DG.guard = false;
