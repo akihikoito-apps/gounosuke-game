@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.40';
+  const GAME_VERSION = '6.41';
 
 
   /* =================================================
@@ -5905,7 +5905,9 @@
 
   /* わくの おおきさ（がめんに たいする わりあい）*/
   function duelBox(W, H) {
-    const w = Math.min(W * 0.80, H * 0.62), h = Math.min(H * 0.42, w * 0.78);
+    /* ★わくは がめんより すこし ほそく します。
+         そとの あきに「ちかづいて くる たま」を みせる ため です。   */
+    const w = Math.min(W * 0.66, H * 0.52), h = Math.min(H * 0.42, w * 0.86);
     return { x: (W - w) / 2, y: H * 0.50, w: w, h: h };
   }
 
@@ -5975,10 +5977,12 @@
     for (let i = DG.bullets.length - 1; i >= 0; i--) {
       const b = DG.bullets[i];
       b.x += b.vx * dt; b.y += b.vy * dt;
+      /* ★だす ばしょを わくの そとに ひろげた ぶん、きえる はんていも ひろく */
+      const mX = box.w * 0.45, mY = box.h * 0.70;
       const out = b.rect
-        ? (b.x < box.x - 120 || b.x > box.x + box.w + 120)
-        : (b.x < box.x - 90 || b.x > box.x + box.w + 90 ||
-           b.y < box.y - 90 || b.y > box.y + box.h + 90);
+        ? (b.x < box.x - mX - box.w * 0.2 || b.x > box.x + box.w + mX + box.w * 0.2)
+        : (b.x < box.x - mX || b.x > box.x + box.w + mX ||
+           b.y < box.y - mY || b.y > box.y + box.h + mY);
       if (out) { DG.bullets.splice(i, 1); continue; }
       /* ★あおい け は「うごいて いなければ」あたらない */
       if (b.blue && !DG.moved) continue;
@@ -6025,6 +6029,10 @@
   function spawnDuelAttack(dt, box) {
     const w = DUEL.waves[DG.wave];
     if (!w || DG.phaseT > DG.waveDur) return;
+    /* ★わくの そとの どれくらい てまえから だすか（＝よめる じかん）。
+         よこは がめんから はみだすと みえない ので、あきの ぶんまで。 */
+    const leadY = box.h * 0.42;
+    const leadX = Math.min(box.w * 0.34, Math.max(12, box.x - 6));
     const hard = 1 + DG.lap * 0.18;              // しゅうを かさねるほど はやい
     DG.spawnT -= dt;
     if (DG.spawnT > 0) return;
@@ -6034,7 +6042,7 @@
       const n = 1 + (Math.random() < 0.35 ? 1 : 0);
       for (let i = 0; i < n; i++) {
         DG.bullets.push({
-          x: box.x + (0.06 + Math.random() * 0.88) * box.w, y: box.y - 14,
+          x: box.x + (0.06 + Math.random() * 0.88) * box.w, y: box.y - leadY - Math.random() * box.h * 0.12,
           vx: 0, vy: (120 + Math.random() * 80) * hard,
           r: box.h * 0.045, kind: 'ball',
         });
@@ -6049,7 +6057,7 @@
         const fx = (i + 0.5) / n;
         if (Math.abs(fx - DG.gap) < 0.17) continue;
         DG.bullets.push({
-          x: box.x + fx * box.w, y: up ? box.y - 16 : box.y + box.h + 16,
+          x: box.x + fx * box.w, y: up ? box.y - leadY : box.y + box.h + leadY,
           vx: 0, vy: (up ? 1 : -1) * 150 * hard,
           r: box.h * 0.055, kind: 'spike',
         });
@@ -6074,7 +6082,7 @@
       DG.spawnT = 0.50 / hard;
       DG.blueTurn = !DG.blueTurn;
       const fromLeft = Math.random() < 0.5;
-      const x0 = fromLeft ? box.x - 20 : box.x + box.w + 20;
+      const x0 = fromLeft ? box.x - leadX : box.x + box.w + leadX;
       const vx = (fromLeft ? 1 : -1) * 195 * hard;
       if (DG.blueTurn) {
         /* あおい け ── 3ほん、すきま なし */
@@ -6104,7 +6112,7 @@
       DG.spawnT = 1.20 / hard;
       const fromLeft = Math.random() < 0.5;
       const vx = (fromLeft ? 1 : -1) * 150 * hard;
-      const x0 = fromLeft ? box.x - 26 : box.x + box.w + 26;
+      const x0 = fromLeft ? box.x - leadX : box.x + box.w + leadX;
       const down = DG.grav > 0;                    // ゆかは した か うえ か
       /* 7かいに 2かいは「くぐる」ほう */
       const duck = Math.random() < 0.28;
@@ -6128,7 +6136,7 @@
         const fy = (i + 0.5) / n;
         if (Math.abs(fy - DG.gap) < 0.19) continue;
         DG.bullets.push({
-          x: fromLeft ? box.x - 16 : box.x + box.w + 16,
+          x: fromLeft ? box.x - leadX : box.x + box.w + leadX,
           y: box.y + fy * box.h,
           vx: (fromLeft ? 1 : -1) * 165 * hard, vy: 0,
           r: box.h * 0.052, kind: 'spike',
@@ -6210,6 +6218,28 @@
     /* --- わく --- */
     const box = duelBox(w, h);
     if (DG.phase === 'enemy') {
+      /* ★★ わくの そとに いる たまも うすく かきます ★★
+           まえは わくの なかだけに かいて いた ので、とつぜん あらわれて
+           よける じかんが ありませんでした。いまは そとから ちかづいて
+           くる ようすが みえる ので、さきに よみながら うごけます。     */
+      ctx.save();
+      ctx.globalAlpha = 0.38;
+      for (const b of DG.bullets) drawDuelBullet(ctx, b);
+      /* ビームの よこくも わくの そとに のばして、どの れつか わかるように */
+      for (const bm of DG.beams) {
+        if (bm.t > bm.warn) continue;
+        ctx.fillStyle = 'rgba(255,241,118,0.85)';
+        const th = Math.max(2, bm.w * 0.14);
+        if (bm.vertical) {
+          ctx.fillRect(bm.p - th / 2, box.y - h * 0.045, th, h * 0.045);
+          ctx.fillRect(bm.p - th / 2, box.y + box.h, th, h * 0.045);
+        } else {
+          ctx.fillRect(box.x - w * 0.05, bm.p - th / 2, w * 0.05, th);
+          ctx.fillRect(box.x + box.w, bm.p - th / 2, w * 0.05, th);
+        }
+      }
+      ctx.restore();
+
       ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(3, h * 0.008);
       ctx.strokeRect(box.x, box.y, box.w, box.h);
       ctx.save();
@@ -6229,52 +6259,8 @@
         else             ctx.fillRect(box.x, bm.p - th / 2, box.w, th);
       }
 
-      /* たま */
-      for (const b of DG.bullets) {
-        if (b.rect) {                        /* ★ほね（ジャンプで こえる）*/
-          ctx.fillStyle = '#fff'; ctx.strokeStyle = '#bdbdbd'; ctx.lineWidth = 2;
-          roundRectPath(ctx, b.x - b.w / 2, b.y, b.w, b.h, b.w * 0.35);
-          ctx.fill(); ctx.stroke();
-          /* ほねの りょうはし の こぶ */
-          ctx.fillStyle = '#fff';
-          for (const ey of [b.y, b.y + b.h]) {
-            ctx.beginPath(); ctx.arc(b.x - b.w * 0.42, ey, b.w * 0.44, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(b.x + b.w * 0.42, ey, b.w * 0.44, 0, Math.PI * 2); ctx.fill();
-          }
-        } else if (b.blue) {
-          ctx.fillStyle = '#4fc3f7'; ctx.strokeStyle = '#e1f5fe';
-          ctx.lineWidth = 2;
-          roundRectPath(ctx, b.x - b.r * 1.9, b.y - b.r * 0.5, b.r * 3.8, b.r, b.r * 0.4);
-          ctx.fill(); ctx.stroke();
-        } else if (b.kind === 'spike') {
-          ctx.fillStyle = '#fff';
-          ctx.beginPath();
-          if (b.vy !== 0) {                      // たて
-            const d = b.vy > 0 ? 1 : -1;
-            ctx.moveTo(b.x, b.y + b.r * 1.5 * d);
-            ctx.lineTo(b.x - b.r * 0.7, b.y - b.r * d);
-            ctx.lineTo(b.x + b.r * 0.7, b.y - b.r * d);
-          } else {                                // よこ
-            const d = b.vx > 0 ? 1 : -1;
-            ctx.moveTo(b.x + b.r * 1.5 * d, b.y);
-            ctx.lineTo(b.x - b.r * d, b.y - b.r * 0.7);
-            ctx.lineTo(b.x - b.r * d, b.y + b.r * 0.7);
-          }
-          ctx.closePath(); ctx.fill();
-        } else {
-          ctx.fillStyle = '#e0e0e0'; ctx.strokeStyle = '#9e9e9e'; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-          /* けだま らしい とげ */
-          ctx.strokeStyle = '#bdbdbd';
-          for (let i = 0; i < 6; i++) {
-            const a = DG.t * 2 + i * Math.PI / 3;
-            ctx.beginPath();
-            ctx.moveTo(b.x + Math.cos(a) * b.r, b.y + Math.sin(a) * b.r);
-            ctx.lineTo(b.x + Math.cos(a) * b.r * 1.6, b.y + Math.sin(a) * b.r * 1.6);
-            ctx.stroke();
-          }
-        }
-      }
+      /* たま（わくの なか。こい いろ）*/
+      for (const b of DG.bullets) drawDuelBullet(ctx, b);
 
       /* ★あおい たましいの ターンは ゆかを ひからせる */
       if (DG.grav) {
@@ -6362,6 +6348,50 @@
     if (DG.flash > 0) {
       ctx.fillStyle = 'rgba(255,60,60,' + (DG.flash * 1.6).toFixed(2) + ')';
       ctx.fillRect(0, 0, w, h);
+    }
+  }
+
+  /* たま 1つぶんの え（わくの なか・そと の どちらでも つかいます）*/
+  function drawDuelBullet(ctx, b) {
+    if (b.rect) {                            /* ★ほね（ジャンプで こえる）*/
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = '#bdbdbd'; ctx.lineWidth = 2;
+      roundRectPath(ctx, b.x - b.w / 2, b.y, b.w, b.h, b.w * 0.35);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff';
+      for (const ey of [b.y, b.y + b.h]) {
+        ctx.beginPath(); ctx.arc(b.x - b.w * 0.42, ey, b.w * 0.44, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(b.x + b.w * 0.42, ey, b.w * 0.44, 0, Math.PI * 2); ctx.fill();
+      }
+    } else if (b.blue) {
+      ctx.fillStyle = '#4fc3f7'; ctx.strokeStyle = '#e1f5fe'; ctx.lineWidth = 2;
+      roundRectPath(ctx, b.x - b.r * 1.9, b.y - b.r * 0.5, b.r * 3.8, b.r, b.r * 0.4);
+      ctx.fill(); ctx.stroke();
+    } else if (b.kind === 'spike') {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      if (b.vy !== 0) {                      // たて
+        const d = b.vy > 0 ? 1 : -1;
+        ctx.moveTo(b.x, b.y + b.r * 1.5 * d);
+        ctx.lineTo(b.x - b.r * 0.7, b.y - b.r * d);
+        ctx.lineTo(b.x + b.r * 0.7, b.y - b.r * d);
+      } else {                               // よこ
+        const d = b.vx > 0 ? 1 : -1;
+        ctx.moveTo(b.x + b.r * 1.5 * d, b.y);
+        ctx.lineTo(b.x - b.r * d, b.y - b.r * 0.7);
+        ctx.lineTo(b.x - b.r * d, b.y + b.r * 0.7);
+      }
+      ctx.closePath(); ctx.fill();
+    } else {
+      ctx.fillStyle = '#e0e0e0'; ctx.strokeStyle = '#9e9e9e'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#bdbdbd';
+      for (let i = 0; i < 6; i++) {
+        const a = DG.t * 2 + i * Math.PI / 3;
+        ctx.beginPath();
+        ctx.moveTo(b.x + Math.cos(a) * b.r, b.y + Math.sin(a) * b.r);
+        ctx.lineTo(b.x + Math.cos(a) * b.r * 1.6, b.y + Math.sin(a) * b.r * 1.6);
+        ctx.stroke();
+      }
     }
   }
 
