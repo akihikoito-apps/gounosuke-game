@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.42';
+  const GAME_VERSION = '6.43';
 
 
   /* =================================================
@@ -2016,6 +2016,32 @@
     if (!towerAllCleared(s)) return null;
     if (!Array.isArray(s.owned)) s.owned = START_CHARS.slice();
     if (s.owned.indexOf(id) >= 0) return null;               // もう もらって いる
+    s.owned.push(id);
+    if (typeof s.levels[id] !== 'number') s.levels[id] = 1;
+    if (typeof s.plus[id]   !== 'number') s.plus[id]   = 0;
+    storeSave();
+    return id;
+  }
+
+  /* ★しょうの ごほうびキャラ
+       CHAPTERS に rewardChar を かいて おくと、その しょうの コースを
+       ぜんぶ クリアした とき、その キャラが なかまに なります。
+       （とくせつ「地底の国」ぜんクリアで サンズ）                    */
+  function giveChapterReward(stageNo) {
+    const s = slot();
+    if (!s) return null;
+    const st = STAGES.find(x => x.no === stageNo);
+    if (!st) return null;
+    const info = chapterInfo(st.chapter);
+    const id = info && info.rewardChar;
+    if (!id || !UNITS[id]) return null;
+    if (!Array.isArray(s.owned)) s.owned = START_CHARS.slice();
+    if (s.owned.indexOf(id) >= 0) return null;          // もう もって いる
+    const list = coursesOf(st.chapter);
+    if (!list.length || !list.every(c => s.cleared[c.no])) return null;
+    /* ★コースが まだ ぜんぶ できて いない しょうでは わたさない
+       （rewardNeed に よていの コースすうを かいて おく）*/
+    if (info.rewardNeed && list.length < info.rewardNeed) return null;
     s.owned.push(id);
     if (typeof s.levels[id] !== 'number') s.levels[id] = 1;
     if (typeof s.plus[id]   !== 'number') s.plus[id]   = 0;
@@ -6856,6 +6882,13 @@
       if (coins) {
         $('#result-sub').textContent +=
           '　／　★' + (currentTower ? currentTower.name : '') + ' せいは！　Gコイン +' + coins;
+      }
+      /* ★しょうを ぜんぶ クリアした ごほうびキャラ（地底の国 → サンズ）*/
+      const chGot = giveChapterReward(Game.stage.no);
+      if (chGot) {
+        const info = chapterInfo(Game.stage.chapter);
+        $('#result-sub').textContent =
+          '★' + (info.name || '') + ' せいは！★　「' + UNITS[chGot].name + '」が なかまに なった！';
       }
       const got = giveTowerReward();          // ★とくべつステージを ぜんぶ クリアした ごほうび
       if (got) {
