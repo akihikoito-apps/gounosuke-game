@@ -2905,6 +2905,190 @@ const ENEMIES = {
     isBoss: true,
   },
   /* ==========================================================================
+     ★ 地底の国 4〜7ステージの ざこ
+     ========================================================================== */
+
+  /* --- ヴァルキン（4ステージの ざこ）---
+       ちいさな かざん。わるぎは ないのに ようがんが あふれて
+       まわりを やいて しまう。うごきは とても おそい。               */
+  vulkin: {
+    id: 'vulkin', name: 'ヴァルキン',
+    rarity: 'R',
+    attr: 'fire',
+    hp: 1400,   atk: 210,  range: 88,   speed: 14,
+    attackInterval: 2.0,   attackWindup: 0.40,
+    kbCount: 4, scale: 1.05,
+    attackType: 'area',  areaRadius: 54,  projectile: null,
+    burn: { chance: 0.40, duration: 3.0, dpsRate: 0.16 },
+    money: 200,
+  },
+
+  /* --- マッフェット（4ステージの ざこ）---
+       むらさきの クモの おじょうさま。めが 5つ、うでが 6ぽん。
+       ★まえの ほうに クモの巣を はって、みかたを どんそくに します。
+         じぶんは よわいので、ほうって おくと じわじわ きいて きます。 */
+  muffet: {
+    id: 'muffet', name: 'マッフェット',
+    rarity: 'GR',
+    attr: 'magic',
+    hp: 1900,   atk: 250,  range: 158,  speed: 28,
+    attackInterval: 2.1,   attackWindup: 0.42,
+    kbCount: 4, scale: 1.05,
+    attackType: 'area',  areaRadius: 66,  projectile: 'web',
+    web: { interval: 9, ahead: 320, radius: 150, slowRate: 0.55, duration: 8 },
+    money: 260,
+  },
+
+  /* --- おうこくけいびたい01（5・6ステージの ざこ）---
+       うさぎの きし。おおきな けんを ふりまわす。よろいが かたい。   */
+  guard01: {
+    id: 'guard01', name: 'けいびたい01',
+    rarity: 'GR',
+    attr: 'metal',
+    hp: 2600,   atk: 330,  range: 118,  speed: 22,
+    attackInterval: 2.0,   attackWindup: 0.44,
+    kbCount: 6, scale: 1.12,
+    attackType: 'single', projectile: null,
+    resist: { attrs: ['fire'], mult: 0.55 },
+    money: 285,
+  },
+
+  /* --- おうこくけいびたい02（5・6ステージの ざこ）---
+       ねこの きし。01より ちいさくて はやい。おのを ふる。
+       ふたりは ないしょで なかよし（あたまの うえに ハートが でます）。*/
+  guard02: {
+    id: 'guard02', name: 'けいびたい02',
+    rarity: 'GR',
+    attr: 'metal',
+    hp: 2000,   atk: 290,  range: 108,  speed: 40,
+    attackInterval: 1.5,   attackWindup: 0.30,
+    kbCount: 5, scale: 1.08,
+    attackType: 'single', projectile: null,
+    money: 265,
+  },
+
+  /* --- にんげんの たましい（7ステージの ざこ）---
+       フラウィーが あつめた 6つの たましい。
+       からだが ない ので ★パワーの こうげきが すりぬけます★。
+       ふわふわ うかんで、とおくから ちいさな たまを とばして くる。  */
+  humansoul: {
+    id: 'humansoul', name: 'にんげんの たましい',
+    rarity: 'GR',
+    attr: 'ghost',
+    hp: 1500,   atk: 270,  range: 150,  speed: 34,
+    attackInterval: 1.7,   attackWindup: 0.32,
+    kbCount: 3, scale: 1.1,
+    attackType: 'area',  areaRadius: 58,  projectile: 'drop',
+    flying: true, flyOver: false,
+    nullify: { attrs: ['power'] },
+    money: 300,
+  },
+
+  /* ==========================================================================
+     ★ 地底の国の ボスたち（4〜7ステージ）
+     ========================================================================== */
+
+  /* --- メタトンEX（4ステージ ボス）---
+       ちていの テレビスター。ロボットの ボディに ながい あし。
+       ★スターなので こうげきが よく あたらない（dodge）。
+       ★ハートの だんまくを 3れんぞくで とばす（multiHit）。
+       ★マッフェットを ステージに よびこむ（escort）。                */
+  metaton_ex: {
+    id: 'metaton_ex', name: 'メタトンEX',
+    rarity: 'LR',
+    attr: 'metal',
+    hp: 24000,  atk: 560,  range: 172,  speed: 30,
+    attackInterval: 1.8,   attackWindup: 0.38,
+    kbCount: 99, scale: 1.5,
+    /* ★はんいは せまめ。16・17しょうで なんども でた とおり、
+         はんいが ひろい ボスは つよさを さげても てが つけられない。*/
+    attackType: 'area',  areaRadius: 70,  projectile: 'drop',
+    multiHit: { count: 3, delay: 0.20 },   // ハートの だんまく
+    dodge: 0.28,                           // ★スターは あたらない
+    kbImmune: true, stunImmune: true,
+    escort: { id: ['muffet', 'vulkin'], count: 1, interval: 12, first: 8 },
+    money: 1900,
+    isBoss: true,
+  },
+
+  /* --- サンズ（5ステージ ボス）---
+       「さばきの ろうか」で まって いる ガイコツ。
+
+       ★かみ みたいに よわい（たいりょくは ボスの 1/4 いか）。
+       ★でも 80% かわす。まともに あたらない。
+       ★あてられた ダメージは KARMA で じわじわ ふえる（burn）。
+       ★はんぶん けずると ひだりめが あおく ひかって ほんきに なる。
+       ★ガスターブラスター（たましい）を よびだす。
+
+       「たいりょくを けずる」のでは なく「なんども あてる」ことを
+       もとめる ボス です。かいひを むしする こうげきは ない ので、
+       かずで せめる しか ありません。                                 */
+  sans_boss: {
+    id: 'sans_boss', name: 'サンズ',
+    rarity: 'LR',
+    attr: 'ghost',
+    hp: 7200,                              // ★かみ。ボスとしては ありえない ひくさ
+    atk: 700,   range: 194,  speed: 34,
+    attackInterval: 1.5,   attackWindup: 0.44,
+    kbCount: 99, scale: 1.4,
+    attackType: 'area',  areaRadius: 74,  projectile: 'beam',
+    multiHit: { count: 2, delay: 0.22 },   // ほねを 2ほん
+    dodge: 0.72,                           // ★7わり かわす
+    burn: { chance: 1.0, duration: 6.0, dpsRate: 0.28 },  // ★KARMA
+    enrage: { below: 0.5, atkMult: 1.35, intervalMult: 0.70 },
+    kbImmune: true, stunImmune: true, slowImmune: true,
+    escort: { id: ['humansoul'], count: 1, interval: 14, first: 10 },
+    money: 2000,
+    isBoss: true,
+  },
+
+  /* --- アズゴア（6ステージ ボス）---
+       ちていの おうさま。やさしい かおを した おおきな やぎ。
+       ★ほのおの やりで ひろく なぎはらう。
+       ★ほのおの おうさま なので ★ほのおは まったく きかない★。
+       ★みずの こうげきも よろいで はんぶん いかに なる。
+       ★どんな じゃまも きかない（ふきとばし・スタン・どんそく ぜんぶ）。*/
+  asgore: {
+    id: 'asgore', name: 'アズゴア',
+    rarity: 'LR',
+    attr: 'fire',
+    hp: 34000,  atk: 760,  range: 186,  speed: 22,
+    attackInterval: 2.3,   attackWindup: 0.52,
+    kbCount: 99, scale: 1.5,
+    attackType: 'area',  areaRadius: 80,  projectile: 'fireball',
+    burn: { chance: 0.55, duration: 4.0, dpsRate: 0.22 },
+    nullify: { attrs: ['fire'] },                        // ★ほのおは きかない
+    resist: { attrs: ['water'], mult: 0.50 },            // ★みずも はんぶん
+    kbImmune: true, stunImmune: true, slowImmune: true,
+    escort: { id: ['guard01', 'guard02'], count: 1, interval: 13, first: 9 },
+    money: 2200,
+    isBoss: true,
+  },
+
+  /* --- フラウィー（7ステージ ボス。★2だんかい★）---
+       まえはん：きんいろの はな。「ペレット」を とばして くる。
+       ★たいりょくが はんぶんに なると「オメガフラウィー」に なって、
+         こうげきが 2ばい・かんかくが はんぶん・はんいも ひろく なる。
+         えも きかいと つるの かたまりに かわります（s.enraged）。
+       ★6つの にんげんの たましいを よびだして たたかわせる。         */
+  flowey: {
+    id: 'flowey', name: 'フラウィー',
+    rarity: 'LR',
+    attr: ['grass', 'ghost'],
+    hp: 38000,  atk: 700,  range: 190,  speed: 18,
+    attackInterval: 2.2,   attackWindup: 0.46,
+    kbCount: 99, scale: 1.45,
+    attackType: 'area',  areaRadius: 78,  projectile: 'needle',
+    multiHit: { count: 2, delay: 0.26 },                 // ペレット 2はつ
+    enrage: { below: 0.5, atkMult: 1.8, intervalMult: 0.55 },  // ★オメガ
+    kbImmune: true, stunImmune: true, slowImmune: true,
+    resist: { attrs: ['grass', 'metal'], mult: 0.55 },
+    escort: { id: ['humansoul'], count: 1, interval: 13, first: 8 },
+    money: 2600,
+    isBoss: true,
+  },
+
+  /* ==========================================================================
      ★ 17しょう「埃にまみれた都市」の ざこキャラ 4しゅるい
      ========================================================================== */
 
@@ -3242,6 +3426,38 @@ const BACKGROUNDS = {
     sky: ['#04121f', '#0b2740', '#134766'],
     hillFar: '#16344e', hillNear: '#0b2033',
     ground: '#10293c', groundTop: '#1c4460',
+    deco: 'star',
+  },
+
+  /* 4ステージ：ホットランド ── あつい ようがんの こうじょう */
+  ut_hot: {
+    sky: ['#2b0a10', '#6b1512', '#b83a16'],
+    hillFar: '#8a2a17', hillNear: '#4d140e',
+    ground: '#3a1210', groundTop: '#6d2213',
+    deco: 'ember',
+  },
+
+  /* 5ステージ：さばきの ろうか ── きんいろの ひかりが さす ながい ろうか */
+  ut_hall: {
+    sky: ['#3a2a10', '#7a5a1c', '#d2a63c'],
+    hillFar: '#a07f2d', hillNear: '#6a501a',
+    ground: '#5a4517', groundTop: '#9b7a2c',
+    deco: 'sun',
+  },
+
+  /* 6ステージ：おうの へや ── きんいろの はなが いちめんに さいて いる */
+  ut_throne: {
+    sky: ['#1c1226', '#3a2450', '#6b4a2a'],
+    hillFar: '#7d6a2e', hillNear: '#3f3418',
+    ground: '#4b3f1c', groundTop: '#8f7c2e',
+    deco: 'leaf',
+  },
+
+  /* 7ステージ：なにも ない ばしょ ── まっくらな そこ。ほしだけが ある */
+  ut_void: {
+    sky: ['#000000', '#08060f', '#140f22'],
+    hillFar: '#191327', hillNear: '#0a0713',
+    ground: '#0d0a16', groundTop: '#1b1430',
     deco: 'star',
   },
 
@@ -6776,6 +6992,80 @@ const UNDERGROUND = {
         { at: 68, id: 'maddummy', count: 1, repeat: 36 },
       ],
     },
+    {
+      no: 504, floor: 4, chapter: 0, course: 4,
+      name: 'ねつの まちの スター',
+      desc: '★とくせつ★ テレビスター「メタトンEX」。よく かわすうえに ハートの だんまくを 3れんぞく。',
+      bg: 'ut_hot',
+      castleHp: 3200,
+      /* ★メタトンEXは dodge 0.35＋3れんぞく なので、つよさの めもりは ひくめ */
+      power: 1.70,
+      drops: ['iron', 'alumi', 'cloth'],
+      reward: { coins: 15, exp: 18000 },
+      waves: [
+        { at: 3,  id: 'vulkin',     count: 2, gap: 2.0 },
+        { at: 17, id: 'muffet',     count: 1 },
+        { at: 29, id: 'vulkin',     count: 3, gap: 1.8 },
+        { at: 40, id: 'metaton_ex', count: 1, hold: 0.60 },
+        { at: 54, id: 'vulkin',     count: 3, gap: 1.8, repeat: 22 },
+        { at: 70, id: 'muffet',     count: 1, repeat: 32 },
+      ],
+    },
+    {
+      no: 505, floor: 5, chapter: 0, course: 5,
+      name: 'さばきの ろうか',
+      desc: '★とくせつ★ ガイコツの「サンズ」。たいりょくは かみ。でも ★8わり かわす★。あてつづける しかない。',
+      bg: 'ut_hall',
+      castleHp: 3300,
+      /* ★サンズ本人は たいりょく 7200 しか ない。そのぶん ざこが かたい */
+      power: 1.25,
+      drops: ['stone', 'iron', 'glue'],
+      reward: { coins: 16, exp: 20000 },
+      waves: [
+        { at: 3,  id: 'guard02',   count: 2, gap: 1.8 },
+        { at: 16, id: 'guard01',   count: 1 },
+        { at: 28, id: 'guard02',   count: 2, gap: 1.6 },
+        { at: 38, id: 'sans_boss', count: 1, hold: 0.62 },
+        { at: 52, id: 'guard01',   count: 2, gap: 2.2, repeat: 24 },
+        { at: 68, id: 'guard02',   count: 3, gap: 1.6, repeat: 22 },
+      ],
+    },
+    {
+      no: 506, floor: 6, chapter: 0, course: 6,
+      name: 'おうさまの へや',
+      desc: '★とくせつ★ ちていの おうさま「アズゴア」。ほのおの やりで なぎはらう。★ほのおは きかない★。',
+      bg: 'ut_throne',
+      castleHp: 3500,
+      power: 2.15,
+      drops: ['iron', 'alumi', 'glue'],
+      reward: { coins: 18, exp: 23000 },
+      waves: [
+        { at: 3,  id: 'guard01', count: 2, gap: 2.2 },
+        { at: 17, id: 'vulkin',  count: 2, gap: 1.8 },
+        { at: 30, id: 'guard02', count: 3, gap: 1.6 },
+        { at: 42, id: 'asgore',  count: 1, hold: 0.58 },
+        { at: 56, id: 'guard01', count: 2, gap: 2.2, repeat: 26 },
+        { at: 72, id: 'vulkin',  count: 3, gap: 1.8, repeat: 24 },
+      ],
+    },
+    {
+      no: 507, floor: 7, chapter: 0, course: 7,
+      name: 'なにも ない ばしょ',
+      desc: '★さいしゅう★ きんいろの はな「フラウィー」。はんぶん けずると ★オメガフラウィー★ に なる。',
+      bg: 'ut_void',
+      castleHp: 3800,
+      power: 1.25,
+      drops: ['glue', 'alumi', 'cloth'],
+      reward: { coins: 22, exp: 30000 },
+      waves: [
+        { at: 3,  id: 'humansoul', count: 2, gap: 2.4 },
+        { at: 18, id: 'guard01',   count: 1 },
+        { at: 30, id: 'humansoul', count: 2, gap: 2.0 },
+        { at: 42, id: 'flowey',    count: 1, hold: 0.56 },
+        { at: 58, id: 'humansoul', count: 2, gap: 2.2, repeat: 24 },
+        { at: 74, id: 'guard02',   count: 2, gap: 1.8, repeat: 28 },
+      ],
+    },
 
   ],
 };
@@ -6885,6 +7175,18 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.46', date: '2026-09-21',
+    title: '★地底の国 かんせい★ 4〜7ステージ ついか ＝ サンズが もらえます',
+    items: [
+      '4ステージ「ねつの まちの スター」── テレビスターの ★メタトンEX★。ハートの だんまくを 3れんぞくで とばし、★こうげきを よく かわします★。ざこは ヴァルキン（ちいさな かざん）と マッフェット（★クモの巣を はって どんそくに する★）。',
+      '5ステージ「さばきの ろうか」── ガイコツの ★サンズ★。★たいりょくは かみ（ほかの ボスの 1/5）★ なのに ★7わり かわす★ ので、つよい 1げきでは たおせません。★かずで あてつづける★ しか ありません。あてると KARMA が かならず つきます。はんぶん けずると ひだりめが あおく ひかります。',
+      '6ステージ「おうさまの へや」── ちていの おうさま ★アズゴア★。ほのおの やりで ひろく なぎはらう。★ほのおは まったく きかず★、みずも はんぶんに されます。おうこくけいびたい01・02 を よんで きます。',
+      '7ステージ「なにも ない ばしょ」── きんいろの はな ★フラウィー★。★たいりょく はんぶんで「オメガフラウィー」★ に かわって、きかいと つるの かたまりに なります。こうげきは 1.8ばい、かんかくは ほぼ はんぶん。にんげんの たましいも よんで きます。',
+      '★7ステージ ぜんぶ クリアで サンズが なかまに なります。★ ずっと おあずけ だった ごほうび が やっと もらえます。',
+      'けいびたい02の あたまの うえには、ときどき ちいさな ハートが でます（ふたりは ないしょで なかよし）。',
+    ],
+  },
   {
     ver: '6.45', date: '2026-09-21',
     title: 'サンズを ★ずんぐりむっくり★ に かきなおしました',
