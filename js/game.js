@@ -1553,6 +1553,42 @@ const Game = {
         ctx.ellipse(dx, dy, dr * 2.1, dr * 0.7, 0, 0, Math.PI * 2);
         ctx.fill();
       }
+    } else if (kind === 'leaf') {
+      /* ★あかい はっぱが ひらひら おちる（いせき）*/
+      const gy = V.groundY;
+      for (let i = 0; i < 9; i++) {
+        const sp = 0.030 + (i % 4) * 0.010;
+        const lx = ((i * 0.137 + t * 0.012) % 1.2 - 0.1) * V.w + Math.sin(t * 1.4 + i) * gy * 0.05;
+        const ly = ((i * 0.213 + t * sp) % 1.15) * gy;
+        const ls = gy * 0.020;
+        ctx.save();
+        ctx.translate(lx, ly); ctx.rotate(t * 1.6 + i);
+        ctx.fillStyle = ['#c0392b', '#a83226', '#d4553f'][i % 3];
+        ctx.beginPath();
+        ctx.moveTo(0, -ls);
+        ctx.quadraticCurveTo(ls, 0, 0, ls);
+        ctx.quadraticCurveTo(-ls, 0, 0, -ls);
+        ctx.fill();
+        ctx.restore();
+      }
+    } else if (kind === 'snow') {
+      /* ★ゆきが ふる（スノーフル）*/
+      const gy = V.groundY;
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      for (let i = 0; i < 26; i++) {
+        const sp = 0.020 + (i % 5) * 0.006;
+        const sx = ((i * 0.0731 + t * 0.006) % 1.1 - 0.05) * V.w + Math.sin(t * 1.1 + i) * gy * 0.04;
+        const sy = ((i * 0.117 + t * sp) % 1.12) * gy;
+        const r = gy * (0.006 + (i % 3) * 0.003);
+        ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2); ctx.fill();
+      }
+      /* つもった ゆき */
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.beginPath();
+      ctx.moveTo(0, gy);
+      ctx.quadraticCurveTo(V.w * 0.5, gy - gy * 0.035, V.w, gy);
+      ctx.lineTo(V.w, gy + 10); ctx.lineTo(0, gy + 10);
+      ctx.closePath(); ctx.fill();
     } else if (kind === 'sun') {
       const cx = V.w * 0.5, cy = V.groundY * 0.82, r = V.groundY * 0.20;
       const g = ctx.createRadialGradient(cx, cy, r * 0.4, cx, cy, r * 2.4);

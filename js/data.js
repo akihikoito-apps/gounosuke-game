@@ -2693,6 +2693,161 @@ const ENEMIES = {
   },
 
 
+
+  /* ==========================================================================
+     ★ とくせつ「地底の国」（だい18しょう）の キャラたち
+        ちていの くにの じゅうにんたち。
+        ★1〜3面ぶん（トリエル／パピルス／アンダイン）★
+     ========================================================================== */
+
+  /* --- フロギット（1面のざこ）---
+       いせきの カエル。よわいが かずで くる。                          */
+  froggit: {
+    id: 'froggit', name: 'フロギット',
+    rarity: 'R',
+    attr: 'none',
+    hp: 950,    atk: 175,  range: 92,   speed: 24,
+    attackInterval: 1.6,   attackWindup: 0.30,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    money: 145,
+  },
+
+  /* --- ナプスタブルーク（1面のざこ）---
+       かなしそうな ゆうれい。ふわふわ うかんで いる。
+       ★パワーの こうげきは からだを すりぬけて しまう（nullify）。     */
+  napstablook: {
+    id: 'napstablook', name: 'ナプスタブルーク',
+    rarity: 'R',
+    attr: 'ghost',                        // ゆうれい
+    hp: 760,    atk: 165,  range: 128,  speed: 30,
+    attackInterval: 1.8,   attackWindup: 0.35,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: 'drop',
+    flying: true, flyOver: false,         // うかんで いる（とびこえは しない）
+    nullify: { attrs: ['power'] },        // ★パワーは すりぬける
+    money: 170,
+  },
+
+  /* --- レッサードッグ（2面のざこ）---
+       よろいの いぬ。くびが どんどん のびる。かたくて しぶとい。       */
+  lesserdog: {
+    id: 'lesserdog', name: 'レッサードッグ',
+    rarity: 'GR',
+    attr: 'none',
+    hp: 2400,   atk: 285,  range: 112,  speed: 20,
+    attackInterval: 2.0,   attackWindup: 0.42,
+    kbCount: 6, scale: 1.1,               // よろいが かたい ＝ ふきとびにくい
+    attackType: 'single', projectile: null,
+    money: 215,
+  },
+
+  /* --- スノードレイク（2面のざこ）---
+       あたまに ゆきを のせた とり。はやく とんで くる。               */
+  snowdrake: {
+    id: 'snowdrake', name: 'スノードレイク',
+    rarity: 'R',
+    attr: 'water',                        // みず（ゆき）
+    hp: 820,    atk: 205,  range: 100,  speed: 46,
+    attackInterval: 1.3,   attackWindup: 0.26,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    flying: true, flyOver: false,
+    money: 155,
+  },
+
+  /* --- アーロン（3面のざこ）---
+       サングラスの タツノオトシゴ。ちからこぶを つくりながら
+       すごい はやさで およいで くる。                                 */
+  aaron: {
+    id: 'aaron', name: 'アーロン',
+    rarity: 'R',
+    attr: 'power',                        // パワー
+    hp: 1350,   atk: 240,  range: 94,   speed: 56,
+    attackInterval: 1.2,   attackWindup: 0.22,
+    kbCount: 3, scale: 1.0,
+    money: 175,
+    attackType: 'single', projectile: null,
+  },
+
+  /* --- マッドダミー（3面のざこ）---
+       おこった わたの にんぎょう。ちいさな にんぎょうを なげて くる。  */
+  maddummy: {
+    id: 'maddummy', name: 'マッドダミー',
+    rarity: 'GR',
+    attr: 'none',
+    hp: 2000,   atk: 265,  range: 150,  speed: 14,
+    attackInterval: 2.2,   attackWindup: 0.45,
+    kbCount: 4, scale: 1.1,
+    attackType: 'area',  areaRadius: 62,  projectile: 'wool',
+    money: 225,
+  },
+
+  /* ==========================================================================
+     ★ 地底の国の ボスたち（1〜3面）
+     ========================================================================== */
+
+  /* --- トリエル（1面ボス）---
+       いせきに すむ やぎの おかあさん。ほのおの まほうを つかう。
+       ほんきでは ない ので、こうげきの かんかくは ながめ。            */
+  toriel: {
+    id: 'toriel', name: 'トリエル',
+    rarity: 'LR',
+    attr: 'fire',                         // ほのお
+    hp: 21000,  atk: 520,  range: 168,  speed: 20,
+    attackInterval: 2.4,   attackWindup: 0.50,
+    kbCount: 99, scale: 1.45,
+    /* ★はんいは せまめ。ひろいと まえせんが まとめて きえて、
+         1面なのに どうしようも なく なります（118 で かちりつ 40%）。*/
+    attackType: 'area',  areaRadius: 76,   projectile: 'fireball',
+    burn: { chance: 0.45, duration: 3.0, dpsRate: 0.18 },   // やけど
+    kbImmune: true,
+    money: 1600,
+    isBoss: true,
+  },
+
+  /* --- パピルス（2面ボス）---
+       せの たかい ガイコツ。ほねを 2かい つづけて なげる。
+       ★あおい ほねで あいての うごきを とめる（stun）。
+       ★いぬたちを よんで くる（escort）。                             */
+  papyrus: {
+    id: 'papyrus', name: 'パピルス',
+    rarity: 'LR',
+    attr: 'none',                         // むぞくせい
+    hp: 25000,  atk: 500,  range: 178,  speed: 22,
+    attackInterval: 2.0,   attackWindup: 0.42,
+    kbCount: 99, scale: 1.5,
+    /* ★ほねは「かべ」に なって とんで くる ので はんい こうげき。
+         たんたい こうげきの ボスは、つよさを いくら あげても
+         かたまった みかたには きかない（power 6.8 でも かちりつ 93%）。*/
+    attackType: 'area',  areaRadius: 86,  projectile: 'needle',
+    multiHit: { count: 2, delay: 0.24 },  // ほねを 2ほん
+    stun: { chance: 0.45, duration: 1.2 },// ★あおい ほね
+    kbImmune: true, slowImmune: true,
+    escort: { id: ['lesserdog', 'snowdrake'], count: 1, interval: 13, first: 8 },
+    money: 1700,
+    isBoss: true,
+  },
+
+  /* --- アンダイン（3面ボス）---
+       あおい さかなの せんし。やりを なげる。
+       ★よろいが かたく、パワーと けものの こうげきを 45%に おさえる。
+       ★たいりょくが はんぶんに なると「アンダイン・ジ・アンダイング」に
+         なって、こうげきが 1.5ばい・かんかくが 0.65ばい に なる。      */
+  undyne: {
+    id: 'undyne', name: 'アンダイン',
+    rarity: 'LR',
+    attr: 'water',                        // みず
+    hp: 27000,  atk: 600,  range: 196,  speed: 26,
+    attackInterval: 1.9,   attackWindup: 0.40,
+    kbCount: 99, scale: 1.5,
+    attackType: 'single', projectile: 'needle',
+    resist: { attrs: ['power', 'beast'], mult: 0.45 },      // ★よろい
+    enrage: { below: 0.5, atkMult: 1.5, intervalMult: 0.65 },// ★アンダイング
+    kbImmune: true, stunImmune: true,
+    money: 1800,
+    isBoss: true,
+  },
   /* ==========================================================================
      ★ 17しょう「埃にまみれた都市」の ざこキャラ 4しゅるい
      ========================================================================== */
@@ -3006,6 +3161,32 @@ const BACKGROUNDS = {
     hillFar: '#6f695c', hillNear: '#4e4a42',
     ground: '#5f584c', groundTop: '#847b6c',
     deco: 'dust',
+  },
+
+  /* ===== とくせつ「地底の国」（だい18しょう）の はいけい ===== */
+
+  /* 1面：いせき ── むらさきの いしの まち。あかい はっぱが ちる */
+  ut_ruins: {
+    sky: ['#2a1a33', '#46284f', '#6b3b63'],
+    hillFar: '#5a3560', hillNear: '#3d2342',
+    ground: '#4a2c48', groundTop: '#6d4264',
+    deco: 'leaf',
+  },
+
+  /* 2面：スノーフル ── ゆきの まち。ゆきが ふる */
+  ut_snow: {
+    sky: ['#1d2b3f', '#3b567a', '#8fb0cc'],
+    hillFar: '#c6d7e6', hillNear: '#9db6cd',
+    ground: '#e6eef6', groundTop: '#ffffff',
+    deco: 'snow',
+  },
+
+  /* 3面：ウォーターフェル ── くらい あおの どうくつ。いしが ひかる */
+  ut_water: {
+    sky: ['#04121f', '#0b2740', '#134766'],
+    hillFar: '#16344e', hillNear: '#0b2033',
+    ground: '#10293c', groundTop: '#1c4460',
+    deco: 'star',
   },
 
   /* ロボこうじょう ── 小惑星ぷりぷりの ボスステージ（3面）。しゃしんの はいけい */
@@ -3592,6 +3773,74 @@ const STAGES = [
       { at: 56, id: 'haneneko',    count: 2, gap: 1.8, repeat: 28 },
       { at: 70, id: 'chirimaimai', count: 1, repeat: 46 },
       { at: 86, id: 'susube',      count: 2, gap: 2.6, repeat: 30 },
+    ],
+  },
+
+
+  /* ==========================================================================
+     18しょう ★とくせつ「地底の国」★（ぜんぶで 7コース・1〜3面を さきに）
+
+     たつまきちずの みぎうえに ある、ちかの くにへの いりぐち。
+     ★さいしょから はいれますが、つよさは ほんぺんより ずっと うえです。
+       「つよい ものだけ きなさい」の やりこみ ステージ。
+     ★ここだけ たつまきほうは ありません（ちかの どうくつ なので）。
+     ========================================================================== */
+  {
+    no: 142, chapter: 18, course: 1,
+    name: 'いせきの おかあさん',
+    desc: '★とくせつ★ やぎの おかあさん「トリエル」。ほのおの まほうで やけどを させて くる。',
+    bg: 'ut_ruins',
+    castleHp: 3000,
+    /* ★とくせつ なので ほんぺん（1.5〜2.8）より ずっと たかい */
+    power: 4.2,
+    drops: ['wood', 'cloth', 'glue'],
+    reward: { coins: 12, exp: 15000 },
+    waves: [
+      { at: 3,  id: 'froggit',     count: 2, gap: 2.2 },
+      { at: 16, id: 'napstablook', count: 1 },
+      { at: 28, id: 'froggit',     count: 3, gap: 1.8 },
+      /* ★ボスは しろに たどりつく まえに でて きます */
+      { at: 40, id: 'toriel',      count: 1, hold: 0.60 },
+      { at: 52, id: 'froggit',     count: 3, gap: 1.8, repeat: 20 },
+      { at: 66, id: 'napstablook', count: 2, gap: 2.4, repeat: 26 },
+    ],
+  },
+  {
+    no: 143, chapter: 18, course: 2,
+    name: 'ゆきの まちの ほねやろう',
+    desc: '★とくせつ★ ガイコツの「パピルス」。あおい ほねで うごきを とめ、いぬたちを よんで くる。',
+    bg: 'ut_snow',
+    castleHp: 3200,
+    /* ★パピルスは はんい＋2れんぞく＋スタン なので、
+         つよさの めもりは ひくめ（2.8 で かちりつ 27% に なる）*/
+    power: 2.5,
+    drops: ['stone', 'iron', 'string'],
+    reward: { coins: 13, exp: 16000 },
+    waves: [
+      { at: 3,  id: 'snowdrake',  count: 2, gap: 1.8 },
+      { at: 16, id: 'lesserdog',  count: 1 },
+      { at: 28, id: 'snowdrake',  count: 3, gap: 1.6 },
+      { at: 40, id: 'papyrus',    count: 1, hold: 0.60 },
+      { at: 54, id: 'snowdrake',  count: 3, gap: 1.6, repeat: 22 },
+      { at: 70, id: 'lesserdog',  count: 1, repeat: 34 },
+    ],
+  },
+  {
+    no: 144, chapter: 18, course: 3,
+    name: 'たきの せんし',
+    desc: '★とくせつ★ さかなの せんし「アンダイン」。よろいが かたく、ピンチに なると さらに つよく なる。',
+    bg: 'ut_water',
+    castleHp: 3400,
+    power: 3.9,
+    drops: ['iron', 'alumi', 'glue'],
+    reward: { coins: 14, exp: 17000 },
+    waves: [
+      { at: 3,  id: 'aaron',    count: 2, gap: 1.8 },
+      { at: 16, id: 'maddummy', count: 1 },
+      { at: 28, id: 'aaron',    count: 3, gap: 1.5 },
+      { at: 38, id: 'undyne',   count: 1, hold: 0.62 },
+      { at: 52, id: 'aaron',    count: 3, gap: 1.5, repeat: 20 },
+      { at: 68, id: 'maddummy', count: 1, repeat: 36 },
     ],
   },
 
@@ -5999,6 +6248,8 @@ const CHAPTERS = {
   15:{ name: '虫に支配された町', short: 'むしのまち', x: 0.66, y: 0.38, icon: '🦟', world: 'storm' },
   16:{ name: '秩序が失われた村', short: 'むら', x: 0.88, y: 0.64, icon: '🏚️', world: 'storm' },
   17:{ name: '埃にまみれた都市', short: 'ほこりのまち', x: 0.22, y: 0.20, icon: '🏙️', world: 'storm' },
+  /* ★とくせつ。ちずの みぎうえ。さいしょから はいれますが つよいです */
+  18:{ name: '特設・地底の国', short: 'ちてい', x: 0.90, y: 0.16, icon: '🔺', world: 'storm', alwaysOpen: true },
 };
 
 
@@ -6558,6 +6809,18 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.42', date: '2026-09-21',
+    title: '★とくせつステージ「地底の国」（まずは 1〜3面）',
+    items: [
+      'たつまきちずの ★みぎうえ★ に、あたらしい とくせつステージが できました。ぜんぶで 7コースの よてい で、まずは 1〜3面 です。',
+      '★さいしょから はいれます★。ただし つよさは ほんぺんより ずっと うえ なので、そだてて から いく ばしょ です。',
+      '1面「いせきの おかあさん」── やぎの おかあさん ★トリエル★。ほのおの まほうで やけどを させて くる。ざこは フロギットと ナプスタブルーク（★パワーの こうげきが すりぬける★）。',
+      '2面「ゆきの まちの ほねやろう」── ガイコツの ★パピルス★。ほねの かべを 2れんぞくで なげ、★あおい ほねで うごきを とめる★。いぬたちを よんで くる。ざこは レッサードッグ（くびが のびる）と スノードレイク。',
+      '3面「たきの せんし」── さかなの せんし ★アンダイン★。よろいが かたくて ★パワーと けものの こうげきを 45%に おさえる★。★たいりょく はんぶんで「アンダイン・ジ・アンダイング」に なって もっと つよく なる★。ざこは アーロンと マッドダミー。',
+      'ここだけ たつまきほうは ありません（ちかの どうくつ なので）。そのぶん ボスが つよいです。',
+    ],
+  },
   {
     ver: '6.41', date: '2026-09-20',
     title: 'ケダマールの こうげきが「わくの そとから」ちかづいて くるように',

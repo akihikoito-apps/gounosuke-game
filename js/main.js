@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.41';
+  const GAME_VERSION = '6.42';
 
 
   /* =================================================
@@ -428,6 +428,9 @@
 
   /* まえの しょうを ぜんぶ クリアすると つぎの しょうが あそべる */
   function chapterOpen(ch) {
+    /* ★とくせつ ステージ（alwaysOpen）は、その ちずに はいれれば
+         さいしょから ちょうせんできます。ただし つよさは べつばら。 */
+    if (chapterInfo(ch).alwaysOpen) return true;
     /* うちゅうの さいしょの ほしは、せかいちずを ぜんぶ クリアしたら あそべる */
     const list = allChapters().filter(c => worldOf(c) === worldOf(ch));
     if (ch <= list[0]) {
