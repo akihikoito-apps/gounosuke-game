@@ -3833,72 +3833,6 @@ const STAGES = [
   },
 
 
-  /* ==========================================================================
-     18しょう ★とくせつ「地底の国」★（ぜんぶで 7コース・1〜3面を さきに）
-
-     たつまきちずの みぎうえに ある、ちかの くにへの いりぐち。
-     ★さいしょから はいれますが、つよさは ほんぺんより ずっと うえです。
-       「つよい ものだけ きなさい」の やりこみ ステージ。
-     ★ここだけ たつまきほうは ありません（ちかの どうくつ なので）。
-     ========================================================================== */
-  {
-    no: 142, chapter: 18, course: 1,
-    name: 'いせきの おかあさん',
-    desc: '★とくせつ★ やぎの おかあさん「トリエル」。ほのおの まほうで やけどを させて くる。',
-    bg: 'ut_ruins',
-    castleHp: 3000,
-    /* ★とくせつ なので ほんぺん（1.5〜2.8）より ずっと たかい */
-    power: 4.2,
-    drops: ['wood', 'cloth', 'glue'],
-    reward: { coins: 12, exp: 15000 },
-    waves: [
-      { at: 3,  id: 'froggit',     count: 2, gap: 2.2 },
-      { at: 16, id: 'napstablook', count: 1 },
-      { at: 28, id: 'froggit',     count: 3, gap: 1.8 },
-      /* ★ボスは しろに たどりつく まえに でて きます */
-      { at: 40, id: 'toriel',      count: 1, hold: 0.60 },
-      { at: 52, id: 'froggit',     count: 3, gap: 1.8, repeat: 20 },
-      { at: 66, id: 'napstablook', count: 2, gap: 2.4, repeat: 26 },
-    ],
-  },
-  {
-    no: 143, chapter: 18, course: 2,
-    name: 'ゆきの まちの ほねやろう',
-    desc: '★とくせつ★ ガイコツの「パピルス」。あおい ほねで うごきを とめ、いぬたちを よんで くる。',
-    bg: 'ut_snow',
-    castleHp: 3200,
-    /* ★パピルスは はんい＋2れんぞく＋スタン なので、
-         つよさの めもりは ひくめ（2.8 で かちりつ 27% に なる）*/
-    power: 2.5,
-    drops: ['stone', 'iron', 'string'],
-    reward: { coins: 13, exp: 16000 },
-    waves: [
-      { at: 3,  id: 'snowdrake',  count: 2, gap: 1.8 },
-      { at: 16, id: 'lesserdog',  count: 1 },
-      { at: 28, id: 'snowdrake',  count: 3, gap: 1.6 },
-      { at: 40, id: 'papyrus',    count: 1, hold: 0.60 },
-      { at: 54, id: 'snowdrake',  count: 3, gap: 1.6, repeat: 22 },
-      { at: 70, id: 'lesserdog',  count: 1, repeat: 34 },
-    ],
-  },
-  {
-    no: 144, chapter: 18, course: 3,
-    name: 'たきの せんし',
-    desc: '★とくせつ★ さかなの せんし「アンダイン」。よろいが かたく、ピンチに なると さらに つよく なる。',
-    bg: 'ut_water',
-    castleHp: 3400,
-    power: 3.9,
-    drops: ['iron', 'alumi', 'glue'],
-    reward: { coins: 14, exp: 17000 },
-    waves: [
-      { at: 3,  id: 'aaron',    count: 2, gap: 1.8 },
-      { at: 16, id: 'maddummy', count: 1 },
-      { at: 28, id: 'aaron',    count: 3, gap: 1.5 },
-      { at: 38, id: 'undyne',   count: 1, hold: 0.62 },
-      { at: 52, id: 'aaron',    count: 3, gap: 1.5, repeat: 20 },
-      { at: 68, id: 'maddummy', count: 1, repeat: 36 },
-    ],
-  },
 
   {
     no: 2,
@@ -6304,12 +6238,6 @@ const CHAPTERS = {
   15:{ name: '虫に支配された町', short: 'むしのまち', x: 0.66, y: 0.38, icon: '🦟', world: 'storm' },
   16:{ name: '秩序が失われた村', short: 'むら', x: 0.88, y: 0.64, icon: '🏚️', world: 'storm' },
   17:{ name: '埃にまみれた都市', short: 'ほこりのまち', x: 0.22, y: 0.20, icon: '🏙️', world: 'storm' },
-  /* ★とくせつ。ちずの みぎうえ。さいしょから はいれますが つよいです */
-  /* ★ぜんぶ クリアすると「サンズ」が なかまに なります（rewardChar）
-     rewardNeed は「コースが ぜんぶ そろって から わたす」ための かず。
-     いまは 1〜3面 しか ないので、7コース できるまで サンズは もらえません。*/
-  18:{ name: '特設・地底の国', short: 'ちてい', x: 0.90, y: 0.16, icon: '🔺', world: 'storm',
-       alwaysOpen: true, rewardChar: 'sans', rewardNeed: 7 },
 };
 
 
@@ -6764,6 +6692,94 @@ const ATTR_LABEL = {
   none: 'む',
 };
 
+
+/* --------------------------------------------------------------------------
+   ★とくせつステージ「地底の国」★（ぜんぶで 7ステージ・いまは 1〜3）
+
+   たつまきちずの ★みぎうえ★ に ある、ちかの くにへの いりぐち。
+   あき坊の塔 や 宇宙船 と おなじ「とくせつステージ」なので、
+   ★ほんぺんの コースの ならびには のって いません★。
+   ちずの みぎうえの ボタンから はいります。
+
+   ★さいしょから はいれますが、つよさは ほんぺんより ずっと うえです。
+   ★ここだけ たつまきほうは ありません（ちかの どうくつ なので）。
+
+   7ステージ ぜんぶ クリアすると ★サンズ★ が なかまに なります。
+   （floors: 7 なので、コースが 7つ そろうまで ごほうびは でません）
+   -------------------------------------------------------------------------- */
+const UNDERGROUND = {
+  name: '特設・地底の国',
+  icon: '🔺',
+  desc: 'ちかの くにの つわものたち。7ステージ せいはで「サンズ」が なかまに なる！',
+  floors: 7,
+  world: 'storm',            // たつまきちずの みぎうえに でます
+  unit: 'ステージ',           // 「1かい」では なく「1ステージ」と よびます
+  rewardChar: 'sans',
+  rewardName: 'サンズ',
+  courses: [
+
+    {
+      no: 501, floor: 1, chapter: 0, course: 1,
+      name: 'いせきの おかあさん',
+      desc: '★とくせつ★ やぎの おかあさん「トリエル」。ほのおの まほうで やけどを させて くる。',
+      bg: 'ut_ruins',
+      castleHp: 3000,
+      /* ★とくせつ なので ほんぺん（1.5〜2.8）より ずっと たかい */
+      power: 4.2,
+      drops: ['wood', 'cloth', 'glue'],
+      reward: { coins: 12, exp: 15000 },
+      waves: [
+        { at: 3,  id: 'froggit',     count: 2, gap: 2.2 },
+        { at: 16, id: 'napstablook', count: 1 },
+        { at: 28, id: 'froggit',     count: 3, gap: 1.8 },
+        /* ★ボスは しろに たどりつく まえに でて きます */
+        { at: 40, id: 'toriel',      count: 1, hold: 0.60 },
+        { at: 52, id: 'froggit',     count: 3, gap: 1.8, repeat: 20 },
+        { at: 66, id: 'napstablook', count: 2, gap: 2.4, repeat: 26 },
+      ],
+    },
+    {
+      no: 502, floor: 2, chapter: 0, course: 2,
+      name: 'ゆきの まちの ほねやろう',
+      desc: '★とくせつ★ ガイコツの「パピルス」。あおい ほねで うごきを とめ、いぬたちを よんで くる。',
+      bg: 'ut_snow',
+      castleHp: 3200,
+      /* ★パピルスは はんい＋2れんぞく＋スタン なので、
+           つよさの めもりは ひくめ（2.8 で かちりつ 27% に なる）*/
+      power: 2.5,
+      drops: ['stone', 'iron', 'string'],
+      reward: { coins: 13, exp: 16000 },
+      waves: [
+        { at: 3,  id: 'snowdrake',  count: 2, gap: 1.8 },
+        { at: 16, id: 'lesserdog',  count: 1 },
+        { at: 28, id: 'snowdrake',  count: 3, gap: 1.6 },
+        { at: 40, id: 'papyrus',    count: 1, hold: 0.60 },
+        { at: 54, id: 'snowdrake',  count: 3, gap: 1.6, repeat: 22 },
+        { at: 70, id: 'lesserdog',  count: 1, repeat: 34 },
+      ],
+    },
+    {
+      no: 503, floor: 3, chapter: 0, course: 3,
+      name: 'たきの せんし',
+      desc: '★とくせつ★ さかなの せんし「アンダイン」。よろいが かたく、ピンチに なると さらに つよく なる。',
+      bg: 'ut_water',
+      castleHp: 3400,
+      power: 3.9,
+      drops: ['iron', 'alumi', 'glue'],
+      reward: { coins: 14, exp: 17000 },
+      waves: [
+        { at: 3,  id: 'aaron',    count: 2, gap: 1.8 },
+        { at: 16, id: 'maddummy', count: 1 },
+        { at: 28, id: 'aaron',    count: 3, gap: 1.5 },
+        { at: 38, id: 'undyne',   count: 1, hold: 0.62 },
+        { at: 52, id: 'aaron',    count: 3, gap: 1.5, repeat: 20 },
+        { at: 68, id: 'maddummy', count: 1, repeat: 36 },
+      ],
+    },
+
+  ],
+};
+
 const ATTR_COLOR = {
   water: '#4fc3f7', fire: '#ff7043', grass: '#8bc34a',
   magic: '#ba68c8', power: '#ffca28', beast: '#8d6e63', metal: '#78909c',
@@ -6869,6 +6885,17 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.44', date: '2026-09-21',
+    title: '「地底の国」を ちずの みぎうえの ★とくせつステージ★ に うつしました',
+    items: [
+      'これまでは たつまきちずの コースの ならびに まざって いましたが、★あき坊の塔★ や ★あき坊の宇宙船★ と おなじように、ちずの ★みぎうえの ボタン★ から はいる かたちに なりました。',
+      'ほんぺんの みちすじとは べつの、ひとりだちした「やりこみ」ばしょ です。もちろん ★さいしょから はいれます★。',
+      '「1かい」では なく ★「1ステージ」★ と よぶように なりました。7ステージ ぜんぶで、いまは 1〜3ステージ あります。',
+      '7ステージ ぜんぶ クリアで ★サンズ★ が なかまに なります（まだ 3つしか ないので、そろうまで おあずけ です）。',
+      'まえの ばんで クリアずみの ひとは、そのまま ひきつがれます。',
+    ],
+  },
   {
     ver: '6.43', date: '2026-09-21',
     title: '★とくせつ「地底の国」の しょうりほうしゅう ── ガイコツの「サンズ」★',

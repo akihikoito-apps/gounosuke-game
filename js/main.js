@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.43';
+  const GAME_VERSION = '6.44';
 
 
   /* =================================================
@@ -115,6 +115,14 @@
     if (!s.evolved) s.evolved = {};
     if (!s.evolved2) s.evolved2 = {};
     if (!s.seenEnemies) s.seenEnemies = {};
+    /* ★v6.44：地底の国を「ほんぺんの 18しょう（142〜144）」から
+         とくせつステージ（501〜503）に うつしました。
+         まえの ばんで クリアずみの ひとは そのまま ひきつぎます。     */
+    if (s.cleared) {
+      [[142, 501], [143, 502], [144, 503]].forEach(([oldNo, newNo]) => {
+        if (s.cleared[oldNo]) { s.cleared[newNo] = true; delete s.cleared[oldNo]; }
+      });
+    }
     backfillSeen(s);          // まえに クリアした ステージの てきを ずかんに のせる
     if (!Array.isArray(s.owned) || !s.owned.length) s.owned = START_CHARS.slice();
     if (!Array.isArray(s.party) || !s.party.filter(Boolean).length) s.party = s.owned.slice(0, PARTY_MAX);
@@ -173,6 +181,7 @@
     if (typeof SPACESHIP !== 'undefined' && SPACESHIP) list.push(SPACESHIP);
     if (typeof GONO !== 'undefined' && GONO) list.push(GONO);
     if (typeof DOZLE_PLANET !== 'undefined' && DOZLE_PLANET) list.push(DOZLE_PLANET);
+    if (typeof UNDERGROUND !== 'undefined' && UNDERGROUND) list.push(UNDERGROUND);
     return list;
   }
   /* その ちずに ある とくべつステージ（ふくすう ある ばあいも）*/
@@ -428,9 +437,6 @@
 
   /* まえの しょうを ぜんぶ クリアすると つぎの しょうが あそべる */
   function chapterOpen(ch) {
-    /* ★とくせつ ステージ（alwaysOpen）は、その ちずに はいれれば
-         さいしょから ちょうせんできます。ただし つよさは べつばら。 */
-    if (chapterInfo(ch).alwaysOpen) return true;
     /* うちゅうの さいしょの ほしは、せかいちずを ぜんぶ クリアしたら あそべる */
     const list = allChapters().filter(c => worldOf(c) === worldOf(ch));
     if (ch <= list[0]) {
@@ -1359,7 +1365,7 @@
     const s = slot();
     const T = currentTower || TOWER;
     const title = $('#tower-title');
-    if (title) title.textContent = ((T.world === 'space') ? '🚀 ' : '🗼 ') + T.name;
+    if (title) title.textContent = (T.icon || ((T.world === 'space') ? '🚀' : '🗼')) + ' ' + T.name;
     $('#tower-lead').textContent = T.desc;
     /* ★つかえる なかまの レア度が きまって いる ステージなら しらせる */
     const lim = $('#tower-limit');
@@ -1390,7 +1396,7 @@
       const el = document.createElement('button');
       el.className = 'tower-floor' + (open ? ' open' : '');
       el.innerHTML =
-        '<span class="tf-no">' + f + 'かい</span>' +
+        '<span class="tf-no">' + f + (T.unit || 'かい') + '</span>' +
         '<span class="tf-name">' + (course ? course.name : 'じゅんびちゅう') + '</span>' +
         '<span class="tf-mark">' + (course && cleared[course.no] ? '⭐' : (open ? '▶' : '🔒')) + '</span>';
       if (open) {
@@ -1398,14 +1404,14 @@
           startBattle(course);
         });
       } else {
-        el.addEventListener('click', () => toast(course ? 'したの かいから のぼってね' : 'この かいは まだ じゅんびちゅう！'));
+        el.addEventListener('click', () => toast(course ? ('まえの ' + (T.unit || 'かい') + 'から すすんでね') : ('この ' + (T.unit || 'かい') + 'は まだ じゅんびちゅう！')));
       }
       box.appendChild(el);
     }
     if (lockedFloors > 1) {
       const more = document.createElement('div');
       more.className = 'more-note';
-      more.textContent = 'この うえに あと ' + (lockedFloors - 1) + ' かい';
+      more.textContent = 'この さきに あと ' + (lockedFloors - 1) + ' ' + (T.unit || 'かい');
       box.appendChild(more);   // ならびは column-reverse なので さいごが いちばん うえ
     }
     show('screen-tower');
@@ -2016,32 +2022,6 @@
     if (!towerAllCleared(s)) return null;
     if (!Array.isArray(s.owned)) s.owned = START_CHARS.slice();
     if (s.owned.indexOf(id) >= 0) return null;               // もう もらって いる
-    s.owned.push(id);
-    if (typeof s.levels[id] !== 'number') s.levels[id] = 1;
-    if (typeof s.plus[id]   !== 'number') s.plus[id]   = 0;
-    storeSave();
-    return id;
-  }
-
-  /* ★しょうの ごほうびキャラ
-       CHAPTERS に rewardChar を かいて おくと、その しょうの コースを
-       ぜんぶ クリアした とき、その キャラが なかまに なります。
-       （とくせつ「地底の国」ぜんクリアで サンズ）                    */
-  function giveChapterReward(stageNo) {
-    const s = slot();
-    if (!s) return null;
-    const st = STAGES.find(x => x.no === stageNo);
-    if (!st) return null;
-    const info = chapterInfo(st.chapter);
-    const id = info && info.rewardChar;
-    if (!id || !UNITS[id]) return null;
-    if (!Array.isArray(s.owned)) s.owned = START_CHARS.slice();
-    if (s.owned.indexOf(id) >= 0) return null;          // もう もって いる
-    const list = coursesOf(st.chapter);
-    if (!list.length || !list.every(c => s.cleared[c.no])) return null;
-    /* ★コースが まだ ぜんぶ できて いない しょうでは わたさない
-       （rewardNeed に よていの コースすうを かいて おく）*/
-    if (info.rewardNeed && list.length < info.rewardNeed) return null;
     s.owned.push(id);
     if (typeof s.levels[id] !== 'number') s.levels[id] = 1;
     if (typeof s.plus[id]   !== 'number') s.plus[id]   = 0;
@@ -6883,19 +6863,12 @@
         $('#result-sub').textContent +=
           '　／　★' + (currentTower ? currentTower.name : '') + ' せいは！　Gコイン +' + coins;
       }
-      /* ★しょうを ぜんぶ クリアした ごほうびキャラ（地底の国 → サンズ）*/
-      const chGot = giveChapterReward(Game.stage.no);
-      if (chGot) {
-        const info = chapterInfo(Game.stage.chapter);
-        $('#result-sub').textContent =
-          '★' + (info.name || '') + ' せいは！★　「' + UNITS[chGot].name + '」が なかまに なった！';
-      }
       const got = giveTowerReward();          // ★とくべつステージを ぜんぶ クリアした ごほうび
       if (got) {
         /* ★どの とくべつステージでも ただしい なまえが でる ように します
            （まえは「あき坊の塔 10かい」で きめうちに なって いました）*/
         const T = currentTower || TOWER;
-        const unit = (T === TOWER) ? 'かい' : 'ステージ';
+        const unit = T.unit || ((T === TOWER) ? 'かい' : 'ステージ');
         $('#result-sub').textContent =
           T.name + ' ' + T.floors + unit + ' せいは！　「' + UNITS[got].name + '」が なかまに なった！';
       }
