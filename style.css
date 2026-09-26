@@ -759,7 +759,13 @@ body.dragging-slot #party-slots { touch-action:none; }
 }
 .mn-label {
   position:absolute; top:calc(78px * var(--ui)); left:50%; transform:translateX(-50%);
-  white-space:nowrap; font-size:calc(11.5px * var(--ui)); font-weight:bold; color:#fff;
+  /* ★ながい なまえは 2ぎょうに おりかえします（はみ出さない ように）。
+     はばを きめうちに しないと、left:50% の せいで 2〜3もじで おれます。
+     となりの ノードに かぶさっても タップの じゃまを しない ように
+     pointer-events は きって おきます。                                */
+  white-space:normal; width:calc(118px * var(--ui)); line-height:1.15; text-align:center;
+  pointer-events:none;
+  font-size:calc(11.5px * var(--ui)); font-weight:bold; color:#fff;
   text-shadow:0 2px 3px rgba(0,0,0,.75);
 }
 

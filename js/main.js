@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.46';
+  const GAME_VERSION = '6.47';
 
 
   /* =================================================
@@ -115,14 +115,11 @@
     if (!s.evolved) s.evolved = {};
     if (!s.evolved2) s.evolved2 = {};
     if (!s.seenEnemies) s.seenEnemies = {};
-    /* ★v6.44：地底の国を「ほんぺんの 18しょう（142〜144）」から
-         とくせつステージ（501〜503）に うつしました。
-         まえの ばんで クリアずみの ひとは そのまま ひきつぎます。     */
-    if (s.cleared) {
-      [[142, 501], [143, 502], [144, 503]].forEach(([oldNo, newNo]) => {
-        if (s.cleared[oldNo]) { s.cleared[newNo] = true; delete s.cleared[oldNo]; }
-      });
-    }
+    /* ★v6.44 に あった「142〜144 → 501〜503」の ひきつぎは はずしました。
+         v6.47 から 142・143 は「ターツーマーキーが支配する平原」なので、
+         のこして おくと ★へいげんを クリアする たびに その きろくが
+         地底の国に うつされて きえて しまいます★。
+         ひきつぎは v6.44〜v6.46 の あいだに おわって います。        */
     backfillSeen(s);          // まえに クリアした ステージの てきを ずかんに のせる
     if (!Array.isArray(s.owned) || !s.owned.length) s.owned = START_CHARS.slice();
     if (!Array.isArray(s.party) || !s.party.filter(Boolean).length) s.party = s.owned.slice(0, PARTY_MAX);
@@ -477,7 +474,7 @@
   }
 
   function openChapters() {
-    if (rarityLimit) { rarityLimit = null; applyParty(); }
+    if (rarityLimit || guestLevels) { rarityLimit = null; guestLevels = null; applyParty(); }
     show('screen-chapter');
     requestAnimationFrame(() => { drawMap(); buildMapNodes(); refreshWorldBtn(); });
   }
@@ -544,7 +541,7 @@
   }
 
   function openArcs() {
-    if (rarityLimit) { rarityLimit = null; applyParty(); }
+    if (rarityLimit || guestLevels) { rarityLimit = null; guestLevels = null; applyParty(); }
     const box = $('#arc-list');
     if (box) {
       box.innerHTML = '';
@@ -3554,10 +3551,45 @@
 
   /* いま たたかって いる ステージの レア度せいげん（なければ null）*/
   let rarityLimit = null;
+  /* いま たたかって いる ステージの ゲスト（{ id: レベル }。なければ null）*/
+  let guestLevels = null;
+
+  /* ふつうの レベルひょうに、ゲストの こていレベルを かさねた もの */
+  function levelMapWithGuests(s) {
+    const map = s ? effLevelMap(s) : {};
+    if (guestLevels) for (const id in guestLevels) map[id] = guestLevels[id];
+    return map;
+  }
 
   /* ★つかえる なかまだけに へんせいを しぼる。
-     ステージに allowRarity が あれば、その レア度の なかま だけが でられます。 */
-  function applyRarityLimit(course) {
+     ・allowRarity … その レア度の なかま だけが でられます
+     ・allowChars  … ★なまえで きめうち★。ここに かいた なかま だけ
+     ・guestChars  … その コース だけ でられる「ゲスト」。
+                     もって いなくても でられて、レベルも ここで きまります
+       （18-2「さいごの しょうぶ」＝ タンクン ＋ ネコス Lv.20）        */
+  function applyCharLimit(course) {
+    guestLevels = (course && course.guestChars) ? course.guestChars : null;
+
+    /* --- allowChars（なまえで きめうち）--- */
+    if (course && Array.isArray(course.allowChars) && course.allowChars.length) {
+      rarityLimit = null;
+      const s = slot();
+      const owned = (s && Array.isArray(s.owned)) ? s.owned : DEFAULT_PARTY.slice();
+      /* もって いる なかま、または ゲストに かいて ある なかま だけ */
+      const list = course.allowChars.filter(id =>
+        UNITS[id] && (owned.indexOf(id) >= 0 || (guestLevels && guestLevels[id])));
+      PARTY.length = 0;
+      list.forEach(id => PARTY.push(id));
+      if (!PARTY.length) PARTY.push(DEFAULT_PARTY[0]);
+      Game.levels = levelMapWithGuests(s);
+      Game.evolved = (s && s.evolved) ? s.evolved : {};
+      Game.evolved2 = (s && s.evolved2) ? s.evolved2 : {};
+      applyUnitLayout();
+      buildUnitButtons();
+      requestAnimationFrame(redrawIcons);
+      return;
+    }
+
     rarityLimit = (course && Array.isArray(course.allowRarity) && course.allowRarity.length)
       ? course.allowRarity.slice() : null;
     if (!rarityLimit) { applyParty(); return; }
@@ -3586,7 +3618,7 @@
   }
 
   function startBattle(course) {
-    applyRarityLimit(course);
+    applyCharLimit(course);
     show('screen-battle');
     const canvas = $('#canvas');
     Game.canvas = canvas;
@@ -4073,6 +4105,108 @@
   }
 
   /* なまえの ふだ（3大王の しょうかい に つかいます）*/
+  /* ★やられて たおれた キャラ（よこむきに ころがす）。
+       ネコスの ムービーで「ぜんめつ」を みせる ために つかいます。 */
+  function stDown(ctx, id, x, yBase, h, tilt) {
+    const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS[id] : null;
+    if (!fn) return;
+    ctx.save();
+    ctx.translate(x, yBase);
+    ctx.rotate(tilt === undefined ? -1.35 : tilt);
+    const sc = h / storyArtUp(id);
+    ctx.scale(sc, sc);
+    ctx.globalAlpha = 0.9;
+    fn(ctx, { t: 0.2, moving: false, atk: -1, hpRatio: 0.08, hpRate: 0.08, roll: 0.35 });
+    ctx.restore();
+  }
+
+  /* ★しゅうちゅうせん（まんなかに めが いく）*/
+  function stRays(ctx, W, H, cx, cy, color, n) {
+    ctx.save();
+    ctx.globalAlpha = 0.20;
+    ctx.fillStyle = color || '#ffffff';
+    const R = Math.max(W, H) * 1.4;
+    const k = n || 18;
+    for (let i = 0; i < k; i++) {
+      const a = (i / k) * Math.PI * 2;
+      const w = 0.028 + (i % 3) * 0.012;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(a - w) * R, cy + Math.sin(a - w) * R);
+      ctx.lineTo(cx + Math.cos(a + w) * R, cy + Math.sin(a + w) * R);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /* ★あれはてた へいげん（18しょうの はいけい）。
+       たつまきで なにも なくなって、いわだけが ころがって います。   */
+  function stPlain(ctx, W, H, dark) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, dark ? '#140f20' : '#2a2340');
+    g.addColorStop(0.62, dark ? '#2a2340' : '#5b4c78');
+    g.addColorStop(1, dark ? '#0f0c18' : '#3a3050');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    /* とおくの やま */
+    ctx.fillStyle = dark ? '#1c1730' : '#3d3358';
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.72);
+    for (let i = 0; i <= 8; i++) {
+      ctx.lineTo(W * (i / 8), H * (0.72 - (i % 2 ? 0.06 : 0.02)));
+    }
+    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
+    /* じめん */
+    ctx.fillStyle = dark ? '#221c34' : '#4a3f64';
+    ctx.fillRect(0, H * 0.78, W, H * 0.22);
+    ctx.fillStyle = dark ? '#2e2644' : '#5e5080';
+    ctx.fillRect(0, H * 0.78, W, H * 0.02);
+    /* ころがった いし */
+    ctx.fillStyle = dark ? '#2b2440' : '#554873';
+    for (const [rx, ry, rr] of [[0.10, 0.90, 0.030], [0.34, 0.86, 0.018],
+                                [0.66, 0.92, 0.024], [0.88, 0.85, 0.016]]) {
+      ctx.beginPath();
+      ctx.ellipse(W * rx, H * ry, Math.min(W, H) * rr, Math.min(W, H) * rr * 0.62, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  /* ★ゆうやけ／よあけの そら（さいごの ムービー）*/
+  function stDawn(ctx, W, H) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#1d2a52');
+    g.addColorStop(0.45, '#e9834a');
+    g.addColorStop(0.72, '#ffd08a');
+    g.addColorStop(1, '#8fbf6a');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(255,240,190,.85)';
+    ctx.beginPath(); ctx.arc(W * 0.5, H * 0.70, Math.min(W, H) * 0.16, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#6ea84f';
+    ctx.fillRect(0, H * 0.80, W, H * 0.20);
+  }
+
+  /* ★コーヒーカップ（ネコスの しるし）*/
+  function stCup(ctx, cx, yBase, h, tilt) {
+    ctx.save();
+    ctx.translate(cx, yBase); ctx.rotate(tilt || 0);
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = Math.max(1.6, h * 0.08);
+    ctx.fillStyle = '#f6f1e4';
+    ctx.beginPath();
+    ctx.moveTo(-h * 0.46, -h);
+    ctx.lineTo(h * 0.46, -h);
+    ctx.lineTo(h * 0.30, 0);
+    ctx.lineTo(-h * 0.30, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(0, -h, h * 0.46, h * 0.16, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#6b4226'; ctx.fill(); ctx.stroke();
+    /* とって */
+    ctx.beginPath();
+    ctx.arc(h * 0.50, -h * 0.58, h * 0.24, -1.2, 1.2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function stNamePlate(ctx, W, H, name, sub, color) {
     ctx.save();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -4292,6 +4426,356 @@
         stDebris(c, W, H, 10);
         stGate(c, W * 0.18, H * 0.88, Math.min(W * 0.20, H * 0.26), 0.5);
         stChar(c, 'tankun', W * 0.32, H * 0.94, H * 0.13);
+      } },
+  ];
+
+
+  /* --- 「埃にまみれた都市」を クリアした あとの おはなし ---
+         3大王を ぜんぶ たおした。ターツーマーキー ほんにんが でて くる。 */
+  const STORY_STORM_KING = [
+    /* 1 3大王を ぜんぶ たおした */
+    { text: 'ケダマールが たおれた。これで ★3大王は ぜんめつ★。ほこりの まちに、ひさしぶりの しずけさが もどった。',
+      art: (c, W, H) => {
+        stTownScape(c, W, H, 0.15, true);
+        stChar(c, 'tankun',  W * 0.30, H * 0.94, H * 0.16);
+        stChar(c, 'kabekun', W * 0.40, H * 0.94, H * 0.22);
+        stChar(c, 'akibou',  W * 0.51, H * 0.94, H * 0.26);
+        stCup(c, W * 0.86, H * 0.95, H * 0.10, 0.3);
+      } },
+
+    /* 2 そらが くらく なる */
+    { text: '……だが、しずけさは ながく つづかなかった。そらが、すっと くらく なる。',
+      art: (c, W, H) => {
+        stTownScape(c, W, H, 0.4, true);
+        stFlash(c, W, H, '#100c1c');
+        stTornado(c, W * 0.5, H * 0.00, H * 0.26, W * 0.95, 'rgba(90,82,120,.5)');
+        stChar(c, 'tankun', W * 0.28, H * 0.94, H * 0.15);
+      } },
+
+    /* 3 おりて くる */
+    { text: 'まちの まんなかに、おおきな たつまきが おりて きた。なかから あらわれたのは ──',
+      art: (c, W, H) => {
+        stTownScape(c, W, H, 0.9, true);
+        stTornado(c, W * 0.52, H * 0.00, H * 0.86, W * 0.44, 'rgba(160,148,205,.9)');
+        stDebris(c, W, H, 14);
+      } },
+
+    /* 4 ターツーマーキー */
+    { text: 'うちゅうの しはいしゃ、ターツーマーキー。やくそく どおり、じきじきに でて きたのだ。',
+      art: (c, W, H) => {
+        stTownScape(c, W, H, 0.5, true);
+        stFlash(c, W, H, '#1a1430');
+        stRays(c, W, H, W * 0.5, H * 0.45, '#b9a8ff', 20);
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.94, H * 0.66);
+        stNamePlate(c, W, H, 'ターツーマーキー', 'うちゅうの しはいしゃ　ぞくせい：かみ', '#c7b8ff');
+      } },
+
+    /* 5 みなおした */
+    { text: '「……まさか、3たいとも たおすとはな。わしは おまえたちを ★みくびって おった★。」',
+      art: (c, W, H) => {
+        stTownScape(c, W, H, 0.3, true);
+        stFlash(c, W, H, '#241c3c');
+        stChar(c, 'tatsumarky', W * 0.68, H * 0.92, H * 0.60);
+        stChar(c, 'tankun',  W * 0.22, H * 0.95, H * 0.14);
+        stChar(c, 'kabekun', W * 0.31, H * 0.95, H * 0.19);
+      } },
+
+    /* 6 3大王の おもかげ */
+    { text: '「ケダマールも、ガオウドウも、チューチューも、わしの じまんの しもべ じゃった。それを、この ちいさな むれが。」',
+      art: (c, W, H) => {
+        stSpaceBg(c, W, H, '#191230', '#2e1c50');
+        const u = Math.min(W, H);
+        stVision(c, W * 0.22, H * 0.40, u * 0.17, (cc, w2, h2) => {
+          stChar(cc, 'kedamaru', w2 * 0.5, h2 * 0.92, h2 * 0.72);
+        });
+        stVision(c, W * 0.50, H * 0.40, u * 0.17, (cc, w2, h2) => {
+          stChar(cc, 'gaoudou', w2 * 0.5, h2 * 0.92, h2 * 0.74);
+        });
+        stVision(c, W * 0.78, H * 0.40, u * 0.17, (cc, w2, h2) => {
+          stChar(cc, 'chuchu', w2 * 0.5, h2 * 0.92, h2 * 0.72);
+        });
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.99, H * 0.40);
+      } },
+
+    /* 7 なまえを よぶ */
+    { text: '「なまえを きいて おこう。── ごうのすけ。おぼえて おいて やる。」',
+      art: (c, W, H) => {
+        stTownScape(c, W, H, 0.25, true);
+        stFlash(c, W, H, '#1d1734');
+        stChar(c, 'tatsumarky', W * 0.70, H * 0.92, H * 0.58);
+        stChar(c, 'tankun', W * 0.26, H * 0.94, H * 0.18);
+      } },
+
+    /* 8 やくそくを はたす */
+    { text: '「やくそく じゃ。★こんどは わしが、じきじきに あいてを して やろう。★」',
+      art: (c, W, H) => {
+        stTownScape(c, W, H, 0.8, true);
+        stFlash(c, W, H, '#3a0f28');
+        stBolt(c, W * 0.16, H * 0.04, H * 0.40);
+        stBolt(c, W * 0.84, H * 0.02, H * 0.34);
+        stChar(c, 'tatsumarky', W * 0.5, H * 0.94, H * 0.66,
+               { t: 0.2, moving: false, atk: 0.3, hpRatio: 1, roll: 0.35 });
+      } },
+
+    /* 9 まちの そとが へいげんに */
+    { text: 'ターツーマーキーが うでを ふると、まちの そとの もりも やまも、たつまきに けずられて たいらに なって いった。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stTornado(c, W * 0.22, H * 0.00, H * 0.76, W * 0.26, 'rgba(150,138,195,.85)');
+        stTornado(c, W * 0.74, H * 0.04, H * 0.70, W * 0.22, 'rgba(120,110,160,.7)');
+        stDebris(c, W, H, 16);
+        stTree(c, W * 0.48, H * 0.86, Math.min(W, H) * 0.12, 1.1);
+      } },
+
+    /* 10 へいげんの おく */
+    { text: 'なにも なくなった ひろい へいげんの おくで、ターツーマーキーは しずかに まって いる。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stChar(c, 'tatsumarky', W * 0.80, H * 0.92, H * 0.44);
+        stCastle(c, W * 0.10, H * 0.94, Math.min(W, H) * 0.16);
+        stChar(c, 'tankun',  W * 0.24, H * 0.95, H * 0.13);
+        stChar(c, 'kabekun', W * 0.31, H * 0.95, H * 0.17);
+      } },
+
+    /* 11 タイトル */
+    { text: 'さいごの ばしょ「ターツーマーキーが支配する平原」が あそべる ように なりました。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stTornado(c, W * 0.5, H * 0.00, H * 0.30, W * 0.9, 'rgba(120,110,150,.4)');
+        stTitle(c, W, H, 'しはいする平原', '#c7b8ff');
+      } },
+  ];
+
+  /* --- 「ターツーマーキーの へいげん」で ぜんめつ した あとの おはなし ---
+         ネコスが たすけに くる。ここで うらステージが あらわれます。   */
+  const STORY_NEKOS = [
+    /* 1 けたちがい */
+    { text: 'けたが ちがった。たつまきが ひとふき する だけで、まえせんが まるごと きえて いく。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stTornado(c, W * 0.66, H * 0.00, H * 0.82, W * 0.40, 'rgba(170,158,215,.9)');
+        stDebris(c, W, H, 18);
+        stChar(c, 'tatsumarky', W * 0.72, H * 0.92, H * 0.56);
+      } },
+
+    /* 2 ぜんめつ */
+    { text: 'あき坊も、かべくんも、たたみんも。ひとり、また ひとりと たおれて いった。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#140f24');
+        stDown(c, 'akibou',  W * 0.22, H * 0.90, H * 0.22, -1.4);
+        stDown(c, 'kabekun', W * 0.44, H * 0.94, H * 0.20,  1.3);
+        stDown(c, 'tatamin', W * 0.64, H * 0.90, H * 0.20, -1.2);
+        stChar(c, 'tatsumarky', W * 0.86, H * 0.94, H * 0.44);
+      } },
+
+    /* 3 のこったのは タンクン だけ */
+    { text: 'さいごに のこったのは、ぼろぼろの ★タンクン★ ひとり だけ だった。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stDown(c, 'kabekun', W * 0.62, H * 0.94, H * 0.16, 1.3);
+        stDown(c, 'akibou',  W * 0.78, H * 0.90, H * 0.17, -1.4);
+        stRays(c, W, H, W * 0.30, H * 0.80, '#8a7fb5', 14);
+        stChar(c, 'tankun', W * 0.30, H * 0.94, H * 0.26,
+               { t: 0.2, moving: false, atk: -1, hpRatio: 0.06, hpRate: 0.06, roll: 0.35 });
+      } },
+
+    /* 4 とどめ */
+    { text: '「よく やった ほうじゃ。……さらばじゃ、ちいさき もの。」ターツーマーキーが うでを ふりあげる。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#3a0f24');
+        stBolt(c, W * 0.62, H * 0.02, H * 0.44);
+        stChar(c, 'tatsumarky', W * 0.68, H * 0.94, H * 0.66,
+               { t: 0.2, moving: false, atk: 0.35, hpRatio: 1, roll: 0.35 });
+        stChar(c, 'tankun', W * 0.20, H * 0.95, H * 0.22,
+               { t: 0.2, moving: false, atk: -1, hpRatio: 0.06, hpRate: 0.06, roll: 0.35 });
+      } },
+
+    /* 5 カップが ころがって きた */
+    { text: 'その とき。カラン、と ──　ひとつの ★コーヒーカップ★ が、ふたりの あいだに ころがって きた。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#1a1430');
+        stChar(c, 'tatsumarky', W * 0.80, H * 0.94, H * 0.50);
+        stChar(c, 'tankun', W * 0.18, H * 0.95, H * 0.20,
+               { t: 0.2, moving: false, atk: -1, hpRatio: 0.06, hpRate: 0.06, roll: 0.35 });
+        stCup(c, W * 0.50, H * 0.93, H * 0.14, 0.9);
+      } },
+
+    /* 6 ネコス とうじょう */
+    { text: '「── そこまでだ。」　ふりおろされた うでを、よこから うけとめた もの が いた。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#241a3c');
+        stRays(c, W, H, W * 0.52, H * 0.50, '#ffe8a8', 22);
+        stChar(c, 'nekos_fight', W * 0.52, H * 0.94, H * 0.58,
+               { t: 0.4, moving: false, atk: 0.5, hpRatio: 1, hpRate: 1, roll: 0.35 });
+        stChar(c, 'tatsumarky', W * 0.84, H * 0.94, H * 0.52);
+      } },
+
+    /* 7 ターツーマーキーが おどろく */
+    { text: '「……きさま。その うでは ── ★いきて おったのか、ネコス。★」',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#3a1030');
+        stBolt(c, W * 0.86, H * 0.04, H * 0.30);
+        stChar(c, 'tatsumarky', W * 0.74, H * 0.94, H * 0.66,
+               { t: 0.2, moving: false, atk: 0.2, hpRatio: 1, roll: 0.35 });
+      } },
+
+    /* 8 でんせつの せんし */
+    { text: 'ネコス。むかし、たつまきに たった ひとりで たちむかった ★でんせつの せんし★。まけた あと、まちの すみで おみせを ひらいて いたのだ。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#1c1634');
+        stRays(c, W, H, W * 0.5, H * 0.46, '#ffd98a', 18);
+        stChar(c, 'nekos_fight', W * 0.5, H * 0.94, H * 0.70);
+        stNamePlate(c, W, H, 'ネコス', 'でんせつの せんし　ぞくせい：かみ', '#ffe08a');
+      } },
+
+    /* 9 けりを つけに きた */
+    { text: '「まいにち コーヒーを いれながら、ずっと まって いた。── あの ひの けりを つけに きた。」',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#241c3c');
+        stChar(c, 'nekos_fight', W * 0.34, H * 0.94, H * 0.62);
+        stChar(c, 'tatsumarky',  W * 0.80, H * 0.94, H * 0.56);
+        stCup(c, W * 0.58, H * 0.95, H * 0.10, 0.5);
+      } },
+
+    /* 10 タンクンに てを さしだす */
+    { text: '「たちな、ちびすけ。おまえが もちこたえた から、ここまで これたんだ。── ★ふたりで いくぞ。★」',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stRays(c, W, H, W * 0.40, H * 0.66, '#ffe8a8', 16);
+        stChar(c, 'nekos_fight', W * 0.46, H * 0.94, H * 0.60);
+        stChar(c, 'tankun', W * 0.22, H * 0.95, H * 0.24);
+      } },
+
+    /* 11 タイトル */
+    { text: 'うらステージ「さいごの しょうぶ」が あらわれた！　つかえる なかまは ★タンクンと ネコス だけ★ です。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stTornado(c, W * 0.86, H * 0.00, H * 0.60, W * 0.24, 'rgba(140,128,185,.7)');
+        stChar(c, 'nekos_fight', W * 0.34, H * 0.99, H * 0.30);
+        stChar(c, 'tankun',      W * 0.18, H * 0.99, H * 0.14);
+        stTitle(c, W, H, 'さいごの しょうぶ', '#ffe08a');
+      } },
+  ];
+
+  /* --- 「さいごの しょうぶ」に かった あとの おはなし --- */
+  const STORY_FINAL = [
+    /* 1 さいごの いちげき */
+    { text: 'ネコスの りょうての やじるしが、まっすぐに とんだ。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stRays(c, W, H, W * 0.38, H * 0.56, '#ffe8a8', 24);
+        stChar(c, 'nekos_fight', W * 0.34, H * 0.94, H * 0.62,
+               { t: 0.4, moving: false, atk: 0.5, hpRatio: 0.5, hpRate: 0.5, roll: 0.35 });
+        stChar(c, 'tankun', W * 0.14, H * 0.95, H * 0.20);
+      } },
+
+    /* 2 ひざを つく */
+    { text: 'うちゅうの しはいしゃが、はじめて ひざを ついた。あたまの うえの たつまきが、ゆっくりと ほどけて いく。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#241c3c');
+        stChar(c, 'tatsumarky', W * 0.62, H * 1.06, H * 0.60,
+               { t: 0.2, moving: false, atk: -1, hpRatio: 0.05, hpRate: 0.05, roll: 0.35 });
+      } },
+
+    /* 3 みごとじゃ */
+    { text: '「……みごと じゃ。ほしを ひとつ したがえる より、むずかしい ことを して のけた。」',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stChar(c, 'tatsumarky',  W * 0.70, H * 1.02, H * 0.52,
+               { t: 0.2, moving: false, atk: -1, hpRatio: 0.05, hpRate: 0.05, roll: 0.35 });
+        stChar(c, 'nekos_fight', W * 0.30, H * 0.94, H * 0.56);
+        stChar(c, 'tankun',      W * 0.14, H * 0.95, H * 0.20);
+      } },
+
+    /* 4 なぜ たたかった */
+    { text: '「ネコスよ。おまえは なぜ、いまさら たたかった。かちめなど なかった で あろう。」',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#2a2040');
+        stChar(c, 'tatsumarky', W * 0.72, H * 1.02, H * 0.54,
+               { t: 0.2, moving: false, atk: -1, hpRatio: 0.05, hpRate: 0.05, roll: 0.35 });
+      } },
+
+    /* 5 ネコスの こたえ */
+    { text: '「かちめ？　……うちの みせに、まいにち こどもが くるんだ。それだけで じゅうぶんだろう。」',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stRays(c, W, H, W * 0.40, H * 0.52, '#ffe8a8', 14);
+        stChar(c, 'nekos_fight', W * 0.40, H * 0.94, H * 0.64);
+        stCup(c, W * 0.66, H * 0.95, H * 0.12, 0.2);
+      } },
+
+    /* 6 わらう */
+    { text: 'ターツーマーキーは、はじめて こえを あげて わらった。「……くだらん。じつに、くだらん りゆう じゃ。」',
+      art: (c, W, H) => {
+        stPlain(c, W, H, false);
+        stChar(c, 'tatsumarky', W * 0.58, H * 1.02, H * 0.56,
+               { t: 0.9, moving: false, atk: -1, hpRatio: 0.2, hpRate: 0.2, roll: 0.35 });
+        stChar(c, 'nekos_fight', W * 0.24, H * 0.94, H * 0.50);
+        stChar(c, 'tankun',      W * 0.10, H * 0.95, H * 0.18);
+      } },
+
+    /* 7 うちゅうへ かえる */
+    { text: '「この ほしは、おまえたちに あずけて おく。」　そう いって、しはいしゃは ほしの そらへ かえって いった。',
+      art: (c, W, H) => {
+        stSpaceBg(c, W, H, '#120c28', '#2c1a52');
+        stPlanet(c, W * 0.26, H * 0.62, Math.min(W, H) * 0.22, 'earth');
+        stTornado(c, W * 0.70, H * 0.04, H * 0.56, W * 0.26, 'rgba(180,168,225,.75)');
+        stStars(c, W, H, 40);
+      } },
+
+    /* 8 たつまきが きえる */
+    { text: 'その ひ、ちきゅうじゅうの たつまきが いっせいに ほどけた。ながい ながい かぜが、やっと やんだ。',
+      art: (c, W, H) => {
+        stDawn(c, W, H);
+        stTree(c, W * 0.12, H * 0.92, Math.min(W, H) * 0.16, 0.05);
+        stTree(c, W * 0.88, H * 0.94, Math.min(W, H) * 0.14, -0.05);
+      } },
+
+    /* 9 まちが もどって くる */
+    { text: 'ふきとばされた まちに、ひとが もどって きた。やねを なおす おと。わらいごえ。ふつうの まいにちが かえって きた。',
+      art: (c, W, H) => {
+        stDawn(c, W, H);
+        stHouse(c, W * 0.22, H * 0.94, Math.min(W, H) * 0.20, 0);
+        stHouse(c, W * 0.50, H * 0.96, Math.min(W, H) * 0.24, 0);
+        stHouse(c, W * 0.78, H * 0.94, Math.min(W, H) * 0.20, 0);
+        stPerson(c, W * 0.36, H * 0.97, H * 0.14, 'stand');
+        stPerson(c, W * 0.64, H * 0.97, H * 0.13, 'stand');
+      } },
+
+    /* 10 ネコスは おみせに もどった */
+    { text: 'ネコスは なにごとも なかった ように、きょうも おみせで コーヒーを いれて いる。',
+      art: (c, W, H) => {
+        stDawn(c, W, H);
+        stHouse(c, W * 0.50, H * 0.96, Math.min(W, H) * 0.30, 0, '#f6ecd6', '#7a4a34');
+        stChar(c, 'nekos', W * 0.30, H * 0.96, H * 0.44);
+        stCup(c, W * 0.70, H * 0.90, H * 0.14, 0);
+      } },
+
+    /* 11 みんなで */
+    { text: '「……で、いつ また くるんだ、あいつ。」「さあ。そのときは、また みんなで いこう。」',
+      art: (c, W, H) => {
+        stDawn(c, W, H);
+        stChar(c, 'nekos',   W * 0.16, H * 0.97, H * 0.44);
+        stChar(c, 'tankun',  W * 0.38, H * 0.97, H * 0.18);
+        stChar(c, 'kabekun', W * 0.50, H * 0.97, H * 0.24);
+        stChar(c, 'akibou',  W * 0.64, H * 0.97, H * 0.28);
+        stChar(c, 'tatamin', W * 0.80, H * 0.97, H * 0.24);
+      } },
+
+    /* 12 おしまい */
+    { text: 'ごうのすけたちの たたかいは、これで おしまい。── あそんで くれて ありがとう！',
+      art: (c, W, H) => {
+        stDawn(c, W, H);
+        stTitle(c, W, H, 'おしまい', '#ffe08a');
       } },
   ];
 
@@ -6705,6 +7189,18 @@
       desc: '「新・始まりの道」を クリアした あと。ターツーマーキーが ちゅうじつな しもべ「3大王」を しょうかいして きえて いく。',
       when: '新・始まりの道（13-1）を クリアすると みられます',
       list: () => STORY_STORM_FLEE },
+    { key: 'storm_king', name: 'しはいしゃ、じきじきに',
+      desc: '3大王を ぜんぶ たおした あと。ターツーマーキーが まちに おりて きて、やくそく どおり じぶんが あいてを すると いう。',
+      when: '埃にまみれた都市（17-7）を クリアすると みられます',
+      list: () => STORY_STORM_KING },
+    { key: 'nekos', name: 'ネコス、ふたたび',
+      desc: 'へいげんで ぜんめつ した あと。とどめを さされそうな タンクンの まえに、おみせの ネコスが あらわれる。',
+      when: 'ターツーマーキーの へいげん（18-1）を たたかうと みられます',
+      list: () => STORY_NEKOS },
+    { key: 'final', name: 'そして、いつもの あさ',
+      desc: 'さいごの しょうぶに かった あと。ながい たつまきが やっと やんで、まちに ふつうの まいにちが もどって くる。',
+      when: 'さいごの しょうぶ（18-2）に かつと みられます',
+      list: () => STORY_FINAL },
   ];
 
   function openMovies() {
@@ -6816,12 +7312,50 @@
       playStory(STORY_STORM_FLEE, () => show('screen-result'));
       return true;
     }
+    /* ★「埃にまみれた都市」ぜんぶ クリア ＝ 3大王 ぜんめつ。
+         ターツーマーキー ほんにんが でて くる。                       */
+    if (stageNo === 141 && !storySeen('storm_king')) {
+      markStory('storm_king');
+      playStory(STORY_STORM_KING, () => show('screen-result'));
+      return true;
+    }
+    /* ★18-1 で ぜんめつ ── ネコスが たすけに くる。
+         ここで うらステージ（18-2）が あらわれます。                 */
+    if (stageNo === 142 && !storySeen('nekos')) {
+      markStory('nekos');
+      playStory(STORY_NEKOS, () => show('screen-result'));
+      return true;
+    }
+    /* ★18-2「さいごの しょうぶ」に かった ── エンディング */
+    if (stageNo === 143 && !storySeen('final')) {
+      markStory('final');
+      playStory(STORY_FINAL, () => show('screen-result'));
+      return true;
+    }
     return false;
   }
 
   function showResult() {
     resultShown = true;
     recordSeen();                 // まけても「でてきた てき」は ずかんに のこす
+
+    /* ★ものがたりの ための「ぜったいに かてない」たたかい（18-1）。
+         ぜんめつ するのが せいかい なので、「まけた…」では なく
+         せんようの がめんを だして、そのまま ネコスの ムービーに つなぎます。*/
+    if (Game.stage && Game.stage.loseIsClear && Game.result !== 'win') {
+      const s0 = slot();
+      if (s0 && !s0.cleared[Game.stage.no]) { s0.cleared[Game.stage.no] = true; storeSave(); }
+      const tt = $('#result-title');
+      tt.textContent = 'ぜんめつ…';
+      tt.className = 'lose';
+      $('#result-sub').textContent = 'まだ、ものがたりは おわって いない。';
+      $('#btn-result-main').textContent = 'ステージせんたくに もどる';
+      $('#btn-result-sub').textContent  = 'もういちど あそぶ';
+      if (maybeStory(Game.stage.no)) return;
+      show('screen-result');
+      return;
+    }
+
     const win = Game.result === 'win';
     const t = $('#result-title');
     t.textContent = win ? 'かった！' : 'まけた…';

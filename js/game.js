@@ -1180,6 +1180,13 @@ const Game = {
     if (!this.finished) this.holdBossFloor();
 
     if (this.finished) return;
+    /* ★ものがたりの ための「ぜったいに かてない」たたかい。
+         しろは いくら たたいても こわれません（18-1 ターツーマーキー）。*/
+    if (this.stage && this.stage.unbeatable) {
+      if (this.enemyCastle.hp < this.enemyCastle.maxHp) this.enemyCastle.hp = this.enemyCastle.maxHp;
+      if (this.playerCastle.hp <= 0) { this.finished = true; this.result = 'lose'; this.finishAt = this.time; }
+      return;
+    }
     if (this.enemyCastle.hp <= 0)  { this.finished = true; this.result = 'win';  this.finishAt = this.time; }
     else if (this.playerCastle.hp <= 0) { this.finished = true; this.result = 'lose'; this.finishAt = this.time; }
   },

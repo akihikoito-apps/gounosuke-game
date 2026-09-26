@@ -9800,6 +9800,145 @@ function drawNekos(ctx, st) {
   ctx.restore();
 }
 
+
+/* --- ★ネコス（せんとうモード）---
+     おみせの てんしゅと おなじ すがた ですが、あかい マフラーを まいて
+     こしを おとして います。りょうての やじるしが きんいろに ひかり、
+     こうげきの ときは まえに つきだされます。
+     うらステージ「さいごの しょうぶ」だけで つかえます。            */
+function drawNekosFight(ctx, st) {
+  const t = (st && st.t) || 0;
+  const atk = (st && st.atk !== undefined) ? st.atk : -1;
+  const cast = (atk >= 0) ? (1 - Math.abs(atk - 0.5) * 2) : 0;
+  const GREY = '#c9c7bf', INK = '#20201e';
+  const GOLD = '#ffd54f', GOLD2 = '#e0a91c', SCARF = '#c0392b';
+  const wobble = Math.sin(t * 2) * 1.2;
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+  /* ★ネコスは もともと とても せが たかい え（190ちかく）なので、
+       そのままだと カードの かおアイコンが「アフロだけ」に なります。
+       え ぜんたいを ちぢめて、たいせんでは UNITS の scale で もどします。*/
+  ctx.scale(0.72, 0.72);
+
+  /* ★たたかいの オーラ（こうげきの ときだけ）*/
+  if (cast > 0.05) {
+    ctx.save();
+    ctx.globalAlpha = 0.22 * cast;
+    const g = ctx.createRadialGradient(0, -110, 10, 0, -110, 130);
+    g.addColorStop(0, GOLD);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, -110, 130, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 2.2;
+  ctx.fillStyle = GREY;
+
+  /* --- あし（こしを おとした かまえ。すそが ひろい）--- */
+  ctx.beginPath();
+  ctx.moveTo(-19, -58);
+  ctx.lineTo(-36, -34);
+  ctx.lineTo(-16, 0);
+  ctx.lineTo(-4, -14);
+  ctx.lineTo(4, -14);
+  ctx.lineTo(18, 0);
+  ctx.lineTo(36, -34);
+  ctx.lineTo(19, -58);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  /* --- からだ --- */
+  roundRect(ctx, -19, -121, 38, 66, 8);
+  ctx.fill(); ctx.stroke();
+
+  /* --- ★あかい マフラー（うしろに たなびく）--- */
+  ctx.fillStyle = SCARF; ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  roundRect(ctx, -22, -128, 44, 13, 5); ctx.fill(); ctx.stroke();
+  const flow = Math.sin(t * 3.2) * 7;
+  ctx.beginPath();
+  ctx.moveTo(-18, -126);
+  ctx.quadraticCurveTo(-46, -122 + flow, -62, -96 + flow * 1.4);
+  ctx.quadraticCurveTo(-46, -108 + flow, -18, -114);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  /* --- りょうての やじるし（きんいろ。こうげきで まえに でる）--- */
+  for (const d of [-1, 1]) {
+    ctx.save();
+    ctx.scale(d, 1);
+    ctx.translate((d > 0 ? cast * 16 : 0), wobble * (d > 0 ? 1 : -1));
+    ctx.fillStyle = GOLD; ctx.strokeStyle = GOLD2; ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.moveTo(17, -107);
+    ctx.lineTo(42, -107);
+    ctx.lineTo(42, -116);
+    ctx.lineTo(68, -100);
+    ctx.lineTo(42, -84);
+    ctx.lineTo(42, -93);
+    ctx.lineTo(17, -93);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.restore();
+  }
+
+  /* --- あたま --- */
+  ctx.fillStyle = GREY; ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.arc(0, -154, 35, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  /* --- め（つりあがった たてぼう ＝ ほんき）--- */
+  ctx.lineWidth = 3.0; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-11, -170); ctx.lineTo(-7, -146);
+  ctx.moveTo(11, -170);  ctx.lineTo(7, -146);
+  ctx.stroke();
+
+  /* --- くち（へのじ ＝ まじめ）--- */
+  ctx.lineWidth = 2.6;
+  ctx.beginPath();
+  ctx.arc(0, -124, 14, 1.24 * Math.PI, 1.76 * Math.PI);
+  ctx.stroke();
+
+  /* --- かみ（くろい もじゃもじゃ）--- */
+  ctx.save();
+  ctx.fillStyle = '#141414'; ctx.strokeStyle = '#141414';
+  ctx.lineWidth = 3.0; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  for (let i = 0; i <= 26; i++) {
+    const a = Math.PI + (i / 26) * Math.PI;
+    const r = 35.5;
+    ctx.lineTo(Math.cos(a) * r, -154 + Math.sin(a) * r);
+  }
+  [[32, -178], [24, -166], [17, -180], [8, -165], [1, -179],
+   [-8, -166], [-16, -180], [-24, -167], [-32, -177]].forEach(pt => ctx.lineTo(pt[0], pt[1]));
+  ctx.closePath();
+  ctx.fill();
+  for (let k = 0; k < 5; k++) {
+    ctx.beginPath();
+    for (let i = 0; i <= 44; i++) {
+      const a = Math.PI * (1.02 + k * 0.19) + (i / 44) * Math.PI * 0.40;
+      const r = 17 + k * 3.4 + Math.sin(i * 2.1 + k * 1.3) * 10;
+      ctx.lineTo(Math.cos(a) * r, -176 + Math.sin(a) * r * 0.66);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  /* --- ★ひたいの はちまき（きんいろ）--- */
+  ctx.fillStyle = GOLD; ctx.strokeStyle = GOLD2; ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(-34, -160);
+  ctx.quadraticCurveTo(0, -150, 34, -160);
+  ctx.quadraticCurveTo(0, -158, -34, -160);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  ctx.restore();
+}
+
 /* =====================================================================
    ★3大王 ── ターツーマーキーの ちゅうじつな しもべ たち
    この 3たいを たおすと、ターツーマーキー じしんが あいてを して くれます。
@@ -12698,6 +12837,7 @@ function drawSansBoss(ctx, s) { drawSansBody(ctx, s, !!(s && s.enraged)); }
 
 const DRAWERS = {
   nekos: drawNekos,
+  nekos_fight: drawNekosFight,      /* ★うらステージ「さいごの しょうぶ」*/
   sans: drawSans,
   sans_true: drawSansTrue,
   /* ★とくせつ「地底の国」4〜7ステージ */
