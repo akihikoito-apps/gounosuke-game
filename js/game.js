@@ -1638,6 +1638,17 @@ const Game = {
         ctx.fillStyle = 'rgba(255,171,64,' + a.toFixed(2) + ')';
         ctx.beginPath(); ctx.arc(ex, ey, 2.2, 0, Math.PI * 2); ctx.fill();
       }
+    /* ★あわ（科学の館。やくひんタンクから のぼって くる みどりの あわ）*/
+    } else if (kind === 'bubble') {
+      for (let i = 0; i < 16; i++) {
+        const bx = ((i * 71.7) % 100) / 100 * V.w + Math.sin(t * 1.4 + i) * 6;
+        const by = V.groundY - ((t * (12 + i % 5) + i * 61) % (V.groundY * 0.95));
+        const r = 2.4 + (i % 4) * 1.5;
+        const a = 0.18 + 0.32 * Math.abs(Math.sin(t * 1.6 + i));
+        ctx.strokeStyle = 'rgba(126,230,150,' + a.toFixed(2) + ')';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2); ctx.stroke();
+      }
     }
   },
 

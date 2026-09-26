@@ -2948,6 +2948,99 @@ const ENEMIES = {
     isBoss: true,
   },
   /* ==========================================================================
+     ★ だい19しょう「タンクンが逃げ込んだ科学の館」
+     ========================================================================== */
+
+  /* --- ながれーる（ざこ・ゆうれい）---
+       みずの ながれが そのまま おばけに なった もの。
+       ★メタルの こうげきは すりぬけます（ゆうれいの むこうか）。
+       あたった あいてを ★ぬらして すべらせ、どんそくに します★。     */
+  nagareru: {
+    id: 'nagareru', name: 'ながれーる',
+    rarity: 'GR',
+    attr: 'ghost',
+    hp: 1600,   atk: 215,  range: 112,  speed: 34,
+    attackInterval: 1.6,   attackWindup: 0.32,
+    kbCount: 4, scale: 1.1,
+    attackType: 'single', projectile: 'splash',
+    nullify: { attrs: ['metal'] },                        // ★メタルは すりぬける
+    slow: { chance: 0.35, duration: 2.5, rate: 0.55 },    // ★すべらせる
+    money: 210,
+  },
+
+  /* --- なげっと（ざこ・くさ）---
+       みどりの しかくい きかいどり。ちゃいろの はねで うかんで いて、
+       ★とおくから あおい ダーツを 2ほん つづけて なげて きます★。    */
+  nagetto: {
+    id: 'nagetto', name: 'なげっと',
+    rarity: 'GR',
+    attr: 'grass',
+    hp: 1150,   atk: 245,  range: 162,  speed: 42,
+    attackInterval: 1.8,   attackWindup: 0.34,
+    kbCount: 3, scale: 1.05,
+    attackType: 'single', projectile: 'needle',
+    multiHit: { count: 2, delay: 0.18 },                  // ★ダーツ 2ほん
+    flying: true, flyOver: false,                         // うかんで いる（つっこまない）
+    money: 225,
+  },
+
+  /* --- なおきち（6めんの ボス・まじゅつし）---
+       したはんしんが クモの かがくしゃ。
+       きょうらんかを なおす ★くすり★ を もって います。
+       ★クモの巣を はって みかたを どんそくに し★、
+       ★やくひんを なげて とかして きます（やけど）★。
+       ざこを よびながら たたかいます。                                */
+  naokichi: {
+    id: 'naokichi', name: 'なおきち',
+    rarity: 'LR',
+    attr: 'magic',
+    hp: 24000,  atk: 620,  range: 182,  speed: 20,
+    attackInterval: 2.1,   attackWindup: 0.44,
+    kbCount: 99, scale: 1.45,
+    /* ★はんいは せまめ。ひろいと まえせんが まとめて きえます */
+    attackType: 'area',  areaRadius: 80,  projectile: 'jelly',
+    burn: { chance: 0.50, duration: 3.0, dpsRate: 0.20 },
+    /* ★クモの巣は とても きく ので、ひかえめに。
+         はやさ 0.60 → 0.75、かんかく 10 → 15びょう。                */
+    web: { interval: 15, ahead: 300, radius: 130, slowRate: 0.75, duration: 6 },
+    kbImmune: true, stunImmune: true,
+    escort: { id: ['nagareru', 'nagetto'], count: 1, interval: 12, first: 8 },
+    money: 1750,
+    isBoss: true,
+  },
+
+  /* --- きょうらんタンクン（7めんの ボス・むぞくせい）---
+
+       ★もとは みかたの かべやく でした。★
+       ターツーマーキーの ウイルスに のっとられて てきに なって います。
+
+       きょうらんの こうか ＝ ★こうげきりょくが あがる ＋ こうげきが はやい★
+       この 2つ だけ です（じぶんが けずれる ような ことは ありません）。
+
+       ・かべやく だった ので たいりょくは とても おおい
+       ・そのかわり りょうても ほうしんも こちらに むいて いる
+       ・ふきとばし・スタン・どんそくは ぜんぶ きかない
+       ・たいりょく はんぶんで ウイルスが あばれて もっと はやく なる   */
+  tankun_kyoran: {
+    id: 'tankun_kyoran', name: 'きょうらんタンクン',
+    rarity: 'LR',
+    attr: 'none',
+    hp: 30000,
+    atk: 390,                              // ★もとの タンクンは 22。けたちがい
+                                           //   こうげきが とても はやい ぶん、
+                                           //   1げきは ほかの ボスより ひかえめ
+    range: 124,   speed: 40,
+    attackInterval: 1.1,   attackWindup: 0.26,   // ★こうげきが とても はやい
+    kbCount: 99, scale: 1.5,
+    attackType: 'area',  areaRadius: 74,  projectile: null,
+    enrage: { below: 0.5, atkMult: 1.3, intervalMult: 0.72 },
+    kbImmune: true, stunImmune: true, slowImmune: true,
+    escort: { id: ['nagareru', 'nagetto'], count: 1, interval: 11, first: 7 },
+    money: 1950,
+    isBoss: true,
+  },
+
+  /* ==========================================================================
      ★ ターツーマーキー（だい18しょう）
      ========================================================================== */
 
@@ -3544,6 +3637,22 @@ const BACKGROUNDS = {
     deco: 'star',
   },
 
+  /* だい19しょう：科学の館（なか）── しろい タイルと みどりの やくひんタンク */
+  labhall: {
+    sky: ['#0e2230', '#17394b', '#2c6072'],
+    hillFar: '#245061', hillNear: '#132e3c',
+    ground: '#1b3a48', groundTop: '#b9ccd4',
+    deco: 'bubble',
+  },
+
+  /* だい19しょう：おくの ひろま ── みどりの ひかりが もれる ボスべや */
+  labcore: {
+    sky: ['#06170f', '#0d2e1d', '#1b5433'],
+    hillFar: '#1d5c39', hillNear: '#0b2a1b',
+    ground: '#10301f', groundTop: '#3f8f5a',
+    deco: 'bubble',
+  },
+
   /* だい18しょう：ターツーマーキーが しはいする へいげん
        たつまきで なにも なくなった、だだっぴろい あれち */
   stormplain: {
@@ -3839,7 +3948,10 @@ const STAGES = [
     desc: '★大ボス★ 3大王の ひとり「チューチュー」。ちを すい、うごきを とめ、こうげきを かわす。',
     bg: 'bugsky',
     castleHp: 3000,
-    power: 1.5,
+    /* ★きょうらんタンクンは こうげきの かんかくが 1.1びょう しか ない
+         （ふつうの ボスの はんぶん）ので、めもりは いちばん ひくい 1.0。
+         おなじ しょうの ほかの コース（1.7〜2.3）と くらべないで ください。*/
+    power: 1.0,
     /* ★7コースめは 竜巻編と おなじ フルスペック */
     tornado: { interval: 24, chance: 0.60, first: 16 },
     drops: ['alumi', 'cloth', 'glue'],
@@ -3918,7 +4030,7 @@ const STAGES = [
     desc: 'ガレキマルが とおくから いしを なげて くる。ちかづく までが たいへん。',
     bg: 'ruinvillage',
     castleHp: 2400,
-    power: 2.0,
+    power: 2.3,
     tornado: { interval: 28, chance: 0.52, first: 19 },
     drops: ['stone', 'iron', 'string'],
     reward: { coins: 6, exp: 8400 },
@@ -4222,6 +4334,157 @@ const STAGES = [
     reward: { coins: 30, exp: 40000 },
     waves: [
       { at: 2, id: 'tatsumarky_true', count: 1 },
+    ],
+  },
+
+  /* ==========================================================================
+     19しょう「タンクンが逃げ込んだ科学の館」（ぜんぶで 7コース）
+
+     ★たつまきは もう おわって いる ので、たつまきほうは ありません。★
+     そのぶん てきの つよさは 17しょう（埃にまみれた都市）より すこし うえ。
+
+     ★ながれーる★ と ★なげっと★ が この しょうの しゅやくです。
+     コースごとに どちらが さきに くるか・どの ざこが まざるかを かえて、
+     おなじ かんじに ならない ように して います。
+
+     6めん：なおきち（くすりを もって いる）
+     7めん：きょうらんタンクン（6めんを クリアして ムービーを みると でます）
+     ========================================================================== */
+  {
+    no: 144, chapter: 19, course: 1,
+    name: 'じっけんしつの いりぐち',
+    desc: 'しろい タイルの ろうか。みずの おばけ「ながれーる」が すべって くる。',
+    bg: 'labhall',
+    castleHp: 2400,
+    power: 2.3,
+    drops: ['iron', 'glue', 'cloth'],
+    reward: { coins: 12, exp: 14000 },
+    waves: [
+      { at: 3,  id: 'nagareru',  count: 2, gap: 1.8 },
+      { at: 15, id: 'togehaya_t', count: 3, gap: 1.0 },
+      { at: 26, id: 'nagetto',   count: 1 },
+      { at: 38, id: 'nagareru',  count: 3, gap: 1.6, repeat: 20 },
+      { at: 54, id: 'nagetto',   count: 2, gap: 1.8, repeat: 26 },
+      { at: 70, id: 'togehaya_t', count: 4, gap: 0.9, repeat: 22 },
+    ],
+  },
+  {
+    no: 145, chapter: 19, course: 2,
+    name: 'ガラスの ろうか',
+    desc: 'こんどは「なげっと」が さきに くる。とおくから あおい ダーツを なげて くる。',
+    bg: 'labhall',
+    castleHp: 2600,
+    power: 2.2,
+    drops: ['alumi', 'glue', 'string'],
+    reward: { coins: 12, exp: 15000 },
+    waves: [
+      { at: 3,  id: 'nagetto',  count: 2, gap: 2.0 },
+      { at: 16, id: 'susube',   count: 2, gap: 1.6 },
+      { at: 28, id: 'nagareru', count: 2, gap: 1.6 },
+      { at: 42, id: 'nagetto',  count: 3, gap: 1.6, repeat: 22 },
+      { at: 58, id: 'nagareru', count: 2, gap: 1.8, repeat: 24 },
+      { at: 74, id: 'susube',   count: 2, gap: 2.4, repeat: 30 },
+    ],
+  },
+  {
+    no: 146, chapter: 19, course: 3,
+    name: 'やくひんの たな',
+    desc: 'ながれーるが どっと おしよせる。★メタルの こうげきは すりぬける★ ので ちゅうい。',
+    bg: 'labhall',
+    castleHp: 2500,
+    power: 2.1,
+    drops: ['glue', 'iron', 'cloth'],
+    reward: { coins: 13, exp: 15500 },
+    waves: [
+      { at: 3,  id: 'nagareru',    count: 2, gap: 1.6 },
+      { at: 17, id: 'chirimaimai', count: 1 },
+      { at: 29, id: 'nagareru',    count: 3, gap: 1.4 },
+      { at: 44, id: 'nagetto',     count: 2, gap: 1.8, repeat: 28 },
+      { at: 58, id: 'nagareru',    count: 3, gap: 1.4, repeat: 24 },
+      { at: 76, id: 'chirimaimai', count: 1, repeat: 46 },
+    ],
+  },
+  {
+    no: 147, chapter: 19, course: 4,
+    name: 'ぶんりきの へや',
+    desc: 'なげっとの むれ。はやい「イノチチ」と そらの「ハネネコ」も まざる。',
+    bg: 'labhall',
+    castleHp: 2700,
+    power: 2.0,
+    drops: ['alumi', 'iron', 'glue'],
+    reward: { coins: 13, exp: 16000 },
+    waves: [
+      { at: 3,  id: 'nagetto',   count: 3, gap: 1.6 },
+      { at: 15, id: 'inochichi', count: 2, gap: 0.8 },
+      { at: 28, id: 'haneneko',  count: 2, gap: 1.6 },
+      { at: 42, id: 'nagetto',   count: 3, gap: 1.6, repeat: 20 },
+      { at: 56, id: 'inochichi', count: 3, gap: 0.8, repeat: 24 },
+      { at: 72, id: 'nagareru',  count: 2, gap: 1.8, repeat: 26 },
+    ],
+  },
+  {
+    no: 148, chapter: 19, course: 5,
+    name: 'はいすいの みち',
+    desc: 'ながれーると なげっとが かわりばんこに くる。おもい「ガレキマル」も でる。',
+    bg: 'labhall',
+    castleHp: 2800,
+    power: 1.7,
+    drops: ['iron', 'stone', 'glue'],
+    reward: { coins: 14, exp: 17000 },
+    waves: [
+      { at: 3,  id: 'nagareru',   count: 2, gap: 1.6 },
+      { at: 13, id: 'nagetto',    count: 2, gap: 1.6 },
+      { at: 24, id: 'garekimaru', count: 1 },
+      { at: 34, id: 'nagareru',   count: 3, gap: 1.4 },
+      { at: 46, id: 'nagetto',    count: 3, gap: 1.6, repeat: 22 },
+      { at: 60, id: 'kamajirou',  count: 1, repeat: 44 },
+      { at: 76, id: 'nagareru',   count: 3, gap: 1.4, repeat: 24 },
+    ],
+  },
+  {
+    no: 149, chapter: 19, course: 6,
+    name: 'なおきちの けんきゅうしつ',
+    desc: '★大ボス★ クモの かがくしゃ「なおきち」。クモの巣で うごきを とめ、やくひんを なげて くる。',
+    bg: 'labcore',
+    castleHp: 2900,
+    /* ★ボスは クモの巣＋やけど もち なので、つよさの めもりは ひかえめ */
+    power: 1.25,
+    drops: ['glue', 'alumi', 'iron'],
+    reward: { coins: 16, exp: 19000 },
+    waves: [
+      { at: 3,  id: 'nagareru', count: 2, gap: 1.6 },
+      { at: 15, id: 'nagetto',  count: 2, gap: 1.6 },
+      /* ★ボスは しろに たどりつく まえに でて きます。
+           おともの ざこが まわりを かためて まもります。            */
+      { at: 34, id: 'naokichi', count: 1, hold: 0.62 },
+      { at: 34, id: 'nagareru', count: 3, gap: 1.0 },
+      { at: 38, id: 'nagetto',  count: 2, gap: 1.2 },
+      { at: 54, id: 'nagareru', count: 3, gap: 1.4, repeat: 22 },
+      { at: 70, id: 'nagetto',  count: 2, gap: 1.6, repeat: 26 },
+    ],
+  },
+  {
+    no: 150, chapter: 19, course: 7,
+    name: 'きょうらんの ひろま',
+    desc: '★大ボス★ ウイルスに のっとられた「きょうらんタンクン」。かべやく だった ころの おもかげは もう ない。',
+    bg: 'labcore',
+    castleHp: 3000,
+    /* ★きょうらんタンクンは こうげきの かんかくが 1.1びょう しか ない
+         （ふつうの ボスの はんぶん）ので、めもりは いちばん ひくい 1.0。
+         おなじ しょうの ほかの コース（1.7〜2.3）と くらべないで ください。*/
+    power: 1.0,
+    drops: ['glue', 'alumi', 'cloth'],
+    reward: { coins: 20, exp: 24000 },
+    waves: [
+      { at: 3,  id: 'nagetto',       count: 2, gap: 1.6 },
+      { at: 14, id: 'nagareru',      count: 2, gap: 1.6 },
+      /* ★タンクンも はやめに でて きて、ざこに まもられながら たたかいます */
+      { at: 32, id: 'tankun_kyoran', count: 1, hold: 0.62 },
+      { at: 32, id: 'nagareru',      count: 3, gap: 1.0 },
+      { at: 36, id: 'nagetto',       count: 2, gap: 1.2 },
+      { at: 52, id: 'nagetto',       count: 3, gap: 1.6, repeat: 22 },
+      { at: 66, id: 'nagareru',      count: 3, gap: 1.4, repeat: 20 },
+      { at: 82, id: 'susube',        count: 2, gap: 2.4, repeat: 30 },
     ],
   },
 
@@ -6627,16 +6890,20 @@ const CHAPTERS = {
          ちずは ちきゅうへんと おなじ。そこに あかい もんが たって います。 ---- */
   /* ★たつまきちずは ひだり → みぎ に すすみます。
        あたらしい しょうは いつも「いちばん みぎ」に たします。       */
-  13:{ name: '新・始まりの門', short: 'あたらしいもん', x: 0.10, y: 0.56, icon: '⛩️', world: 'storm' },
+  13:{ name: '新・始まりの門', short: 'あたらしいもん', x: 0.11, y: 0.54, icon: '⛩️', world: 'storm' },
   /* ★たたかいの ない ばしょ（shop: true）。タップすると おみせに はいります */
-  14:{ name: 'ネコスの店', short: 'ネコスのみせ', x: 0.26, y: 0.76, icon: '☕', world: 'storm', shop: true },
-  15:{ name: '虫に支配された町', short: 'むしのまち', x: 0.43, y: 0.36, icon: '🦟', world: 'storm' },
-  16:{ name: '秩序が失われた村', short: 'むら', x: 0.61, y: 0.72, icon: '🏚️', world: 'storm' },
-  17:{ name: '埃にまみれた都市', short: 'ほこりのまち', x: 0.78, y: 0.38, icon: '🏙️', world: 'storm' },
-  /* ★さいしゅう しょう。3大王を たおした あと、ターツーマーキー ほんにんが
-       まちうける ひろい へいげん。コースは 2つ（2つめは「うらステージ」）*/
-  18:{ name: 'ターツーマーキーが支配する平原', short: 'へいげん', x: 0.90, y: 0.72,
+  14:{ name: 'ネコスの店', short: 'ネコスのみせ', x: 0.21, y: 0.78, icon: '☕', world: 'storm', shop: true },
+  15:{ name: '虫に支配された町', short: 'むしのまち', x: 0.35, y: 0.34, icon: '🦟', world: 'storm' },
+  16:{ name: '秩序が失われた村', short: 'むら', x: 0.49, y: 0.72, icon: '🏚️', world: 'storm' },
+  17:{ name: '埃にまみれた都市', short: 'ほこりのまち', x: 0.63, y: 0.34, icon: '🏙️', world: 'storm' },
+  /* ★ターツーマーキー ほんにんが まちうける ひろい へいげん。
+       コースは 2つ（2つめは「うらステージ」）*/
+  18:{ name: 'ターツーマーキーが支配する平原', short: 'へいげん', x: 0.77, y: 0.72,
        icon: '🌪️', world: 'storm' },
+  /* ★タンクンが にげこんだ さき。ウイルスを なおす くすりを さがす しょう。
+       たつまきは もう おわって いる ので ★たつまきほうは ありません★。    */
+  19:{ name: 'タンクンが逃げ込んだ科学の館', short: 'かがくのやかた', x: 0.88, y: 0.36,
+       icon: '🧪', world: 'storm' },
 };
 
 
@@ -7358,6 +7625,22 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.52', date: '2026-09-26',
+    title: '★あたらしい しょう「タンクンが逃げ込んだ科学の館」★（ぜんぶで 7コース）',
+    items: [
+      'たつまきちずの ★いちばん みぎ★ に、あたらしい しょうが できました。ウイルスに のっとられた タンクンが にげこんだ けんきゅうしょ です。',
+      '★この しょうから たつまきほうは ありません。★ ターツーマーキーを たおした とき、せかいじゅうの たつまきが ほどけた から です。',
+      'あたらしい ざこ 2しゅるい。★ながれーる★（みずの ながれの おばけ。★メタルの こうげきが すりぬける★・あたると すべって どんそくに なる）と ★なげっと★（みどりの きかいどり。うかんだ まま ★あおい ダーツを 2ほん★ なげて くる）。',
+      'この 2たいが しゅやくで、コースごとに ★どちらが さきに くるか★ と ★どの むかしの てきが まざるか★ を かえて あります。',
+      '★6めんの ボスは クモの かがくしゃ「なおきち」★。クモの巣を はって うごきを とめ、やくひんを なげて とかして きます。ざこを よびながら たたかいます。',
+      '★なおきちを たおすと ムービーが ながれます。★ なおきちは わるものでは なく、タンクンを なおそうと して できなかった ひと でした。★きょうらんかを なおす くすり★ を わたして くれます。',
+      'ムービーを みると ★7めん「きょうらんの ひろま」★ が でて きます。',
+      '★7めんの ボスは きょうらんタンクン★。もとは かべやく でしたが、いまは ★こうげきりょくが 390（もとは 22）・こうげきの かんかくが 1.1びょう★ の あいてです。',
+      'なおきちも タンクンも、ほかの ボスと おなじく ★はやめに でて きて、ざこに まもられながら★ たたかいます。',
+      'つよさは「埃にまみれた都市」より すこし うえ に して あります。',
+    ],
+  },
   {
     ver: '6.51', date: '2026-09-26',
     title: 'タンクンが ★てきに なって★ はしりさる ながれに かえました',

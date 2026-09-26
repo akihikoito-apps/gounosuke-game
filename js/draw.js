@@ -10028,6 +10028,301 @@ function drawTankunKyoran(ctx, s) {
   ctx.restore();
 }
 
+
+/* ==========================================================================
+   ★ だい19しょう「タンクンが逃げ込んだ科学の館」の キャラたち
+   ========================================================================== */
+
+/* --- ながれーる（ざこ・ぞくせい：ゆうれい）---
+     みずの ながれが そのまま おばけに なった もの。
+     あたまの うしろから ながい ながれが たなびいて いて、
+     したの ふちは なみなみ（ゆかに ついて いない）。
+     ★メタルの こうげきは すりぬけます。                              */
+function drawNagareru(ctx, s) {
+  const t = (s && s.t) || 0;
+  const atk = (s && s.atk !== undefined) ? s.atk : -1;
+  const cast = (atk >= 0) ? (1 - Math.abs(atk - 0.5) * 2) : 0;
+  const INK = '#12303f', BLUE = '#33a7dd', BLUE2 = '#2a8fc0';
+  const flow = Math.sin(t * 2.2) * 5;
+
+  ctx.save();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.translate(0, Math.sin(t * 1.8) * 2);
+
+  /* ★あたまの うしろから たなびく ながれ（うしろ ＝ ひだり）*/
+  ctx.fillStyle = BLUE;
+  ctx.beginPath();
+  ctx.moveTo(-6, -96);
+  ctx.bezierCurveTo(-34, -112 + flow, -8, -128 - flow, -30, -150 + flow);
+  ctx.bezierCurveTo(-52, -168 - flow, -18, -176 + flow, -40, -192);
+  ctx.lineTo(-18, -194);
+  ctx.bezierCurveTo(-2, -176 + flow, -32, -166 - flow, -10, -148 + flow);
+  ctx.bezierCurveTo(10, -130 - flow, -14, -114 + flow, 14, -96);
+  ctx.closePath(); ctx.fill();
+
+  /* ★はやさの せん */
+  ctx.strokeStyle = '#7fd3f2'; ctx.lineWidth = 3;
+  for (const [x, y, w] of [[-58, -176, 26], [-52, -146, 22], [-62, -118, 20]]) {
+    for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      ctx.moveTo(x - flow, y + i * 7); ctx.lineTo(x + w - flow, y + i * 7);
+      ctx.stroke();
+    }
+  }
+
+  /* ★からだ（かどまるの しかく）*/
+  ctx.fillStyle = BLUE;
+  roundRect(ctx, -34, -98, 68, 82, 14); ctx.fill();
+  /* したの ふち（なみなみ）*/
+  ctx.beginPath();
+  ctx.moveTo(-34, -20);
+  for (let i = 0; i < 5; i++) {
+    const x0 = -34 + i * 13.6;
+    ctx.quadraticCurveTo(x0 + 3.4, -20 + 12 + Math.sin(t * 4 + i) * 2, x0 + 6.8, -20);
+    ctx.quadraticCurveTo(x0 + 10.2, -20 - 6, x0 + 13.6, -20);
+  }
+  ctx.lineTo(34, -30); ctx.lineTo(-34, -30);
+  ctx.closePath(); ctx.fill();
+
+  /* かげ */
+  ctx.fillStyle = BLUE2;
+  roundRect(ctx, -34, -40, 68, 20, 8); ctx.fill();
+
+  /* ★かお（ななめの め 2ほん と しかくい くち）*/
+  ctx.strokeStyle = INK; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(-14, -84); ctx.lineTo(-10, -62); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(12, -84);  ctx.lineTo(8, -62);   ctx.stroke();
+  ctx.lineWidth = 3.4;
+  const mo = 4 + cast * 7;                       // うつ ときに くちが ひらく
+  ctx.beginPath();
+  ctx.moveTo(-16, -48); ctx.lineTo(16, -50);
+  ctx.lineTo(16, -50 + mo * 2); ctx.lineTo(-14, -48 + mo * 2);
+  ctx.closePath(); ctx.stroke();
+
+  /* こうげき：みずの かたまりを とばす */
+  if (cast > 0.12) {
+    ctx.save(); ctx.globalAlpha = cast;
+    ctx.fillStyle = '#7fd3f2';
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.ellipse(48 + i * 18 + cast * 14, -54 + Math.sin(t * 7 + i) * 8,
+                  8 - i * 1.6, 6 - i * 1.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+/* --- なげっと（ざこ・ぞくせい：くさ）---
+     みどりの しかくい きかいどりの ような もの。
+     まるい あおい かお、あかい くちばしの おおい、ながい あおい ダーツ。
+     したには ちゃいろの はねが 2まい。とおくから ダーツを なげて きます。 */
+function drawNagetto(ctx, s) {
+  const t = (s && s.t) || 0;
+  const atk = (s && s.atk !== undefined) ? s.atk : -1;
+  const cast = (atk >= 0) ? (1 - Math.abs(atk - 0.5) * 2) : 0;
+  const INK = '#1e2a18', GREEN = '#57b843', GREEN2 = '#3f8f30';
+  const BLUE = '#33a7dd', RED = '#d6382a', WING = '#7a5535';
+  const flap = Math.sin(t * 9) * 0.34;
+
+  ctx.save();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.translate(0, -Math.sin(t * 2.4) * 3);
+
+  /* ★はね（したに 2まい。パタパタ する）*/
+  for (const [d, ph] of [[-1, 0.0], [1, 0.9]]) {
+    ctx.save();
+    ctx.translate(d * 16, -18);
+    ctx.rotate(d * (0.55 + flap + ph * 0.12));
+    ctx.fillStyle = WING; ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(0, -4);
+    ctx.quadraticCurveTo(-10, 30, -40, 44);
+    ctx.quadraticCurveTo(-30, 30, -24, 26);
+    ctx.quadraticCurveTo(-16, 26, -12, 20);
+    ctx.quadraticCurveTo(-6, 18, 4, 12);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ★みどりの しかくい からだ */
+  ctx.fillStyle = GREEN; ctx.strokeStyle = INK; ctx.lineWidth = 2.6;
+  roundRect(ctx, -34, -76, 66, 60, 14); ctx.fill(); ctx.stroke();
+
+  /* ひだりの とげ（みどり）*/
+  ctx.fillStyle = GREEN2;
+  for (const y of [-62, -40]) {
+    ctx.beginPath();
+    ctx.moveTo(-34, y); ctx.lineTo(-52, y - 4); ctx.lineTo(-34, y + 7);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+
+  /* あおい まるい かお */
+  ctx.fillStyle = BLUE;
+  ctx.beginPath(); ctx.arc(-1, -46, 27, 0, Math.PI * 2); ctx.fill();
+
+  /* ★あかい くちばしの おおい（ひしがた）*/
+  ctx.fillStyle = RED; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(22, -74); ctx.lineTo(42, -46); ctx.lineTo(22, -18); ctx.lineTo(14, -46);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  /* おおいの め（ちいさな あな）*/
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(27, -46, 3, 0, Math.PI * 2); ctx.fill();
+  /* よこの あかい かぎづめ */
+  ctx.fillStyle = RED;
+  ctx.beginPath();
+  ctx.moveTo(6, -34); ctx.lineTo(24, -30); ctx.lineTo(24, -24); ctx.lineTo(6, -28);
+  ctx.closePath(); ctx.fill();
+
+  /* ★ながい あおい ダーツ（くちばし）*/
+  ctx.fillStyle = BLUE; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(40, -52); ctx.lineTo(78 + cast * 10, -46); ctx.lineTo(40, -40);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  /* ★こうげき：ダーツを なげる */
+  if (cast > 0.12) {
+    ctx.save(); ctx.globalAlpha = cast;
+    ctx.fillStyle = BLUE; ctx.strokeStyle = INK; ctx.lineWidth = 1.6;
+    for (let i = 0; i < 2; i++) {
+      const bx = 92 + i * 26 + cast * 18, by = -48 + i * 10;
+      ctx.beginPath();
+      ctx.moveTo(bx, by - 5); ctx.lineTo(bx + 22, by); ctx.lineTo(bx, by + 5);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+/* --- なおきち（6めんの ボス・ぞくせい：まじゅつし）---
+     しろい はくいの かがくしゃ。ゴーグルを かけて いて、
+     したはんしんが ★クモ★（ほそい あしが 8ぽん）。
+     おなかに けいさんき、みぎてに みどりの くすりの フラスコ。
+     ★クモの巣を はって、やくひんを なげて きます。                  */
+function drawNaokichi(ctx, s) {
+  const t = (s && s.t) || 0;
+  const atk = (s && s.atk !== undefined) ? s.atk : -1;
+  const cast = (atk >= 0) ? (1 - Math.abs(atk - 0.5) * 2) : 0;
+  const INK = '#23252c', COAT = '#f4f2ec', COAT2 = '#d9d5cb';
+  const SKIN = '#f0c9a4', HAIR = '#e8c765', GLASS = '#cfe6f2', MED = '#5fd23a';
+  const step = Math.sin(t * 3) * 3;
+
+  ctx.save();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+
+  /* ★クモの あし（きんぞくの ほそい あし。りょうがわに 4ほんずつ）*/
+  for (let i = 0; i < 4; i++) {
+    for (const d of [-1, 1]) {
+      const sp = step * (i % 2 ? 1 : -1) * d;
+      /* ひざは どうたいより したに おく（からだに かぶらない ように）*/
+      const kx = d * (42 + i * 13), ky = -60 - i * 4;
+      ctx.beginPath();
+      ctx.moveTo(d * 20, -46);
+      ctx.lineTo(kx, ky + sp);
+      ctx.lineTo(d * (54 + i * 17), 0);
+      /* そとがわの こい せん → うちがわの あかるい せん の 2どがき */
+      ctx.strokeStyle = INK;     ctx.lineWidth = 7; ctx.stroke();
+      ctx.strokeStyle = '#b9bec7'; ctx.lineWidth = 4; ctx.stroke();
+    }
+  }
+
+  /* ★どうたい（まるい はくい）*/
+  ctx.fillStyle = COAT; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.ellipse(0, -48, 38, 32, 0, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = COAT2;
+  ctx.beginPath(); ctx.ellipse(0, -36, 34, 18, 0, 0, Math.PI * 2); ctx.fill();
+
+  /* ★おなかの けいさんき */
+  ctx.fillStyle = '#6fb6e8'; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+  roundRect(ctx, -17, -54, 34, 30, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#e8f4fb';
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) {
+    ctx.fillRect(-13 + c * 8, -46 + r * 7, 5.4, 4.6);
+  }
+
+  /* ★うわはんしん（はくい）*/
+  ctx.fillStyle = COAT; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(-22, -70);
+  ctx.quadraticCurveTo(-26, -96, -14, -106);
+  ctx.lineTo(16, -106);
+  ctx.quadraticCurveTo(28, -96, 24, -70);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  /* えりと ネクタイ */
+  ctx.fillStyle = '#3f6fa8';
+  ctx.beginPath();
+  ctx.moveTo(1, -106); ctx.lineTo(9, -104); ctx.lineTo(6, -84); ctx.lineTo(0, -84);
+  ctx.closePath(); ctx.fill();
+
+  /* ★みぎての フラスコ（みどりの くすり。あわが でて いる）*/
+  ctx.save();
+  ctx.translate(34 + cast * 14, -84 - cast * 12);
+  ctx.rotate(cast * 0.5);
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  ctx.fillStyle = 'rgba(232,244,248,.9)';
+  ctx.beginPath();
+  ctx.moveTo(-6, -22); ctx.lineTo(6, -22); ctx.lineTo(16, 10);
+  ctx.quadraticCurveTo(0, 18, -16, 10);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = MED;
+  ctx.beginPath();
+  ctx.moveTo(-11, -2); ctx.lineTo(11, -2); ctx.lineTo(15, 9);
+  ctx.quadraticCurveTo(0, 16, -15, 9);
+  ctx.closePath(); ctx.fill();
+  /* あわ */
+  ctx.fillStyle = '#d8ffcb';
+  for (let i = 0; i < 3; i++) {
+    const a = t * 3 + i * 2;
+    ctx.beginPath();
+    ctx.arc(Math.sin(a) * 6, -6 - ((t * 14 + i * 9) % 16), 2.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+  /* うで */
+  ctx.strokeStyle = COAT; ctx.lineWidth = 9;
+  ctx.beginPath(); ctx.moveTo(20, -96); ctx.lineTo(32 + cast * 14, -80 - cast * 12); ctx.stroke();
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.moveTo(20, -96); ctx.lineTo(32 + cast * 14, -80 - cast * 12); ctx.stroke();
+
+  /* ★あたま */
+  ctx.fillStyle = SKIN; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.ellipse(1, -126, 22, 24, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  /* かみ（きんぱつ）*/
+  ctx.fillStyle = HAIR;
+  ctx.beginPath();
+  ctx.moveTo(-22, -130);
+  ctx.quadraticCurveTo(-22, -156, 2, -152);
+  ctx.quadraticCurveTo(24, -152, 23, -128);
+  ctx.quadraticCurveTo(10, -140, -4, -134);
+  ctx.quadraticCurveTo(-14, -130, -22, -130);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  /* ★ゴーグル */
+  ctx.strokeStyle = INK; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-22, -132); ctx.lineTo(23, -132); ctx.stroke();
+  ctx.fillStyle = GLASS; ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.ellipse(-7, -125, 9, 8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(12, -125, 9, 8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  /* め */
+  ctx.fillStyle = '#4a3a22';
+  ctx.beginPath(); ctx.arc(-6, -125, 3.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(13, -125, 3.6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-4.6, -126.6, 1.3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(14.4, -126.6, 1.3, 0, Math.PI * 2); ctx.fill();
+  /* くち */
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.arc(3, -113, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+
+  ctx.restore();
+}
+
 /* =====================================================================
    ★3大王 ── ターツーマーキーの ちゅうじつな しもべ たち
    この 3たいを たおすと、ターツーマーキー じしんが あいてを して くれます。
@@ -12928,6 +13223,8 @@ const DRAWERS = {
   nekos: drawNekos,
   nekos_fight: drawNekosFight,      /* ★うらステージ「さいごの しょうぶ」*/
   tankun_kyoran: drawTankunKyoran,  /* ★ウイルスで きょうらんした タンクン */
+  /* ★だい19しょう「タンクンが逃げ込んだ科学の館」*/
+  nagareru: drawNagareru, nagetto: drawNagetto, naokichi: drawNaokichi,
   sans: drawSans,
   sans_true: drawSansTrue,
   /* ★とくせつ「地底の国」4〜7ステージ */

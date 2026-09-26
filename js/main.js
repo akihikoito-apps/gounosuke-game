@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.51';
+  const GAME_VERSION = '6.52';
 
 
   /* =================================================
@@ -4207,6 +4207,86 @@
     ctx.restore();
   }
 
+  /* ★科学の館の なか（しろい タイルと みどりの やくひんタンク）*/
+  function stLab(ctx, W, H, dark) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, dark ? '#0b1a24' : '#16323f');
+    g.addColorStop(0.7, dark ? '#16323f' : '#2c6072');
+    g.addColorStop(1, dark ? '#0d2029' : '#1b3a48');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    /* おくの やくひんタンク */
+    for (let i = 0; i < 4; i++) {
+      const x = W * (0.10 + i * 0.26), w = Math.min(W, H) * 0.11;
+      ctx.fillStyle = dark ? 'rgba(60,160,110,.35)' : 'rgba(90,210,140,.45)';
+      roundRect(ctx, x - w / 2, H * 0.34, w, H * 0.42, w * 0.22); ctx.fill();
+      ctx.strokeStyle = 'rgba(200,225,235,.45)'; ctx.lineWidth = Math.max(1.5, W * 0.003);
+      roundRect(ctx, x - w / 2, H * 0.34, w, H * 0.42, w * 0.22); ctx.stroke();
+      /* あわ */
+      ctx.fillStyle = 'rgba(190,255,205,.5)';
+      for (let k = 0; k < 3; k++) {
+        ctx.beginPath();
+        ctx.arc(x + (k - 1) * w * 0.22, H * (0.72 - k * 0.11), w * 0.07, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    /* ゆか（しろい タイル）*/
+    ctx.fillStyle = dark ? '#1b3a48' : '#2b5668';
+    ctx.fillRect(0, H * 0.78, W, H * 0.22);
+    ctx.strokeStyle = 'rgba(185,204,212,.45)'; ctx.lineWidth = 1.5;
+    for (let i = 0; i <= 10; i++) {
+      ctx.beginPath(); ctx.moveTo(W * (i / 10), H * 0.78); ctx.lineTo(W * (i / 10), H); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.moveTo(0, H * 0.78); ctx.lineTo(W, H * 0.78); ctx.stroke();
+  }
+
+  /* ★くすりの フラスコ（みどりの みずと あわ）*/
+  function stFlask(ctx, cx, yBase, h, tilt) {
+    ctx.save();
+    ctx.translate(cx, yBase); ctx.rotate(tilt || 0);
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = Math.max(1.8, h * 0.07);
+    ctx.fillStyle = 'rgba(236,246,250,.92)';
+    ctx.beginPath();
+    ctx.moveTo(-h * 0.17, -h);
+    ctx.lineTo(h * 0.17, -h);
+    ctx.lineTo(h * 0.46, -h * 0.06);
+    ctx.quadraticCurveTo(0, h * 0.12, -h * 0.46, -h * 0.06);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#5fd23a';
+    ctx.beginPath();
+    ctx.moveTo(-h * 0.33, -h * 0.34);
+    ctx.lineTo(h * 0.33, -h * 0.34);
+    ctx.lineTo(h * 0.44, -h * 0.05);
+    ctx.quadraticCurveTo(0, h * 0.10, -h * 0.44, -h * 0.05);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#d8ffcb';
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc((i - 1) * h * 0.16, -h * (0.46 + i * 0.13), h * 0.06, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /* ★おくへ つづく おおきな とびら */
+  function stDoor(ctx, cx, yBase, w) {
+    const h = w * 1.35;
+    ctx.save();
+    ctx.translate(cx, yBase);
+    ctx.fillStyle = '#3d4a52'; ctx.strokeStyle = '#c8d6dc';
+    ctx.lineWidth = Math.max(2, w * 0.035);
+    roundRect(ctx, -w / 2, -h, w, h, w * 0.08); ctx.fill(); ctx.stroke();
+    /* まんなかの すきま（みどりの ひかりが もれる）*/
+    ctx.fillStyle = 'rgba(126,230,150,.55)';
+    ctx.fillRect(-w * 0.03, -h, w * 0.06, h);
+    ctx.strokeStyle = 'rgba(200,225,235,.5)'; ctx.lineWidth = Math.max(1.5, w * 0.02);
+    for (let i = 1; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(-w / 2, -h * (i / 4)); ctx.lineTo(w / 2, -h * (i / 4)); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   function stNamePlate(ctx, W, H, name, sub, color) {
     ctx.save();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -4851,6 +4931,101 @@
         stFlash(c, W, H, '#2a1338');
         stChar(c, 'tankun_kyoran', W * 0.5, H * 0.90, H * 0.30);
         stTitle(c, W, H, 'つづく', '#ff8a80');
+      } },
+  ];
+
+
+  /* --- 「なおきちの けんきゅうしつ」を クリアした あとの おはなし ---
+         くすりを てに いれる。ここで 7めんが あそべる ように なります。 */
+  const STORY_MEDICINE = [
+    /* 1 なおきちが たおれる */
+    { text: 'クモの あしが おれ、なおきちは がらがらと くずれおちた。けんきゅうしつに、しずけさが もどる。',
+      art: (c, W, H) => {
+        stLab(c, W, H, true);
+        stDown(c, 'naokichi', W * 0.60, H * 0.92, H * 0.34, -1.25);
+        stChar(c, 'nekos_fight', W * 0.20, H * 0.94, H * 0.44);
+        stChar(c, 'purio', W * 0.36, H * 0.96, H * 0.22);
+      } },
+
+    /* 2 フラスコが ころがって くる */
+    { text: 'コロン、と ── なにかが ころがって きた。みどりの みずが はいった、ちいさな ★フラスコ★ だ。',
+      art: (c, W, H) => {
+        stLab(c, W, H, true);
+        stRays(c, W, H, W * 0.50, H * 0.70, '#7ee696', 16);
+        stFlask(c, W * 0.50, H * 0.90, H * 0.26, 0.45);
+        stChar(c, 'purio', W * 0.76, H * 0.95, H * 0.28);
+      } },
+
+    /* 3 なおきちが しゃべる */
+    { text: '「……もって いけ。それが、わしの つくった ★きょうらんかを なおす くすり★ じゃ。」',
+      art: (c, W, H) => {
+        stLab(c, W, H, true);
+        stDown(c, 'naokichi', W * 0.52, H * 0.94, H * 0.40, -1.1);
+        stChar(c, 'purio', W * 0.86, H * 0.96, H * 0.24);
+      } },
+
+    /* 4 なぜ たたかった のか */
+    { text: '「あの あおい せんしゃが とびこんで きてな。なおして やろうと したが、あばれて どうにも ならん。とじこめる しか なかった。」',
+      art: (c, W, H) => {
+        stLab(c, W, H, true);
+        stDown(c, 'naokichi', W * 0.34, H * 0.94, H * 0.38, -1.0);
+        stChar(c, 'nekos_fight', W * 0.72, H * 0.94, H * 0.48);
+      } },
+
+    /* 5 タンクンは おくに いる */
+    { text: '「あいつは ★いちばん おくの ひろま★ に おる。……きを つけろ。もう ことばは つうじん。」',
+      art: (c, W, H) => {
+        stLab(c, W, H, true);
+        stFlash(c, W, H, '#10281a');
+        stDoor(c, W * 0.5, H * 0.88, Math.min(W * 0.26, H * 0.40));
+      } },
+
+    /* 6 ぷりおが うけとる */
+    { text: '「……ありがとう、なおきち。」　ぷりおぷりねこは、フラスコを りょうてで しっかりと うけとった。',
+      art: (c, W, H) => {
+        stLab(c, W, H, false);
+        stRays(c, W, H, W * 0.44, H * 0.62, '#7ee696', 18);
+        stChar(c, 'purio', W * 0.44, H * 0.94, H * 0.48);
+        stFlask(c, W * 0.70, H * 0.82, H * 0.20, 0);
+      } },
+
+    /* 7 みんなで かくにん */
+    { text: '「これを のませれば、タンクンは もとに もどるんだね？」「……ああ。1ぱつ しか ない。★そとさないように な。★」',
+      art: (c, W, H) => {
+        stLab(c, W, H, false);
+        stChar(c, 'purio',   W * 0.24, H * 0.95, H * 0.30);
+        stChar(c, 'kabekun', W * 0.42, H * 0.95, H * 0.30);
+        stChar(c, 'akibou',  W * 0.60, H * 0.95, H * 0.34);
+        stChar(c, 'nekos_fight', W * 0.82, H * 0.94, H * 0.44);
+      } },
+
+    /* 8 いそごう */
+    { text: '「まってて タンクン。★いま、もとに もどして あげる。★」　ぷりおぷりねこが、おくの とびらへ かけだす。',
+      art: (c, W, H) => {
+        stLab(c, W, H, false);
+        stRays(c, W, H, W * 0.62, H * 0.56, '#ffe8a8', 16);
+        stDoor(c, W * 0.78, H * 0.90, Math.min(W * 0.22, H * 0.34));
+        stChar(c, 'purio', W * 0.34, H * 0.95, H * 0.40);
+        stFlask(c, W * 0.50, H * 0.86, H * 0.16, -0.3);
+      } },
+
+    /* 9 とびらの むこう */
+    { text: 'とびらの むこうから、ゴウン……ゴウン……と、きいた ことの ある キャタピラの おとが きこえて きた。',
+      art: (c, W, H) => {
+        stLab(c, W, H, true);
+        stFlash(c, W, H, '#1a0e26');
+        stDoor(c, W * 0.5, H * 0.90, Math.min(W * 0.30, H * 0.46));
+        stChar(c, 'purio', W * 0.18, H * 0.96, H * 0.24);
+        stChar(c, 'nekos_fight', W * 0.86, H * 0.94, H * 0.38);
+      } },
+
+    /* 10 7めんへ */
+    { text: '★さいごの コース「きょうらんの ひろま」が あそべる ように なりました。★　くすりは 1ぱつ。いこう。',
+      art: (c, W, H) => {
+        stLab(c, W, H, true);
+        stRays(c, W, H, W * 0.5, H * 0.56, '#ff8a80', 20);
+        stChar(c, 'tankun_kyoran', W * 0.5, H * 0.92, H * 0.34);
+        stTitle(c, W, H, 'きょうらんの ひろま', '#ff8a80');
       } },
   ];
 
@@ -7276,6 +7451,10 @@
       desc: 'さいごの しょうぶに かった あと。かえりみちで タンクンが ウイルスに のっとられ、なかまに ほうしんを むけて はしりさって しまう。',
       when: 'さいごの しょうぶ（18-2）に かつと みられます',
       list: () => STORY_FINAL },
+    { key: 'medicine', name: 'くすりを てに いれた',
+      desc: 'かがくしゃ なおきちを たおした あと。なおきちは きょうらんかを なおす くすりを わたして くれる。',
+      when: 'なおきちの けんきゅうしつ（19-6）を クリアすると みられます',
+      list: () => STORY_MEDICINE },
   ];
 
   function openMovies() {
@@ -7399,6 +7578,13 @@
     if (stageNo === 142 && !storySeen('nekos')) {
       markStory('nekos');
       playStory(STORY_NEKOS, () => show('screen-result'));
+      return true;
+    }
+    /* ★19-6「なおきちの けんきゅうしつ」を クリア ── くすりを てに いれる。
+         これを みると 7めん「きょうらんの ひろま」が あそべる ように なります。*/
+    if (stageNo === 149 && !storySeen('medicine')) {
+      markStory('medicine');
+      playStory(STORY_MEDICINE, () => show('screen-result'));
       return true;
     }
     /* ★18-2「さいごの しょうぶ」に かった ── エンディング */
