@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.49';
+  const GAME_VERSION = '6.50';
 
 
   /* =================================================
@@ -4740,42 +4740,96 @@
         stTree(c, W * 0.88, H * 0.94, Math.min(W, H) * 0.14, -0.05);
       } },
 
-    /* 9 まちが もどって くる */
-    { text: 'ふきとばされた まちに、ひとが もどって きた。やねを なおす おと。わらいごえ。ふつうの まいにちが かえって きた。',
+    /* 9 かえりみち */
+    { text: '「かえろう。ネコスの みせで、あまい やつでも のもうぜ。」　みんなで かえりみちを あるいて いた、その ときだった。',
       art: (c, W, H) => {
         stDawn(c, W, H);
-        stHouse(c, W * 0.22, H * 0.94, Math.min(W, H) * 0.20, 0);
-        stHouse(c, W * 0.50, H * 0.96, Math.min(W, H) * 0.24, 0);
-        stHouse(c, W * 0.78, H * 0.94, Math.min(W, H) * 0.20, 0);
-        stPerson(c, W * 0.36, H * 0.97, H * 0.14, 'stand');
-        stPerson(c, W * 0.64, H * 0.97, H * 0.13, 'stand');
+        stChar(c, 'nekos_fight', W * 0.16, H * 0.97, H * 0.40);
+        stChar(c, 'tankun',  W * 0.38, H * 0.97, H * 0.17);
+        stChar(c, 'purio',   W * 0.52, H * 0.97, H * 0.19);
+        stChar(c, 'kabekun', W * 0.66, H * 0.97, H * 0.23);
+        stChar(c, 'akibou',  W * 0.82, H * 0.97, H * 0.27);
       } },
 
-    /* 10 ネコスは おみせに もどった */
-    { text: 'ネコスは なにごとも なかった ように、きょうも おみせで コーヒーを いれて いる。',
+    /* 10 タンクンの ようすが おかしい */
+    { text: 'タンクンが、きゅうに たちどまった。キャタピラが ガタガタと ふるえて いる。',
       art: (c, W, H) => {
         stDawn(c, W, H);
-        stHouse(c, W * 0.50, H * 0.96, Math.min(W, H) * 0.30, 0, '#f6ecd6', '#7a4a34');
-        stChar(c, 'nekos', W * 0.30, H * 0.96, H * 0.44);
-        stCup(c, W * 0.70, H * 0.90, H * 0.14, 0);
+        stChar(c, 'tankun', W * 0.38, H * 0.95, H * 0.30,
+               { t: 0.2, moving: false, atk: -1, hpRatio: 0.4, hpRate: 0.4, roll: 0.35 });
+        stChar(c, 'purio',  W * 0.62, H * 0.96, H * 0.24);
       } },
 
-    /* 11 みんなで */
-    { text: '「……で、いつ また くるんだ、あいつ。」「さあ。そのときは、また みんなで いこう。」',
+    /* 11 ぷりおぷりねこが こえを かける */
+    { text: '「タンクン？　どうしたの、きゅうに。……ねえ、どうしたの！」　ぷりおぷりねこが かけよる。',
       art: (c, W, H) => {
         stDawn(c, W, H);
-        stChar(c, 'nekos',   W * 0.16, H * 0.97, H * 0.44);
-        stChar(c, 'tankun',  W * 0.38, H * 0.97, H * 0.18);
-        stChar(c, 'kabekun', W * 0.50, H * 0.97, H * 0.24);
-        stChar(c, 'akibou',  W * 0.64, H * 0.97, H * 0.28);
-        stChar(c, 'tatamin', W * 0.80, H * 0.97, H * 0.24);
+        stFlash(c, W, H, '#3a2040');
+        stChar(c, 'purio',  W * 0.66, H * 0.95, H * 0.34);
+        stChar(c, 'tankun', W * 0.30, H * 0.95, H * 0.30,
+               { t: 0.2, moving: false, atk: -1, hpRatio: 0.25, hpRate: 0.25, roll: 0.35 });
       } },
 
-    /* 12 おしまい */
-    { text: 'ごうのすけたちの たたかいは、これで おしまい。── あそんで くれて ありがとう！',
+    /* 12 くろい もやが あふれる */
+    { text: 'タンクンの からだの すきまから、★くろい もや★ が あふれだした。……ターツーマーキーが もって いた ★ウイルス★ だ。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#1a0e26');
+        stRays(c, W, H, W * 0.42, H * 0.70, '#7e3f9c', 18);
+        stChar(c, 'tankun_kyoran', W * 0.42, H * 0.95, H * 0.36);
+        stChar(c, 'purio', W * 0.74, H * 0.96, H * 0.26);
+      } },
+
+    /* 13 きょうらん */
+    { text: 'めが まっかに ひかる。ひびわれた からだから ちからが あふれて ── ★タンクンが きょうらんした。★',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#3a0f1a');
+        stRays(c, W, H, W * 0.5, H * 0.60, '#ff3b3b', 22);
+        stBolt(c, W * 0.20, H * 0.04, H * 0.34, '#ff5252');
+        stBolt(c, W * 0.82, H * 0.02, H * 0.30, '#ff5252');
+        stChar(c, 'tankun_kyoran', W * 0.5, H * 0.94, H * 0.52);
+        stNamePlate(c, W, H, 'きょうらん タンクン', 'つよい。でも、とても くるしそう', '#ff8a80');
+      } },
+
+    /* 14 つよいのに くるしそう */
+    { text: 'ひとふりで いわが くだけた。あきらかに つよく なって いる。……でも タンクンは、ずっと くるしそうに うなって いた。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stDebris(c, W, H, 14);
+        stChar(c, 'tankun_kyoran', W * 0.36, H * 0.95, H * 0.44);
+        stChar(c, 'purio',   W * 0.66, H * 0.96, H * 0.22);
+        stChar(c, 'kabekun', W * 0.80, H * 0.96, H * 0.24);
+      } },
+
+    /* 15 ネコスが きづく */
+    { text: '「……この もや、わしも みた ことが ある。あいつが ずっと もちあるいて いた やつじゃ。」　ネコスの かおが けわしく なる。',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stFlash(c, W, H, '#241a3c');
+        stChar(c, 'nekos_fight', W * 0.34, H * 0.94, H * 0.56);
+        stChar(c, 'tankun_kyoran', W * 0.74, H * 0.96, H * 0.30);
+      } },
+
+    /* 16 くすりを さがしに */
+    { text: '「このままでは タンクンの からだが もたん。── ★くすりを さがすんじゃ。★ いそげ！」',
+      art: (c, W, H) => {
+        stPlain(c, W, H, true);
+        stRays(c, W, H, W * 0.5, H * 0.50, '#ffe8a8', 16);
+        stChar(c, 'nekos_fight', W * 0.22, H * 0.96, H * 0.44);
+        stChar(c, 'purio',   W * 0.44, H * 0.97, H * 0.22);
+        stChar(c, 'kabekun', W * 0.58, H * 0.97, H * 0.24);
+        stChar(c, 'akibou',  W * 0.74, H * 0.97, H * 0.28);
+        stChar(c, 'tankun_kyoran', W * 0.90, H * 0.97, H * 0.22);
+      } },
+
+    /* 17 つづく */
+    { text: 'たつまきは おわった。けれど、あたらしい たたかいが はじまった。── ★つぎの しょうへ つづく。★',
       art: (c, W, H) => {
         stDawn(c, W, H);
-        stTitle(c, W, H, 'おしまい', '#ffe08a');
+        stFlash(c, W, H, '#2a1338');
+        stChar(c, 'tankun_kyoran', W * 0.5, H * 0.90, H * 0.30);
+        stTitle(c, W, H, 'つづく', '#ff8a80');
       } },
   ];
 
@@ -7197,8 +7251,8 @@
       desc: 'へいげんで ぜんめつ した あと。とどめを さされそうな タンクンの まえに、おみせの ネコスが あらわれる。',
       when: 'ターツーマーキーの へいげん（18-1）を たたかうと みられます',
       list: () => STORY_NEKOS },
-    { key: 'final', name: 'そして、いつもの あさ',
-      desc: 'さいごの しょうぶに かった あと。ながい たつまきが やっと やんで、まちに ふつうの まいにちが もどって くる。',
+    { key: 'final', name: 'ウイルスの きざし',
+      desc: 'さいごの しょうぶに かった あと。たつまきは おわった のに、かえりみちで タンクンの ようすが おかしく なって いく。',
       when: 'さいごの しょうぶ（18-2）に かつと みられます',
       list: () => STORY_FINAL },
   ];

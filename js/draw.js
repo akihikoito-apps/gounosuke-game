@@ -9939,6 +9939,95 @@ function drawNekosFight(ctx, st) {
   ctx.restore();
 }
 
+
+/* --- ★きょうらんタンクン（ウイルスに おかされた すがた）---
+     ターツーマーキーが もって いた ウイルスに かかって しまった タンクン。
+     からだは どす黒い むらさきに かわり、めは まっかに ひかり、
+     ひびわれた すきまから くろい もやが たちのぼって います。
+     つよく なって いますが、ずっと くるしそうに ふるえて います。     */
+function drawTankunKyoran(ctx, s) {
+  const t = (s && s.t) || 0;
+  const bob = Math.sin(t * 9) * (s && s.moving ? 1.2 : 0);
+  const shiver = Math.sin(t * 27) * 1.1;          // ★ずっと ふるえて いる
+  const pulse = 0.55 + 0.45 * Math.abs(Math.sin(t * 5));
+
+  ctx.save();
+  ctx.translate(shiver, bob);
+
+  /* ★たちのぼる くろい もや */
+  ctx.save();
+  ctx.globalAlpha = 0.45;
+  ctx.fillStyle = '#2a1338';
+  for (let i = 0; i < 5; i++) {
+    const a = t * 1.8 + i * 1.256;
+    const x = -26 + i * 13 + Math.sin(a) * 5;
+    const y = -48 - ((t * 26 + i * 22) % 46);
+    const r = 7 + (i % 3) * 2.4;
+    ctx.beginPath(); ctx.ellipse(x, y, r, r * 0.72, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+
+  /* キャタピラ */
+  ctx.fillStyle = '#231b2e';
+  roundRect(ctx, -36, -13, 72, 13, 6); ctx.fill();
+  ctx.fillStyle = '#5a4470';
+  for (let i = -30; i <= 30; i += 10) {
+    ctx.beginPath(); ctx.arc(i, -6.5, 3.4, 0, Math.PI * 2); ctx.fill();
+  }
+
+  /* みみ（とがって そりかえる）*/
+  ctx.fillStyle = '#7e3f9c';
+  ctx.beginPath(); ctx.moveTo(14, -40); ctx.lineTo(23, -58); ctx.lineTo(27, -40); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-24, -40); ctx.lineTo(-21, -57); ctx.lineTo(-11, -40); ctx.closePath(); ctx.fill();
+
+  /* からだ（どす黒い むらさき）*/
+  const g = ctx.createLinearGradient(0, -44, 0, -10);
+  g.addColorStop(0, '#6a3a86'); g.addColorStop(1, '#2e1840');
+  ctx.fillStyle = g;
+  roundRect(ctx, -37, -44, 74, 34, 13); ctx.fill();
+  ctx.strokeStyle = '#1a0e26'; ctx.lineWidth = 2.4;
+  roundRect(ctx, -37, -44, 74, 34, 13); ctx.stroke();
+
+  /* ★ひびわれ（あかく ひかる）*/
+  ctx.save();
+  ctx.globalAlpha = pulse;
+  ctx.strokeStyle = '#ff3b3b'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-28, -40); ctx.lineTo(-20, -28); ctx.lineTo(-25, -16);
+  ctx.moveTo(-6, -43); ctx.lineTo(-1, -30); ctx.lineTo(-9, -22); ctx.lineTo(-4, -12);
+  ctx.moveTo(14, -42); ctx.lineTo(9, -32);
+  ctx.stroke();
+  ctx.restore();
+
+  /* ほうしん */
+  ctx.fillStyle = '#3a2050';
+  roundRect(ctx, 34, -34, 14, 8, 3); ctx.fill();
+
+  /* ★め（まっかに ひかる。つりあがって いる）*/
+  ctx.save();
+  ctx.globalAlpha = 0.28 * pulse;
+  ctx.fillStyle = '#ff2b2b';
+  ctx.beginPath(); ctx.arc(17.5, -31, 5.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(28.5, -31, 5.5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = '#ff2b2b';
+  ctx.beginPath();
+  ctx.moveTo(13.5, -34.5); ctx.lineTo(21, -31.5); ctx.lineTo(20, -26.5); ctx.lineTo(14.5, -29);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(32.5, -34.5); ctx.lineTo(25, -31.5); ctx.lineTo(26, -26.5); ctx.lineTo(31.5, -29);
+  ctx.closePath(); ctx.fill();
+
+  /* ★くち（くいしばって いる）*/
+  ctx.strokeStyle = '#1a0e26'; ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(17, -19);
+  for (let i = 0; i < 5; i++) ctx.lineTo(17 + i * 3.2 + 1.6, -19 + (i % 2 ? 3 : -3));
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 /* =====================================================================
    ★3大王 ── ターツーマーキーの ちゅうじつな しもべ たち
    この 3たいを たおすと、ターツーマーキー じしんが あいてを して くれます。
@@ -12838,6 +12927,7 @@ function drawSansBoss(ctx, s) { drawSansBody(ctx, s, !!(s && s.enraged)); }
 const DRAWERS = {
   nekos: drawNekos,
   nekos_fight: drawNekosFight,      /* ★うらステージ「さいごの しょうぶ」*/
+  tankun_kyoran: drawTankunKyoran,  /* ★ウイルスで きょうらんした タンクン */
   sans: drawSans,
   sans_true: drawSansTrue,
   /* ★とくせつ「地底の国」4〜7ステージ */
