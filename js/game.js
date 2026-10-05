@@ -49,6 +49,7 @@ const Game = {
     // STAGES に はいって いない コースにも たいおう するため）
     const st = (typeof stageOrCourse === 'number') ? STAGES[stageOrCourse] : stageOrCourse;
     this.stage = st;
+    this.setupGimmicks();          // ★ふしぎな せかいの しかけ
     this.stageIndex = STAGES.indexOf(st);
     this.active = true;
     this.paused = false;
@@ -245,6 +246,7 @@ const Game = {
       for (const id in this.cooldown) {
         if (this.cooldown[id] > 0) this.cooldown[id] = Math.max(0, this.cooldown[id] - dt);
       }
+      this.updateGimmicks(dt);
       this.updateWaves(dt);
       this.updateEscort();
       this.updateTornado(dt);
@@ -284,6 +286,78 @@ const Game = {
     }
     if (floor > 0 && this.enemyCastle.hp < floor) this.enemyCastle.hp = floor;
     return floor;
+  },
+
+  /* ============================================================
+     ふしぎな せかいの しかけ（てんき と うごく ゆか）
+
+     ・てんき … じかんで かわり、ぞくせいの いりょくが かわる
+     ・うごく ゆか … のって いる あいだ あるく はやさが かわる
+     ステージの データに かくだけで つかえます（くわしくは data.js）。
+     ============================================================ */
+  setupGimmicks() {
+    const st = this.stage || {};
+    this.belts = (st.belts || []).map(b => Object.assign({ t: 0, dir: 1 }, b));
+    const w = st.weather;
+    if (w && Array.isArray(w.list) && w.list.length) {
+      this.weatherI = 0;
+      this.weatherNow = w.list[0];
+      this.weatherT = w.every || 25;
+    } else {
+      this.weatherNow = null;
+      this.weatherI = 0;
+      this.weatherT = 0;
+    }
+  },
+
+  updateGimmicks(dt) {
+    /* てんきは じかんで まわる */
+    const w = this.stage && this.stage.weather;
+    if (w && Array.isArray(w.list) && w.list.length) {
+      this.weatherT -= dt;
+      if (this.weatherT <= 0) {
+        this.weatherI = (this.weatherI + 1) % w.list.length;
+        this.weatherNow = w.list[this.weatherI];
+        this.weatherT = w.every || 25;
+        const info = (typeof WEATHERS !== 'undefined') ? WEATHERS[this.weatherNow] : null;
+        if (info) {
+          this.addEffect({ type: 'dmg', x: CONFIG.fieldLength * 0.5,
+                           y: this.groundWorldY() - 200,
+                           text: info.icon + ' ' + info.name + '！',
+                           color: '#ffffff', life: 1.8, big: true });
+        }
+        if (typeof Sound !== 'undefined') Sound.se('knockback');
+      }
+    }
+    /* うごく ゆかは ときどき むきが かわる */
+    if (this.belts) this.belts.forEach(b => {
+      if (!b.flip) return;
+      b.t += dt;
+      if (b.t >= b.flip) { b.t = 0; b.dir *= -1; }
+    });
+  },
+
+  /* その ばしょの ゆかが どちらへ どれだけ うごいて いるか */
+  beltAt(x) {
+    if (!this.belts || !this.belts.length) return 0;
+    let v = 0;
+    for (const b of this.belts) {
+      if (x >= b.from && x <= b.to) v += (b.speed || 0) * (b.dir || 1);
+    }
+    return v;
+  },
+
+  /* てんきで かわる こうげきの ばいりつ */
+  weatherMult(attr) {
+    if (!this.weatherNow || typeof WEATHERS === 'undefined') return 1;
+    const w = WEATHERS[this.weatherNow];
+    if (!w) return 1;
+    let m = 1;
+    attrList(attr).forEach(a => {
+      if (w.up && w.up.indexOf(a) >= 0) m *= WEATHER_UP;
+      if (w.down && w.down.indexOf(a) >= 0) m *= WEATHER_DOWN;
+    });
+    return m;
   },
 
   updateWaves(dt) {
@@ -604,7 +678,10 @@ const Game = {
         u.hp -= u.def.leak.hpLoss * dt;
         if (u.hp <= 0) { u.hp = 0; this.killUnit(u); return; }
       }
-      u.x += (sp + u.speedBonus) * u.forward * dt;
+      /* ★うごく ゆか：のって いる あいだ はやさが かわる。
+         そらを とぶ なかまには ききません。 */
+      const belt = u.def.flying ? 0 : this.beltAt(u.x);
+      u.x += (sp + u.speedBonus) * u.forward * dt + belt * dt;
       u.x = Math.max(0, Math.min(CONFIG.fieldLength, u.x));
       if (u.def.rolls) u.roll += (sp * dt / 25) * -u.forward;   // コロコロ ころがる
     }
@@ -827,12 +904,14 @@ const Game = {
       if (rs && rs.attrs && attrList(attr).some(x => rs.attrs.indexOf(x) >= 0)) {
         mult = Math.min(mult, rs.mult);
       }
-      let dmg = Math.round(atk * mult);
+      /* ★てんきで いりょくが かわる */
+      const wmul = this.weatherMult ? this.weatherMult(attr) : 1;
+      let dmg = Math.round(atk * mult * wmul);
       let isCrit = false;
       if (crit && Math.random() < ((crit.chance === undefined) ? 1 : crit.chance)) {
         // ignoreAttr の とき は「もとの こうげきりょく × ばいりつ」。
         // あいしょうの ゆうり／ふりは まったく けいさんに いれない
-        dmg = crit.ignoreAttr ? Math.round(atk * (crit.mult || 2))
+        dmg = crit.ignoreAttr ? Math.round(atk * (crit.mult || 2) * wmul)
                               : Math.round(dmg * (crit.mult || 2));
         isCrit = true;
       }
@@ -1096,7 +1175,8 @@ const Game = {
           break;
         }
         const mult = attrMultiplier(w.attr, o.def.attr);
-        this.damageUnit(o, Math.round(w.atk * mult), w.attr, mult, false, false);
+        const wm = this.weatherMult ? this.weatherMult(w.attr) : 1;
+        this.damageUnit(o, Math.round(w.atk * mult * wm), w.attr, mult, false, false);
       }
       if (stopped) { this.shocks.splice(i, 1); continue; }
       if (w.left <= 0 || w.x < -60 || w.x > CONFIG.fieldLength + 60) this.shocks.splice(i, 1);
