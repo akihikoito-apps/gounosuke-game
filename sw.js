@@ -10,7 +10,7 @@
      （この ファイルの なかみが かわらないと ブラウザが こうしんに きづきません）
    ========================================================================== */
 
-const APP_VERSION = '6.52';
+const APP_VERSION = '6.53';
 const CACHE_NAME  = 'gounosuke-' + APP_VERSION;
 
 /* ネットが なくても あそべるように とっておく ファイル */
@@ -19,6 +19,7 @@ const APP_SHELL = [
   './index.html',
   './style.css',
   './manifest.json',
+  './js/sound.js',
   './js/data.js',
   './js/bg-photo.js',
   './js/draw.js',

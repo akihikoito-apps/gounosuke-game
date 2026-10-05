@@ -1736,3 +1736,16 @@ body.dragging-slot #party-slots { touch-action:none; }
   .shelf-items { font-size:calc(17px * var(--ui)); }
   .shelf-legs i { height:calc(18px * var(--ui)); }
 }
+
+
+/* ---------- おとの オンオフ ---------- */
+.sound-btn {
+  position:absolute; right:calc(10px * var(--ui)); top:calc(10px * var(--ui) + var(--safe-top));
+  width:calc(44px * var(--ui)); height:calc(44px * var(--ui));
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%; border:2px solid rgba(255,255,255,.5);
+  background:rgba(0,0,0,.35); color:#fff;
+  font-size:calc(20px * var(--ui)); cursor:pointer; z-index:5;
+}
+.sound-btn:active { transform:translateY(2px); }
+.sound-btn.off { opacity:.55; }

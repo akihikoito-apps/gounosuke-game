@@ -7520,6 +7520,20 @@ const UNDERGROUND = {
   ],
 };
 
+/* ぞくせいを あらわす 1もじ（てきの あたまの うえに でます）*/
+const ATTR_MARK = {
+  none:  '無',
+  water: '水',
+  fire:  '火',
+  grass: '草',
+  magic: '魔',
+  power: '力',
+  beast: '獣',
+  metal: '鉄',
+  god:   '神',
+  ghost: '霊',
+};
+
 const ATTR_COLOR = {
   water: '#4fc3f7', fire: '#ff7043', grass: '#8bc34a',
   magic: '#ba68c8', power: '#ffca28', beast: '#8d6e63', metal: '#78909c',

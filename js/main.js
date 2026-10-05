@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.52';
+  const GAME_VERSION = '6.53';
 
 
   /* =================================================
@@ -96,6 +96,41 @@
       }
     } catch (e) { /* なくても OK */ }
     return fresh;
+  }
+
+  /* ---- おとの オンオフ（セーブに のこす）---- */
+  function soundPref() {
+    if (!saveData.sound) saveData.sound = { se: true, bgm: true };
+    return saveData.sound;
+  }
+  function applySound() {
+    if (typeof Sound === 'undefined') return;
+    const p = soundPref();
+    Sound.setOn('se', p.se);
+    Sound.setOn('bgm', p.bgm);
+    const b = $('#btn-sound'), ico = $('#sound-ico');
+    if (b) b.classList.toggle('off', !p.se && !p.bgm);
+    if (ico) ico.textContent = (p.se || p.bgm) ? '🔊' : '🔇';
+  }
+  /* おすたび：ぜんぶ ON → BGMだけ OFF → ぜんぶ OFF → … */
+  function cycleSound() {
+    const p = soundPref();
+    if (p.se && p.bgm)       { p.bgm = false; toast('BGM を けしました'); }
+    else if (p.se && !p.bgm) { p.se = false;  toast('おとを ぜんぶ けしました'); }
+    else                     { p.se = true; p.bgm = true; toast('おとを つけました'); }
+    applySound(); storeSave();
+  }
+
+  /* がめんに あわせて BGM を きりかえる */
+  function bgmFor(id) {
+    if (typeof Sound === 'undefined') return;
+    const map = {
+      'screen-tower': 'gacha', 'screen-gacha': 'gacha',
+      'screen-room': 'room', 'screen-garden': 'room', 'screen-shop': 'room',
+      'screen-battle': 'battle',
+      'screen-result': null, 'screen-movie': null,
+    };
+    Sound.bgm(Object.prototype.hasOwnProperty.call(map, id) ? map[id] : 'home');
   }
 
   function storeSave() {
@@ -356,7 +391,8 @@
      がめんの きりかえ
      ================================================= */
   function show(id) {
-    $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+    $('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+    bgmFor(id);
   }
 
   /* =================================================
@@ -3618,6 +3654,10 @@
   }
 
   function startBattle(course) {
+    if (typeof Sound !== 'undefined') {
+      const isBoss = (course.waves || []).some(w => ENEMIES[w.id] && ENEMIES[w.id].isBoss);
+      Sound.bgm(isBoss ? 'boss' : 'battle');
+    }
     applyCharLimit(course);
     show('screen-battle');
     const canvas = $('#canvas');
@@ -7597,6 +7637,7 @@
   }
 
   function showResult() {
+    if (typeof Sound !== 'undefined') Sound.se(Game.result === 'win' ? 'win' : 'lose');
     resultShown = true;
     recordSeen();                 // まけても「でてきた てき」は ずかんに のこす
 
@@ -7767,6 +7808,8 @@
     });
 
     /* トップがめん */
+    if (typeof Sound !== 'undefined') { Sound.install(); applySound(); }
+    const _sb = $('#btn-sound'); if (_sb) _sb.addEventListener('click', cycleSound);
     $('#btn-home-stage').addEventListener('click', openArcs);
     $('#btn-world').addEventListener('click', switchWorld);
     const mr = $('#btn-map-right'); if (mr) mr.addEventListener('click', goSunMap);

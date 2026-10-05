@@ -121,6 +121,7 @@ const Game = {
     if (this.money < def.cost) return false;
     if (this.allyCount() >= CONFIG.maxAllies) return false;   // だしすぎ ぼうし
     this.money -= def.cost;
+    if (typeof Sound !== 'undefined') Sound.se('summon');
     this.cooldown[id] = def.recharge;
     this.units.push(this.makeUnit(def, 'ally'));
     return true;
@@ -131,6 +132,7 @@ const Game = {
     const cost = this.walletCost;
     if (cost === null || this.money < cost) return false;
     this.money -= cost;
+    if (typeof Sound !== 'undefined') Sound.se('chudon');
     this.walletLv++;
     this.addEffect({ type: 'dmg', x: CONFIG.fieldLength - 60, y: this.groundWorldY() - 120,
                      text: 'おさいふ君 Lv.' + (this.walletLv + 1), color: '#ffe082', life: 1.2, big: true });
@@ -303,6 +305,7 @@ const Game = {
       }
       if (!fire) continue;
 
+      if (typeof Sound !== 'undefined' && ENEMIES[w.id] && ENEMIES[w.id].isBoss) Sound.se('bossIn');
       const n = w.count || 1;
       const gap = w.gap || 0;
       for (let i = 0; i < n; i++) {
@@ -937,8 +940,13 @@ const Game = {
     if (nu && attr && nu.attrs) {
       const list = attrList(attr);
       if (list.length === 1 && nu.attrs.indexOf(list[0]) >= 0) {
+        /* ★ここが いちばん だいじ：こうげきが まったく きいて いない。
+           「すりぬけ！」では わかりにくい ので、はっきり しらせます。 */
+        if (typeof Sound !== 'undefined') Sound.se('nullify');
+        this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 118 - u.lane,
+                         text: 'きかない！', color: '#b39ddb', life: 1.0, big: true });
         this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 60 - u.lane,
-                         text: 'すりぬけ！', color: '#b39ddb', life: 0.75, big: true });
+                         text: 'すりぬけ', color: '#b39ddb', life: 0.75 });
         return;
       }
     }
@@ -975,6 +983,26 @@ const Game = {
       }
     }
 
+    if (typeof Sound !== 'undefined') {
+      if (isCrit)           Sound.se('crit');
+      else if (mult > 1.01) Sound.se('hitBig');
+      else if (mult < 0.99) Sound.se('weak');
+      else                  Sound.se('hit');
+    }
+
+    /* ★あいしょうを もじで だす。いろだけでは わかりにくい ため。 */
+    if (!noNumber) {
+      let tx = null, tc = null;
+      if (mult >= 2.0)      { tx = 'こうかばつぐん！'; tc = '#ff5252'; }
+      else if (mult > 1.01) { tx = 'よく きく！';      tc = '#ff8a65'; }
+      else if (mult < 0.99) { tx = 'いまひとつ…';      tc = '#90a4ae'; }
+      if (tx && (u.markT === undefined || this.time - u.markT > 0.9)) {
+        u.markT = this.time;
+        this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 118 - u.lane,
+                         text: tx, color: tc, life: 0.85, big: (mult >= 2.0) });
+      }
+    }
+
     let color = '#ffffff';
     if (mult > 1.01) color = '#ff5252';
     else if (mult < 0.99 && mult > 0) color = '#90a4ae';
@@ -989,6 +1017,7 @@ const Game = {
                      color: ATTR_COLOR[attrMain(attr)] || '#fff59d' });
 
     if (u.hp <= 0) {
+      if (typeof Sound !== 'undefined') Sound.se('die');
       u.dead = true;
       if (u.side === 'enemy' && u.def.money) {
         const before = this.money;
@@ -1187,7 +1216,7 @@ const Game = {
       if (this.playerCastle.hp <= 0) { this.finished = true; this.result = 'lose'; this.finishAt = this.time; }
       return;
     }
-    if (this.enemyCastle.hp <= 0)  { this.finished = true; this.result = 'win';  this.finishAt = this.time; }
+    if (this.enemyCastle.hp <= 0)  { if (typeof Sound !== 'undefined') { Sound.se('castle'); Sound.bgm(null); } this.finished = true; this.result = 'win';  this.finishAt = this.time; }
     else if (this.playerCastle.hp <= 0) { this.finished = true; this.result = 'lose'; this.finishAt = this.time; }
   },
 
@@ -1706,6 +1735,41 @@ const Game = {
       ctx.beginPath(); ctx.moveTo(84, -104); ctx.lineTo(70, -80); ctx.lineTo(82, -60); ctx.stroke();
     }
     ctx.restore();
+  },
+
+  /* ★あたまの うえの ぞくせいマーク。
+     ぞくせいを おぼえなくても、みれば わかる ように します。
+     2つ もって いる てきは 2つ ならびます。みかたには だしません。 */
+  drawAttrMark(ctx, u, topY) {
+    if (u.side !== 'enemy') return;
+    if (typeof ATTR_MARK === 'undefined') return;
+    const list = attrList(u.def.attr);
+    if (!list.length) return;
+    const V = this.view, s = V.scale;
+    const x = this.worldToScreenX(u.x);
+    const r = 9 * s, gap = r * 2.3;
+    const y = topY - r - 6 * s;
+    const x0 = x - (list.length - 1) * gap / 2;
+    list.forEach((a, i) => {
+      const cx = x0 + i * gap;
+      ctx.beginPath(); ctx.arc(cx, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = ATTR_COLOR[a] || '#bdbdbd';
+      ctx.fill();
+      ctx.lineWidth = Math.max(1.5, 2 * s);
+      ctx.strokeStyle = 'rgba(0,0,0,.55)';
+      ctx.stroke();
+      const ch = ATTR_MARK[a] || '';
+      if (ch) {
+        ctx.font = 'bold ' + Math.round(r * 1.25) + 'px "Hiragino Maru Gothic ProN","Yu Gothic",sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.lineWidth = Math.max(2, 3 * s);
+        ctx.strokeStyle = 'rgba(0,0,0,.65)';
+        ctx.strokeText(ch, cx, y + r * 0.08);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(ch, cx, y + r * 0.08);
+      }
+    });
+    ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
   },
 
   drawUnit(ctx, u) {
