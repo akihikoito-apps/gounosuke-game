@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <pattern id="s" patternUnits="userSpaceOnUse" width="56" height="56"><rect width="56" height="56" fill="#FCE4E9"/><rect width="28" height="56" fill="#F2A9B8"/></pattern>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#s)"/>
+  <ellipse cx="256" cy="250" rx="130" ry="122" fill="#F5C58E" stroke="#4A3A40" stroke-width="10"/>
+  <path d="M246 132 C226 92 276 66 302 98 C318 120 290 140 274 126 C264 116 280 104 288 112" fill="none" stroke="#8A5A3B" stroke-width="16" stroke-linecap="round"/>
+  <ellipse cx="212" cy="250" rx="17" ry="21" fill="#3B2F35"/><ellipse cx="300" cy="250" rx="17" ry="21" fill="#3B2F35"/>
+  <circle cx="206" cy="241" r="6" fill="#fff"/><circle cx="294" cy="241" r="6" fill="#fff"/>
+  <ellipse cx="172" cy="292" rx="24" ry="16" fill="#F28B8B" opacity="0.6"/><ellipse cx="340" cy="292" rx="24" ry="16" fill="#F28B8B" opacity="0.6"/>
+  <path d="M234 298 Q256 320 278 298" fill="none" stroke="#3B2F35" stroke-width="9" stroke-linecap="round"/>
+  <rect x="96" y="352" width="320" height="120" rx="22" fill="#E9785F" stroke="#4A3A40" stroke-width="10"/>
+  <rect x="80" y="340" width="352" height="44" rx="16" fill="#F29A7E" stroke="#4A3A40" stroke-width="10"/>
+</svg>

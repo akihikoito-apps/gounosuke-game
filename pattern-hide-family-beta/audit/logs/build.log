@@ -1,0 +1,13 @@
+
+> pattern-hide-family-beta@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 26 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  1.15 kB │ gzip:  0.63 kB
+dist/assets/index-bZSR_rCI.css  12.51 kB │ gzip:  3.63 kB
+dist/assets/index-CGFBpk59.js   76.78 kB │ gzip: 24.78 kB
+✓ built in 456ms

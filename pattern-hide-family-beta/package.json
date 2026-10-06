@@ -1,0 +1,23 @@
+{
+  "name": "pattern-hide-family-beta",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "もようのかくれんぼ（仮）家族内テスト用ベータ。公開・課金なし。",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "verify:layouts": "vitest run tests/unit/placement.test.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "5.0.3"
+  }
+}
