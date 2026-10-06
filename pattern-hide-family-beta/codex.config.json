@@ -1,0 +1,8 @@
+{
+  "_note": "Codex CLI の呼び出し方。setup-home.mjs が codex exec --help を保存するので、Claude Code がそれを読んで args を確認・修正する。存在しないオプションを書かないこと。",
+  "command": "codex",
+  "args": ["exec"],
+  "verified": false,
+  "timeoutMinutes": 60,
+  "allowedPaths": ["art/", "audit/codex/"]
+}

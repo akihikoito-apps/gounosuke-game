@@ -28,6 +28,14 @@
   - Codex に貼り付ける依頼文（CODEX_ART_BRIEF.md）
 - Claude は `art/` 以外、Codex は `art/` だけを編集する分担にしました（同じファイルを同時に編集しないため）。
 
+## 3回目の作業：Claude が Codex を呼び出す体制
+- ご自宅PCの Claude Code が司令塔になり、`scripts/codex/run-job.mjs` で Codex を非対話で呼び出す仕組みを用意しました
+  - ジョブ：`codex-jobs/`、順番：`QUEUE.md`、手順：CLAUDE.md とスキル `codex-art`
+  - Codex 側の決まり：AGENTS.md
+- 安全装置：実行前後の git status を比べ、許可外（art/, audit/codex/ 以外）の変更があれば失敗にします。OPENAI_API_KEY があれば中止します。ログは audit/codex/ に残します
+- この環境で偽の Codex を使い、次の3つを確認しました：許可内の変更は成功、src/ への変更は失敗として検出、API キーがあれば中止
+- **本物の Codex での実行はまだ**です（ご自宅PCでの準備後）
+
 ## 未実施のまま残っていること
 - **Codex による絵の制作**（ご自宅PCで CODEX_ART_BRIEF.md を使って実施）
 - Codex による独立レビュー（ご自宅PCで実施する場合：状態遷移 `src/ui/app.ts`、入力、`src/storage/`、`src/entitlements/` を対象にするのがおすすめ）
