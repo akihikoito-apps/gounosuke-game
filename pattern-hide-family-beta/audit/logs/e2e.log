@@ -1,26 +1,26 @@
-2026-10-06T04:22:06Z
+2026-10-06T05:48:20Z
 
 Running 21 tests using 1 worker
 
   ✓   1 [phone-portrait] › tests/e2e/hide.spec.ts:4:1 › 2/3. hide -> handoff (no leak) -> find at the exact placed spot -> swap (7.6s)
-  ✓   2 [phone-portrait] › tests/e2e/hide.spec.ts:28:1 › 5. placement works by tap->tap (no drag) and by drag; undo and costume change keep things safe (6.8s)
+  ✓   2 [phone-portrait] › tests/e2e/hide.spec.ts:28:1 › 5. placement works by tap->tap (no drag) and by drag; undo and costume change keep things safe (6.9s)
   ✓   3 [phone-portrait] › tests/e2e/hide.spec.ts:86:1 › resume after hiding starts at the blind handoff screen (4.6s)
   ✓   4 [phone-portrait] › tests/e2e/hide.spec.ts:96:1 › regression: resume a hide round, then "かくしなおす" and "もういちど" work (no crash) (10.5s)
-  ✓   5 [phone-portrait] › tests/e2e/hide.spec.ts:119:1 › keyboard: hide mode can be completed with Tab/Enter only (2.4s)
+  ✓   5 [phone-portrait] › tests/e2e/hide.spec.ts:119:1 › keyboard: hide mode can be completed with Tab/Enter only (2.5s)
   ✓   6 [phone-portrait] › tests/e2e/offline.spec.ts:12:3 › offline › 13a. once opened, play continues with network OFF (4.3s)
   ✓   7 [phone-portrait] › tests/e2e/offline.spec.ts:21:3 › offline › 13b. service worker: reload while offline still starts the app (4.2s)
   ✓   8 [phone-portrait] › tests/e2e/offline.spec.ts:37:3 › offline › 13c. close browser, relaunch offline (persistent profile) -> app starts from cache (1.2s)
-  ✓   9 [phone-portrait] › tests/e2e/safety.spec.ts:20:1 › 9. corrupted save -> app still starts and repairs (152ms)
+  ✓   9 [phone-portrait] › tests/e2e/safety.spec.ts:20:1 › 9. corrupted save -> app still starts and repairs (156ms)
   ✓  10 [phone-portrait] › tests/e2e/safety.spec.ts:29:1 › 9. storage unavailable / quota exceeded -> still playable (4.1s)
-  ✓  11 [phone-portrait] › tests/e2e/safety.spec.ts:41:1 › 9. getItem throws (private mode-like) -> still playable (4.2s)
-  ✓  12 [phone-portrait] › tests/e2e/safety.spec.ts:54:1 › 14. parent gate: random tapping does not pass; Escape closes; back does not reopen (11.4s)
+  ✓  11 [phone-portrait] › tests/e2e/safety.spec.ts:41:1 › 9. getItem throws (private mode-like) -> still playable (4.1s)
+  ✓  12 [phone-portrait] › tests/e2e/safety.spec.ts:54:1 › 14. parent gate: random tapping does not pass; Escape closes; back does not reopen (11.3s)
   ✓  13 [phone-portrait] › tests/e2e/safety.spec.ts:88:1 › parent area is keyboard operable; settings, delete, playtest toggle (3.6s)
   ✓  14 [phone-portrait] › tests/e2e/safety.spec.ts:126:1 › 10/12. playtest OFF leaves no counters; ON counts locally; never any external request (12.9s)
   ✓  15 [phone-portrait] › tests/e2e/safety.spec.ts:150:1 › 11. child screens have no purchase, ads, tracking, external links or permission prompts (3.0s)
-  ✓  16 [phone-portrait] › tests/e2e/safety.spec.ts:184:1 › regression: deleting data after "home" does not get written back later (6.0s)
-  ✓  17 [phone-portrait] › tests/e2e/search.spec.ts:4:1 › 1. search: start, tutorial, hints, find, clear, again, bye (8.8s)
-  ✓  18 [phone-portrait] › tests/e2e/search.spec.ts:40:1 › normal: up to 3 characters, all findable (14.0s)
-  ✓  19 [phone-portrait] › tests/e2e/search.spec.ts:56:1 › 6. rapid taps, multi-touch, pointercancel and screen switch do not break the game (5.8s)
+  ✓  16 [phone-portrait] › tests/e2e/safety.spec.ts:188:1 › regression: deleting data after "home" does not get written back later (5.9s)
+  ✓  17 [phone-portrait] › tests/e2e/search.spec.ts:4:1 › 1. search: start, tutorial, hints, find, clear, again, bye (8.7s)
+  ✓  18 [phone-portrait] › tests/e2e/search.spec.ts:40:1 › normal: up to 3 characters, all findable (14.4s)
+  ✓  19 [phone-portrait] › tests/e2e/search.spec.ts:56:1 › 6. rapid taps, multi-touch, pointercancel and screen switch do not break the game (5.7s)
   ✓  20 [phone-portrait] › tests/e2e/search.spec.ts:89:1 › 4/7. coordinates stay correct across sizes and rotation; characters inside scene and not under UI (3.7s)
   ✓  21 [phone-portrait] › tests/e2e/search.spec.ts:132:1 › 15. "おしまい" from the middle of a game ends cleanly without any purchase prompt (2.5s)
 

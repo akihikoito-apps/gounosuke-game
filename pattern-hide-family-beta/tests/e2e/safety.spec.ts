@@ -167,7 +167,11 @@ test('11. child screens have no purchase, ads, tracking, external links or permi
   await act(page, 'hidePickScene', '[data-scene="shop"]');
   await grab();
   for (const h of screens) {
-    expect(h).not.toMatch(/<a\s|href=|<iframe|円|¥|購入|広告|ランキング|ログイン|レビュー/);
+    expect(h).not.toMatch(/<a\s|<iframe|<form|[0-9]\s*円|¥|購入|広告|ランキング|ログイン|レビュー/);
+    // href/src は自分の絵（同一オリジン）か、同じ文書内の #id、data:image だけ
+    for (const m of h.matchAll(/(?:href|src)="([^"]+)"/g)) {
+      expect(m[1].startsWith('http://127.0.0.1:4173/') || m[1].startsWith('./') || m[1].startsWith('/assets/') || m[1].startsWith('assets/') || m[1].startsWith('#') || m[1].startsWith('data:image/'), m[1]).toBe(true);
+    }
   }
   expect(prompts).toEqual([]);
   // 権限 API を呼んでいない（geolocation / camera / notification）

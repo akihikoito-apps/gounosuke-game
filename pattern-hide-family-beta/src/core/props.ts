@@ -1,6 +1,15 @@
 // 隠れ場所の前に置く小物（前景の遮蔽物）。
 // shapes は可視判定に使い、markup は同じ寸法で描く。
-import { type Shape, r1 } from './geometry';
+import { type Pt, type Shape, quadPoints, r1 } from './geometry';
+
+/** 太さのある取っ手（2次曲線）を多角形にする。描画の線と判定を一致させる */
+function arcBand(p0: Pt, c: Pt, p1: Pt, width: number): Shape {
+  const mid = [p0, ...quadPoints(p0, c, p1, 12)];
+  const half = width / 2;
+  const up = mid.map((p) => ({ x: p.x, y: p.y - half }));
+  const down = mid.map((p) => ({ x: p.x, y: p.y + half })).reverse();
+  return { kind: 'poly', pts: [...up, ...down] };
+}
 
 export interface Prop {
   shapes: Shape[];
@@ -95,15 +104,15 @@ export function ball(cx: number, cy: number, r = 54): Prop {
   };
 }
 
-export function basket(cx: number, top: number, w = 150, h = 72, color = '#D8A65F'): Prop {
+export function basket(cx: number, top: number, w = 150, h = 72, color = '#D8A65F', handle = 70): Prop {
   const x = cx - w / 2;
   const lines = [1, 2, 3]
     .map((i) => `<path d="M${x + 4} ${top + (h * i) / 4} H${x + w - 4}" stroke="#A8783B" stroke-width="3"/>`)
     .join('');
   return {
-    shapes: [{ kind: 'rect', x, y: top, w, h, rx: 16 }],
+    shapes: [{ kind: 'rect', x, y: top, w, h, rx: 16 }, arcBand({ x: x + 20, y: top + 4 }, { x: cx, y: top - handle }, { x: x + w - 20, y: top + 4 }, 10)],
     markup:
-      `<path d="M${x + 20} ${top + 4} Q${cx} ${top - 70} ${x + w - 20} ${top + 4}" fill="none" stroke="#A8783B" stroke-width="9" stroke-linecap="round"/>` +
+      `<path d="M${x + 20} ${top + 4} Q${cx} ${top - handle} ${x + w - 20} ${top + 4}" fill="none" stroke="#A8783B" stroke-width="9" stroke-linecap="round"/>` +
       `<rect x="${x}" y="${top}" width="${w}" height="${h}" rx="16" fill="${color}" ${L}/>` +
       lines,
   };
@@ -129,7 +138,7 @@ export function bucket(cx: number, top: number, w = 120, h = 80): Prop {
     { x: cx - w / 2 + 12, y: top + h },
   ];
   return {
-    shapes: [{ kind: 'poly', pts }],
+    shapes: [{ kind: 'poly', pts }, { kind: 'ellipse', cx, cy: top, rx: w / 2, ry: 9 }, arcBand({ x: cx - w / 2 + 6, y: top }, { x: cx, y: top - 56 }, { x: cx + w / 2 - 6, y: top }, 6)],
     markup:
       `<path d="M${cx - w / 2 + 6} ${top} Q${cx} ${top - 56} ${cx + w / 2 - 6} ${top}" fill="none" stroke="#5E6A7A" stroke-width="5"/>` +
       `<polygon points="${pts.map((p) => `${p.x},${p.y}`).join(' ')}" fill="#7FC4E8" ${L}/>` +
@@ -164,7 +173,10 @@ export function flowerClump(cx: number, cy: number, rx = 78, ry = 40): Prop {
 export function stump(cx: number, top: number, w = 130, h = 84): Prop {
   const x = cx - w / 2;
   return {
-    shapes: [{ kind: 'rect', x, y: top, w, h, rx: 10 }],
+    shapes: [
+      { kind: 'rect', x, y: top, w, h, rx: 10 },
+      { kind: 'ellipse', cx, cy: top, rx: w / 2, ry: 16 },
+    ],
     markup:
       `<rect x="${x}" y="${top}" width="${w}" height="${h}" rx="10" fill="#A9774A" ${L}/>` +
       `<ellipse cx="${cx}" cy="${top}" rx="${w / 2}" ry="16" fill="#E8C690" ${L}/>` +
@@ -194,7 +206,10 @@ export function jar(cx: number, top: number, w = 112, h = 76): Prop {
     })
     .join('');
   return {
-    shapes: [{ kind: 'rect', x, y: top, w, h, rx: 18 }],
+    shapes: [
+      { kind: 'rect', x, y: top, w, h, rx: 18 },
+      { kind: 'rect', x: x + 12, y: top - 14, w: w - 24, h: 18, rx: 6 },
+    ],
     markup:
       `<rect x="${x}" y="${top}" width="${w}" height="${h}" rx="18" fill="#EAF6FB" ${L}/>` +
       candies +
@@ -218,11 +233,14 @@ export function cakeStand(cx: number, top: number): Prop {
 }
 
 export function breadBasket(cx: number, top: number): Prop {
-  const p = basket(cx, top, 140, 62, '#E0B271');
+  const p = basket(cx, top, 140, 62, '#E0B271', 40);
   const breads =
     `<ellipse cx="${cx - 30}" cy="${top + 2}" rx="30" ry="16" fill="#D4924C" ${L}/>` +
     `<ellipse cx="${cx + 28}" cy="${top}" rx="30" ry="16" fill="#C9833E" ${L}/>`;
-  return { shapes: p.shapes, markup: breads + p.markup };
+  return {
+    shapes: [...p.shapes, { kind: 'ellipse', cx: cx - 30, cy: top + 2, rx: 30, ry: 16 }, { kind: 'ellipse', cx: cx + 28, cy: top, rx: 30, ry: 16 }],
+    markup: breads + p.markup,
+  };
 }
 
 export function stool(cx: number, top: number): Prop {

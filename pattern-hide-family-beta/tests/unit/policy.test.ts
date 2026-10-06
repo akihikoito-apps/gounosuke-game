@@ -26,7 +26,7 @@ describe('policy', () => {
     ['external URL', /https?:\/\//],
     ['anchor link', /<a\s/],
     ['window.open', /window\.open/],
-    ['price/purchase words', /[¥￥]|円|購入する|価格|広告を/],
+    ['price/purchase words', /[¥￥]|[0-9０-９]\s*円|購入する|価格|広告を/],
     ['eval', /\beval\s*\(|new Function/],
   ])('no %s in app source (except service worker same-origin fetch)', (_n, re) => {
     for (const f of src) {

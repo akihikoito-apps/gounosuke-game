@@ -1,10 +1,11 @@
 // シーンのSVGを組み立てる。形状・座標は core の定義をそのまま使う。
 import { CHARACTERS, type CharacterId } from '../core/characters';
 import { r1, shapeToSvg } from '../core/geometry';
-import { patternMarkup, softVariant } from '../core/patterns';
+import { type PatternSpec, patternMarkup, softVariant } from '../core/patterns';
 import { type Placement, getSpot, silhouetteWorld, spotAnchor, spotTransform } from '../core/placement';
 import type { SceneDef, SpotDef } from '../core/scene';
-import { characterMarkup } from '../core/characters';
+import { charArtMarkup } from './charArt';
+import { patternTile, sceneArt } from '../art/registry';
 import type { HintInfo } from '../core/session';
 
 export interface SceneRenderOpts {
@@ -25,25 +26,50 @@ export function scenePatternId(prefix: string, scene: SceneDef, costume: string)
   return `${prefix}p-${scene.id}-${costume}`;
 }
 
+/** 柄の定義。art/patterns に絵のタイルがあればそれを使う（背景と服で同じタイル） */
+export function tiledPatternMarkup(id: string, scene: SceneDef, costumeId: string, spec: PatternSpec, transform = ''): string {
+  const tile = patternTile(scene.id, costumeId);
+  if (!tile) return patternMarkup(id, spec, transform);
+  const s = spec.size;
+  const tf = transform ? ` patternTransform="${transform}"` : '';
+  return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${r1(s)}" height="${r1(s)}"${tf}><image href="${tile}" width="${r1(s)}" height="${r1(s)}" preserveAspectRatio="none"/></pattern>`;
+}
+
 export function scenePatternDefs(prefix: string, scene: SceneDef): string {
-  return scene.costumes.map((c) => patternMarkup(scenePatternId(prefix, scene, c.id), c.spec)).join('') + scene.extraDefs.split('{P}').join(prefix);
+  return scene.costumes.map((c) => tiledPatternMarkup(scenePatternId(prefix, scene, c.id), scene, c.id, c.spec)).join('') + scene.extraDefs.split('{P}').join(prefix);
 }
 
 /** 服の柄。背景と同じ座標系にそろえる patternTransform を付ける。 */
 export function costumePatternDef(id: string, scene: SceneDef, pl: Placement, spot: SpotDef): string {
   const costume = scene.costumes.find((c) => c.id === pl.costume);
   if (!costume) throw new Error(`unknown costume ${pl.costume}`);
-  const spec = pl.variant === 'soft' ? softVariant(costume.spec) : costume.spec;
   const t = spotTransform(spot);
-  return patternMarkup(id, spec, `scale(${r1(1 / t.s)}) translate(${r1(-t.tx)} ${r1(-t.ty)})`);
+  const tf = `scale(${r1(1 / t.s)}) translate(${r1(-t.tx)} ${r1(-t.ty)})`;
+  if (pl.variant === 'soft') {
+    // やさしい：大きさと色が少し違う柄（絵のタイルの場合は大きさだけ変え、少し暗くする）
+    const soft = softVariant(costume.spec);
+    if (patternTile(scene.id, costume.id)) {
+      return tiledPatternMarkup(id, scene, costume.id, soft, tf).replace('<image ', '<image style="filter:brightness(0.86) saturate(1.15)" ');
+    }
+    return patternMarkup(id, soft, tf);
+  }
+  return tiledPatternMarkup(id, scene, costume.id, costume.spec, tf);
 }
+
+const full = (href: string, cls = '') => `<image${cls ? ` class="${cls}"` : ''} href="${href}" x="0" y="0" width="1000" height="1000" preserveAspectRatio="none"/>`;
 
 function backgroundMarkup(prefix: string, scene: SceneDef): string {
   const sub = (s: string) => s.split('{P}').join(prefix);
+  const art = sceneArt(scene.id);
   const regions = scene.regions
     .map((r) => r.shapes.map((sh) => shapeToSvg(sh, `fill="url(#${scenePatternId(prefix, scene, r.costume)})"`)).join(''))
     .join('');
-  return sub(scene.base) + regions + sub(scene.decor) + `<g class="minor">${sub(scene.minorDecor)}</g>`;
+  return (
+    (art?.back ? full(art.back) : sub(scene.base)) +
+    regions +
+    (art?.over ? full(art.over) : sub(scene.decor)) +
+    `<g class="minor">${art?.minor ? full(art.minor) : art?.over ? '' : sub(scene.minorDecor)}</g>`
+  );
 }
 
 export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: number, found: boolean, outline: number): string {
@@ -53,7 +79,7 @@ export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: num
   return (
     `<g class="char${found ? ' found' : ''}" data-index="${i}" data-char="${pl.char}" transform="translate(${r1(t.tx)} ${r1(t.ty)}) scale(${t.s})">` +
     `<defs>${costumePatternDef(fid, scene, pl, spot)}</defs>` +
-    `<g class="char-inner">${characterMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found })}</g>` +
+    `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found })}</g>` +
     `</g>`
   );
 }
@@ -91,7 +117,8 @@ export function renderScene(scene: SceneDef, o: SceneRenderOpts): string {
   const found = o.found ?? placements.map(() => false);
   const outline = o.outline ?? 0.6;
   const chars = placements.map((pl, i) => charGroup(P, scene, pl, i, !!found[i], outline)).join('');
-  const props = scene.spots.map((s) => `<g class="prop" data-spot="${s.id}">${s.prop.markup}</g>`).join('');
+  const fore = sceneArt(scene.id)?.fore;
+  const props = fore ? full(fore, 'fore') : scene.spots.map((s) => `<g class="prop" data-spot="${s.id}">${s.prop.markup}</g>`).join('');
   const fx = placements.map((pl, i) => (found[i] ? sparkles(scene, pl) : '')).join('');
   const cand = (o.candidates ?? [])
     .map((s) => {

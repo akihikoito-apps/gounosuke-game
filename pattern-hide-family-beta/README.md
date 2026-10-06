@@ -26,6 +26,11 @@ node scripts/capture.mjs   # preview を起動した状態で、画面写真と�
 
 スマホで開く方法は [PHONE_ACCESS.md](PHONE_ACCESS.md) を見てください（localhost のURLはスマホからは開けません）。
 
+## 絵の差し替え（Codex など）
+
+`art/` に決まった名前でPNG/WebP/SVGを置くと、その絵が使われます（[ART_SLOTS.md](ART_SLOTS.md)）。
+`npm run art:guides` で下書きガイド、`npm run validate:art` で自動検査。依頼文は [CODEX_ART_BRIEF.md](CODEX_ART_BRIEF.md)。
+
 ## 構成
 
 | 場所 | 役割 |

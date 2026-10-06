@@ -18,6 +18,19 @@ export interface CharacterDef {
 
 const B = (p0: Pt, c: Pt, p1: Pt) => quadPoints(p0, c, p1, 8);
 
+/** 回転した楕円を多角形にする（描画の rotate と同じ形を判定にも使う） */
+function rotEllipse(cx: number, cy: number, rx: number, ry: number, deg: number, ox: number, oy: number): Shape {
+  const a = (deg * Math.PI) / 180;
+  const pts: Pt[] = [];
+  for (let i = 0; i < 24; i++) {
+    const t = (i / 24) * Math.PI * 2;
+    const x = cx + rx * Math.cos(t) - ox;
+    const y = cy + ry * Math.sin(t) - oy;
+    pts.push({ x: ox + x * Math.cos(a) - y * Math.sin(a), y: oy + x * Math.sin(a) + y * Math.cos(a) });
+  }
+  return { kind: 'poly', pts };
+}
+
 /** 服（からだ）の多角形。3体共通の形で、柄が主役になる。 */
 export const BODY_POLY: Pt[] = [
   { x: -58, y: 0 },
@@ -52,8 +65,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     silhouette: [
       BODY,
       HEAD,
-      { kind: 'ellipse', cx: -50, cy: -126, rx: 15, ry: 34 },
-      { kind: 'ellipse', cx: 50, cy: -126, rx: 15, ry: 34 },
+      rotEllipse(-50, -126, 16, 36, 18, -46, -158),
+      rotEllipse(50, -126, 16, 36, -18, 46, -158),
     ],
     facePoints: FACE,
   },
@@ -163,5 +176,5 @@ export function faceIconMarkup(c: CharacterDef): string {
 
 /** 選択画面・チュートリアル用の全身アイコン */
 export function fullIconMarkup(c: CharacterDef, patternDefs: string, fillId: string): string {
-  return `<svg viewBox="-80 -215 160 230" aria-hidden="true" focusable="false"><defs>${patternDefs}</defs>${characterMarkup(c, { fillId, outline: 1 })}</svg>`;
+  return `<svg viewBox="-90 -225 180 240" aria-hidden="true" focusable="false"><defs>${patternDefs}</defs>${characterMarkup(c, { fillId, outline: 1 })}</svg>`;
 }

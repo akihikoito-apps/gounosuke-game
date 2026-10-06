@@ -43,14 +43,14 @@ export const shop: SceneDef = {
     `<rect x="310" y="210" width="46" height="60" rx="12" fill="#EAF6FB" stroke="#4A3A40" stroke-width="3"/><circle cx="333" cy="250" r="12" fill="#8CCB9B"/>` +
     `<circle cx="760" cy="310" r="64" fill="#FFF3D6" stroke="#4A3A40" stroke-width="3"/><path d="M724 330 q36 -70 72 0z" fill="#F8D6A8" stroke="#4A3A40" stroke-width="3"/><circle cx="760" cy="290" r="9" fill="#F07D7D"/>`,
   spots: [
-    { id: 'shop-wall-1', x: 190, y: 578, s: 1, region: 'wall', prop: jar(190, 516), easy: true },
+    { id: 'shop-wall-1', x: 190, y: 578, s: 1, region: 'wall', prop: jar(190, 532), easy: true },
     { id: 'shop-wall-2', x: 470, y: 578, s: 1, region: 'wall', prop: cakeStand(470, 498), easy: false },
-    { id: 'shop-wall-3', x: 790, y: 578, s: 1, region: 'wall', prop: breadBasket(790, 520), easy: true },
+    { id: 'shop-wall-3', x: 790, y: 578, s: 1, region: 'wall', prop: breadBasket(790, 538), easy: true },
     { id: 'shop-counter-1', x: 250, y: 800, s: 1, region: 'counter', prop: stool(250, 728), easy: true },
     { id: 'shop-counter-2', x: 470, y: 800, s: 1, region: 'counter', prop: sack(470, 734), easy: false },
     { id: 'shop-cloth-1', x: 720, y: 960, s: 1, region: 'cloth', prop: sack(720, 896), easy: true },
     { id: 'shop-cloth-2', x: 880, y: 962, s: 1, region: 'cloth', prop: stool(880, 872), easy: false },
-    { id: 'shop-floor-1', x: 90, y: 985, s: 0.95, region: 'floor', prop: jar(90, 926, 120, 64), easy: true },
-    { id: 'shop-floor-2', x: 560, y: 985, s: 0.95, region: 'floor', prop: breadBasket(560, 930), easy: false },
+    { id: 'shop-floor-1', x: 90, y: 985, s: 0.95, region: 'floor', prop: jar(90, 942, 120, 54), easy: true },
+    { id: 'shop-floor-2', x: 560, y: 985, s: 0.95, region: 'floor', prop: breadBasket(560, 948), easy: false },
   ],
 };

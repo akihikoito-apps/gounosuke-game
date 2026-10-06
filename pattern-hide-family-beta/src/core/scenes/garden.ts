@@ -42,7 +42,7 @@ export const garden: SceneDef = {
   decor:
     `<path d="M570 400 H1000 M570 600 H1000" stroke="#D9BE94" stroke-width="10"/>` +
     // 飛び石
-    `<ellipse cx="640" cy="760" rx="44" ry="18" fill="#D9D3E2"/><ellipse cx="720" cy="820" rx="44" ry="18" fill="#D9D3E2"/><ellipse cx="650" cy="980" rx="44" ry="18" fill="#D9D3E2"/>`,
+    `<ellipse cx="560" cy="770" rx="44" ry="18" fill="#D9D3E2"/><ellipse cx="720" cy="820" rx="44" ry="18" fill="#D9D3E2"/><ellipse cx="650" cy="980" rx="44" ry="18" fill="#D9D3E2"/>`,
   minorDecor:
     `<g fill="#FFFFFF" opacity="0.9"><ellipse cx="200" cy="120" rx="70" ry="28"/><ellipse cx="250" cy="100" rx="50" ry="30"/><ellipse cx="560" cy="170" rx="60" ry="24"/></g>` +
     `<path d="M380 180 q12 -12 24 0 q12 -12 24 0" stroke="#4A3A40" stroke-width="4" fill="none"/>`,
@@ -54,7 +54,7 @@ export const garden: SceneDef = {
     { id: 'garden-fence-2', x: 870, y: 662, s: 1, region: 'fence', prop: wateringCan(856, 598), easy: false },
     { id: 'garden-flowers-1', x: 150, y: 900, s: 1, region: 'flowers', prop: flowerClump(150, 884), easy: true },
     { id: 'garden-flowers-2', x: 390, y: 900, s: 1, region: 'flowers', prop: flowerClump(390, 888, 74, 38), easy: false },
-    { id: 'garden-lawn-1', x: 640, y: 905, s: 1, region: 'lawn', prop: stump(640, 842), easy: true },
-    { id: 'garden-lawn-2', x: 870, y: 870, s: 1, region: 'lawn', prop: bucket(870, 808, 124, 78), easy: false },
+    { id: 'garden-lawn-1', x: 640, y: 905, s: 1, region: 'lawn', prop: stump(640, 862), easy: true },
+    { id: 'garden-lawn-2', x: 870, y: 870, s: 1, region: 'lawn', prop: bucket(870, 826, 124, 74), easy: false },
   ],
 };

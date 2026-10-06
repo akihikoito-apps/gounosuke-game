@@ -18,6 +18,17 @@
 | Antigravity / Gemini | 実装・素材制作・画面確認 | **未実施**。この環境にCLIも接続も無かったため。代わりに Claude Code がSVGをコードで制作し、Playwright で画面を確認 |
 | Codex | 重要部分の独立レビュー | **未実施**。この環境にCLIも接続も無かったため。代わりに上記の Claude サブエージェントがレビュー（Codex のレビューとはみなさないでください） |
 
+## 2回目の作業（2026-10-06 午後）
+- ご本人の承認を受けて、作業ブランチを GitHub に push しました（main は変更なし）。
+- ご本人から「絵は Codex で作りたい」との依頼。**この環境では Codex を使えない**ことを再確認しました（`codex` コマンドなし、`~/.codex` なし、OpenAI の認証情報なし）。導入とログインにはご本人の OpenAI アカウントか、別料金の API キーが必要です。指示（追加費用ゼロ・認証の境界を越えない）に従い、導入していません。
+- 代わりに、Codex がご自宅PCで描いた絵をそのまま差し込める準備をしました：
+  - `art/` に置くだけで使われる差し替え口（ART_SLOTS.md）
+  - 形状データから作る下書きガイド（`npm run art:guides`）
+  - 自動検査（`npm run validate:art`）
+  - Codex に貼り付ける依頼文（CODEX_ART_BRIEF.md）
+- Claude は `art/` 以外、Codex は `art/` だけを編集する分担にしました（同じファイルを同時に編集しないため）。
+
 ## 未実施のまま残っていること
+- **Codex による絵の制作**（ご自宅PCで CODEX_ART_BRIEF.md を使って実施）
 - Codex による独立レビュー（ご自宅PCで実施する場合：状態遷移 `src/ui/app.ts`、入力、`src/storage/`、`src/entitlements/` を対象にするのがおすすめ）
 - Antigravity による画面確認・素材の見直し

@@ -241,3 +241,7 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
   .tut-hand { transform: translate(505px, 430px); }
   .hold-btn.holding .hold-fill { width: 100%; }
 }
+
+/* 差し替え用の絵（art/ui） */
+.ui-art { display: block; max-width: min(420px, 80vw); max-height: 34dvh; width: auto; height: auto; margin: 0 auto; pointer-events: none; }
+.scene-svg .bg image, .scene-svg image.fore { pointer-events: none; }

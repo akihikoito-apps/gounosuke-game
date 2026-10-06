@@ -1,5 +1,7 @@
 // 画面の流れと入力。ゲームの判定は core、保存は storage に任せる。
-import { CHARACTERS, CHARACTER_IDS, type CharacterId, faceIconMarkup, fullIconMarkup } from '../core/characters';
+import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../core/characters';
+import { charArtMarkup, faceIcon, fullIcon } from './charArt';
+import { uiArt } from '../art/registry';
 import { patternMarkup } from '../core/patterns';
 import { type Difficulty, type Placement, autoLayout, freeSpots, getSpot, validateLayout } from '../core/placement';
 import type { SceneDef, SceneId } from '../core/scene';
@@ -169,10 +171,10 @@ export class App {
 
   private titleHtml(): string {
     const resume = this.store.data.resume;
-    const peek = CHARACTER_IDS.map((c) => `<div class="peek peek-${c}">${faceIconMarkup(CHARACTERS[c])}</div>`).join('');
+    const peek = CHARACTER_IDS.map((c) => `<div class="peek peek-${c}">${faceIcon(CHARACTERS[c])}</div>`).join('');
     return `<main class="screen title" data-screen="title">
       <div class="logo" aria-label="もようの かくれんぼ">
-        <div class="peeks">${peek}</div>
+        ${artImg('title') ?? `<div class="peeks">${peek}</div>`}
         <h1>もようの<br>かくれんぼ</h1>
         <p class="beta-tag">かぞく テスト ばん（かりの なまえ）</p>
       </div>
@@ -232,7 +234,7 @@ export class App {
     const targets = s.placements
       .map(
         (pl, i) =>
-          `<div class="target${s.found[i] ? ' found' : ''}" data-target="${i}" aria-label="${CHARACTERS[pl.char].name}${s.found[i] ? ' みつけた' : ''}">${faceIconMarkup(CHARACTERS[pl.char])}${s.found[i] ? `<span class="check">${ICONS.done}</span>` : ''}</div>`,
+          `<div class="target${s.found[i] ? ' found' : ''}" data-target="${i}" aria-label="${CHARACTERS[pl.char].name}${s.found[i] ? ' みつけた' : ''}">${faceIcon(CHARACTERS[pl.char])}${s.found[i] ? `<span class="check">${ICONS.done}</span>` : ''}</div>`,
       )
       .join('');
     const done = isComplete(s);
@@ -262,7 +264,7 @@ export class App {
 
   private clearHtml(): string {
     const s = this.session as PlaySession;
-    const faces = s.placements.map((pl) => `<div class="clear-face">${faceIconMarkup(CHARACTERS[pl.char])}</div>`).join('');
+    const faces = s.placements.map((pl) => `<div class="clear-face">${faceIcon(CHARACTERS[pl.char])}</div>`).join('');
     return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="ぜんぶ みつけた">
       <div class="clear-card">
         <div class="clear-faces">${faces}</div>
@@ -279,7 +281,7 @@ export class App {
   private handoffHtml(): string {
     return `<main class="screen handoff" data-screen="handoff">
       <header class="topbar">${btn('handoffBack', ICONS.back, 'かくしなおす', 'round small-lbl')}<span></span><span></span></header>
-      <div class="handoff-art" aria-hidden="true">${handoffArt()}</div>
+      <div class="handoff-art" aria-hidden="true">${artImg('handoff') ?? handoffArt()}</div>
       <p class="handoff-text">つぎの ひとに わたしてね</p>
       <div class="actions">${btn('ready', ICONS.ready, 'じゅんび できた', 'big primary')}</div>
     </main>`;
@@ -298,7 +300,7 @@ export class App {
     const cards = CHARACTER_IDS.map((c) => {
       const on = sel.includes(c);
       const defs = patternMarkup(`hc-${c}`, scene.costumes[0].spec);
-      return `<button type="button" class="char-card${on ? ' on' : ''}" data-action="pickChar" data-char="${c}" aria-pressed="${on}" aria-label="${CHARACTERS[c].name}">${fullIconMarkup(CHARACTERS[c], defs, `hc-${c}`)}<span class="lbl">${CHARACTERS[c].name}</span>${on ? `<span class="check">${ICONS.done}</span>` : ''}</button>`;
+      return `<button type="button" class="char-card${on ? ' on' : ''}" data-action="pickChar" data-char="${c}" aria-pressed="${on}" aria-label="${CHARACTERS[c].name}">${fullIcon(CHARACTERS[c], defs, `hc-${c}`)}<span class="lbl">${CHARACTERS[c].name}</span>${on ? `<span class="check">${ICONS.done}</span>` : ''}</button>`;
     }).join('');
     return `<main class="screen setup" data-screen="hideChars">
       <header class="topbar">${btn('toHide', ICONS.back, 'もどる', 'round')}<h2>だれを かくす？</h2><span></span></header>
@@ -319,14 +321,14 @@ export class App {
         ? `<div class="tabs" role="group" aria-label="だれの ふく？">${d.chars
             .map(
               (c) =>
-                `<button type="button" class="tab${c === cur ? ' on' : ''}" data-action="costumeTab" data-char="${c}" aria-pressed="${c === cur}" aria-label="${CHARACTERS[c].name}">${faceIconMarkup(CHARACTERS[c])}</button>`,
+                `<button type="button" class="tab${c === cur ? ' on' : ''}" data-action="costumeTab" data-char="${c}" aria-pressed="${c === cur}" aria-label="${CHARACTERS[c].name}">${faceIcon(CHARACTERS[c])}</button>`,
             )
             .join('')}</div>`
         : '';
     const big = (() => {
       const cid = d.costumes[cur] as string;
       const spec = scene.costumes.find((x) => x.id === cid)!.spec;
-      return fullIconMarkup(CHARACTERS[cur], patternMarkup('cos-big', spec), 'cos-big');
+      return fullIcon(CHARACTERS[cur], patternMarkup('cos-big', spec), 'cos-big');
     })();
     const swatches = scene.costumes
       .map((c) => {
@@ -354,7 +356,7 @@ export class App {
         const spec = scene.costumes.find((x) => x.id === d.costumes[c])!.spec;
         const on = d.selected === c;
         const placed = !!d.placed[c];
-        return `<button type="button" class="tray-char${on ? ' on' : ''}${placed ? ' placed' : ''}" data-tray="${c}" aria-pressed="${on}" aria-label="${CHARACTERS[c].name}${placed ? ' おいた' : ''}">${fullIconMarkup(CHARACTERS[c], patternMarkup(`tr-${c}`, spec), `tr-${c}`)}</button>`;
+        return `<button type="button" class="tray-char${on ? ' on' : ''}${placed ? ' placed' : ''}" data-tray="${c}" aria-pressed="${on}" aria-label="${CHARACTERS[c].name}${placed ? ' おいた' : ''}">${fullIcon(CHARACTERS[c], patternMarkup(`tr-${c}`, spec), `tr-${c}`)}</button>`;
       })
       .join('');
     return `<main class="screen place" data-screen="hidePlace">
@@ -388,9 +390,9 @@ export class App {
   }
 
   private byeHtml(): string {
-    const faces = CHARACTER_IDS.map((c) => `<div class="bye-face">${faceIconMarkup(CHARACTERS[c])}</div>`).join('');
+    const faces = CHARACTER_IDS.map((c) => `<div class="bye-face">${faceIcon(CHARACTERS[c])}</div>`).join('');
     return `<main class="screen bye" data-screen="bye">
-      <div class="bye-faces">${faces}</div>
+      ${artImg('bye') ?? `<div class="bye-faces">${faces}</div>`}
       <p class="bye-text">またね！</p>
       <div class="actions">${btn('home', ICONS.home, 'はじめに もどる', 'mid', 'data-autofocus')}</div>
     </main>`;
@@ -878,7 +880,7 @@ export class App {
     const spec = scene.costumes.find((x) => x.id === this.draft.costumes[c])!.spec;
     const g = document.createElement('div');
     g.className = 'ghost';
-    g.innerHTML = fullIconMarkup(CHARACTERS[c], patternMarkup('ghost-p', spec), 'ghost-p');
+    g.innerHTML = fullIcon(CHARACTERS[c], patternMarkup('ghost-p', spec), 'ghost-p');
     document.body.appendChild(g);
     return g;
   }
@@ -923,6 +925,11 @@ function draftFromPlacements(sceneId: SceneId, placements: Placement[]): HideDra
   return d;
 }
 
+function artImg(name: 'title' | 'handoff' | 'bye'): string | null {
+  const u = uiArt(name);
+  return u ? `<img class="ui-art ui-art-${name}" src="${u}" alt="" draggable="false">` : null;
+}
+
 function costumeName(kind: string): string {
   return ({ plain: 'むじ', stripes: 'しましま', dots: 'みずたま', check: 'チェック', leaf: 'はっぱ', wood: 'もくめ' } as Record<string, string>)[kind] ?? kind;
 }
@@ -933,9 +940,8 @@ function fullCharInner(c: CharacterId, fillId: string): string {
   return `<g class="tut-hidden">${charInner(ch.id, fillId, false)}</g><g class="tut-found">${charInner(ch.id, fillId, true)}</g>`;
 }
 
-import { characterMarkup } from '../core/characters';
 function charInner(c: CharacterId, fillId: string, found: boolean): string {
-  return characterMarkup(CHARACTERS[c], { fillId, outline: 0.6, found });
+  return charArtMarkup(CHARACTERS[c], { fillId, outline: 0.6, found });
 }
 
 function tutBox(): string {
