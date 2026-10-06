@@ -50,6 +50,9 @@ const Game = {
     const st = (typeof stageOrCourse === 'number') ? STAGES[stageOrCourse] : stageOrCourse;
     this.stage = st;
     this.setupGimmicks();          // ★ふしぎな せかいの しかけ
+    this.ballUsed = {};            // ★てんきだま：この しあいで つかった もの
+    this.ballUntil = 0;            // だまの てんきが おわる じかん
+    this.ballBefore = null;        // だまの まえの てんき
     this.stageIndex = STAGES.indexOf(st);
     this.active = true;
     this.paused = false;
@@ -310,10 +313,51 @@ const Game = {
     }
   },
 
+  /* ============================================================
+     ★てんきだま
+
+     1つの だまは 1つの しあいで 1かいだけ つかえます。
+     つかうと WEATHER_BALL_TIME びょうの あいだ その てんきに なり、
+     じかんが くると もとの てんきに もどります。
+     しあいが おわれば また つかえる ように なります（start で まっさら）。
+     ============================================================ */
+  canUseBall(key) {
+    if (!WEATHERS || !WEATHERS[key]) return false;
+    return !(this.ballUsed && this.ballUsed[key]);
+  },
+  useWeatherBall(key) {
+    if (this.finished || !this.canUseBall(key)) return false;
+    this.ballUsed[key] = true;
+    this.ballBefore = this.weatherNow;
+    this.weatherNow = key;
+    this.ballUntil = this.time + WEATHER_BALL_TIME;
+    const info = WEATHERS[key];
+    this.addEffect({ type: 'dmg', x: CONFIG.fieldLength * 0.5,
+                     y: this.groundWorldY() - 200,
+                     text: info.icon + ' ' + info.name + 'の たま！',
+                     color: '#ffffff', life: 1.8, big: true });
+    if (typeof Sound !== 'undefined') Sound.se('rare');
+    return true;
+  },
+
   updateGimmicks(dt) {
+    /* ★てんきだまの こうかが きれたら もとに もどす */
+    if (this.ballUntil > 0 && this.time >= this.ballUntil) {
+      this.ballUntil = 0;
+      this.weatherNow = this.ballBefore;
+      this.ballBefore = null;
+      const info = (this.weatherNow && WEATHERS) ? WEATHERS[this.weatherNow] : null;
+      if (info) {
+        this.addEffect({ type: 'dmg', x: CONFIG.fieldLength * 0.5,
+                         y: this.groundWorldY() - 200,
+                         text: info.icon + ' ' + info.name + 'に もどった',
+                         color: '#cfd8dc', life: 1.2 });
+      }
+    }
+
     /* てんきは じかんで まわる */
     const w = this.stage && this.stage.weather;
-    if (w && Array.isArray(w.list) && w.list.length) {
+    if (w && Array.isArray(w.list) && w.list.length && this.ballUntil <= 0) {
       this.weatherT -= dt;
       if (this.weatherT <= 0) {
         this.weatherI = (this.weatherI + 1) % w.list.length;

@@ -1749,3 +1749,22 @@ body.dragging-slot #party-slots { touch-action:none; }
 }
 .sound-btn:active { transform:translateY(2px); }
 .sound-btn.off { opacity:.55; }
+
+
+/* ---------- てんきだま ---------- */
+.wball-bar {
+  position:absolute; left:50%; transform:translateX(-50%);
+  bottom:calc(var(--hud-h) + 4px);
+  display:flex; gap:calc(5px * var(--ui));
+  z-index:4; pointer-events:auto;
+}
+.wball {
+  width:calc(40px * var(--ui)); height:calc(40px * var(--ui));
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%; border:2px solid rgba(255,255,255,.65);
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), rgba(60,80,120,.85));
+  font-size:calc(19px * var(--ui)); cursor:pointer;
+  box-shadow:0 calc(3px * var(--ui)) 0 rgba(0,0,0,.4);
+}
+.wball:active { transform:translateY(2px); }
+.wball.used { opacity:.3; filter:grayscale(1); }

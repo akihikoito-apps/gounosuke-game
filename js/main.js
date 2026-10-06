@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.54';
+  const GAME_VERSION = '6.55';
 
 
   /* =================================================
@@ -133,6 +133,55 @@
     Sound.bgm(Object.prototype.hasOwnProperty.call(map, id) ? map[id] : 'home');
   }
 
+  /* ---- てんきだま ----
+     ふしぎ遊園地の コースを クリアすると 1つずつ もらえます。
+     s.balls = ['rain','sun',…] の かたちで もって います。          */
+  function myBalls() {
+    const s = slot();
+    if (!s) return [];
+    if (!Array.isArray(s.balls)) s.balls = [];
+    return s.balls;
+  }
+  function giveBall(key) {
+    if (!key || typeof WEATHERS === 'undefined' || !WEATHERS[key]) return false;
+    const b = myBalls();
+    if (b.indexOf(key) >= 0) return false;
+    b.push(key); storeSave();
+    return true;
+  }
+  /* せんとうがめんの だまの ボタンを つくる */
+  function buildWeatherBalls() {
+    const box = $('#weather-balls');
+    if (!box) return;
+    const list = myBalls();
+    box.innerHTML = '';
+    box.classList.toggle('hidden', list.length === 0);
+    list.forEach(key => {
+      const w = WEATHERS[key];
+      if (!w) return;
+      const b = document.createElement('button');
+      b.className = 'wball';
+      b.textContent = w.icon;
+      b.title = w.name + 'に かえる';
+      b.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        if (!Game.canUseBall || !Game.canUseBall(key)) { toast('この たまは もう つかったよ'); return; }
+        Game.useWeatherBall(key);
+        refreshWeatherBalls();
+      });
+      box.appendChild(b);
+    });
+  }
+  function refreshWeatherBalls() {
+    const box = $('#weather-balls');
+    if (!box) return;
+    const list = myBalls();
+    [...box.children].forEach((b, i) => {
+      const key = list[i];
+      b.classList.toggle('used', !!(Game.ballUsed && Game.ballUsed[key]));
+    });
+  }
+
   function storeSave() {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(saveData)); }
     catch (e) { /* ほぞん できない ばあいも ゲームは あそべます */ }
@@ -214,6 +263,7 @@
     if (typeof GONO !== 'undefined' && GONO) list.push(GONO);
     if (typeof DOZLE_PLANET !== 'undefined' && DOZLE_PLANET) list.push(DOZLE_PLANET);
     if (typeof UNDERGROUND !== 'undefined' && UNDERGROUND) list.push(UNDERGROUND);
+    if (typeof FUSHIGI_PARK !== 'undefined' && FUSHIGI_PARK) list.push(FUSHIGI_PARK);
     return list;
   }
   /* その ちずに ある とくべつステージ（ふくすう ある ばあいも）*/
@@ -3654,6 +3704,7 @@
   }
 
   function startBattle(course) {
+    buildWeatherBalls();
     if (typeof Sound !== 'undefined') {
       const isBoss = (course.waves || []).some(w => ENEMIES[w.id] && ENEMIES[w.id].isBoss);
       Sound.bgm(isBoss ? 'boss' : 'battle');
@@ -7687,6 +7738,12 @@
         $('#result-sub').textContent += '　／　' +
           drops.map(id => MATERIALS[id].icon + MATERIALS[id].name).join('・') + ' を てにいれた！';
       }
+      /* ★ふしぎ遊園地を クリアすると てんきだまが もらえる */
+      if (Game.stage.weatherBall && giveBall(Game.stage.weatherBall)) {
+        const w = WEATHERS[Game.stage.weatherBall];
+        $('#result-sub').textContent += '　／　★' + w.icon + w.name + 'の たま を てにいれた！';
+        if (typeof Sound !== 'undefined') Sound.se('rare');
+      }
       markCleared(Game.stage.no);
       recordSeen();
       const rush = giveBossRushReward();      // ★ボスラッシュ ぜんクリアの ごほうび
@@ -7727,6 +7784,7 @@
     }
     Game.render();
     updateHud();
+    refreshWeatherBalls();
 
     if (Game.finished && !resultShown && Game.time > Game.finishAt + 1.3) {
       Game.active = false;

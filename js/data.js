@@ -1322,6 +1322,181 @@ const ENEMIES = {
     isBoss: true,
   },
 
+
+  /* ============================================================
+     特設・ふしぎ遊園地 の てき（14たい）
+
+     てんきが くるくる かわり、じめんが うごく ふしぎな ゆうえんち。
+     コースごとに 2たいずつ。4コースめに ちゅうボス、
+     7コースめに おおボス「ピエロ大王」が でます。
+     ============================================================ */
+
+  /* ---- 1コースめ：いりぐちの ゲート ---- */
+  ticketmogi: {
+    id: 'ticketmogi', name: 'チケットもぎり',
+    rarity: 'R', attr: 'none',
+    hp: 1100,   atk: 190,  range: 80,   speed: 30,
+    attackInterval: 1.4,   attackWindup: 0.3,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    money: 120,
+  },
+  fusenuri: {
+    id: 'fusenuri', name: 'ふうせんうり',
+    rarity: 'GR', attr: ['none', 'grass'],
+    hp: 1500,   atk: 250,  range: 200,  speed: 20,
+    attackInterval: 2.0,   attackWindup: 0.45,
+    kbCount: 3, scale: 1.05,
+    attackType: 'area', areaRadius: 62, projectile: 'bubble',
+    knockbackChance: 0.20,
+    money: 165,
+  },
+
+  /* ---- 2コースめ：メリーゴーランド（はやく すすむ）---- */
+  mokubakun: {
+    id: 'mokubakun', name: 'もくばくん',
+    rarity: 'R', attr: ['beast', 'none'],
+    hp: 980,    atk: 230,  range: 72,   speed: 62,
+    attackInterval: 1.2,   attackWindup: 0.25,
+    kbCount: 3, scale: 1.0,
+    attackType: 'single', projectile: null,
+    money: 130,
+  },
+  orgora: {
+    id: 'orgora', name: 'オルゴーラ',
+    rarity: 'GR', attr: ['magic', 'metal'],
+    hp: 1700,   atk: 225,  range: 230,  speed: 18,
+    attackInterval: 2.2,   attackWindup: 0.5,
+    kbCount: 4, scale: 1.1,
+    attackType: 'area', areaRadius: 70, projectile: 'moji',
+    /* おんがくで ねむく なる */
+    slow: { rate: 0.5, duration: 3.0, chance: 0.30 },
+    money: 185,
+  },
+
+  /* ---- 3コースめ：ジェットコースター ---- */
+  coastan: {
+    id: 'coastan', name: 'コースタン',
+    rarity: 'GR', attr: ['metal', 'none'],
+    hp: 2000,   atk: 290,  range: 76,   speed: 78,
+    attackInterval: 1.1,   attackWindup: 0.22,
+    kbCount: 4, scale: 1.1,
+    attackType: 'single', projectile: null,
+    knockbackChance: 0.25,
+    money: 190,
+  },
+  railun: {
+    id: 'railun', name: 'レールン',
+    rarity: 'R', attr: 'metal',
+    hp: 2400,   atk: 120,  range: 68,   speed: 14,
+    attackInterval: 1.8,   attackWindup: 0.35,
+    kbCount: 6, scale: 1.05,
+    attackType: 'single', projectile: null,
+    money: 140,
+  },
+
+  /* ---- 4コースめ：おばけやしき（ゆうれい・ちゅうボス）---- */
+  lantankozo: {
+    id: 'lantankozo', name: 'ランタンこぞう',
+    rarity: 'GR', attr: ['ghost', 'fire'],
+    hp: 1400,   atk: 270,  range: 190,  speed: 26,
+    attackInterval: 1.9,   attackWindup: 0.4,
+    kbCount: 3, scale: 1.0,
+    attackType: 'area', areaRadius: 58, projectile: 'flame',
+    burn: { chance: 0.25, dps: 70, duration: 3.0 },
+    money: 180,
+  },
+  /* ★ちゅうボス */
+  kanchoobake: {
+    id: 'kanchoobake', name: '館長オバケ',
+    rarity: 'SR', attr: 'ghost',
+    hp: 9200,   atk: 430,  range: 240,  speed: 16,
+    attackInterval: 2.6,   attackWindup: 0.6,
+    kbCount: 99, scale: 1.45,
+    attackType: 'area', areaRadius: 86, projectile: 'beam',
+    kbImmune: true,
+    /* むぞくせいと パワーを むこうかする（ゆうれいの ちから）*/
+    nullify: { attrs: ['none', 'power'] },
+    stun: { duration: 2.0, chance: 0.25 },
+    money: 900,
+    isBoss: true,
+  },
+
+  /* ---- 5コースめ：かんらんしゃ ---- */
+  gondoran: {
+    id: 'gondoran', name: 'ゴンドラン',
+    rarity: 'GR', attr: ['metal', 'water'],
+    hp: 2600,   atk: 250,  range: 150,  speed: 12,
+    attackInterval: 2.4,   attackWindup: 0.5,
+    kbCount: 6, scale: 1.15,
+    attackType: 'area', areaRadius: 66, projectile: null,
+    money: 200,
+  },
+  wataamen: {
+    id: 'wataamen', name: 'わたあめん',
+    rarity: 'R', attr: ['grass', 'none'],
+    hp: 1250,   atk: 165,  range: 175,  speed: 24,
+    attackInterval: 1.7,   attackWindup: 0.35,
+    kbCount: 3, scale: 1.05,
+    attackType: 'single', projectile: 'wool',
+    /* ふわふわで つかまる */
+    slow: { rate: 0.6, duration: 2.5, chance: 0.25 },
+    money: 145,
+  },
+
+  /* ---- 6コースめ：ミラーハウス ---- */
+  kagamin: {
+    id: 'kagamin', name: 'カガミン',
+    rarity: 'GR', attr: ['metal', 'ghost'],
+    hp: 1900,   atk: 280,  range: 200,  speed: 22,
+    attackInterval: 2.0,   attackWindup: 0.45,
+    kbCount: 4, scale: 1.1,
+    attackType: 'area', areaRadius: 64, projectile: 'beam',
+    /* かがみで はねかえす */
+    resist: { attrs: ['magic', 'fire'], mult: 0.5 },
+    money: 195,
+  },
+  mirrorghost: {
+    id: 'mirrorghost', name: 'ミラーゴースト',
+    rarity: 'GR', attr: 'ghost',
+    hp: 1600,   atk: 300,  range: 110,  speed: 40,
+    attackInterval: 1.5,   attackWindup: 0.3,
+    kbCount: 3, scale: 1.05,
+    attackType: 'single', projectile: null,
+    nullify: { attrs: ['none', 'power'] },
+    money: 200,
+  },
+
+  /* ---- 7コースめ：サーカステント（おおボス）---- */
+  acrobat: {
+    id: 'acrobat', name: 'アクロバッター',
+    rarity: 'GR', attr: ['power', 'none'],
+    hp: 1800,   atk: 330,  range: 84,   speed: 70,
+    attackInterval: 1.3,   attackWindup: 0.26,
+    kbCount: 3, scale: 1.05,
+    attackType: 'single', projectile: null,
+    knockbackChance: 0.30,
+    money: 210,
+  },
+  /* ★おおボス：ピエロ大王 */
+  pierrot: {
+    id: 'pierrot', name: 'ピエロ大王',
+    rarity: 'LR', attr: ['magic', 'ghost'],
+    hp: 26000,  atk: 640,  range: 300,  speed: 14,
+    attackInterval: 2.8,   attackWindup: 0.7,
+    kbCount: 99, scale: 1.75,
+    attackType: 'area', areaRadius: 100, projectile: 'star',
+    kbImmune: true,
+    /* ゆうれいの ちから：むぞくせいと パワーを むこうか */
+    nullify: { attrs: ['none', 'power'] },
+    /* まほうで あいてを かきまわす */
+    stun:   { duration: 2.5, chance: 0.28 },
+    weaken: { chance: 0.30, rate: 0.6, duration: 4.0 },
+    enrage: { below: 0.4, intervalMult: 0.65 },
+    money: 2600,
+    isBoss: true,
+  },
+
   /* ============================================================
      ここから した は だい3しょう「けものみち」に でてくる てき
      けもの ぞくせいが おおく、パワーの なかまが かつやく します
@@ -3519,6 +3694,14 @@ const BACKGROUNDS = {
   },
 
   /* 水星（宇宙編）── みずの ほし。あおと みずいろの せかい */
+  /* ふしぎ遊園地 */
+  park: {
+    sky: ['#2b1046', '#5e2a7e', '#a74b9c'],
+    hillFar: '#4a2068', hillNear: '#2a1140',
+    ground: '#3b1a52', groundTop: '#6a2f80',
+    deco: 'star',
+  },
+
   mercury: {
     sky: ['#04182e', '#0b3a63', '#1d78ad'],
     hillFar: '#1b5a86', hillNear: '#0b3050',
@@ -7373,6 +7556,196 @@ const ATTR_LABEL = {
    7ステージ ぜんぶ クリアすると ★サンズ★ が なかまに なります。
    （floors: 7 なので、コースが 7つ そろうまで ごほうびは でません）
    -------------------------------------------------------------------------- */
+
+
+/* --------------------------------------------------------------------------
+   特設・ふしぎ遊園地（7コース）
+
+   てんきが くるくる かわり、じめんが うごく ふしぎな ゆうえんち。
+     2コースめ メリーゴーランド … ゆかが すすむ むきに うごく（はやい！）
+     4コースめ おばけやしき     … ゆかが ぎゃくむき（なかなか すすめない）
+                                   ★ゆうれいの てきだらけ。ちゅうボスも ゆうれい
+     7コースめ サーカステント   … おおボス「ピエロ大王」
+
+   むずかしさは いまの さいなんかん（19しょう・地底の国）と おなじ くらい。
+   そのぶん けいけんちは たっぷり もらえます。
+
+   ★コースを クリアすると「てんきだま」が 1つずつ つかえる ように なります。
+   -------------------------------------------------------------------------- */
+const FUSHIGI_PARK = {
+  name: '特設・ふしぎ遊園地',
+  icon: '🎡',
+  desc: 'てんきが かわり じめんが うごく ゆうえんち！クリアすると てんきだまが つかえる！',
+  floors: 7,
+  world: 'storm',
+  unit: 'コース',
+  rewardChar: null,
+  rewardName: 'てんきだま 5こ',
+  courses: [
+
+    /* ---------- 1 いりぐちの ゲート ---------- */
+    {
+      no: 601, floor: 1, chapter: 0, course: 1,
+      name: 'いりぐちの ゲート',
+      desc: '★とくせつ★ ようこそ ふしぎ遊園地へ。はれと あめが くりかえす。',
+      bg: 'park',
+      castleHp: 2600,
+      power: 2.1,
+      weather: { every: 22, list: ['sun', 'rain'] },
+      drops: ['cloth', 'wood', 'glue'],
+      reward: { coins: 10, exp: 16000 },
+      weatherBall: 'rain',
+      waves: [
+        { at: 3,  id: 'ticketmogi', count: 3, gap: 0.9 },
+        { at: 18, id: 'fusenuri',   count: 1 },
+        { at: 32, id: 'ticketmogi', count: 3, gap: 0.9, repeat: 16 },
+        { at: 48, id: 'fusenuri',   count: 1, repeat: 22 },
+        { at: 64, id: 'wataamen',   count: 2, gap: 1.1, repeat: 24 },
+      ],
+    },
+
+    /* ---------- 2 メリーゴーランド（はやく すすめる）---------- */
+    {
+      no: 602, floor: 2, chapter: 0, course: 2,
+      name: 'メリーゴーランド',
+      desc: '★ゆかが すすむ むきに うごく！みかたも てきも はやく すすむ。',
+      bg: 'park',
+      castleHp: 3800,
+      power: 2.7,
+      weather: { every: 20, list: ['sun', 'wind'] },
+      /* みかたは ひだりへ すすむ ので、マイナス＝すすむ むき */
+      belts: [{ from: 260, to: 760, speed: -34, flip: 0 }],
+      drops: ['wood', 'string', 'cloth'],
+      reward: { coins: 10, exp: 16500 },
+      weatherBall: 'sun',
+      waves: [
+        { at: 3,  id: 'mokubakun', count: 3, gap: 0.8 },
+        { at: 16, id: 'orgora',    count: 1 },
+        { at: 30, id: 'mokubakun', count: 4, gap: 0.7, repeat: 15 },
+        { at: 46, id: 'orgora',    count: 1, repeat: 24 },
+        { at: 62, id: 'ticketmogi',count: 3, gap: 0.9, repeat: 20 },
+      ],
+    },
+
+    /* ---------- 3 ジェットコースター ---------- */
+    {
+      no: 603, floor: 3, chapter: 0, course: 3,
+      name: 'ジェットコースター',
+      desc: '★ゆかの むきが ときどき ぎゃくに なる！はやい てきが つっこんで くる。',
+      bg: 'park',
+      castleHp: 2800,
+      power: 2.4,
+      weather: { every: 18, list: ['wind', 'sun', 'rain'] },
+      belts: [{ from: 300, to: 780, speed: 30, flip: 12 }],
+      drops: ['iron', 'alumi', 'glue'],
+      reward: { coins: 10, exp: 17000 },
+      weatherBall: 'wind',
+      waves: [
+        { at: 3,  id: 'coastan',  count: 2, gap: 1.0 },
+        { at: 17, id: 'railun',   count: 2, gap: 1.1 },
+        { at: 32, id: 'coastan',  count: 2, gap: 1.0, repeat: 17 },
+        { at: 48, id: 'railun',   count: 2, gap: 1.1, repeat: 22 },
+        { at: 64, id: 'mokubakun',count: 3, gap: 0.8, repeat: 19 },
+      ],
+    },
+
+    /* ---------- 4 おばけやしき（ちゅうボス・なかなか すすめない）---------- */
+    {
+      no: 604, floor: 4, chapter: 0, course: 4,
+      name: 'おばけやしき',
+      desc: '★ゆかが ぎゃくむきで なかなか すすめない！ゆうれいだらけ。ちゅうボス「館長オバケ」。',
+      bg: 'park',
+      castleHp: 3000,
+      power: 1.35,
+      /* ずっと よる。ゆうれいが とても つよい */
+      weather: { every: 999, list: ['night'] },
+      /* ぎゃくむき＝おしもどされる */
+      belts: [{ from: 300, to: 740, speed: 15, flip: 0 }],
+      drops: ['cloth', 'glue', 'stone'],
+      reward: { coins: 14, exp: 19000 },
+      weatherBall: 'night',
+      waves: [
+        { at: 3,  id: 'lantankozo',  count: 2, gap: 1.1 },
+        { at: 18, id: 'mirrorghost', count: 2, gap: 1.0 },
+        { at: 34, id: 'lantankozo',  count: 2, gap: 1.1, repeat: 20 },
+        { at: 50, id: 'mirrorghost', count: 2, gap: 1.0, repeat: 22 },
+        { at: 66, id: 'ticketmogi',  count: 3, gap: 0.9, repeat: 24 },
+        /* ★ちゅうボス */
+        { atCastleHp: 0.75, id: 'kanchoobake', count: 1 },
+      ],
+    },
+
+    /* ---------- 5 かんらんしゃ ---------- */
+    {
+      no: 605, floor: 5, chapter: 0, course: 5,
+      name: 'かんらんしゃ',
+      desc: '★そらの たかい ところ。ゆきが ふると メタルが つよく なる。',
+      bg: 'park',
+      castleHp: 3100,
+      power: 1.85,
+      weather: { every: 20, list: ['snow', 'wind', 'night'] },
+      belts: [{ from: 320, to: 720, speed: 22, flip: 16 }],
+      drops: ['alumi', 'iron', 'cloth'],
+      reward: { coins: 10, exp: 20000 },
+      weatherBall: 'snow',
+      waves: [
+        { at: 3,  id: 'gondoran', count: 1 },
+        { at: 17, id: 'wataamen', count: 3, gap: 0.9 },
+        { at: 32, id: 'gondoran', count: 1, repeat: 22 },
+        { at: 48, id: 'coastan',  count: 2, gap: 1.0, repeat: 20 },
+        { at: 64, id: 'wataamen', count: 3, gap: 0.9, repeat: 18 },
+      ],
+    },
+
+    /* ---------- 6 ミラーハウス ---------- */
+    {
+      no: 606, floor: 6, chapter: 0, course: 6,
+      name: 'ミラーハウス',
+      desc: '★かがみの いえ。まほうと ほのおが きき にくい てきが まつ。',
+      bg: 'park',
+      castleHp: 3200,
+      power: 1.3,
+      weather: { every: 16, list: ['snow', 'wind', 'night'] },
+      belts: [{ from: 300, to: 740, speed: 18, flip: 10 }],
+      drops: ['alumi', 'stone', 'glue'],
+      reward: { coins: 12, exp: 21000 },
+      waves: [
+        { at: 3,  id: 'kagamin',     count: 2, gap: 1.0 },
+        { at: 18, id: 'wataamen',    count: 2, gap: 1.1 },
+        { at: 34, id: 'kagamin',     count: 2, gap: 1.0, repeat: 24 },
+        { at: 52, id: 'lantankozo',  count: 2, gap: 1.1, repeat: 26 },
+        { at: 70, id: 'mirrorghost', count: 1, repeat: 28 },
+      ],
+    },
+
+    /* ---------- 7 サーカステント（おおボス）---------- */
+    {
+      no: 607, floor: 7, chapter: 0, course: 7,
+      name: 'サーカステント',
+      desc: '★おおボス「ピエロ大王」！てんきも じめんも めまぐるしく かわる。',
+      bg: 'boss',
+      castleHp: 3400,
+      power: 1.55,
+      weather: { every: 14, list: ['night', 'sun', 'rain', 'wind', 'snow'] },
+      belts: [{ from: 260, to: 800, speed: 30, flip: 8 }],
+      drops: ['cloth', 'glue', 'stone'],
+      reward: { coins: 20, exp: 26000 },
+      waves: [
+        { at: 3,  id: 'acrobat',     count: 2, gap: 1.0 },
+        { at: 18, id: 'coastan',     count: 2, gap: 1.0 },
+        { at: 34, id: 'acrobat',     count: 2, gap: 1.0, repeat: 18 },
+        { at: 50, id: 'kagamin',     count: 1, repeat: 22 },
+        { at: 66, id: 'mirrorghost', count: 2, gap: 1.0, repeat: 20 },
+        { at: 82, id: 'orgora',      count: 1, repeat: 26 },
+        /* ★ちゅうボスも でる → そして おおボス */
+        { atCastleHp: 0.80, id: 'kanchoobake', count: 1 },
+        { atCastleHp: 0.45, id: 'pierrot',     count: 1 },
+      ],
+    },
+
+  ],
+};
+
 const UNDERGROUND = {
   name: '特設・地底の国',
   icon: '🔺',
@@ -7539,6 +7912,9 @@ const UNDERGROUND = {
      のって いる あいだ、あるく はやさに その ぶんが たされます。
      そらを とぶ なかま（flying）には ききません。
    -------------------------------------------------------------------------- */
+/* てんきだまを つかった とき、なんびょう その てんきに なるか */
+const WEATHER_BALL_TIME = 18;
+
 const WEATHERS = {
   sun:   { name: 'かんかん でり', icon: '☀️', up: ['fire'],  down: ['water'], tint: 'rgba(255,183,77,.16)' },
   rain:  { name: 'あめ',          icon: '🌧️', up: ['water'], down: ['fire'],  tint: 'rgba(79,195,247,.18)' },
