@@ -1,0 +1,753 @@
+job: codex-jobs/feedback.md
+exit: 0
+minutes: 2.6
+changed (1): art/README.md
+outside allowed paths (0): -
+
+----- codex output -----
+OpenAI Codex v0.154.0
+--------
+workdir: C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a11693-1a12-7d50-9f6b-a100867c3136
+--------
+user
+Read the file codex-jobs/feedback.md and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.
+codex
+`AGENTS.md` と `codex-jobs/feedback.md` を読み、指定された作業と書き込み範囲を確認します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content AGENTS.md; Get-Content codex-jobs/feedback.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 191ms:
+# Codex 蜷代￠縺ｮ豎ｺ縺ｾ繧奇ｼ医％縺ｮ繝輔か繝ｫ繝・・
+
+縺薙・繝輔か繝ｫ繝縺ｯ蟷ｼ蜈仙髄縺代ご繝ｼ繝縲後ｂ繧医≧縺ｮ縺九￥繧後ｓ縺ｼ・井ｻｮ・峨阪・Web繝吶・繧ｿ縺ｧ縺吶・laude Code 縺悟昇莉､蝪斐〒縲，odex 縺ｯ **邨ｵ縺ｮ蛻ｶ菴・* 縺ｨ **迢ｬ遶九Ξ繝薙Η繝ｼ** 繧呈球蠖薙＠縺ｾ縺吶・
+
+## 譖ｸ縺崎ｾｼ繧薙〒繧医＞蝣ｴ謇
+- 邨ｵ縺ｮ蛻ｶ菴懊ず繝ｧ繝厄ｼ啻art/` 縺ｮ荳ｭ縺縺・
+- 繝ｬ繝薙Η繝ｼ繧ｸ繝ｧ繝厄ｼ啻audit/codex/` 縺ｮ荳ｭ縺縺托ｼ医Ξ繝昴・繝医ｒ譖ｸ縺擾ｼ・
+- 縺昴ｌ莉･螟厄ｼ・src/`, `tests/`, `scripts/`, 險ｭ螳壹∵枚譖ｸ・峨・ **螟画峩縺励↑縺・*縲ら峩縺励◆縺ｻ縺・′繧医＞轤ｹ縺ｯ縲√Ξ繝昴・繝医ｄ `art/README.md` 縺ｫ謠先｡医→縺励※譖ｸ縺・
+
+## 蠢・★螳医ｋ縺薙→
+- 繧ｸ繝ｧ繝悶ヵ繧｡繧､繝ｫ・・codex-jobs/*.md`・峨・謖・､ｺ縺ｨ縲～ART_SLOTS.md`繝ｻ`CODEX_ART_BRIEF.md` 縺ｮ豎ｺ縺ｾ繧翫↓蠕薙≧
+- 邨ｵ繧剃ｽ懊▲縺溘ｉ `npm run validate:art` 繧貞ｮ溯｡後＠縲∝粋譬ｼ縺吶ｋ縺ｾ縺ｧ逶ｴ縺吶らｵ先棡縺ｯ `art-guides/ART_CHECK.md` 縺ｫ蜃ｺ繧・
+- 譌｢蟄倥・菴懷刀・医く繝｣繝ｩ繧ｯ繧ｿ繝ｼ繝ｻ繝ｭ繧ｴ繝ｻ逕ｻ髱｢繝ｻ髻ｳ・峨ｒ縺ｾ縺ｭ縺ｪ縺・ｼ丞叙繧願ｾｼ縺ｾ縺ｪ縺・ゅロ繝・ヨ荳翫・逕ｻ蜒上ｒ菴ｿ繧上↑縺・よ枚蟄励ｒ邨ｵ縺ｫ蜈･繧後↑縺・
+- 蟄舌←繧ゅ・蛟倶ｺｺ諠・ｱ繝ｻ螟夜Κ騾壻ｿ｡繝ｻ蠎・相繝ｻ隱ｲ驥代↓髢｢繧上ｋ繧ゅ・繧定ｿｽ蜉縺励↑縺・
+- 霑ｽ蜉譁咎≡縺檎匱逕溘☆繧区焔谿ｵ・亥挨譁咎≡縺ｮ API 繧ｭ繝ｼ縲∵怏譁吶し繝ｼ繝薙せ・峨ｒ菴ｿ繧上↑縺・ょ茜逕ｨ荳企剞縺ｫ驕斐＠縺溘ｉ縲√◎縺薙〒豁｢繧√※蝣ｱ蜻翫☆繧・
+- git 縺ｮ commit / push 縺ｯ縺励↑縺・ｼ・laude Code 縺檎｢ｺ隱阪＠縺ｦ縺九ｉ陦後≧・・
+- 譛蠕後↓縲√ｄ縺｣縺溘％縺ｨ繝ｻ菴ｿ縺｣縺滓婿豕包ｼ・VG繧偵さ繝ｼ繝峨〒譖ｸ縺・◆・冗判蜒冗函謌舌ｒ菴ｿ縺｣縺・遲会ｼ峨・讀懈渊邨先棡繝ｻ縺ｧ縺阪↑縺九▲縺溘％縺ｨ繧偵√ず繝ｧ繝悶ヵ繧｡繧､繝ｫ縺ｮ謖・ｮ壼ｴ謇縺ｫ譖ｸ縺・
+
+## 繧ｵ繝ｳ繝峨・繝・け繧ｹ縺ｧ縺ｮ豕ｨ諢擾ｼ・026-10-07 霑ｽ險假ｼ・- `art-guides/ART_CHECK.md` 縺ｯ `npm run validate:art` 縺瑚・蜍輔〒譖ｸ縺肴鋤縺医ｋ縲ゅ％繧後・險ｱ蜿ｯ貂医∩縺ｪ縺ｮ縺ｧ縲∵嶌縺崎ｾｼ縺ｿ蜈医ｒ螟峨∴繧句ｷ･螟ｫ縺ｯ荳崎ｦ・- 讀懈渊繝ｻ繝薙Ν繝峨・驕灘・・・ode_modules縲《cripts縲∫腸蠅・､画焚 NODE_OPTIONS 縺ｪ縺ｩ・峨ｒ蟾ｮ縺玲崛縺医◆繧翫∽ｸ頑嶌縺阪＠縺溘ｊ縺吶ｋ蝗槭ｊ驕薙・縺励↑縺・ゅし繝ｳ繝峨・繝・け繧ｹ縺ｧ蜍輔°縺ｪ縺・さ繝槭Φ繝峨′縺ゅｌ縺ｰ縲∫┌逅・ｒ縺帙★縲√◎縺ｮ譌ｨ繧剃ｽ懈･ｭ險倬鹸縺ｫ譖ｸ縺・※邨ゅ∴繧具ｼ域､懈渊縺ｯ Claude Code 縺悟､悶〒繧ょｮ溯｡後☆繧具ｼ・- 菴懈･ｭ逕ｨ縺ｮ荳譎ゅヵ繧｡繧､繝ｫ・医ン繝ｫ繝峨・蜃ｺ蜉帙↑縺ｩ・峨ｒ `art/` 縺ｫ谿九＆縺ｪ縺・
+# 繧ｸ繝ｧ繝厄ｼ夊ｦ九◆逶ｮ縺ｮ菫ｮ豁｣・・laude Code 縺九ｉ縺ｮ萓晞ｼ・・
+## 譖ｸ縺崎ｾｼ繧薙〒繧医＞蝣ｴ謇
+art/ 縺ｮ荳ｭ縺ｨ art/README.md 縺縺・
+## 莉雁屓縺ｮ菫ｮ豁｣轤ｹ
+蟇ｾ雎｡・啻art/characters/koro/`・医ず繝ｧ繝・1縺ｧ菴懊▲縺・縺薙ｍ縲ょ・菴薙・譁ｹ蜷第ｧ繝ｻ蠖｢繝ｻ濶ｲ繝ｻ髯ｰ蠖ｱ縺ｯ縺ｨ縺ｦ繧り憶縺・・縺ｧ縲√◎縺ｮ縺ｾ縺ｾ菫昴▽・・
+1. **縺ｵ縺｡邱壹′邏ｰ縺吶℃繧・*縲ゅご繝ｼ繝縺ｧ縺ｯ邏・/3縺ｫ邵ｮ蟆上＆繧後※閭梧勹縺ｮ荳翫↓鄂ｮ縺九ｌ繧九◆繧√∽ｻ翫・螟ｪ縺包ｼ・troke-width 邏・.5・峨□縺ｨ邱壹′縺ｻ縺ｨ繧薙←豸医∴縺ｦ縲∬ｼｪ驛ｭ縺後⊂繧・￠繧九・   - 螟門・縺ｮ霈ｪ驛ｭ・磯ｭ繝ｻ謇九・譛阪・繧ｷ繝ｫ繧ｨ繝・ヨ繝ｻ雜ｳ・会ｼ嘖troke-width 2.6縲・.4 繧堤岼螳峨↓縲∝､ｪ縺輔↓蠑ｷ蠑ｱ繧偵▽縺代ｋ・井ｸ句・繝ｻ蠖ｱ蛛ｴ繧貞､ｪ縺上∝・縺ｮ蠖薙◆繧句ｷｦ荳翫ｒ邏ｰ縺擾ｼ峨らｷ壹・濶ｲ縺ｯ豼・＞闌ｶ濶ｲ邉ｻ・・4A3A40 蜑榊ｾ鯉ｼ峨・縺ｾ縺ｾ
+   - 蜀・・縺ｮ邏ｰ驛ｨ・育怏縲∝哨蜈・・蟆上§繧上∫ｸｫ縺・岼縲√ワ繧､繝ｩ繧､繝茨ｼ会ｼ壻ｻ翫・邏ｰ縺輔・縺ｾ縺ｾ縺ｧ繧医＞
+   - `clothes-line` 縺ｮ譛阪・縺ｵ縺｡邱壹ｂ蜷後§閠・∴譁ｹ縺ｧ螟ｪ縺上☆繧・2. **謇・*・壻ｻ翫・荳ｸ縺・°縺溘∪繧翫りｦｪ謖・・蟆上＆縺ｪ縺ｵ縺上ｉ縺ｿ繧・縺､縺縺題ｶｳ縺励※縲梧焔縲阪↓隕九∴繧九ｈ縺・↓・域欠繧貞・驛ｨ謠上°縺ｪ縺・ょｹｼ縺・魂雎｡繧剃ｿ昴▽・・3. `front-found`・域焔繧偵・繧具ｼ峨ｂ蜷後§螟ｪ縺輔・蜷後§謇九・謠上″譁ｹ縺ｫ縺昴ｍ縺医ｋ
+4. `art/README.md` 縺ｮ菴懈･ｭ險倬鹸縺ｫ縲√ず繝ｧ繝・1縺ｨ縺薙・菫ｮ豁｣縺ｮ荳｡譁ｹ繧呈嶌縺擾ｼ亥燕蝗槭・騾比ｸｭ縺ｧ邨ゅｏ縺｣縺溘◆繧∵悴險伜・・峨ゆｽｿ縺｣縺滓婿豕輔∵､懈渊邨先棡縲∬ｿｷ縺｣縺溽せ
+
+縺薙・ 縺薙ｍ 縺ｮ邱壹・螟ｪ縺輔・髯ｰ蠖ｱ縺ｮ莉倥￠譁ｹ縺後∽ｻ･蠕後・縺吶∋縺ｦ縺ｮ邨ｵ縺ｮ蝓ｺ貅悶↓縺ｪ繧九・
+## 螳医ｋ縺薙→
+- 菫ｮ豁｣轤ｹ縺ｫ譖ｸ縺九ｌ縺溘％縺ｨ縺縺代ｒ逶ｴ縺吶ょ粋譬ｼ縺励※縺・ｋ莉悶・邨ｵ縺ｯ螟峨∴縺ｪ縺・- `npm run validate:art` 縺後☆縺ｹ縺ｦ蜷域ｼ縺吶ｋ縺薙→縲～npm run build` 縺梧・蜉溘☆繧九％縺ｨ
+- art/README.md 縺ｮ菴懈･ｭ險倬鹸縺ｫ霑ｽ險・- AGENTS.md 縺ｮ縲後し繝ｳ繝峨・繝・け繧ｹ縺ｧ縺ｮ豕ｨ諢上阪↓蠕薙≧
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 AGENTS.md; Get-Content -Encoding UTF8 codex-jobs/feedback.md; rg --files -g AGENTS.md -g '*ART*' -g '*.md' art codex-jobs art-guides; Get-Content -Encoding UTF8 package.json" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 397ms:
+# Codex 向けの決まり（このフォルダ）
+
+このフォルダは幼児向けゲーム「もようのかくれんぼ（仮）」のWebベータです。Claude Code が司令塔で、Codex は **絵の制作** と **独立レビュー** を担当します。
+
+## 書き込んでよい場所
+- 絵の制作ジョブ：`art/` の中だけ
+- レビュージョブ：`audit/codex/` の中だけ（レポートを書く）
+- それ以外（`src/`, `tests/`, `scripts/`, 設定、文書）は **変更しない**。直したほうがよい点は、レポートや `art/README.md` に提案として書く
+
+## 必ず守ること
+- ジョブファイル（`codex-jobs/*.md`）の指示と、`ART_SLOTS.md`・`CODEX_ART_BRIEF.md` の決まりに従う
+- 絵を作ったら `npm run validate:art` を実行し、合格するまで直す。結果は `art-guides/ART_CHECK.md` に出る
+- 既存の作品（キャラクター・ロゴ・画面・音）をまねない／取り込まない。ネット上の画像を使わない。文字を絵に入れない
+- 子どもの個人情報・外部通信・広告・課金に関わるものを追加しない
+- 追加料金が発生する手段（別料金の API キー、有料サービス）を使わない。利用上限に達したら、そこで止めて報告する
+- git の commit / push はしない（Claude Code が確認してから行う）
+- 最後に、やったこと・使った方法（SVGをコードで書いた／画像生成を使った 等）・検査結果・できなかったことを、ジョブファイルの指定場所に書く
+
+## サンドボックスでの注意（2026-10-07 追記）
+- `art-guides/ART_CHECK.md` は `npm run validate:art` が自動で書き換える。これは許可済みなので、書き込み先を変える工夫は不要
+- 検査・ビルドの道具（node_modules、scripts、環境変数 NODE_OPTIONS など）を差し替えたり、上書きしたりする回り道はしない。サンドボックスで動かないコマンドがあれば、無理をせず、その旨を作業記録に書いて終える（検査は Claude Code が外でも実行する）
+- 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
+# ジョブ：見た目の修正（Claude Code からの依頼）
+
+## 書き込んでよい場所
+art/ の中と art/README.md だけ
+
+## 今回の修正点
+対象：`art/characters/koro/`（ジョブ01で作った ころ。全体の方向性・形・色・陰影はとても良いので、そのまま保つ）
+
+1. **ふち線が細すぎる**。ゲームでは約1/3に縮小されて背景の上に置かれるため、今の太さ（stroke-width 約1.5）だと線がほとんど消えて、輪郭がぼやける。
+   - 外側の輪郭（頭・手・服のシルエット・足）：stroke-width 2.6〜3.4 を目安に、太さに強弱をつける（下側・影側を太く、光の当たる左上を細く）。線の色は濃い茶色系（#4A3A40 前後）のまま
+   - 内側の細部（眉、口元の小じわ、縫い目、ハイライト）：今の細さのままでよい
+   - `clothes-line` の服のふち線も同じ考え方で太くする
+2. **手**：今は丸いかたまり。親指の小さなふくらみを1つだけ足して「手」に見えるように（指を全部描かない。幼い印象を保つ）
+3. `front-found`（手をふる）も同じ太さ・同じ手の描き方にそろえる
+4. `art/README.md` の作業記録に、ジョブ01とこの修正の両方を書く（前回は途中で終わったため未記入）。使った方法、検査結果、迷った点
+
+この ころ の線の太さ・陰影の付け方が、以後のすべての絵の基準になる。
+
+## 守ること
+- 修正点に書かれたことだけを直す。合格している他の絵は変えない
+- `npm run validate:art` がすべて合格すること、`npm run build` が成功すること
+- art/README.md の作業記録に追記
+- AGENTS.md の「サンドボックスでの注意」に従う
+art\README.md
+codex-jobs\_template.md
+codex-jobs\QUEUE.md
+codex-jobs\fix-validation.md
+codex-jobs\feedback.md
+codex-jobs\90-review-code.md
+codex-jobs\06-ui.md
+codex-jobs\05-garden-shop.md
+codex-jobs\04-room.md
+codex-jobs\03-patterns.md
+codex-jobs\02-mimi-moko.md
+codex-jobs\01-koro.md
+art-guides\ART_CHECK.md
+{
+  "name": "pattern-hide-family-beta",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "もようのかくれんぼ（仮）家族内テスト用ベータ。公開・課金なし。",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "verify:layouts": "vitest run tests/unit/placement.test.ts",
+    "validate:art": "node scripts/validate-art.mjs",
+    "art:guides": "node scripts/export-art-guides.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "5.0.3"
+  }
+}
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 ART_SLOTS.md; Get-Content -Encoding UTF8 CODEX_ART_BRIEF.md; Get-Content -Encoding UTF8 codex-jobs/01-koro.md; Get-Content -Encoding UTF8 art/README.md; rg --files art/characters/koro; git status --short' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 206ms:
+# 絵の差し替え口（ART_SLOTS）
+
+`art/` フォルダに決まった名前でファイルを置くと、ゲームが自動でその絵を使います。
+**置かなかった部分は、今のコードの絵のまま** 動きます（一部だけ差し替えてもよい）。
+
+- 形式：PNG（透過）／WebP／SVG。1ファイル 800KB まで、合計 8MB まで
+- SVG はスクリプト・外部参照・文字（フォント）を含めない
+- 置いたら `npm run validate:art` で検査 → `npm run build` → 画面を確認
+- 下書きガイド：`npm run art:guides` で `art-guides/` に出る（形状データから自動生成。描く位置の基準）
+
+## キャラクター `art/characters/{koro|mimi|moko}/`
+
+枠：**450×600px**（またはその整数倍。縦横比 3:4）。ゲーム内の座標 x −90〜90、y −225〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 37.5px**。ガイド `art-guides/character-*.png` に重ねて描く。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `clothes-mask.png` | ○ | 服の形だけを **白**、ほかは黒か透明。ここにゲームが背景と同じ柄を流し込む。ガイドの青い範囲（からだの判定）からはみ出さないこと |
+| `front.png` | ○ | 服より前に描くもの：顔・頭・耳・髪・手・服の上に出る線。目と口はガイドの赤い点の位置 |
+| `back.png` | | 服より後ろ：足、背中側の耳や髪など |
+| `clothes-shade.png` | | 服の陰影（乗算で重なる）。グレー〜茶系の濃淡、透過 |
+| `clothes-line.png` | | 服のふち線だけ。難易度に応じてゲームが濃さを変える（最低25%） |
+| `front-found.png` | | 見つかった時の前面（手をふるポーズ）。無ければ front を使う |
+
+`clothes-mask` と `front` がそろっていない時は、そのキャラクターはコードの絵のままです。
+
+## シーン `art/scenes/{room|garden|shop}/`
+
+枠：**1000×1000px**（2000×2000 推奨）。ガイド `art-guides/scene-*.png` の色面が「柄の領域」で、**ここはゲームが柄を塗る**（服と同じ柄にして隠れられるようにするため）。
+
+| ファイル | 中身 | 決まり |
+|---|---|---|
+| `back.png` | 柄の領域より下：空・壁の上部・床など | 不透明でよい |
+| `over.png` | 柄の領域の上・キャラクターの後ろ：家具の縁・カーテンのひだの陰・窓・棚など | 透過。キャラクターの服の後ろは薄く（平均の濃さ35%以下）、顔の後ろには描かない |
+| `minor.png` | 小さい画面では省く飾り（壁の絵・雲など） | over と同じ決まり |
+| `fore.png` | 前景の小物すべて（キャラクターの前に重なる） | 透過。ガイドの橙色の形に合わせる。**赤い円（顔）には重ねない**。服は少し（2割以上8割未満が見える程度）隠す |
+
+## 柄のタイル `art/patterns/{シーン}-{服}.png`
+
+例：`room-stripes.png`、`garden-leaf.png`。正方形 64px 以上、不透明、**上下左右がつなぎ目なく続く**こと。
+同じタイルが背景の領域と服の両方に使われます（だから隠れられる）。タイル1枚がゲーム内で表す大きさは、各シーンの柄の `size`（38〜52）です。
+
+| シーン | 服（ファイル名の後半） |
+|---|---|
+| room | plain（壁）, stripes（カーテン）, dots（ソファ）, check（ラグ） |
+| garden | plain（芝生）, stripes（柵）, dots（花だん）, leaf（生け垣） |
+| shop | plain（床）, stripes（カウンター）, dots（壁）, check（テーブルクロス） |
+
+## 画面の絵 `art/ui/`
+
+`title.png`（タイトルの絵）、`handoff.png`（受け渡し画面の絵。**隠れ場所や背景を描かない**）、`bye.png`（おしまい画面）。2000px 以内。
+# Codex への絵の制作依頼（CODEX_ART_BRIEF）
+
+> ご自宅PCで Codex に渡すための依頼文です。下の「Codex への指示」をそのまま貼り付けてください。
+
+## 事前準備（ご自宅PC）
+
+```bash
+git fetch origin
+git checkout claude/pattern-hide-family-beta
+git pull
+cd pattern-hide-family-beta
+npm ci
+npm run art:guides      # art-guides/ に下書きガイドができる
+```
+
+## Codex への指示（ここから貼り付け）
+
+あなたは、幼児向けかくれんぼゲーム「もようのかくれんぼ（仮）」の絵を作る担当です。
+作業フォルダは `pattern-hide-family-beta/` です。最初に `ART_SLOTS.md` と、この `CODEX_ART_BRIEF.md` を読んでください。
+
+### 守ること
+1. 書き込んでよいのは `pattern-hide-family-beta/art/` の中だけです。`src/` やテスト、設定ファイルは変更しないでください（別のAIが担当しています）。
+2. ファイル名・寸法・層の分け方は `ART_SLOTS.md` のとおりにしてください。描く位置は `art-guides/` のガイド画像に合わせてください。ガイドはゲームの当たり判定と同じ形から作られています。
+3. 描き終えたら `npm run validate:art` を実行し、**すべて合格するまで直してください**。結果は `art-guides/ART_CHECK.md` に出ます。そのあと `npm run build` が通ることを確認してください。
+4. 既存の作品（キャラクター、ロゴ、画面、音）をまねたり、取り込んだりしないでください。ネット上の画像も使わないでください。特定の作品に見える顔の配置や特徴は避けてください。
+5. 文字は絵に入れないでください。
+6. 追加料金が発生する手段（別料金のAPIキー、有料サービス）は使わないでください。今の契約の範囲でできないことがあれば、無理をせず、できなかったことを報告してください。
+7. 最後に、作ったファイル・使った方法（SVGをコードで書いた／画像生成を使った等）・検査結果を `art/README.md` に書いてください。
+
+### 絵の方向性
+- **かわいらしく、幼い子向け。ただし安っぽくしない。** 絵本の挿絵のような品のある仕上がりにします。
+- 形に丸みと立体感を持たせます。やわらかい陰影、ほのかなグラデーション、光は左上から、接地面にやわらかい影を入れてください。平べったいクリップアートや絵文字のようにはしないでください。
+- 線は黒ではなく濃い茶色系（目安 #4A3A40）。太さに少し強弱をつけ、全部の線を同じ太さにしないでください。
+- 色は、少しくすんだやさしいパステルを基調に、差し色を少しだけ。蛍光色や彩度の高すぎる色は使わないでください。
+- 布の縫い目、木目、葉脈など、見つけるとうれしい細部を控えめに入れます。ただし背景がうるさくなり、さがしにくくなる量にはしないでください。
+- 3体の見分けは **色だけに頼らず形で** つけます。今の形を受け継いでください：
+  - **ころ**：あたまに「くるん」とした毛。げんきでくいしんぼう。アプリコット色
+  - **みみ**：たれた長い耳（内側はピンク）。ものしりでのんびり。ミントグリーン
+  - **もこ**：くもの形のもこもこした頭と、星の髪どめ。ふわふわではずかしがり。ラベンダー
+- 3体とも、頭が大きめの約2頭身です。目は大きく、ハイライトを入れてください。表情はおだやかな笑顔です。
+- 服は **ゲームが柄を流し込む部分** なので、`clothes-mask.png`（白黒の形）として分けてください。服の陰影は `clothes-shade.png`、ふち線は `clothes-line.png` に分けると、柄の上に立体感が出ます。
+- 背景の「柄の領域」（カーテン・ソファ・ラグ、生け垣・柵・花だん・芝生、かべ・カウンター・テーブルクロス・床）は、ゲームが柄で塗ります。質感は **柄タイル**（`art/patterns/`）で出してください。布の織り目や紙の質感などを入れたタイルにします。同じタイルが服にも使われます。
+- 前景の小物（`fore.png`）は、今の小物と同じ位置・同じくらいの大きさで描き直してください（ガイドの橙色）。顔（赤い円）には絶対に重ねないでください。
+- 怖い表情、暗い影、先のとがった危なそうな物は入れないでください。
+
+### おすすめの順番
+1. `art/characters/koro/` の5層（back, clothes-mask, clothes-shade, clothes-line, front, front-found）を作る → 検査に合格させる
+2. 同じ画風で みみ・もこ を作る
+3. `art/patterns/` の柄タイル12枚
+4. `art/scenes/room/` の back / over / minor / fore → 検査 → garden → shop
+5. `art/ui/` の title / handoff / bye
+
+途中で、`npm run build && npm run preview` を実行し、`http://127.0.0.1:4173/` で見た目を確認してください。
+
+（貼り付けここまで）
+
+## 作業後
+
+- Codex の作業を `git add art && git commit` して、同じブランチに push してください。
+- Claude 側では、画面写真・操作テスト・溶け込み具合を確認し、必要なら調整案を出します。
+- 同じファイルを同時に複数のAIで編集しないため、Codex は `art/` だけ、Claude はそれ以外、と分けています。
+# ジョブ01：ころ（画風の基準）
+
+## 書き込んでよい場所
+`art/characters/koro/` と `art/README.md` だけ
+
+## 読むもの
+AGENTS.md / ART_SLOTS.md の「キャラクター」/ CODEX_ART_BRIEF.md の「絵の方向性」/ art-guides/character-koro.png（今の絵が薄く入った下書き。青＝服、赤点＝目と口、橙点線＝はみ出し上限）/ art-guides/current-*.png（今の画面）
+
+## やること
+- ころ を、絵本の挿絵のような品のある画風で描き直す。この絵が以後の全ての絵の画風の基準になる
+- 層：back, clothes-mask（必須）, clothes-shade, clothes-line, front（必須）, front-found（手をふる）
+- 450×600px（または 900×1200px）、透過PNG（またはSVG）。足もと中央の位置・顔の位置はガイドに合わせる
+- 特徴（あたまの「くるん」とした毛、アプリコット色、げんきでくいしんぼう）を保つ
+
+## 合格条件
+- `npm run validate:art` がすべて合格（結果は art-guides/ART_CHECK.md）
+- `npm run build` が成功
+
+## 最後に書くこと
+`art/README.md` の「作業記録」に追記：日付、作ったファイル、使った方法（SVGをコードで書いた／画像生成を使った 等）、検査結果、できなかったこと・迷った点
+# art/
+
+差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+今は空です。空の間は、ゲームはコードで描いた既定の絵を使います。
+
+## 作業記録
+（Codex がジョブごとに追記）
+art/characters/koro\front.svg
+art/characters/koro\front-found.svg
+art/characters/koro\clothes-shade.svg
+art/characters/koro\clothes-mask.svg
+art/characters/koro\clothes-line.svg
+art/characters/koro\back.svg
+ M art-guides/ART_CHECK.md
+ M screenshots/375x667_01-title.png
+ M screenshots/375x667_02-search-setup.png
+ M screenshots/375x667_03-tutorial.png
+ M screenshots/375x667_04-search-room-easy.png
+ M screenshots/375x667_05-hint-outline.png
+ M screenshots/375x667_06-found.png
+ M screenshots/375x667_07-clear.png
+ M screenshots/375x667_08-search-shop-normal.png
+ M screenshots/375x667_09-hide-chars.png
+ M screenshots/375x667_10-hide-costume.png
+ M screenshots/375x667_11-hide-place-candidates.png
+ M screenshots/375x667_12-hide-placed.png
+ M screenshots/375x667_13-handoff-blind.png
+ M screenshots/375x667_14-find-after-handoff.png
+ M screenshots/375x667_15-parent-gate.png
+ M screenshots/390x844_01-title.png
+ M screenshots/390x844_02-search-setup.png
+ M screenshots/390x844_03-tutorial.png
+ M screenshots/390x844_04-search-room-easy.png
+ M screenshots/390x844_05-hint-outline.png
+ M screenshots/390x844_06-found.png
+ M screenshots/390x844_07-clear.png
+ M screenshots/390x844_08-search-shop-normal.png
+ M screenshots/390x844_09-hide-chars.png
+ M screenshots/390x844_10-hide-costume.png
+ M screenshots/390x844_11-hide-place-candidates.png
+ M screenshots/390x844_12-hide-placed.png
+ M screenshots/390x844_13-handoff-blind.png
+ M screenshots/390x844_14-find-after-handoff.png
+ M screenshots/390x844_15-parent-gate.png
+ M screenshots/768x1024_01-title.png
+ M screenshots/768x1024_02-search-setup.png
+ M screenshots/768x1024_03-tutorial.png
+ M screenshots/768x1024_04-search-room-easy.png
+ M screenshots/768x1024_05-hint-outline.png
+ M screenshots/768x1024_06-found.png
+ M screenshots/768x1024_07-clear.png
+ M screenshots/768x1024_08-search-shop-normal.png
+ M screenshots/768x1024_09-hide-chars.png
+ M screenshots/768x1024_10-hide-costume.png
+ M screenshots/768x1024_11-hide-place-candidates.png
+ M screenshots/768x1024_12-hide-placed.png
+ M screenshots/768x1024_13-handoff-blind.png
+ M screenshots/768x1024_14-find-after-handoff.png
+ M screenshots/768x1024_15-parent-gate.png
+ M screenshots/844x390-landscape_01-title.png
+ M screenshots/844x390-landscape_02-search-setup.png
+ M screenshots/844x390-landscape_03-tutorial.png
+ M screenshots/844x390-landscape_05-hint-outline.png
+ M screenshots/844x390-landscape_06-found.png
+ M screenshots/844x390-landscape_07-clear.png
+ M screenshots/844x390-landscape_08-search-shop-normal.png
+ M screenshots/844x390-landscape_09-hide-chars.png
+ M screenshots/844x390-landscape_10-hide-costume.png
+ M screenshots/844x390-landscape_11-hide-place-candidates.png
+ M screenshots/844x390-landscape_12-hide-placed.png
+ M screenshots/844x390-landscape_13-handoff-blind.png
+ M screenshots/844x390-landscape_14-find-after-handoff.png
+ M screenshots/844x390-landscape_15-parent-gate.png
+?? art/characters/
+?? video/hide-handoff-find.webm
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 art/characters/koro/front.svg; Get-Content -Encoding UTF8 art/characters/koro/front-found.svg; Get-Content -Encoding UTF8 art/characters/koro/back.svg; Get-Content -Encoding UTF8 art/characters/koro/clothes-line.svg; Get-Content -Encoding UTF8 scripts/validate-art.mjs -TotalCount 85; Get-Content -Encoding UTF8 vite.config.ts' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 142ms:
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#ffe5be"/><stop offset=".48" stop-color="#f3c48f"/><stop offset=".82" stop-color="#eab07e"/><stop offset="1" stop-color="#d49770"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#fff1d7" stop-opacity=".62"/><stop offset="1" stop-color="#fff1d7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+<linearGradient id="curl" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#b7875f"/><stop offset="1" stop-color="#81573f"/></linearGradient>
+</defs><path d="M-47-145 C-46-168-29-185-5-187 C17-190 39-175 46-153 C53-130 40-109 19-102 C4-96-14-99-28-109 C-41-118-49-130-47-145Z" fill="url(#skin)" stroke="#705246" stroke-width="1.55" stroke-linejoin="round"/>
+<path d="M-43-149 C-41-168-27-180-10-182" fill="none" stroke="#fff1d8" stroke-opacity=".64" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M41-128 Q34-108 12-103" fill="none" stroke="#aa7357" stroke-opacity=".5" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M-4-187 C-12-199 1-209 12-202 C22-195 14-185 7-191 C3-195 9-199 12-195" fill="none" stroke="#745140" stroke-width="6.4" stroke-linecap="round"/>
+<path d="M-4.5-189 C-10-199 1-206 11-200 C18-195 13-190 8-193" fill="none" stroke="url(#curl)" stroke-width="3.8" stroke-linecap="round"/>
+<path d="M-5-196 Q-1-204 7-201" fill="none" stroke="#e7ba85" stroke-width="1.1" stroke-linecap="round"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153" fill="none" stroke="#9a7155" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g><path d="M-43-54 C-49-60-59-56-60-48 C-63-40-55-34-48-36 C-42-37-38-43-41-49 Q-43-52-46-49" fill="url(#skin)" stroke="#735446" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-55-50 Q-57-45-54-42" fill="none" stroke="#ffe7c5" stroke-width="1.15" stroke-linecap="round" opacity=".8"/><path d="M43-54 C49-60 58-55 60-48 C62-40 55-34 48-36 C42-37 38-43 41-49 Q43-52 46-49" fill="url(#skin)" stroke="#735446" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M46-53 Q51-56 55-51" fill="none" stroke="#ffe7c5" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#ffe5be"/><stop offset=".48" stop-color="#f3c48f"/><stop offset=".82" stop-color="#eab07e"/><stop offset="1" stop-color="#d49770"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#fff1d7" stop-opacity=".62"/><stop offset="1" stop-color="#fff1d7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+<linearGradient id="curl" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#b7875f"/><stop offset="1" stop-color="#81573f"/></linearGradient>
+</defs><path d="M-47-145 C-46-168-29-185-5-187 C17-190 39-175 46-153 C53-130 40-109 19-102 C4-96-14-99-28-109 C-41-118-49-130-47-145Z" fill="url(#skin)" stroke="#705246" stroke-width="1.55" stroke-linejoin="round"/>
+<path d="M-43-149 C-41-168-27-180-10-182" fill="none" stroke="#fff1d8" stroke-opacity=".64" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M41-128 Q34-108 12-103" fill="none" stroke="#aa7357" stroke-opacity=".5" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M-4-187 C-12-199 1-209 12-202 C22-195 14-185 7-191 C3-195 9-199 12-195" fill="none" stroke="#745140" stroke-width="6.4" stroke-linecap="round"/>
+<path d="M-4.5-189 C-10-199 1-206 11-200 C18-195 13-190 8-193" fill="none" stroke="url(#curl)" stroke-width="3.8" stroke-linecap="round"/>
+<path d="M-5-196 Q-1-204 7-201" fill="none" stroke="#e7ba85" stroke-width="1.1" stroke-linecap="round"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153" fill="none" stroke="#9a7155" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g><path d="M-43-54 C-49-60-59-56-60-48 C-63-40-55-34-48-36 C-42-37-38-43-41-49 Q-43-52-46-49" fill="url(#skin)" stroke="#735446" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-55-50 Q-57-45-54-42" fill="none" stroke="#ffe7c5" stroke-width="1.15" stroke-linecap="round" opacity=".8"/><path d="M43-63 C48-69 51-77 51-82 C47-87 46-91 49-93 C52-94 54-88 56-87 C56-91 54-99 58-100 C62-101 61-93 63-90 C65-94 64-100 68-99 C72-97 68-91 69-88 C72-91 73-94 76-92 C80-89 74-80 69-76 Q61-70 57-58 C52-55 46-57 43-63Z" fill="url(#skin)" stroke="#735446" stroke-width="1.45" stroke-linejoin="round"/>
+<path d="M56-86 Q61-86 62-81 M58-77 Q62-75 65-78" fill="none" stroke="#b07b5c" stroke-width=".9" stroke-linecap="round"/>
+<path d="M53-67 Q58-72 58-75" fill="none" stroke="#ffe5bf" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+ <radialGradient id="ground"><stop stop-color="#6b5350" stop-opacity=".22"/><stop offset="1" stop-color="#6b5350" stop-opacity="0"/></radialGradient>
+ <linearGradient id="foot" x1="0" y1="0" x2=".6" y2="1"><stop stop-color="#b78c70"/><stop offset=".6" stop-color="#946e5b"/><stop offset="1" stop-color="#70534b"/></linearGradient>
+</defs>
+<ellipse cx="0" cy="6" rx="48" ry="8" fill="url(#ground)"/>
+<path d="M-40 0 C-42 5-34 9-25 9 C-16 9-8 6-8 2 L-11-7-36-7Z M8 2 C8 7 17 9 26 9 C35 9 43 5 40 0 L36-7 12-7Z" fill="url(#foot)" stroke="#624b46" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M-35 3 Q-24 7-15 3 M15 3 Q26 7 35 3" fill="none" stroke="#e4bb92" stroke-opacity=".55" stroke-width="1.2" stroke-linecap="round"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" fill="none" stroke="#66504a" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M-23-98 Q-1-84 23-98" fill="none" stroke="#66504a" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M-20-97 Q0-89 20-97 M-53-3 Q0 5 53-3" fill="none" stroke="#80695b" stroke-width=".7" stroke-dasharray="1.5 2.6" stroke-linecap="round" opacity=".75"/>
+<path d="M-35-90 Q-42-81-44-72 M35-90 Q42-81 44-72" fill="none" stroke="#6e574d" stroke-width=".9" stroke-linecap="round" opacity=".6"/>
+</svg>
+// art/ の絵を自動検査する（npm run validate:art）。
+// 形式・寸法・安全性に加え、ゲームと同じ形状データで「顔が隠れない」「全面を隠さない」
+// 「服の形がからだの判定とずれない」「柄タイルがつなぎ目なく並ぶ」を確かめる。
+// 見た目の良し悪し・幼児にとっての難しさは検査しない（人が見る）。
+import { chromium } from '@playwright/test';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, extname, basename } from 'node:path';
+import { loadGeometry } from './lib/load-geometry.mjs';
+
+const dirArg = process.argv.indexOf('--dir');
+const ART = dirArg > 0 ? process.argv[dirArg + 1] : 'art';
+const G = await loadGeometry();
+const F = G.CHAR_FRAME;
+const MAX_FILE = 800 * 1024;
+const MAX_TOTAL = 8 * 1024 * 1024;
+const results = []; // {file, ok, msg}
+const ok = (file, msg) => results.push({ file, ok: true, msg });
+const ng = (file, msg) => results.push({ file, ok: false, msg });
+
+function list(d) {
+  if (!existsSync(d)) return [];
+  return readdirSync(d).flatMap((f) => {
+    const p = join(d, f);
+    return statSync(p).isDirectory() ? list(p) : [p];
+  });
+}
+const files = list(ART).filter((f) => !basename(f).startsWith('.') && !['README.md', 'ART_CHECK.md'].includes(basename(f)));
+const MIME = { '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
+
+// ---- 形式・安全性
+let total = 0;
+for (const f of files) {
+  const ext = extname(f).toLowerCase();
+  const size = statSync(f).size;
+  total += size;
+  if (!MIME[ext]) {
+    ng(f, `使えない形式 ${ext}（png / webp / svg のみ）`);
+    continue;
+  }
+  if (size > MAX_FILE) ng(f, `大きすぎ ${(size / 1024).toFixed(0)}KB > ${MAX_FILE / 1024}KB`);
+  if (ext === '.svg') {
+    const t = readFileSync(f, 'utf8');
+    if (/<script|on[a-z]+\s*=|<foreignObject|javascript:/i.test(t)) ng(f, 'SVG にスクリプト／イベント属性／foreignObject がある');
+    if (/(href|src)\s*=\s*["'](?!#|data:image\/)/i.test(t) || /url\(\s*['"]?(?!#)/i.test(t)) ng(f, 'SVG が外部ファイル・URLを参照している（同じファイル内の #id と data:image のみ可）');
+    if (/<text|font-family/i.test(t)) ng(f, 'SVG に文字・フォント指定がある（端末で見た目が変わるため、線に変換してください）');
+  }
+}
+if (total > MAX_TOTAL) ng(ART, `合計が大きすぎ ${(total / 1048576).toFixed(1)}MB > 8MB`);
+
+// ---- 画素の読み取り（Chromium の canvas）
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.setContent('<html><body></body></html>');
+async function pixels(file, w, h) {
+  const data = `data:${MIME[extname(file).toLowerCase()]};base64,${readFileSync(file).toString('base64')}`;
+  return page.evaluate(
+    async ({ data, w, h }) => {
+      const img = new Image();
+      img.src = data;
+      await img.decode();
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const x = c.getContext('2d');
+      x.drawImage(img, 0, 0, w, h);
+      const d = x.getImageData(0, 0, w, h).data;
+      const a = new Uint8Array(w * h);
+      const l = new Uint8Array(w * h);
+      for (let i = 0; i < w * h; i++) {
+        a[i] = d[i * 4 + 3];
+        l[i] = Math.round((d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114) * (d[i * 4 + 3] / 255));
+      }
+      const b64 = (u) => {
+        let s = '';
+        for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+        return btoa(s);
+      };
+      return { nw: img.naturalWidth, nh: img.naturalHeight, a: b64(a), l: b64(l), w, h };
+    },
+    { data, w, h },
+  ).then((r) => ({ ...r, a: Buffer.from(r.a, 'base64'), l: Buffer.from(r.l, 'base64') }));
+}
+const at = (px, x, y) => {
+  const xi = Math.min(px.w - 1, Math.max(0, Math.round(x)));
+  const yi = Math.min(px.h - 1, Math.max(0, Math.round(y)));
+import { defineConfig, type Plugin } from 'vite';
+import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = dirname(fileURLToPath(import.meta.url));
+
+// 本番ビルドの後に、ビルド成果物の一覧から Service Worker を作る。
+// 版（VERSION）は成果物の内容のハッシュなので、更新すると古いキャッシュは消える。
+function serviceWorkerPlugin(): Plugin {
+  let outDir = 'dist';
+  return {
+    name: 'local-service-worker',
+    apply: 'build',
+    configResolved(c) {
+      outDir = resolve(c.root, c.build.outDir);
+    },
+    closeBundle() {
+      const files: string[] = [];
+      const walk = (d: string) => {
+        for (const f of readdirSync(d)) {
+          const p = join(d, f);
+          if (statSync(p).isDirectory()) walk(p);
+          else files.push(p);
+        }
+      };
+      walk(outDir);
+      const list = files
+        .map((f) => relative(outDir, f).split('\\').join('/'))
+        .filter((f) => f !== 'sw.js')
+        .sort();
+      const h = createHash('sha256');
+      for (const f of list) h.update(f).update(readFileSync(join(outDir, f)));
+      const version = h.digest('hex').slice(0, 12);
+      const tpl = readFileSync(resolve(ROOT, 'src/sw-template.js'), 'utf8');
+      const out = tpl.replace('__VERSION__', version).replace('__ASSETS__', JSON.stringify(['./', ...list.map((f) => './' + f)]));
+      writeFileSync(join(outDir, 'sw.js'), out);
+    },
+  };
+}
+
+// 本番だけ、通信先を同一オリジンに制限する CSP を入れる
+function cspPlugin(): Plugin {
+  return {
+    name: 'csp-meta',
+    apply: 'build',
+    transformIndexHtml(html) {
+      const csp =
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'";
+      return html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${csp}" />`);
+    },
+  };
+}
+
+export default defineConfig({
+  base: './',
+  plugins: [cspPlugin(), serviceWorkerPlugin()],
+  build: { target: 'es2020', sourcemap: false },
+  server: { host: '127.0.0.1', strictPort: false },
+  preview: { host: '127.0.0.1' },
+  test: {
+    include: ['tests/unit/**/*.test.ts'],
+    environment: 'node',
+  },
+} as never);
+
+codex
+ころのSVGを確認しました。色・陰影・顔の細部は保ち、外側の輪郭を左上は2.6、下側・影側は3.4程度に太くします。手をふるポーズも、親指のふくらみが1つある丸い手にそろえます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs = require('node:fs');
+const dir = 'art/characters/koro/';
+const leftOld = 'M-43-54 C-49-60-59-56-60-48 C-63-40-55-34-48-36 C-42-37-38-43-41-49 Q-43-52-46-49';
+const left = 'M-43-54 C-49-60-59-56-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44 C-36-42-34-46-37-49 Q-40-53-43-54Z';
+const rightOld = 'M43-54 C49-60 58-55 60-48 C62-40 55-34 48-36 C42-37 38-43 41-49 Q43-52 46-49';
+const right = 'M43-54 C49-60 58-55 60-48 C62-40 55-34 48-36 C43-37 40-40 41-44 C36-42 34-46 37-49 Q40-53 43-54Z';
+const waveOld = 'M43-63 C48-69 51-77 51-82 C47-87 46-91 49-93 C52-94 54-88 56-87 C56-91 54-99 58-100 C62-101 61-93 63-90 C65-94 64-100 68-99 C72-97 68-91 69-88 C72-91 73-94 76-92 C80-89 74-80 69-76 Q61-70 57-58 C52-55 46-57 43-63Z';
+const wave = 'M43-63 C48-69 51-77 51-82 C47-85 46-90 49-92 C52-94 54-89 56-87 C55-93 57-99 63-99 C71-100 76-95 76-89 C77-83 73-79 69-76 Q61-70 57-58 C52-55 46-57 43-63Z';
+const edge = d => "'`<path d="${d}" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+for (const name of ['"'front.svg', 'front-found.svg']) {
+ let s = fs.readFileSync(dir+name, 'utf8');
+ s = s.replace('stroke=\"#705246\" stroke-width=\"1.55\"', 'stroke=\"#4A3A40\" stroke-width=\"2.6\"');
+ const headEnd = 'stroke-width=\"2.6\" stroke-linejoin=\"round\"/>';
+ s = s.replace(headEnd, headEnd+'\\n'+edge('M46-153 C53-130 40-109 19-102 C4-96-14-99-28-109'));
+ s = s.replace(leftOld,left).replace(rightOld,right).replace(waveOld,wave);
+ s = s.replaceAll('stroke=\"#735446\" stroke-width=\"1.45\"', 'stroke=\"#4A3A40\" stroke-width=\"2.6\"');
+ s = s.replace('</svg>', edge('M-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44')+'\\n'+edge(name==='front.svg' ? 'M60-48 C62-40 55-34 48-36 C43-37 40-40 41-44' : 'M76-89 C77-83 73-79 69-76 Q61-70 57-58 C52-55 46-57 43-63')+'\\n</svg>');
+ fs.writeFileSync(dir+name,s);
+}
+let s = fs.readFileSync(dir+'back.svg','utf8').replace('stroke=\"#624b46\" stroke-width=\"1.2\"','stroke=\"#4A3A40\" stroke-width=\"2.6\"');
+s=s.replace('</svg>',edge('M-40 0 C-42 5-34 9-25 9 C-16 9-8 6-8 2 M8 2 C8 7 17 9 26 9 C35 9 43 5 40 0')+'\\n</svg>');
+fs.writeFileSync(dir+'back.svg',s);
+s=fs.readFileSync(dir+'clothes-line.svg','utf8').replaceAll('stroke=\"#66504a\" stroke-width=\"1.5\"','stroke=\"#4A3A40\" stroke-width=\"2.6\"');
+s=s.replace('</svg>',edge('M34-94 L40.9-85.5 46.8-76.1 51.4-65.8 55-54.5 57.4-42.3 58.8-29.1 58.9-15 58 0 43.5 2 29 3.4 14.5 4.2 0 4.5 -14.5 4.2 -29 3.4 -43.5 2 -58 0')+'\\n</svg>');
+fs.writeFileSync(dir+'clothes-line.svg',s);
+'@ | node" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 234ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm run validate:art' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 191ms:
+npm : このシステムではスクリプトの実行が無効になっているため、ファイル C:\Program Files\nodejs\npm.ps1 を読み込むことができません。詳細については、「about_Execution_Policies」
+(https://go.microsoft.com/fwlink/?LinkID=135170) を参照してください。
+発生場所 行:2 文字:1
++ npm run validate:art
++ ~~~
+    + CategoryInfo          : セキュリティ エラー: (: ) []、PSSecurityException
+    + FullyQualifiedErrorId : UnauthorizedAccess
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm run build' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 219ms:
+npm : このシステムではスクリプトの実行が無効になっているため、ファイル C:\Program Files\nodejs\npm.ps1 を読み込むことができません。詳細については、「about_Execution_Policies」
+(https://go.microsoft.com/fwlink/?LinkID=135170) を参照してください。
+発生場所 行:2 文字:1
++ npm run build
++ ~~~
+    + CategoryInfo          : セキュリティ エラー: (: ) []、PSSecurityException
+    + FullyQualifiedErrorId : UnauthorizedAccess
+
+codex
+輪郭と手の修正は完了しました。検査とビルドは、PowerShellが `npm.ps1` の実行を禁止しているため、どちらも開始できませんでした。`AGENTS.md` の指示に従って回避策は使わず、この結果とジョブ01・今回の修正内容を `art/README.md` に記録します。
+
+apply patch
+patch: completed
+C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\art\README.md
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 04b20b5c6f843fcab702dd4922121b6f65ddfd92..b27a22529a1b1a961216d40759c692dfce16ee63
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,7 +1,23 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-今は空です。空の間は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/` に、ころの差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
+-（Codex がジョブごとに追記）
++### 2026-10-07：ジョブ01（既存成果物の記録を補記）
++
++- 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
++- 方法：既存成果物はコードで記述されたSVG（450×600px、viewBox `-90 -225 180 240`）。アプリコット色の肌、くるんとした毛、目のハイライト、左上からの光と柔らかな陰影を、パスとグラデーションで構成。服のマスク・陰影・輪郭を別の層に分けている。
++- 検査結果：前回の実行結果を確定できる作業記録がないため、ジョブ01当時の検査・ビルドの合否は未確認。今回の再検査の試行結果は下記。
++- できなかったこと・迷った点：この記録は残っているSVGを読んで補記したもの。前回の制作過程や判断理由は確認できないため、推測で補っていない。
++
++### 2026-10-07：feedback（ころの輪郭と手の修正）
++
++- 変更ファイル：`characters/koro/front.svg`、`front-found.svg`、`back.svg`、`clothes-line.svg`、本README。
++- 方法：既存SVGのコードを直接編集。画像生成・ネット画像・追加料金のAPIは使用していない。
++- 頭・手・足・服の外周は濃い茶色 `#4A3A40`、基本の線幅を2.6に変更。同じ外周の下側・影側に幅3.4の線を重ね、左上を細くした。線幅は既存SVGのviewBox座標単位。服の襟の線も2.6にそろえた。肌・足・服の陰影、顔、髪、縫い目、ハイライト、服マスクは保持。
++- 通常ポーズの両手と発見ポーズの下げた手には、小さい親指のふくらみを1つ追加。発見ポーズの上げた手は、複数の指の突起を丸いひとまとまりにし、親指のふくらみを1つ残した。手をふる位置は維持。
++- 迷った点：縮小時の読みやすさと幼い丸みを両立するため、指を描き分けず、外周のふくらみで親指を表現。線幅の強弱は元の形を維持した外周の重ね描きで付けた。
++- 検査結果：`npm run validate:art` と `npm run build` を実行したが、いずれもPowerShellの実行ポリシーにより `C:\Program Files\nodejs\npm.ps1` がブロックされた（`PSSecurityException` / `UnauthorizedAccess`）。両コマンドとも処理開始前に終了コード1で停止。今回の検査レポートは生成されておらず、既存の `art-guides/ART_CHECK.md` は今回の合格を示すものではない。
++- できなかったこと：自動検査の全項目合格、ビルド成功、ブラウザーでの縮小表示確認は未確認。`AGENTS.md` のサンドボックス指示に従い、検査道具・設定・環境変数の変更や回避策は行わず終了。Claude Code側で両コマンドと実画面の確認が必要。
++- 他キャラクターやアプリのコードは変更していない。commit / push は行っていない。
+
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 04b20b5c6f843fcab702dd4922121b6f65ddfd92..b27a22529a1b1a961216d40759c692dfce16ee63
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,7 +1,23 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-今は空です。空の間は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/` に、ころの差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
+-（Codex がジョブごとに追記）
++### 2026-10-07：ジョブ01（既存成果物の記録を補記）
++
++- 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
++- 方法：既存成果物はコードで記述されたSVG（450×600px、viewBox `-90 -225 180 240`）。アプリコット色の肌、くるんとした毛、目のハイライト、左上からの光と柔らかな陰影を、パスとグラデーションで構成。服のマスク・陰影・輪郭を別の層に分けている。
++- 検査結果：前回の実行結果を確定できる作業記録がないため、ジョブ01当時の検査・ビルドの合否は未確認。今回の再検査の試行結果は下記。
++- できなかったこと・迷った点：この記録は残っているSVGを読んで補記したもの。前回の制作過程や判断理由は確認できないため、推測で補っていない。
++
++### 2026-10-07：feedback（ころの輪郭と手の修正）
++
++- 変更ファイル：`characters/koro/front.svg`、`front-found.svg`、`back.svg`、`clothes-line.svg`、本README。
++- 方法：既存SVGのコードを直接編集。画像生成・ネット画像・追加料金のAPIは使用していない。
++- 頭・手・足・服の外周は濃い茶色 `#4A3A40`、基本の線幅を2.6に変更。同じ外周の下側・影側に幅3.4の線を重ね、左上を細くした。線幅は既存SVGのviewBox座標単位。服の襟の線も2.6にそろえた。肌・足・服の陰影、顔、髪、縫い目、ハイライト、服マスクは保持。
++- 通常ポーズの両手と発見ポーズの下げた手には、小さい親指のふくらみを1つ追加。発見ポーズの上げた手は、複数の指の突起を丸いひとまとまりにし、親指のふくらみを1つ残した。手をふる位置は維持。
++- 迷った点：縮小時の読みやすさと幼い丸みを両立するため、指を描き分けず、外周のふくらみで親指を表現。線幅の強弱は元の形を維持した外周の重ね描きで付けた。
++- 検査結果：`npm run validate:art` と `npm run build` を実行したが、いずれもPowerShellの実行ポリシーにより `C:\Program Files\nodejs\npm.ps1` がブロックされた（`PSSecurityException` / `UnauthorizedAccess`）。両コマンドとも処理開始前に終了コード1で停止。今回の検査レポートは生成されておらず、既存の `art-guides/ART_CHECK.md` は今回の合格を示すものではない。
++- できなかったこと：自動検査の全項目合格、ビルド成功、ブラウザーでの縮小表示確認は未確認。`AGENTS.md` のサンドボックス指示に従い、検査道具・設定・環境変数の変更や回避策は行わず終了。Claude Code側で両コマンドと実画面の確認が必要。
++- 他キャラクターやアプリのコードは変更していない。commit / push は行っていない。
+
+codex
+ころの輪郭に太さの強弱を付け、通常・手をふるポーズの手を親指1つの丸い形に修正しました。色・陰影・顔の細部は保持しています。
+
+ジョブ01と今回の作業記録を [art/README.md](art/README.md) に追記しました。
+
+検査・ビルドは `npm.ps1` の実行禁止で開始できませんでした。指示どおり回避策は使っていません。合格確認と実画面の確認は未完了です。
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 04b20b5c6f843fcab702dd4922121b6f65ddfd92..b27a22529a1b1a961216d40759c692dfce16ee63
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,7 +1,23 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-今は空です。空の間は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/` に、ころの差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
+-（Codex がジョブごとに追記）
++### 2026-10-07：ジョブ01（既存成果物の記録を補記）
++
++- 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
++- 方法：既存成果物はコードで記述されたSVG（450×600px、viewBox `-90 -225 180 240`）。アプリコット色の肌、くるんとした毛、目のハイライト、左上からの光と柔らかな陰影を、パスとグラデーションで構成。服のマスク・陰影・輪郭を別の層に分けている。
++- 検査結果：前回の実行結果を確定できる作業記録がないため、ジョブ01当時の検査・ビルドの合否は未確認。今回の再検査の試行結果は下記。
++- できなかったこと・迷った点：この記録は残っているSVGを読んで補記したもの。前回の制作過程や判断理由は確認できないため、推測で補っていない。
++
++### 2026-10-07：feedback（ころの輪郭と手の修正）
++
++- 変更ファイル：`characters/koro/front.svg`、`front-found.svg`、`back.svg`、`clothes-line.svg`、本README。
++- 方法：既存SVGのコードを直接編集。画像生成・ネット画像・追加料金のAPIは使用していない。
++- 頭・手・足・服の外周は濃い茶色 `#4A3A40`、基本の線幅を2.6に変更。同じ外周の下側・影側に幅3.4の線を重ね、左上を細くした。線幅は既存SVGのviewBox座標単位。服の襟の線も2.6にそろえた。肌・足・服の陰影、顔、髪、縫い目、ハイライト、服マスクは保持。
++- 通常ポーズの両手と発見ポーズの下げた手には、小さい親指のふくらみを1つ追加。発見ポーズの上げた手は、複数の指の突起を丸いひとまとまりにし、親指のふくらみを1つ残した。手をふる位置は維持。
++- 迷った点：縮小時の読みやすさと幼い丸みを両立するため、指を描き分けず、外周のふくらみで親指を表現。線幅の強弱は元の形を維持した外周の重ね描きで付けた。
++- 検査結果：`npm run validate:art` と `npm run build` を実行したが、いずれもPowerShellの実行ポリシーにより `C:\Program Files\nodejs\npm.ps1` がブロックされた（`PSSecurityException` / `UnauthorizedAccess`）。両コマンドとも処理開始前に終了コード1で停止。今回の検査レポートは生成されておらず、既存の `art-guides/ART_CHECK.md` は今回の合格を示すものではない。
++- できなかったこと：自動検査の全項目合格、ビルド成功、ブラウザーでの縮小表示確認は未確認。`AGENTS.md` のサンドボックス指示に従い、検査道具・設定・環境変数の変更や回避策は行わず終了。Claude Code側で両コマンドと実画面の確認が必要。
++- 他キャラクターやアプリのコードは変更していない。commit / push は行っていない。
+
+tokens used
+29,110
+ころの輪郭に太さの強弱を付け、通常・手をふるポーズの手を親指1つの丸い形に修正しました。色・陰影・顔の細部は保持しています。
+
+ジョブ01と今回の作業記録を [art/README.md](art/README.md) に追記しました。
+
+検査・ビルドは `npm.ps1` の実行禁止で開始できませんでした。指示どおり回避策は使っていません。合格確認と実画面の確認は未完了です。
