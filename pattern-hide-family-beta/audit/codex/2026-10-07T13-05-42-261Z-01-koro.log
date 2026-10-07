@@ -1,0 +1,15 @@
+job: codex-jobs/01-koro.md
+exit: 2
+minutes: 0.0
+changed (0): -
+outside allowed paths (0): -
+
+----- codex output -----
+error: unrecognized subcommand 'the'
+
+  tip: a similar subcommand exists: 'help'
+
+Usage: codex exec [OPTIONS] [PROMPT]
+       codex exec [OPTIONS] <COMMAND> [ARGS]
+
+For more information, try '--help'.

@@ -40,10 +40,12 @@ const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 mkdirSync('audit/codex', { recursive: true });
 const logPath = `audit/codex/${stamp}-${basename(job, '.md')}.log`;
 const prompt = `Read the file ${job.replace(/\\/g, '/')} and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.`;
-const args = [...cfg.args, prompt];
-console.log(`> ${cfg.command} ${cfg.args.join(' ')} "<prompt>"`);
+// 指示文は標準入力で渡す（codex exec --help：PROMPT が - なら stdin から読む）。Windows の shell 経由でも引用符が壊れない
+const args = [...cfg.args, '-'];
+console.log(`> ${cfg.command} ${cfg.args.join(' ')} - (prompt via stdin)`);
 const t0 = Date.now();
-const child = spawn(cfg.command, args, { shell: process.platform === 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
+const child = spawn(cfg.command, args, { shell: process.platform === 'win32', stdio: ['pipe', 'pipe', 'pipe'] });
+child.stdin.end(prompt);
 let out = '';
 child.stdout.on('data', (d) => {
   out += d;

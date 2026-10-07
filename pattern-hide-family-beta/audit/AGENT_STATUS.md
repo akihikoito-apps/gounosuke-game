@@ -40,3 +40,6 @@
 - **Codex による絵の制作**（ご自宅PCで CODEX_ART_BRIEF.md を使って実施）
 - Codex による独立レビュー（ご自宅PCで実施する場合：状態遷移 `src/ui/app.ts`、入力、`src/storage/`、`src/entitlements/` を対象にするのがおすすめ）
 - Antigravity による画面確認・素材の見直し
+
+- 2026-10-07T13:05:42.584Z Codex ジョブ `codex-jobs/01-koro.md`：終了コード 2、0.0分、変更 0 件、許可外 0 件（ログ `audit/codex/2026-10-07T13-05-42-261Z-01-koro.log`）
+- 2026-10-07T13:06:22.058Z Codex ジョブ `codex-jobs/01-koro.md`：終了コード 0、0.3分、変更 0 件、許可外 0 件（ログ `audit/codex/2026-10-07T13-06-01-190Z-01-koro.log`）
