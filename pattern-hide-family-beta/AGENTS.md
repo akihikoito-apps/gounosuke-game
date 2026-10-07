@@ -22,3 +22,6 @@
 - 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
 - Windows の PowerShell では `npm` / `npx` が実行ポリシーで止まる。代わりに `npm.cmd run validate:art`、`npm.cmd run build` を使う（設定は変えない）
 - PowerShell でファイルを読むときは `Get-Content -Encoding UTF8` を使う（指定しないと日本語が文字化けする）
+
+## 本部（_hq）との約束
+- 作業の区切りで必ず STATUS.md（リポジトリ直下）を更新すること。「状態・今やっていること・次の一手・ブロッカー・最終更新」の各行を書き換える。
