@@ -1,0 +1,995 @@
+job: codex-jobs/02-mimi-moko.md
+exit: 0
+minutes: 2.4
+changed (14): art-guides/ART_CHECK.md, art/README.md, art/characters/mimi/back.svg, art/characters/mimi/clothes-line.svg, art/characters/mimi/clothes-mask.svg, art/characters/mimi/clothes-shade.svg, art/characters/mimi/front-found.svg, art/characters/mimi/front.svg, art/characters/moko/back.svg, art/characters/moko/clothes-line.svg, art/characters/moko/clothes-mask.svg, art/characters/moko/clothes-shade.svg, art/characters/moko/front-found.svg, art/characters/moko/front.svg
+outside allowed paths (0): -
+
+----- codex output -----
+OpenAI Codex v0.154.0
+--------
+workdir: C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a116cd-ae64-74f2-9164-4ee2164cb574
+--------
+user
+Read the file codex-jobs/02-mimi-moko.md and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.
+codex
+ジョブファイルとフォルダの決まりを確認して、指定された範囲で制作と検査を進めます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 AGENTS.md; Get-Content -Encoding UTF8 codex-jobs/02-mimi-moko.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 167ms:
+# Codex 向けの決まり（このフォルダ）
+
+このフォルダは幼児向けゲーム「もようのかくれんぼ（仮）」のWebベータです。Claude Code が司令塔で、Codex は **絵の制作** と **独立レビュー** を担当します。
+
+## 書き込んでよい場所
+- 絵の制作ジョブ：`art/` の中だけ
+- レビュージョブ：`audit/codex/` の中だけ（レポートを書く）
+- それ以外（`src/`, `tests/`, `scripts/`, 設定、文書）は **変更しない**。直したほうがよい点は、レポートや `art/README.md` に提案として書く
+
+## 必ず守ること
+- ジョブファイル（`codex-jobs/*.md`）の指示と、`ART_SLOTS.md`・`CODEX_ART_BRIEF.md` の決まりに従う
+- 絵を作ったら `npm run validate:art` を実行し、合格するまで直す。結果は `art-guides/ART_CHECK.md` に出る
+- 既存の作品（キャラクター・ロゴ・画面・音）をまねない／取り込まない。ネット上の画像を使わない。文字を絵に入れない
+- 子どもの個人情報・外部通信・広告・課金に関わるものを追加しない
+- 追加料金が発生する手段（別料金の API キー、有料サービス）を使わない。利用上限に達したら、そこで止めて報告する
+- git の commit / push はしない（Claude Code が確認してから行う）
+- 最後に、やったこと・使った方法（SVGをコードで書いた／画像生成を使った 等）・検査結果・できなかったことを、ジョブファイルの指定場所に書く
+
+## サンドボックスでの注意（2026-10-07 追記）
+- `art-guides/ART_CHECK.md` は `npm run validate:art` が自動で書き換える。これは許可済みなので、書き込み先を変える工夫は不要
+- 検査・ビルドの道具（node_modules、scripts、環境変数 NODE_OPTIONS など）を差し替えたり、上書きしたりする回り道はしない。サンドボックスで動かないコマンドがあれば、無理をせず、その旨を作業記録に書いて終える（検査は Claude Code が外でも実行する）
+- 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
+- Windows の PowerShell では `npm` / `npx` が実行ポリシーで止まる。代わりに `npm.cmd run validate:art`、`npm.cmd run build` を使う（設定は変えない）
+- PowerShell でファイルを読むときは `Get-Content -Encoding UTF8` を使う（指定しないと日本語が文字化けする）
+# ジョブ02：みみ・もこ
+
+## 書き込んでよい場所
+`art/characters/mimi/`, `art/characters/moko/`, `art/README.md` だけ
+
+## 読むもの
+AGENTS.md / ART_SLOTS.md / CODEX_ART_BRIEF.md / art-guides/character-mimi.png, character-moko.png / **art/characters/koro/（画風の基準。線・陰影・色の扱いをそろえる）**
+
+## やること
+- みみ（たれた長い耳・内側ピンク・ミントグリーン・ものしりでのんびり）と、もこ（くもの形のもこもこ頭・星の髪どめ・ラベンダー・ふわふわではずかしがり）を、ころと同じ画風で描く
+- 3体が並んだとき、色だけでなく形で見分けられること
+- 層と寸法はジョブ01と同じ
+
+## 合格条件
+- `npm run validate:art` がすべて合格（結果は art-guides/ART_CHECK.md）
+- `npm run build` が成功
+
+## 最後に書くこと
+`art/README.md` の「作業記録」に追記：日付、作ったファイル、使った方法（SVGをコードで書いた／画像生成を使った 等）、検査結果、できなかったこと・迷った点
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 ART_SLOTS.md; Get-Content -Encoding UTF8 CODEX_ART_BRIEF.md; Get-Content -Encoding UTF8 codex-jobs/01-koro.md; Get-Content -Encoding UTF8 art/README.md; rg --files art/characters art-guides; Get-Content -Encoding UTF8 package.json' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 185ms:
+# 絵の差し替え口（ART_SLOTS）
+
+`art/` フォルダに決まった名前でファイルを置くと、ゲームが自動でその絵を使います。
+**置かなかった部分は、今のコードの絵のまま** 動きます（一部だけ差し替えてもよい）。
+
+- 形式：PNG（透過）／WebP／SVG。1ファイル 800KB まで、合計 8MB まで
+- SVG はスクリプト・外部参照・文字（フォント）を含めない
+- 置いたら `npm run validate:art` で検査 → `npm run build` → 画面を確認
+- 下書きガイド：`npm run art:guides` で `art-guides/` に出る（形状データから自動生成。描く位置の基準）
+
+## キャラクター `art/characters/{koro|mimi|moko}/`
+
+枠：**450×600px**（またはその整数倍。縦横比 3:4）。ゲーム内の座標 x −90〜90、y −225〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 37.5px**。ガイド `art-guides/character-*.png` に重ねて描く。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `clothes-mask.png` | ○ | 服の形だけを **白**、ほかは黒か透明。ここにゲームが背景と同じ柄を流し込む。ガイドの青い範囲（からだの判定）からはみ出さないこと |
+| `front.png` | ○ | 服より前に描くもの：顔・頭・耳・髪・手・服の上に出る線。目と口はガイドの赤い点の位置 |
+| `back.png` | | 服より後ろ：足、背中側の耳や髪など |
+| `clothes-shade.png` | | 服の陰影（乗算で重なる）。グレー〜茶系の濃淡、透過 |
+| `clothes-line.png` | | 服のふち線だけ。難易度に応じてゲームが濃さを変える（最低25%） |
+| `front-found.png` | | 見つかった時の前面（手をふるポーズ）。無ければ front を使う |
+
+`clothes-mask` と `front` がそろっていない時は、そのキャラクターはコードの絵のままです。
+
+## シーン `art/scenes/{room|garden|shop}/`
+
+枠：**1000×1000px**（2000×2000 推奨）。ガイド `art-guides/scene-*.png` の色面が「柄の領域」で、**ここはゲームが柄を塗る**（服と同じ柄にして隠れられるようにするため）。
+
+| ファイル | 中身 | 決まり |
+|---|---|---|
+| `back.png` | 柄の領域より下：空・壁の上部・床など | 不透明でよい |
+| `over.png` | 柄の領域の上・キャラクターの後ろ：家具の縁・カーテンのひだの陰・窓・棚など | 透過。キャラクターの服の後ろは薄く（平均の濃さ35%以下）、顔の後ろには描かない |
+| `minor.png` | 小さい画面では省く飾り（壁の絵・雲など） | over と同じ決まり |
+| `fore.png` | 前景の小物すべて（キャラクターの前に重なる） | 透過。ガイドの橙色の形に合わせる。**赤い円（顔）には重ねない**。服は少し（2割以上8割未満が見える程度）隠す |
+
+## 柄のタイル `art/patterns/{シーン}-{服}.png`
+
+例：`room-stripes.png`、`garden-leaf.png`。正方形 64px 以上、不透明、**上下左右がつなぎ目なく続く**こと。
+同じタイルが背景の領域と服の両方に使われます（だから隠れられる）。タイル1枚がゲーム内で表す大きさは、各シーンの柄の `size`（38〜52）です。
+
+| シーン | 服（ファイル名の後半） |
+|---|---|
+| room | plain（壁）, stripes（カーテン）, dots（ソファ）, check（ラグ） |
+| garden | plain（芝生）, stripes（柵）, dots（花だん）, leaf（生け垣） |
+| shop | plain（床）, stripes（カウンター）, dots（壁）, check（テーブルクロス） |
+
+## 画面の絵 `art/ui/`
+
+`title.png`（タイトルの絵）、`handoff.png`（受け渡し画面の絵。**隠れ場所や背景を描かない**）、`bye.png`（おしまい画面）。2000px 以内。
+# Codex への絵の制作依頼（CODEX_ART_BRIEF）
+
+> ご自宅PCで Codex に渡すための依頼文です。下の「Codex への指示」をそのまま貼り付けてください。
+
+## 事前準備（ご自宅PC）
+
+```bash
+git fetch origin
+git checkout claude/pattern-hide-family-beta
+git pull
+cd pattern-hide-family-beta
+npm ci
+npm run art:guides      # art-guides/ に下書きガイドができる
+```
+
+## Codex への指示（ここから貼り付け）
+
+あなたは、幼児向けかくれんぼゲーム「もようのかくれんぼ（仮）」の絵を作る担当です。
+作業フォルダは `pattern-hide-family-beta/` です。最初に `ART_SLOTS.md` と、この `CODEX_ART_BRIEF.md` を読んでください。
+
+### 守ること
+1. 書き込んでよいのは `pattern-hide-family-beta/art/` の中だけです。`src/` やテスト、設定ファイルは変更しないでください（別のAIが担当しています）。
+2. ファイル名・寸法・層の分け方は `ART_SLOTS.md` のとおりにしてください。描く位置は `art-guides/` のガイド画像に合わせてください。ガイドはゲームの当たり判定と同じ形から作られています。
+3. 描き終えたら `npm run validate:art` を実行し、**すべて合格するまで直してください**。結果は `art-guides/ART_CHECK.md` に出ます。そのあと `npm run build` が通ることを確認してください。
+4. 既存の作品（キャラクター、ロゴ、画面、音）をまねたり、取り込んだりしないでください。ネット上の画像も使わないでください。特定の作品に見える顔の配置や特徴は避けてください。
+5. 文字は絵に入れないでください。
+6. 追加料金が発生する手段（別料金のAPIキー、有料サービス）は使わないでください。今の契約の範囲でできないことがあれば、無理をせず、できなかったことを報告してください。
+7. 最後に、作ったファイル・使った方法（SVGをコードで書いた／画像生成を使った等）・検査結果を `art/README.md` に書いてください。
+
+### 絵の方向性
+- **かわいらしく、幼い子向け。ただし安っぽくしない。** 絵本の挿絵のような品のある仕上がりにします。
+- 形に丸みと立体感を持たせます。やわらかい陰影、ほのかなグラデーション、光は左上から、接地面にやわらかい影を入れてください。平べったいクリップアートや絵文字のようにはしないでください。
+- 線は黒ではなく濃い茶色系（目安 #4A3A40）。太さに少し強弱をつけ、全部の線を同じ太さにしないでください。
+- 色は、少しくすんだやさしいパステルを基調に、差し色を少しだけ。蛍光色や彩度の高すぎる色は使わないでください。
+- 布の縫い目、木目、葉脈など、見つけるとうれしい細部を控えめに入れます。ただし背景がうるさくなり、さがしにくくなる量にはしないでください。
+- 3体の見分けは **色だけに頼らず形で** つけます。今の形を受け継いでください：
+  - **ころ**：あたまに「くるん」とした毛。げんきでくいしんぼう。アプリコット色
+  - **みみ**：たれた長い耳（内側はピンク）。ものしりでのんびり。ミントグリーン
+  - **もこ**：くもの形のもこもこした頭と、星の髪どめ。ふわふわではずかしがり。ラベンダー
+- 3体とも、頭が大きめの約2頭身です。目は大きく、ハイライトを入れてください。表情はおだやかな笑顔です。
+- 服は **ゲームが柄を流し込む部分** なので、`clothes-mask.png`（白黒の形）として分けてください。服の陰影は `clothes-shade.png`、ふち線は `clothes-line.png` に分けると、柄の上に立体感が出ます。
+- 背景の「柄の領域」（カーテン・ソファ・ラグ、生け垣・柵・花だん・芝生、かべ・カウンター・テーブルクロス・床）は、ゲームが柄で塗ります。質感は **柄タイル**（`art/patterns/`）で出してください。布の織り目や紙の質感などを入れたタイルにします。同じタイルが服にも使われます。
+- 前景の小物（`fore.png`）は、今の小物と同じ位置・同じくらいの大きさで描き直してください（ガイドの橙色）。顔（赤い円）には絶対に重ねないでください。
+- 怖い表情、暗い影、先のとがった危なそうな物は入れないでください。
+
+### おすすめの順番
+1. `art/characters/koro/` の5層（back, clothes-mask, clothes-shade, clothes-line, front, front-found）を作る → 検査に合格させる
+2. 同じ画風で みみ・もこ を作る
+3. `art/patterns/` の柄タイル12枚
+4. `art/scenes/room/` の back / over / minor / fore → 検査 → garden → shop
+5. `art/ui/` の title / handoff / bye
+
+途中で、`npm run build && npm run preview` を実行し、`http://127.0.0.1:4173/` で見た目を確認してください。
+
+（貼り付けここまで）
+
+## 作業後
+
+- Codex の作業を `git add art && git commit` して、同じブランチに push してください。
+- Claude 側では、画面写真・操作テスト・溶け込み具合を確認し、必要なら調整案を出します。
+- 同じファイルを同時に複数のAIで編集しないため、Codex は `art/` だけ、Claude はそれ以外、と分けています。
+# ジョブ01：ころ（画風の基準）
+
+## 書き込んでよい場所
+`art/characters/koro/` と `art/README.md` だけ
+
+## 読むもの
+AGENTS.md / ART_SLOTS.md の「キャラクター」/ CODEX_ART_BRIEF.md の「絵の方向性」/ art-guides/character-koro.png（今の絵が薄く入った下書き。青＝服、赤点＝目と口、橙点線＝はみ出し上限）/ art-guides/current-*.png（今の画面）
+
+## やること
+- ころ を、絵本の挿絵のような品のある画風で描き直す。この絵が以後の全ての絵の画風の基準になる
+- 層：back, clothes-mask（必須）, clothes-shade, clothes-line, front（必須）, front-found（手をふる）
+- 450×600px（または 900×1200px）、透過PNG（またはSVG）。足もと中央の位置・顔の位置はガイドに合わせる
+- 特徴（あたまの「くるん」とした毛、アプリコット色、げんきでくいしんぼう）を保つ
+
+## 合格条件
+- `npm run validate:art` がすべて合格（結果は art-guides/ART_CHECK.md）
+- `npm run build` が成功
+
+## 最後に書くこと
+`art/README.md` の「作業記録」に追記：日付、作ったファイル、使った方法（SVGをコードで書いた／画像生成を使った 等）、検査結果、できなかったこと・迷った点
+# art/
+
+差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+現在は `characters/koro/` に、ころの差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+
+## 作業記録
+### 2026-10-07：ジョブ01（既存成果物の記録を補記）
+
+- 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
+- 方法：既存成果物はコードで記述されたSVG（450×600px、viewBox `-90 -225 180 240`）。アプリコット色の肌、くるんとした毛、目のハイライト、左上からの光と柔らかな陰影を、パスとグラデーションで構成。服のマスク・陰影・輪郭を別の層に分けている。
+- 検査結果：前回の実行結果を確定できる作業記録がないため、ジョブ01当時の検査・ビルドの合否は未確認。今回の再検査の試行結果は下記。
+- できなかったこと・迷った点：この記録は残っているSVGを読んで補記したもの。前回の制作過程や判断理由は確認できないため、推測で補っていない。
+
+### 2026-10-07：feedback（ころの輪郭と手の修正）
+
+- 変更ファイル：`characters/koro/front.svg`、`front-found.svg`、`back.svg`、`clothes-line.svg`、本README。
+- 方法：既存SVGのコードを直接編集。画像生成・ネット画像・追加料金のAPIは使用していない。
+- 頭・手・足・服の外周は濃い茶色 `#4A3A40`、基本の線幅を2.6に変更。同じ外周の下側・影側に幅3.4の線を重ね、左上を細くした。線幅は既存SVGのviewBox座標単位。服の襟の線も2.6にそろえた。肌・足・服の陰影、顔、髪、縫い目、ハイライト、服マスクは保持。
+- 通常ポーズの両手と発見ポーズの下げた手には、小さい親指のふくらみを1つ追加。発見ポーズの上げた手は、複数の指の突起を丸いひとまとまりにし、親指のふくらみを1つ残した。手をふる位置は維持。
+- 迷った点：縮小時の読みやすさと幼い丸みを両立するため、指を描き分けず、外周のふくらみで親指を表現。線幅の強弱は元の形を維持した外周の重ね描きで付けた。
+- 検査結果：`npm run validate:art` と `npm run build` を実行したが、いずれもPowerShellの実行ポリシーにより `C:\Program Files\nodejs\npm.ps1` がブロックされた（`PSSecurityException` / `UnauthorizedAccess`）。両コマンドとも処理開始前に終了コード1で停止。今回の検査レポートは生成されておらず、既存の `art-guides/ART_CHECK.md` は今回の合格を示すものではない。
+- できなかったこと：自動検査の全項目合格、ビルド成功、ブラウザーでの縮小表示確認は未確認。`AGENTS.md` のサンドボックス指示に従い、検査道具・設定・環境変数の変更や回避策は行わず終了。Claude Code側で両コマンドと実画面の確認が必要。
+- 他キャラクターやアプリのコードは変更していない。commit / push は行っていない。
+art-guides\scene-shop.svg
+art-guides\scene-shop.png
+art-guides\scene-room.svg
+art-guides\scene-room.png
+art-guides\scene-garden.svg
+art-guides\scene-garden.png
+art-guides\current-title.png
+art-guides\current-shop-normal.png
+art-guides\current-room-easy.png
+art-guides\current-garden-hide.png
+art-guides\character-moko.svg
+art-guides\character-moko.png
+art-guides\character-mimi.svg
+art-guides\character-mimi.png
+art-guides\character-koro.svg
+art-guides\character-koro.png
+art-guides\ART_CHECK.md
+art/characters\koro\front.svg
+art/characters\koro\front-found.svg
+art/characters\koro\clothes-shade.svg
+art/characters\koro\clothes-mask.svg
+art/characters\koro\clothes-line.svg
+art/characters\koro\back.svg
+{
+  "name": "pattern-hide-family-beta",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "もようのかくれんぼ（仮）家族内テスト用ベータ。公開・課金なし。",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "verify:layouts": "vitest run tests/unit/placement.test.ts",
+    "validate:art": "node scripts/validate-art.mjs",
+    "art:guides": "node scripts/export-art-guides.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "5.0.3"
+  }
+}
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 art/characters/koro/*.svg; Get-Content -Encoding UTF8 art-guides/character-mimi.svg; Get-Content -Encoding UTF8 art-guides/character-moko.svg; Get-Content -Encoding UTF8 scripts/validate-art.mjs; git status --short' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 271ms:
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+ <radialGradient id="ground"><stop stop-color="#6b5350" stop-opacity=".22"/><stop offset="1" stop-color="#6b5350" stop-opacity="0"/></radialGradient>
+ <linearGradient id="foot" x1="0" y1="0" x2=".6" y2="1"><stop stop-color="#b78c70"/><stop offset=".6" stop-color="#946e5b"/><stop offset="1" stop-color="#70534b"/></linearGradient>
+</defs>
+<ellipse cx="0" cy="6" rx="48" ry="8" fill="url(#ground)"/>
+<path d="M-40 0 C-42 5-34 9-25 9 C-16 9-8 6-8 2 L-11-7-36-7Z M8 2 C8 7 17 9 26 9 C35 9 43 5 40 0 L36-7 12-7Z" fill="url(#foot)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M-35 3 Q-24 7-15 3 M15 3 Q26 7 35 3" fill="none" stroke="#e4bb92" stroke-opacity=".55" stroke-width="1.2" stroke-linecap="round"/>
+<path d="M-40 0 C-42 5-34 9-25 9 C-16 9-8 6-8 2 M8 2 C8 7 17 9 26 9 C35 9 43 5 40 0" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" fill="none" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M-23-98 Q-1-84 23-98" fill="none" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M-20-97 Q0-89 20-97 M-53-3 Q0 5 53-3" fill="none" stroke="#80695b" stroke-width=".7" stroke-dasharray="1.5 2.6" stroke-linecap="round" opacity=".75"/>
+<path d="M-35-90 Q-42-81-44-72 M35-90 Q42-81 44-72" fill="none" stroke="#6e574d" stroke-width=".9" stroke-linecap="round" opacity=".6"/>
+<path d="M34-94 L40.9-85.5 46.8-76.1 51.4-65.8 55-54.5 57.4-42.3 58.8-29.1 58.9-15 58 0 43.5 2 29 3.4 14.5 4.2 0 4.5 -14.5 4.2 -29 3.4 -43.5 2 -58 0" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" fill="#fff"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<clipPath id="cloth"><polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2"/></clipPath>
+<linearGradient id="side"><stop stop-color="#8e7767" stop-opacity=".13"/><stop offset=".23" stop-color="#8e7767" stop-opacity="0"/><stop offset=".65" stop-color="#8e7767" stop-opacity="0"/><stop offset="1" stop-color="#796052" stop-opacity=".23"/></linearGradient>
+<linearGradient id="hem" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#796052" stop-opacity="0"/><stop offset="1" stop-color="#796052" stop-opacity=".18"/></linearGradient>
+<radialGradient id="neck"><stop stop-color="#705849" stop-opacity=".22"/><stop offset="1" stop-color="#705849" stop-opacity="0"/></radialGradient>
+</defs>
+<g clip-path="url(#cloth)">
+<polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" fill="url(#side)"/>
+<ellipse cx="2" cy="-100" rx="30" ry="16" fill="url(#neck)"/>
+<path d="M-61-9 Q0 1 61-9 V8 H-61Z" fill="url(#hem)"/>
+<path d="M-37-83 Q-49-62-47-28 Q-45-62-34-80Z M37-79 Q49-60 48-35 Q43-63 35-80Z" fill="#826954" opacity=".09"/>
+</g>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#ffe5be"/><stop offset=".48" stop-color="#f3c48f"/><stop offset=".82" stop-color="#eab07e"/><stop offset="1" stop-color="#d49770"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#fff1d7" stop-opacity=".62"/><stop offset="1" stop-color="#fff1d7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+<linearGradient id="curl" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#b7875f"/><stop offset="1" stop-color="#81573f"/></linearGradient>
+</defs><path d="M-47-145 C-46-168-29-185-5-187 C17-190 39-175 46-153 C53-130 40-109 19-102 C4-96-14-99-28-109 C-41-118-49-130-47-145Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M46-153 C53-130 40-109 19-102 C4-96-14-99-28-109" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-43-149 C-41-168-27-180-10-182" fill="none" stroke="#fff1d8" stroke-opacity=".64" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M41-128 Q34-108 12-103" fill="none" stroke="#aa7357" stroke-opacity=".5" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M-4-187 C-12-199 1-209 12-202 C22-195 14-185 7-191 C3-195 9-199 12-195" fill="none" stroke="#745140" stroke-width="6.4" stroke-linecap="round"/>
+<path d="M-4.5-189 C-10-199 1-206 11-200 C18-195 13-190 8-193" fill="none" stroke="url(#curl)" stroke-width="3.8" stroke-linecap="round"/>
+<path d="M-5-196 Q-1-204 7-201" fill="none" stroke="#e7ba85" stroke-width="1.1" stroke-linecap="round"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153" fill="none" stroke="#9a7155" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g><path d="M-43-54 C-49-60-59-56-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44 C-36-42-34-46-37-49 Q-40-53-43-54Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-55-50 Q-57-45-54-42" fill="none" stroke="#ffe7c5" stroke-width="1.15" stroke-linecap="round" opacity=".8"/><path d="M43-63 C48-69 51-77 51-82 C47-85 46-90 49-92 C52-94 54-89 56-87 C55-93 57-99 63-99 C71-100 76-95 76-89 C77-83 73-79 69-76 Q61-70 57-58 C52-55 46-57 43-63Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M56-86 Q61-86 62-81 M58-77 Q62-75 65-78" fill="none" stroke="#b07b5c" stroke-width=".9" stroke-linecap="round"/>
+<path d="M53-67 Q58-72 58-75" fill="none" stroke="#ffe5bf" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
+<path d="M-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M76-89 C77-83 73-79 69-76 Q61-70 57-58 C52-55 46-57 43-63" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#ffe5be"/><stop offset=".48" stop-color="#f3c48f"/><stop offset=".82" stop-color="#eab07e"/><stop offset="1" stop-color="#d49770"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#fff1d7" stop-opacity=".62"/><stop offset="1" stop-color="#fff1d7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+<linearGradient id="curl" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#b7875f"/><stop offset="1" stop-color="#81573f"/></linearGradient>
+</defs><path d="M-47-145 C-46-168-29-185-5-187 C17-190 39-175 46-153 C53-130 40-109 19-102 C4-96-14-99-28-109 C-41-118-49-130-47-145Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M46-153 C53-130 40-109 19-102 C4-96-14-99-28-109" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-43-149 C-41-168-27-180-10-182" fill="none" stroke="#fff1d8" stroke-opacity=".64" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M41-128 Q34-108 12-103" fill="none" stroke="#aa7357" stroke-opacity=".5" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M-4-187 C-12-199 1-209 12-202 C22-195 14-185 7-191 C3-195 9-199 12-195" fill="none" stroke="#745140" stroke-width="6.4" stroke-linecap="round"/>
+<path d="M-4.5-189 C-10-199 1-206 11-200 C18-195 13-190 8-193" fill="none" stroke="url(#curl)" stroke-width="3.8" stroke-linecap="round"/>
+<path d="M-5-196 Q-1-204 7-201" fill="none" stroke="#e7ba85" stroke-width="1.1" stroke-linecap="round"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153" fill="none" stroke="#9a7155" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g><path d="M-43-54 C-49-60-59-56-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44 C-36-42-34-46-37-49 Q-40-53-43-54Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-55-50 Q-57-45-54-42" fill="none" stroke="#ffe7c5" stroke-width="1.15" stroke-linecap="round" opacity=".8"/><path d="M43-54 C49-60 58-55 60-48 C62-40 55-34 48-36 C43-37 40-40 41-44 C36-42 34-46 37-49 Q40-53 43-54Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M46-53 Q51-56 55-51" fill="none" stroke="#ffe7c5" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<path d="M-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M60-48 C62-40 55-34 48-36 C43-37 40-40 41-44" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+    <defs><pattern id="gp" patternUnits="userSpaceOnUse" width="40" height="40"><rect width="40" height="40" fill="#d6e4ff"/></pattern></defs>
+    <rect x="-90" y="-225" width="180" height="240" fill="#fff"/>
+    <g opacity="0.35"><g class="char-body"><ellipse cx="-24" cy="2" rx="17" ry="8" fill="#6B5B60"/><ellipse cx="24" cy="2" rx="17" ry="8" fill="#6B5B60"/><polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" class="clothes" fill="url(#gp)" stroke="#4A3A40" stroke-opacity="1" stroke-width="3.5" stroke-linejoin="round"/><path d="M-22 -98 Q0 -84 22 -98" fill="none" stroke="#4A3A40" stroke-opacity="1" stroke-width="3"/><circle cx="-50" cy="-46" r="11" fill="#BFE6CB" stroke="#4A3A40" stroke-width="3"/><circle cx="50" cy="-46" r="11" fill="#BFE6CB" stroke="#4A3A40" stroke-width="3"/></g><g class="char-head"><g transform="rotate(18 -46 -158)"><ellipse cx="-50" cy="-126" rx="15" ry="35" fill="#9FD2AF" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/><ellipse cx="-50" cy="-120" rx="7" ry="22" fill="#F7C6CF"/></g><g transform="rotate(-18 46 -158)"><ellipse cx="50" cy="-126" rx="15" ry="35" fill="#9FD2AF" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/><ellipse cx="50" cy="-120" rx="7" ry="22" fill="#F7C6CF"/></g><ellipse cx="0" cy="-142" rx="46" ry="44" fill="#BFE6CB" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/><ellipse class="eye" cx="-16" cy="-142" rx="6.5" ry="8" fill="#3B2F35"/><circle cx="-18" cy="-145.5" r="2.4" fill="#fff"/><ellipse class="eye" cx="16" cy="-142" rx="6.5" ry="8" fill="#3B2F35"/><circle cx="14" cy="-145.5" r="2.4" fill="#fff"/><ellipse cx="-31" cy="-126" rx="9" ry="6" fill="#F28B8B" opacity="0.55"/><ellipse cx="31" cy="-126" rx="9" ry="6" fill="#F28B8B" opacity="0.55"/><path d="M-9 -127 Q-4.5 -120 0 -126 Q4.5 -120 9 -127" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/></g></g>
+    <polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" fill="#5b8def" fill-opacity="0.28" stroke="#2b5fd0" stroke-width="1"/><polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" fill="none" stroke="#e05a00" stroke-width="1.2" stroke-dasharray="4 3"/><ellipse cx="0" cy="-142" rx="48" ry="45" fill="none" stroke="#e05a00" stroke-width="1.2" stroke-dasharray="4 3"/><polygon points="-44.5,-123.9 -47.9,-115.2 -52.1,-107.4 -56.8,-101.1 -61.7,-96.7 -66.5,-94.5 -70.8,-94.6 -74.4,-97 -76.9,-101.6 -78.3,-108.1 -78.4,-116 -77.3,-124.7 -74.9,-133.7 -71.5,-142.4 -67.3,-150.2 -62.6,-156.5 -57.7,-160.9 -52.9,-163.2 -48.6,-163 -45,-160.6 -42.5,-156 -41.1,-149.5 -41,-141.6 -42.1,-132.9" fill="none" stroke="#e05a00" stroke-width="1.2" stroke-dasharray="4 3"/><polygon points="74.9,-133.7 77.3,-124.7 78.4,-116 78.3,-108.1 76.9,-101.6 74.4,-97 70.8,-94.6 66.5,-94.5 61.7,-96.7 56.8,-101.1 52.1,-107.4 47.9,-115.2 44.5,-123.9 42.1,-132.9 41,-141.6 41.1,-149.5 42.5,-156 45,-160.6 48.6,-163 52.9,-163.2 57.7,-160.9 62.6,-156.5 67.3,-150.2 71.5,-142.4" fill="none" stroke="#e05a00" stroke-width="1.2" stroke-dasharray="4 3"/><circle cx="-16" cy="-142" r="2.6" fill="#e00000"/><circle cx="16" cy="-142" r="2.6" fill="#e00000"/><circle cx="0" cy="-125" r="2.6" fill="#e00000"/>
+    <path d="M-6 0 H6 M0 -6 V6" stroke="#000" stroke-width="1"/>
+    <text x="-87" y="-216" font-size="7" fill="#333">mimi 450x600 青=服 橙=上限 赤=顔 ＋=足</text>
+  </svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+    <defs><pattern id="gp" patternUnits="userSpaceOnUse" width="40" height="40"><rect width="40" height="40" fill="#d6e4ff"/></pattern></defs>
+    <rect x="-90" y="-225" width="180" height="240" fill="#fff"/>
+    <g opacity="0.35"><g class="char-body"><ellipse cx="-24" cy="2" rx="17" ry="8" fill="#6B5B60"/><ellipse cx="24" cy="2" rx="17" ry="8" fill="#6B5B60"/><polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" class="clothes" fill="url(#gp)" stroke="#4A3A40" stroke-opacity="1" stroke-width="3.5" stroke-linejoin="round"/><path d="M-22 -98 Q0 -84 22 -98" fill="none" stroke="#4A3A40" stroke-opacity="1" stroke-width="3"/><circle cx="-50" cy="-46" r="11" fill="#DCCBF4" stroke="#4A3A40" stroke-width="3"/><circle cx="50" cy="-46" r="11" fill="#DCCBF4" stroke="#4A3A40" stroke-width="3"/></g><g class="char-head"><circle cx="0" cy="-160" r="34" fill="#DCCBF4" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/><circle cx="-32" cy="-146" r="28" fill="#DCCBF4" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/><circle cx="32" cy="-146" r="28" fill="#DCCBF4" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/><circle cx="-24" cy="-118" r="26" fill="#DCCBF4" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/><circle cx="24" cy="-118" r="26" fill="#DCCBF4" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/><circle cx="0" cy="-136" r="40" fill="#DCCBF4" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/><circle cx="0" cy="-160" r="32.2" fill="#DCCBF4"/><circle cx="-32" cy="-146" r="26.2" fill="#DCCBF4"/><circle cx="32" cy="-146" r="26.2" fill="#DCCBF4"/><circle cx="-24" cy="-118" r="24.2" fill="#DCCBF4"/><circle cx="24" cy="-118" r="24.2" fill="#DCCBF4"/><circle cx="0" cy="-136" r="38.2" fill="#DCCBF4"/><path transform="translate(36 -184)" d="M0 -13 L3.8 -4 L13 -4 L5.6 2 L8.4 11.5 L0 6 L-8.4 11.5 L-5.6 2 L-13 -4 L-3.8 -4Z" fill="#FFD45C" stroke="#4A3A40" stroke-width="2.5" stroke-linejoin="round"/><ellipse class="eye" cx="-16" cy="-142" rx="6.5" ry="8" fill="#3B2F35"/><circle cx="-18" cy="-145.5" r="2.4" fill="#fff"/><ellipse class="eye" cx="16" cy="-142" rx="6.5" ry="8" fill="#3B2F35"/><circle cx="14" cy="-145.5" r="2.4" fill="#fff"/><ellipse cx="-31" cy="-126" rx="9" ry="6" fill="#F28B8B" opacity="0.55"/><ellipse cx="31" cy="-126" rx="9" ry="6" fill="#F28B8B" opacity="0.55"/><ellipse cx="0" cy="-124" rx="4.5" ry="5.5" fill="#C0616F"/></g></g>
+    <polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" fill="#5b8def" fill-opacity="0.28" stroke="#2b5fd0" stroke-width="1"/><polygon points="-58,0 -58.9,-15 -58.7,-29.1 -57.4,-42.3 -55,-54.5 -51.4,-65.8 -46.7,-76.1 -40.9,-85.5 -34,-94 -25.5,-97.1 -17,-99.2 -8.5,-100.6 0,-101 8.5,-100.6 17,-99.2 25.5,-97.1 34,-94 40.9,-85.5 46.8,-76.1 51.4,-65.8 55,-54.5 57.4,-42.3 58.8,-29.1 58.9,-15 58,0 43.5,2 29,3.4 14.5,4.2 0,4.5 -14.5,4.2 -29,3.4 -43.5,2" fill="none" stroke="#e05a00" stroke-width="1.2" stroke-dasharray="4 3"/><ellipse cx="0" cy="-142" rx="56" ry="48" fill="none" stroke="#e05a00" stroke-width="1.2" stroke-dasharray="4 3"/><ellipse cx="36" cy="-184" rx="13" ry="13" fill="none" stroke="#e05a00" stroke-width="1.2" stroke-dasharray="4 3"/><circle cx="-16" cy="-142" r="2.6" fill="#e00000"/><circle cx="16" cy="-142" r="2.6" fill="#e00000"/><circle cx="0" cy="-125" r="2.6" fill="#e00000"/>
+    <path d="M-6 0 H6 M0 -6 V6" stroke="#000" stroke-width="1"/>
+    <text x="-87" y="-216" font-size="7" fill="#333">moko 450x600 青=服 橙=上限 赤=顔 ＋=足</text>
+  </svg>
+// art/ の絵を自動検査する（npm run validate:art）。
+// 形式・寸法・安全性に加え、ゲームと同じ形状データで「顔が隠れない」「全面を隠さない」
+// 「服の形がからだの判定とずれない」「柄タイルがつなぎ目なく並ぶ」を確かめる。
+// 見た目の良し悪し・幼児にとっての難しさは検査しない（人が見る）。
+import { chromium } from '@playwright/test';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, extname, basename } from 'node:path';
+import { loadGeometry } from './lib/load-geometry.mjs';
+
+const dirArg = process.argv.indexOf('--dir');
+const ART = dirArg > 0 ? process.argv[dirArg + 1] : 'art';
+const G = await loadGeometry();
+const F = G.CHAR_FRAME;
+const MAX_FILE = 800 * 1024;
+const MAX_TOTAL = 8 * 1024 * 1024;
+const results = []; // {file, ok, msg}
+const ok = (file, msg) => results.push({ file, ok: true, msg });
+const ng = (file, msg) => results.push({ file, ok: false, msg });
+
+function list(d) {
+  if (!existsSync(d)) return [];
+  return readdirSync(d).flatMap((f) => {
+    const p = join(d, f);
+    return statSync(p).isDirectory() ? list(p) : [p];
+  });
+}
+const files = list(ART).filter((f) => !basename(f).startsWith('.') && !['README.md', 'ART_CHECK.md'].includes(basename(f)));
+const MIME = { '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
+
+// ---- 形式・安全性
+let total = 0;
+for (const f of files) {
+  const ext = extname(f).toLowerCase();
+  const size = statSync(f).size;
+  total += size;
+  if (!MIME[ext]) {
+    ng(f, `使えない形式 ${ext}（png / webp / svg のみ）`);
+    continue;
+  }
+  if (size > MAX_FILE) ng(f, `大きすぎ ${(size / 1024).toFixed(0)}KB > ${MAX_FILE / 1024}KB`);
+  if (ext === '.svg') {
+    const t = readFileSync(f, 'utf8');
+    if (/<script|on[a-z]+\s*=|<foreignObject|javascript:/i.test(t)) ng(f, 'SVG にスクリプト／イベント属性／foreignObject がある');
+    if (/(href|src)\s*=\s*["'](?!#|data:image\/)/i.test(t) || /url\(\s*['"]?(?!#)/i.test(t)) ng(f, 'SVG が外部ファイル・URLを参照している（同じファイル内の #id と data:image のみ可）');
+    if (/<text|font-family/i.test(t)) ng(f, 'SVG に文字・フォント指定がある（端末で見た目が変わるため、線に変換してください）');
+  }
+}
+if (total > MAX_TOTAL) ng(ART, `合計が大きすぎ ${(total / 1048576).toFixed(1)}MB > 8MB`);
+
+// ---- 画素の読み取り（Chromium の canvas）
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.setContent('<html><body></body></html>');
+async function pixels(file, w, h) {
+  const data = `data:${MIME[extname(file).toLowerCase()]};base64,${readFileSync(file).toString('base64')}`;
+  return page.evaluate(
+    async ({ data, w, h }) => {
+      const img = new Image();
+      img.src = data;
+      await img.decode();
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const x = c.getContext('2d');
+      x.drawImage(img, 0, 0, w, h);
+      const d = x.getImageData(0, 0, w, h).data;
+      const a = new Uint8Array(w * h);
+      const l = new Uint8Array(w * h);
+      for (let i = 0; i < w * h; i++) {
+        a[i] = d[i * 4 + 3];
+        l[i] = Math.round((d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114) * (d[i * 4 + 3] / 255));
+      }
+      const b64 = (u) => {
+        let s = '';
+        for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+        return btoa(s);
+      };
+      return { nw: img.naturalWidth, nh: img.naturalHeight, a: b64(a), l: b64(l), w, h };
+    },
+    { data, w, h },
+  ).then((r) => ({ ...r, a: Buffer.from(r.a, 'base64'), l: Buffer.from(r.l, 'base64') }));
+}
+const at = (px, x, y) => {
+  const xi = Math.min(px.w - 1, Math.max(0, Math.round(x)));
+  const yi = Math.min(px.h - 1, Math.max(0, Math.round(y)));
+  return xi + yi * px.w;
+};
+const near = (px, arr, x, y, r) => {
+  let m = 0;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) m = Math.max(m, px[arr][at(px, x + dx, y + dy)]);
+  return m;
+};
+
+// ---- キャラクター
+const CH_SCALE = 2; // 1単位 = 2px で検査
+for (const id of G.CHARACTER_IDS) {
+  const d = join(ART, 'characters', id);
+  if (!existsSync(d)) continue;
+  const pick = (n) => ['webp', 'png', 'svg'].map((e) => join(d, `${n}.${e}`)).find(existsSync);
+  const mask = pick('clothes-mask');
+  const front = pick('front');
+  if (!mask || !front) {
+    ng(d, 'clothes-mask と front の両方が必要（片方だけだと使われません）');
+    continue;
+  }
+  const W = F.w * CH_SCALE;
+  const H = F.h * CH_SCALE;
+  const toPx = (p) => ({ x: (p.x - F.x) * CH_SCALE, y: (p.y - F.y) * CH_SCALE });
+  const c = G.CHARACTERS[id];
+  const grid = [];
+  for (let y = F.y + 1; y < F.y + F.h; y += 2) for (let x = F.x + 1; x < F.x + F.w; x += 2) grid.push({ x, y });
+  const dist = (shapes, p) => Math.min(...shapes.map((s) => G.distanceTo(s, p)));
+  for (const n of ['back', 'clothes-mask', 'clothes-shade', 'clothes-line', 'front', 'front-found']) {
+    const f = pick(n);
+    if (!f) continue;
+    const px = await pixels(f, W, H);
+    const ar = px.nw / px.nh;
+    if (Math.abs(ar - F.w / F.h) > 0.01 || px.nw < 450) ng(f, `寸法 ${px.nw}×${px.nh}（450×600 か、その整数倍）`);
+    if (n === 'clothes-mask') {
+      const isCl = (p) => px.l[at(px, toPx(p).x, toPx(p).y)] > 128;
+      const cl = grid.filter(isCl);
+      const inside = cl.filter((p) => G.distanceTo(G.BODY, p) <= 6).length;
+      const bodyPts = G.samplePoints(G.BODY, 2);
+      const cover = bodyPts.filter(isCl).length / bodyPts.length;
+      const r1 = cl.length ? inside / cl.length : 0;
+      (r1 >= 0.95 ? ok : ng)(f, `服の白い部分がからだの判定内 ${(r1 * 100).toFixed(0)}%（95%以上）`);
+      (cover >= 0.7 ? ok : ng)(f, `からだの判定を服が覆う割合 ${(cover * 100).toFixed(0)}%（70%以上）`);
+    } else {
+      const op = grid.filter((p) => px.a[at(px, toPx(p).x, toPx(p).y)] > 128);
+      const out = op.filter((p) => dist(c.silhouette, p) > 10).length;
+      const lim = n === 'front-found' ? 0.12 : 0.04;
+      const r = op.length ? out / op.length : 0;
+      (r <= lim ? ok : ng)(f, `輪郭の判定からはみ出す割合 ${(r * 100).toFixed(1)}%（${lim * 100}%以下）`);
+      if (n === 'front' || n === 'front-found') {
+        const faceOk = c.facePoints.every((p) => near(px, 'a', toPx(p).x, toPx(p).y, 2) > 128);
+        (faceOk ? ok : ng)(f, faceOk ? '顔の位置に絵がある' : '顔の位置（目・口）に絵が無い');
+      }
+    }
+  }
+}
+
+// ---- シーン
+for (const sid of G.SCENE_IDS) {
+  const d = join(ART, 'scenes', sid);
+  if (!existsSync(d)) continue;
+  const sc = G.SCENES[sid];
+  const pick = (n) => ['webp', 'png', 'svg'].map((e) => join(d, `${n}.${e}`)).find(existsSync);
+  for (const n of ['back', 'over', 'minor', 'fore']) {
+    const f = pick(n);
+    if (!f) continue;
+    const px = await pixels(f, 1000, 1000);
+    if (px.nw !== px.nh || px.nw < 1000) ng(f, `寸法 ${px.nw}×${px.nh}（正方形・1000以上）`);
+    if (n === 'back') {
+      ok(f, '寸法確認のみ');
+      continue;
+    }
+    let bad = 0;
+    for (const sp of sc.spots) {
+      for (const cid of G.CHARACTER_IDS) {
+        const t = G.spotTransform(sp);
+        const face = G.CHARACTERS[cid].facePoints.map((p) => G.transformPt(t, p));
+        const faceA = Math.max(...face.map((p) => near(px, 'a', p.x, p.y, 4)));
+        const body = G.samplePoints(G.transformShape(t, G.BODY), 6);
+        if (n === 'fore') {
+          const sil = G.silhouetteWorld(cid, sp).flatMap((s) => G.samplePoints(s, 6));
+          const vis = sil.filter((p) => px.a[at(px, p.x, p.y)] <= 128).length / sil.length;
+          const bvis = body.filter((p) => px.a[at(px, p.x, p.y)] <= 128).length / body.length;
+          const probs = [];
+          if (faceA > 76) probs.push('顔に重なる');
+          if (vis < G.LIMITS.minVisible) probs.push(`見える割合 ${vis.toFixed(2)} < ${G.LIMITS.minVisible}`);
+          if (bvis < G.LIMITS.minBodyVisible) probs.push(`服が見える割合 ${bvis.toFixed(2)} < ${G.LIMITS.minBodyVisible}`);
+          if (bvis > G.LIMITS.maxBodyVisible) probs.push(`服がまったく隠れていない ${bvis.toFixed(2)}`);
+          if (probs.length) {
+            bad++;
+            ng(f, `${sp.id}/${cid}: ${probs.join('、')}`);
+          }
+        } else {
+          const mean = body.reduce((s, p) => s + px.a[at(px, p.x, p.y)], 0) / body.length / 255;
+          const probs = [];
+          if (faceA > 76) probs.push('顔の後ろに濃い絵がある（顔の輪郭が読みにくくなる）');
+          if (mean > 0.35) probs.push(`服の後ろの濃さ ${mean.toFixed(2)} > 0.35（柄が溶け込まなくなる）`);
+          if (probs.length) {
+            bad++;
+            ng(f, `${sp.id}/${cid}: ${probs.join('、')}`);
+          }
+        }
+      }
+    }
+    if (!bad) ok(f, `全 ${sc.spots.length} か所 × 3体で問題なし`);
+  }
+}
+
+// ---- 柄タイル
+const pdir = join(ART, 'patterns');
+for (const f of list(pdir)) {
+  const m = basename(f).match(/^(room|garden|shop)-(plain|stripes|dots|check|leaf)\.(png|webp|svg)$/);
+  if (!m) {
+    ng(f, 'ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png）');
+    continue;
+  }
+  if (!G.SCENES[m[1]].costumes.some((c) => c.id === m[2])) ng(f, `${m[1]} に ${m[2]} の服はありません`);
+  const px = await pixels(f, 128, 128);
+  if (px.nw !== px.nh || px.nw < 64) ng(f, `寸法 ${px.nw}×${px.nh}（正方形・64以上）`);
+  let diff = 0;
+  for (let i = 0; i < 128; i++) {
+    diff += Math.abs(px.l[at(px, 0, i)] - px.l[at(px, 127, i)]) + Math.abs(px.l[at(px, i, 0)] - px.l[at(px, i, 127)]);
+  }
+  diff /= 256;
+  const opaque = px.a.every((v) => v > 250);
+  (diff < 28 ? ok : ng)(f, `つなぎ目の差 ${diff.toFixed(1)}（28未満）`);
+  (opaque ? ok : ng)(f, opaque ? '不透明' : '透明な部分がある（柄タイルは不透明にしてください）');
+}
+
+// ---- UI
+for (const f of list(join(ART, 'ui'))) {
+  if (!/^(title|handoff|bye)\.(png|webp|svg)$/.test(basename(f))) {
+    ng(f, 'ファイル名は title / handoff / bye のいずれか');
+    continue;
+  }
+  const px = await pixels(f, 64, 64);
+  (px.nw <= 2000 && px.nh <= 2000 ? ok : ng)(f, `寸法 ${px.nw}×${px.nh}`);
+}
+await browser.close();
+
+const fails = results.filter((r) => !r.ok);
+const lines = [
+  `# 絵の自動検査結果`,
+  ``,
+  `対象：\`${ART}/\`（${files.length}ファイル、合計 ${(total / 1024).toFixed(0)}KB） 実行：${new Date().toISOString()}`,
+  ``,
+  files.length === 0 ? '差し替えの絵はまだありません（ゲームはコードで描いた既定の絵を使います）。' : fails.length ? `**不合格 ${fails.length} 件**` : '**すべて合格**',
+  ``,
+  `| 結果 | ファイル | 内容 |`,
+  `|---|---|---|`,
+  ...results.map((r) => `| ${r.ok ? 'OK' : 'NG'} | ${r.file} | ${r.msg} |`),
+  ``,
+  `見た目の良し悪し・幼児にとっての難しさ・既存作品との似ている度合いは、この検査では分かりません。`,
+];
+mkdirSync('art-guides', { recursive: true });
+writeFileSync(dirArg > 0 ? join(ART, 'ART_CHECK.md') : 'art-guides/ART_CHECK.md', lines.join('\n') + '\n');
+console.log(lines.slice(0, 5).join('\n'));
+for (const r of fails.slice(0, 40)) console.log('NG', r.file, r.msg);
+process.exit(fails.length ? 1 : 0);
+?? video/hide-handoff-find.webm
+
+codex
+ころのSVGに合わせ、茶色の輪郭、左上からの光、淡い陰影で各6層を作ります。みみは長いたれ耳とももの色の耳の内側、もこは雲形の頭と星の髪どめで、形でも見分けられるようにします。服のマスクと顔の位置はガイドに合わせます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg --files -g AGENTS.md art; Get-Content -Encoding UTF8 scripts/lib/load-geometry.mjs; Get-Content -Encoding UTF8 vite.config.ts' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 173ms:
+import { build } from 'esbuild';
+import { mkdtempSync, mkdirSync, copyFileSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+// Codex のサンドボックス内では esbuild が親フォルダを読めずに失敗する。
+// 外で成功したときの結果をここに残し、失敗したときはそれを使う（形状データを変えるのは src/ を触る Claude 側だけ）
+const cache = join(here, '../../node_modules/.cache/phfb-geo.mjs');
+export async function loadGeometry() {
+  const out = join(mkdtempSync(join(tmpdir(), 'phfb-geo-')), 'geo.mjs');
+  try {
+    await build({ entryPoints: [join(here, 'geometry-entry.ts')], bundle: true, format: 'esm', platform: 'node', outfile: out, logLevel: 'silent' });
+  } catch (e) {
+    if (!existsSync(cache)) throw e;
+    console.warn(`形状データを組み立てられなかったため、前回の結果を使います（${e.message.split('\n')[0]}）`);
+    return import(pathToFileURL(cache).href);
+  }
+  try {
+    mkdirSync(dirname(cache), { recursive: true });
+    copyFileSync(out, cache);
+  } catch {
+    // 保存できなくても検査は続ける
+  }
+  return import(pathToFileURL(out).href);
+}
+import { defineConfig, type Plugin } from 'vite';
+import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = dirname(fileURLToPath(import.meta.url));
+
+// 本番ビルドの後に、ビルド成果物の一覧から Service Worker を作る。
+// 版（VERSION）は成果物の内容のハッシュなので、更新すると古いキャッシュは消える。
+function serviceWorkerPlugin(): Plugin {
+  let outDir = 'dist';
+  return {
+    name: 'local-service-worker',
+    apply: 'build',
+    configResolved(c) {
+      outDir = resolve(c.root, c.build.outDir);
+    },
+    closeBundle() {
+      const files: string[] = [];
+      const walk = (d: string) => {
+        for (const f of readdirSync(d)) {
+          const p = join(d, f);
+          if (statSync(p).isDirectory()) walk(p);
+          else files.push(p);
+        }
+      };
+      walk(outDir);
+      const list = files
+        .map((f) => relative(outDir, f).split('\\').join('/'))
+        .filter((f) => f !== 'sw.js')
+        .sort();
+      const h = createHash('sha256');
+      for (const f of list) h.update(f).update(readFileSync(join(outDir, f)));
+      const version = h.digest('hex').slice(0, 12);
+      const tpl = readFileSync(resolve(ROOT, 'src/sw-template.js'), 'utf8');
+      const out = tpl.replace('__VERSION__', version).replace('__ASSETS__', JSON.stringify(['./', ...list.map((f) => './' + f)]));
+      writeFileSync(join(outDir, 'sw.js'), out);
+    },
+  };
+}
+
+// 本番だけ、通信先を同一オリジンに制限する CSP を入れる
+function cspPlugin(): Plugin {
+  return {
+    name: 'csp-meta',
+    apply: 'build',
+    transformIndexHtml(html) {
+      const csp =
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'";
+      return html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${csp}" />`);
+    },
+  };
+}
+
+export default defineConfig({
+  base: './',
+  plugins: [cspPlugin(), serviceWorkerPlugin()],
+  build: { target: 'es2020', sourcemap: false },
+  server: { host: '127.0.0.1', strictPort: false },
+  preview: { host: '127.0.0.1' },
+  test: {
+    include: ['tests/unit/**/*.test.ts'],
+    environment: 'node',
+  },
+} as never);
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs = require('node:fs');
+const base = 'art/characters/';
+const read = n => fs.readFileSync(base+'koro/'+n+'.svg','utf8');
+const mimiHead = "'`<g transform="rotate(18 -46 -158)">
+<ellipse cx="-50" cy="-126" rx="15" ry="35" fill="url(#ear)" stroke="#4A3A40" stroke-width="2.6"/>
+<path d="M-35-126 C-35-106-42-91-50-91 C-57-91-63-101-65-114" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round"/>
+<ellipse cx="-50" cy="-121" rx="7" ry="23" fill="url(#pink)"/>
+<path d="M-59-141 Q-62-131-61-120" fill="none" stroke="#e4f3dd" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>
+</g>
+<g transform="rotate(-18 46 -158)">
+<ellipse cx="50" cy="-126" rx="15" ry="35" fill="url(#ear)" stroke="#4A3A40" stroke-width="2.6"/>
+<path d="M65-126 C65-106 58-91 50-91 C43-91 37-101 35-114" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round"/>
+<ellipse cx="50" cy="-121" rx="7" ry="23" fill="url(#pink)"/>
+<path d="M42-143 Q39-132 40-124" fill="none" stroke="#e4f3dd" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>
+</g>
+<path d="M-46-142 C-46-167-27-186 0-186 C26-186 46-167 46-142 C46-117 26-98 0-98 C-26-98-46-117-46-142Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6"/>
+<path d="M46-142 C46-117 26-98 0-98 C-14-98-27-104-35-112" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round"/>
+<path d="M-41-151 C-38-167-24-179-10-181" fill="none" stroke="#eef8e5" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>
+<path d="M39-125 Q28-105 10-103" fill="none" stroke="#739b85" stroke-width="1.15" stroke-linecap="round" opacity=".5"/>
+`;
+const mokoHead = `<path d="M-50-125 C-63-135-59-158-45-166 Q-37-172-27-170 C-23-184-10-192 3-190 C16-190 25-182 28-171 C42-176 56-163 57-148 C59-137 54-129 48-124 C53-111 44-98 32-96 Q21-91 10-98 Q0-94-11-98 C-24-90-41-98-46-109 Q-50-117-50-125Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M57-148 C59-137 54-129 48-124 C53-111 44-98 32-96 Q21-91 10-98 Q0-94-11-98 C-24-90-41-98-46-109" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-54-145 Q-53-164-38-165 M-22-173 Q-16-185-4-185" fill="none" stroke="#faf0fc" stroke-opacity=".7" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M43-121 Q47-106 32-102 M-33-104 Q-23-97-15-103" fill="none" stroke="#9c87ad" stroke-opacity=".45" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M26-174 Q35-166 43-174" fill="none" stroke="#948099" stroke-opacity=".25" stroke-width="4" stroke-linecap="round"/>
+<path d="M36-195 Q37-195 40-187 L47-187 Q49-187 47-185 L42-180 L44-173 Q45-171 43-172 L36-177 L29-173 Q27-172 28-175 L30-181 L24-185 Q23-187 25-187 L32-187 L35-194 Q35-195 36-195Z" fill="url(#star)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M35-190 L34-184 L28-184 M38-179 L41-175" fill="none" stroke="#fff3c9" stroke-width="1.1" stroke-linecap="round"/>
+`;
+for (const id of ['"'mimi','moko']) {
+ fs.mkdirSync(base+id,{recursive:true});
+ for(const layer of ['back','clothes-mask','clothes-shade','clothes-line']) fs.writeFileSync(base+id+'/'+layer+'.svg',read(layer));
+ for(const layer of ['front','front-found']) {
+  let svg=read(layer);
+  const start=svg.indexOf('</defs>')+7;
+  const end=svg.indexOf('<ellipse cx=\"-30\"');
+  svg=svg.slice(0,start)+(id==='mimi'?mimiHead:mokoHead)+svg.slice(end);
+  svg=svg.replace(/<linearGradient id=\"curl\"[\\s\\S]*?<\\/linearGradient>/,'');
+  const colors=id==='mimi' ? {'#ffe5be':'#e5f2db','#f3c48f':'#bfdcc5','#eab07e':'#a8cfb5','#d49770':'#88b39e','#fff1d7':'#f1f6df','#9a7155':'#718a78','#bd8565':'#88a58c','#b98160':'#859d83','#ffe7c5':'#eaf5dd','#ffe5bf':'#e5f2db','#b07b5c':'#799a82','#e8bd91':'#b5ceb0'} : {'#ffe5be':'#efe5f5','#f3c48f':'#d8c7e8','#eab07e':'#c4b0d6','#d49770':'#ad95c0','#fff1d7':'#faf0f7','#9a7155':'#96809f','#bd8565':'#ab8faa','#b98160':'#a18ba6','#ffe7c5':'#f4eafa','#ffe5bf':'#efe5f5','#b07b5c':'#9a81a5','#e8bd91':'#cab0cf'};
+  for(const [a,b] of Object.entries(colors))svg=svg.replaceAll(a,b);
+  svg=svg.replace('</defs>',"'`<linearGradient id="ear" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#cce4ca"/><stop offset=".55" stop-color="#a7cdb2"/><stop offset="1" stop-color="#85ac96"/></linearGradient>
+<radialGradient id="pink" cx=".3" cy=".25" r=".8"><stop stop-color="#f5d8d6"/><stop offset="1" stop-color="#dcaeaf"/></radialGradient>
+<linearGradient id="star" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#f9e6ac"/><stop offset=".55" stop-color="#edcc7d"/><stop offset="1" stop-color="#cba360"/></linearGradient></defs>`);
+  if(id==='"'mimi')svg=svg.replace('M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153','M-22-155 Q-17-156-12-155 M12-155 Q17-156 22-155').replace('M-7.5-126 Q-.5-117.5 8-126','M-8-126 Q-4-120 0-125 Q4-120 8-126');
+  else svg=svg.replace('M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153','M-22-153 Q-17-157-12-157 M12-157 Q17-157 22-153').replace('M-7.5-126 Q-.5-117.5 8-126','M-5-126 Q0-120 5-126');
+  fs.writeFileSync(base+id+'/'+layer+'.svg',svg);
+ }
+}
+console.log('Created 12 SVG layers, 450 x 600.');
+'@ | node" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 214ms:
+Created 12 SVG layers, 450 x 600.
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm.cmd run validate:art' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 4263ms:
+
+> pattern-hide-family-beta@0.1.0 validate:art
+> node scripts/validate-art.mjs
+
+形状データを組み立てられなかったため、前回の結果を使います（Build failed with 2 errors:）
+# 絵の自動検査結果
+
+対象：`art/`（18ファイル、合計 40KB） 実行：2026-10-07T14:40:34.364Z
+
+**すべて合格**
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm.cmd run build' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 3073ms:
+
+> pattern-hide-family-beta@0.1.0 build
+> tsc --noEmit && vite build
+
+X [ERROR] Cannot read directory "../..": Access is denied.
+
+X [ERROR] Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+
+failed to load config from C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\vite.config.ts
+error during build:
+Error: Build failed with 2 errors:
+error: Cannot read directory "../..": Access is denied.
+error: Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+    at failureErrorWithLog (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1752:15)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1211:25
+    at runOnEndCallbacks (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1592:45)
+    at buildResponseToResult (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1209:7)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1236:16
+    at responseCallbacks.<computed> (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:886:9)
+    at handleIncomingPacket (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:941:12)
+    at Socket.readFromStdout (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:864:7)
+    at Socket.emit (node:events:509:28)
+    at addChunk (node:internal/streams/readable:563:12)
+
+codex
+各6層、計12枚のSVGを作成し、自動検査はすべて合格しました。検査は既存の仕組みにより、保存済みの形状データを使用しています。
+
+ビルドは型チェック後、Viteの設定読み込みでサンドボックスのアクセス拒否により停止しました。AGENTS.mdの指示に従って回避策は試さず、この結果と実画面の確認が未実施であることを作業記録に残します。
+
+apply patch
+patch: completed
+C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\art\README.md
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index b27a22529a1b1a961216d40759c692dfce16ee63..fbd5fa5156c1573d871109508110f249dff68073
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,9 +1,20 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-現在は `characters/koro/` に、ころの差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に、3体の差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+-## 作業記録
++## 作業記録
++### 2026-10-07：ジョブ02（みみ・もこ）
++
++- 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
++- 方法：SVGをコードで記述。ころの既存SVGを画風の基準とし、服の白いマスク・陰影・輪郭、接地影と足を共通化。顔と手のグラデーションを各キャラクターの色に調整し、頭の形を新しく記述した。画像生成、ネット画像、別料金のAPIは使用していない。
++- みみ：ミントグリーンの丸い頭、左右にたれた長い耳、淡いピンクの耳の内側、ゆったりした眉と小さな笑顔。もこ：ラベンダーの雲形の頭、角を丸めた淡い金色の星の髪どめ、控えめな笑顔。色に加えて、たれ耳／雲形と星／ころの巻き毛で区別できる構成にした。
++- 画風・位置：ころと同じ濃茶色 `#4A3A40`、外周の基本線幅2.6と影側3.4、左上からの光、目のハイライト、淡い頬、控えめな縫い目を使用。目の中心はガイドの `(±16, -142)`、口は `(0, -125)` 付近。服の白いマスクはガイドと同じ形。発見時は片手を上げてふるポーズ。
++- 検査結果：`npm.cmd run validate:art` は終了コード0、18ファイル（既存ころ6枚を含む）、合計40KBで「すべて合格」。結果は `art-guides/ART_CHECK.md` に自動出力。形状データの組み立てに失敗したため、検査スクリプトに元から備わっている処理で保存済みの形状データを使用した旨の警告あり。検査道具は変更していない。
++- ビルド結果：`npm.cmd run build` は `tsc --noEmit` を通過した後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
++- できなかったこと・迷った点：ビルド成功とゲーム実画面での表示・縮小表示の目視確認は未確認。もこの口はガイド既定の開いた口ではなく、制作方針の「おだやかな笑顔」に合わせた。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数の差し替えや回避策は試さず終了。Claude Code側で最新の形状データによる再検査、ビルド、3体を並べた表示と発見ポーズの目視確認が必要。
++- 手動の書き込みはジョブで許可された2体のフォルダと本READMEのみ。検査レポートは許可済みの自動更新。commit / push は行っていない。
++
+ ### 2026-10-07：ジョブ01（既存成果物の記録を補記）
+ 
+ - 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short; git diff --stat; Get-Content -Encoding UTF8 art-guides/ART_CHECK.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 221ms:
+ M art-guides/ART_CHECK.md
+ M art/README.md
+?? art/characters/mimi/
+?? art/characters/moko/
+?? video/hide-handoff-find.webm
+warning: in the working copy of 'pattern-hide-family-beta/art-guides/ART_CHECK.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'pattern-hide-family-beta/art/README.md', LF will be replaced by CRLF the next time Git touches it
+ pattern-hide-family-beta/art-guides/ART_CHECK.md | 20 +++++++++++++++++++-
+ pattern-hide-family-beta/art/README.md           | 13 ++++++++++++-
+ 2 files changed, 31 insertions(+), 2 deletions(-)
+# 絵の自動検査結果
+
+対象：`art/`（18ファイル、合計 40KB） 実行：2026-10-07T14:40:34.364Z
+
+**すべて合格**
+
+| 結果 | ファイル | 内容 |
+|---|---|---|
+| OK | art\characters\koro\back.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\koro\clothes-mask.svg | 服の白い部分がからだの判定内 100%（95%以上） |
+| OK | art\characters\koro\clothes-mask.svg | からだの判定を服が覆う割合 100%（70%以上） |
+| OK | art\characters\koro\clothes-shade.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\koro\clothes-line.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\koro\front.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\koro\front.svg | 顔の位置に絵がある |
+| OK | art\characters\koro\front-found.svg | 輪郭の判定からはみ出す割合 6.6%（12%以下） |
+| OK | art\characters\koro\front-found.svg | 顔の位置に絵がある |
+| OK | art\characters\mimi\back.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\mimi\clothes-mask.svg | 服の白い部分がからだの判定内 100%（95%以上） |
+| OK | art\characters\mimi\clothes-mask.svg | からだの判定を服が覆う割合 100%（70%以上） |
+| OK | art\characters\mimi\clothes-shade.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\mimi\clothes-line.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\mimi\front.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\mimi\front.svg | 顔の位置に絵がある |
+| OK | art\characters\mimi\front-found.svg | 輪郭の判定からはみ出す割合 2.4%（12%以下） |
+| OK | art\characters\mimi\front-found.svg | 顔の位置に絵がある |
+| OK | art\characters\moko\back.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\moko\clothes-mask.svg | 服の白い部分がからだの判定内 100%（95%以上） |
+| OK | art\characters\moko\clothes-mask.svg | からだの判定を服が覆う割合 100%（70%以上） |
+| OK | art\characters\moko\clothes-shade.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\moko\clothes-line.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\moko\front.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\moko\front.svg | 顔の位置に絵がある |
+| OK | art\characters\moko\front-found.svg | 輪郭の判定からはみ出す割合 5.4%（12%以下） |
+| OK | art\characters\moko\front-found.svg | 顔の位置に絵がある |
+
+見た目の良し悪し・幼児にとっての難しさ・既存作品との似ている度合いは、この検査では分かりません。
+
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index b27a22529a1b1a961216d40759c692dfce16ee63..fbd5fa5156c1573d871109508110f249dff68073
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,9 +1,20 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-現在は `characters/koro/` に、ころの差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に、3体の差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+-## 作業記録
++## 作業記録
++### 2026-10-07：ジョブ02（みみ・もこ）
++
++- 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
++- 方法：SVGをコードで記述。ころの既存SVGを画風の基準とし、服の白いマスク・陰影・輪郭、接地影と足を共通化。顔と手のグラデーションを各キャラクターの色に調整し、頭の形を新しく記述した。画像生成、ネット画像、別料金のAPIは使用していない。
++- みみ：ミントグリーンの丸い頭、左右にたれた長い耳、淡いピンクの耳の内側、ゆったりした眉と小さな笑顔。もこ：ラベンダーの雲形の頭、角を丸めた淡い金色の星の髪どめ、控えめな笑顔。色に加えて、たれ耳／雲形と星／ころの巻き毛で区別できる構成にした。
++- 画風・位置：ころと同じ濃茶色 `#4A3A40`、外周の基本線幅2.6と影側3.4、左上からの光、目のハイライト、淡い頬、控えめな縫い目を使用。目の中心はガイドの `(±16, -142)`、口は `(0, -125)` 付近。服の白いマスクはガイドと同じ形。発見時は片手を上げてふるポーズ。
++- 検査結果：`npm.cmd run validate:art` は終了コード0、18ファイル（既存ころ6枚を含む）、合計40KBで「すべて合格」。結果は `art-guides/ART_CHECK.md` に自動出力。形状データの組み立てに失敗したため、検査スクリプトに元から備わっている処理で保存済みの形状データを使用した旨の警告あり。検査道具は変更していない。
++- ビルド結果：`npm.cmd run build` は `tsc --noEmit` を通過した後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
++- できなかったこと・迷った点：ビルド成功とゲーム実画面での表示・縮小表示の目視確認は未確認。もこの口はガイド既定の開いた口ではなく、制作方針の「おだやかな笑顔」に合わせた。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数の差し替えや回避策は試さず終了。Claude Code側で最新の形状データによる再検査、ビルド、3体を並べた表示と発見ポーズの目視確認が必要。
++- 手動の書き込みはジョブで許可された2体のフォルダと本READMEのみ。検査レポートは許可済みの自動更新。commit / push は行っていない。
++
+ ### 2026-10-07：ジョブ01（既存成果物の記録を補記）
+ 
+ - 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
+
+codex
+みみ・もこを、ころに合わせた画風で各6層、計12枚のSVGとして制作しました。
+
+- 自動検査：すべて合格（保存済み形状データを使用）。
+- ビルド：型チェック通過後、サンドボックスのアクセス拒否で停止。実画面の確認は未実施です。
+- 方法・検査結果・未確認事項を [art/README.md](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/art/README.md) に記録しました。
+
+書き込みは許可範囲と許可済みの検査レポート自動更新のみです。commit / push は行っていません。
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index b27a22529a1b1a961216d40759c692dfce16ee63..fbd5fa5156c1573d871109508110f249dff68073
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,9 +1,20 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-現在は `characters/koro/` に、ころの差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に、3体の差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+-## 作業記録
++## 作業記録
++### 2026-10-07：ジョブ02（みみ・もこ）
++
++- 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
++- 方法：SVGをコードで記述。ころの既存SVGを画風の基準とし、服の白いマスク・陰影・輪郭、接地影と足を共通化。顔と手のグラデーションを各キャラクターの色に調整し、頭の形を新しく記述した。画像生成、ネット画像、別料金のAPIは使用していない。
++- みみ：ミントグリーンの丸い頭、左右にたれた長い耳、淡いピンクの耳の内側、ゆったりした眉と小さな笑顔。もこ：ラベンダーの雲形の頭、角を丸めた淡い金色の星の髪どめ、控えめな笑顔。色に加えて、たれ耳／雲形と星／ころの巻き毛で区別できる構成にした。
++- 画風・位置：ころと同じ濃茶色 `#4A3A40`、外周の基本線幅2.6と影側3.4、左上からの光、目のハイライト、淡い頬、控えめな縫い目を使用。目の中心はガイドの `(±16, -142)`、口は `(0, -125)` 付近。服の白いマスクはガイドと同じ形。発見時は片手を上げてふるポーズ。
++- 検査結果：`npm.cmd run validate:art` は終了コード0、18ファイル（既存ころ6枚を含む）、合計40KBで「すべて合格」。結果は `art-guides/ART_CHECK.md` に自動出力。形状データの組み立てに失敗したため、検査スクリプトに元から備わっている処理で保存済みの形状データを使用した旨の警告あり。検査道具は変更していない。
++- ビルド結果：`npm.cmd run build` は `tsc --noEmit` を通過した後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
++- できなかったこと・迷った点：ビルド成功とゲーム実画面での表示・縮小表示の目視確認は未確認。もこの口はガイド既定の開いた口ではなく、制作方針の「おだやかな笑顔」に合わせた。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数の差し替えや回避策は試さず終了。Claude Code側で最新の形状データによる再検査、ビルド、3体を並べた表示と発見ポーズの目視確認が必要。
++- 手動の書き込みはジョブで許可された2体のフォルダと本READMEのみ。検査レポートは許可済みの自動更新。commit / push は行っていない。
++
+ ### 2026-10-07：ジョブ01（既存成果物の記録を補記）
+ 
+ - 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
+
+tokens used
+37,964
+みみ・もこを、ころに合わせた画風で各6層、計12枚のSVGとして制作しました。
+
+- 自動検査：すべて合格（保存済み形状データを使用）。
+- ビルド：型チェック通過後、サンドボックスのアクセス拒否で停止。実画面の確認は未実施です。
+- 方法・検査結果・未確認事項を [art/README.md](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/art/README.md) に記録しました。
+
+書き込みは許可範囲と許可済みの検査レポート自動更新のみです。commit / push は行っていません。
