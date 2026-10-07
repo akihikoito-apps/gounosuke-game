@@ -48,3 +48,4 @@
 - 2026-10-07T14:49:09.599Z Codex ジョブ `codex-jobs/03-patterns.md`：終了コード 0、2.5分、変更 14 件、許可外 0 件（ログ `audit/codex/2026-10-07T14-46-37-222Z-03-patterns.log`）
 - 2026-10-07T14:53:56.987Z Codex ジョブ `codex-jobs/feedback.md`：終了コード 0、1.9分、変更 0 件、許可外 0 件（ログ `audit/codex/2026-10-07T14-52-01-696Z-feedback.log`）
 - 2026-10-07T15:05:51.114Z Codex ジョブ `codex-jobs/04-room.md`：終了コード 0、6.8分、変更 6 件、許可外 0 件（ログ `audit/codex/2026-10-07T14-59-00-695Z-04-room.log`）
+- 2026-10-07T15:19:39.580Z Codex ジョブ `codex-jobs/05-garden-shop.md`：終了コード 0、7.6分、変更 10 件、許可外 0 件（ログ `audit/codex/2026-10-07T15-12-04-021Z-05-garden-shop.log`）

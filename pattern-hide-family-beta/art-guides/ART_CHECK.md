@@ -1,6 +1,6 @@
 # 絵の自動検査結果
 
-対象：`art/`（34ファイル、合計 1400KB） 実行：2026-10-07T15:06:02.720Z
+対象：`art/`（42ファイル、合計 3037KB） 実行：2026-10-07T15:19:49.742Z
 
 **すべて合格**
 
@@ -37,6 +37,14 @@
 | OK | art\scenes\room\over.png | 全 9 か所 × 3体で問題なし |
 | OK | art\scenes\room\minor.png | 全 9 か所 × 3体で問題なし |
 | OK | art\scenes\room\fore.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\garden\back.png | 寸法確認のみ |
+| OK | art\scenes\garden\over.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\garden\minor.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\garden\fore.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\shop\back.png | 寸法確認のみ |
+| OK | art\scenes\shop\over.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\shop\minor.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\shop\fore.png | 全 9 か所 × 3体で問題なし |
 | OK | art\patterns\garden-dots.svg | つなぎ目の差 0.0（28未満） |
 | OK | art\patterns\garden-dots.svg | 不透明 |
 | OK | art\patterns\garden-leaf.svg | つなぎ目の差 0.0（28未満） |
