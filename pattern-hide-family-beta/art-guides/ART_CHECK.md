@@ -1,6 +1,6 @@
 # 絵の自動検査結果
 
-対象：`art/`（42ファイル、合計 3037KB） 実行：2026-10-07T15:19:49.742Z
+対象：`art/`（45ファイル、合計 3941KB） 実行：2026-10-07T15:27:55.238Z
 
 **すべて合格**
 
@@ -69,5 +69,8 @@
 | OK | art\patterns\shop-plain.svg | 不透明 |
 | OK | art\patterns\shop-stripes.svg | つなぎ目の差 0.1（28未満） |
 | OK | art\patterns\shop-stripes.svg | 不透明 |
+| OK | art\ui\bye.png | 寸法 1000×600 |
+| OK | art\ui\handoff.png | 寸法 800×600 |
+| OK | art\ui\title.png | 寸法 1200×700 |
 
 見た目の良し悪し・幼児にとっての難しさ・既存作品との似ている度合いは、この検査では分かりません。
