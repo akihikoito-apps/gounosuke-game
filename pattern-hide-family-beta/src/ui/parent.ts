@@ -168,6 +168,13 @@ export class ParentArea {
     hold.addEventListener('keyup', (e) => {
       if (e.key === 'Enter' || e.key === ' ') stopHold();
     });
+    // キーを押したまま Tab で離れる・ウィンドウを離れると keyup が届かないため、ここでも取り消す
+    hold.addEventListener('blur', stopHold);
+    const onWindowBlur = () => {
+      if (!hold.isConnected) window.removeEventListener('blur', onWindowBlur);
+      stopHold();
+    };
+    window.addEventListener('blur', onWindowBlur);
   }
 
   // ---- 設定パネル ----

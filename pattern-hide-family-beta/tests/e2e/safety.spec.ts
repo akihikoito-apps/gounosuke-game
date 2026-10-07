@@ -85,6 +85,21 @@ test('14. parent gate: random tapping does not pass; Escape closes; back does no
   await expect(page.locator('.parent-layer')).toHaveCount(0);
 });
 
+test('regression: holding a key then tabbing away does not open the parent area', async ({ page }) => {
+  await fresh(page);
+  await act(page, 'parent');
+  const nums = await page.locator('.gate-nums').innerText();
+  const K = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  for (const n of nums.split('・').map((k) => K.indexOf(k)).sort((a, b) => a - b)) await page.locator(`[data-key="${n}"]`).click();
+  await page.locator('[data-hold]').focus();
+  await page.keyboard.down('Space');
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Tab');
+  await page.keyboard.up('Space');
+  await page.waitForTimeout(2600);
+  await expect(page.locator('.panel')).toHaveCount(0);
+});
+
 test('parent area is keyboard operable; settings, delete, playtest toggle', async ({ page }) => {
   await fresh(page);
   // キーボードだけでゲートを通る
