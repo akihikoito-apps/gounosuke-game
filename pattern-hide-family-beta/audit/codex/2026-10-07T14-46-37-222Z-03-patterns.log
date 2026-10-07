@@ -1,0 +1,1161 @@
+job: codex-jobs/03-patterns.md
+exit: 0
+minutes: 2.5
+changed (14): art-guides/ART_CHECK.md, art/README.md, art/patterns/garden-dots.svg, art/patterns/garden-leaf.svg, art/patterns/garden-plain.svg, art/patterns/garden-stripes.svg, art/patterns/room-check.svg, art/patterns/room-dots.svg, art/patterns/room-plain.svg, art/patterns/room-stripes.svg, art/patterns/shop-check.svg, art/patterns/shop-dots.svg, art/patterns/shop-plain.svg, art/patterns/shop-stripes.svg
+outside allowed paths (0): -
+
+----- codex output -----
+OpenAI Codex v0.154.0
+--------
+workdir: C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a116d4-a676-7883-9fed-d8cd8273150f
+--------
+user
+Read the file codex-jobs/03-patterns.md and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.
+codex
+指定のジョブと `AGENTS.md` を読み、許可された範囲で制作・検査・作業記録まで進めます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 AGENTS.md; Get-Content -Encoding UTF8 codex-jobs/03-patterns.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 148ms:
+# Codex 向けの決まり（このフォルダ）
+
+このフォルダは幼児向けゲーム「もようのかくれんぼ（仮）」のWebベータです。Claude Code が司令塔で、Codex は **絵の制作** と **独立レビュー** を担当します。
+
+## 書き込んでよい場所
+- 絵の制作ジョブ：`art/` の中だけ
+- レビュージョブ：`audit/codex/` の中だけ（レポートを書く）
+- それ以外（`src/`, `tests/`, `scripts/`, 設定、文書）は **変更しない**。直したほうがよい点は、レポートや `art/README.md` に提案として書く
+
+## 必ず守ること
+- ジョブファイル（`codex-jobs/*.md`）の指示と、`ART_SLOTS.md`・`CODEX_ART_BRIEF.md` の決まりに従う
+- 絵を作ったら `npm run validate:art` を実行し、合格するまで直す。結果は `art-guides/ART_CHECK.md` に出る
+- 既存の作品（キャラクター・ロゴ・画面・音）をまねない／取り込まない。ネット上の画像を使わない。文字を絵に入れない
+- 子どもの個人情報・外部通信・広告・課金に関わるものを追加しない
+- 追加料金が発生する手段（別料金の API キー、有料サービス）を使わない。利用上限に達したら、そこで止めて報告する
+- git の commit / push はしない（Claude Code が確認してから行う）
+- 最後に、やったこと・使った方法（SVGをコードで書いた／画像生成を使った 等）・検査結果・できなかったことを、ジョブファイルの指定場所に書く
+
+## サンドボックスでの注意（2026-10-07 追記）
+- `art-guides/ART_CHECK.md` は `npm run validate:art` が自動で書き換える。これは許可済みなので、書き込み先を変える工夫は不要
+- 検査・ビルドの道具（node_modules、scripts、環境変数 NODE_OPTIONS など）を差し替えたり、上書きしたりする回り道はしない。サンドボックスで動かないコマンドがあれば、無理をせず、その旨を作業記録に書いて終える（検査は Claude Code が外でも実行する）
+- 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
+- Windows の PowerShell では `npm` / `npx` が実行ポリシーで止まる。代わりに `npm.cmd run validate:art`、`npm.cmd run build` を使う（設定は変えない）
+- PowerShell でファイルを読むときは `Get-Content -Encoding UTF8` を使う（指定しないと日本語が文字化けする）
+# ジョブ03：柄タイル12枚
+
+## 書き込んでよい場所
+`art/patterns/` と `art/README.md` だけ
+
+## 読むもの
+AGENTS.md / ART_SLOTS.md の「柄のタイル」/ src/core/scenes/*.ts の costumes（今の色と size。**読むだけ、変更しない**）/ art/characters/（画風の基準）
+
+## やること
+- room-{plain,stripes,dots,check}, garden-{plain,stripes,dots,leaf}, shop-{plain,stripes,dots,check} の12枚
+- 正方形・不透明・上下左右がつなぎ目なく続く。256×256px 程度
+- 今の色味を基本に、布の織り目・紙の質感・葉脈などの質感を控えめに加える。**同じタイルが背景と服の両方に使われる**ので、服になったときにうるさくならないこと
+- 柄の種類（無地・しま・水玉・チェック・葉）が、幼児にもひと目で分かること
+
+## 合格条件
+- `npm run validate:art` がすべて合格（結果は art-guides/ART_CHECK.md）
+- `npm run build` が成功
+
+## 最後に書くこと
+`art/README.md` の「作業記録」に追記：日付、作ったファイル、使った方法（SVGをコードで書いた／画像生成を使った 等）、検査結果、できなかったこと・迷った点
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg --files -g AGENTS.md -g ART_SLOTS.md -g CODEX_ART_BRIEF.md -g '*.*' art src/core/scenes art-guides scripts | Select-Object -First 100; Get-Content -Encoding UTF8 ART_SLOTS.md; Get-Content -Encoding UTF8 CODEX_ART_BRIEF.md; Get-Content -Encoding UTF8 art/README.md; Get-Content -Encoding UTF8 src/core/scenes/*.ts; Get-Content -Encoding UTF8 package.json" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 244ms:
+art\README.md
+scripts\validate-art.mjs
+scripts\make-sample-art.mjs
+scripts\make-icons.mjs
+art\characters\moko\front.svg
+art\characters\moko\front-found.svg
+art\characters\moko\clothes-shade.svg
+art\characters\moko\clothes-mask.svg
+art\characters\moko\clothes-line.svg
+art\characters\moko\back.svg
+scripts\lib\load-geometry.mjs
+scripts\lib\geometry-entry.ts
+scripts\export-art-guides.mjs
+art\characters\mimi\front.svg
+art\characters\mimi\front-found.svg
+art\characters\mimi\clothes-shade.svg
+art\characters\mimi\clothes-mask.svg
+art\characters\mimi\clothes-line.svg
+art\characters\mimi\back.svg
+scripts\codex\setup-home.mjs
+scripts\codex\run-job.mjs
+scripts\capture.mjs
+art\characters\koro\front.svg
+art\characters\koro\front-found.svg
+art\characters\koro\clothes-shade.svg
+art\characters\koro\clothes-mask.svg
+art\characters\koro\clothes-line.svg
+art\characters\koro\back.svg
+src/core/scenes\shop.ts
+src/core/scenes\room.ts
+src/core/scenes\index.ts
+src/core/scenes\garden.ts
+art-guides\scene-shop.svg
+art-guides\scene-shop.png
+art-guides\scene-room.svg
+art-guides\scene-room.png
+art-guides\scene-garden.svg
+art-guides\scene-garden.png
+art-guides\current-title.png
+art-guides\current-shop-normal.png
+art-guides\current-room-easy.png
+art-guides\current-garden-hide.png
+art-guides\character-moko.svg
+art-guides\character-moko.png
+art-guides\character-mimi.svg
+art-guides\character-mimi.png
+art-guides\character-koro.svg
+art-guides\character-koro.png
+art-guides\ART_CHECK.md
+# 絵の差し替え口（ART_SLOTS）
+
+`art/` フォルダに決まった名前でファイルを置くと、ゲームが自動でその絵を使います。
+**置かなかった部分は、今のコードの絵のまま** 動きます（一部だけ差し替えてもよい）。
+
+- 形式：PNG（透過）／WebP／SVG。1ファイル 800KB まで、合計 8MB まで
+- SVG はスクリプト・外部参照・文字（フォント）を含めない
+- 置いたら `npm run validate:art` で検査 → `npm run build` → 画面を確認
+- 下書きガイド：`npm run art:guides` で `art-guides/` に出る（形状データから自動生成。描く位置の基準）
+
+## キャラクター `art/characters/{koro|mimi|moko}/`
+
+枠：**450×600px**（またはその整数倍。縦横比 3:4）。ゲーム内の座標 x −90〜90、y −225〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 37.5px**。ガイド `art-guides/character-*.png` に重ねて描く。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `clothes-mask.png` | ○ | 服の形だけを **白**、ほかは黒か透明。ここにゲームが背景と同じ柄を流し込む。ガイドの青い範囲（からだの判定）からはみ出さないこと |
+| `front.png` | ○ | 服より前に描くもの：顔・頭・耳・髪・手・服の上に出る線。目と口はガイドの赤い点の位置 |
+| `back.png` | | 服より後ろ：足、背中側の耳や髪など |
+| `clothes-shade.png` | | 服の陰影（乗算で重なる）。グレー〜茶系の濃淡、透過 |
+| `clothes-line.png` | | 服のふち線だけ。難易度に応じてゲームが濃さを変える（最低25%） |
+| `front-found.png` | | 見つかった時の前面（手をふるポーズ）。無ければ front を使う |
+
+`clothes-mask` と `front` がそろっていない時は、そのキャラクターはコードの絵のままです。
+
+## シーン `art/scenes/{room|garden|shop}/`
+
+枠：**1000×1000px**（2000×2000 推奨）。ガイド `art-guides/scene-*.png` の色面が「柄の領域」で、**ここはゲームが柄を塗る**（服と同じ柄にして隠れられるようにするため）。
+
+| ファイル | 中身 | 決まり |
+|---|---|---|
+| `back.png` | 柄の領域より下：空・壁の上部・床など | 不透明でよい |
+| `over.png` | 柄の領域の上・キャラクターの後ろ：家具の縁・カーテンのひだの陰・窓・棚など | 透過。キャラクターの服の後ろは薄く（平均の濃さ35%以下）、顔の後ろには描かない |
+| `minor.png` | 小さい画面では省く飾り（壁の絵・雲など） | over と同じ決まり |
+| `fore.png` | 前景の小物すべて（キャラクターの前に重なる） | 透過。ガイドの橙色の形に合わせる。**赤い円（顔）には重ねない**。服は少し（2割以上8割未満が見える程度）隠す |
+
+## 柄のタイル `art/patterns/{シーン}-{服}.png`
+
+例：`room-stripes.png`、`garden-leaf.png`。正方形 64px 以上、不透明、**上下左右がつなぎ目なく続く**こと。
+同じタイルが背景の領域と服の両方に使われます（だから隠れられる）。タイル1枚がゲーム内で表す大きさは、各シーンの柄の `size`（38〜52）です。
+
+| シーン | 服（ファイル名の後半） |
+|---|---|
+| room | plain（壁）, stripes（カーテン）, dots（ソファ）, check（ラグ） |
+| garden | plain（芝生）, stripes（柵）, dots（花だん）, leaf（生け垣） |
+| shop | plain（床）, stripes（カウンター）, dots（壁）, check（テーブルクロス） |
+
+## 画面の絵 `art/ui/`
+
+`title.png`（タイトルの絵）、`handoff.png`（受け渡し画面の絵。**隠れ場所や背景を描かない**）、`bye.png`（おしまい画面）。2000px 以内。
+# Codex への絵の制作依頼（CODEX_ART_BRIEF）
+
+> ご自宅PCで Codex に渡すための依頼文です。下の「Codex への指示」をそのまま貼り付けてください。
+
+## 事前準備（ご自宅PC）
+
+```bash
+git fetch origin
+git checkout claude/pattern-hide-family-beta
+git pull
+cd pattern-hide-family-beta
+npm ci
+npm run art:guides      # art-guides/ に下書きガイドができる
+```
+
+## Codex への指示（ここから貼り付け）
+
+あなたは、幼児向けかくれんぼゲーム「もようのかくれんぼ（仮）」の絵を作る担当です。
+作業フォルダは `pattern-hide-family-beta/` です。最初に `ART_SLOTS.md` と、この `CODEX_ART_BRIEF.md` を読んでください。
+
+### 守ること
+1. 書き込んでよいのは `pattern-hide-family-beta/art/` の中だけです。`src/` やテスト、設定ファイルは変更しないでください（別のAIが担当しています）。
+2. ファイル名・寸法・層の分け方は `ART_SLOTS.md` のとおりにしてください。描く位置は `art-guides/` のガイド画像に合わせてください。ガイドはゲームの当たり判定と同じ形から作られています。
+3. 描き終えたら `npm run validate:art` を実行し、**すべて合格するまで直してください**。結果は `art-guides/ART_CHECK.md` に出ます。そのあと `npm run build` が通ることを確認してください。
+4. 既存の作品（キャラクター、ロゴ、画面、音）をまねたり、取り込んだりしないでください。ネット上の画像も使わないでください。特定の作品に見える顔の配置や特徴は避けてください。
+5. 文字は絵に入れないでください。
+6. 追加料金が発生する手段（別料金のAPIキー、有料サービス）は使わないでください。今の契約の範囲でできないことがあれば、無理をせず、できなかったことを報告してください。
+7. 最後に、作ったファイル・使った方法（SVGをコードで書いた／画像生成を使った等）・検査結果を `art/README.md` に書いてください。
+
+### 絵の方向性
+- **かわいらしく、幼い子向け。ただし安っぽくしない。** 絵本の挿絵のような品のある仕上がりにします。
+- 形に丸みと立体感を持たせます。やわらかい陰影、ほのかなグラデーション、光は左上から、接地面にやわらかい影を入れてください。平べったいクリップアートや絵文字のようにはしないでください。
+- 線は黒ではなく濃い茶色系（目安 #4A3A40）。太さに少し強弱をつけ、全部の線を同じ太さにしないでください。
+- 色は、少しくすんだやさしいパステルを基調に、差し色を少しだけ。蛍光色や彩度の高すぎる色は使わないでください。
+- 布の縫い目、木目、葉脈など、見つけるとうれしい細部を控えめに入れます。ただし背景がうるさくなり、さがしにくくなる量にはしないでください。
+- 3体の見分けは **色だけに頼らず形で** つけます。今の形を受け継いでください：
+  - **ころ**：あたまに「くるん」とした毛。げんきでくいしんぼう。アプリコット色
+  - **みみ**：たれた長い耳（内側はピンク）。ものしりでのんびり。ミントグリーン
+  - **もこ**：くもの形のもこもこした頭と、星の髪どめ。ふわふわではずかしがり。ラベンダー
+- 3体とも、頭が大きめの約2頭身です。目は大きく、ハイライトを入れてください。表情はおだやかな笑顔です。
+- 服は **ゲームが柄を流し込む部分** なので、`clothes-mask.png`（白黒の形）として分けてください。服の陰影は `clothes-shade.png`、ふち線は `clothes-line.png` に分けると、柄の上に立体感が出ます。
+- 背景の「柄の領域」（カーテン・ソファ・ラグ、生け垣・柵・花だん・芝生、かべ・カウンター・テーブルクロス・床）は、ゲームが柄で塗ります。質感は **柄タイル**（`art/patterns/`）で出してください。布の織り目や紙の質感などを入れたタイルにします。同じタイルが服にも使われます。
+- 前景の小物（`fore.png`）は、今の小物と同じ位置・同じくらいの大きさで描き直してください（ガイドの橙色）。顔（赤い円）には絶対に重ねないでください。
+- 怖い表情、暗い影、先のとがった危なそうな物は入れないでください。
+
+### おすすめの順番
+1. `art/characters/koro/` の5層（back, clothes-mask, clothes-shade, clothes-line, front, front-found）を作る → 検査に合格させる
+2. 同じ画風で みみ・もこ を作る
+3. `art/patterns/` の柄タイル12枚
+4. `art/scenes/room/` の back / over / minor / fore → 検査 → garden → shop
+5. `art/ui/` の title / handoff / bye
+
+途中で、`npm run build && npm run preview` を実行し、`http://127.0.0.1:4173/` で見た目を確認してください。
+
+（貼り付けここまで）
+
+## 作業後
+
+- Codex の作業を `git add art && git commit` して、同じブランチに push してください。
+- Claude 側では、画面写真・操作テスト・溶け込み具合を確認し、必要なら調整案を出します。
+- 同じファイルを同時に複数のAIで編集しないため、Codex は `art/` だけ、Claude はそれ以外、と分けています。
+# art/
+
+差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に、3体の差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+
+## 作業記録
+### 2026-10-07：ジョブ02（みみ・もこ）
+
+- 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
+- 方法：SVGをコードで記述。ころの既存SVGを画風の基準とし、服の白いマスク・陰影・輪郭、接地影と足を共通化。顔と手のグラデーションを各キャラクターの色に調整し、頭の形を新しく記述した。画像生成、ネット画像、別料金のAPIは使用していない。
+- みみ：ミントグリーンの丸い頭、左右にたれた長い耳、淡いピンクの耳の内側、ゆったりした眉と小さな笑顔。もこ：ラベンダーの雲形の頭、角を丸めた淡い金色の星の髪どめ、控えめな笑顔。色に加えて、たれ耳／雲形と星／ころの巻き毛で区別できる構成にした。
+- 画風・位置：ころと同じ濃茶色 `#4A3A40`、外周の基本線幅2.6と影側3.4、左上からの光、目のハイライト、淡い頬、控えめな縫い目を使用。目の中心はガイドの `(±16, -142)`、口は `(0, -125)` 付近。服の白いマスクはガイドと同じ形。発見時は片手を上げてふるポーズ。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、18ファイル（既存ころ6枚を含む）、合計40KBで「すべて合格」。結果は `art-guides/ART_CHECK.md` に自動出力。形状データの組み立てに失敗したため、検査スクリプトに元から備わっている処理で保存済みの形状データを使用した旨の警告あり。検査道具は変更していない。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` を通過した後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと・迷った点：ビルド成功とゲーム実画面での表示・縮小表示の目視確認は未確認。もこの口はガイド既定の開いた口ではなく、制作方針の「おだやかな笑顔」に合わせた。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数の差し替えや回避策は試さず終了。Claude Code側で最新の形状データによる再検査、ビルド、3体を並べた表示と発見ポーズの目視確認が必要。
+- 手動の書き込みはジョブで許可された2体のフォルダと本READMEのみ。検査レポートは許可済みの自動更新。commit / push は行っていない。
+
+### 2026-10-07：ジョブ01（既存成果物の記録を補記）
+
+- 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
+- 方法：既存成果物はコードで記述されたSVG（450×600px、viewBox `-90 -225 180 240`）。アプリコット色の肌、くるんとした毛、目のハイライト、左上からの光と柔らかな陰影を、パスとグラデーションで構成。服のマスク・陰影・輪郭を別の層に分けている。
+- 検査結果：前回の実行結果を確定できる作業記録がないため、ジョブ01当時の検査・ビルドの合否は未確認。今回の再検査の試行結果は下記。
+- できなかったこと・迷った点：この記録は残っているSVGを読んで補記したもの。前回の制作過程や判断理由は確認できないため、推測で補っていない。
+
+### 2026-10-07：feedback（ころの輪郭と手の修正）
+
+- 変更ファイル：`characters/koro/front.svg`、`front-found.svg`、`back.svg`、`clothes-line.svg`、本README。
+- 方法：既存SVGのコードを直接編集。画像生成・ネット画像・追加料金のAPIは使用していない。
+- 頭・手・足・服の外周は濃い茶色 `#4A3A40`、基本の線幅を2.6に変更。同じ外周の下側・影側に幅3.4の線を重ね、左上を細くした。線幅は既存SVGのviewBox座標単位。服の襟の線も2.6にそろえた。肌・足・服の陰影、顔、髪、縫い目、ハイライト、服マスクは保持。
+- 通常ポーズの両手と発見ポーズの下げた手には、小さい親指のふくらみを1つ追加。発見ポーズの上げた手は、複数の指の突起を丸いひとまとまりにし、親指のふくらみを1つ残した。手をふる位置は維持。
+- 迷った点：縮小時の読みやすさと幼い丸みを両立するため、指を描き分けず、外周のふくらみで親指を表現。線幅の強弱は元の形を維持した外周の重ね描きで付けた。
+- 検査結果：`npm run validate:art` と `npm run build` を実行したが、いずれもPowerShellの実行ポリシーにより `C:\Program Files\nodejs\npm.ps1` がブロックされた（`PSSecurityException` / `UnauthorizedAccess`）。両コマンドとも処理開始前に終了コード1で停止。今回の検査レポートは生成されておらず、既存の `art-guides/ART_CHECK.md` は今回の合格を示すものではない。
+- できなかったこと：自動検査の全項目合格、ビルド成功、ブラウザーでの縮小表示確認は未確認。`AGENTS.md` のサンドボックス指示に従い、検査道具・設定・環境変数の変更や回避策は行わず終了。Claude Code側で両コマンドと実画面の確認が必要。
+- 他キャラクターやアプリのコードは変更していない。commit / push は行っていない。
+// にわ：葉もようの生け垣、しまの柵、水玉の花だん
+import type { SceneDef, CostumeDef } from '../scene';
+import { bucket, crate, flowerClump, pot, stones, stump, wateringCan } from '../props';
+
+const costumes: CostumeDef[] = [
+  { id: 'plain', kind: 'plain', spec: { kind: 'plain', bg: '#9DD481', fg: '#9DD481', size: 40 } },
+  { id: 'stripes', kind: 'stripes', spec: { kind: 'stripes', bg: '#FFF7E8', fg: '#E9D2AE', size: 40 } },
+  { id: 'dots', kind: 'dots', spec: { kind: 'dots', bg: '#79BE68', fg: '#F7A8C4', size: 42 } },
+  { id: 'leaf', kind: 'leaf', spec: { kind: 'leaf', bg: '#67B067', fg: '#3F8E4C', size: 48 } },
+];
+
+const hedgeTop = (() => {
+  const pts = [{ x: 0, y: 660 }];
+  for (let x = 0; x <= 570; x += 57) pts.push({ x, y: x % 114 === 0 ? 300 : 278 });
+  pts.push({ x: 570, y: 660 });
+  return pts;
+})();
+
+const fence = (() => {
+  const pts = [{ x: 570, y: 660 }];
+  for (let x = 570; x < 1000; x += 40) {
+    pts.push({ x, y: 380 }, { x: x + 20, y: 356 });
+  }
+  pts.push({ x: 1000, y: 380 }, { x: 1000, y: 660 });
+  return pts;
+})();
+
+export const garden: SceneDef = {
+  id: 'garden',
+  name: 'にわ',
+  costumes,
+  base:
+    `<rect x="0" y="0" width="1000" height="660" fill="#CDEBFA"/>` +
+    `<circle cx="860" cy="120" r="56" fill="#FFE07A"/>`,
+  extraDefs: '',
+  regions: [
+    { id: 'lawn', costume: 'plain', shapes: [{ kind: 'rect', x: 0, y: 650, w: 1000, h: 350 }] },
+    { id: 'hedge', costume: 'leaf', shapes: [{ kind: 'poly', pts: hedgeTop }] },
+    { id: 'fence', costume: 'stripes', shapes: [{ kind: 'poly', pts: fence }] },
+    { id: 'flowers', costume: 'dots', shapes: [{ kind: 'rect', x: 40, y: 770, w: 470, h: 176, rx: 60 }] },
+  ],
+  decor:
+    `<path d="M570 400 H1000 M570 600 H1000" stroke="#D9BE94" stroke-width="10"/>` +
+    // 飛び石
+    `<ellipse cx="560" cy="770" rx="44" ry="18" fill="#D9D3E2"/><ellipse cx="720" cy="820" rx="44" ry="18" fill="#D9D3E2"/><ellipse cx="650" cy="980" rx="44" ry="18" fill="#D9D3E2"/>`,
+  minorDecor:
+    `<g fill="#FFFFFF" opacity="0.9"><ellipse cx="200" cy="120" rx="70" ry="28"/><ellipse cx="250" cy="100" rx="50" ry="30"/><ellipse cx="560" cy="170" rx="60" ry="24"/></g>` +
+    `<path d="M380 180 q12 -12 24 0 q12 -12 24 0" stroke="#4A3A40" stroke-width="4" fill="none"/>`,
+  spots: [
+    { id: 'garden-hedge-1', x: 110, y: 662, s: 1, region: 'hedge', prop: bucket(110, 600), easy: true },
+    { id: 'garden-hedge-2', x: 290, y: 662, s: 1, region: 'hedge', prop: stones(290, 638), easy: false },
+    { id: 'garden-hedge-3', x: 470, y: 662, s: 1, region: 'hedge', prop: pot(470, 598, 116, 70, '#C77E4E'), easy: true },
+    { id: 'garden-fence-1', x: 670, y: 662, s: 1, region: 'fence', prop: crate(670, 598), easy: true },
+    { id: 'garden-fence-2', x: 870, y: 662, s: 1, region: 'fence', prop: wateringCan(856, 598), easy: false },
+    { id: 'garden-flowers-1', x: 150, y: 900, s: 1, region: 'flowers', prop: flowerClump(150, 884), easy: true },
+    { id: 'garden-flowers-2', x: 390, y: 900, s: 1, region: 'flowers', prop: flowerClump(390, 888, 74, 38), easy: false },
+    { id: 'garden-lawn-1', x: 640, y: 905, s: 1, region: 'lawn', prop: stump(640, 862), easy: true },
+    { id: 'garden-lawn-2', x: 870, y: 870, s: 1, region: 'lawn', prop: bucket(870, 826, 124, 74), easy: false },
+  ],
+};
+import type { SceneDef, SceneId } from '../scene';
+import { room } from './room';
+import { garden } from './garden';
+import { shop } from './shop';
+
+export const SCENES: Record<SceneId, SceneDef> = { room, garden, shop };
+export const SCENE_IDS: SceneId[] = ['room', 'garden', 'shop'];
+// へや：布（カーテン・ソファ・ラグ）と木目のある部屋
+import type { SceneDef, CostumeDef } from '../scene';
+import { patternMarkup } from '../patterns';
+import { basket, ball, blanket, blocks, cushion, pot, toyBox } from '../props';
+
+const costumes: CostumeDef[] = [
+  { id: 'plain', kind: 'plain', spec: { kind: 'plain', bg: '#F6E4C8', fg: '#F6E4C8', size: 40 } },
+  { id: 'stripes', kind: 'stripes', spec: { kind: 'stripes', bg: '#FCE4E9', fg: '#F2A9B8', size: 38 } },
+  { id: 'dots', kind: 'dots', spec: { kind: 'dots', bg: '#7EA6DA', fg: '#EAF2FC', size: 46 } },
+  { id: 'check', kind: 'check', spec: { kind: 'check', bg: '#FFF6DC', fg: '#F2B84B', size: 52 } },
+];
+
+export const room: SceneDef = {
+  id: 'room',
+  name: 'へや',
+  costumes,
+  base:
+    // 床（木目）
+    `<rect x="0" y="650" width="1000" height="350" fill="url(#{P}wood-room)"/>` +
+    `<path d="M0 760 H1000 M0 880 H1000" stroke="#C99A68" stroke-width="3" opacity="0.6"/>`,
+  extraDefs:
+    patternMarkup('{P}wood-room', { kind: 'wood', bg: '#E8C194', fg: '#CFA06C', size: 120 }) +
+    patternMarkup('{P}wood-room-dark', { kind: 'wood', bg: '#C08A57', fg: '#9E6C3E', size: 90 }),
+  regions: [
+    { id: 'wall', costume: 'plain', shapes: [{ kind: 'rect', x: 0, y: 0, w: 1000, h: 650 }] },
+    {
+      id: 'curtain',
+      costume: 'stripes',
+      shapes: [
+        {
+          kind: 'poly',
+          pts: [
+            { x: 24, y: 40 },
+            { x: 218, y: 40 },
+            { x: 226, y: 644 },
+            { x: 16, y: 644 },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'sofa',
+      costume: 'dots',
+      shapes: [
+        { kind: 'rect', x: 360, y: 400, w: 400, h: 240, rx: 42 },
+        { kind: 'rect', x: 326, y: 480, w: 70, h: 190, rx: 30 },
+        { kind: 'rect', x: 724, y: 480, w: 70, h: 190, rx: 30 },
+      ],
+    },
+    { id: 'rug', costume: 'check', shapes: [{ kind: 'ellipse', cx: 530, cy: 868, rx: 380, ry: 112 }] },
+  ],
+  decor:
+    // はば木
+    `<rect x="0" y="632" width="1000" height="22" fill="#D7B48A"/>` +
+    // まど
+    `<rect x="250" y="80" width="250" height="230" rx="14" fill="#CFEFFF" stroke="#C99A68" stroke-width="12"/>` +
+    `<path d="M375 86 V304 M256 195 H494" stroke="#C99A68" stroke-width="8"/>` +
+    `<circle cx="440" cy="140" r="26" fill="#FFF2A8"/>` +
+    // カーテンレール
+    `<rect x="8" y="28" width="230" height="16" rx="8" fill="#B07A4A"/>` +
+    // ソファの脚
+    `<rect x="350" y="664" width="18" height="22" rx="4" fill="#7A5A3A"/><rect x="752" y="664" width="18" height="22" rx="4" fill="#7A5A3A"/>` +
+    // 低い戸だな（木目）
+    `<rect x="812" y="474" width="176" height="180" rx="10" fill="url(#{P}wood-room-dark)" stroke="#7A5A3A" stroke-width="5"/>` +
+    `<path d="M900 480 V648" stroke="#7A5A3A" stroke-width="4"/><circle cx="886" cy="566" r="6" fill="#7A5A3A"/><circle cx="914" cy="566" r="6" fill="#7A5A3A"/>`,
+  minorDecor:
+    // かべの絵と時計
+    `<rect x="560" y="120" width="120" height="96" rx="8" fill="#FFFFFF" stroke="#C99A68" stroke-width="8"/>` +
+    `<path d="M574 200 L606 160 L630 186 L646 170 L668 200Z" fill="#8CCB9B"/><circle cx="650" cy="146" r="10" fill="#F2B84B"/>` +
+    `<circle cx="790" cy="140" r="40" fill="#FFFFFF" stroke="#B07A4A" stroke-width="8"/><path d="M790 140 V114 M790 140 L808 150" stroke="#4A3A40" stroke-width="5" stroke-linecap="round"/>`,
+  spots: [
+    { id: 'room-curtain', x: 120, y: 646, s: 1, region: 'curtain', prop: toyBox(120, 590), easy: true },
+    { id: 'room-plant', x: 290, y: 652, s: 1, region: 'wall', prop: pot(290, 588), easy: true },
+    { id: 'room-sofa-l', x: 470, y: 600, s: 1, region: 'sofa', prop: cushion(470, 602), easy: true },
+    { id: 'room-sofa-r', x: 650, y: 600, s: 1, region: 'sofa', prop: blanket(650, 566), easy: false },
+    { id: 'room-cabinet', x: 900, y: 476, s: 0.95, region: 'wall', prop: pot(900, 418, 104, 62, '#7FB8F0'), easy: false },
+    { id: 'room-rug-1', x: 260, y: 880, s: 1, region: 'rug', prop: blocks(260, 912), easy: true },
+    { id: 'room-rug-2', x: 440, y: 950, s: 1, region: 'rug', prop: ball(440, 920), easy: false },
+    { id: 'room-rug-3', x: 630, y: 878, s: 1, region: 'rug', prop: basket(630, 832), easy: true },
+    { id: 'room-rug-4', x: 810, y: 930, s: 1, region: 'rug', prop: cushion(810, 920, 78, 44, '#F6A5B8'), easy: false },
+  ],
+};
+// おやつのみせ：水玉のかべ、しまのカウンター、チェックのテーブルクロス
+import type { SceneDef, CostumeDef } from '../scene';
+import { breadBasket, cakeStand, jar, sack, stool } from '../props';
+
+const costumes: CostumeDef[] = [
+  { id: 'plain', kind: 'plain', spec: { kind: 'plain', bg: '#F2DDBE', fg: '#F2DDBE', size: 40 } },
+  { id: 'stripes', kind: 'stripes', spec: { kind: 'stripes', bg: '#E6F7F0', fg: '#9CD8C2', size: 40 } },
+  { id: 'dots', kind: 'dots', spec: { kind: 'dots', bg: '#FCE5EC', fg: '#F4AFC4', size: 46 } },
+  { id: 'check', kind: 'check', spec: { kind: 'check', bg: '#FFFFFF', fg: '#EE8C8C', size: 46 } },
+];
+
+const awning = (() => {
+  let d = 'M0 40 H1000 V150';
+  for (let x = 1000; x > 0; x -= 50) d += ` Q${x - 25} 190 ${x - 50} 150`;
+  return d + 'Z';
+})();
+
+export const shop: SceneDef = {
+  id: 'shop',
+  name: 'おやつのみせ',
+  costumes,
+  base: '',
+  extraDefs: `<clipPath id="{P}awning-clip"><path d="${awning}"/></clipPath>`,
+  regions: [
+    { id: 'wall', costume: 'dots', shapes: [{ kind: 'rect', x: 0, y: 0, w: 1000, h: 600 }] },
+    { id: 'floor', costume: 'plain', shapes: [{ kind: 'rect', x: 0, y: 790, w: 1000, h: 210 }] },
+    { id: 'counter', costume: 'stripes', shapes: [{ kind: 'rect', x: 60, y: 590, w: 880, h: 210 }] },
+    { id: 'cloth', costume: 'check', shapes: [{ kind: 'poly', pts: [{ x: 640, y: 730 }, { x: 960, y: 730 }, { x: 980, y: 975 }, { x: 620, y: 975 }] }] },
+  ],
+  decor:
+    // ひさし
+    `<path d="${awning}" fill="#FFFFFF" stroke="#4A3A40" stroke-width="3"/>` +
+    `<g clip-path="url(#{P}awning-clip)">${Array.from({ length: 10 }, (_, i) => `<rect x="${i * 100}" y="40" width="50" height="160" fill="#F7B267"/>`).join('')}</g>` +
+    // カウンターの天板
+    `<rect x="40" y="572" width="920" height="26" rx="8" fill="#C98F5A" stroke="#4A3A40" stroke-width="3"/>` +
+    // テーブルの天板
+    `<rect x="624" y="716" width="352" height="20" rx="8" fill="#B07A4A" stroke="#4A3A40" stroke-width="3"/>`,
+  minorDecor:
+    // かべのたなと びん
+    `<rect x="120" y="270" width="300" height="14" rx="5" fill="#C98F5A"/>` +
+    `<rect x="150" y="214" width="46" height="56" rx="12" fill="#EAF6FB" stroke="#4A3A40" stroke-width="3"/><circle cx="173" cy="250" r="12" fill="#F07D7D"/>` +
+    `<rect x="230" y="224" width="46" height="46" rx="12" fill="#EAF6FB" stroke="#4A3A40" stroke-width="3"/><circle cx="253" cy="250" r="12" fill="#FFD45C"/>` +
+    `<rect x="310" y="210" width="46" height="60" rx="12" fill="#EAF6FB" stroke="#4A3A40" stroke-width="3"/><circle cx="333" cy="250" r="12" fill="#8CCB9B"/>` +
+    `<circle cx="760" cy="310" r="64" fill="#FFF3D6" stroke="#4A3A40" stroke-width="3"/><path d="M724 330 q36 -70 72 0z" fill="#F8D6A8" stroke="#4A3A40" stroke-width="3"/><circle cx="760" cy="290" r="9" fill="#F07D7D"/>`,
+  spots: [
+    { id: 'shop-wall-1', x: 190, y: 578, s: 1, region: 'wall', prop: jar(190, 532), easy: true },
+    { id: 'shop-wall-2', x: 470, y: 578, s: 1, region: 'wall', prop: cakeStand(470, 498), easy: false },
+    { id: 'shop-wall-3', x: 790, y: 578, s: 1, region: 'wall', prop: breadBasket(790, 538), easy: true },
+    { id: 'shop-counter-1', x: 250, y: 800, s: 1, region: 'counter', prop: stool(250, 728), easy: true },
+    { id: 'shop-counter-2', x: 470, y: 800, s: 1, region: 'counter', prop: sack(470, 734), easy: false },
+    { id: 'shop-cloth-1', x: 720, y: 960, s: 1, region: 'cloth', prop: sack(720, 896), easy: true },
+    { id: 'shop-cloth-2', x: 880, y: 962, s: 1, region: 'cloth', prop: stool(880, 872), easy: false },
+    { id: 'shop-floor-1', x: 90, y: 985, s: 0.95, region: 'floor', prop: jar(90, 942, 120, 54), easy: true },
+    { id: 'shop-floor-2', x: 560, y: 985, s: 0.95, region: 'floor', prop: breadBasket(560, 948), easy: false },
+  ],
+};
+{
+  "name": "pattern-hide-family-beta",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "もようのかくれんぼ（仮）家族内テスト用ベータ。公開・課金なし。",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "verify:layouts": "vitest run tests/unit/placement.test.ts",
+    "validate:art": "node scripts/validate-art.mjs",
+    "art:guides": "node scripts/export-art-guides.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "5.0.3"
+  }
+}
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 src/core/patterns.ts; Get-Content -Encoding UTF8 art/characters/koro/front.svg; Get-Content -Encoding UTF8 scripts/validate-art.mjs; git status --short; rg --files -g AGENTS.md -g '"'!node_modules'"' -g '"'!dist'"' ." in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 203ms:
+// 服と背景で共有する柄の定義。SVG <pattern> を userSpaceOnUse で作るので、
+// 背景と服で座標をそろえると継ぎ目なく溶け込む（＝隠れる）。
+import { r1 } from './geometry';
+
+export type PatternKind = 'plain' | 'stripes' | 'dots' | 'check' | 'leaf' | 'wood';
+
+export interface PatternSpec {
+  kind: PatternKind;
+  /** 地の色 */
+  bg: string;
+  /** 柄の色 */
+  fg: string;
+  /** 柄の大きさ（1周期の長さ） */
+  size: number;
+  /** しま の向き（度） */
+  angle?: number;
+}
+
+export function patternMarkup(id: string, p: PatternSpec, transform = ''): string {
+  const s = p.size;
+  const tf = transform ? ` patternTransform="${transform}"` : '';
+  const head = `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${r1(s)}" height="${r1(s)}"${tf}>`;
+  let body = '';
+  switch (p.kind) {
+    case 'plain':
+      body = `<rect width="${s}" height="${s}" fill="${p.bg}"/>`;
+      break;
+    case 'stripes':
+      body = `<rect width="${s}" height="${s}" fill="${p.bg}"/><rect width="${r1(s / 2)}" height="${s}" fill="${p.fg}"/>`;
+      break;
+    case 'dots':
+      body =
+        `<rect width="${s}" height="${s}" fill="${p.bg}"/>` +
+        `<circle cx="${r1(s / 4)}" cy="${r1(s / 4)}" r="${r1(s * 0.13)}" fill="${p.fg}"/>` +
+        `<circle cx="${r1((s * 3) / 4)}" cy="${r1((s * 3) / 4)}" r="${r1(s * 0.13)}" fill="${p.fg}"/>`;
+      break;
+    case 'check':
+      body =
+        `<rect width="${s}" height="${s}" fill="${p.bg}"/>` +
+        `<rect width="${r1(s / 2)}" height="${s}" fill="${p.fg}" opacity="0.5"/>` +
+        `<rect width="${s}" height="${r1(s / 2)}" fill="${p.fg}" opacity="0.5"/>`;
+      break;
+    case 'leaf': {
+      const leaf = (cx: number, cy: number, rot: number) =>
+        `<path transform="translate(${r1(cx)} ${r1(cy)}) rotate(${rot})" d="M0 ${r1(-s * 0.2)} Q${r1(s * 0.13)} 0 0 ${r1(s * 0.2)} Q${r1(-s * 0.13)} 0 0 ${r1(-s * 0.2)}Z" fill="${p.fg}"/>`;
+      body = `<rect width="${s}" height="${s}" fill="${p.bg}"/>` + leaf(s * 0.27, s * 0.27, 35) + leaf(s * 0.75, s * 0.72, -40);
+      break;
+    }
+    case 'wood':
+      body =
+        `<rect width="${s}" height="${s}" fill="${p.bg}"/>` +
+        `<path d="M0 ${r1(s * 0.3)} Q${r1(s * 0.5)} ${r1(s * 0.22)} ${s} ${r1(s * 0.3)}" stroke="${p.fg}" stroke-width="${r1(s * 0.04)}" fill="none"/>` +
+        `<path d="M0 ${r1(s * 0.75)} Q${r1(s * 0.5)} ${r1(s * 0.85)} ${s} ${r1(s * 0.75)}" stroke="${p.fg}" stroke-width="${r1(s * 0.03)}" fill="none"/>`;
+      break;
+  }
+  const rot = p.kind === 'stripes' && p.angle ? `<g transform="rotate(${p.angle} ${r1(s / 2)} ${r1(s / 2)})">` : '';
+  if (rot) {
+    // 回転したしまは patternTransform で表現する（タイルの継ぎ目を出さないため）
+    const tf2 = `${transform} rotate(${p.angle})`.trim();
+    return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${r1(s)}" height="${r1(s)}" patternTransform="${tf2}">${body}</pattern>`;
+  }
+  return head + body + '</pattern>';
+}
+
+/** 色の明るさを変える（-1..1） */
+export function shade(hex: string, amt: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  let r = (n >> 16) & 255;
+  let g = (n >> 8) & 255;
+  let b = n & 255;
+  const f = (c: number) => Math.round(amt >= 0 ? c + (255 - c) * amt : c * (1 + amt));
+  r = f(r);
+  g = f(g);
+  b = f(b);
+  return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+}
+
+/**
+ * 「やさしい」用の少し違う柄。同じ種類の柄だが、大きさと色が少し違うので
+ * 背景にまぎれつつも見分けやすい。
+ */
+export function softVariant(p: PatternSpec): PatternSpec {
+  return { ...p, size: p.size * 1.45, bg: shade(p.bg, -0.14), fg: shade(p.fg, -0.18) };
+}
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#ffe5be"/><stop offset=".48" stop-color="#f3c48f"/><stop offset=".82" stop-color="#eab07e"/><stop offset="1" stop-color="#d49770"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#fff1d7" stop-opacity=".62"/><stop offset="1" stop-color="#fff1d7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+<linearGradient id="curl" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#b7875f"/><stop offset="1" stop-color="#81573f"/></linearGradient>
+</defs><path d="M-47-145 C-46-168-29-185-5-187 C17-190 39-175 46-153 C53-130 40-109 19-102 C4-96-14-99-28-109 C-41-118-49-130-47-145Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M46-153 C53-130 40-109 19-102 C4-96-14-99-28-109" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-43-149 C-41-168-27-180-10-182" fill="none" stroke="#fff1d8" stroke-opacity=".64" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M41-128 Q34-108 12-103" fill="none" stroke="#aa7357" stroke-opacity=".5" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M-4-187 C-12-199 1-209 12-202 C22-195 14-185 7-191 C3-195 9-199 12-195" fill="none" stroke="#745140" stroke-width="6.4" stroke-linecap="round"/>
+<path d="M-4.5-189 C-10-199 1-206 11-200 C18-195 13-190 8-193" fill="none" stroke="url(#curl)" stroke-width="3.8" stroke-linecap="round"/>
+<path d="M-5-196 Q-1-204 7-201" fill="none" stroke="#e7ba85" stroke-width="1.1" stroke-linecap="round"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153" fill="none" stroke="#9a7155" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g><path d="M-43-54 C-49-60-59-56-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44 C-36-42-34-46-37-49 Q-40-53-43-54Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-55-50 Q-57-45-54-42" fill="none" stroke="#ffe7c5" stroke-width="1.15" stroke-linecap="round" opacity=".8"/><path d="M43-54 C49-60 58-55 60-48 C62-40 55-34 48-36 C43-37 40-40 41-44 C36-42 34-46 37-49 Q40-53 43-54Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M46-53 Q51-56 55-51" fill="none" stroke="#ffe7c5" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<path d="M-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M60-48 C62-40 55-34 48-36 C43-37 40-40 41-44" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+// art/ の絵を自動検査する（npm run validate:art）。
+// 形式・寸法・安全性に加え、ゲームと同じ形状データで「顔が隠れない」「全面を隠さない」
+// 「服の形がからだの判定とずれない」「柄タイルがつなぎ目なく並ぶ」を確かめる。
+// 見た目の良し悪し・幼児にとっての難しさは検査しない（人が見る）。
+import { chromium } from '@playwright/test';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, extname, basename } from 'node:path';
+import { loadGeometry } from './lib/load-geometry.mjs';
+
+const dirArg = process.argv.indexOf('--dir');
+const ART = dirArg > 0 ? process.argv[dirArg + 1] : 'art';
+const G = await loadGeometry();
+const F = G.CHAR_FRAME;
+const MAX_FILE = 800 * 1024;
+const MAX_TOTAL = 8 * 1024 * 1024;
+const results = []; // {file, ok, msg}
+const ok = (file, msg) => results.push({ file, ok: true, msg });
+const ng = (file, msg) => results.push({ file, ok: false, msg });
+
+function list(d) {
+  if (!existsSync(d)) return [];
+  return readdirSync(d).flatMap((f) => {
+    const p = join(d, f);
+    return statSync(p).isDirectory() ? list(p) : [p];
+  });
+}
+const files = list(ART).filter((f) => !basename(f).startsWith('.') && !['README.md', 'ART_CHECK.md'].includes(basename(f)));
+const MIME = { '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
+
+// ---- 形式・安全性
+let total = 0;
+for (const f of files) {
+  const ext = extname(f).toLowerCase();
+  const size = statSync(f).size;
+  total += size;
+  if (!MIME[ext]) {
+    ng(f, `使えない形式 ${ext}（png / webp / svg のみ）`);
+    continue;
+  }
+  if (size > MAX_FILE) ng(f, `大きすぎ ${(size / 1024).toFixed(0)}KB > ${MAX_FILE / 1024}KB`);
+  if (ext === '.svg') {
+    const t = readFileSync(f, 'utf8');
+    if (/<script|on[a-z]+\s*=|<foreignObject|javascript:/i.test(t)) ng(f, 'SVG にスクリプト／イベント属性／foreignObject がある');
+    if (/(href|src)\s*=\s*["'](?!#|data:image\/)/i.test(t) || /url\(\s*['"]?(?!#)/i.test(t)) ng(f, 'SVG が外部ファイル・URLを参照している（同じファイル内の #id と data:image のみ可）');
+    if (/<text|font-family/i.test(t)) ng(f, 'SVG に文字・フォント指定がある（端末で見た目が変わるため、線に変換してください）');
+  }
+}
+if (total > MAX_TOTAL) ng(ART, `合計が大きすぎ ${(total / 1048576).toFixed(1)}MB > 8MB`);
+
+// ---- 画素の読み取り（Chromium の canvas）
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.setContent('<html><body></body></html>');
+async function pixels(file, w, h) {
+  const data = `data:${MIME[extname(file).toLowerCase()]};base64,${readFileSync(file).toString('base64')}`;
+  return page.evaluate(
+    async ({ data, w, h }) => {
+      const img = new Image();
+      img.src = data;
+      await img.decode();
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const x = c.getContext('2d');
+      x.drawImage(img, 0, 0, w, h);
+      const d = x.getImageData(0, 0, w, h).data;
+      const a = new Uint8Array(w * h);
+      const l = new Uint8Array(w * h);
+      for (let i = 0; i < w * h; i++) {
+        a[i] = d[i * 4 + 3];
+        l[i] = Math.round((d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114) * (d[i * 4 + 3] / 255));
+      }
+      const b64 = (u) => {
+        let s = '';
+        for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+        return btoa(s);
+      };
+      return { nw: img.naturalWidth, nh: img.naturalHeight, a: b64(a), l: b64(l), w, h };
+    },
+    { data, w, h },
+  ).then((r) => ({ ...r, a: Buffer.from(r.a, 'base64'), l: Buffer.from(r.l, 'base64') }));
+}
+const at = (px, x, y) => {
+  const xi = Math.min(px.w - 1, Math.max(0, Math.round(x)));
+  const yi = Math.min(px.h - 1, Math.max(0, Math.round(y)));
+  return xi + yi * px.w;
+};
+const near = (px, arr, x, y, r) => {
+  let m = 0;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) m = Math.max(m, px[arr][at(px, x + dx, y + dy)]);
+  return m;
+};
+
+// ---- キャラクター
+const CH_SCALE = 2; // 1単位 = 2px で検査
+for (const id of G.CHARACTER_IDS) {
+  const d = join(ART, 'characters', id);
+  if (!existsSync(d)) continue;
+  const pick = (n) => ['webp', 'png', 'svg'].map((e) => join(d, `${n}.${e}`)).find(existsSync);
+  const mask = pick('clothes-mask');
+  const front = pick('front');
+  if (!mask || !front) {
+    ng(d, 'clothes-mask と front の両方が必要（片方だけだと使われません）');
+    continue;
+  }
+  const W = F.w * CH_SCALE;
+  const H = F.h * CH_SCALE;
+  const toPx = (p) => ({ x: (p.x - F.x) * CH_SCALE, y: (p.y - F.y) * CH_SCALE });
+  const c = G.CHARACTERS[id];
+  const grid = [];
+  for (let y = F.y + 1; y < F.y + F.h; y += 2) for (let x = F.x + 1; x < F.x + F.w; x += 2) grid.push({ x, y });
+  const dist = (shapes, p) => Math.min(...shapes.map((s) => G.distanceTo(s, p)));
+  for (const n of ['back', 'clothes-mask', 'clothes-shade', 'clothes-line', 'front', 'front-found']) {
+    const f = pick(n);
+    if (!f) continue;
+    const px = await pixels(f, W, H);
+    const ar = px.nw / px.nh;
+    if (Math.abs(ar - F.w / F.h) > 0.01 || px.nw < 450) ng(f, `寸法 ${px.nw}×${px.nh}（450×600 か、その整数倍）`);
+    if (n === 'clothes-mask') {
+      const isCl = (p) => px.l[at(px, toPx(p).x, toPx(p).y)] > 128;
+      const cl = grid.filter(isCl);
+      const inside = cl.filter((p) => G.distanceTo(G.BODY, p) <= 6).length;
+      const bodyPts = G.samplePoints(G.BODY, 2);
+      const cover = bodyPts.filter(isCl).length / bodyPts.length;
+      const r1 = cl.length ? inside / cl.length : 0;
+      (r1 >= 0.95 ? ok : ng)(f, `服の白い部分がからだの判定内 ${(r1 * 100).toFixed(0)}%（95%以上）`);
+      (cover >= 0.7 ? ok : ng)(f, `からだの判定を服が覆う割合 ${(cover * 100).toFixed(0)}%（70%以上）`);
+    } else {
+      const op = grid.filter((p) => px.a[at(px, toPx(p).x, toPx(p).y)] > 128);
+      const out = op.filter((p) => dist(c.silhouette, p) > 10).length;
+      const lim = n === 'front-found' ? 0.12 : 0.04;
+      const r = op.length ? out / op.length : 0;
+      (r <= lim ? ok : ng)(f, `輪郭の判定からはみ出す割合 ${(r * 100).toFixed(1)}%（${lim * 100}%以下）`);
+      if (n === 'front' || n === 'front-found') {
+        const faceOk = c.facePoints.every((p) => near(px, 'a', toPx(p).x, toPx(p).y, 2) > 128);
+        (faceOk ? ok : ng)(f, faceOk ? '顔の位置に絵がある' : '顔の位置（目・口）に絵が無い');
+      }
+    }
+  }
+}
+
+// ---- シーン
+for (const sid of G.SCENE_IDS) {
+  const d = join(ART, 'scenes', sid);
+  if (!existsSync(d)) continue;
+  const sc = G.SCENES[sid];
+  const pick = (n) => ['webp', 'png', 'svg'].map((e) => join(d, `${n}.${e}`)).find(existsSync);
+  for (const n of ['back', 'over', 'minor', 'fore']) {
+    const f = pick(n);
+    if (!f) continue;
+    const px = await pixels(f, 1000, 1000);
+    if (px.nw !== px.nh || px.nw < 1000) ng(f, `寸法 ${px.nw}×${px.nh}（正方形・1000以上）`);
+    if (n === 'back') {
+      ok(f, '寸法確認のみ');
+      continue;
+    }
+    let bad = 0;
+    for (const sp of sc.spots) {
+      for (const cid of G.CHARACTER_IDS) {
+        const t = G.spotTransform(sp);
+        const face = G.CHARACTERS[cid].facePoints.map((p) => G.transformPt(t, p));
+        const faceA = Math.max(...face.map((p) => near(px, 'a', p.x, p.y, 4)));
+        const body = G.samplePoints(G.transformShape(t, G.BODY), 6);
+        if (n === 'fore') {
+          const sil = G.silhouetteWorld(cid, sp).flatMap((s) => G.samplePoints(s, 6));
+          const vis = sil.filter((p) => px.a[at(px, p.x, p.y)] <= 128).length / sil.length;
+          const bvis = body.filter((p) => px.a[at(px, p.x, p.y)] <= 128).length / body.length;
+          const probs = [];
+          if (faceA > 76) probs.push('顔に重なる');
+          if (vis < G.LIMITS.minVisible) probs.push(`見える割合 ${vis.toFixed(2)} < ${G.LIMITS.minVisible}`);
+          if (bvis < G.LIMITS.minBodyVisible) probs.push(`服が見える割合 ${bvis.toFixed(2)} < ${G.LIMITS.minBodyVisible}`);
+          if (bvis > G.LIMITS.maxBodyVisible) probs.push(`服がまったく隠れていない ${bvis.toFixed(2)}`);
+          if (probs.length) {
+            bad++;
+            ng(f, `${sp.id}/${cid}: ${probs.join('、')}`);
+          }
+        } else {
+          const mean = body.reduce((s, p) => s + px.a[at(px, p.x, p.y)], 0) / body.length / 255;
+          const probs = [];
+          if (faceA > 76) probs.push('顔の後ろに濃い絵がある（顔の輪郭が読みにくくなる）');
+          if (mean > 0.35) probs.push(`服の後ろの濃さ ${mean.toFixed(2)} > 0.35（柄が溶け込まなくなる）`);
+          if (probs.length) {
+            bad++;
+            ng(f, `${sp.id}/${cid}: ${probs.join('、')}`);
+          }
+        }
+      }
+    }
+    if (!bad) ok(f, `全 ${sc.spots.length} か所 × 3体で問題なし`);
+  }
+}
+
+// ---- 柄タイル
+const pdir = join(ART, 'patterns');
+for (const f of list(pdir)) {
+  const m = basename(f).match(/^(room|garden|shop)-(plain|stripes|dots|check|leaf)\.(png|webp|svg)$/);
+  if (!m) {
+    ng(f, 'ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png）');
+    continue;
+  }
+  if (!G.SCENES[m[1]].costumes.some((c) => c.id === m[2])) ng(f, `${m[1]} に ${m[2]} の服はありません`);
+  const px = await pixels(f, 128, 128);
+  if (px.nw !== px.nh || px.nw < 64) ng(f, `寸法 ${px.nw}×${px.nh}（正方形・64以上）`);
+  let diff = 0;
+  for (let i = 0; i < 128; i++) {
+    diff += Math.abs(px.l[at(px, 0, i)] - px.l[at(px, 127, i)]) + Math.abs(px.l[at(px, i, 0)] - px.l[at(px, i, 127)]);
+  }
+  diff /= 256;
+  const opaque = px.a.every((v) => v > 250);
+  (diff < 28 ? ok : ng)(f, `つなぎ目の差 ${diff.toFixed(1)}（28未満）`);
+  (opaque ? ok : ng)(f, opaque ? '不透明' : '透明な部分がある（柄タイルは不透明にしてください）');
+}
+
+// ---- UI
+for (const f of list(join(ART, 'ui'))) {
+  if (!/^(title|handoff|bye)\.(png|webp|svg)$/.test(basename(f))) {
+    ng(f, 'ファイル名は title / handoff / bye のいずれか');
+    continue;
+  }
+  const px = await pixels(f, 64, 64);
+  (px.nw <= 2000 && px.nh <= 2000 ? ok : ng)(f, `寸法 ${px.nw}×${px.nh}`);
+}
+await browser.close();
+
+const fails = results.filter((r) => !r.ok);
+const lines = [
+  `# 絵の自動検査結果`,
+  ``,
+  `対象：\`${ART}/\`（${files.length}ファイル、合計 ${(total / 1024).toFixed(0)}KB） 実行：${new Date().toISOString()}`,
+  ``,
+  files.length === 0 ? '差し替えの絵はまだありません（ゲームはコードで描いた既定の絵を使います）。' : fails.length ? `**不合格 ${fails.length} 件**` : '**すべて合格**',
+  ``,
+  `| 結果 | ファイル | 内容 |`,
+  `|---|---|---|`,
+  ...results.map((r) => `| ${r.ok ? 'OK' : 'NG'} | ${r.file} | ${r.msg} |`),
+  ``,
+  `見た目の良し悪し・幼児にとっての難しさ・既存作品との似ている度合いは、この検査では分かりません。`,
+];
+mkdirSync('art-guides', { recursive: true });
+writeFileSync(dirArg > 0 ? join(ART, 'ART_CHECK.md') : 'art-guides/ART_CHECK.md', lines.join('\n') + '\n');
+console.log(lines.slice(0, 5).join('\n'));
+for (const r of fails.slice(0, 40)) console.log('NG', r.file, r.msg);
+process.exit(fails.length ? 1 : 0);
+?? video/hide-handoff-find.webm
+.\AGENTS.md
+
+codex
+現在の色と柄の大きさに合わせ、256×256のSVGタイルを12枚作ります。柄ははっきり残し、織り目・紙の粒・葉脈を薄く加えます。しま・チェックの帯はタイルの中央に置き、四辺が自然につながる構成にします。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 art/characters/mimi/front.svg | Select-Object -First 9; Get-Content -Encoding UTF8 art/characters/moko/front.svg | Select-Object -First 9; rg -n 'tile|patterns|image' src/core/art* src -g '*art*'" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 235ms:
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#e5f2db"/><stop offset=".48" stop-color="#bfdcc5"/><stop offset=".82" stop-color="#a8cfb5"/><stop offset="1" stop-color="#88b39e"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#f1f6df" stop-opacity=".62"/><stop offset="1" stop-color="#f1f6df" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+
+<linearGradient id="ear" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#cce4ca"/><stop offset=".55" stop-color="#a7cdb2"/><stop offset="1" stop-color="#85ac96"/></linearGradient>
+<radialGradient id="pink" cx=".3" cy=".25" r=".8"><stop stop-color="#f5d8d6"/><stop offset="1" stop-color="#dcaeaf"/></radialGradient>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#efe5f5"/><stop offset=".48" stop-color="#d8c7e8"/><stop offset=".82" stop-color="#c4b0d6"/><stop offset="1" stop-color="#ad95c0"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#faf0f7" stop-opacity=".62"/><stop offset="1" stop-color="#faf0f7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+
+<linearGradient id="ear" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#cce4ca"/><stop offset=".55" stop-color="#a7cdb2"/><stop offset="1" stop-color="#85ac96"/></linearGradient>
+<radialGradient id="pink" cx=".3" cy=".25" r=".8"><stop stop-color="#f5d8d6"/><stop offset="1" stop-color="#dcaeaf"/></radialGradient>
+rg: src/core/art*: ファイル名、ディレクトリ名、またはボリューム ラベルの構文が間違っています。 (os error 123)
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+mkdirSync('art/patterns', { recursive: true });
+for (const scene of ['room', 'garden', 'shop']) {
+  const source = readFileSync("'`src/core/scenes/${scene}.ts`, '"'utf8');
+  const entries = [...source.matchAll(/id: '(plain|stripes|dots|check|leaf)', kind: '["'^'"']+', spec: \\{ kind: '["'^'"']+', bg: '(#[A-Fa-f0-9]+)', fg: '(#[A-Fa-f0-9]+)', size: (\\d+)/g)];
+  if (entries.length "'!== 4) throw new Error(`Expected 4 costumes for ${scene}`);
+  for (const [, kind, bg, fg, size] of entries) {
+    const defs = `<defs>
+<linearGradient id="thread-light"><stop stop-color="#FFF9EB" stop-opacity=".12"/><stop offset=".45" stop-color="#FFF9EB" stop-opacity="0"/><stop offset="1" stop-color="#4A3A40" stop-opacity=".035"/></linearGradient>
+<radialGradient id="soft-light" cx=".3" cy=".25" r=".8"><stop stop-color="#FFF9EB" stop-opacity=".16"/><stop offset=".65" stop-color="#FFF9EB" stop-opacity="0"/><stop offset="1" stop-color="#4A3A40" stop-opacity=".035"/></radialGradient>
+</defs>`;
+    const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256">`, `<!-- Original repeating ${scene} ${kind}; one tile = ${size} game units. -->`, defs, `<rect width="256" height="256" fill="${bg}"/>`];
+    if (kind === '"'stripes') {
+      parts.push("'`<rect x="64" width="128" height="256" fill="${fg}"/>`, '"'<rect x=\"64\" width=\"128\" height=\"256\" fill=\"url(#thread-light)\"/>');
+    } else if (kind === 'dots') {
+      for (const p of [64, 192]) parts.push("'`<circle cx="${p}" cy="${p}" r="33.28" fill="${fg}"/>`, `<circle cx="${p}" cy="${p}" r="33.28" fill="url(#soft-light)"/>`);
+    } else if (kind === '"'check') {
+      parts.push("'`<g fill="${fg}" opacity=".5"><rect x="64" width="128" height="256"/><rect y="64" width="256" height="128"/></g>`);
+    } else if (kind === '"'leaf') {
+      for (const [x,y,r] of [[69.12,69.12,35],[192,184.32,-40]]) {
+        parts.push("'`<g transform="translate(${x} ${y}) rotate(${r})">`, `<path d="M0-51.2 Q33.28 0 0 51.2 Q-33.28 0 0-51.2Z" fill="${fg}"/>`, '"'<path d=\"M0-51.2 Q33.28 0 0 51.2 Q-33.28 0 0-51.2Z\" fill=\"url(#soft-light)\"/>', '<path d=\"M0-37 Q-2 0 0 39 M0-15 L-10-25 M0 6 L11-6 M0 22 L-9 13\" fill=\"none\" stroke=\"#FFF9EB\" stroke-opacity=\".22\" stroke-width=\"2\" stroke-linecap=\"round\"/>', '</g>');
+      }
+    }
+    if (kind === 'plain' || kind === 'leaf') {
+      // Deterministic, small paper fibres, kept away from tile edges.
+      let seed = 1027;
+      const rand = () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; };
+      parts.push('<g fill=\"none\" stroke-linecap=\"round\">');
+      for (let i = 0; i < 96; i++) {
+        const x = (5 + rand()*242).toFixed(2), y = (5 + rand()*242).toFixed(2);
+        const len = (1.5 + rand()*2.5).toFixed(2);
+        parts.push("'`<path d="M${x} ${y} l${len} -.6" stroke="${i%2 ? '"'#FFF9EB' : '#4A3A40'}\" stroke-opacity=\""'${i%2 ? '"'.10' : '.035'}\" stroke-width=\"1.1\"/>"'`);
+      }
+      parts.push('"'</g>');
+    } else {
+      const horizontal = [], vertical = [];
+      for (let p=4; p<256; p+=8) { horizontal.push("'`M0 ${p}H256`); vertical.push(`M${p} 0V256`); }
+      parts.push(`<path d="${horizontal.join('"' ')}\" fill=\"none\" stroke=\"#FFF9EB\" stroke-opacity=\".10\" stroke-width=\"1\"/>"'`, `<path d="${vertical.join('"' ')}\" fill=\"none\" stroke=\"#4A3A40\" stroke-opacity=\".035\" stroke-width=\".8\"/>"'`);
+    }
+    parts.push('"'</svg>');
+    const file = "'`art/patterns/${scene}-${kind}.svg`;
+    writeFileSync(file, parts.join('"'\\n')+'\\n');
+    console.log(file);
+  }
+}
+'@ | node --input-type=module
+npm.cmd run validate:art" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 4496ms:
+art/patterns/room-plain.svg
+art/patterns/room-stripes.svg
+art/patterns/room-dots.svg
+art/patterns/room-check.svg
+art/patterns/garden-plain.svg
+art/patterns/garden-stripes.svg
+art/patterns/garden-dots.svg
+art/patterns/garden-leaf.svg
+art/patterns/shop-plain.svg
+art/patterns/shop-stripes.svg
+art/patterns/shop-dots.svg
+art/patterns/shop-check.svg
+
+> pattern-hide-family-beta@0.1.0 validate:art
+> node scripts/validate-art.mjs
+
+形状データを組み立てられなかったため、前回の結果を使います（Build failed with 2 errors:）
+# 絵の自動検査結果
+
+対象：`art/`（30ファイル、合計 92KB） 実行：2026-10-07T14:48:01.020Z
+
+**すべて合格**
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm.cmd run build' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 2338ms:
+
+> pattern-hide-family-beta@0.1.0 build
+> tsc --noEmit && vite build
+
+X [ERROR] Cannot read directory "../..": Access is denied.
+
+X [ERROR] Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+
+failed to load config from C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\vite.config.ts
+error during build:
+Error: Build failed with 2 errors:
+error: Cannot read directory "../..": Access is denied.
+error: Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+    at failureErrorWithLog (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1752:15)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1211:25
+    at runOnEndCallbacks (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1592:45)
+    at buildResponseToResult (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1209:7)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1236:16
+    at responseCallbacks.<computed> (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:886:9)
+    at handleIncomingPacket (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:941:12)
+    at Socket.readFromStdout (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:864:7)
+    at Socket.emit (node:events:509:28)
+    at addChunk (node:internal/streams/readable:563:12)
+
+codex
+12枚を作成し、絵の自動検査は既存キャラクターを含む30ファイルすべて合格しました。ただし、検査は保存済みの形状データを使用しています。
+
+ビルドは型検査を通過した後、親ディレクトリへのアクセス拒否で停止しました。`AGENTS.md` の「サンドボックスで動かないコマンドがあれば……作業記録に書いて終える」に従い、回避策は試さず、この結果と実画面確認ができなかった点を記録します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 art-guides/ART_CHECK.md | Select-Object -Last 28; git status --short' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 211ms:
+| OK | art\characters\moko\front-found.svg | 輪郭の判定からはみ出す割合 5.4%（12%以下） |
+| OK | art\characters\moko\front-found.svg | 顔の位置に絵がある |
+| OK | art\patterns\garden-dots.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\garden-dots.svg | 不透明 |
+| OK | art\patterns\garden-leaf.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\garden-leaf.svg | 不透明 |
+| OK | art\patterns\garden-plain.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\garden-plain.svg | 不透明 |
+| OK | art\patterns\garden-stripes.svg | つなぎ目の差 0.1（28未満） |
+| OK | art\patterns\garden-stripes.svg | 不透明 |
+| OK | art\patterns\room-check.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\room-check.svg | 不透明 |
+| OK | art\patterns\room-dots.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\room-dots.svg | 不透明 |
+| OK | art\patterns\room-plain.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\room-plain.svg | 不透明 |
+| OK | art\patterns\room-stripes.svg | つなぎ目の差 0.1（28未満） |
+| OK | art\patterns\room-stripes.svg | 不透明 |
+| OK | art\patterns\shop-check.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\shop-check.svg | 不透明 |
+| OK | art\patterns\shop-dots.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\shop-dots.svg | 不透明 |
+| OK | art\patterns\shop-plain.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\shop-plain.svg | 不透明 |
+| OK | art\patterns\shop-stripes.svg | つなぎ目の差 0.1（28未満） |
+| OK | art\patterns\shop-stripes.svg | 不透明 |
+
+見た目の良し悪し・幼児にとっての難しさ・既存作品との似ている度合いは、この検査では分かりません。
+ M art-guides/ART_CHECK.md
+?? art/patterns/
+?? video/hide-handoff-find.webm
+
+apply patch
+patch: completed
+C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\art\README.md
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index fbd5fa5156c1573d871109508110f249dff68073..9ee98b467067eef75871513972b3fa5e17f08b10
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,9 +1,21 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に、3体の差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-07：ジョブ03（柄タイル12枚）
++
++- 作成ファイル：`patterns/room-plain.svg`、`room-stripes.svg`、`room-dots.svg`、`room-check.svg`、`patterns/garden-plain.svg`、`garden-stripes.svg`、`garden-dots.svg`、`garden-leaf.svg`、`patterns/shop-plain.svg`、`shop-stripes.svg`、`shop-dots.svg`、`shop-check.svg`（すべて `patterns/` 内）。本READMEも更新。
++- 方法：SVGをコードで記述。すべて256×256pxの正方形、不透明な地色。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
++- 色と大きさ：各シーンの `costumes` の地色・柄色をそのまま使用。ゲーム内の1周期は既存のsize（38〜52）のまま使える構成。水玉の位置・半径、葉の位置・傾き・大きさも既存柄を基準にした。しま・チェックは幅を保ったまま帯を中央に移し、両端の色をそろえた。
++- 質感：既存3体のSVGの柔らかい光と濃茶色 `#4A3A40` を参考に、布には白系10%・茶系3.5%の細い織り目、無地には小さく薄い紙の繊維、葉には控えめな葉脈を追加。水玉・葉には左上が明るい薄いグラデーション、しまには横方向の淡い陰影を重ねた。無地が別の柄に見えないよう、大きな装飾は加えていない。背景と服に同じタイルを使う前提で細部の濃さを抑えた。
++- つなぎ目：布の織り目は256を割り切る8px周期。水玉・葉・紙の繊維は四辺をまたがず、しま・チェックは辺まで同じ色で続く。タイル全体を一方向に明暗変化させるグラデーションは使用していない。
++- 検査結果：`npm.cmd run validate:art` は終了コード0、既存キャラクターを含む30ファイル・合計92KBで「すべて合格」。柄12枚すべて不透明、つなぎ目の差は0.0〜0.1（基準28未満）。`art-guides/ART_CHECK.md` は許可済みの自動更新。形状データの組み立てに失敗したため、検査スクリプトが保存済みの形状データを使用した旨の警告あり。道具は変更していない。
++- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
++- できなかったこと・迷った点：ビルド成功およびゲーム実画面での見た目・縮小時の柄の読みやすさ・服との溶け込みの目視確認は未確認。SVGはART_SLOTSで許可された形式のため採用。AGENTS.mdのサンドボックス指示に従い、ビルド停止後は道具・設定・環境変数の差し替えや回避策を試さず記録して終了。Claude Code側で最新形状データでの再検査、ビルド、実画面確認が必要。
++- 手動の書き込みは `art/patterns/` と本READMEのみ。制作スクリプト・一時ファイルは残していない。commit / push は行っていない。
++
+ ### 2026-10-07：ジョブ02（みみ・もこ）
+ 
+ - 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git diff --stat; git diff --check; Get-ChildItem art/patterns | Select-Object Name,Length' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 290ms:
+warning: in the working copy of 'pattern-hide-family-beta/art-guides/ART_CHECK.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'pattern-hide-family-beta/art/README.md', LF will be replaced by CRLF the next time Git touches it
+ pattern-hide-family-beta/art-guides/ART_CHECK.md | 26 +++++++++++++++++++++++-
+ pattern-hide-family-beta/art/README.md           | 14 ++++++++++++-
+ 2 files changed, 38 insertions(+), 2 deletions(-)
+warning: in the working copy of 'pattern-hide-family-beta/art-guides/ART_CHECK.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'pattern-hide-family-beta/art/README.md', LF will be replaced by CRLF the next time Git touches it
+
+Name               Length
+----               ------
+garden-dots.svg      1739
+garden-leaf.svg     10422
+garden-plain.svg     9705
+garden-stripes.svg   1637
+room-check.svg       1626
+room-dots.svg        1737
+room-plain.svg       9703
+room-stripes.svg     1635
+shop-check.svg       1626
+shop-dots.svg        1737
+shop-plain.svg       9703
+shop-stripes.svg     1635
+
+
+
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index fbd5fa5156c1573d871109508110f249dff68073..9ee98b467067eef75871513972b3fa5e17f08b10
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,9 +1,21 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に、3体の差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-07：ジョブ03（柄タイル12枚）
++
++- 作成ファイル：`patterns/room-plain.svg`、`room-stripes.svg`、`room-dots.svg`、`room-check.svg`、`patterns/garden-plain.svg`、`garden-stripes.svg`、`garden-dots.svg`、`garden-leaf.svg`、`patterns/shop-plain.svg`、`shop-stripes.svg`、`shop-dots.svg`、`shop-check.svg`（すべて `patterns/` 内）。本READMEも更新。
++- 方法：SVGをコードで記述。すべて256×256pxの正方形、不透明な地色。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
++- 色と大きさ：各シーンの `costumes` の地色・柄色をそのまま使用。ゲーム内の1周期は既存のsize（38〜52）のまま使える構成。水玉の位置・半径、葉の位置・傾き・大きさも既存柄を基準にした。しま・チェックは幅を保ったまま帯を中央に移し、両端の色をそろえた。
++- 質感：既存3体のSVGの柔らかい光と濃茶色 `#4A3A40` を参考に、布には白系10%・茶系3.5%の細い織り目、無地には小さく薄い紙の繊維、葉には控えめな葉脈を追加。水玉・葉には左上が明るい薄いグラデーション、しまには横方向の淡い陰影を重ねた。無地が別の柄に見えないよう、大きな装飾は加えていない。背景と服に同じタイルを使う前提で細部の濃さを抑えた。
++- つなぎ目：布の織り目は256を割り切る8px周期。水玉・葉・紙の繊維は四辺をまたがず、しま・チェックは辺まで同じ色で続く。タイル全体を一方向に明暗変化させるグラデーションは使用していない。
++- 検査結果：`npm.cmd run validate:art` は終了コード0、既存キャラクターを含む30ファイル・合計92KBで「すべて合格」。柄12枚すべて不透明、つなぎ目の差は0.0〜0.1（基準28未満）。`art-guides/ART_CHECK.md` は許可済みの自動更新。形状データの組み立てに失敗したため、検査スクリプトが保存済みの形状データを使用した旨の警告あり。道具は変更していない。
++- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
++- できなかったこと・迷った点：ビルド成功およびゲーム実画面での見た目・縮小時の柄の読みやすさ・服との溶け込みの目視確認は未確認。SVGはART_SLOTSで許可された形式のため採用。AGENTS.mdのサンドボックス指示に従い、ビルド停止後は道具・設定・環境変数の差し替えや回避策を試さず記録して終了。Claude Code側で最新形状データでの再検査、ビルド、実画面確認が必要。
++- 手動の書き込みは `art/patterns/` と本READMEのみ。制作スクリプト・一時ファイルは残していない。commit / push は行っていない。
++
+ ### 2026-10-07：ジョブ02（みみ・もこ）
+ 
+ - 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
+
+codex
+256×256の柄タイル12枚をSVGコードで制作し、[作業記録](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/art/README.md)に追記しました。
+
+- 絵の検査：30ファイルすべて合格（保存済み形状データを使用）。
+- ビルド：型検査通過後、アクセス拒否で停止。実画面確認は未実施です。
+
+[AGENTS.md](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/AGENTS.md)の「サンドボックスで動かないコマンドがあれば……作業記録に書いて終える」に従い、回避策は試していません。書き込みは許可範囲と検査レポートの自動更新のみです。
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index fbd5fa5156c1573d871109508110f249dff68073..9ee98b467067eef75871513972b3fa5e17f08b10
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,9 +1,21 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に、3体の差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-07：ジョブ03（柄タイル12枚）
++
++- 作成ファイル：`patterns/room-plain.svg`、`room-stripes.svg`、`room-dots.svg`、`room-check.svg`、`patterns/garden-plain.svg`、`garden-stripes.svg`、`garden-dots.svg`、`garden-leaf.svg`、`patterns/shop-plain.svg`、`shop-stripes.svg`、`shop-dots.svg`、`shop-check.svg`（すべて `patterns/` 内）。本READMEも更新。
++- 方法：SVGをコードで記述。すべて256×256pxの正方形、不透明な地色。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
++- 色と大きさ：各シーンの `costumes` の地色・柄色をそのまま使用。ゲーム内の1周期は既存のsize（38〜52）のまま使える構成。水玉の位置・半径、葉の位置・傾き・大きさも既存柄を基準にした。しま・チェックは幅を保ったまま帯を中央に移し、両端の色をそろえた。
++- 質感：既存3体のSVGの柔らかい光と濃茶色 `#4A3A40` を参考に、布には白系10%・茶系3.5%の細い織り目、無地には小さく薄い紙の繊維、葉には控えめな葉脈を追加。水玉・葉には左上が明るい薄いグラデーション、しまには横方向の淡い陰影を重ねた。無地が別の柄に見えないよう、大きな装飾は加えていない。背景と服に同じタイルを使う前提で細部の濃さを抑えた。
++- つなぎ目：布の織り目は256を割り切る8px周期。水玉・葉・紙の繊維は四辺をまたがず、しま・チェックは辺まで同じ色で続く。タイル全体を一方向に明暗変化させるグラデーションは使用していない。
++- 検査結果：`npm.cmd run validate:art` は終了コード0、既存キャラクターを含む30ファイル・合計92KBで「すべて合格」。柄12枚すべて不透明、つなぎ目の差は0.0〜0.1（基準28未満）。`art-guides/ART_CHECK.md` は許可済みの自動更新。形状データの組み立てに失敗したため、検査スクリプトが保存済みの形状データを使用した旨の警告あり。道具は変更していない。
++- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
++- できなかったこと・迷った点：ビルド成功およびゲーム実画面での見た目・縮小時の柄の読みやすさ・服との溶け込みの目視確認は未確認。SVGはART_SLOTSで許可された形式のため採用。AGENTS.mdのサンドボックス指示に従い、ビルド停止後は道具・設定・環境変数の差し替えや回避策を試さず記録して終了。Claude Code側で最新形状データでの再検査、ビルド、実画面確認が必要。
++- 手動の書き込みは `art/patterns/` と本READMEのみ。制作スクリプト・一時ファイルは残していない。commit / push は行っていない。
++
+ ### 2026-10-07：ジョブ02（みみ・もこ）
+ 
+ - 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
+
+tokens used
+34,989
+256×256の柄タイル12枚をSVGコードで制作し、[作業記録](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/art/README.md)に追記しました。
+
+- 絵の検査：30ファイルすべて合格（保存済み形状データを使用）。
+- ビルド：型検査通過後、アクセス拒否で停止。実画面確認は未実施です。
+
+[AGENTS.md](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/AGENTS.md)の「サンドボックスで動かないコマンドがあれば……作業記録に書いて終える」に従い、回避策は試していません。書き込みは許可範囲と検査レポートの自動更新のみです。

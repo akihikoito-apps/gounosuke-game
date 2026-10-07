@@ -1,6 +1,6 @@
 # 絵の自動検査結果
 
-対象：`art/`（18ファイル、合計 40KB） 実行：2026-10-07T14:41:29.223Z
+対象：`art/`（30ファイル、合計 92KB） 実行：2026-10-07T14:54:02.792Z
 
 **すべて合格**
 
@@ -33,5 +33,29 @@
 | OK | art\characters\moko\front.svg | 顔の位置に絵がある |
 | OK | art\characters\moko\front-found.svg | 輪郭の判定からはみ出す割合 5.4%（12%以下） |
 | OK | art\characters\moko\front-found.svg | 顔の位置に絵がある |
+| OK | art\patterns\garden-dots.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\garden-dots.svg | 不透明 |
+| OK | art\patterns\garden-leaf.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\garden-leaf.svg | 不透明 |
+| OK | art\patterns\garden-plain.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\garden-plain.svg | 不透明 |
+| OK | art\patterns\garden-stripes.svg | つなぎ目の差 0.1（28未満） |
+| OK | art\patterns\garden-stripes.svg | 不透明 |
+| OK | art\patterns\room-check.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\room-check.svg | 不透明 |
+| OK | art\patterns\room-dots.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\room-dots.svg | 不透明 |
+| OK | art\patterns\room-plain.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\room-plain.svg | 不透明 |
+| OK | art\patterns\room-stripes.svg | つなぎ目の差 0.1（28未満） |
+| OK | art\patterns\room-stripes.svg | 不透明 |
+| OK | art\patterns\shop-check.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\shop-check.svg | 不透明 |
+| OK | art\patterns\shop-dots.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\shop-dots.svg | 不透明 |
+| OK | art\patterns\shop-plain.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\shop-plain.svg | 不透明 |
+| OK | art\patterns\shop-stripes.svg | つなぎ目の差 0.1（28未満） |
+| OK | art\patterns\shop-stripes.svg | 不透明 |
 
 見た目の良し悪し・幼児にとっての難しさ・既存作品との似ている度合いは、この検査では分かりません。

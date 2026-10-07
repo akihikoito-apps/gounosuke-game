@@ -45,3 +45,5 @@
 - 2026-10-07T13:06:22.058Z Codex ジョブ `codex-jobs/01-koro.md`：終了コード 0、0.3分、変更 0 件、許可外 0 件（ログ `audit/codex/2026-10-07T13-06-01-190Z-01-koro.log`）
 - 2026-10-07T13:37:35.054Z Codex ジョブ `codex-jobs/feedback.md`：終了コード 0、2.6分、変更 1 件、許可外 0 件（ログ `audit/codex/2026-10-07T13-35-00-346Z-feedback.log`）
 - 2026-10-07T14:41:22.115Z Codex ジョブ `codex-jobs/02-mimi-moko.md`：終了コード 0、2.4分、変更 14 件、許可外 0 件（ログ `audit/codex/2026-10-07T14-39-00-495Z-02-mimi-moko.log`）
+- 2026-10-07T14:49:09.599Z Codex ジョブ `codex-jobs/03-patterns.md`：終了コード 0、2.5分、変更 14 件、許可外 0 件（ログ `audit/codex/2026-10-07T14-46-37-222Z-03-patterns.log`）
+- 2026-10-07T14:53:56.987Z Codex ジョブ `codex-jobs/feedback.md`：終了コード 0、1.9分、変更 0 件、許可外 0 件（ログ `audit/codex/2026-10-07T14-52-01-696Z-feedback.log`）

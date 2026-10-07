@@ -1,9 +1,31 @@
 # art/
 
 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
-現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に、3体の差し替え用SVGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
 
 ## 作業記録
+### 2026-10-07：feedback（ギンガムチェックの修正）
+
+- 変更ファイル：`patterns/room-check.svg`、`patterns/shop-check.svg`、本READMEのみ。他の柄10枚は変更していない。
+- 方法：`art-guides/current-room-easy.png` のラグ、`current-shop-normal.png` のテーブルクロスと既存の柄定義を確認し、SVGコードを直接編集。画像生成・ネット画像・外部サービス・別料金のAPIは使用していない。
+- 修正内容：グループ全体の `opacity=".5"` を各帯に適用される `fill-opacity=".5"` に変更。縦横それぞれ64px幅の帯を32px・160pxの位置に2本配置し、帯と間隔を64pxに統一した。地色／半透明の帯／二重に重なる交差部分の3段階に戻した。roomの黄色系、shopのピンク系の色値と既存の控えめな織り目は保持。対象2枚の不足していたviewBoxの高さも補い、`0 0 256 256` とした。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、30ファイル・合計92KBで「すべて合格」。修正した2枚は不透明、上下左右のつなぎ目の差はいずれも0.0（基準28未満）。`art-guides/ART_CHECK.md` は許可済みの自動更新。形状データの組み立てに失敗し、検査スクリプトが保存済みの形状データを使用した旨の警告あり。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと：ビルド成功と変更後のゲーム実画面での目視確認は未確認。AGENTS.mdのサンドボックス指示に従い、検査・ビルド道具、設定、環境変数を変更する回避策は試さず終了。Claude Code側で最新形状データによる検査、ビルド、実画面確認が必要。
+- 一時ファイルは残していない。既存の作業記録・他の作業者による変更は保持。commit / push は行っていない。
+
+### 2026-10-07：ジョブ03（柄タイル12枚）
+
+- 作成ファイル：`patterns/room-plain.svg`、`room-stripes.svg`、`room-dots.svg`、`room-check.svg`、`patterns/garden-plain.svg`、`garden-stripes.svg`、`garden-dots.svg`、`garden-leaf.svg`、`patterns/shop-plain.svg`、`shop-stripes.svg`、`shop-dots.svg`、`shop-check.svg`（すべて `patterns/` 内）。本READMEも更新。
+- 方法：SVGをコードで記述。すべて256×256pxの正方形、不透明な地色。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
+- 色と大きさ：各シーンの `costumes` の地色・柄色をそのまま使用。ゲーム内の1周期は既存のsize（38〜52）のまま使える構成。水玉の位置・半径、葉の位置・傾き・大きさも既存柄を基準にした。しま・チェックは幅を保ったまま帯を中央に移し、両端の色をそろえた。
+- 質感：既存3体のSVGの柔らかい光と濃茶色 `#4A3A40` を参考に、布には白系10%・茶系3.5%の細い織り目、無地には小さく薄い紙の繊維、葉には控えめな葉脈を追加。水玉・葉には左上が明るい薄いグラデーション、しまには横方向の淡い陰影を重ねた。無地が別の柄に見えないよう、大きな装飾は加えていない。背景と服に同じタイルを使う前提で細部の濃さを抑えた。
+- つなぎ目：布の織り目は256を割り切る8px周期。水玉・葉・紙の繊維は四辺をまたがず、しま・チェックは辺まで同じ色で続く。タイル全体を一方向に明暗変化させるグラデーションは使用していない。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存キャラクターを含む30ファイル・合計92KBで「すべて合格」。柄12枚すべて不透明、つなぎ目の差は0.0〜0.1（基準28未満）。`art-guides/ART_CHECK.md` は許可済みの自動更新。形状データの組み立てに失敗したため、検査スクリプトが保存済みの形状データを使用した旨の警告あり。道具は変更していない。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと・迷った点：ビルド成功およびゲーム実画面での見た目・縮小時の柄の読みやすさ・服との溶け込みの目視確認は未確認。SVGはART_SLOTSで許可された形式のため採用。AGENTS.mdのサンドボックス指示に従い、ビルド停止後は道具・設定・環境変数の差し替えや回避策を試さず記録して終了。Claude Code側で最新形状データでの再検査、ビルド、実画面確認が必要。
+- 手動の書き込みは `art/patterns/` と本READMEのみ。制作スクリプト・一時ファイルは残していない。commit / push は行っていない。
+
 ### 2026-10-07：ジョブ02（みみ・もこ）
 
 - 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
