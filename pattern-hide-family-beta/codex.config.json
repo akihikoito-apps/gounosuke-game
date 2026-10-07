@@ -1,8 +1,19 @@
 {
   "_note": "Codex CLI の呼び出し方。setup-home.mjs が codex exec --help を保存するので、Claude Code がそれを読んで args を確認・修正する。存在しないオプションを書かないこと。",
   "command": "codex",
-  "args": ["exec"],
-  "verified": false,
+  "args": [
+    "exec",
+    "--sandbox",
+    "workspace-write",
+    "--color",
+    "never"
+  ],
+  "verified": true,
   "timeoutMinutes": 60,
-  "allowedPaths": ["art/", "audit/codex/"]
+  "allowedPaths": [
+    "art/",
+    "audit/codex/",
+    "art-guides/ART_CHECK.md"
+  ],
+  "_verifiedNote": "2026-10-07 codex-cli 0.154.0 の codex exec --help で確認：--sandbox workspace-write（このフォルダ内のみ書き込み可）、--color never（ログ用）。承認バイパス系は使わない"
 }

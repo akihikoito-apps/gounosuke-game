@@ -1,0 +1,18 @@
+# ご自宅PCの準備チェック 2026-10-07T13:03:38.159Z
+OS: win32 / Node: v24.18.0
+OK  Node 20 以上
+OK  git: git version 2.55.0.windows.2
+OK  npm: 11.16.0
+NG  Claude Code: 'claude' �́A�����R�}���h�܂��͊O���R�}���h�A
+OK  Codex CLI: codex-cli 0.154.0
+OK  ブランチ: claude/pattern-hide-family-beta
+OK  OPENAI_API_KEY は未設定（ChatGPT ログインで使う前提）
+OK  codex exec --help を audit/logs/codex-help.txt に保存
+
+## 依存を入れる（このフォルダの中だけ）
+OK  npm ci
+
+## 画面確認用のブラウザ（Playwright の Chromium。ユーザーのキャッシュフォルダに入ります）
+OK  Chromium
+NG  単体テスト
+OK  下書きガイド（art-guides/）
