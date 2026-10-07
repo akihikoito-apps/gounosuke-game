@@ -1,0 +1,1378 @@
+job: codex-jobs/04-room.md
+exit: 0
+minutes: 6.8
+changed (6): art-guides/ART_CHECK.md, art/README.md, art/scenes/room/back.png, art/scenes/room/fore.png, art/scenes/room/minor.png, art/scenes/room/over.png
+outside allowed paths (0): -
+
+----- codex output -----
+OpenAI Codex v0.154.0
+--------
+workdir: C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a116e0-0285-7aa2-b728-9afc8e8c97f9
+--------
+user
+Read the file codex-jobs/04-room.md and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.
+codex
+`AGENTS.md` とジョブの指示を確認し、許可された範囲で制作・検査・作業記録まで進めます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 AGENTS.md; Get-Content -Encoding UTF8 codex-jobs/04-room.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 175ms:
+# Codex 向けの決まり（このフォルダ）
+
+このフォルダは幼児向けゲーム「もようのかくれんぼ（仮）」のWebベータです。Claude Code が司令塔で、Codex は **絵の制作** と **独立レビュー** を担当します。
+
+## 書き込んでよい場所
+- 絵の制作ジョブ：`art/` の中だけ
+- レビュージョブ：`audit/codex/` の中だけ（レポートを書く）
+- それ以外（`src/`, `tests/`, `scripts/`, 設定、文書）は **変更しない**。直したほうがよい点は、レポートや `art/README.md` に提案として書く
+
+## 必ず守ること
+- ジョブファイル（`codex-jobs/*.md`）の指示と、`ART_SLOTS.md`・`CODEX_ART_BRIEF.md` の決まりに従う
+- 絵を作ったら `npm run validate:art` を実行し、合格するまで直す。結果は `art-guides/ART_CHECK.md` に出る
+- 既存の作品（キャラクター・ロゴ・画面・音）をまねない／取り込まない。ネット上の画像を使わない。文字を絵に入れない
+- 子どもの個人情報・外部通信・広告・課金に関わるものを追加しない
+- 追加料金が発生する手段（別料金の API キー、有料サービス）を使わない。利用上限に達したら、そこで止めて報告する
+- git の commit / push はしない（Claude Code が確認してから行う）
+- 最後に、やったこと・使った方法（SVGをコードで書いた／画像生成を使った 等）・検査結果・できなかったことを、ジョブファイルの指定場所に書く
+
+## サンドボックスでの注意（2026-10-07 追記）
+- `art-guides/ART_CHECK.md` は `npm run validate:art` が自動で書き換える。これは許可済みなので、書き込み先を変える工夫は不要
+- 検査・ビルドの道具（node_modules、scripts、環境変数 NODE_OPTIONS など）を差し替えたり、上書きしたりする回り道はしない。サンドボックスで動かないコマンドがあれば、無理をせず、その旨を作業記録に書いて終える（検査は Claude Code が外でも実行する）
+- 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
+- Windows の PowerShell では `npm` / `npx` が実行ポリシーで止まる。代わりに `npm.cmd run validate:art`、`npm.cmd run build` を使う（設定は変えない）
+- PowerShell でファイルを読むときは `Get-Content -Encoding UTF8` を使う（指定しないと日本語が文字化けする）
+# ジョブ04：へや（シーン）
+
+## 書き込んでよい場所
+`art/scenes/room/` と `art/README.md` だけ
+
+## 読むもの
+AGENTS.md / ART_SLOTS.md の「シーン」/ art-guides/scene-room.png（色面＝柄の領域。ここはゲームが柄を塗るので描かない。橙＝小物の位置、赤い円＝顔、何も重ねない）/ art-guides/current-room-easy.png / art/characters/, art/patterns/（画風の基準）
+
+## やること
+- back.png（柄の領域より下：床・壁の上部など）、over.png（柄の領域の上・キャラの後ろ：窓・カーテンレール・戸だな・ソファの縁や陰）、minor.png（壁の絵・時計など、省いてもよい飾り）、fore.png（前景の小物9か所：おもちゃ箱・植木鉢・クッション・ブランケット・積み木・ボール・かご 等）
+- 2000×2000px 推奨。小物はガイドの橙色と同じ位置・同じくらいの大きさ
+- 背景が細かすぎてさがしにくくならないこと
+
+## 合格条件
+- `npm run validate:art` がすべて合格（結果は art-guides/ART_CHECK.md）
+- `npm run build` が成功
+
+## 最後に書くこと
+`art/README.md` の「作業記録」に追記：日付、作ったファイル、使った方法（SVGをコードで書いた／画像生成を使った 等）、検査結果、できなかったこと・迷った点
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 ART_SLOTS.md; Get-Content -Encoding UTF8 CODEX_ART_BRIEF.md; Get-Content -Encoding UTF8 art/README.md; Get-Content -Encoding UTF8 package.json; rg --files art art-guides codex-jobs | Select-Object -First 100' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 238ms:
+# 絵の差し替え口（ART_SLOTS）
+
+`art/` フォルダに決まった名前でファイルを置くと、ゲームが自動でその絵を使います。
+**置かなかった部分は、今のコードの絵のまま** 動きます（一部だけ差し替えてもよい）。
+
+- 形式：PNG（透過）／WebP／SVG。1ファイル 800KB まで、合計 8MB まで
+- SVG はスクリプト・外部参照・文字（フォント）を含めない
+- 置いたら `npm run validate:art` で検査 → `npm run build` → 画面を確認
+- 下書きガイド：`npm run art:guides` で `art-guides/` に出る（形状データから自動生成。描く位置の基準）
+
+## キャラクター `art/characters/{koro|mimi|moko}/`
+
+枠：**450×600px**（またはその整数倍。縦横比 3:4）。ゲーム内の座標 x −90〜90、y −225〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 37.5px**。ガイド `art-guides/character-*.png` に重ねて描く。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `clothes-mask.png` | ○ | 服の形だけを **白**、ほかは黒か透明。ここにゲームが背景と同じ柄を流し込む。ガイドの青い範囲（からだの判定）からはみ出さないこと |
+| `front.png` | ○ | 服より前に描くもの：顔・頭・耳・髪・手・服の上に出る線。目と口はガイドの赤い点の位置 |
+| `back.png` | | 服より後ろ：足、背中側の耳や髪など |
+| `clothes-shade.png` | | 服の陰影（乗算で重なる）。グレー〜茶系の濃淡、透過 |
+| `clothes-line.png` | | 服のふち線だけ。難易度に応じてゲームが濃さを変える（最低25%） |
+| `front-found.png` | | 見つかった時の前面（手をふるポーズ）。無ければ front を使う |
+
+`clothes-mask` と `front` がそろっていない時は、そのキャラクターはコードの絵のままです。
+
+## シーン `art/scenes/{room|garden|shop}/`
+
+枠：**1000×1000px**（2000×2000 推奨）。ガイド `art-guides/scene-*.png` の色面が「柄の領域」で、**ここはゲームが柄を塗る**（服と同じ柄にして隠れられるようにするため）。
+
+| ファイル | 中身 | 決まり |
+|---|---|---|
+| `back.png` | 柄の領域より下：空・壁の上部・床など | 不透明でよい |
+| `over.png` | 柄の領域の上・キャラクターの後ろ：家具の縁・カーテンのひだの陰・窓・棚など | 透過。キャラクターの服の後ろは薄く（平均の濃さ35%以下）、顔の後ろには描かない |
+| `minor.png` | 小さい画面では省く飾り（壁の絵・雲など） | over と同じ決まり |
+| `fore.png` | 前景の小物すべて（キャラクターの前に重なる） | 透過。ガイドの橙色の形に合わせる。**赤い円（顔）には重ねない**。服は少し（2割以上8割未満が見える程度）隠す |
+
+## 柄のタイル `art/patterns/{シーン}-{服}.png`
+
+例：`room-stripes.png`、`garden-leaf.png`。正方形 64px 以上、不透明、**上下左右がつなぎ目なく続く**こと。
+同じタイルが背景の領域と服の両方に使われます（だから隠れられる）。タイル1枚がゲーム内で表す大きさは、各シーンの柄の `size`（38〜52）です。
+
+| シーン | 服（ファイル名の後半） |
+|---|---|
+| room | plain（壁）, stripes（カーテン）, dots（ソファ）, check（ラグ） |
+| garden | plain（芝生）, stripes（柵）, dots（花だん）, leaf（生け垣） |
+| shop | plain（床）, stripes（カウンター）, dots（壁）, check（テーブルクロス） |
+
+## 画面の絵 `art/ui/`
+
+`title.png`（タイトルの絵）、`handoff.png`（受け渡し画面の絵。**隠れ場所や背景を描かない**）、`bye.png`（おしまい画面）。2000px 以内。
+# Codex への絵の制作依頼（CODEX_ART_BRIEF）
+
+> ご自宅PCで Codex に渡すための依頼文です。下の「Codex への指示」をそのまま貼り付けてください。
+
+## 事前準備（ご自宅PC）
+
+```bash
+git fetch origin
+git checkout claude/pattern-hide-family-beta
+git pull
+cd pattern-hide-family-beta
+npm ci
+npm run art:guides      # art-guides/ に下書きガイドができる
+```
+
+## Codex への指示（ここから貼り付け）
+
+あなたは、幼児向けかくれんぼゲーム「もようのかくれんぼ（仮）」の絵を作る担当です。
+作業フォルダは `pattern-hide-family-beta/` です。最初に `ART_SLOTS.md` と、この `CODEX_ART_BRIEF.md` を読んでください。
+
+### 守ること
+1. 書き込んでよいのは `pattern-hide-family-beta/art/` の中だけです。`src/` やテスト、設定ファイルは変更しないでください（別のAIが担当しています）。
+2. ファイル名・寸法・層の分け方は `ART_SLOTS.md` のとおりにしてください。描く位置は `art-guides/` のガイド画像に合わせてください。ガイドはゲームの当たり判定と同じ形から作られています。
+3. 描き終えたら `npm run validate:art` を実行し、**すべて合格するまで直してください**。結果は `art-guides/ART_CHECK.md` に出ます。そのあと `npm run build` が通ることを確認してください。
+4. 既存の作品（キャラクター、ロゴ、画面、音）をまねたり、取り込んだりしないでください。ネット上の画像も使わないでください。特定の作品に見える顔の配置や特徴は避けてください。
+5. 文字は絵に入れないでください。
+6. 追加料金が発生する手段（別料金のAPIキー、有料サービス）は使わないでください。今の契約の範囲でできないことがあれば、無理をせず、できなかったことを報告してください。
+7. 最後に、作ったファイル・使った方法（SVGをコードで書いた／画像生成を使った等）・検査結果を `art/README.md` に書いてください。
+
+### 絵の方向性
+- **かわいらしく、幼い子向け。ただし安っぽくしない。** 絵本の挿絵のような品のある仕上がりにします。
+- 形に丸みと立体感を持たせます。やわらかい陰影、ほのかなグラデーション、光は左上から、接地面にやわらかい影を入れてください。平べったいクリップアートや絵文字のようにはしないでください。
+- 線は黒ではなく濃い茶色系（目安 #4A3A40）。太さに少し強弱をつけ、全部の線を同じ太さにしないでください。
+- 色は、少しくすんだやさしいパステルを基調に、差し色を少しだけ。蛍光色や彩度の高すぎる色は使わないでください。
+- 布の縫い目、木目、葉脈など、見つけるとうれしい細部を控えめに入れます。ただし背景がうるさくなり、さがしにくくなる量にはしないでください。
+- 3体の見分けは **色だけに頼らず形で** つけます。今の形を受け継いでください：
+  - **ころ**：あたまに「くるん」とした毛。げんきでくいしんぼう。アプリコット色
+  - **みみ**：たれた長い耳（内側はピンク）。ものしりでのんびり。ミントグリーン
+  - **もこ**：くもの形のもこもこした頭と、星の髪どめ。ふわふわではずかしがり。ラベンダー
+- 3体とも、頭が大きめの約2頭身です。目は大きく、ハイライトを入れてください。表情はおだやかな笑顔です。
+- 服は **ゲームが柄を流し込む部分** なので、`clothes-mask.png`（白黒の形）として分けてください。服の陰影は `clothes-shade.png`、ふち線は `clothes-line.png` に分けると、柄の上に立体感が出ます。
+- 背景の「柄の領域」（カーテン・ソファ・ラグ、生け垣・柵・花だん・芝生、かべ・カウンター・テーブルクロス・床）は、ゲームが柄で塗ります。質感は **柄タイル**（`art/patterns/`）で出してください。布の織り目や紙の質感などを入れたタイルにします。同じタイルが服にも使われます。
+- 前景の小物（`fore.png`）は、今の小物と同じ位置・同じくらいの大きさで描き直してください（ガイドの橙色）。顔（赤い円）には絶対に重ねないでください。
+- 怖い表情、暗い影、先のとがった危なそうな物は入れないでください。
+
+### おすすめの順番
+1. `art/characters/koro/` の5層（back, clothes-mask, clothes-shade, clothes-line, front, front-found）を作る → 検査に合格させる
+2. 同じ画風で みみ・もこ を作る
+3. `art/patterns/` の柄タイル12枚
+4. `art/scenes/room/` の back / over / minor / fore → 検査 → garden → shop
+5. `art/ui/` の title / handoff / bye
+
+途中で、`npm run build && npm run preview` を実行し、`http://127.0.0.1:4173/` で見た目を確認してください。
+
+（貼り付けここまで）
+
+## 作業後
+
+- Codex の作業を `git add art && git commit` して、同じブランチに push してください。
+- Claude 側では、画面写真・操作テスト・溶け込み具合を確認し、必要なら調整案を出します。
+- 同じファイルを同時に複数のAIで編集しないため、Codex は `art/` だけ、Claude はそれ以外、と分けています。
+# art/
+
+差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+
+## 作業記録
+### 2026-10-07：feedback（ギンガムチェックの修正）
+
+- 変更ファイル：`patterns/room-check.svg`、`patterns/shop-check.svg`、本READMEのみ。他の柄10枚は変更していない。
+- 方法：`art-guides/current-room-easy.png` のラグ、`current-shop-normal.png` のテーブルクロスと既存の柄定義を確認し、SVGコードを直接編集。画像生成・ネット画像・外部サービス・別料金のAPIは使用していない。
+- 修正内容：グループ全体の `opacity=".5"` を各帯に適用される `fill-opacity=".5"` に変更。縦横それぞれ64px幅の帯を32px・160pxの位置に2本配置し、帯と間隔を64pxに統一した。地色／半透明の帯／二重に重なる交差部分の3段階に戻した。roomの黄色系、shopのピンク系の色値と既存の控えめな織り目は保持。対象2枚の不足していたviewBoxの高さも補い、`0 0 256 256` とした。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、30ファイル・合計92KBで「すべて合格」。修正した2枚は不透明、上下左右のつなぎ目の差はいずれも0.0（基準28未満）。`art-guides/ART_CHECK.md` は許可済みの自動更新。形状データの組み立てに失敗し、検査スクリプトが保存済みの形状データを使用した旨の警告あり。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと：ビルド成功と変更後のゲーム実画面での目視確認は未確認。AGENTS.mdのサンドボックス指示に従い、検査・ビルド道具、設定、環境変数を変更する回避策は試さず終了。Claude Code側で最新形状データによる検査、ビルド、実画面確認が必要。
+- 一時ファイルは残していない。既存の作業記録・他の作業者による変更は保持。commit / push は行っていない。
+
+### 2026-10-07：ジョブ03（柄タイル12枚）
+
+- 作成ファイル：`patterns/room-plain.svg`、`room-stripes.svg`、`room-dots.svg`、`room-check.svg`、`patterns/garden-plain.svg`、`garden-stripes.svg`、`garden-dots.svg`、`garden-leaf.svg`、`patterns/shop-plain.svg`、`shop-stripes.svg`、`shop-dots.svg`、`shop-check.svg`（すべて `patterns/` 内）。本READMEも更新。
+- 方法：SVGをコードで記述。すべて256×256pxの正方形、不透明な地色。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
+- 色と大きさ：各シーンの `costumes` の地色・柄色をそのまま使用。ゲーム内の1周期は既存のsize（38〜52）のまま使える構成。水玉の位置・半径、葉の位置・傾き・大きさも既存柄を基準にした。しま・チェックは幅を保ったまま帯を中央に移し、両端の色をそろえた。
+- 質感：既存3体のSVGの柔らかい光と濃茶色 `#4A3A40` を参考に、布には白系10%・茶系3.5%の細い織り目、無地には小さく薄い紙の繊維、葉には控えめな葉脈を追加。水玉・葉には左上が明るい薄いグラデーション、しまには横方向の淡い陰影を重ねた。無地が別の柄に見えないよう、大きな装飾は加えていない。背景と服に同じタイルを使う前提で細部の濃さを抑えた。
+- つなぎ目：布の織り目は256を割り切る8px周期。水玉・葉・紙の繊維は四辺をまたがず、しま・チェックは辺まで同じ色で続く。タイル全体を一方向に明暗変化させるグラデーションは使用していない。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存キャラクターを含む30ファイル・合計92KBで「すべて合格」。柄12枚すべて不透明、つなぎ目の差は0.0〜0.1（基準28未満）。`art-guides/ART_CHECK.md` は許可済みの自動更新。形状データの組み立てに失敗したため、検査スクリプトが保存済みの形状データを使用した旨の警告あり。道具は変更していない。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと・迷った点：ビルド成功およびゲーム実画面での見た目・縮小時の柄の読みやすさ・服との溶け込みの目視確認は未確認。SVGはART_SLOTSで許可された形式のため採用。AGENTS.mdのサンドボックス指示に従い、ビルド停止後は道具・設定・環境変数の差し替えや回避策を試さず記録して終了。Claude Code側で最新形状データでの再検査、ビルド、実画面確認が必要。
+- 手動の書き込みは `art/patterns/` と本READMEのみ。制作スクリプト・一時ファイルは残していない。commit / push は行っていない。
+
+### 2026-10-07：ジョブ02（みみ・もこ）
+
+- 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
+- 方法：SVGをコードで記述。ころの既存SVGを画風の基準とし、服の白いマスク・陰影・輪郭、接地影と足を共通化。顔と手のグラデーションを各キャラクターの色に調整し、頭の形を新しく記述した。画像生成、ネット画像、別料金のAPIは使用していない。
+- みみ：ミントグリーンの丸い頭、左右にたれた長い耳、淡いピンクの耳の内側、ゆったりした眉と小さな笑顔。もこ：ラベンダーの雲形の頭、角を丸めた淡い金色の星の髪どめ、控えめな笑顔。色に加えて、たれ耳／雲形と星／ころの巻き毛で区別できる構成にした。
+- 画風・位置：ころと同じ濃茶色 `#4A3A40`、外周の基本線幅2.6と影側3.4、左上からの光、目のハイライト、淡い頬、控えめな縫い目を使用。目の中心はガイドの `(±16, -142)`、口は `(0, -125)` 付近。服の白いマスクはガイドと同じ形。発見時は片手を上げてふるポーズ。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、18ファイル（既存ころ6枚を含む）、合計40KBで「すべて合格」。結果は `art-guides/ART_CHECK.md` に自動出力。形状データの組み立てに失敗したため、検査スクリプトに元から備わっている処理で保存済みの形状データを使用した旨の警告あり。検査道具は変更していない。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` を通過した後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと・迷った点：ビルド成功とゲーム実画面での表示・縮小表示の目視確認は未確認。もこの口はガイド既定の開いた口ではなく、制作方針の「おだやかな笑顔」に合わせた。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数の差し替えや回避策は試さず終了。Claude Code側で最新の形状データによる再検査、ビルド、3体を並べた表示と発見ポーズの目視確認が必要。
+- 手動の書き込みはジョブで許可された2体のフォルダと本READMEのみ。検査レポートは許可済みの自動更新。commit / push は行っていない。
+
+### 2026-10-07：ジョブ01（既存成果物の記録を補記）
+
+- 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
+- 方法：既存成果物はコードで記述されたSVG（450×600px、viewBox `-90 -225 180 240`）。アプリコット色の肌、くるんとした毛、目のハイライト、左上からの光と柔らかな陰影を、パスとグラデーションで構成。服のマスク・陰影・輪郭を別の層に分けている。
+- 検査結果：前回の実行結果を確定できる作業記録がないため、ジョブ01当時の検査・ビルドの合否は未確認。今回の再検査の試行結果は下記。
+- できなかったこと・迷った点：この記録は残っているSVGを読んで補記したもの。前回の制作過程や判断理由は確認できないため、推測で補っていない。
+
+### 2026-10-07：feedback（ころの輪郭と手の修正）
+
+- 変更ファイル：`characters/koro/front.svg`、`front-found.svg`、`back.svg`、`clothes-line.svg`、本README。
+- 方法：既存SVGのコードを直接編集。画像生成・ネット画像・追加料金のAPIは使用していない。
+- 頭・手・足・服の外周は濃い茶色 `#4A3A40`、基本の線幅を2.6に変更。同じ外周の下側・影側に幅3.4の線を重ね、左上を細くした。線幅は既存SVGのviewBox座標単位。服の襟の線も2.6にそろえた。肌・足・服の陰影、顔、髪、縫い目、ハイライト、服マスクは保持。
+- 通常ポーズの両手と発見ポーズの下げた手には、小さい親指のふくらみを1つ追加。発見ポーズの上げた手は、複数の指の突起を丸いひとまとまりにし、親指のふくらみを1つ残した。手をふる位置は維持。
+- 迷った点：縮小時の読みやすさと幼い丸みを両立するため、指を描き分けず、外周のふくらみで親指を表現。線幅の強弱は元の形を維持した外周の重ね描きで付けた。
+- 検査結果：`npm run validate:art` と `npm run build` を実行したが、いずれもPowerShellの実行ポリシーにより `C:\Program Files\nodejs\npm.ps1` がブロックされた（`PSSecurityException` / `UnauthorizedAccess`）。両コマンドとも処理開始前に終了コード1で停止。今回の検査レポートは生成されておらず、既存の `art-guides/ART_CHECK.md` は今回の合格を示すものではない。
+- できなかったこと：自動検査の全項目合格、ビルド成功、ブラウザーでの縮小表示確認は未確認。`AGENTS.md` のサンドボックス指示に従い、検査道具・設定・環境変数の変更や回避策は行わず終了。Claude Code側で両コマンドと実画面の確認が必要。
+- 他キャラクターやアプリのコードは変更していない。commit / push は行っていない。
+{
+  "name": "pattern-hide-family-beta",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "もようのかくれんぼ（仮）家族内テスト用ベータ。公開・課金なし。",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "verify:layouts": "vitest run tests/unit/placement.test.ts",
+    "validate:art": "node scripts/validate-art.mjs",
+    "art:guides": "node scripts/export-art-guides.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "5.0.3"
+  }
+}
+art\README.md
+codex-jobs\03-patterns.md
+art-guides\character-moko.svg
+art-guides\character-moko.png
+art-guides\character-mimi.svg
+art-guides\character-mimi.png
+codex-jobs\02-mimi-moko.md
+codex-jobs\01-koro.md
+art-guides\character-koro.svg
+art-guides\character-koro.png
+art-guides\ART_CHECK.md
+codex-jobs\05-garden-shop.md
+codex-jobs\04-room.md
+codex-jobs\06-ui.md
+codex-jobs\90-review-code.md
+art-guides\current-shop-normal.png
+art-guides\current-room-easy.png
+art-guides\current-garden-hide.png
+art-guides\scene-garden.png
+art-guides\current-title.png
+codex-jobs\feedback.md
+art-guides\scene-garden.svg
+art-guides\scene-room.png
+codex-jobs\fix-validation.md
+art-guides\scene-room.svg
+codex-jobs\QUEUE.md
+codex-jobs\_template.md
+art-guides\scene-shop.png
+art-guides\scene-shop.svg
+art\patterns\shop-stripes.svg
+art\patterns\shop-plain.svg
+art\patterns\shop-dots.svg
+art\patterns\shop-check.svg
+art\patterns\room-stripes.svg
+art\patterns\room-plain.svg
+art\patterns\room-dots.svg
+art\patterns\room-check.svg
+art\patterns\garden-stripes.svg
+art\patterns\garden-plain.svg
+art\patterns\garden-leaf.svg
+art\patterns\garden-dots.svg
+art\characters\moko\front.svg
+art\characters\moko\front-found.svg
+art\characters\moko\clothes-shade.svg
+art\characters\moko\clothes-mask.svg
+art\characters\moko\clothes-line.svg
+art\characters\moko\back.svg
+art\characters\koro\front.svg
+art\characters\koro\front-found.svg
+art\characters\koro\clothes-shade.svg
+art\characters\koro\clothes-mask.svg
+art\characters\koro\clothes-line.svg
+art\characters\koro\back.svg
+art\characters\mimi\front.svg
+art\characters\mimi\front-found.svg
+art\characters\mimi\clothes-shade.svg
+art\characters\mimi\clothes-mask.svg
+art\characters\mimi\clothes-line.svg
+art\characters\mimi\back.svg
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 art-guides/scene-room.svg; Get-Content -Encoding UTF8 scripts/validate-art.mjs; Get-Content -Encoding UTF8 art/characters/koro/front.svg; git status --short; rg --files -g AGENTS.md -g '*geometry*' -g '*room*' scripts src" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 316ms:
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000"><rect width="1000" height="1000" fill="#fff"/><rect x="0" y="0" width="1000" height="650" fill="#5b8def" fill-opacity="0.18" stroke="#5b8def" stroke-width="3"/><text x="8" y="28" font-size="22" fill="#5b8def">wall（服:plain）</text><polygon points="24,40 218,40 226,644 16,644" fill="#e05a00" fill-opacity="0.18" stroke="#e05a00" stroke-width="3"/><text x="24" y="68" font-size="22" fill="#e05a00">curtain（服:stripes）</text><rect x="360" y="400" width="400" height="240" rx="42" fill="#18a058" fill-opacity="0.18" stroke="#18a058" stroke-width="3"/><rect x="326" y="480" width="70" height="190" rx="30" fill="#18a058" fill-opacity="0.18" stroke="#18a058" stroke-width="3"/><rect x="724" y="480" width="70" height="190" rx="30" fill="#18a058" fill-opacity="0.18" stroke="#18a058" stroke-width="3"/><text x="368" y="428" font-size="22" fill="#18a058">sofa（服:dots）</text><ellipse cx="530" cy="868" rx="380" ry="112" fill="#a040c0" fill-opacity="0.18" stroke="#a040c0" stroke-width="3"/><text x="170" y="868" font-size="22" fill="#a040c0">rug（服:check）</text><rect x="45" y="590" width="150" height="76" rx="8" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><polygon points="232,588 348,588 334,662 246,662" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><ellipse cx="470" cy="602" rx="76" ry="42" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><rect x="575" y="566" width="150" height="62" rx="20" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><polygon points="848,418 952,418 938,480 862,480" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><rect x="202" y="858" width="54" height="54" rx="6" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><rect x="264" y="858" width="54" height="54" rx="6" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><rect x="233" y="800" width="54" height="54" rx="6" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><ellipse cx="440" cy="920" rx="54" ry="54" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><rect x="555" y="832" width="150" height="72" rx="16" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><polygon points="575,831 584.2,819.7 593.3,810.4 602.5,803.3 611.7,798.1 620.8,795 630,794 639.2,795 648.3,798.1 657.5,803.3 666.7,810.4 675.8,819.7 685,831 685,841 675.8,829.7 666.7,820.4 657.5,813.3 648.3,808.1 639.2,805 630,804 620.8,805 611.7,808.1 602.5,813.3 593.3,820.4 584.2,829.7 575,841" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><ellipse cx="810" cy="920" rx="78" ry="44" fill="#ff8a00" fill-opacity="0.35" stroke="#ff8a00" stroke-width="2"/><polygon points="62,646 61.1,631 61.3,616.9 62.6,603.7 65,591.5 68.6,580.2 73.3,569.9 79.1,560.5 86,552 94.5,548.9 103,546.8 111.5,545.4 120,545 128.5,545.4 137,546.8 145.5,548.9 154,552 160.9,560.5 166.8,569.9 171.4,580.2 175,591.5 177.4,603.7 178.8,616.9 178.9,631 178,646 163.5,648 149,649.4 134.5,650.2 120,650.5 105.5,650.2 91,649.4 76.5,648" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="120" cy="504" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="124" cy="454" rx="14" ry="12" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="62,646 61.1,631 61.3,616.9 62.6,603.7 65,591.5 68.6,580.2 73.3,569.9 79.1,560.5 86,552 94.5,548.9 103,546.8 111.5,545.4 120,545 128.5,545.4 137,546.8 145.5,548.9 154,552 160.9,560.5 166.8,569.9 171.4,580.2 175,591.5 177.4,603.7 178.8,616.9 178.9,631 178,646 163.5,648 149,649.4 134.5,650.2 120,650.5 105.5,650.2 91,649.4 76.5,648" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="120" cy="504" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="75.5,522.1 72.1,530.8 67.9,538.6 63.2,544.9 58.3,549.3 53.5,551.5 49.2,551.4 45.6,549 43.1,544.4 41.7,537.9 41.6,530 42.7,521.3 45.1,512.3 48.5,503.6 52.7,495.8 57.4,489.5 62.3,485.1 67.1,482.8 71.4,483 75,485.4 77.5,490 78.9,496.5 79,504.4 77.9,513.1" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="194.9,512.3 197.3,521.3 198.4,530 198.3,537.9 196.9,544.4 194.4,549 190.8,551.4 186.5,551.5 181.7,549.3 176.8,544.9 172.1,538.6 167.9,530.8 164.5,522.1 162.1,513.1 161,504.4 161.1,496.5 162.5,490 165,485.4 168.6,483 172.9,482.8 177.7,485.1 182.6,489.5 187.3,495.8 191.5,503.6" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="62,646 61.1,631 61.3,616.9 62.6,603.7 65,591.5 68.6,580.2 73.3,569.9 79.1,560.5 86,552 94.5,548.9 103,546.8 111.5,545.4 120,545 128.5,545.4 137,546.8 145.5,548.9 154,552 160.9,560.5 166.8,569.9 171.4,580.2 175,591.5 177.4,603.7 178.8,616.9 178.9,631 178,646 163.5,648 149,649.4 134.5,650.2 120,650.5 105.5,650.2 91,649.4 76.5,648" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="120" cy="504" rx="56" ry="48" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="156" cy="462" rx="13" ry="13" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><circle cx="104" cy="504" r="5" fill="#e00000"/><circle cx="136" cy="504" r="5" fill="#e00000"/><circle cx="120" cy="521" r="5" fill="#e00000"/><ellipse cx="120" cy="504" rx="60" ry="56" fill="none" stroke="#e00000" stroke-width="3"/><text x="60" y="672" font-size="16" fill="#000">room-curtain</text><polygon points="232,652 231.1,637 231.3,622.9 232.6,609.7 235,597.5 238.6,586.2 243.3,575.9 249.1,566.5 256,558 264.5,554.9 273,552.8 281.5,551.4 290,551 298.5,551.4 307,552.8 315.5,554.9 324,558 330.9,566.5 336.8,575.9 341.4,586.2 345,597.5 347.4,609.7 348.8,622.9 348.9,637 348,652 333.5,654 319,655.4 304.5,656.2 290,656.5 275.5,656.2 261,655.4 246.5,654" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="290" cy="510" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="294" cy="460" rx="14" ry="12" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="232,652 231.1,637 231.3,622.9 232.6,609.7 235,597.5 238.6,586.2 243.3,575.9 249.1,566.5 256,558 264.5,554.9 273,552.8 281.5,551.4 290,551 298.5,551.4 307,552.8 315.5,554.9 324,558 330.9,566.5 336.8,575.9 341.4,586.2 345,597.5 347.4,609.7 348.8,622.9 348.9,637 348,652 333.5,654 319,655.4 304.5,656.2 290,656.5 275.5,656.2 261,655.4 246.5,654" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="290" cy="510" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="245.5,528.1 242.1,536.8 237.9,544.6 233.2,550.9 228.3,555.3 223.5,557.5 219.2,557.4 215.6,555 213.1,550.4 211.7,543.9 211.6,536 212.7,527.3 215.1,518.3 218.5,509.6 222.7,501.8 227.4,495.5 232.3,491.1 237.1,488.8 241.4,489 245,491.4 247.5,496 248.9,502.5 249,510.4 247.9,519.1" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="364.9,518.3 367.3,527.3 368.4,536 368.3,543.9 366.9,550.4 364.4,555 360.8,557.4 356.5,557.5 351.7,555.3 346.8,550.9 342.1,544.6 337.9,536.8 334.5,528.1 332.1,519.1 331,510.4 331.1,502.5 332.5,496 335,491.4 338.6,489 342.9,488.8 347.7,491.1 352.6,495.5 357.3,501.8 361.5,509.6" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="232,652 231.1,637 231.3,622.9 232.6,609.7 235,597.5 238.6,586.2 243.3,575.9 249.1,566.5 256,558 264.5,554.9 273,552.8 281.5,551.4 290,551 298.5,551.4 307,552.8 315.5,554.9 324,558 330.9,566.5 336.8,575.9 341.4,586.2 345,597.5 347.4,609.7 348.8,622.9 348.9,637 348,652 333.5,654 319,655.4 304.5,656.2 290,656.5 275.5,656.2 261,655.4 246.5,654" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="290" cy="510" rx="56" ry="48" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="326" cy="468" rx="13" ry="13" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><circle cx="274" cy="510" r="5" fill="#e00000"/><circle cx="306" cy="510" r="5" fill="#e00000"/><circle cx="290" cy="527" r="5" fill="#e00000"/><ellipse cx="290" cy="510" rx="60" ry="56" fill="none" stroke="#e00000" stroke-width="3"/><text x="230" y="678" font-size="16" fill="#000">room-plant</text><polygon points="412,600 411.1,585 411.3,570.9 412.6,557.7 415,545.5 418.6,534.2 423.3,523.9 429.1,514.5 436,506 444.5,502.9 453,500.8 461.5,499.4 470,499 478.5,499.4 487,500.8 495.5,502.9 504,506 510.9,514.5 516.8,523.9 521.4,534.2 525,545.5 527.4,557.7 528.8,570.9 528.9,585 528,600 513.5,602 499,603.4 484.5,604.2 470,604.5 455.5,604.2 441,603.4 426.5,602" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="470" cy="458" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="474" cy="408" rx="14" ry="12" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="412,600 411.1,585 411.3,570.9 412.6,557.7 415,545.5 418.6,534.2 423.3,523.9 429.1,514.5 436,506 444.5,502.9 453,500.8 461.5,499.4 470,499 478.5,499.4 487,500.8 495.5,502.9 504,506 510.9,514.5 516.8,523.9 521.4,534.2 525,545.5 527.4,557.7 528.8,570.9 528.9,585 528,600 513.5,602 499,603.4 484.5,604.2 470,604.5 455.5,604.2 441,603.4 426.5,602" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="470" cy="458" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="425.5,476.1 422.1,484.8 417.9,492.6 413.2,498.9 408.3,503.3 403.5,505.5 399.2,505.4 395.6,503 393.1,498.4 391.7,491.9 391.6,484 392.7,475.3 395.1,466.3 398.5,457.6 402.7,449.8 407.4,443.5 412.3,439.1 417.1,436.8 421.4,437 425,439.4 427.5,444 428.9,450.5 429,458.4 427.9,467.1" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="544.9,466.3 547.3,475.3 548.4,484 548.3,491.9 546.9,498.4 544.4,503 540.8,505.4 536.5,505.5 531.7,503.3 526.8,498.9 522.1,492.6 517.9,484.8 514.5,476.1 512.1,467.1 511,458.4 511.1,450.5 512.5,444 515,439.4 518.6,437 522.9,436.8 527.7,439.1 532.6,443.5 537.3,449.8 541.5,457.6" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="412,600 411.1,585 411.3,570.9 412.6,557.7 415,545.5 418.6,534.2 423.3,523.9 429.1,514.5 436,506 444.5,502.9 453,500.8 461.5,499.4 470,499 478.5,499.4 487,500.8 495.5,502.9 504,506 510.9,514.5 516.8,523.9 521.4,534.2 525,545.5 527.4,557.7 528.8,570.9 528.9,585 528,600 513.5,602 499,603.4 484.5,604.2 470,604.5 455.5,604.2 441,603.4 426.5,602" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="470" cy="458" rx="56" ry="48" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="506" cy="416" rx="13" ry="13" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><circle cx="454" cy="458" r="5" fill="#e00000"/><circle cx="486" cy="458" r="5" fill="#e00000"/><circle cx="470" cy="475" r="5" fill="#e00000"/><ellipse cx="470" cy="458" rx="60" ry="56" fill="none" stroke="#e00000" stroke-width="3"/><text x="410" y="626" font-size="16" fill="#000">room-sofa-l</text><polygon points="592,600 591.1,585 591.3,570.9 592.6,557.7 595,545.5 598.6,534.2 603.3,523.9 609.1,514.5 616,506 624.5,502.9 633,500.8 641.5,499.4 650,499 658.5,499.4 667,500.8 675.5,502.9 684,506 690.9,514.5 696.8,523.9 701.4,534.2 705,545.5 707.4,557.7 708.8,570.9 708.9,585 708,600 693.5,602 679,603.4 664.5,604.2 650,604.5 635.5,604.2 621,603.4 606.5,602" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="650" cy="458" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="654" cy="408" rx="14" ry="12" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="592,600 591.1,585 591.3,570.9 592.6,557.7 595,545.5 598.6,534.2 603.3,523.9 609.1,514.5 616,506 624.5,502.9 633,500.8 641.5,499.4 650,499 658.5,499.4 667,500.8 675.5,502.9 684,506 690.9,514.5 696.8,523.9 701.4,534.2 705,545.5 707.4,557.7 708.8,570.9 708.9,585 708,600 693.5,602 679,603.4 664.5,604.2 650,604.5 635.5,604.2 621,603.4 606.5,602" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="650" cy="458" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="605.5,476.1 602.1,484.8 597.9,492.6 593.2,498.9 588.3,503.3 583.5,505.5 579.2,505.4 575.6,503 573.1,498.4 571.7,491.9 571.6,484 572.7,475.3 575.1,466.3 578.5,457.6 582.7,449.8 587.4,443.5 592.3,439.1 597.1,436.8 601.4,437 605,439.4 607.5,444 608.9,450.5 609,458.4 607.9,467.1" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="724.9,466.3 727.3,475.3 728.4,484 728.3,491.9 726.9,498.4 724.4,503 720.8,505.4 716.5,505.5 711.7,503.3 706.8,498.9 702.1,492.6 697.9,484.8 694.5,476.1 692.1,467.1 691,458.4 691.1,450.5 692.5,444 695,439.4 698.6,437 702.9,436.8 707.7,439.1 712.6,443.5 717.3,449.8 721.5,457.6" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="592,600 591.1,585 591.3,570.9 592.6,557.7 595,545.5 598.6,534.2 603.3,523.9 609.1,514.5 616,506 624.5,502.9 633,500.8 641.5,499.4 650,499 658.5,499.4 667,500.8 675.5,502.9 684,506 690.9,514.5 696.8,523.9 701.4,534.2 705,545.5 707.4,557.7 708.8,570.9 708.9,585 708,600 693.5,602 679,603.4 664.5,604.2 650,604.5 635.5,604.2 621,603.4 606.5,602" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="650" cy="458" rx="56" ry="48" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="686" cy="416" rx="13" ry="13" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><circle cx="634" cy="458" r="5" fill="#e00000"/><circle cx="666" cy="458" r="5" fill="#e00000"/><circle cx="650" cy="475" r="5" fill="#e00000"/><ellipse cx="650" cy="458" rx="60" ry="56" fill="none" stroke="#e00000" stroke-width="3"/><text x="590" y="626" font-size="16" fill="#000">room-sofa-r</text><polygon points="844.9,476 844,461.7 844.2,448.3 845.4,435.8 847.8,424.2 851.1,413.5 855.6,403.7 861.1,394.7 867.7,386.7 875.8,383.8 883.9,381.7 891.9,380.5 900,380.1 908.1,380.5 916.2,381.7 924.2,383.8 932.3,386.7 938.9,394.7 944.4,403.7 948.9,413.5 952.3,424.2 954.6,435.8 955.8,448.3 956,461.7 955.1,476 941.3,477.9 927.6,479.2 913.8,480 900,480.3 886.2,480 872.5,479.2 858.7,477.9" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="900" cy="341.1" rx="45.6" ry="42.8" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="903.8" cy="293.6" rx="13.3" ry="11.4" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="844.9,476 844,461.7 844.2,448.3 845.4,435.8 847.8,424.2 851.1,413.5 855.6,403.7 861.1,394.7 867.7,386.7 875.8,383.8 883.9,381.7 891.9,380.5 900,380.1 908.1,380.5 916.2,381.7 924.2,383.8 932.3,386.7 938.9,394.7 944.4,403.7 948.9,413.5 952.3,424.2 954.6,435.8 955.8,448.3 956,461.7 955.1,476 941.3,477.9 927.6,479.2 913.8,480 900,480.3 886.2,480 872.5,479.2 858.7,477.9" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="900" cy="341.1" rx="45.6" ry="42.8" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="857.7,358.3 854.5,366.6 850.5,374 846,380 841.4,384.2 836.8,386.3 832.7,386.2 829.3,383.8 826.9,379.5 825.6,373.3 825.5,365.8 826.6,357.5 828.8,348.9 832.1,340.7 836.1,333.3 840.5,327.3 845.2,323.1 849.8,321 853.9,321.1 857.2,323.4 859.7,327.8 861,334 861.1,341.4 860,349.8" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="971.2,348.9 973.4,357.5 974.5,365.8 974.4,373.3 973.1,379.5 970.7,383.8 967.3,386.2 963.2,386.3 958.6,384.2 954,380 949.5,374 945.5,366.6 942.3,358.3 940,349.8 938.9,341.4 939,334 940.3,327.8 942.8,323.4 946.1,321.1 950.2,321 954.8,323.1 959.5,327.3 963.9,333.3 967.9,340.7" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="844.9,476 844,461.7 844.2,448.3 845.4,435.8 847.8,424.2 851.1,413.5 855.6,403.7 861.1,394.7 867.7,386.7 875.8,383.8 883.9,381.7 891.9,380.5 900,380.1 908.1,380.5 916.2,381.7 924.2,383.8 932.3,386.7 938.9,394.7 944.4,403.7 948.9,413.5 952.3,424.2 954.6,435.8 955.8,448.3 956,461.7 955.1,476 941.3,477.9 927.6,479.2 913.8,480 900,480.3 886.2,480 872.5,479.2 858.7,477.9" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="900" cy="341.1" rx="53.2" ry="45.6" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="934.2" cy="301.2" rx="12.4" ry="12.4" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><circle cx="884.8" cy="341.1" r="5" fill="#e00000"/><circle cx="915.2" cy="341.1" r="5" fill="#e00000"/><circle cx="900" cy="357.25" r="5" fill="#e00000"/><ellipse cx="900" cy="341.1" rx="57" ry="53.199999999999996" fill="none" stroke="#e00000" stroke-width="3"/><text x="840" y="502" font-size="16" fill="#000">room-cabinet</text><polygon points="202,880 201.1,865 201.3,850.9 202.6,837.7 205,825.5 208.6,814.2 213.3,803.9 219.1,794.5 226,786 234.5,782.9 243,780.8 251.5,779.4 260,779 268.5,779.4 277,780.8 285.5,782.9 294,786 300.9,794.5 306.8,803.9 311.4,814.2 315,825.5 317.4,837.7 318.8,850.9 318.9,865 318,880 303.5,882 289,883.4 274.5,884.2 260,884.5 245.5,884.2 231,883.4 216.5,882" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="260" cy="738" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="264" cy="688" rx="14" ry="12" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="202,880 201.1,865 201.3,850.9 202.6,837.7 205,825.5 208.6,814.2 213.3,803.9 219.1,794.5 226,786 234.5,782.9 243,780.8 251.5,779.4 260,779 268.5,779.4 277,780.8 285.5,782.9 294,786 300.9,794.5 306.8,803.9 311.4,814.2 315,825.5 317.4,837.7 318.8,850.9 318.9,865 318,880 303.5,882 289,883.4 274.5,884.2 260,884.5 245.5,884.2 231,883.4 216.5,882" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="260" cy="738" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="215.5,756.1 212.1,764.8 207.9,772.6 203.2,778.9 198.3,783.3 193.5,785.5 189.2,785.4 185.6,783 183.1,778.4 181.7,771.9 181.6,764 182.7,755.3 185.1,746.3 188.5,737.6 192.7,729.8 197.4,723.5 202.3,719.1 207.1,716.8 211.4,717 215,719.4 217.5,724 218.9,730.5 219,738.4 217.9,747.1" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="334.9,746.3 337.3,755.3 338.4,764 338.3,771.9 336.9,778.4 334.4,783 330.8,785.4 326.5,785.5 321.7,783.3 316.8,778.9 312.1,772.6 307.9,764.8 304.5,756.1 302.1,747.1 301,738.4 301.1,730.5 302.5,724 305,719.4 308.6,717 312.9,716.8 317.7,719.1 322.6,723.5 327.3,729.8 331.5,737.6" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="202,880 201.1,865 201.3,850.9 202.6,837.7 205,825.5 208.6,814.2 213.3,803.9 219.1,794.5 226,786 234.5,782.9 243,780.8 251.5,779.4 260,779 268.5,779.4 277,780.8 285.5,782.9 294,786 300.9,794.5 306.8,803.9 311.4,814.2 315,825.5 317.4,837.7 318.8,850.9 318.9,865 318,880 303.5,882 289,883.4 274.5,884.2 260,884.5 245.5,884.2 231,883.4 216.5,882" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="260" cy="738" rx="56" ry="48" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="296" cy="696" rx="13" ry="13" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><circle cx="244" cy="738" r="5" fill="#e00000"/><circle cx="276" cy="738" r="5" fill="#e00000"/><circle cx="260" cy="755" r="5" fill="#e00000"/><ellipse cx="260" cy="738" rx="60" ry="56" fill="none" stroke="#e00000" stroke-width="3"/><text x="200" y="906" font-size="16" fill="#000">room-rug-1</text><polygon points="382,950 381.1,935 381.3,920.9 382.6,907.7 385,895.5 388.6,884.2 393.3,873.9 399.1,864.5 406,856 414.5,852.9 423,850.8 431.5,849.4 440,849 448.5,849.4 457,850.8 465.5,852.9 474,856 480.9,864.5 486.8,873.9 491.4,884.2 495,895.5 497.4,907.7 498.8,920.9 498.9,935 498,950 483.5,952 469,953.4 454.5,954.2 440,954.5 425.5,954.2 411,953.4 396.5,952" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="440" cy="808" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="444" cy="758" rx="14" ry="12" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="382,950 381.1,935 381.3,920.9 382.6,907.7 385,895.5 388.6,884.2 393.3,873.9 399.1,864.5 406,856 414.5,852.9 423,850.8 431.5,849.4 440,849 448.5,849.4 457,850.8 465.5,852.9 474,856 480.9,864.5 486.8,873.9 491.4,884.2 495,895.5 497.4,907.7 498.8,920.9 498.9,935 498,950 483.5,952 469,953.4 454.5,954.2 440,954.5 425.5,954.2 411,953.4 396.5,952" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="440" cy="808" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="395.5,826.1 392.1,834.8 387.9,842.6 383.2,848.9 378.3,853.3 373.5,855.5 369.2,855.4 365.6,853 363.1,848.4 361.7,841.9 361.6,834 362.7,825.3 365.1,816.3 368.5,807.6 372.7,799.8 377.4,793.5 382.3,789.1 387.1,786.8 391.4,787 395,789.4 397.5,794 398.9,800.5 399,808.4 397.9,817.1" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="514.9,816.3 517.3,825.3 518.4,834 518.3,841.9 516.9,848.4 514.4,853 510.8,855.4 506.5,855.5 501.7,853.3 496.8,848.9 492.1,842.6 487.9,834.8 484.5,826.1 482.1,817.1 481,808.4 481.1,800.5 482.5,794 485,789.4 488.6,787 492.9,786.8 497.7,789.1 502.6,793.5 507.3,799.8 511.5,807.6" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="382,950 381.1,935 381.3,920.9 382.6,907.7 385,895.5 388.6,884.2 393.3,873.9 399.1,864.5 406,856 414.5,852.9 423,850.8 431.5,849.4 440,849 448.5,849.4 457,850.8 465.5,852.9 474,856 480.9,864.5 486.8,873.9 491.4,884.2 495,895.5 497.4,907.7 498.8,920.9 498.9,935 498,950 483.5,952 469,953.4 454.5,954.2 440,954.5 425.5,954.2 411,953.4 396.5,952" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="440" cy="808" rx="56" ry="48" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="476" cy="766" rx="13" ry="13" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><circle cx="424" cy="808" r="5" fill="#e00000"/><circle cx="456" cy="808" r="5" fill="#e00000"/><circle cx="440" cy="825" r="5" fill="#e00000"/><ellipse cx="440" cy="808" rx="60" ry="56" fill="none" stroke="#e00000" stroke-width="3"/><text x="380" y="976" font-size="16" fill="#000">room-rug-2</text><polygon points="572,878 571.1,863 571.3,848.9 572.6,835.7 575,823.5 578.6,812.2 583.3,801.9 589.1,792.5 596,784 604.5,780.9 613,778.8 621.5,777.4 630,777 638.5,777.4 647,778.8 655.5,780.9 664,784 670.9,792.5 676.8,801.9 681.4,812.2 685,823.5 687.4,835.7 688.8,848.9 688.9,863 688,878 673.5,880 659,881.4 644.5,882.2 630,882.5 615.5,882.2 601,881.4 586.5,880" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="630" cy="736" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="634" cy="686" rx="14" ry="12" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="572,878 571.1,863 571.3,848.9 572.6,835.7 575,823.5 578.6,812.2 583.3,801.9 589.1,792.5 596,784 604.5,780.9 613,778.8 621.5,777.4 630,777 638.5,777.4 647,778.8 655.5,780.9 664,784 670.9,792.5 676.8,801.9 681.4,812.2 685,823.5 687.4,835.7 688.8,848.9 688.9,863 688,878 673.5,880 659,881.4 644.5,882.2 630,882.5 615.5,882.2 601,881.4 586.5,880" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="630" cy="736" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="585.5,754.1 582.1,762.8 577.9,770.6 573.2,776.9 568.3,781.3 563.5,783.5 559.2,783.4 555.6,781 553.1,776.4 551.7,769.9 551.6,762 552.7,753.3 555.1,744.3 558.5,735.6 562.7,727.8 567.4,721.5 572.3,717.1 577.1,714.8 581.4,715 585,717.4 587.5,722 588.9,728.5 589,736.4 587.9,745.1" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="704.9,744.3 707.3,753.3 708.4,762 708.3,769.9 706.9,776.4 704.4,781 700.8,783.4 696.5,783.5 691.7,781.3 686.8,776.9 682.1,770.6 677.9,762.8 674.5,754.1 672.1,745.1 671,736.4 671.1,728.5 672.5,722 675,717.4 678.6,715 682.9,714.8 687.7,717.1 692.6,721.5 697.3,727.8 701.5,735.6" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="572,878 571.1,863 571.3,848.9 572.6,835.7 575,823.5 578.6,812.2 583.3,801.9 589.1,792.5 596,784 604.5,780.9 613,778.8 621.5,777.4 630,777 638.5,777.4 647,778.8 655.5,780.9 664,784 670.9,792.5 676.8,801.9 681.4,812.2 685,823.5 687.4,835.7 688.8,848.9 688.9,863 688,878 673.5,880 659,881.4 644.5,882.2 630,882.5 615.5,882.2 601,881.4 586.5,880" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="630" cy="736" rx="56" ry="48" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="666" cy="694" rx="13" ry="13" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><circle cx="614" cy="736" r="5" fill="#e00000"/><circle cx="646" cy="736" r="5" fill="#e00000"/><circle cx="630" cy="753" r="5" fill="#e00000"/><ellipse cx="630" cy="736" rx="60" ry="56" fill="none" stroke="#e00000" stroke-width="3"/><text x="570" y="904" font-size="16" fill="#000">room-rug-3</text><polygon points="752,930 751.1,915 751.3,900.9 752.6,887.7 755,875.5 758.6,864.2 763.3,853.9 769.1,844.5 776,836 784.5,832.9 793,830.8 801.5,829.4 810,829 818.5,829.4 827,830.8 835.5,832.9 844,836 850.9,844.5 856.8,853.9 861.4,864.2 865,875.5 867.4,887.7 868.8,900.9 868.9,915 868,930 853.5,932 839,933.4 824.5,934.2 810,934.5 795.5,934.2 781,933.4 766.5,932" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="810" cy="788" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="814" cy="738" rx="14" ry="12" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="752,930 751.1,915 751.3,900.9 752.6,887.7 755,875.5 758.6,864.2 763.3,853.9 769.1,844.5 776,836 784.5,832.9 793,830.8 801.5,829.4 810,829 818.5,829.4 827,830.8 835.5,832.9 844,836 850.9,844.5 856.8,853.9 861.4,864.2 865,875.5 867.4,887.7 868.8,900.9 868.9,915 868,930 853.5,932 839,933.4 824.5,934.2 810,934.5 795.5,934.2 781,933.4 766.5,932" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="810" cy="788" rx="48" ry="45" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="765.5,806.1 762.1,814.8 757.9,822.6 753.2,828.9 748.3,833.3 743.5,835.5 739.2,835.4 735.6,833 733.1,828.4 731.7,821.9 731.6,814 732.7,805.3 735.1,796.3 738.5,787.6 742.7,779.8 747.4,773.5 752.3,769.1 757.1,766.8 761.4,767 765,769.4 767.5,774 768.9,780.5 769,788.4 767.9,797.1" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="884.9,796.3 887.3,805.3 888.4,814 888.3,821.9 886.9,828.4 884.4,833 880.8,835.4 876.5,835.5 871.7,833.3 866.8,828.9 862.1,822.6 857.9,814.8 854.5,806.1 852.1,797.1 851,788.4 851.1,780.5 852.5,774 855,769.4 858.6,767 862.9,766.8 867.7,769.1 872.6,773.5 877.3,779.8 881.5,787.6" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><polygon points="752,930 751.1,915 751.3,900.9 752.6,887.7 755,875.5 758.6,864.2 763.3,853.9 769.1,844.5 776,836 784.5,832.9 793,830.8 801.5,829.4 810,829 818.5,829.4 827,830.8 835.5,832.9 844,836 850.9,844.5 856.8,853.9 861.4,864.2 865,875.5 867.4,887.7 868.8,900.9 868.9,915 868,930 853.5,932 839,933.4 824.5,934.2 810,934.5 795.5,934.2 781,933.4 766.5,932" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="810" cy="788" rx="56" ry="48" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><ellipse cx="846" cy="746" rx="13" ry="13" fill="none" stroke="#333" stroke-width="1.5" stroke-dasharray="6 4"/><circle cx="794" cy="788" r="5" fill="#e00000"/><circle cx="826" cy="788" r="5" fill="#e00000"/><circle cx="810" cy="805" r="5" fill="#e00000"/><ellipse cx="810" cy="788" rx="60" ry="56" fill="none" stroke="#e00000" stroke-width="3"/><text x="750" y="956" font-size="16" fill="#000">room-rug-4</text>
+    <text x="10" y="990" font-size="18" fill="#000">room: 色面=柄の領域（ここはゲームが柄を塗る） 橙=前景の小物(fore) 点線=キャラ 赤円=顔（何も重ねない）</text></svg>
+// art/ の絵を自動検査する（npm run validate:art）。
+// 形式・寸法・安全性に加え、ゲームと同じ形状データで「顔が隠れない」「全面を隠さない」
+// 「服の形がからだの判定とずれない」「柄タイルがつなぎ目なく並ぶ」を確かめる。
+// 見た目の良し悪し・幼児にとっての難しさは検査しない（人が見る）。
+import { chromium } from '@playwright/test';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, extname, basename } from 'node:path';
+import { loadGeometry } from './lib/load-geometry.mjs';
+
+const dirArg = process.argv.indexOf('--dir');
+const ART = dirArg > 0 ? process.argv[dirArg + 1] : 'art';
+const G = await loadGeometry();
+const F = G.CHAR_FRAME;
+const MAX_FILE = 800 * 1024;
+const MAX_TOTAL = 8 * 1024 * 1024;
+const results = []; // {file, ok, msg}
+const ok = (file, msg) => results.push({ file, ok: true, msg });
+const ng = (file, msg) => results.push({ file, ok: false, msg });
+
+function list(d) {
+  if (!existsSync(d)) return [];
+  return readdirSync(d).flatMap((f) => {
+    const p = join(d, f);
+    return statSync(p).isDirectory() ? list(p) : [p];
+  });
+}
+const files = list(ART).filter((f) => !basename(f).startsWith('.') && !['README.md', 'ART_CHECK.md'].includes(basename(f)));
+const MIME = { '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
+
+// ---- 形式・安全性
+let total = 0;
+for (const f of files) {
+  const ext = extname(f).toLowerCase();
+  const size = statSync(f).size;
+  total += size;
+  if (!MIME[ext]) {
+    ng(f, `使えない形式 ${ext}（png / webp / svg のみ）`);
+    continue;
+  }
+  if (size > MAX_FILE) ng(f, `大きすぎ ${(size / 1024).toFixed(0)}KB > ${MAX_FILE / 1024}KB`);
+  if (ext === '.svg') {
+    const t = readFileSync(f, 'utf8');
+    if (/<script|on[a-z]+\s*=|<foreignObject|javascript:/i.test(t)) ng(f, 'SVG にスクリプト／イベント属性／foreignObject がある');
+    if (/(href|src)\s*=\s*["'](?!#|data:image\/)/i.test(t) || /url\(\s*['"]?(?!#)/i.test(t)) ng(f, 'SVG が外部ファイル・URLを参照している（同じファイル内の #id と data:image のみ可）');
+    if (/<text|font-family/i.test(t)) ng(f, 'SVG に文字・フォント指定がある（端末で見た目が変わるため、線に変換してください）');
+  }
+}
+if (total > MAX_TOTAL) ng(ART, `合計が大きすぎ ${(total / 1048576).toFixed(1)}MB > 8MB`);
+
+// ---- 画素の読み取り（Chromium の canvas）
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.setContent('<html><body></body></html>');
+async function pixels(file, w, h) {
+  const data = `data:${MIME[extname(file).toLowerCase()]};base64,${readFileSync(file).toString('base64')}`;
+  return page.evaluate(
+    async ({ data, w, h }) => {
+      const img = new Image();
+      img.src = data;
+      await img.decode();
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const x = c.getContext('2d');
+      x.drawImage(img, 0, 0, w, h);
+      const d = x.getImageData(0, 0, w, h).data;
+      const a = new Uint8Array(w * h);
+      const l = new Uint8Array(w * h);
+      for (let i = 0; i < w * h; i++) {
+        a[i] = d[i * 4 + 3];
+        l[i] = Math.round((d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114) * (d[i * 4 + 3] / 255));
+      }
+      const b64 = (u) => {
+        let s = '';
+        for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+        return btoa(s);
+      };
+      return { nw: img.naturalWidth, nh: img.naturalHeight, a: b64(a), l: b64(l), w, h };
+    },
+    { data, w, h },
+  ).then((r) => ({ ...r, a: Buffer.from(r.a, 'base64'), l: Buffer.from(r.l, 'base64') }));
+}
+const at = (px, x, y) => {
+  const xi = Math.min(px.w - 1, Math.max(0, Math.round(x)));
+  const yi = Math.min(px.h - 1, Math.max(0, Math.round(y)));
+  return xi + yi * px.w;
+};
+const near = (px, arr, x, y, r) => {
+  let m = 0;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) m = Math.max(m, px[arr][at(px, x + dx, y + dy)]);
+  return m;
+};
+
+// ---- キャラクター
+const CH_SCALE = 2; // 1単位 = 2px で検査
+for (const id of G.CHARACTER_IDS) {
+  const d = join(ART, 'characters', id);
+  if (!existsSync(d)) continue;
+  const pick = (n) => ['webp', 'png', 'svg'].map((e) => join(d, `${n}.${e}`)).find(existsSync);
+  const mask = pick('clothes-mask');
+  const front = pick('front');
+  if (!mask || !front) {
+    ng(d, 'clothes-mask と front の両方が必要（片方だけだと使われません）');
+    continue;
+  }
+  const W = F.w * CH_SCALE;
+  const H = F.h * CH_SCALE;
+  const toPx = (p) => ({ x: (p.x - F.x) * CH_SCALE, y: (p.y - F.y) * CH_SCALE });
+  const c = G.CHARACTERS[id];
+  const grid = [];
+  for (let y = F.y + 1; y < F.y + F.h; y += 2) for (let x = F.x + 1; x < F.x + F.w; x += 2) grid.push({ x, y });
+  const dist = (shapes, p) => Math.min(...shapes.map((s) => G.distanceTo(s, p)));
+  for (const n of ['back', 'clothes-mask', 'clothes-shade', 'clothes-line', 'front', 'front-found']) {
+    const f = pick(n);
+    if (!f) continue;
+    const px = await pixels(f, W, H);
+    const ar = px.nw / px.nh;
+    if (Math.abs(ar - F.w / F.h) > 0.01 || px.nw < 450) ng(f, `寸法 ${px.nw}×${px.nh}（450×600 か、その整数倍）`);
+    if (n === 'clothes-mask') {
+      const isCl = (p) => px.l[at(px, toPx(p).x, toPx(p).y)] > 128;
+      const cl = grid.filter(isCl);
+      const inside = cl.filter((p) => G.distanceTo(G.BODY, p) <= 6).length;
+      const bodyPts = G.samplePoints(G.BODY, 2);
+      const cover = bodyPts.filter(isCl).length / bodyPts.length;
+      const r1 = cl.length ? inside / cl.length : 0;
+      (r1 >= 0.95 ? ok : ng)(f, `服の白い部分がからだの判定内 ${(r1 * 100).toFixed(0)}%（95%以上）`);
+      (cover >= 0.7 ? ok : ng)(f, `からだの判定を服が覆う割合 ${(cover * 100).toFixed(0)}%（70%以上）`);
+    } else {
+      const op = grid.filter((p) => px.a[at(px, toPx(p).x, toPx(p).y)] > 128);
+      const out = op.filter((p) => dist(c.silhouette, p) > 10).length;
+      const lim = n === 'front-found' ? 0.12 : 0.04;
+      const r = op.length ? out / op.length : 0;
+      (r <= lim ? ok : ng)(f, `輪郭の判定からはみ出す割合 ${(r * 100).toFixed(1)}%（${lim * 100}%以下）`);
+      if (n === 'front' || n === 'front-found') {
+        const faceOk = c.facePoints.every((p) => near(px, 'a', toPx(p).x, toPx(p).y, 2) > 128);
+        (faceOk ? ok : ng)(f, faceOk ? '顔の位置に絵がある' : '顔の位置（目・口）に絵が無い');
+      }
+    }
+  }
+}
+
+// ---- シーン
+for (const sid of G.SCENE_IDS) {
+  const d = join(ART, 'scenes', sid);
+  if (!existsSync(d)) continue;
+  const sc = G.SCENES[sid];
+  const pick = (n) => ['webp', 'png', 'svg'].map((e) => join(d, `${n}.${e}`)).find(existsSync);
+  for (const n of ['back', 'over', 'minor', 'fore']) {
+    const f = pick(n);
+    if (!f) continue;
+    const px = await pixels(f, 1000, 1000);
+    if (px.nw !== px.nh || px.nw < 1000) ng(f, `寸法 ${px.nw}×${px.nh}（正方形・1000以上）`);
+    if (n === 'back') {
+      ok(f, '寸法確認のみ');
+      continue;
+    }
+    let bad = 0;
+    for (const sp of sc.spots) {
+      for (const cid of G.CHARACTER_IDS) {
+        const t = G.spotTransform(sp);
+        const face = G.CHARACTERS[cid].facePoints.map((p) => G.transformPt(t, p));
+        const faceA = Math.max(...face.map((p) => near(px, 'a', p.x, p.y, 4)));
+        const body = G.samplePoints(G.transformShape(t, G.BODY), 6);
+        if (n === 'fore') {
+          const sil = G.silhouetteWorld(cid, sp).flatMap((s) => G.samplePoints(s, 6));
+          const vis = sil.filter((p) => px.a[at(px, p.x, p.y)] <= 128).length / sil.length;
+          const bvis = body.filter((p) => px.a[at(px, p.x, p.y)] <= 128).length / body.length;
+          const probs = [];
+          if (faceA > 76) probs.push('顔に重なる');
+          if (vis < G.LIMITS.minVisible) probs.push(`見える割合 ${vis.toFixed(2)} < ${G.LIMITS.minVisible}`);
+          if (bvis < G.LIMITS.minBodyVisible) probs.push(`服が見える割合 ${bvis.toFixed(2)} < ${G.LIMITS.minBodyVisible}`);
+          if (bvis > G.LIMITS.maxBodyVisible) probs.push(`服がまったく隠れていない ${bvis.toFixed(2)}`);
+          if (probs.length) {
+            bad++;
+            ng(f, `${sp.id}/${cid}: ${probs.join('、')}`);
+          }
+        } else {
+          const mean = body.reduce((s, p) => s + px.a[at(px, p.x, p.y)], 0) / body.length / 255;
+          const probs = [];
+          if (faceA > 76) probs.push('顔の後ろに濃い絵がある（顔の輪郭が読みにくくなる）');
+          if (mean > 0.35) probs.push(`服の後ろの濃さ ${mean.toFixed(2)} > 0.35（柄が溶け込まなくなる）`);
+          if (probs.length) {
+            bad++;
+            ng(f, `${sp.id}/${cid}: ${probs.join('、')}`);
+          }
+        }
+      }
+    }
+    if (!bad) ok(f, `全 ${sc.spots.length} か所 × 3体で問題なし`);
+  }
+}
+
+// ---- 柄タイル
+const pdir = join(ART, 'patterns');
+for (const f of list(pdir)) {
+  const m = basename(f).match(/^(room|garden|shop)-(plain|stripes|dots|check|leaf)\.(png|webp|svg)$/);
+  if (!m) {
+    ng(f, 'ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png）');
+    continue;
+  }
+  if (!G.SCENES[m[1]].costumes.some((c) => c.id === m[2])) ng(f, `${m[1]} に ${m[2]} の服はありません`);
+  const px = await pixels(f, 128, 128);
+  if (px.nw !== px.nh || px.nw < 64) ng(f, `寸法 ${px.nw}×${px.nh}（正方形・64以上）`);
+  let diff = 0;
+  for (let i = 0; i < 128; i++) {
+    diff += Math.abs(px.l[at(px, 0, i)] - px.l[at(px, 127, i)]) + Math.abs(px.l[at(px, i, 0)] - px.l[at(px, i, 127)]);
+  }
+  diff /= 256;
+  const opaque = px.a.every((v) => v > 250);
+  (diff < 28 ? ok : ng)(f, `つなぎ目の差 ${diff.toFixed(1)}（28未満）`);
+  (opaque ? ok : ng)(f, opaque ? '不透明' : '透明な部分がある（柄タイルは不透明にしてください）');
+}
+
+// ---- UI
+for (const f of list(join(ART, 'ui'))) {
+  if (!/^(title|handoff|bye)\.(png|webp|svg)$/.test(basename(f))) {
+    ng(f, 'ファイル名は title / handoff / bye のいずれか');
+    continue;
+  }
+  const px = await pixels(f, 64, 64);
+  (px.nw <= 2000 && px.nh <= 2000 ? ok : ng)(f, `寸法 ${px.nw}×${px.nh}`);
+}
+await browser.close();
+
+const fails = results.filter((r) => !r.ok);
+const lines = [
+  `# 絵の自動検査結果`,
+  ``,
+  `対象：\`${ART}/\`（${files.length}ファイル、合計 ${(total / 1024).toFixed(0)}KB） 実行：${new Date().toISOString()}`,
+  ``,
+  files.length === 0 ? '差し替えの絵はまだありません（ゲームはコードで描いた既定の絵を使います）。' : fails.length ? `**不合格 ${fails.length} 件**` : '**すべて合格**',
+  ``,
+  `| 結果 | ファイル | 内容 |`,
+  `|---|---|---|`,
+  ...results.map((r) => `| ${r.ok ? 'OK' : 'NG'} | ${r.file} | ${r.msg} |`),
+  ``,
+  `見た目の良し悪し・幼児にとっての難しさ・既存作品との似ている度合いは、この検査では分かりません。`,
+];
+mkdirSync('art-guides', { recursive: true });
+writeFileSync(dirArg > 0 ? join(ART, 'ART_CHECK.md') : 'art-guides/ART_CHECK.md', lines.join('\n') + '\n');
+console.log(lines.slice(0, 5).join('\n'));
+for (const r of fails.slice(0, 40)) console.log('NG', r.file, r.msg);
+process.exit(fails.length ? 1 : 0);
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#ffe5be"/><stop offset=".48" stop-color="#f3c48f"/><stop offset=".82" stop-color="#eab07e"/><stop offset="1" stop-color="#d49770"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#fff1d7" stop-opacity=".62"/><stop offset="1" stop-color="#fff1d7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+<linearGradient id="curl" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#b7875f"/><stop offset="1" stop-color="#81573f"/></linearGradient>
+</defs><path d="M-47-145 C-46-168-29-185-5-187 C17-190 39-175 46-153 C53-130 40-109 19-102 C4-96-14-99-28-109 C-41-118-49-130-47-145Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M46-153 C53-130 40-109 19-102 C4-96-14-99-28-109" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-43-149 C-41-168-27-180-10-182" fill="none" stroke="#fff1d8" stroke-opacity=".64" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M41-128 Q34-108 12-103" fill="none" stroke="#aa7357" stroke-opacity=".5" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M-4-187 C-12-199 1-209 12-202 C22-195 14-185 7-191 C3-195 9-199 12-195" fill="none" stroke="#745140" stroke-width="6.4" stroke-linecap="round"/>
+<path d="M-4.5-189 C-10-199 1-206 11-200 C18-195 13-190 8-193" fill="none" stroke="url(#curl)" stroke-width="3.8" stroke-linecap="round"/>
+<path d="M-5-196 Q-1-204 7-201" fill="none" stroke="#e7ba85" stroke-width="1.1" stroke-linecap="round"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153" fill="none" stroke="#9a7155" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g><path d="M-43-54 C-49-60-59-56-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44 C-36-42-34-46-37-49 Q-40-53-43-54Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-55-50 Q-57-45-54-42" fill="none" stroke="#ffe7c5" stroke-width="1.15" stroke-linecap="round" opacity=".8"/><path d="M43-54 C49-60 58-55 60-48 C62-40 55-34 48-36 C43-37 40-40 41-44 C36-42 34-46 37-49 Q40-53 43-54Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M46-53 Q51-56 55-51" fill="none" stroke="#ffe7c5" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<path d="M-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M60-48 C62-40 55-34 48-36 C43-37 40-40 41-44" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+?? video/hide-handoff-find.webm
+scripts\lib\load-geometry.mjs
+scripts\lib\geometry-entry.ts
+src\core\scenes\room.ts
+src\core\geometry.ts
+
+codex
+前景9か所と顔の保護範囲を確認しました。既存の絵に合わせ、淡い色・茶色の輪郭・柔らかな陰影を使い、柄はゲーム側で描けるように4層を分けます。SVGをコードで描き、指定の2000×2000pxのPNGに書き出します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 src/core/scenes/room.ts; Get-Content -Encoding UTF8 art/patterns/room-plain.svg; Get-Content -Encoding UTF8 art/patterns/room-dots.svg; rg -n 'cabinet|drawRoom|curtain|art.*scene' src; Get-Content -Encoding UTF8 scripts/lib/load-geometry.mjs" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 188ms:
+// へや：布（カーテン・ソファ・ラグ）と木目のある部屋
+import type { SceneDef, CostumeDef } from '../scene';
+import { patternMarkup } from '../patterns';
+import { basket, ball, blanket, blocks, cushion, pot, toyBox } from '../props';
+
+const costumes: CostumeDef[] = [
+  { id: 'plain', kind: 'plain', spec: { kind: 'plain', bg: '#F6E4C8', fg: '#F6E4C8', size: 40 } },
+  { id: 'stripes', kind: 'stripes', spec: { kind: 'stripes', bg: '#FCE4E9', fg: '#F2A9B8', size: 38 } },
+  { id: 'dots', kind: 'dots', spec: { kind: 'dots', bg: '#7EA6DA', fg: '#EAF2FC', size: 46 } },
+  { id: 'check', kind: 'check', spec: { kind: 'check', bg: '#FFF6DC', fg: '#F2B84B', size: 52 } },
+];
+
+export const room: SceneDef = {
+  id: 'room',
+  name: 'へや',
+  costumes,
+  base:
+    // 床（木目）
+    `<rect x="0" y="650" width="1000" height="350" fill="url(#{P}wood-room)"/>` +
+    `<path d="M0 760 H1000 M0 880 H1000" stroke="#C99A68" stroke-width="3" opacity="0.6"/>`,
+  extraDefs:
+    patternMarkup('{P}wood-room', { kind: 'wood', bg: '#E8C194', fg: '#CFA06C', size: 120 }) +
+    patternMarkup('{P}wood-room-dark', { kind: 'wood', bg: '#C08A57', fg: '#9E6C3E', size: 90 }),
+  regions: [
+    { id: 'wall', costume: 'plain', shapes: [{ kind: 'rect', x: 0, y: 0, w: 1000, h: 650 }] },
+    {
+      id: 'curtain',
+      costume: 'stripes',
+      shapes: [
+        {
+          kind: 'poly',
+          pts: [
+            { x: 24, y: 40 },
+            { x: 218, y: 40 },
+            { x: 226, y: 644 },
+            { x: 16, y: 644 },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'sofa',
+      costume: 'dots',
+      shapes: [
+        { kind: 'rect', x: 360, y: 400, w: 400, h: 240, rx: 42 },
+        { kind: 'rect', x: 326, y: 480, w: 70, h: 190, rx: 30 },
+        { kind: 'rect', x: 724, y: 480, w: 70, h: 190, rx: 30 },
+      ],
+    },
+    { id: 'rug', costume: 'check', shapes: [{ kind: 'ellipse', cx: 530, cy: 868, rx: 380, ry: 112 }] },
+  ],
+  decor:
+    // はば木
+    `<rect x="0" y="632" width="1000" height="22" fill="#D7B48A"/>` +
+    // まど
+    `<rect x="250" y="80" width="250" height="230" rx="14" fill="#CFEFFF" stroke="#C99A68" stroke-width="12"/>` +
+    `<path d="M375 86 V304 M256 195 H494" stroke="#C99A68" stroke-width="8"/>` +
+    `<circle cx="440" cy="140" r="26" fill="#FFF2A8"/>` +
+    // カーテンレール
+    `<rect x="8" y="28" width="230" height="16" rx="8" fill="#B07A4A"/>` +
+    // ソファの脚
+    `<rect x="350" y="664" width="18" height="22" rx="4" fill="#7A5A3A"/><rect x="752" y="664" width="18" height="22" rx="4" fill="#7A5A3A"/>` +
+    // 低い戸だな（木目）
+    `<rect x="812" y="474" width="176" height="180" rx="10" fill="url(#{P}wood-room-dark)" stroke="#7A5A3A" stroke-width="5"/>` +
+    `<path d="M900 480 V648" stroke="#7A5A3A" stroke-width="4"/><circle cx="886" cy="566" r="6" fill="#7A5A3A"/><circle cx="914" cy="566" r="6" fill="#7A5A3A"/>`,
+  minorDecor:
+    // かべの絵と時計
+    `<rect x="560" y="120" width="120" height="96" rx="8" fill="#FFFFFF" stroke="#C99A68" stroke-width="8"/>` +
+    `<path d="M574 200 L606 160 L630 186 L646 170 L668 200Z" fill="#8CCB9B"/><circle cx="650" cy="146" r="10" fill="#F2B84B"/>` +
+    `<circle cx="790" cy="140" r="40" fill="#FFFFFF" stroke="#B07A4A" stroke-width="8"/><path d="M790 140 V114 M790 140 L808 150" stroke="#4A3A40" stroke-width="5" stroke-linecap="round"/>`,
+  spots: [
+    { id: 'room-curtain', x: 120, y: 646, s: 1, region: 'curtain', prop: toyBox(120, 590), easy: true },
+    { id: 'room-plant', x: 290, y: 652, s: 1, region: 'wall', prop: pot(290, 588), easy: true },
+    { id: 'room-sofa-l', x: 470, y: 600, s: 1, region: 'sofa', prop: cushion(470, 602), easy: true },
+    { id: 'room-sofa-r', x: 650, y: 600, s: 1, region: 'sofa', prop: blanket(650, 566), easy: false },
+    { id: 'room-cabinet', x: 900, y: 476, s: 0.95, region: 'wall', prop: pot(900, 418, 104, 62, '#7FB8F0'), easy: false },
+    { id: 'room-rug-1', x: 260, y: 880, s: 1, region: 'rug', prop: blocks(260, 912), easy: true },
+    { id: 'room-rug-2', x: 440, y: 950, s: 1, region: 'rug', prop: ball(440, 920), easy: false },
+    { id: 'room-rug-3', x: 630, y: 878, s: 1, region: 'rug', prop: basket(630, 832), easy: true },
+    { id: 'room-rug-4', x: 810, y: 930, s: 1, region: 'rug', prop: cushion(810, 920, 78, 44, '#F6A5B8'), easy: false },
+  ],
+};
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256">
+<!-- Original repeating room plain; one tile = 40 game units. -->
+<defs>
+<linearGradient id="thread-light"><stop stop-color="#FFF9EB" stop-opacity=".12"/><stop offset=".45" stop-color="#FFF9EB" stop-opacity="0"/><stop offset="1" stop-color="#4A3A40" stop-opacity=".035"/></linearGradient>
+<radialGradient id="soft-light" cx=".3" cy=".25" r=".8"><stop stop-color="#FFF9EB" stop-opacity=".16"/><stop offset=".65" stop-color="#FFF9EB" stop-opacity="0"/><stop offset="1" stop-color="#4A3A40" stop-opacity=".035"/></radialGradient>
+</defs>
+<rect width="256" height="256" fill="#F6E4C8"/>
+<g fill="none" stroke-linecap="round">
+<path d="M158.45 109.38 l1.54 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M170.45 209.47 l2.80 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M9.54 133.05 l3.90 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M145.70 192.06 l1.60 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M210.78 102.24 l2.75 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M52.08 246.30 l3.81 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M12.26 94.17 l2.18 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M142.19 181.49 l3.73 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M145.33 6.31 l2.73 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M101.42 46.66 l1.78 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M201.54 85.53 l3.23 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M39.34 27.82 l2.22 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M80.27 94.00 l3.20 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M14.24 127.01 l3.33 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M74.88 104.66 l2.30 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M65.27 199.40 l2.53 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M54.18 45.03 l3.13 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M53.59 174.88 l1.98 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M49.81 213.41 l3.12 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M67.94 197.50 l1.64 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M158.14 156.94 l3.25 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M244.84 207.37 l2.24 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M150.74 81.49 l2.96 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M16.14 177.16 l3.63 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M45.10 147.19 l3.40 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M75.67 188.04 l2.98 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M14.73 67.38 l2.84 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M156.74 154.86 l2.40 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M81.53 65.46 l2.01 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M43.52 64.69 l3.48 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M91.43 36.37 l2.65 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M143.61 5.83 l1.72 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M174.67 151.15 l2.64 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M161.13 73.04 l3.97 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M100.91 162.13 l3.86 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M144.38 126.05 l3.22 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M113.59 161.80 l3.26 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M29.82 243.74 l2.97 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M69.57 32.57 l3.26 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M215.66 32.88 l3.93 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M240.36 210.44 l1.89 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M68.03 46.67 l1.77 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M128.92 185.45 l1.82 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M105.73 224.32 l2.55 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M118.26 128.48 l3.01 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M155.69 135.04 l2.18 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M162.35 95.53 l3.10 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M10.35 93.75 l2.33 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M184.73 239.29 l2.14 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M243.14 226.19 l1.67 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M203.70 5.48 l1.83 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M205.82 245.37 l3.64 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M62.72 195.96 l1.71 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M32.05 42.68 l3.31 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M131.79 17.70 l3.17 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M205.78 191.97 l2.70 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M91.16 99.40 l1.95 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M220.05 133.49 l3.28 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M169.62 88.03 l2.00 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M84.94 143.33 l3.41 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M111.42 187.41 l3.51 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M117.55 181.89 l2.17 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M127.55 25.46 l1.71 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M139.29 165.95 l2.36 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M13.18 43.70 l2.03 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M57.48 210.94 l1.62 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M230.06 114.07 l2.77 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M194.84 219.31 l2.84 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M69.80 30.59 l2.43 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M139.42 236.08 l3.69 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M134.41 130.11 l2.08 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M179.65 36.39 l1.74 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M121.52 207.35 l1.89 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M219.74 24.76 l3.35 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M69.79 153.38 l2.02 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M246.01 54.66 l3.64 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M113.58 42.86 l3.19 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M70.45 199.63 l2.63 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M100.36 99.10 l3.89 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M242.53 66.30 l2.50 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M200.67 113.75 l3.47 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M141.20 174.16 l3.15 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M109.76 38.21 l3.49 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M90.19 60.78 l3.92 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M141.68 21.33 l3.98 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M32.10 86.28 l1.86 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M19.32 47.29 l2.35 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M14.93 49.65 l1.99 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M189.21 131.81 l1.90 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M73.00 161.94 l2.77 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M54.74 83.19 l3.41 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M133.89 79.59 l2.73 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M172.82 42.08 l3.83 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M91.71 197.06 l3.43 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+<path d="M210.45 196.39 l3.54 -.6" stroke="#4A3A40" stroke-opacity=".035" stroke-width="1.1"/>
+<path d="M162.87 6.64 l1.61 -.6" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1.1"/>
+</g>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256">
+<!-- Original repeating room dots; one tile = 46 game units. -->
+<defs>
+<linearGradient id="thread-light"><stop stop-color="#FFF9EB" stop-opacity=".12"/><stop offset=".45" stop-color="#FFF9EB" stop-opacity="0"/><stop offset="1" stop-color="#4A3A40" stop-opacity=".035"/></linearGradient>
+<radialGradient id="soft-light" cx=".3" cy=".25" r=".8"><stop stop-color="#FFF9EB" stop-opacity=".16"/><stop offset=".65" stop-color="#FFF9EB" stop-opacity="0"/><stop offset="1" stop-color="#4A3A40" stop-opacity=".035"/></radialGradient>
+</defs>
+<rect width="256" height="256" fill="#7EA6DA"/>
+<circle cx="64" cy="64" r="33.28" fill="#EAF2FC"/>
+<circle cx="64" cy="64" r="33.28" fill="url(#soft-light)"/>
+<circle cx="192" cy="192" r="33.28" fill="#EAF2FC"/>
+<circle cx="192" cy="192" r="33.28" fill="url(#soft-light)"/>
+<path d="M0 4H256 M0 12H256 M0 20H256 M0 28H256 M0 36H256 M0 44H256 M0 52H256 M0 60H256 M0 68H256 M0 76H256 M0 84H256 M0 92H256 M0 100H256 M0 108H256 M0 116H256 M0 124H256 M0 132H256 M0 140H256 M0 148H256 M0 156H256 M0 164H256 M0 172H256 M0 180H256 M0 188H256 M0 196H256 M0 204H256 M0 212H256 M0 220H256 M0 228H256 M0 236H256 M0 244H256 M0 252H256" fill="none" stroke="#FFF9EB" stroke-opacity=".10" stroke-width="1"/>
+<path d="M4 0V256 M12 0V256 M20 0V256 M28 0V256 M36 0V256 M44 0V256 M52 0V256 M60 0V256 M68 0V256 M76 0V256 M84 0V256 M92 0V256 M100 0V256 M108 0V256 M116 0V256 M124 0V256 M132 0V256 M140 0V256 M148 0V256 M156 0V256 M164 0V256 M172 0V256 M180 0V256 M188 0V256 M196 0V256 M204 0V256 M212 0V256 M220 0V256 M228 0V256 M236 0V256 M244 0V256 M252 0V256" fill="none" stroke="#4A3A40" stroke-opacity=".035" stroke-width=".8"/>
+</svg>
+src\art\registry.ts:7:const files = import.meta.glob('../../art/{characters,scenes,patterns,ui}/**/*.{png,webp,svg}', {
+src\ui\sceneView.ts:63:  const art = sceneArt(scene.id);
+src\ui\sceneView.ts:68:    (art?.back ? full(art.back) : sub(scene.base)) +
+src\ui\sceneView.ts:70:    (art?.over ? full(art.over) : sub(scene.decor)) +
+src\ui\sceneView.ts:71:    `<g class="minor">${art?.minor ? full(art.minor) : art?.over ? '' : sub(scene.minorDecor)}</g>`
+src\core\scenes\room.ts:27:      id: 'curtain',
+src\core\scenes\room.ts:72:    { id: 'room-curtain', x: 120, y: 646, s: 1, region: 'curtain', prop: toyBox(120, 590), easy: true },
+src\core\scenes\room.ts:76:    { id: 'room-cabinet', x: 900, y: 476, s: 0.95, region: 'wall', prop: pot(900, 418, 104, 62, '#7FB8F0'), easy: false },
+import { build } from 'esbuild';
+import { mkdtempSync, mkdirSync, copyFileSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+// Codex のサンドボックス内では esbuild が親フォルダを読めずに失敗する。
+// 外で成功したときの結果をここに残し、失敗したときはそれを使う（形状データを変えるのは src/ を触る Claude 側だけ）
+const cache = join(here, '../../node_modules/.cache/phfb-geo.mjs');
+export async function loadGeometry() {
+  const out = join(mkdtempSync(join(tmpdir(), 'phfb-geo-')), 'geo.mjs');
+  try {
+    await build({ entryPoints: [join(here, 'geometry-entry.ts')], bundle: true, format: 'esm', platform: 'node', outfile: out, logLevel: 'silent' });
+  } catch (e) {
+    if (!existsSync(cache)) throw e;
+    console.warn(`形状データを組み立てられなかったため、前回の結果を使います（${e.message.split('\n')[0]}）`);
+    return import(pathToFileURL(cache).href);
+  }
+  try {
+    mkdirSync(dirname(cache), { recursive: true });
+    copyFileSync(out, cache);
+  } catch {
+    // 保存できなくても検査は続ける
+  }
+  return import(pathToFileURL(out).href);
+}
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+
+import { chromium } from '@playwright/test';
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
+const dir='art/scenes/room';
+const ink='#4A3A40';
+const grad=(id,a,b)=>'<linearGradient id=\"'+id+'\" x2=\".65\" y2=\"1\"><stop stop-color=\"'+a+'\"/><stop offset=\"1\" stop-color=\"'+b+'\"/></linearGradient>';
+const glow=(id,a,b)=>'<radialGradient id=\"'+id+'\" cx=\".3\" cy=\".25\" r=\".85\"><stop stop-color=\"'+a+'\"/><stop offset=\"1\" stop-color=\"'+b+'\"/></radialGradient>';
+const faces=[[120,504,60,56],[290,510,60,56],[470,458,60,56],[650,458,60,56],[900,341.1,57,53.2],[260,738,60,56],[440,808,60,56],[630,736,60,56],[810,788,60,56]];
+const defs=grad('wood','#E9CBA5','#CA9C72')+grad('floor','#F0D5AE','#E0B889')+grad('frame','#DFC096','#BC8C64')+grad('sky','#DFEFF0','#BEDDE4')+grad('rose','#F1B4BA','#D38B95')+grad('clay','#E8AF86','#C58B69')+grad('blue','#BBD6EC','#8AAFCF')+grad('green','#CCE0C3','#9CBEA4')+grad('leaf','#B6CFA1','#7FAD8F')+grad('honey','#E9C790','#CFA36C')+glow('gold','#FFEDBE','#E4BA72')+glow('pink','#FAD5DF','#DFA0B4')+glow('ball','#FFFCED','#E6D8BF')+
+'<radialGradient id=\"shadow\"><stop stop-color=\"#6D5143\" stop-opacity=\".19\"/><stop offset=\"1\" stop-color=\"#6D5143\" stop-opacity=\"0\"/></radialGradient>'+
+'<linearGradient id=\"edge\" x2=\"0\" y2=\"1\"><stop stop-color=\"#4A3A40\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#4A3A40\" stop-opacity=\".14\"/></linearGradient>'+
+'<mask id=\"face-safe\"><rect width=\"1000\" height=\"1000\" fill=\"white\"/>'+faces.map(([x,y,rx,ry])=>'<ellipse cx=\"'+x+'\" cy=\"'+y+'\" rx=\"'+(rx+3)+'\" ry=\"'+(ry+3)+'\" fill=\"black\"/>').join('')+'</mask>';
+const path=(d,fill='none',stroke=ink,w=2.6,more='')=>'<path d=\"'+d+'\" fill=\"'+fill+'\" stroke=\"'+stroke+'\" stroke-width=\"'+w+'\" stroke-linecap=\"round\" stroke-linejoin=\"round\" '+more+'/>';
+const rect=(x,y,w,h,r,fill,stroke=ink,sw=2.6)=>'<rect x=\"'+x+'\" y=\"'+y+'\" width=\"'+w+'\" height=\"'+h+'\" rx=\"'+r+'\" fill=\"'+fill+'\" stroke=\"'+stroke+'\" stroke-width=\"'+sw+'\"/>';
+const ell=(x,y,rx,ry,fill,stroke='none',sw=2.6,more='')=>'<ellipse cx=\"'+x+'\" cy=\"'+y+'\" rx=\"'+rx+'\" ry=\"'+ry+'\" fill=\"'+fill+'\" stroke=\"'+stroke+'\" stroke-width=\"'+sw+'\" '+more+'/>';
+const shadow=(x,y,rx,ry)=>ell(x,y,rx,ry,'url(#shadow)');
+const svg=(body)=>'<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"2000\" height=\"2000\" viewBox=\"0 0 1000 1000\"><defs>'+defs+'</defs>'+body+'</svg>';
+let back=rect(0,650,1000,350,0,'url(#floor)','none');
+back+=path('M0 760 H1000 M0 880 H1000','none','#BB9067',1.6,'opacity=\".28\"');
+back+=path('M330 650 V760 M760 760 V880 M110 880 V1000','none','#BB9067',1.2,'opacity=\".22\"');
+for(const [x,y,w] of [[22,711,195],[398,700,220],[792,714,140],[14,813,170],[380,832,205],[823,820,153],[21,950,134],[614,985,240]]){
+back+=path('M'+x+' '+y+' q'+w*.3+' -5 '+w*.6+' 0 t'+w*.4+' 0','none','#B78760',1.1,'opacity=\".21\"');
+back+=path('M'+(x+15)+' '+(y+5)+' q'+w*.25+' -3 '+w*.54+' 0','none','#FFF4DA',1.3,'opacity=\".3\"');
+}
+back+=shadow(530,883,390,108)+shadow(560,672,242,17)+shadow(900,657,97,14);
+
+let over='<g mask=\"url(#face-safe)\">';
+over+=rect(0,637,1000,15,0,'url(#wood)','none')+path('M0 638 H1000','none','#F9E7C7',1.4)+path('M0 652 H1000','none','#997355',1.5,'opacity=\".25\"');
+// Window: rounded timber frame and a quiet sky, away from all hiding faces.
+over+=shadow(381,312,141,17)+rect(249,79,252,232,16,'url(#frame)','#987659',2.4)+rect(260,90,230,210,9,'url(#sky)','#EAD7B6',2);
+over+=ell(443,142,25,25,'#FFF0B9')+path('M276 129 Q286 117 296 128 Q311 125 315 136 H274 Q269 132 276 129Z','#F5F8EE','none',0);
+over+=path('M376 92 V299 M261 196 H489','none','#C19C75',6)+path('M374 92 V297 M263 194 H487','none','#F0DDC0',1.5);
+over+=rect(241,305,268,10,5,'url(#wood)','#AC825E',1.8);
+over+=path('M256 98 V286','none','#FFF3DA',1.4,'opacity=\".65\"');
+// Curtain hardware; the pattern surface itself remains entirely game-owned.
+over+=rect(8,28,230,15,7.5,'url(#frame)','#9B7357',2);
+for(const x of [35,79,123,167,208])over+=path('M'+x+' 33 v13','none','#EED7B6',3);
+over+=path('M24 47 L17 639 M218 47 L225 639','none','#866C70',2,'opacity=\".2\"');
+over+=path('M45 49 Q39 266 39 431 M190 49 Q201 250 205 428','none','#FFF5ED',5,'opacity=\".16\"');
+over+=path('M69 48 Q64 246 64 425 M172 48 Q183 246 184 425','none','#806172',4,'opacity=\".07\"');
+// Small sofa seams and edge shading, with no paint beneath the face circles.
+over+=rect(350,664,18,22,4,'url(#frame)','#8D6A52',1.8)+rect(752,664,18,22,4,'url(#frame)','#8D6A52',1.8);
+over+=path('M402 401 H718 Q758 401 759 442 V597 Q758 639 715 639 H405 Q361 639 361 598 V444 Q361 415 383 406','none','#4A3A40',2.2,'opacity=\".2\"');
+over+=path('M406 620 H714','none','#4A3A40',9,'opacity=\".06\"');
+over+=path('M401 615 Q555 624 719 615','none','#FFF4E4',2,'opacity=\".28\"');
+over+=rect(326,480,70,190,30,'url(#edge)','none')+rect(724,480,70,190,30,'url(#edge)','none');
+over+=path('M340 490 Q328 497 328 516 V637 Q328 667 359 668 Q392 668 393 639 V517','none','#4A3A40',2.1,'opacity=\".2\"');
+over+=path('M738 490 Q726 497 726 516 V637 Q726 667 757 668 Q790 668 791 639 V517','none','#4A3A40',2.1,'opacity=\".2\"');
+over+=path('M335 516 V625 M733 516 V625','none','#FFF7EA',2,'opacity=\".22\"');
+// Low cabinet sits below the plant and its hiding character.
+over+=rect(820,643,13,15,3,'#AD835F','none')+rect(967,643,13,15,3,'#AD835F','none');
+over+=rect(812,478,176,174,11,'url(#wood)','#82654F',2.6)+rect(809,473,182,12,5,'url(#frame)','#82654F',2.4);
+over+=path('M900 490 V645','none','#957151',2.2)+path('M820 491 V637 Q820 643 826 643 H891 M909 643 H973 Q980 643 980 637 V491','none','#F9E4C1',1.3,'opacity=\".7\"');
+over+=path('M829 526 Q853 522 880 527 M918 609 Q943 604 972 610','none','#AE815B',1.1,'opacity=\".38\"');
+over+=ell(886,562,4.5,5,'#947054')+ell(914,562,4.5,5,'#947054')+ell(885,560,1.5,1.5,'#F8E0B5')+ell(913,560,1.5,1.5,'#F8E0B5');
+over+='</g>';
+
+let minor=shadow(621,221,65,7)+rect(560,120,120,96,8,'url(#frame)','#A58164',2)+rect(568,128,104,80,3,'#FFF9E9','none');
+minor+=ell(646,148,10,10,'#EBD095')+path('M574 200 Q589 170 606 177 Q617 181 628 193 Q644 177 666 199Z','#BAD1B1','none',0)+path('M575 201 Q601 186 621 201 Q642 188 666 201Z','#9FBEA4','none',0);
+minor+=shadow(792,181,39,6)+ell(790,140,41,41,'url(#frame)','#A07A5B',2)+ell(790,140,34,34,'#FFF9EC','none');
+minor+=path('M790 140 V115 M790 140 L807 149','none',ink,3)+ell(790,140,3.4,3.4,'#806450');
+for(const [x,y] of [[790,111],[819,140],[790,169],[761,140]])minor+=ell(x,y,1.5,1.5,'#C2A383');
+
+const cushion=(x,y,rx,ry,id)=>{
+let s=shadow(x,y+ry-2,rx+6,12)+ell(x,y,rx,ry,'url(#'+id+')',ink,2.6);
+s+=path('M'+(x-rx*.98)+' '+(y+ry*.15)+' C'+(x-rx*.8)+' '+(y+ry*1.3)+' '+(x+rx*.8)+' '+(y+ry*1.3)+' '+(x+rx*.98)+' '+(y+ry*.15),'none',ink,3.4);
+s+=ell(x,y-1,rx-10,ry-8,'none','#FFF5E6',1.6,'stroke-dasharray=\"3 6\"');
+s+=path('M'+(x-rx*.55)+' '+(y-ry*.6)+' Q'+x+' '+(y-ry*.98)+' '+(x+rx*.38)+' '+(y-ry*.7),'none','#FFF7E9',1.6,'opacity=\".6\"');
+return s;
+};
+const pot=(x,y,w,h,id)=>{
+let s=shadow(x,y+h,w*.57,9);
+s+=path('M'+(x-w*.28)+' '+(y+1)+' Q'+(x-w*.57)+' '+(y-3)+' '+(x-w*.67)+' '+(y-29)+' Q'+(x-w*.4)+' '+(y-30)+' '+(x-w*.28)+' '+(y+1)+'Z','url(#leaf)',ink,2);
+s+=path('M'+(x+w*.29)+' '+(y+1)+' Q'+(x+w*.6)+' '+(y-3)+' '+(x+w*.66)+' '+(y-28)+' Q'+(x+w*.42)+' '+(y-29)+' '+(x+w*.29)+' '+(y+1)+'Z','url(#leaf)',ink,2);
+s+=path('M'+(x-w*.5)+' '+(y-17)+' L'+(x-w*.3)+' '+y+' M'+(x+w*.5)+' '+(y-16)+' L'+(x+w*.31)+' '+y,'none','#68876E',1.1);
+s+=path('M'+(x-w/2)+' '+y+' H'+(x+w/2)+' L'+(x+w/2-14)+' '+(y+h)+' H'+(x-w/2+14)+'Z','url(#'+id+')',ink,2.6);
+s+=path('M'+(x-w/2+14)+' '+(y+h)+' H'+(x+w/2-14)+' L'+(x+w/2-2)+' '+(y+12),'none',ink,3.4);
+s+=path('M'+(x-w/2+12)+' '+(y+16)+' L'+(x-w/2+21)+' '+(y+h-10),'none','#FFF1D7',2,'opacity=\".6\"');
+s+=rect(x-w/2-3,y-5,w+6,13,4,'url(#'+id+')',ink,2.6)+path('M'+(x-w/2+4)+' '+(y-1)+' H'+(x+w/2-4),'none','#FFF2DA',1.3,'opacity=\".65\"');
+return s;
+};
+let fore=shadow(120,665,83,11)+rect(45,590,150,76,8,'url(#rose)',ink,2.6);
+fore+=path('M45 636 V657 Q45 666 54 666 H186 Q195 666 195 657 V606','none',ink,3.4);
+fore+=rect(42,587,156,16,5,'url(#clay)',ink,2.6)+path('M49 591 H190','none','#FBE5CF',1.5);
+fore+=ell(85,637,10,10,'#FBE5AD')+path('M130 646 Q140 620 145 627 L159 646Z','#D0E0D2','none',0);
+fore+=pot(290,588,116,74,'clay');
+fore+=cushion(470,602,76,42,'gold');
+// Folded blanket: rounded silhouette, two soft folds and a small stitched hem.
+fore+=shadow(650,627,81,10)+rect(575,566,150,62,20,'url(#green)',ink,2.6);
+fore+=path('M576 601 V608 Q576 628 596 628 H705 Q725 628 725 608 V589','none',ink,3.4);
+fore+=path('M582 596 H719','none','#7D9E88',2,'opacity=\".6\"')+path('M584 593 H716','none','#F5F0DA',2.2,'opacity=\".8\"')+path('M589 618 H712','none','#EBEFDA',1.2,'stroke-dasharray=\"3 5\"');
+fore+=pot(900,418,104,62,'blue');
+fore+=shadow(260,912,68,9);
+for(const [x,y,id] of [[202,858,'blue'],[264,858,'rose'],[233,800,'gold']]){
+fore+=rect(x,y,54,54,6,'url(#'+id+')',ink,2.6);
+fore+=path('M'+x+' '+(y+37)+' V'+(y+48)+' Q'+x+' '+(y+54)+' '+(x+6)+' '+(y+54)+' H'+(x+48)+' Q'+(x+54)+' '+(y+54)+' '+(x+54)+' '+(y+48),'none',ink,3.4);
+fore+=path('M'+(x+6)+' '+(y+5)+' H'+(x+47),'none','#FFF8E5',1.5,'opacity=\".7\"');
+}
+fore+=ell(229,885,11,11,'#FFF9EA')+path('M277 898 L291 873 L305 898Z','#FFF8EB','none',0)+rect(247,814,26,26,2,'#FFFAEA','none');
+fore+=shadow(440,974,59,10)+ell(440,920,54,54,'url(#ball)',ink,2.6);
+fore+=path('M440 867 C413 887 409 948 440 973 C428 938 430 899 440 867Z','#D9969C','none',0)+path('M440 867 C466 889 467 948 440 973 C452 941 450 896 440 867Z','#90B9CB','none',0);
+fore+=path('M388 934 A54 54 0 0 0 492 934','none',ink,3.4)+path('M401 900 Q410 880 429 875','none','#FFFFFF',2,'opacity=\".72\"');
+// Basket handle follows the guide arch exactly.
+fore+=shadow(630,904,84,10)+path('M575 836 Q630 762 685 836','none',ink,12)+path('M575 836 Q630 762 685 836','none','#D3AF7C',7)+path('M575 834 Q630 760 685 834','none','#F4DBAC',1.2);
+fore+=rect(555,832,150,72,16,'url(#honey)',ink,2.6)+path('M555 875 V888 Q555 904 571 904 H689 Q705 904 705 888 V851','none',ink,3.4);
+fore+=rect(556,833,148,13,6,'url(#wood)',ink,1.8);
+for(const y of [858,875,891])fore+=path('M561 '+y+' H699','none','#A77E50',1.4,'opacity=\".58\"');
+for(const x of [578,603,628,653,678])fore+=path('M'+x+' 849 V896','none','#FFE8BC',1,'opacity=\".35\"');
+fore+=cushion(810,920,78,44,'pink');
+const layers={back:svg(back),over:svg(over),minor:svg(minor),fore:svg(fore)};
+const browser=await chromium.launch();
+try{
+const page=await browser.newPage();
+mkdirSync(dir,{recursive:true});
+for(const [name,markup] of Object.entries(layers)){
+const b64=await page.evaluate(async(s)=>{
+const img=new Image();img.src='data:image/svg+xml;base64,'+btoa(s);await img.decode();
+const c=document.createElement('canvas');c.width=2000;c.height=2000;c.getContext('2d').drawImage(img,0,0);
+return c.toDataURL('image/png').split(',')[1];
+},markup);
+const buf=Buffer.from(b64,'base64');writeFileSync(dir+'/'+name+'.png',buf);console.log(name+'.png: '+buf.length+' bytes');
+}
+// A temporary composite uses the existing guide regions and existing local pattern assets.
+const guide=readFileSync('art-guides/scene-room.svg','utf8');
+let regions=guide.slice(guide.indexOf('<rect x=\"0\"'),guide.indexOf('<rect x=\"45\"')).replace(/<text\\b[\\s\\S]*?<\\/text>/g,'');
+let i=0;const ids=['plain','stripes','dots','dots','dots','check'];
+regions=regions.replace(/fill=\"#["'^"]+" fill-opacity="0.18" stroke="#[''^"]+" stroke-width="3"/g,()=> '"'fill=\"url(#p-'+ids[i++]+')\"');
+const patternDefs=Object.entries({plain:40,stripes:38,dots:46,check:52}).map(([id,size])=>'<pattern id=\"p-'+id+'\" width=\"'+size+'\" height=\"'+size+'\" patternUnits=\"userSpaceOnUse\"><image width=\"'+size+'\" height=\"'+size+'\" href=\"data:image/svg+xml;base64,'+readFileSync('art/patterns/room-'+id+'.svg').toString('base64')+'\"/></pattern>').join('');
+const preview='<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1000\" height=\"1000\"><defs>'+defs+patternDefs+'</defs>'+back+regions+over+minor+fore+'</svg>';
+const preview64=await page.evaluate(async(s)=>{const im=new Image();im.src='data:image/svg+xml;base64,'+btoa(s);await im.decode();const c=document.createElement('canvas');c.width=c.height=1000;c.getContext('2d').drawImage(im,0,0);return c.toDataURL().split(',')[1];},preview);
+writeFileSync(dir+'/_preview.png',Buffer.from(preview64,'base64'));
+}finally{await browser.close();}
+
+'@ | node --input-type=module" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 3209ms:
+back.png: 1271340 bytes
+over.png: 653874 bytes
+minor.png: 146743 bytes
+fore.png: 643675 bytes
+
+codex
+4層の描画ができました。床のPNGが800KBの上限を超えたため、画質を変えずに圧縮を調整します。その後、合成した見た目と前景9か所の隠れ具合を確認し、指定の検査・ビルドを実行します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import {readFileSync,writeFileSync} from 'node:fs';
+import {deflateSync,inflateSync} from 'node:zlib';
+function crc(b){let c=0xffffffff;for(const x of b){c"'^=x;for(let j=0;j<8;j++)c=(c>>>1)''^((c&1)?0xedb88320:0);}return (c''^0xffffffff)>>>0;}
+for(const name of ['"'back','over','minor','fore']){
+const p='art/scenes/room/'+name+'.png';const b=readFileSync(p);let pos=8;const chunks=[];const data=[];
+while(pos<b.length){const len=b.readUInt32BE(pos);const type=b.toString('ascii',pos+4,pos+8);const chunk=b.subarray(pos,pos+12+len);if(type==='IDAT')data.push(b.subarray(pos+8,pos+8+len));else chunks.push({type,chunk});pos+=12+len;}
+const packed=deflateSync(inflateSync(Buffer.concat(data)),{level:9});const idat=Buffer.alloc(packed.length+12);idat.writeUInt32BE(packed.length);idat.write('IDAT',4);packed.copy(idat,8);idat.writeUInt32BE(crc(idat.subarray(4,-4)),idat.length-4);
+const out=Buffer.concat([b.subarray(0,8),...chunks.filter(c=>c.type"'!=='"'IEND').map(c=>c.chunk),idat,chunks.find(c=>c.type==='IEND').chunk]);writeFileSync(p,out);console.log(name+': '+out.length+' bytes');
+}
+'@ | node --input-type=module" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 2904ms:
+back: 616843 bytes
+over: 315297 bytes
+minor: 65156 bytes
+fore: 355243 bytes
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+
+import { chromium } from '@playwright/test';
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
+const dir='art/scenes/room';
+const ink='#4A3A40';
+const grad=(id,a,b)=>'<linearGradient id=\"'+id+'\" x2=\".65\" y2=\"1\"><stop stop-color=\"'+a+'\"/><stop offset=\"1\" stop-color=\"'+b+'\"/></linearGradient>';
+const glow=(id,a,b)=>'<radialGradient id=\"'+id+'\" cx=\".3\" cy=\".25\" r=\".85\"><stop stop-color=\"'+a+'\"/><stop offset=\"1\" stop-color=\"'+b+'\"/></radialGradient>';
+const faces=[[120,504,60,56],[290,510,60,56],[470,458,60,56],[650,458,60,56],[900,341.1,57,53.2],[260,738,60,56],[440,808,60,56],[630,736,60,56],[810,788,60,56]];
+const defs=grad('wood','#E9CBA5','#CA9C72')+grad('floor','#F0D5AE','#E0B889')+grad('frame','#DFC096','#BC8C64')+grad('sky','#DFEFF0','#BEDDE4')+grad('rose','#F1B4BA','#D38B95')+grad('clay','#E8AF86','#C58B69')+grad('blue','#BBD6EC','#8AAFCF')+grad('green','#CCE0C3','#9CBEA4')+grad('leaf','#B6CFA1','#7FAD8F')+grad('honey','#E9C790','#CFA36C')+glow('gold','#FFEDBE','#E4BA72')+glow('pink','#FAD5DF','#DFA0B4')+glow('ball','#FFFCED','#E6D8BF')+
+'<radialGradient id=\"shadow\"><stop stop-color=\"#6D5143\" stop-opacity=\".19\"/><stop offset=\"1\" stop-color=\"#6D5143\" stop-opacity=\"0\"/></radialGradient>'+
+'<linearGradient id=\"edge\" x2=\"0\" y2=\"1\"><stop stop-color=\"#4A3A40\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#4A3A40\" stop-opacity=\".14\"/></linearGradient>'+
+'<mask id=\"face-safe\"><rect width=\"1000\" height=\"1000\" fill=\"white\"/>'+faces.map(([x,y,rx,ry])=>'<ellipse cx=\"'+x+'\" cy=\"'+y+'\" rx=\"'+(rx+3)+'\" ry=\"'+(ry+3)+'\" fill=\"black\"/>').join('')+'</mask>';
+const path=(d,fill='none',stroke=ink,w=2.6,more='')=>'<path d=\"'+d+'\" fill=\"'+fill+'\" stroke=\"'+stroke+'\" stroke-width=\"'+w+'\" stroke-linecap=\"round\" stroke-linejoin=\"round\" '+more+'/>';
+const rect=(x,y,w,h,r,fill,stroke=ink,sw=2.6)=>'<rect x=\"'+x+'\" y=\"'+y+'\" width=\"'+w+'\" height=\"'+h+'\" rx=\"'+r+'\" fill=\"'+fill+'\" stroke=\"'+stroke+'\" stroke-width=\"'+sw+'\"/>';
+const ell=(x,y,rx,ry,fill,stroke='none',sw=2.6,more='')=>'<ellipse cx=\"'+x+'\" cy=\"'+y+'\" rx=\"'+rx+'\" ry=\"'+ry+'\" fill=\"'+fill+'\" stroke=\"'+stroke+'\" stroke-width=\"'+sw+'\" '+more+'/>';
+const shadow=(x,y,rx,ry)=>ell(x,y,rx,ry,'url(#shadow)');
+const svg=(body)=>'<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"2000\" height=\"2000\" viewBox=\"0 0 1000 1000\"><defs>'+defs+'</defs>'+body+'</svg>';
+let back=rect(0,650,1000,350,0,'url(#floor)','none');
+back+=path('M0 760 H1000 M0 880 H1000','none','#BB9067',1.6,'opacity=\".28\"');
+back+=path('M330 650 V760 M760 760 V880 M110 880 V1000','none','#BB9067',1.2,'opacity=\".22\"');
+for(const [x,y,w] of [[22,711,195],[398,700,220],[792,714,140],[14,813,170],[380,832,205],[823,820,153],[21,950,134],[614,985,240]]){
+back+=path('M'+x+' '+y+' q'+w*.3+' -5 '+w*.6+' 0 t'+w*.4+' 0','none','#B78760',1.1,'opacity=\".21\"');
+back+=path('M'+(x+15)+' '+(y+5)+' q'+w*.25+' -3 '+w*.54+' 0','none','#FFF4DA',1.3,'opacity=\".3\"');
+}
+back+=shadow(530,883,390,108)+shadow(560,672,242,17)+shadow(900,657,97,14);
+
+let over='<g mask=\"url(#face-safe)\">';
+over+='<defs><clipPath id=\"baseboard\"><rect x=\"0\" y=\"632\" width=\"16\" height=\"24\"/><rect x=\"226\" y=\"632\" width=\"100\" height=\"24\"/><rect x=\"794\" y=\"632\" width=\"206\" height=\"24\"/></clipPath></defs><g clip-path=\"url(#baseboard)\">'+rect(0,637,1000,15,0,'url(#wood)','none')+path('M0 638 H1000','none','#F9E7C7',1.4)+path('M0 652 H1000','none','#997355',1.5,'opacity=\".25\"')+'</g>';
+// Window: rounded timber frame and a quiet sky, away from all hiding faces.
+over+=shadow(381,312,141,17)+rect(249,79,252,232,16,'url(#frame)','#987659',2.4)+rect(260,90,230,210,9,'url(#sky)','#EAD7B6',2);
+over+=ell(443,142,25,25,'#FFF0B9')+path('M276 129 Q286 117 296 128 Q311 125 315 136 H274 Q269 132 276 129Z','#F5F8EE','none',0);
+over+=path('M376 92 V299 M261 196 H489','none','#C19C75',6)+path('M374 92 V297 M263 194 H487','none','#F0DDC0',1.5);
+over+=rect(241,305,268,10,5,'url(#wood)','#AC825E',1.8);
+over+=path('M256 98 V286','none','#FFF3DA',1.4,'opacity=\".65\"');
+// Curtain hardware; the pattern surface itself remains entirely game-owned.
+over+=rect(8,28,230,15,7.5,'url(#frame)','#9B7357',2);
+for(const x of [35,79,123,167,208])over+=path('M'+x+' 33 v13','none','#EED7B6',3);
+over+=path('M24 47 L17 639 M218 47 L225 639','none','#866C70',2,'opacity=\".2\"');
+over+=path('M45 49 Q39 266 39 431 M190 49 Q201 250 205 428','none','#FFF5ED',5,'opacity=\".16\"');
+over+=path('M69 48 Q64 246 64 425 M172 48 Q183 246 184 425','none','#806172',4,'opacity=\".07\"');
+// Small sofa seams and edge shading, with no paint beneath the face circles.
+over+=rect(350,664,18,22,4,'url(#frame)','#8D6A52',1.8)+rect(752,664,18,22,4,'url(#frame)','#8D6A52',1.8);
+over+=path('M402 401 H718 Q758 401 759 442 V597 Q758 639 715 639 H405 Q361 639 361 598 V444 Q361 415 383 406','none','#4A3A40',2.2,'opacity=\".2\"');
+over+=path('M406 620 H714','none','#4A3A40',9,'opacity=\".06\"');
+over+=path('M401 615 Q555 624 719 615','none','#FFF4E4',2,'opacity=\".28\"');
+over+=rect(326,480,70,190,30,'url(#edge)','none')+rect(724,480,70,190,30,'url(#edge)','none');
+over+=path('M340 490 Q328 497 328 516 V637 Q328 667 359 668 Q392 668 393 639 V517','none','#4A3A40',2.1,'opacity=\".2\"');
+over+=path('M738 490 Q726 497 726 516 V637 Q726 667 757 668 Q790 668 791 639 V517','none','#4A3A40',2.1,'opacity=\".2\"');
+over+=path('M335 516 V625 M733 516 V625','none','#FFF7EA',2,'opacity=\".22\"');
+// Low cabinet sits below the plant and its hiding character.
+over+=rect(820,643,13,15,3,'#AD835F','none')+rect(967,643,13,15,3,'#AD835F','none');
+over+=rect(812,478,176,174,11,'url(#wood)','#82654F',2.6)+rect(809,473,182,12,5,'url(#frame)','#82654F',2.4);
+over+=path('M900 490 V645','none','#957151',2.2)+path('M820 491 V637 Q820 643 826 643 H891 M909 643 H973 Q980 643 980 637 V491','none','#F9E4C1',1.3,'opacity=\".7\"');
+over+=path('M829 526 Q853 522 880 527 M918 609 Q943 604 972 610','none','#AE815B',1.1,'opacity=\".38\"');
+over+=ell(886,562,4.5,5,'#947054')+ell(914,562,4.5,5,'#947054')+ell(885,560,1.5,1.5,'#F8E0B5')+ell(913,560,1.5,1.5,'#F8E0B5');
+over+='</g>';
+
+let minor=shadow(621,221,65,7)+rect(560,120,120,96,8,'url(#frame)','#A58164',2)+rect(568,128,104,80,3,'#FFF9E9','none');
+minor+=ell(646,148,10,10,'#EBD095')+path('M574 200 Q589 170 606 177 Q617 181 628 193 Q644 177 666 199Z','#BAD1B1','none',0)+path('M575 201 Q601 186 621 201 Q642 188 666 201Z','#9FBEA4','none',0);
+minor+=shadow(792,181,39,6)+ell(790,140,41,41,'url(#frame)','#A07A5B',2)+ell(790,140,34,34,'#FFF9EC','none');
+minor+=path('M790 140 V115 M790 140 L807 149','none',ink,3)+ell(790,140,3.4,3.4,'#806450');
+for(const [x,y] of [[790,111],[819,140],[790,169],[761,140]])minor+=ell(x,y,1.5,1.5,'#C2A383');
+
+const cushion=(x,y,rx,ry,id)=>{
+let s=shadow(x,y+ry-2,rx+6,12)+ell(x,y,rx,ry,'url(#'+id+')',ink,2.6);
+s+=path('M'+(x-rx*.98)+' '+(y+ry*.15)+' C'+(x-rx*.8)+' '+(y+ry*1.3)+' '+(x+rx*.8)+' '+(y+ry*1.3)+' '+(x+rx*.98)+' '+(y+ry*.15),'none',ink,3.4);
+s+=ell(x,y-1,rx-10,ry-8,'none','#FFF5E6',1.6,'stroke-dasharray=\"3 6\"');
+s+=path('M'+(x-rx*.55)+' '+(y-ry*.6)+' Q'+x+' '+(y-ry*.98)+' '+(x+rx*.38)+' '+(y-ry*.7),'none','#FFF7E9',1.6,'opacity=\".6\"');
+return s;
+};
+const pot=(x,y,w,h,id)=>{
+let s=shadow(x,y+h,w*.57,9);
+s+=path('M'+(x-w*.28)+' '+(y+1)+' Q'+(x-w*.57)+' '+(y-3)+' '+(x-w*.67)+' '+(y-29)+' Q'+(x-w*.4)+' '+(y-30)+' '+(x-w*.28)+' '+(y+1)+'Z','url(#leaf)',ink,2);
+s+=path('M'+(x+w*.29)+' '+(y+1)+' Q'+(x+w*.6)+' '+(y-3)+' '+(x+w*.66)+' '+(y-28)+' Q'+(x+w*.42)+' '+(y-29)+' '+(x+w*.29)+' '+(y+1)+'Z','url(#leaf)',ink,2);
+s+=path('M'+(x-w*.5)+' '+(y-17)+' L'+(x-w*.3)+' '+y+' M'+(x+w*.5)+' '+(y-16)+' L'+(x+w*.31)+' '+y,'none','#68876E',1.1);
+s+=path('M'+(x-w/2)+' '+y+' H'+(x+w/2)+' L'+(x+w/2-14)+' '+(y+h)+' H'+(x-w/2+14)+'Z','url(#'+id+')',ink,2.6);
+s+=path('M'+(x-w/2+14)+' '+(y+h)+' H'+(x+w/2-14)+' L'+(x+w/2-2)+' '+(y+12),'none',ink,3.4);
+s+=path('M'+(x-w/2+12)+' '+(y+16)+' L'+(x-w/2+21)+' '+(y+h-10),'none','#FFF1D7',2,'opacity=\".6\"');
+s+=rect(x-w/2-3,y-5,w+6,13,4,'url(#'+id+')',ink,2.6)+path('M'+(x-w/2+4)+' '+(y-1)+' H'+(x+w/2-4),'none','#FFF2DA',1.3,'opacity=\".65\"');
+return s;
+};
+let fore=shadow(120,665,83,11)+rect(45,590,150,76,8,'url(#rose)',ink,2.6);
+fore+=path('M45 636 V657 Q45 666 54 666 H186 Q195 666 195 657 V606','none',ink,3.4);
+fore+=rect(42,587,156,16,5,'url(#clay)',ink,2.6)+path('M49 591 H190','none','#FBE5CF',1.5);
+fore+=ell(85,637,10,10,'#FBE5AD')+path('M130 646 Q140 620 145 627 L159 646Z','#D0E0D2','none',0);
+fore+=pot(290,588,116,74,'clay');
+fore+=cushion(470,602,76,42,'gold');
+// Folded blanket: rounded silhouette, two soft folds and a small stitched hem.
+fore+=shadow(650,627,81,10)+rect(575,566,150,62,20,'url(#green)',ink,2.6);
+fore+=path('M576 601 V608 Q576 628 596 628 H705 Q725 628 725 608 V589','none',ink,3.4);
+fore+=path('M582 596 H719','none','#7D9E88',2,'opacity=\".6\"')+path('M584 593 H716','none','#F5F0DA',2.2,'opacity=\".8\"')+path('M589 618 H712','none','#EBEFDA',1.2,'stroke-dasharray=\"3 5\"');
+fore+=pot(900,418,104,62,'blue');
+fore+=shadow(260,912,68,9);
+for(const [x,y,id] of [[202,858,'blue'],[264,858,'rose'],[233,800,'gold']]){
+fore+=rect(x,y,54,54,6,'url(#'+id+')',ink,2.6);
+fore+=path('M'+x+' '+(y+37)+' V'+(y+48)+' Q'+x+' '+(y+54)+' '+(x+6)+' '+(y+54)+' H'+(x+48)+' Q'+(x+54)+' '+(y+54)+' '+(x+54)+' '+(y+48),'none',ink,3.4);
+fore+=path('M'+(x+6)+' '+(y+5)+' H'+(x+47),'none','#FFF8E5',1.5,'opacity=\".7\"');
+}
+fore+=ell(229,885,11,11,'#FFF9EA')+path('M277 898 L291 873 L305 898Z','#FFF8EB','none',0)+rect(247,814,26,26,2,'#FFFAEA','none');
+fore+=shadow(440,974,59,10)+ell(440,920,54,54,'url(#ball)',ink,2.6);
+fore+=path('M440 867 C413 887 409 948 440 973 C428 938 430 899 440 867Z','#D9969C','none',0)+path('M440 867 C466 889 467 948 440 973 C452 941 450 896 440 867Z','#90B9CB','none',0);
+fore+=path('M388 934 A54 54 0 0 0 492 934','none',ink,3.4)+path('M401 900 Q410 880 429 875','none','#FFFFFF',2,'opacity=\".72\"');
+// Basket handle follows the guide arch exactly.
+fore+=shadow(630,904,84,10)+path('M575 836 Q630 762 685 836','none',ink,12)+path('M575 836 Q630 762 685 836','none','#D3AF7C',7)+path('M575 834 Q630 760 685 834','none','#F4DBAC',1.2);
+fore+=rect(555,832,150,72,16,'url(#honey)',ink,2.6)+path('M555 875 V888 Q555 904 571 904 H689 Q705 904 705 888 V851','none',ink,3.4);
+fore+=rect(556,833,148,13,6,'url(#wood)',ink,1.8);
+for(const y of [858,875,891])fore+=path('M561 '+y+' H699','none','#A77E50',1.4,'opacity=\".58\"');
+for(const x of [578,603,628,653,678])fore+=path('M'+x+' 849 V896','none','#FFE8BC',1,'opacity=\".35\"');
+fore+=cushion(810,920,78,44,'pink');
+const layers={back:svg(back),over:svg(over),minor:svg(minor),fore:svg(fore)};
+const browser=await chromium.launch();
+try{
+const page=await browser.newPage();
+mkdirSync(dir,{recursive:true});
+for(const [name,markup] of Object.entries(layers)){
+const b64=await page.evaluate(async(s)=>{
+const img=new Image();img.src='data:image/svg+xml;base64,'+btoa(s);await img.decode();
+const c=document.createElement('canvas');c.width=2000;c.height=2000;c.getContext('2d').drawImage(img,0,0);
+return c.toDataURL('image/png').split(',')[1];
+},markup);
+const buf=Buffer.from(b64,'base64');writeFileSync(dir+'/'+name+'.png',buf);console.log(name+'.png: '+buf.length+' bytes');
+}
+// A temporary composite uses the existing guide regions and existing local pattern assets.
+const guide=readFileSync('art-guides/scene-room.svg','utf8');
+let regions=guide.slice(guide.indexOf('<rect x=\"0\"'),guide.indexOf('<rect x=\"45\"')).replace(/<text\\b[\\s\\S]*?<\\/text>/g,'');
+let i=0;const ids=['plain','stripes','dots','dots','dots','check'];
+regions=regions.replace(/fill=\"#["'^"]+" fill-opacity="0.18" stroke="#[''^"]+" stroke-width="3"/g,()=> '"'fill=\"url(#p-'+ids[i++]+')\"');
+const patternDefs=Object.entries({plain:40,stripes:38,dots:46,check:52}).map(([id,size])=>'<pattern id=\"p-'+id+'\" width=\"'+size+'\" height=\"'+size+'\" patternUnits=\"userSpaceOnUse\"><image width=\"'+size+'\" height=\"'+size+'\" href=\"data:image/svg+xml;base64,'+readFileSync('art/patterns/room-'+id+'.svg').toString('base64')+'\"/></pattern>').join('');
+const preview='<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1000\" height=\"1000\"><defs>'+defs+patternDefs+'</defs>'+back+regions+over+minor+fore+'</svg>';
+const preview64=await page.evaluate(async(s)=>{const im=new Image();im.src='data:image/svg+xml;base64,'+btoa(s);await im.decode();const c=document.createElement('canvas');c.width=c.height=1000;c.getContext('2d').drawImage(im,0,0);return c.toDataURL().split(',')[1];},preview);
+writeFileSync(dir+'/_preview.png',Buffer.from(preview64,'base64'));
+}finally{await browser.close();}
+
+'@ | node --input-type=module" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 2855ms:
+back.png: 1271340 bytes
+over.png: 625987 bytes
+minor.png: 146743 bytes
+fore.png: 643675 bytes
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+
+import {readFileSync,writeFileSync} from 'node:fs';
+import {deflateSync,inflateSync} from 'node:zlib';
+function crc(b){let c=0xffffffff;for(const x of b){c"'^=x;for(let j=0;j<8;j++)c=(c>>>1)''^((c&1)?0xedb88320:0);}return (c''^0xffffffff)>>>0;}
+for(const name of ['"'back','over','minor','fore']){
+const p='art/scenes/room/'+name+'.png';const b=readFileSync(p);let pos=8;const chunks=[];const data=[];
+while(pos<b.length){const len=b.readUInt32BE(pos);const type=b.toString('ascii',pos+4,pos+8);const chunk=b.subarray(pos,pos+12+len);if(type==='IDAT')data.push(b.subarray(pos+8,pos+8+len));else chunks.push({type,chunk});pos+=12+len;}
+const raw=inflateSync(Buffer.concat(data));const packed=deflateSync(raw,{level:9});if("'!inflateSync(packed).equals(raw))throw Error('"'Lossless check failed');
+const idat=Buffer.alloc(packed.length+12);idat.writeUInt32BE(packed.length);idat.write('IDAT',4);packed.copy(idat,8);idat.writeUInt32BE(crc(idat.subarray(4,-4)),idat.length-4);
+const out=Buffer.concat([b.subarray(0,8),...chunks.filter(c=>c.type"'!=='"'IEND').map(c=>c.chunk),idat,chunks.find(c=>c.type==='IEND').chunk]);writeFileSync(p,out);console.log(name+': '+out.length+' bytes; lossless verified');
+}
+'@ | node --input-type=module" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 2741ms:
+back: 616843 bytes; lossless verified
+over: 302763 bytes; lossless verified
+minor: 65156 bytes; lossless verified
+fore: 355243 bytes; lossless verified
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Remove-Item -LiteralPath art/scenes/room/_preview.png; npm.cmd run validate:art' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 2786ms:
+
+> pattern-hide-family-beta@0.1.0 validate:art
+> node scripts/validate-art.mjs
+
+形状データを組み立てられなかったため、前回の結果を使います（Build failed with 2 errors:）
+# 絵の自動検査結果
+
+対象：`art/`（34ファイル、合計 1400KB） 実行：2026-10-07T15:04:24.568Z
+
+**すべて合格**
+
+codex
+合成画像を確認し、ソファの前を横切っていた巾木を修正しました。4枚とも容量上限内で、自動検査は既存素材を含む34ファイルすべて合格です。ただし形状データは、検査ツールが保存済みデータに切り替えて使用しています。最後にビルドを確認します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import {chromium} from '@playwright/test';
+import {readFileSync} from 'node:fs';
+const browser=await chromium.launch();try{const p=await browser.newPage();for(const name of ['over','minor','fore']){const b64=readFileSync('art/scenes/room/'+name+'.png').toString('base64');console.log(name,await p.evaluate(async(b64)=>{const im=new Image();im.src='data:image/png;base64,'+b64;await im.decode();const c=document.createElement('canvas');c.width=c.height=2000;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,2000,2000).data;const faces=[[120,504,60,56],[290,510,60,56],[470,458,60,56],[650,458,60,56],[900,341.1,57,53.2],[260,738,60,56],[440,808,60,56],[630,736,60,56],[810,788,60,56]];return faces.map(([cx,cy,rx,ry])=>{let max=0;for(let y=Math.ceil((cy-ry)*2);y<(cy+ry)*2;y++)for(let x=Math.ceil((cx-rx)*2);x<(cx+rx)*2;x++)if(((x/2-cx)/rx)**2+((y/2-cy)/ry)**2<1)max=Math.max(max,d[(y*2000+x)*4+3]);return max;});},b64));}}finally{await browser.close();}
+'@ | node --input-type=module" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 2932ms:
+over [
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0
+]
+minor [
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0
+]
+fore [
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0
+]
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm.cmd run build' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 2593ms:
+
+> pattern-hide-family-beta@0.1.0 build
+> tsc --noEmit && vite build
+
+X [ERROR] Cannot read directory "../..": Access is denied.
+
+X [ERROR] Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+
+failed to load config from C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\vite.config.ts
+error during build:
+Error: Build failed with 2 errors:
+error: Cannot read directory "../..": Access is denied.
+error: Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+    at failureErrorWithLog (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1752:15)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1211:25
+    at runOnEndCallbacks (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1592:45)
+    at buildResponseToResult (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1209:7)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1236:16
+    at responseCallbacks.<computed> (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:886:9)
+    at handleIncomingPacket (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:941:12)
+    at Socket.readFromStdout (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:864:7)
+    at Socket.emit (node:events:509:28)
+    at addChunk (node:internal/streams/readable:563:12)
+
+codex
+ビルドは型検査を通過しましたが、esbuildが親フォルダへアクセスできず停止しました。`AGENTS.md` の指示どおり回避策は試さず、この制限を作業記録に残します。追加確認では、3つの透過層すべてで赤い顔領域9か所に描画がないことも確認できました。
+
+apply patch
+patch: completed
+C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\art\README.md
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 3ec2a163f38010353dec43ff52f4b3a44e1c9be8..9f563c769bdb492410f7547c5fed19999cd05c7f
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,9 +1,22 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/` にへやの4層PNGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-08：ジョブ04（へやの4層）
++
++- 作成ファイル：`scenes/room/back.png`、`over.png`、`minor.png`、`fore.png`。すべて2000×2000px。本READMEも更新。
++- 方法：SVGをコードで記述し、既存のローカルChromiumとCanvasでPNGに書き出した。PNGの画像データを可逆圧縮し直し、展開後のデータが一致することを確認。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
++- 画風：既存のキャラクター・柄タイルとガイド・現行画面を参照。濃茶色 `#4A3A40` の輪郭、影側を少し太くした線、左上からの淡い光、くすんだパステル、控えめな木目と縫い目を使用。文字は入れていない。
++- 層の内容：backは木の床と接地影（壁側は透明）。overは窓、カーテンレール、薄いひだ・ソファの縁と陰、脚、戸だな、家具の間に見える巾木。minorは壁の絵と数字のない時計。foreは橙色ガイドに合わせ、おもちゃ箱、植木鉢2個、クッション2個、畳んだブランケット、積み木、ボール、かごの9か所。壁・カーテン・ソファ・ラグの柄は描かず、ゲーム側の領域描画に任せた。
++- 容量：back 616,843 bytes、over 302,763 bytes、minor 65,156 bytes、fore 355,243 bytes。全ファイル800KB以下。透過を維持。
++- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む34ファイル・合計1400KBで「すべて合格」。over・minor・foreとも全9か所×3体で問題なし。形状データの組み立てに失敗したため、検査ツールが保存済みの形状データを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
++- 追加確認：完成PNGのover・minor・foreを2000×2000で読み取り、ガイドの赤い楕円9個の内側すべてでアルファ値が0であることを確認。既存の柄タイルとガイドの領域を合成して目視確認し、ソファの前を巾木が横切らないよう修正した。確認用の一時画像は削除済み。
++- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（`Access is denied`）、`vite.config.ts` を解決できなかった。
++- できなかったこと・迷った点：ビルド成功およびゲーム実画面での表示・縮小時の見やすさは未確認。合成確認はゲーム実画面の確認とは別。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数を変更する回避策は行わず終了。Claude Code側で最新形状データによる再検査、ビルド、実画面確認が必要。サーバーを使うpreview確認はビルド停止のため行っていない。
++- 手動の書き込みは `art/scenes/room/` と本READMEのみ。制作スクリプト・SVG中間ファイル・確認画像は残していない。既存の他作業者の変更は保持。commit / push は行っていない。
++
+ ### 2026-10-07：feedback（ギンガムチェックの修正）
+ 
+ - 変更ファイル：`patterns/room-check.svg`、`patterns/shop-check.svg`、本READMEのみ。他の柄10枚は変更していない。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "git status --short; Get-ChildItem -LiteralPath art/scenes/room | Select-Object Name,Length; Select-String -Path art-guides/ART_CHECK.md -Pattern 'room\\\\|すべて合格|対象' -Encoding UTF8" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 250ms:
+ M art-guides/ART_CHECK.md
+ M art/README.md
+?? art/scenes/
+?? video/hide-handoff-find.webm
+
+Name      Length
+----      ------
+back.png  616843
+fore.png  355243
+minor.png  65156
+over.png  302763
+                
+                
+                
+                
+                
+                
+
+
+
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 3ec2a163f38010353dec43ff52f4b3a44e1c9be8..9f563c769bdb492410f7547c5fed19999cd05c7f
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,9 +1,22 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/` にへやの4層PNGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-08：ジョブ04（へやの4層）
++
++- 作成ファイル：`scenes/room/back.png`、`over.png`、`minor.png`、`fore.png`。すべて2000×2000px。本READMEも更新。
++- 方法：SVGをコードで記述し、既存のローカルChromiumとCanvasでPNGに書き出した。PNGの画像データを可逆圧縮し直し、展開後のデータが一致することを確認。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
++- 画風：既存のキャラクター・柄タイルとガイド・現行画面を参照。濃茶色 `#4A3A40` の輪郭、影側を少し太くした線、左上からの淡い光、くすんだパステル、控えめな木目と縫い目を使用。文字は入れていない。
++- 層の内容：backは木の床と接地影（壁側は透明）。overは窓、カーテンレール、薄いひだ・ソファの縁と陰、脚、戸だな、家具の間に見える巾木。minorは壁の絵と数字のない時計。foreは橙色ガイドに合わせ、おもちゃ箱、植木鉢2個、クッション2個、畳んだブランケット、積み木、ボール、かごの9か所。壁・カーテン・ソファ・ラグの柄は描かず、ゲーム側の領域描画に任せた。
++- 容量：back 616,843 bytes、over 302,763 bytes、minor 65,156 bytes、fore 355,243 bytes。全ファイル800KB以下。透過を維持。
++- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む34ファイル・合計1400KBで「すべて合格」。over・minor・foreとも全9か所×3体で問題なし。形状データの組み立てに失敗したため、検査ツールが保存済みの形状データを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
++- 追加確認：完成PNGのover・minor・foreを2000×2000で読み取り、ガイドの赤い楕円9個の内側すべてでアルファ値が0であることを確認。既存の柄タイルとガイドの領域を合成して目視確認し、ソファの前を巾木が横切らないよう修正した。確認用の一時画像は削除済み。
++- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（`Access is denied`）、`vite.config.ts` を解決できなかった。
++- できなかったこと・迷った点：ビルド成功およびゲーム実画面での表示・縮小時の見やすさは未確認。合成確認はゲーム実画面の確認とは別。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数を変更する回避策は行わず終了。Claude Code側で最新形状データによる再検査、ビルド、実画面確認が必要。サーバーを使うpreview確認はビルド停止のため行っていない。
++- 手動の書き込みは `art/scenes/room/` と本READMEのみ。制作スクリプト・SVG中間ファイル・確認画像は残していない。既存の他作業者の変更は保持。commit / push は行っていない。
++
+ ### 2026-10-07：feedback（ギンガムチェックの修正）
+ 
+ - 変更ファイル：`patterns/room-check.svg`、`patterns/shop-check.svg`、本READMEのみ。他の柄10枚は変更していない。
+
+codex
+へやの4層PNG（2000×2000px）を作成し、`art/README.md` に作業記録を追記しました。
+
+- 全34素材の自動検査：合格（保存済み形状データを使用）
+- 顔領域9か所：重なりなし
+- ビルド：型検査通過後、サンドボックスのアクセス制限で停止
+
+指定外の手動変更、commit／pushは行っていません。
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 3ec2a163f38010353dec43ff52f4b3a44e1c9be8..9f563c769bdb492410f7547c5fed19999cd05c7f
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -1,9 +1,22 @@
+ # art/
+ 
+ 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+-現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
++現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/` にへやの4層PNGを配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-08：ジョブ04（へやの4層）
++
++- 作成ファイル：`scenes/room/back.png`、`over.png`、`minor.png`、`fore.png`。すべて2000×2000px。本READMEも更新。
++- 方法：SVGをコードで記述し、既存のローカルChromiumとCanvasでPNGに書き出した。PNGの画像データを可逆圧縮し直し、展開後のデータが一致することを確認。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
++- 画風：既存のキャラクター・柄タイルとガイド・現行画面を参照。濃茶色 `#4A3A40` の輪郭、影側を少し太くした線、左上からの淡い光、くすんだパステル、控えめな木目と縫い目を使用。文字は入れていない。
++- 層の内容：backは木の床と接地影（壁側は透明）。overは窓、カーテンレール、薄いひだ・ソファの縁と陰、脚、戸だな、家具の間に見える巾木。minorは壁の絵と数字のない時計。foreは橙色ガイドに合わせ、おもちゃ箱、植木鉢2個、クッション2個、畳んだブランケット、積み木、ボール、かごの9か所。壁・カーテン・ソファ・ラグの柄は描かず、ゲーム側の領域描画に任せた。
++- 容量：back 616,843 bytes、over 302,763 bytes、minor 65,156 bytes、fore 355,243 bytes。全ファイル800KB以下。透過を維持。
++- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む34ファイル・合計1400KBで「すべて合格」。over・minor・foreとも全9か所×3体で問題なし。形状データの組み立てに失敗したため、検査ツールが保存済みの形状データを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
++- 追加確認：完成PNGのover・minor・foreを2000×2000で読み取り、ガイドの赤い楕円9個の内側すべてでアルファ値が0であることを確認。既存の柄タイルとガイドの領域を合成して目視確認し、ソファの前を巾木が横切らないよう修正した。確認用の一時画像は削除済み。
++- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（`Access is denied`）、`vite.config.ts` を解決できなかった。
++- できなかったこと・迷った点：ビルド成功およびゲーム実画面での表示・縮小時の見やすさは未確認。合成確認はゲーム実画面の確認とは別。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数を変更する回避策は行わず終了。Claude Code側で最新形状データによる再検査、ビルド、実画面確認が必要。サーバーを使うpreview確認はビルド停止のため行っていない。
++- 手動の書き込みは `art/scenes/room/` と本READMEのみ。制作スクリプト・SVG中間ファイル・確認画像は残していない。既存の他作業者の変更は保持。commit / push は行っていない。
++
+ ### 2026-10-07：feedback（ギンガムチェックの修正）
+ 
+ - 変更ファイル：`patterns/room-check.svg`、`patterns/shop-check.svg`、本READMEのみ。他の柄10枚は変更していない。
+
+tokens used
+65,368
+へやの4層PNG（2000×2000px）を作成し、`art/README.md` に作業記録を追記しました。
+
+- 全34素材の自動検査：合格（保存済み形状データを使用）
+- 顔領域9か所：重なりなし
+- ビルド：型検査通過後、サンドボックスのアクセス制限で停止
+
+指定外の手動変更、commit／pushは行っていません。

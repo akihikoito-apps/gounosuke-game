@@ -1,6 +1,6 @@
 # 絵の自動検査結果
 
-対象：`art/`（30ファイル、合計 92KB） 実行：2026-10-07T14:54:02.792Z
+対象：`art/`（34ファイル、合計 1400KB） 実行：2026-10-07T15:06:02.720Z
 
 **すべて合格**
 
@@ -33,6 +33,10 @@
 | OK | art\characters\moko\front.svg | 顔の位置に絵がある |
 | OK | art\characters\moko\front-found.svg | 輪郭の判定からはみ出す割合 5.4%（12%以下） |
 | OK | art\characters\moko\front-found.svg | 顔の位置に絵がある |
+| OK | art\scenes\room\back.png | 寸法確認のみ |
+| OK | art\scenes\room\over.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\room\minor.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\room\fore.png | 全 9 か所 × 3体で問題なし |
 | OK | art\patterns\garden-dots.svg | つなぎ目の差 0.0（28未満） |
 | OK | art\patterns\garden-dots.svg | 不透明 |
 | OK | art\patterns\garden-leaf.svg | つなぎ目の差 0.0（28未満） |

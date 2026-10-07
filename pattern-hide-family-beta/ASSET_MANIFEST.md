@@ -35,6 +35,7 @@
 | `art/characters/koro/`（back, clothes-mask, clothes-shade, clothes-line, front, front-found の SVG 6枚） | Codex（codex-cli 0.154.0）がSVGをコードで記述。画像生成・ネット画像は不使用。線の太さと手の形を Claude Code の依頼で1回修正 | 2026-10-07 | validate:art 合格、npm test / test:e2e 合格（Claude Code が実行） |
 | `art/characters/mimi/`・`art/characters/moko/`（各 SVG 6枚） | Codex がSVGをコードで記述（ころの画風に合わせる）。画像生成・ネット画像は不使用 | 2026-10-07 | validate:art 合格、npm test / test:e2e 合格 |
 | `art/patterns/`（柄タイル SVG 12枚） | Codex がSVGをコードで記述。チェック2枚はギンガムに戻す修正を1回 | 2026-10-07 | validate:art 合格（つなぎ目なし）、npm test / test:e2e 合格 |
+| `art/scenes/room/`（back / over / minor / fore の PNG 4枚、2000×2000） | Codex がSVGをコードで記述し、ローカルの Chromium で PNG に書き出し。画像生成・ネット画像は不使用 | 2026-10-08 | validate:art 合格（全9か所×3体）、npm test / test:e2e 合格 |
 `art-guides/` は形状データから自動生成した下書きガイドで、ゲームには含まれません。
 
 ## 外部の画像生成について
