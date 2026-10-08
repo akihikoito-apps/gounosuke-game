@@ -1,16 +1,19 @@
 // シールちょう：遊ぶともらえるシール（買うものではない）。
 // コースをクリアすると1枚ずつ（10枚）、見つけた合計回数でも5枚。ガチャやランダムはなし（何をするともらえるか、いつも分かる）。
 import type { CharacterId } from './characters';
+import type { SceneId } from './scene';
 
-export type Motif = 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present';
+export type Motif = 'shell' | 'floatring' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present';
 
 export interface StickerDef {
   id: string;
   /** 子ども向けの名前（ひらがな） */
   name: string;
-  kind: 'course' | 'finds';
-  /** course：このコースをクリア / finds：見つけた合計回数 */
+  kind: 'course' | 'finds' | 'scene';
+  /** course：このコースをクリア / finds：見つけた合計回数 / scene：その背景で見つけた回数 */
   need: number;
+  /** kind が scene のときの背景（背景パック） */
+  scene?: SceneId;
   char: CharacterId;
   motif: Motif;
   /** シールの地の色（くすみパステル） */
@@ -33,22 +36,38 @@ export const STICKERS: StickerDef[] = [
   { id: 'f60', name: '60かい みつけた', kind: 'finds', need: 60, char: 'moko', motif: 'heart', color: '#F5D5DE' },
   { id: 'f100', name: '100かい みつけた', kind: 'finds', need: 100, char: 'nyako', motif: 'balloon', color: '#D8E4F2' },
   { id: 'f150', name: '150かい みつけた', kind: 'finds', need: 150, char: 'mimi', motif: 'star', color: '#F4E6B4' },
+  // 背景パック1「うみべ」
+  { id: 'b1', name: 'ちょきが きたよ', kind: 'scene', scene: 'beach', need: 1, char: 'choki', motif: 'shell', color: '#F6DCD3' },
+  { id: 'b10', name: 'うみべで 10かい', kind: 'scene', scene: 'beach', need: 10, char: 'koro', motif: 'floatring', color: '#D7ECF3' },
+  { id: 'b30', name: 'うみべで 30かい', kind: 'scene', scene: 'beach', need: 30, char: 'choki', motif: 'star', color: '#F3E6C2' },
 ];
 
-export function hasSticker(s: StickerDef, cleared: number, totalFinds: number): boolean {
-  return s.kind === 'course' ? cleared >= s.need : totalFinds >= s.need;
+export interface Progress {
+  cleared: number;
+  totalFinds: number;
+  sceneFinds?: Partial<Record<SceneId, number>>;
 }
 
-export function earnedStickers(cleared: number, totalFinds: number): StickerDef[] {
-  return STICKERS.filter((s) => hasSticker(s, cleared, totalFinds));
+export function hasSticker(s: StickerDef, cleared: number, totalFinds: number, sceneFinds: Partial<Record<SceneId, number>> = {}): boolean {
+  if (s.kind === 'course') return cleared >= s.need;
+  if (s.kind === 'scene') return (sceneFinds[s.scene as SceneId] ?? 0) >= s.need;
+  return totalFinds >= s.need;
+}
+
+export function earnedStickers(cleared: number, totalFinds: number, sceneFinds: Partial<Record<SceneId, number>> = {}): StickerDef[] {
+  return STICKERS.filter((s) => hasSticker(s, cleared, totalFinds, sceneFinds));
 }
 
 /** 進み具合が before → after に変わったときに、新しくもらえたシール */
-export function newStickers(before: { cleared: number; totalFinds: number }, after: { cleared: number; totalFinds: number }): StickerDef[] {
-  return STICKERS.filter((s) => !hasSticker(s, before.cleared, before.totalFinds) && hasSticker(s, after.cleared, after.totalFinds));
+export function newStickers(before: Progress, after: Progress): StickerDef[] {
+  return STICKERS.filter(
+    (s) => !hasSticker(s, before.cleared, before.totalFinds, before.sceneFinds) && hasSticker(s, after.cleared, after.totalFinds, after.sceneFinds),
+  );
 }
 
 /** まだのシールの「どうすればもらえるか」 */
 export function stickerHint(s: StickerDef): string {
-  return s.kind === 'course' ? `コース${s.need} クリアで` : `${s.need}かい みつけたら`;
+  if (s.kind === 'course') return `コース${s.need} クリアで`;
+  if (s.kind === 'scene') return s.need === 1 ? 'うみべで みつけたら' : `うみべで ${s.need}かい`;
+  return `${s.need}かい みつけたら`;
 }

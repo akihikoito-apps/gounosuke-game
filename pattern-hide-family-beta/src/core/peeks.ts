@@ -69,6 +69,10 @@ const TABLE: Shape[] = [
   },
 ];
 
+// うみべ：海の家（壁と屋根の下まで）、風よけ（布と柱）
+const HUT: Shape[] = [R(22, 240, 318, 426)];
+const WINDBREAK: Shape[] = [R(590, 436, 400, 230, 6)];
+
 const peek = (id: string, x: number, y: number, s: number, region: string, front: Shape[], kind: 'peek' | 'window' = 'peek', clip?: Shape[]): PeekDef => ({
   id,
   x,
@@ -99,6 +103,11 @@ export const PEEKS: Record<SceneId, PeekDef[]> = {
     peek('shop-peek-counter-1', 330, 686, 0.9, 'counter', COUNTER),
     peek('shop-peek-counter-2', 625, 686, 0.9, 'counter', COUNTER),
     peek('shop-peek-table', 800, 830, 0.9, 'counter', TABLE),
+  ],
+  beach: [
+    peek('beach-peek-hut', 342, 652, 1, 'sand', HUT),
+    peek('beach-peek-wind-1', 700, 550, 0.9, 'windbreak', WINDBREAK),
+    peek('beach-peek-wind-2', 880, 550, 0.9, 'windbreak', WINDBREAK),
   ],
 };
 

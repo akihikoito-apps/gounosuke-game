@@ -2,7 +2,8 @@
 // ローカル座標：足もと中央が原点、上が -y。高さ約200。
 import { type Pt, type Shape, quadPoints, shapeToSvg } from './geometry';
 
-export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo';
+export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'choki';
+import type { SceneId } from './scene';
 
 export interface CharacterDef {
   id: CharacterId;
@@ -112,9 +113,23 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     ],
     facePoints: FACE,
   },
+  // 背景パック1「うみべ」の友だち。うみべで初めて誰かを見つけると仲間になる
+  choki: {
+    id: 'choki',
+    name: 'ちょき',
+    personality: 'ほがらかで よこあるきが とくい。あたまの よこで あげた はさみ が めじるし。',
+    skin: '#E9A797',
+    silhouette: [
+      BODY,
+      HEAD,
+      { kind: 'ellipse', cx: -54, cy: -184, rx: 16, ry: 20 },
+      { kind: 'ellipse', cx: 54, cy: -184, rx: 16, ry: 20 },
+    ],
+    facePoints: FACE,
+  },
 };
 
-export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo'];
+export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'choki'];
 /** 最初からいる3体 */
 export const BASE_CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
 /** 新しい友だちが仲間になるコース（このコースをクリアしたら）。最初のクリアで1体目が来る */
@@ -123,9 +138,16 @@ export const FRIEND_UNLOCKS: { course: number; char: CharacterId }[] = [
   { course: 5, char: 'popo' },
 ];
 
-/** いま遊べるキャラクター（コースの進み具合で増える） */
-export function unlockedCharacters(cleared: number): CharacterId[] {
-  return [...BASE_CHARACTER_IDS, ...FRIEND_UNLOCKS.filter((f) => cleared >= f.course).map((f) => f.char)];
+/** 背景パックの友だち：その背景で初めて誰かを見つけると仲間になる */
+export const SCENE_FRIENDS: { scene: SceneId; char: CharacterId }[] = [{ scene: 'beach', char: 'choki' }];
+
+/** いま遊べるキャラクター（コースの進み具合と、背景パックで見つけた回数で増える） */
+export function unlockedCharacters(cleared: number, sceneFinds: Partial<Record<SceneId, number>> = {}): CharacterId[] {
+  return [
+    ...BASE_CHARACTER_IDS,
+    ...FRIEND_UNLOCKS.filter((f) => cleared >= f.course).map((f) => f.char),
+    ...SCENE_FRIENDS.filter((f) => (sceneFinds[f.scene] ?? 0) >= 1).map((f) => f.char),
+  ];
 }
 
 const LINE = '#4A3A40';
@@ -180,6 +202,20 @@ function headMarkup(c: CharacterDef): string {
         `<path d="M-9 -124 Q-4.5 -119 0 -124 Q4.5 -119 9 -124" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>` +
         whisk(1) +
         whisk(-1)
+      );
+    }
+    case 'choki': {
+      // 頭の横に上げたはさみ（切れこみのある丸）
+      const claw = (sx: number) =>
+        `<path d="M${-54 * sx} -164 C${-74 * sx} -170 ${-72 * sx} -200 ${-58 * sx} -204 L${-50 * sx} -186 L${-42 * sx} -202 C${-30 * sx} -196 ${-34 * sx} -168 ${-54 * sx} -164 Z" fill="${c.skin}" ${st}/>` +
+        `<path d="M${-48 * sx} -158 L${-52 * sx} -168" stroke="${LINE}" stroke-width="3" stroke-linecap="round"/>`;
+      return (
+        claw(1) +
+        claw(-1) +
+        `<ellipse cx="0" cy="-142" rx="48" ry="45" fill="${c.skin}" ${st}/>` +
+        eyes() +
+        cheeks() +
+        `<path d="M-8 -126 Q0 -118 8 -126" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
       );
     }
     case 'popo': {

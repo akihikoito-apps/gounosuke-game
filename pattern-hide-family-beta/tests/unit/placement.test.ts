@@ -64,7 +64,7 @@ describe('autoLayout (seeded)', { timeout: 60_000 }, () => {
         }
       }
     }
-    expect(checked).toBe(SEEDS * 6);
+    expect(checked).toBe(SEEDS * SCENE_IDS.length * 2);
   });
 
   it('same seed gives same layout', () => {

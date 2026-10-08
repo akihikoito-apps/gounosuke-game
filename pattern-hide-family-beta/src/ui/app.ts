@@ -1,5 +1,5 @@
 // 画面の流れと入力。ゲームの判定は core、保存は storage に任せる。
-import { CHARACTERS, CHARACTER_IDS, FRIEND_UNLOCKS, type CharacterId, unlockedCharacters } from '../core/characters';
+import { CHARACTERS, CHARACTER_IDS, FRIEND_UNLOCKS, SCENE_FRIENDS, type CharacterId, unlockedCharacters } from '../core/characters';
 import { STICKERS, hasSticker, newStickers, stickerHint } from '../core/stickers';
 import { stickerSvg } from './stickerArt';
 import { charArtMarkup, faceIcon, fullIcon } from './charArt';
@@ -272,14 +272,14 @@ export class App {
 
   private stickerCount(): number {
     const d = this.store.data;
-    return STICKERS.filter((x) => hasSticker(x, d.course.cleared, d.collection.totalFinds)).length;
+    return STICKERS.filter((x) => hasSticker(x, d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds)).length;
   }
 
   /** シールちょう：もらったシールと、まだのシール（何をするともらえるか） */
   private stickersHtml(): string {
     const d = this.store.data;
     const cells = STICKERS.map((x) => {
-      const got = hasSticker(x, d.course.cleared, d.collection.totalFinds);
+      const got = hasSticker(x, d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds);
       return got
         ? `<figure class="sticker got" aria-label="${x.name}">${stickerSvg(x)}<figcaption>${x.name}</figcaption></figure>`
         : `<figure class="sticker locked" aria-label="まだ。${stickerHint(x)}"><div class="sticker-q" aria-hidden="true">？</div><figcaption>${stickerHint(x)}</figcaption></figure>`;
@@ -777,16 +777,24 @@ export class App {
 
   /** いま遊べるキャラクター（コース1でにゃこ、コース5でぽぽが仲間に） */
   private allowedChars(): CharacterId[] {
-    return unlockedCharacters(this.store.data.course.cleared);
+    return unlockedCharacters(this.store.data.course.cleared, this.store.data.collection.sceneFinds);
   }
 
   /** 見つけた合計回数を数え、回数のシールをもらえたら知らせる（コースクリアのシールはクリア画面で） */
   private countFind(): void {
-    const before = { cleared: this.store.data.course.cleared, totalFinds: this.store.data.collection.totalFinds };
+    const sceneId = this.session?.sceneId;
+    const before = { cleared: this.store.data.course.cleared, totalFinds: this.store.data.collection.totalFinds, sceneFinds: { ...this.store.data.collection.sceneFinds } };
     this.store.update((d) => {
       d.collection.totalFinds = Math.min(9999, d.collection.totalFinds + 1);
+      if (sceneId) d.collection.sceneFinds[sceneId] = Math.min(9999, (d.collection.sceneFinds[sceneId] ?? 0) + 1);
     });
-    const after = { cleared: before.cleared, totalFinds: this.store.data.collection.totalFinds };
+    const after = { cleared: before.cleared, totalFinds: this.store.data.collection.totalFinds, sceneFinds: this.store.data.collection.sceneFinds };
+    // 背景パックの友だち：その背景で初めて見つけたら仲間に
+    for (const f of SCENE_FRIENDS) {
+      if ((before.sceneFinds[f.scene] ?? 0) === 0 && (after.sceneFinds[f.scene] ?? 0) >= 1) {
+        this.toast(`<div class="toast-sticker">${faceIcon(CHARACTERS[f.char])}</div><p>あたらしい ともだち<br>${CHARACTERS[f.char].name}が なかまに なったよ！</p>`);
+      }
+    }
     for (const st of newStickers(before, after)) this.toast(`<div class="toast-sticker">${stickerSvg(st)}</div><p>シール ゲット！<br>${st.name}</p>`);
   }
 

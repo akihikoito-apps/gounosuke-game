@@ -9,6 +9,10 @@ const L = 'stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round" stroke-li
 /** モチーフ（中心 0,0・半径およそ 16 の範囲） */
 function motif(m: Motif): string {
   switch (m) {
+    case 'shell':
+      return `<path d="M-15 10 Q-16 -14 0 -15 Q16 -14 15 10 Z" fill="#FBE3DC" ${L}/><path d="M-8 9 L-4 -10 M0 10 V-13 M8 9 L4 -10" stroke="#C9A39A" stroke-width="2"/>`;
+    case 'floatring':
+      return `<circle r="15" fill="#F07D7D" ${L}/><circle r="7" fill="#D7ECF3" ${L}/><path d="M0 -15 V-7 M0 7 V15 M-15 0 H-7 M7 0 H15" stroke="#FFFFFF" stroke-width="4"/>`;
     case 'ball':
       return `<circle r="15" fill="#FFF7EA" ${L}/><path d="M-15 0 Q0 -8 15 0" fill="none" stroke="#E07B7B" stroke-width="4"/><path d="M0 -15 Q-7 0 0 15" fill="none" stroke="#7EA6DA" stroke-width="4"/>`;
     case 'cushion':

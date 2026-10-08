@@ -7,7 +7,7 @@ import type { SceneId } from '../core/scene';
 
 export type ContentId = `scene:${SceneId}` | `course:${number}` | `char:${CharacterId}` | 'trial:hardest' | `costume-pack:${string}`;
 
-export type PackId = 'base' | 'more-courses';
+export type PackId = 'base' | 'more-courses' | 'beach';
 
 export interface PackDef {
   id: PackId;
@@ -37,6 +37,12 @@ export const PACKS: PackDef[] = [
     name: 'つづきの コース',
     free: false,
     contents: [...courses(6, 10), 'trial:hardest', 'char:popo'],
+  },
+  {
+    id: 'beach',
+    name: 'うみべ パック',
+    free: false,
+    contents: ['scene:beach', 'char:choki'],
   },
 ];
 

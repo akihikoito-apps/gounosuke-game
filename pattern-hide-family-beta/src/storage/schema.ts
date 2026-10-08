@@ -39,7 +39,7 @@ export interface SaveData {
   playtest: { enabled: boolean; counters: PlaytestCounters };
   course: CourseProgress;
   /** シールちょう用：見つけた合計回数（コース・さがす・かくして わたす。おためしは数えない） */
-  collection: { totalFinds: number };
+  collection: { totalFinds: number; sceneFinds: Partial<Record<SceneId, number>> };
 }
 
 /** コースの進み具合。cleared：クリアした最後のコース（0〜10）。current の finds：そのコースで見つけた回数 */
@@ -83,7 +83,7 @@ export function defaults(): SaveData {
     resume: null,
     playtest: { enabled: false, counters: emptyCounters() },
     course: emptyCourse(),
-    collection: { totalFinds: 0 },
+    collection: { totalFinds: 0, sceneFinds: {} },
   };
 }
 
@@ -169,6 +169,20 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
     const v = validCount(tf);
     if (v !== tf) repaired = true;
     d.collection.totalFinds = v;
+    const sf = typeof col === 'object' && col !== null ? (col as Record<string, unknown>).sceneFinds : undefined;
+    if (sf !== undefined) {
+      if (typeof sf !== 'object' || sf === null) repaired = true;
+      else
+        for (const [k, n] of Object.entries(sf as Record<string, unknown>)) {
+          if (!SCENE_IDS.includes(k as SceneId)) {
+            repaired = true;
+            continue;
+          }
+          const c = validCount(n);
+          if (c !== n) repaired = true;
+          d.collection.sceneFinds[k as SceneId] = c;
+        }
+    }
   }
   const course = validateCourse(raw.course);
   d.course = course.course;
