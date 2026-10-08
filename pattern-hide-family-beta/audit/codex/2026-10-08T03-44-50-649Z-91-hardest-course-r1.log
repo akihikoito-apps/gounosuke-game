@@ -1,0 +1,3981 @@
+job: codex-jobs/91-hardest-course-r1.md
+exit: 0
+minutes: 5.5
+changed (1): audit/codex/hardest-course-r1.md
+outside allowed paths (0): -
+
+----- codex output -----
+OpenAI Codex v0.154.0
+--------
+workdir: C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1199d-22be-7953-993f-ca8ecdb44ecc
+--------
+user
+Read the file codex-jobs/91-hardest-course-r1.md and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.
+codex
+ジョブファイルと AGENTS.md を読み、指定された作業と書き込み範囲を確認します。
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 AGENTS.md; Get-Content -Encoding UTF8 codex-jobs/91-hardest-course-r1.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 176ms:
+# Codex 向けの決まり（このフォルダ）
+
+このフォルダは幼児向けゲーム「もようのかくれんぼ（仮）」のWebベータです。Claude Code が司令塔で、Codex は **絵の制作** と **独立レビュー** を担当します。
+
+## 書き込んでよい場所
+- 絵の制作ジョブ：`art/` の中だけ
+- レビュージョブ：`audit/codex/` の中だけ（レポートを書く）
+- それ以外（`src/`, `tests/`, `scripts/`, 設定、文書）は **変更しない**。直したほうがよい点は、レポートや `art/README.md` に提案として書く
+
+## 必ず守ること
+- ジョブファイル（`codex-jobs/*.md`）の指示と、`ART_SLOTS.md`・`CODEX_ART_BRIEF.md` の決まりに従う
+- 絵を作ったら `npm run validate:art` を実行し、合格するまで直す。結果は `art-guides/ART_CHECK.md` に出る
+- 既存の作品（キャラクター・ロゴ・画面・音）をまねない／取り込まない。ネット上の画像を使わない。文字を絵に入れない
+- 子どもの個人情報・外部通信・広告・課金に関わるものを追加しない
+- 追加料金が発生する手段（別料金の API キー、有料サービス）を使わない。利用上限に達したら、そこで止めて報告する
+- git の commit / push はしない（Claude Code が確認してから行う）
+- 最後に、やったこと・使った方法（SVGをコードで書いた／画像生成を使った 等）・検査結果・できなかったことを、ジョブファイルの指定場所に書く
+
+## サンドボックスでの注意（2026-10-07 追記）
+- `art-guides/ART_CHECK.md` は `npm run validate:art` が自動で書き換える。これは許可済みなので、書き込み先を変える工夫は不要
+- 検査・ビルドの道具（node_modules、scripts、環境変数 NODE_OPTIONS など）を差し替えたり、上書きしたりする回り道はしない。サンドボックスで動かないコマンドがあれば、無理をせず、その旨を作業記録に書いて終える（検査は Claude Code が外でも実行する）
+- 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
+- Windows の PowerShell では `npm` / `npx` が実行ポリシーで止まる。代わりに `npm.cmd run validate:art`、`npm.cmd run build` を使う（設定は変えない）
+- PowerShell でファイルを読むときは `Get-Content -Encoding UTF8` を使う（指定しないと日本語が文字化けする）
+
+## 本部（_hq）との約束
+- 作業の区切りで必ず STATUS.md（リポジトリ直下）を更新すること。「状態・今やっていること・次の一手・ブロッカー・最終更新」の各行を書き換える。
+# ジョブ91：最難関コースの議論（第1回・提案）
+
+## 書き込んでよい場所
+`audit/codex/hardest-course-r1.md` の1ファイルだけ。**コード・絵・設定は変更しない**（読むのは自由）
+
+## 背景
+コースモード（10コース×10回）を作った。ご本人から「最難関コースを試しに遊びたい。どれほど難しくできるかは Codex とよく議論して作って」と依頼があった。
+あなた（Codex）は、ゲームデザイナー兼レビュアーとして、**どこまで難しくできるか**を提案し、その危険も自分で指摘してほしい。Claude Code があなたの提案に反論・修正を返し、第2回で詰める。
+
+## 読むもの
+- `src/core/courses.ts`（コースの表。今のコース10が一番むずかしい）
+- `src/core/accessories.ts`（ニット帽・傘。顔に重ねない・画面内・ほかの小物の下に入らない・camo は後ろの7割が同じ柄）
+- `src/core/placement.ts`（LIMITS：全体の45%以上が見える、服は20〜92%見える、顔は必ず見える、高さ170以上 等）
+- `src/core/session.ts`（当たり判定・3段階のヒント）、`src/core/patterns.ts`（soft/exact の柄）
+- `src/ui/sceneView.ts`, `src/ui/accessoryArt.ts`, `src/ui/app.ts`（outline、表示）
+- `OWNER_REVIEW.md`、`strategy/DIFFERENTIATION_DEBATE.md`（方針・やらないこと）
+- 画面の様子：`screenshots/390x844_08-search-shop-normal.png` など
+
+## 守る前提（ここは動かさない）
+- 対象は4〜6歳と家族。外れても減点・時間切れ・怖い演出なし。ヒントは無料・無制限
+- **顔（目と口）はどの難易度でも隠さない**（キャラクターが「いる」ことが分かる最低限の約束）
+- 色覚に頼る見分けだけにしない。動くと見える型（アクション）にはしない
+- 課金・広告・外部通信は入れない
+
+## 考えてほしいこと
+1. **難しくする手段の一覧**と、それぞれの効き目・副作用。例（これ以外もどんどん出して）：
+   - 人数（3人まで → ？）、ふち線の濃さ（今の最小 0.32、下限 0.25）、服の柄（exact）
+   - 帽子・傘の割合、帽子と傘を同時に、ほかの身につけ物（マフラー？ 手袋？ 背景の柄の箱をかぶる？）
+   - 顔の見え方（顔は隠さないが、目以外を小さく／色を背景に寄せる？ → 前提との関係を必ず議論）
+   - 隠れ場所（より小物に深く隠れる場所の追加、キャラクターを少し小さく）
+   - 「にせもの」（顔のない同じ柄のかたまり）を置く、見つけた子の表示、ヒントの出方
+   - 1回の出題の中の制限（例：みつける順番）
+2. **最難関コースの具体案**：表の1行として（spots / variant / outline / maxChars / hat / umbrella / 新しい項目）。新しい項目が要るなら、何をどう作るか
+3. 「むずかしい」と「ずるい・理不尽」の境目はどこか。4〜6歳と大人で分けて考える
+4. 実装の手間（小・中・大）と、試遊で確かめるべきこと
+5. あなたの案のうち、**自分でも危ないと思う点**（反論されそうな点）
+
+## 書き方
+`audit/codex/hardest-course-r1.md` に、日本語で、重要な順に。数字は具体的に。推測は推測と書く。
+`npx.cmd tsc --noEmit` などの読むだけのコマンドは使ってよい。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 src/core/courses.ts; Get-Content -Encoding UTF8 src/core/accessories.ts; Get-Content -Encoding UTF8 src/core/placement.ts' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 179ms:
+// コースモード：10回みつけると1コースクリア、10コースで100回。
+// あとのコースほど、柄が背景に近づき・ふち線が薄くなり・人数が増え・ニット帽や傘が加わる。
+import { type AccStyle, type Accessories, HAT_COLORS, accessoryFits, accessoryShapes } from './accessories';
+import { CHARACTER_IDS, type CharacterId } from './characters';
+import { bbox, bboxOverlap, transformShape, unionBBox } from './geometry';
+import { type Placement, costumeForRegion, silhouetteBBox, spotsConflict } from './placement';
+import { type Rng, mulberry32, shuffle } from './rng';
+import type { SceneDef, SceneId, SpotDef } from './scene';
+
+export const FINDS_PER_COURSE = 10;
+
+export interface CourseDef {
+  no: number;
+  /** easy：見えやすい場所だけ / all：すべての場所 */
+  spots: 'easy' | 'all';
+  /** soft：少し違う柄 / exact：背景と同じ柄 */
+  variant: 'soft' | 'exact';
+  /** 服のふち線の濃さ */
+  outline: number;
+  /** 1回に隠れる最大の人数 */
+  maxChars: 1 | 2 | 3;
+  /** rate：1人ごとにかぶる割合 */
+  hat: { rate: number; style: AccStyle } | null;
+  umbrella: { rate: number; style: AccStyle } | null;
+}
+
+export const COURSES: CourseDef[] = [
+  { no: 1, spots: 'easy', variant: 'soft', outline: 0.72, maxChars: 1, hat: null, umbrella: null },
+  { no: 2, spots: 'easy', variant: 'soft', outline: 0.62, maxChars: 1, hat: null, umbrella: null },
+  { no: 3, spots: 'all', variant: 'soft', outline: 0.56, maxChars: 1, hat: null, umbrella: null },
+  // ニット帽のはじまり：色つきの帽子で、頭の目印（くるん毛・耳・星）が見えにくくなる
+  { no: 4, spots: 'easy', variant: 'soft', outline: 0.56, maxChars: 1, hat: { rate: 1, style: 'color' }, umbrella: null },
+  { no: 5, spots: 'all', variant: 'soft', outline: 0.5, maxChars: 2, hat: { rate: 0.8, style: 'color' }, umbrella: null },
+  // 傘のはじまり：うしろの背景と同じ柄の傘
+  { no: 6, spots: 'easy', variant: 'soft', outline: 0.5, maxChars: 1, hat: null, umbrella: { rate: 1, style: 'camo' } },
+  { no: 7, spots: 'all', variant: 'exact', outline: 0.44, maxChars: 2, hat: { rate: 0.7, style: 'color' }, umbrella: { rate: 0.6, style: 'camo' } },
+  // 帽子も背景の柄に
+  { no: 8, spots: 'all', variant: 'exact', outline: 0.4, maxChars: 2, hat: { rate: 0.8, style: 'camo' }, umbrella: { rate: 0.6, style: 'camo' } },
+  { no: 9, spots: 'all', variant: 'exact', outline: 0.36, maxChars: 3, hat: { rate: 0.8, style: 'camo' }, umbrella: { rate: 0.7, style: 'camo' } },
+  { no: 10, spots: 'all', variant: 'exact', outline: 0.32, maxChars: 3, hat: { rate: 0.9, style: 'camo' }, umbrella: { rate: 0.8, style: 'camo' } },
+];
+
+export function courseDef(no: number): CourseDef {
+  return COURSES[Math.min(COURSES.length, Math.max(1, Math.floor(no))) - 1];
+}
+
+/** 何回目の出題で、どの背景を使うか（同じ背景が続かないよう順番に回す） */
+export function courseScene(no: number, round: number, sceneIds: SceneId[]): SceneId {
+  return sceneIds[(no - 1 + round) % sceneIds.length];
+}
+
+function worldShapes(spot: SpotDef, acc: Accessories) {
+  const t = { tx: spot.x, ty: spot.y, s: spot.s };
+  return accessoryShapes(acc).map((s) => transformShape(t, s));
+}
+
+/**
+ * コースの1回分の配置。remaining（このコースで残りの「みつける」回数）を超えない人数にする。
+ * シードが同じなら同じ結果。
+ */
+export function courseRound(scene: SceneDef, no: number, remaining: number, seed: number): Placement[] {
+  const c = courseDef(no);
+  const rng: Rng = mulberry32(seed);
+  const want = Math.max(1, Math.min(remaining, 1 + Math.floor(rng() * c.maxChars)));
+  const chars = shuffle(rng, CHARACTER_IDS).slice(0, want);
+  const pool = shuffle(
+    rng,
+    scene.spots.filter((s) => c.spots === 'all' || s.easy),
+  );
+  // 初めて帽子・傘が出るコース（割合 1）は、それが使える場所から先に選ぶ
+  const first = (sp: SpotDef, ch: CharacterId) =>
+    (c.hat?.rate === 1 && accessoryFits(scene, sp, ch, 'hat', c.hat.style).ok) ||
+    (c.umbrella?.rate === 1 && accessoryFits(scene, sp, ch, 'umbrella', c.umbrella.style).ok);
+  const out: Placement[] = [];
+  const used: SpotDef[] = [];
+  const accBoxes: ReturnType<typeof bbox>[] = [];
+  for (const ch of chars) {
+    const ordered = [...pool.filter((sp) => first(sp, ch)), ...pool.filter((sp) => !first(sp, ch))];
+    let placed = false;
+    for (const sp of ordered) {
+      if (used.some((u) => spotsConflict(u, sp))) continue;
+      const charBox = silhouetteBBox(ch, sp);
+      // ほかの子の傘の下に入らない
+      if (accBoxes.some((b) => bboxOverlap(b, charBox, 4))) continue;
+      const acc: Accessories = {};
+      if (c.hat && rng() < c.hat.rate && accessoryFits(scene, sp, ch, 'hat', c.hat.style).ok) acc.hat = c.hat.style;
+      if (c.umbrella && rng() < c.umbrella.rate && accessoryFits(scene, sp, ch, 'umbrella', c.umbrella.style).ok) {
+        // 傘がほかの子に重ならないときだけ
+        const ub = unionBBox(worldShapes(sp, { umbrella: c.umbrella.style }).map(bbox));
+        if (!used.some((u, k) => bboxOverlap(ub, silhouetteBBox(out[k].char, u), 4))) acc.umbrella = c.umbrella.style;
+      }
+      if (acc.hat === 'color' || acc.umbrella === 'color') acc.tone = Math.floor(rng() * HAT_COLORS.length);
+      const p: Placement = { char: ch, spot: sp.id, costume: costumeForRegion(scene, sp.region), variant: c.variant };
+      if (acc.hat || acc.umbrella) {
+        p.acc = acc;
+        const shapes = worldShapes(sp, acc);
+        if (shapes.length) accBoxes.push(unionBBox(shapes.map(bbox)));
+      }
+      out.push(p);
+      used.push(sp);
+      placed = true;
+      break;
+    }
+    if (!placed) break;
+  }
+  return out;
+}
+// コースで使う身につける物（ニット帽・傘）。形はローカル座標（足もと中央が原点、上が -y）。
+// 顔（目と口）にはどちらも重ねない。形は当たり判定・配置の検証・描画で共有する。
+import { type Pt, type Shape, SCENE_SIZE, bbox, contains, quadPoints, samplePoints, transformPt, transformShape, unionBBox } from './geometry';
+import { CHARACTERS, type CharacterId } from './characters';
+import type { SceneDef, SpotDef } from './scene';
+import { regionAt } from './placement';
+
+/** color：色つき（頭の目印を隠す） / camo：うしろの背景と同じ柄 */
+export type AccStyle = 'color' | 'camo';
+
+export interface Accessories {
+  hat?: AccStyle;
+  umbrella?: AccStyle;
+  /** 色つきのときの色（HAT_COLORS / UMBRELLA_COLORS の番号） */
+  tone?: number;
+}
+
+/** くすみのある毛糸の色（地の色・編み目の色） */
+export const HAT_COLORS: [string, string][] = [
+  ['#E59A86', '#C97A68'],
+  ['#8DB7D9', '#6E98BC'],
+  ['#EFC66A', '#D4A84C'],
+  ['#A8CF9A', '#86B077'],
+];
+
+const B = (p0: Pt, c: Pt, p1: Pt) => quadPoints(p0, c, p1, 10);
+
+/** ニット帽：耳の付け根より上だけを覆う（目の上端 y=-150 より上） */
+export const HAT_POLY: Pt[] = [
+  { x: -54, y: -162 },
+  ...B({ x: -54, y: -162 }, { x: -60, y: -222 }, { x: 0, y: -226 }),
+  ...B({ x: 0, y: -226 }, { x: 60, y: -222 }, { x: 54, y: -162 }),
+  ...B({ x: 54, y: -162 }, { x: 0, y: -154 }, { x: -54, y: -162 }).slice(0, -1),
+];
+export const HAT_POMPOM = { cx: 0, cy: -228, r: 13 };
+
+/** 傘の布（左手で持ち、頭の上をおおう） */
+export const UMBRELLA_CANOPY: Pt[] = [
+  { x: -128, y: -232 },
+  ...B({ x: -128, y: -232 }, { x: -116, y: -318 }, { x: -6, y: -322 }),
+  ...B({ x: -6, y: -322 }, { x: 104, y: -318 }, { x: 116, y: -232 }),
+  // すそは小さな波（4つ）
+  ...B({ x: 116, y: -232 }, { x: 86, y: -246 }, { x: 55, y: -232 }).slice(1),
+  ...B({ x: 55, y: -232 }, { x: 25, y: -246 }, { x: -6, y: -232 }).slice(1),
+  ...B({ x: -6, y: -232 }, { x: -37, y: -246 }, { x: -67, y: -232 }).slice(1),
+  ...B({ x: -67, y: -232 }, { x: -98, y: -246 }, { x: -128, y: -232 }).slice(1, -1),
+];
+/** 柄（手の位置から上へ） */
+export const UMBRELLA_SHAFT = { x: -58, y0: -40, y1: -322 };
+
+export function hatShapes(): Shape[] {
+  return [
+    { kind: 'poly', pts: HAT_POLY },
+    { kind: 'ellipse', cx: HAT_POMPOM.cx, cy: HAT_POMPOM.cy, rx: HAT_POMPOM.r, ry: HAT_POMPOM.r },
+  ];
+}
+
+export function umbrellaShapes(): Shape[] {
+  return [{ kind: 'poly', pts: UMBRELLA_CANOPY }];
+}
+
+export function accessoryShapes(acc: Accessories | undefined): Shape[] {
+  if (!acc) return [];
+  return [...(acc.umbrella ? umbrellaShapes() : []), ...(acc.hat ? hatShapes() : [])];
+}
+
+/** 迷彩の柄を合わせる基準点（ローカル座標）。その点のうしろの領域の柄を使う */
+export const HAT_ANCHOR: Pt = { x: 0, y: -196 };
+export const UMBRELLA_ANCHOR: Pt = { x: -6, y: -276 };
+
+export interface AccFit {
+  ok: boolean;
+  /** 迷彩に使う領域（camo のとき） */
+  region: string | null;
+  problems: string[];
+}
+
+/**
+ * その隠れ場所で身につけ物が使えるか。
+ * 画面の内側に収まること・顔を隠さないこと。camo なら、うしろの 7 割以上が同じ柄の領域であること。
+ */
+export function accessoryFits(scene: SceneDef, spot: SpotDef, char: CharacterId, kind: 'hat' | 'umbrella', style: AccStyle): AccFit {
+  const t = { tx: spot.x, ty: spot.y, s: spot.s };
+  const shapes = (kind === 'hat' ? hatShapes() : umbrellaShapes()).map((s) => transformShape(t, s));
+  const problems: string[] = [];
+  const b = unionBBox(shapes.map(bbox));
+  const m = 6;
+  if (b.x0 < m || b.y0 < m || b.x1 > SCENE_SIZE - m || b.y1 > SCENE_SIZE - m) problems.push('out of bounds');
+  const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
+  if (face.some((p) => shapes.some((s) => contains(s, p)))) problems.push('covers face');
+  let region: string | null = null;
+  if (style === 'camo') {
+    const anchor = transformPt(t, kind === 'hat' ? HAT_ANCHOR : UMBRELLA_ANCHOR);
+    region = regionAt(scene, anchor);
+    const pts = shapes.flatMap((s) => samplePoints(s, 8));
+    const match = region === null || pts.length === 0 ? 0 : pts.filter((p) => regionAt(scene, p) === region).length / pts.length;
+    if (match < 0.7) problems.push(`camo match ${match.toFixed(2)}`);
+  }
+  // ほかの隠れ場所の小物（手前に描かれる）と重なると、奥にある物が傘の上に乗って見えるので使わない
+  const others = scene.spots.filter((sp) => sp.id !== spot.id);
+  const pts = shapes.flatMap((s) => samplePoints(s, 8));
+  if (pts.some((p) => others.some((o) => o.prop.shapes.some((s) => contains(s, p))))) problems.push('under another prop');
+  return { ok: problems.length === 0, region, problems };
+}
+// 隠れ場所の検証と自動配置。描画・当たり判定と同じ形状定義を使う。
+import { CHARACTERS, BODY, type CharacterId, CHARACTER_IDS } from './characters';
+import {
+  type BBox,
+  type Pt,
+  type Shape,
+  SCENE_SIZE,
+  bbox,
+  bboxOverlap,
+  contains,
+  samplePoints,
+  transformPt,
+  transformShape,
+  unionBBox,
+} from './geometry';
+import { type Rng, mulberry32, shuffle } from './rng';
+import type { SceneDef, SpotDef } from './scene';
+import type { Accessories } from './accessories';
+
+export type Difficulty = 'easy' | 'normal';
+
+export interface Placement {
+  char: CharacterId;
+  spot: string;
+  costume: string;
+  /** exact: 背景と同じ柄 / soft: 同じ種類で少し違う柄 */
+  variant: 'exact' | 'soft';
+  /** コースだけ：ニット帽・傘 */
+  acc?: Accessories;
+}
+
+export const LIMITS = {
+  /** 画面の端から最低これだけ内側 */
+  margin: 6,
+  /** キャラクター全体のうち見えている割合の下限（全面を隠さない） */
+  minVisible: 0.45,
+  /** からだ（服）が少しは隠れている */
+  maxBodyVisible: 0.92,
+  /** からだ（服）が見えている割合の下限（柄を選ぶ意味を残す） */
+  minBodyVisible: 0.2,
+  /** 見えている服の後ろが、狙った柄の領域である割合 */
+  minRegionMatch: 0.7,
+  /** シーン座標での最小の高さ（極端に小さくしない） */
+  minHeight: 170,
+  /** 複数体の間のすきま */
+  gap: 4,
+};
+
+const STEP = 6;
+
+export function spotTransform(spot: SpotDef) {
+  return { tx: spot.x, ty: spot.y, s: spot.s };
+}
+
+export function silhouetteWorld(char: CharacterId, spot: SpotDef): Shape[] {
+  const t = spotTransform(spot);
+  return CHARACTERS[char].silhouette.map((s) => transformShape(t, s));
+}
+
+export function silhouetteBBox(char: CharacterId, spot: SpotDef): BBox {
+  return unionBBox(silhouetteWorld(char, spot).map(bbox));
+}
+
+/** どのキャラクターが来ても入る外枠 */
+export function spotBBox(spot: SpotDef): BBox {
+  return unionBBox(CHARACTER_IDS.map((c) => silhouetteBBox(c, spot)));
+}
+
+export function regionAt(scene: SceneDef, p: Pt): string | null {
+  for (let i = scene.regions.length - 1; i >= 0; i--) {
+    if (scene.regions[i].shapes.some((s) => contains(s, p))) return scene.regions[i].id;
+  }
+  return null;
+}
+
+function occluded(scene: SceneDef, p: Pt): boolean {
+  return scene.spots.some((sp) => sp.prop.shapes.some((s) => contains(s, p)));
+}
+
+export interface SpotReport {
+  spot: string;
+  char: CharacterId;
+  visible: number;
+  bodyVisible: number;
+  faceVisible: boolean;
+  inBounds: boolean;
+  height: number;
+  regionMatch: number;
+  ok: boolean;
+  problems: string[];
+}
+
+export function analyzeSpot(scene: SceneDef, spot: SpotDef, char: CharacterId): SpotReport {
+  const t = spotTransform(spot);
+  const shapes = silhouetteWorld(char, spot);
+  // 重なりを数えないよう、全形状のサンプル点を一意化
+  const seen = new Set<string>();
+  const pts: Pt[] = [];
+  for (const s of shapes) {
+    for (const p of samplePoints(s, STEP)) {
+      const k = `${Math.round(p.x)}:${Math.round(p.y)}`;
+      if (!seen.has(k)) {
+        seen.add(k);
+        pts.push(p);
+      }
+    }
+  }
+  const visiblePts = pts.filter((p) => !occluded(scene, p));
+  const body = samplePoints(transformShape(t, BODY), STEP);
+  const bodyVis = body.filter((p) => !occluded(scene, p));
+  const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
+  const faceVisible = face.every((p) => !occluded(scene, p));
+  const b = unionBBox(shapes.map(bbox));
+  const m = LIMITS.margin;
+  const inBounds = b.x0 >= m && b.y0 >= m && b.x1 <= SCENE_SIZE - m && b.y1 <= SCENE_SIZE - m;
+  const regionMatch = bodyVis.length === 0 ? 0 : bodyVis.filter((p) => regionAt(scene, p) === spot.region).length / bodyVis.length;
+  const visible = visiblePts.length / pts.length;
+  const bodyVisible = bodyVis.length / body.length;
+  const height = b.y1 - b.y0;
+  const problems: string[] = [];
+  if (visible < LIMITS.minVisible) problems.push(`visible ${visible.toFixed(2)} < ${LIMITS.minVisible}`);
+  if (bodyVisible > LIMITS.maxBodyVisible) problems.push(`bodyVisible ${bodyVisible.toFixed(2)} > ${LIMITS.maxBodyVisible}`);
+  if (bodyVisible < LIMITS.minBodyVisible) problems.push(`bodyVisible ${bodyVisible.toFixed(2)} < ${LIMITS.minBodyVisible}`);
+  if (!faceVisible) problems.push('face hidden');
+  if (!inBounds) problems.push('out of bounds');
+  if (height < LIMITS.minHeight) problems.push(`height ${height.toFixed(0)} < ${LIMITS.minHeight}`);
+  if (regionMatch < LIMITS.minRegionMatch) problems.push(`regionMatch ${regionMatch.toFixed(2)} < ${LIMITS.minRegionMatch}`);
+  return { spot: spot.id, char, visible, bodyVisible, faceVisible, inBounds, height, regionMatch, ok: problems.length === 0, problems };
+}
+
+export function spotsConflict(a: SpotDef, b: SpotDef): boolean {
+  return a.id === b.id || bboxOverlap(spotBBox(a), spotBBox(b), LIMITS.gap);
+}
+
+export function getSpot(scene: SceneDef, id: string): SpotDef {
+  const s = scene.spots.find((sp) => sp.id === id);
+  if (!s) throw new Error(`unknown spot ${id}`);
+  return s;
+}
+
+export function costumeForRegion(scene: SceneDef, region: string): string {
+  const r = scene.regions.find((x) => x.id === region);
+  if (!r) throw new Error(`unknown region ${region}`);
+  return r.costume;
+}
+
+export interface LayoutCheck {
+  ok: boolean;
+  problems: string[];
+}
+
+export function validateLayout(scene: SceneDef, placements: Placement[]): LayoutCheck {
+  const problems: string[] = [];
+  if (placements.length < 1 || placements.length > 3) problems.push(`count ${placements.length}`);
+  const chars = new Set(placements.map((p) => p.char));
+  if (chars.size !== placements.length) problems.push('duplicate character');
+  for (const p of placements) {
+    const spot = scene.spots.find((s) => s.id === p.spot);
+    if (!spot) {
+      problems.push(`unknown spot ${p.spot}`);
+      continue;
+    }
+    if (!scene.costumes.some((c) => c.id === p.costume)) problems.push(`unknown costume ${p.costume}`);
+    const r = analyzeSpot(scene, spot, p.char);
+    if (!r.ok) problems.push(`${p.char}@${p.spot}: ${r.problems.join(', ')}`);
+  }
+  for (let i = 0; i < placements.length; i++) {
+    for (let j = i + 1; j < placements.length; j++) {
+      const a = scene.spots.find((s) => s.id === placements[i].spot);
+      const b = scene.spots.find((s) => s.id === placements[j].spot);
+      if (a && b && spotsConflict(a, b)) problems.push(`overlap ${a.id} / ${b.id}`);
+    }
+  }
+  return { ok: problems.length === 0, problems };
+}
+
+/** 「さがす」モードの自動配置。シードが同じなら同じ結果。 */
+export function autoLayout(scene: SceneDef, difficulty: Difficulty, seed: number): Placement[] {
+  const rng: Rng = mulberry32(seed);
+  const count = difficulty === 'easy' ? 1 : rng() < 0.5 ? 2 : 3;
+  const chars = shuffle(rng, CHARACTER_IDS).slice(0, count);
+  const pool = shuffle(
+    rng,
+    scene.spots.filter((s) => difficulty === 'normal' || s.easy),
+  );
+  const chosen: SpotDef[] = [];
+  for (const sp of pool) {
+    if (chosen.length === count) break;
+    if (chosen.some((c) => spotsConflict(c, sp))) continue;
+    chosen.push(sp);
+  }
+  return chosen.map((sp, i) => ({
+    char: chars[i],
+    spot: sp.id,
+    costume: costumeForRegion(scene, sp.region),
+    variant: difficulty === 'easy' ? 'soft' : 'exact',
+  }));
+}
+
+/** 体の中心（スナップの基準点） */
+export function spotAnchor(spot: SpotDef): Pt {
+  return { x: spot.x, y: spot.y - 100 * spot.s };
+}
+
+/**
+ * 指を離した場所に近い、空いている隠れ場所を返す。
+ * シーンの外や無効な場所でも、いちばん近い安全な候補に戻す。
+ */
+export function snapToSpot(scene: SceneDef, p: Pt, occupied: string[]): SpotDef | null {
+  const occ = occupied.map((id) => getSpot(scene, id));
+  const free = scene.spots.filter((s) => !occ.some((o) => spotsConflict(o, s)));
+  if (free.length === 0) return null;
+  const cx = Math.min(SCENE_SIZE, Math.max(0, p.x));
+  const cy = Math.min(SCENE_SIZE, Math.max(0, p.y));
+  let best = free[0];
+  let bd = Infinity;
+  for (const s of free) {
+    const a = spotAnchor(s);
+    const d = Math.hypot(a.x - cx, a.y - cy);
+    if (d < bd) {
+      bd = d;
+      best = s;
+    }
+  }
+  return best;
+}
+
+/** 置ける候補（編集中だけ表示） */
+export function freeSpots(scene: SceneDef, occupied: string[]): SpotDef[] {
+  const occ = occupied.map((id) => getSpot(scene, id));
+  return scene.spots.filter((s) => !occ.some((o) => spotsConflict(o, s)));
+}
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 src/core/session.ts; Get-Content -Encoding UTF8 src/core/patterns.ts; Get-Content -Encoding UTF8 OWNER_REVIEW.md; Get-Content -Encoding UTF8 strategy/DIFFERENTIATION_DEBATE.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 149ms:
+// 1回の「さがす」プレイの状態（純粋関数）。表示とは分けてある。
+import { type Pt, bbox, distanceTo, transformShape, unionBBox } from './geometry';
+import { accessoryShapes } from './accessories';
+import { type Difficulty, type Placement, getSpot, silhouetteWorld, spotTransform } from './placement';
+import type { SceneDef, SceneId } from './scene';
+
+/** 見える形より少しだけ広い当たり判定（シーン座標）。巨大な矩形にはしない。 */
+export const HIT_TOLERANCE = 22;
+/** チャタリング防止（罰ではない） */
+export const TAP_DEBOUNCE_MS = 120;
+export const MAX_HINT = 3;
+
+export interface PlaySession {
+  sceneId: SceneId;
+  difficulty: Difficulty;
+  placements: Placement[];
+  found: boolean[];
+  /** 0: ヒントなし / 1: このあたり / 2: ちょっと うごく / 3: りんかく */
+  hintLevel: number;
+  hintsUsed: number;
+  origin: 'search' | 'hide' | 'course';
+  startedAt: number;
+}
+
+export function newSession(
+  sceneId: SceneId,
+  difficulty: Difficulty,
+  placements: Placement[],
+  origin: 'search' | 'hide' | 'course',
+  now: number,
+): PlaySession {
+  return {
+    sceneId,
+    difficulty,
+    placements: placements.map((p) => ({ ...p, ...(p.acc ? { acc: { ...p.acc } } : {}) })),
+    found: placements.map(() => false),
+    hintLevel: 0,
+    hintsUsed: 0,
+    origin,
+    startedAt: now,
+  };
+}
+
+export function isComplete(s: PlaySession): boolean {
+  return s.found.length > 0 && s.found.every(Boolean);
+}
+
+/** タップ位置にいる、まだ見つかっていないキャラクターの番号。いなければ -1。 */
+export function hitTest(scene: SceneDef, s: PlaySession, p: Pt, tol = HIT_TOLERANCE): number {
+  let best = -1;
+  let bd = Infinity;
+  s.placements.forEach((pl, i) => {
+    if (s.found[i]) return;
+    const spot = getSpot(scene, pl.spot);
+    // 帽子や傘をタッチしても見つけたことにする
+    const shapes = [...silhouetteWorld(pl.char, spot), ...accessoryShapes(pl.acc).map((sh) => transformShape(spotTransform(spot), sh))];
+    const d = Math.min(...shapes.map((sh) => distanceTo(sh, p)));
+    if (d <= tol && d < bd) {
+      bd = d;
+      best = i;
+    }
+  });
+  return best;
+}
+
+export interface TapResult {
+  session: PlaySession;
+  foundIndex: number;
+}
+
+export function tap(scene: SceneDef, s: PlaySession, p: Pt): TapResult {
+  const i = hitTest(scene, s, p);
+  if (i < 0) return { session: s, foundIndex: -1 }; // 外れても何も減らない
+  const found = s.found.slice();
+  found[i] = true;
+  return { session: { ...s, found, hintLevel: 0 }, foundIndex: i };
+}
+
+export function nextHint(s: PlaySession): PlaySession {
+  if (isComplete(s)) return s;
+  return { ...s, hintLevel: Math.min(MAX_HINT, s.hintLevel + 1), hintsUsed: s.hintsUsed + 1 };
+}
+
+export interface HintInfo {
+  level: number;
+  index: number;
+  /** レベル1：おおまかな まる（中心は対象から少しずらす） */
+  area: { cx: number; cy: number; r: number };
+}
+
+export function currentHint(scene: SceneDef, s: PlaySession): HintInfo | null {
+  if (s.hintLevel === 0) return null;
+  const index = s.found.findIndex((f) => !f);
+  if (index < 0) return null;
+  const pl = s.placements[index];
+  const b = unionBBox(silhouetteWorld(pl.char, getSpot(scene, pl.spot)).map(bbox));
+  const cx = (b.x0 + b.x1) / 2;
+  const cy = (b.y0 + b.y1) / 2;
+  // 対象がちょうど中心にならないよう、位置から決まる量だけずらす（毎回同じ）
+  const ang = ((pl.spot.length * 37 + index * 101) % 360) * (Math.PI / 180);
+  const r = 230;
+  const off = 70;
+  return {
+    level: s.hintLevel,
+    index,
+    area: {
+      cx: Math.min(1000 - 40, Math.max(40, cx + Math.cos(ang) * off)),
+      cy: Math.min(1000 - 40, Math.max(40, cy + Math.sin(ang) * off)),
+      r,
+    },
+  };
+}
+
+export function sceneOf(scenes: Record<SceneId, SceneDef>, s: PlaySession): SceneDef {
+  return scenes[s.sceneId];
+}
+// 服と背景で共有する柄の定義。SVG <pattern> を userSpaceOnUse で作るので、
+// 背景と服で座標をそろえると継ぎ目なく溶け込む（＝隠れる）。
+import { r1 } from './geometry';
+
+export type PatternKind = 'plain' | 'stripes' | 'dots' | 'check' | 'leaf' | 'wood';
+
+export interface PatternSpec {
+  kind: PatternKind;
+  /** 地の色 */
+  bg: string;
+  /** 柄の色 */
+  fg: string;
+  /** 柄の大きさ（1周期の長さ） */
+  size: number;
+  /** しま の向き（度） */
+  angle?: number;
+}
+
+export function patternMarkup(id: string, p: PatternSpec, transform = ''): string {
+  const s = p.size;
+  const tf = transform ? ` patternTransform="${transform}"` : '';
+  const head = `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${r1(s)}" height="${r1(s)}"${tf}>`;
+  let body = '';
+  switch (p.kind) {
+    case 'plain':
+      body = `<rect width="${s}" height="${s}" fill="${p.bg}"/>`;
+      break;
+    case 'stripes':
+      body = `<rect width="${s}" height="${s}" fill="${p.bg}"/><rect width="${r1(s / 2)}" height="${s}" fill="${p.fg}"/>`;
+      break;
+    case 'dots':
+      body =
+        `<rect width="${s}" height="${s}" fill="${p.bg}"/>` +
+        `<circle cx="${r1(s / 4)}" cy="${r1(s / 4)}" r="${r1(s * 0.13)}" fill="${p.fg}"/>` +
+        `<circle cx="${r1((s * 3) / 4)}" cy="${r1((s * 3) / 4)}" r="${r1(s * 0.13)}" fill="${p.fg}"/>`;
+      break;
+    case 'check':
+      body =
+        `<rect width="${s}" height="${s}" fill="${p.bg}"/>` +
+        `<rect width="${r1(s / 2)}" height="${s}" fill="${p.fg}" opacity="0.5"/>` +
+        `<rect width="${s}" height="${r1(s / 2)}" fill="${p.fg}" opacity="0.5"/>`;
+      break;
+    case 'leaf': {
+      const leaf = (cx: number, cy: number, rot: number) =>
+        `<path transform="translate(${r1(cx)} ${r1(cy)}) rotate(${rot})" d="M0 ${r1(-s * 0.2)} Q${r1(s * 0.13)} 0 0 ${r1(s * 0.2)} Q${r1(-s * 0.13)} 0 0 ${r1(-s * 0.2)}Z" fill="${p.fg}"/>`;
+      body = `<rect width="${s}" height="${s}" fill="${p.bg}"/>` + leaf(s * 0.27, s * 0.27, 35) + leaf(s * 0.75, s * 0.72, -40);
+      break;
+    }
+    case 'wood':
+      body =
+        `<rect width="${s}" height="${s}" fill="${p.bg}"/>` +
+        `<path d="M0 ${r1(s * 0.3)} Q${r1(s * 0.5)} ${r1(s * 0.22)} ${s} ${r1(s * 0.3)}" stroke="${p.fg}" stroke-width="${r1(s * 0.04)}" fill="none"/>` +
+        `<path d="M0 ${r1(s * 0.75)} Q${r1(s * 0.5)} ${r1(s * 0.85)} ${s} ${r1(s * 0.75)}" stroke="${p.fg}" stroke-width="${r1(s * 0.03)}" fill="none"/>`;
+      break;
+  }
+  const rot = p.kind === 'stripes' && p.angle ? `<g transform="rotate(${p.angle} ${r1(s / 2)} ${r1(s / 2)})">` : '';
+  if (rot) {
+    // 回転したしまは patternTransform で表現する（タイルの継ぎ目を出さないため）
+    const tf2 = `${transform} rotate(${p.angle})`.trim();
+    return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${r1(s)}" height="${r1(s)}" patternTransform="${tf2}">${body}</pattern>`;
+  }
+  return head + body + '</pattern>';
+}
+
+/** 色の明るさを変える（-1..1） */
+export function shade(hex: string, amt: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  let r = (n >> 16) & 255;
+  let g = (n >> 8) & 255;
+  let b = n & 255;
+  const f = (c: number) => Math.round(amt >= 0 ? c + (255 - c) * amt : c * (1 + amt));
+  r = f(r);
+  g = f(g);
+  b = f(b);
+  return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+}
+
+/**
+ * 「やさしい」用の少し違う柄。同じ種類の柄だが、大きさと色が少し違うので
+ * 背景にまぎれつつも見分けやすい。
+ */
+export function softVariant(p: PatternSpec): PatternSpec {
+  return { ...p, size: p.size * 1.45, bg: shade(p.bg, -0.14), fg: shade(p.fg, -0.18) };
+}
+# 本人確認用メモ（OWNER_REVIEW）
+
+作成日：2026-10-06 ／ 状態：**家族内で遊びを確かめられるWebベータ。公開・課金は未実施**
+
+## 見てほしい3点
+
+1. **操作動画（36秒）** `video/hide-handoff-find.mp4`
+   隠す → 服の柄を選ぶ → ドラッグで置く → 目隠し画面で渡す → ヒント → 見つける → 「こうたい」。遊びの流れが「短い1回で満足して役割を交代したくなる」形になっているか。
+2. **柄の溶け込み具合** `screenshots/390x844_04-search-room-easy.png`（やさしい）と `390x844_08-search-shop-normal.png`（ふつう）
+   ふつうは服が背景とまったく同じ柄で、顔だけが手がかりです。4〜6歳にとって難しすぎないかは、人の試遊でしか分かりません。
+3. **キャラクター3体（ころ・みみ・もこ）** `screenshots/390x844_09-hide-chars.png`
+   見た目が既存の作品に似ていないか、好みに合うか。すべてコードで描いた独自SVGです。
+
+## できていること
+
+- 「さがす」「かくして わたす」の2モード、やさしい／ふつう、3背景（へや・にわ・おやつのみせ）×各9か所の隠れ場所、各背景4種類の服の柄
+- 無料・無制限の3段階ヒント（このあたり → 少し動く → 輪郭）。外れても減点・怖い音・赤い表示・待ち時間なし
+- クリア後の「もういちど／こうたい／おしまい」を同じ大きさで表示し、自動では次へ進まない
+- ドラッグでもタップ→タップでも置ける。キーボードでも置ける。取り消し・服の変更あり
+- 目隠しの受け渡し画面（隠れ場所の情報は画面のデータにも残さない）
+- 端末内保存（破損・保存不可でも止まらない）、データ削除、つづきから
+- 保護者領域（漢数字を小さい順＋長押しのゲート）：音、むずかしさ、保存の説明・削除、試遊用記録（既定OFF）、課金がないことの案内
+- オフライン：開いたまま通信OFFで遊べる／localhost では Service Worker で通信OFF再起動もできた（自動テストで確認）
+
+## 2回目の作業で追加したこと
+
+- **Codex の絵を差し込む準備ができました。** `art/` にファイルを置くだけで、ゲームがその絵を使います。置かない部分は今の絵のまま動きます。
+  - 依頼文：`CODEX_ART_BRIEF.md`（「Codex への指示」の部分をそのまま貼り付け）
+  - 置き方の決まり：`ART_SLOTS.md`
+  - 下書きガイド：`art-guides/`（キャラクターの服の範囲・顔の位置、シーンの柄の領域・小物の位置）
+  - 自動検査：`npm run validate:art`（顔を隠していないか、服の形が判定と合っているか、柄タイルがつなぎ目なく並ぶか、など）
+- 方向性として「かわいらしく幼い子向け、でも安っぽくしない（絵本の挿絵のような立体感・やわらかい陰影・茶系の強弱のある線・くすみパステル）」を依頼文に書きました。
+
+## 承認が必要なこと（一括）
+
+| # | 内容 | なぜ必要か | 注意 |
+|---|---|---|---|
+| 1 | ~~作業ブランチの push~~ | **承認済み・push 済み**（main は変更なし） | |
+| 2 | スマホで開く経路をどれにするか（PHONE_ACCESS.md の案A／B／C） | 今はスマホから開けるURLがありません | 案BはFirewall設定、案Cは非公開ページへの掲載が伴います |
+| 3 | **ご自宅PCで準備（HOME_PC_SETUP.md：コピペ3回）**。以後は Claude が Codex を呼び出して進める | Codex はこの環境では使えません（ご本人のログインが必要） | Codex の利用枠・画像生成ができるかは、ご契約内容によります（こちらでは未確認） |
+
+課金・ストア申請・名称の権利確認は、今回の範囲外で未着手です（KNOWN_LIMITATIONS.md）。
+
+## 2026-10-08 追加：コースモード（10コース×10回）
+
+タイトルの「コースで あそぶ」から。1回見つけるごとに上の丸が1つ埋まり、10回でコースクリア。クリアすると次のコースが開く（10コースで100回）。見つけた回数は端末に保存され、途中でやめても続きから数えます（データ削除で消えます）。
+
+| コース | 変わること |
+|---|---|
+| 1〜2 | 見えやすい場所だけ・少し違う柄・ふち線が濃い・1人ずつ |
+| 3 | すべての場所 |
+| 4 | **色つきのニット帽**（くるん毛・耳・星の目印が隠れる） |
+| 5 | 帽子あり・2人まで |
+| 6 | **背景と同じ柄の傘** |
+| 7 | 服が背景と同じ柄に・帽子と傘 |
+| 8〜10 | 帽子も背景の柄に・ふち線がさらに薄く・3人まで |
+
+- 帽子も傘も顔（目と口）には重ねません。画面からはみ出す場所、ほかの子に重なる場所、手前の小物の下に入る場所では使いません（自動テストで全コース×40通りを確認）
+- 帽子や傘をタッチしても「みつけた」になります。ヒントは今までどおり無制限
+- 帽子と傘の絵は、今はコードで描いています（Codex の画風に合わせた線と陰影）。必要なら Codex に絵の差し替えを依頼できます
+- 難しさの上げ方（何コース目で帽子・傘を出すか、割合）は `src/core/courses.ts` の表1つで調整できます。試遊で「難しすぎ／簡単すぎ」を教えてください
+# 差別化案：6人の議論とブラッシュアップ（2026-10-07）
+
+> 参加者はすべて **AI が演じた人物**（プロマーケター・ゲーム批評家・実業家・女子高生・男子中学生・子持ち主婦）です。実在の人への調査ではありません。市場規模・売上の数字は使っていません。判断材料の一つとして使い、最終的には人の試遊で確かめてください。
+
+## 進め方
+1. 第1ラウンド：たたき台10案（A〜J）を6人がそれぞれ評価し、新案を提案
+2. 統合：意見を6案にまとめ直す
+3. 第2ラウンド：6人が6案を採点（1〜5点）し、改善点と反論を出す
+
+## 第1ラウンドで一致したこと
+- **D（動くと見える）と I（目は何%？）は弱い・危ない**。Dは既存のアクション系の土俵、Iは柄の核と無関係で、色覚への配慮の点でも危ない
+- **中高生向けは、幼児向けと別アプリ／別URLにする**（マーケター・主婦・実業家）。主婦「4歳が対戦や制限時間の画面に入るのが怖い」
+- 批評家「本当の武器は“溶けた状態から、ズレを手がかりに見抜く知覚の遊び”。手間は**見つけた瞬間の演出**に集中すべき」。マーケターも全面賛成（口コミはスクショと声が出る瞬間から生まれる）
+- **女子高生とマーケターが別々に、同じ案を出した**：「自分で撮った写真の柄で擬態」
+
+## 第2ラウンドの採点
+
+| 案 | マーケ | 批評 | 実業 | 女子高生 | 男子中学生 | 主婦 | 合計 |
+|---|---|---|---|---|---|---|---|
+| 2 ギタイ人狼（中高生・主力） | 4 | 4 | 3 | 5 | 5 | 3 | **24** |
+| 4 今日のギタイ（デイリー） | 5 | 2 | 4 | 4 | 3 | 2 | 20 |
+| 1 幼児・強化版 | 4 | 3 | 5 | 1 | 1 | 5 | 19 |
+| 5 自分の柄で擬態 | 4 | 3 | 2 | 4 | 4 | 2 | 19 |
+| 3 ずらし勝負 | 2 | 4 | 2 | 3 | 4 | 3 | 18 |
+| 6 園・図書館ライセンス／イベント受託 | 2 | — | 4 | 1 | 0 | 4 | 11（5人） |
+
+意見がきれいに分かれました。**ギタイ人狼は全員が3点以上**で、どの立場からも否定されなかった唯一の案です。幼児版は、買う側（主婦・実業家）が満点で、中高生は1点でした。対象が違うので当然の結果で、ブランドを分ける判断を裏づけています。
+
+## 第2ラウンドで出た改善点（採用候補）
+- **ギタイ人狼**
+  - 回ってきた端末で絵を見られるのは **1人5秒だけ**（批評家）。記憶が食い違うので議論が起き、嘘が通りやすくなる
+  - **1ゲーム5分以内**で、結果画面は「誰が誰に投票したか」と正解の柄が並ぶ、スクショしたくなるデザイン（女子高生）
+  - ギタイ役が勝ったら、ずれていた1体を **拡大して種明かし**（男子中学生「気づくわけねーだろ！で騒ぎたい」）
+  - ずらし勝負の「ずれの軸（位置・角度・色味）を選ぶ」部分を取り込む（マーケター）
+- **幼児版は欲張らない**（批評家・マーケター・実業家）。まずは (a) 向かい合いの同時プレイと、見つけた瞬間の演出。(b) 印刷柄シートは「買い切りの特典」として直結させる（実業家）
+- **出題カード**（祖父母に問題を送る）は、主婦の購入条件がはっきりしている：「QRを読むとストアに飛ばず、登録もインストールもなしで、おばあちゃんのスマホでそのまま遊べること」
+- **自分の柄で擬態**は、幼児版には入れない（主婦「家の中や兄弟の顔が柄になるのは怖い」）。中高生版の目玉候補。ただし批評家は「遊びのルールがまだ無い」と指摘。女子高生は「スクショでしか共有できないと、もらった側が答えられない」
+
+## 残った対立
+- **今日のギタイ（デイリー）**：マーケターは1位（広告費ゼロで人が集まり、人狼の需要検証にもなる）、批評家は削除（良問を毎日は作れない、30問では1か月で尽きる）。実業家は「続ける前提にせず、30問で需要を測って反応が弱ければやめる」と中間の立場
+- **事業（園・図書館）**：実業家と主婦は推す（園で遊んだものなら家でも安心して買える）。マーケターは「今は営業に手を取られる」
+
+## Claude のまとめ（推奨）
+
+### 二本立て・同じエンジン
+「柄の座標がそろっていて本当に溶ける」技術とキャラ設計を共通にして、名前と見た目を分けます。
+
+| | 幼児ライン「もようのかくれんぼ」 | 中高生ライン「ギタイ人狼（仮）」 |
+|---|---|---|
+| 遊び | 子どもが出題者／向かい合いの同時プレイ | 1台を回す3〜6人の推理。5秒だけ見て、議論して、投票 |
+| 差別化 | 子どもが親を本気で迷わせる。画面の外（印刷シート）にも広がる | 通信なしで、同じ部屋で1つの画面を囲む（オンライン対戦の MIMIC とは逆の方向） |
+| 見た目 | 絵本の挿絵の品のよさ | くすみカラー、服として普通にかわいい柄（チェック・ギンガム・花柄・レトロ） |
+| 売り方 | 本体無料＋保護者向け買い切り（主婦の感覚：追加500〜800円、全部入り1,200円まで） | 買い切り（柄パック・着せ替え）。ガチャ・月額なし |
+
+### 全体に効く一点
+**見つけた瞬間の演出**（溶けていた輪郭がふわっと浮き上がる数フレームと音）。両ラインに共通し、批評家・マーケターがそろって最優先にしました。
+
+### やらないこと（全員の意見から）
+通信対戦・ランキング・アカウント制／ヒント課金・ガチャ・月額／動くと見える型・視覚テスト型／幼児版での写真機能／検証前の背景・衣装の量産
+
+### 最初の3か月（案）
+1. **1か月目**：見つけた瞬間の演出を磨く（Codex の絵と合わせて）＋幼児版に向かい合いの同時プレイ
+2. **2か月目**：ギタイ人狼のローカル試作（家族・友人の3〜5人で10回遊び、議論が起きるかを見る。批評家・男子中学生・主婦がそろって「人数がいれば1日で分かる」と指摘）
+3. **3か月目**：反応を見て、今日のギタイ（30問・2週間だけ）や印刷シート特典、園・図書館での無料試用に進むかを決める
+
+### 承認が必要になること
+- 今日のギタイ・出題カード（ブラウザで遊べる形）・中高生版の配布には、**Webでの公開**が必要です。最初の指示書では公開を禁止しているため、進める段階で改めて承認をお願いします
+- 中高生版は対象年齢・ストアの区分が変わります。名前（ギタイ人狼は仮）の権利確認も必要です
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 src/ui/sceneView.ts; Get-Content -Encoding UTF8 src/ui/accessoryArt.ts; Get-Content -Encoding UTF8 src/core/session.ts' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 src/ui/app.ts' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 145ms:
+// シーンのSVGを組み立てる。形状・座標は core の定義をそのまま使う。
+import { CHARACTERS, type CharacterId } from '../core/characters';
+import { r1, shapeToSvg } from '../core/geometry';
+import { type PatternSpec, patternMarkup, softVariant } from '../core/patterns';
+import { type Placement, getSpot, silhouetteWorld, spotAnchor, spotTransform } from '../core/placement';
+import type { SceneDef, SpotDef } from '../core/scene';
+import { charArtMarkup } from './charArt';
+import { accessoryArt } from './accessoryArt';
+import { patternTile, sceneArt } from '../art/registry';
+import type { HintInfo } from '../core/session';
+
+export interface SceneRenderOpts {
+  prefix: string;
+  placements?: Placement[];
+  found?: boolean[];
+  /** 服のふちの濃さ（難易度で変える。0にはしない） */
+  outline?: number;
+  /** 編集中だけ：置ける候補 */
+  candidates?: SpotDef[];
+  selectedChar?: CharacterId | null;
+  hint?: HintInfo | null;
+  compact?: boolean;
+  title?: string;
+}
+
+export function scenePatternId(prefix: string, scene: SceneDef, costume: string): string {
+  return `${prefix}p-${scene.id}-${costume}`;
+}
+
+/** 柄の定義。art/patterns に絵のタイルがあればそれを使う（背景と服で同じタイル） */
+export function tiledPatternMarkup(id: string, scene: SceneDef, costumeId: string, spec: PatternSpec, transform = ''): string {
+  const tile = patternTile(scene.id, costumeId);
+  if (!tile) return patternMarkup(id, spec, transform);
+  const s = spec.size;
+  const tf = transform ? ` patternTransform="${transform}"` : '';
+  return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${r1(s)}" height="${r1(s)}"${tf}><image href="${tile}" width="${r1(s)}" height="${r1(s)}" preserveAspectRatio="none"/></pattern>`;
+}
+
+export function scenePatternDefs(prefix: string, scene: SceneDef): string {
+  return scene.costumes.map((c) => tiledPatternMarkup(scenePatternId(prefix, scene, c.id), scene, c.id, c.spec)).join('') + scene.extraDefs.split('{P}').join(prefix);
+}
+
+/** 服の柄。背景と同じ座標系にそろえる patternTransform を付ける。 */
+export function costumePatternDef(id: string, scene: SceneDef, pl: Placement, spot: SpotDef): string {
+  const costume = scene.costumes.find((c) => c.id === pl.costume);
+  if (!costume) throw new Error(`unknown costume ${pl.costume}`);
+  const t = spotTransform(spot);
+  const tf = `scale(${r1(1 / t.s)}) translate(${r1(-t.tx)} ${r1(-t.ty)})`;
+  if (pl.variant === 'soft') {
+    // やさしい：大きさと色が少し違う柄（絵のタイルの場合は大きさだけ変え、少し暗くする）
+    const soft = softVariant(costume.spec);
+    if (patternTile(scene.id, costume.id)) {
+      return tiledPatternMarkup(id, scene, costume.id, soft, tf).replace('<image ', '<image style="filter:brightness(0.86) saturate(1.15)" ');
+    }
+    return patternMarkup(id, soft, tf);
+  }
+  return tiledPatternMarkup(id, scene, costume.id, costume.spec, tf);
+}
+
+const full = (href: string, cls = '') => `<image${cls ? ` class="${cls}"` : ''} href="${href}" x="0" y="0" width="1000" height="1000" preserveAspectRatio="none"/>`;
+
+function backgroundMarkup(prefix: string, scene: SceneDef): string {
+  const sub = (s: string) => s.split('{P}').join(prefix);
+  const art = sceneArt(scene.id);
+  const regions = scene.regions
+    .map((r) => r.shapes.map((sh) => shapeToSvg(sh, `fill="url(#${scenePatternId(prefix, scene, r.costume)})"`)).join(''))
+    .join('');
+  return (
+    (art?.back ? full(art.back) : sub(scene.base)) +
+    regions +
+    (art?.over ? full(art.over) : sub(scene.decor)) +
+    `<g class="minor">${art?.minor ? full(art.minor) : art?.over ? '' : sub(scene.minorDecor)}</g>`
+  );
+}
+
+export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: number, found: boolean, outline: number): string {
+  const spot = getSpot(scene, pl.spot);
+  const t = spotTransform(spot);
+  const fid = `${prefix}c${i}`;
+  const acc = accessoryArt(scene, pl, fid, outline);
+  return (
+    `<g class="char${found ? ' found' : ''}" data-index="${i}" data-char="${pl.char}" transform="translate(${r1(t.tx)} ${r1(t.ty)}) scale(${t.s})">` +
+    `<defs>${costumePatternDef(fid, scene, pl, spot)}</defs>` +
+    acc.behind +
+    `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found })}${acc.front}</g>` +
+    `</g>`
+  );
+}
+
+function sparkles(scene: SceneDef, pl: Placement): string {
+  const a = spotAnchor(getSpot(scene, pl.spot));
+  return [
+    [-80, -110],
+    [86, -96],
+    [-60, -170],
+    [70, -168],
+  ]
+    .map(
+      ([dx, dy], k) =>
+        `<path class="sparkle" style="animation-delay:${k * 80}ms" transform="translate(${r1(a.x + dx)} ${r1(a.y + dy)})" d="M0 -14 L4 -4 L14 0 L4 4 L0 14 L-4 4 L-14 0 L-4 -4Z" fill="#FFD45C" stroke="#fff" stroke-width="2"/>`,
+    )
+    .join('');
+}
+
+export function hintMarkup(scene: SceneDef, placements: Placement[], hint: HintInfo | null | undefined): string {
+  if (!hint) return '';
+  const { cx, cy, r } = hint.area;
+  let out = `<circle class="hint-area" cx="${r1(cx)}" cy="${r1(cy)}" r="${r}" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="10" stroke-dasharray="4 18" stroke-linecap="round"/>`;
+  if (hint.level >= 3) {
+    const pl = placements[hint.index];
+    const shapes = silhouetteWorld(pl.char, getSpot(scene, pl.spot));
+    out += `<g class="hint-outline">${shapes.map((s) => shapeToSvg(s, 'fill="none" stroke="#FFD45C" stroke-width="7" stroke-dasharray="14 10" stroke-linecap="round"')).join('')}</g>`;
+  }
+  return out;
+}
+
+export function renderScene(scene: SceneDef, o: SceneRenderOpts): string {
+  const P = o.prefix;
+  const placements = o.placements ?? [];
+  const found = o.found ?? placements.map(() => false);
+  const outline = o.outline ?? 0.6;
+  const chars = placements.map((pl, i) => charGroup(P, scene, pl, i, !!found[i], outline)).join('');
+  const fore = sceneArt(scene.id)?.fore;
+  const props = fore ? full(fore, 'fore') : scene.spots.map((s) => `<g class="prop" data-spot="${s.id}">${s.prop.markup}</g>`).join('');
+  const fx = placements.map((pl, i) => (found[i] ? sparkles(scene, pl) : '')).join('');
+  const cand = (o.candidates ?? [])
+    .map((s) => {
+      const a = spotAnchor(s);
+      return `<g class="candidate" data-spot="${s.id}" tabindex="0" role="button" aria-label="ここに かくす"><circle cx="${r1(a.x)}" cy="${r1(a.y)}" r="70" fill="#FFFFFF" fill-opacity="0.35" stroke="#FFFFFF" stroke-width="7" stroke-dasharray="10 10"/><circle cx="${r1(a.x)}" cy="${r1(a.y)}" r="14" fill="#FFFFFF"/></g>`;
+    })
+    .join('');
+  let sel = '';
+  if (o.selectedChar) {
+    const i = placements.findIndex((p) => p.char === o.selectedChar);
+    if (i >= 0) {
+      const a = spotAnchor(getSpot(scene, placements[i].spot));
+      sel = `<ellipse class="selected-ring" cx="${r1(a.x)}" cy="${r1(a.y - 20)}" rx="96" ry="128" fill="none" stroke="#FFD45C" stroke-width="8"/>`;
+    }
+  }
+  return (
+    `<svg class="scene-svg${o.compact ? ' compact' : ''}" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${o.title ?? scene.name}">` +
+    `<defs>${scenePatternDefs(P, scene)}</defs>` +
+    `<g class="bg">${backgroundMarkup(P, scene)}</g>` +
+    `<g class="chars">${chars}</g>` +
+    `<g class="props">${props}</g>` +
+    `<g class="fx">${fx}</g>` +
+    `<g class="edit-layer">${cand}${sel}</g>` +
+    `<g class="hint-layer">${hintMarkup(scene, placements, o.hint)}</g>` +
+    `</svg>`
+  );
+}
+
+/** シーン選択用の小さい絵（キャラクターなし） */
+export function sceneThumb(scene: SceneDef): string {
+  return renderScene(scene, { prefix: `t-${scene.id}-`, compact: true });
+}
+// ニット帽と傘の絵（コードで描く）。形は core/accessories と同じ点列を使う。
+// 色つきは毛糸・布の質感、camo は背景と同じ座標の柄に、うっすら編み目・骨だけを重ねる。
+import {
+  type Accessories,
+  HAT_COLORS,
+  HAT_POLY,
+  HAT_POMPOM,
+  UMBRELLA_CANOPY,
+  UMBRELLA_SHAFT,
+  accessoryFits,
+} from '../core/accessories';
+import { type Pt, r1 } from '../core/geometry';
+import { type Placement, getSpot } from '../core/placement';
+import type { SceneDef } from '../core/scene';
+import { costumePatternDef } from './sceneView';
+
+const LINE = '#4A3A40';
+const path = (pts: Pt[]) => 'M' + pts.map((p) => `${r1(p.x)} ${r1(p.y)}`).join(' L') + 'Z';
+
+function knitDef(id: string, bg: string, fg: string): string {
+  return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="9" height="8"><rect width="9" height="8" fill="${bg}"/><path d="M0.8 0.8 L4.5 6.6 L8.2 0.8" fill="none" stroke="${fg}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></pattern>`;
+}
+
+function stitchOverlayDef(id: string): string {
+  return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="9" height="8"><path d="M0.8 0.8 L4.5 6.6 L8.2 0.8" fill="none" stroke="${LINE}" stroke-opacity="0.13" stroke-width="1.3" stroke-linecap="round"/></pattern>`;
+}
+
+/** 左上から光が当たる立体感（どの色の上にも重ねられる） */
+function shadeDef(id: string, camo = false): string {
+  // 背景の柄のときは陰影を弱くする（灰色に浮いて見えないように）
+  const hi = camo ? 0.2 : 0.38;
+  const lo = camo ? 0.07 : 0.22;
+  return `<radialGradient id="${id}" cx="0.3" cy="0.22" r="0.95"><stop offset="0" stop-color="#FFFFFF" stop-opacity="${hi}"/><stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#4A3A40" stop-opacity="${lo}"/></radialGradient>`;
+}
+
+function camoFill(scene: SceneDef, pl: Placement, kind: 'hat' | 'umbrella', id: string): string | null {
+  const spot = getSpot(scene, pl.spot);
+  const fit = accessoryFits(scene, spot, pl.char, kind, 'camo');
+  if (!fit.region) return null;
+  const costume = scene.regions.find((r) => r.id === fit.region)?.costume;
+  if (!costume) return null;
+  return costumePatternDef(id, scene, { ...pl, costume }, spot);
+}
+
+export interface AccArt {
+  /** キャラクターより後ろ（傘） */
+  behind: string;
+  /** キャラクターより前（帽子） */
+  front: string;
+}
+
+/** ローカル座標の帽子・傘。id は prefix から作る（同じ画面で重ならない） */
+export function accessoryArt(scene: SceneDef, pl: Placement, prefix: string, outline: number): AccArt {
+  const acc: Accessories | undefined = pl.acc;
+  if (!acc) return { behind: '', front: '' };
+  const tone = HAT_COLORS[(acc.tone ?? 0) % HAT_COLORS.length];
+  let behind = '';
+  let front = '';
+  // camo のふち線は服と同じ濃さ（溶け込ませる）。色つきははっきり
+  const camoLine = Math.max(0.25, outline);
+
+  if (acc.umbrella) {
+    const fid = `${prefix}-umb`;
+    const sid = `${prefix}-umbs`;
+    const camo = acc.umbrella === 'camo' ? camoFill(scene, pl, 'umbrella', fid) : null;
+    const defs = (camo ?? `<pattern id="${fid}" patternUnits="userSpaceOnUse" width="10" height="10"><rect width="10" height="10" fill="${tone[0]}"/></pattern>`) + shadeDef(sid, !!camo);
+    const lo = camo ? camoLine : 1;
+    const apex = { x: -6, y: -322 };
+    const ribs = [-67, -6, 55]
+      .map((x) => `<path d="M${apex.x} ${apex.y} Q${r1((apex.x + x) / 2 + (x - apex.x) * 0.18)} -280 ${x} -232" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo * 0.45)}" stroke-width="2.2" stroke-linecap="round"/>`)
+      .join('');
+    behind =
+      `<g class="acc acc-umbrella"><defs>${defs}</defs>` +
+      // 柄（手の中へ）
+      `<path d="M${UMBRELLA_SHAFT.x} ${UMBRELLA_SHAFT.y0} V${UMBRELLA_SHAFT.y1}" stroke="${LINE}" stroke-width="7" stroke-linecap="round"/>` +
+      `<path d="M${UMBRELLA_SHAFT.x} ${UMBRELLA_SHAFT.y0} V${UMBRELLA_SHAFT.y1}" stroke="#B58C69" stroke-width="3.4" stroke-linecap="round"/>` +
+      `<path d="${path(UMBRELLA_CANOPY)}" fill="url(#${fid})"/>` +
+      `<path d="${path(UMBRELLA_CANOPY)}" fill="url(#${sid})"/>` +
+      ribs +
+      `<path d="${path(UMBRELLA_CANOPY)}" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo)}" stroke-width="3.6" stroke-linejoin="round"/>` +
+      `<circle cx="${apex.x}" cy="${apex.y - 5}" r="5" fill="#B58C69" stroke="${LINE}" stroke-opacity="${r1(lo)}" stroke-width="2.4"/>` +
+      `</g>`;
+  }
+
+  if (acc.hat) {
+    const fid = `${prefix}-hat`;
+    const sid = `${prefix}-hats`;
+    const kid = `${prefix}-hatk`;
+    const camo = acc.hat === 'camo' ? camoFill(scene, pl, 'hat', fid) : null;
+    const defs = (camo ? camo + stitchOverlayDef(kid) : knitDef(fid, tone[0], tone[1])) + shadeDef(sid, !!camo);
+    const lo = camo ? camoLine : 1;
+    const band = `M-56 -160 Q0 -149 56 -160 L57 -178 Q0 -168 -57 -178Z`;
+    const ribs = Array.from({ length: 13 }, (_, k) => {
+      const x = -48 + k * 8;
+      const y0 = -175 + Math.abs(x) * 0.06 + (1 - (x / 56) ** 2) * 6;
+      return `<path d="M${x} ${r1(y0 + 1)} V${r1(y0 + 15)}" stroke="${LINE}" stroke-opacity="${r1(lo * 0.22)}" stroke-width="1.6" stroke-linecap="round"/>`;
+    }).join('');
+    const { cx, cy, r } = HAT_POMPOM;
+    const fluff = Array.from({ length: 10 }, (_, k) => {
+      const a = (k / 10) * Math.PI * 2;
+      return `<circle cx="${r1(cx + Math.cos(a) * r * 0.82)}" cy="${r1(cy + Math.sin(a) * r * 0.82)}" r="${r1(r * 0.42)}" fill="url(#${fid})"/>`;
+    }).join('');
+    front =
+      `<g class="acc acc-hat"><defs>${defs}</defs>` +
+      `<path d="${path(HAT_POLY)}" fill="url(#${fid})"/>` +
+      (camo ? `<path d="${path(HAT_POLY)}" fill="url(#${kid})"/>` : '') +
+      `<path d="${path(HAT_POLY)}" fill="url(#${sid})"/>` +
+      `<path d="${band}" fill="url(#${fid})"/>` +
+      ribs +
+      `<path d="${band}" fill="url(#${sid})" opacity="0.7"/>` +
+      `<path d="${path(HAT_POLY)}" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo)}" stroke-width="3.4" stroke-linejoin="round"/>` +
+      `<path d="M-57 -178 Q0 -168 57 -178" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo * 0.6)}" stroke-width="2.4"/>` +
+      // ぼんぼり
+      `<g>${fluff}<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${fid})"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${sid})"/>` +
+      `<circle cx="${cx}" cy="${cy}" r="${r + 2}" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo * 0.8)}" stroke-width="2.6" stroke-dasharray="5 3"/></g>` +
+      `</g>`;
+  }
+  return { behind, front };
+}
+// 1回の「さがす」プレイの状態（純粋関数）。表示とは分けてある。
+import { type Pt, bbox, distanceTo, transformShape, unionBBox } from './geometry';
+import { accessoryShapes } from './accessories';
+import { type Difficulty, type Placement, getSpot, silhouetteWorld, spotTransform } from './placement';
+import type { SceneDef, SceneId } from './scene';
+
+/** 見える形より少しだけ広い当たり判定（シーン座標）。巨大な矩形にはしない。 */
+export const HIT_TOLERANCE = 22;
+/** チャタリング防止（罰ではない） */
+export const TAP_DEBOUNCE_MS = 120;
+export const MAX_HINT = 3;
+
+export interface PlaySession {
+  sceneId: SceneId;
+  difficulty: Difficulty;
+  placements: Placement[];
+  found: boolean[];
+  /** 0: ヒントなし / 1: このあたり / 2: ちょっと うごく / 3: りんかく */
+  hintLevel: number;
+  hintsUsed: number;
+  origin: 'search' | 'hide' | 'course';
+  startedAt: number;
+}
+
+export function newSession(
+  sceneId: SceneId,
+  difficulty: Difficulty,
+  placements: Placement[],
+  origin: 'search' | 'hide' | 'course',
+  now: number,
+): PlaySession {
+  return {
+    sceneId,
+    difficulty,
+    placements: placements.map((p) => ({ ...p, ...(p.acc ? { acc: { ...p.acc } } : {}) })),
+    found: placements.map(() => false),
+    hintLevel: 0,
+    hintsUsed: 0,
+    origin,
+    startedAt: now,
+  };
+}
+
+export function isComplete(s: PlaySession): boolean {
+  return s.found.length > 0 && s.found.every(Boolean);
+}
+
+/** タップ位置にいる、まだ見つかっていないキャラクターの番号。いなければ -1。 */
+export function hitTest(scene: SceneDef, s: PlaySession, p: Pt, tol = HIT_TOLERANCE): number {
+  let best = -1;
+  let bd = Infinity;
+  s.placements.forEach((pl, i) => {
+    if (s.found[i]) return;
+    const spot = getSpot(scene, pl.spot);
+    // 帽子や傘をタッチしても見つけたことにする
+    const shapes = [...silhouetteWorld(pl.char, spot), ...accessoryShapes(pl.acc).map((sh) => transformShape(spotTransform(spot), sh))];
+    const d = Math.min(...shapes.map((sh) => distanceTo(sh, p)));
+    if (d <= tol && d < bd) {
+      bd = d;
+      best = i;
+    }
+  });
+  return best;
+}
+
+export interface TapResult {
+  session: PlaySession;
+  foundIndex: number;
+}
+
+export function tap(scene: SceneDef, s: PlaySession, p: Pt): TapResult {
+  const i = hitTest(scene, s, p);
+  if (i < 0) return { session: s, foundIndex: -1 }; // 外れても何も減らない
+  const found = s.found.slice();
+  found[i] = true;
+  return { session: { ...s, found, hintLevel: 0 }, foundIndex: i };
+}
+
+export function nextHint(s: PlaySession): PlaySession {
+  if (isComplete(s)) return s;
+  return { ...s, hintLevel: Math.min(MAX_HINT, s.hintLevel + 1), hintsUsed: s.hintsUsed + 1 };
+}
+
+export interface HintInfo {
+  level: number;
+  index: number;
+  /** レベル1：おおまかな まる（中心は対象から少しずらす） */
+  area: { cx: number; cy: number; r: number };
+}
+
+export function currentHint(scene: SceneDef, s: PlaySession): HintInfo | null {
+  if (s.hintLevel === 0) return null;
+  const index = s.found.findIndex((f) => !f);
+  if (index < 0) return null;
+  const pl = s.placements[index];
+  const b = unionBBox(silhouetteWorld(pl.char, getSpot(scene, pl.spot)).map(bbox));
+  const cx = (b.x0 + b.x1) / 2;
+  const cy = (b.y0 + b.y1) / 2;
+  // 対象がちょうど中心にならないよう、位置から決まる量だけずらす（毎回同じ）
+  const ang = ((pl.spot.length * 37 + index * 101) % 360) * (Math.PI / 180);
+  const r = 230;
+  const off = 70;
+  return {
+    level: s.hintLevel,
+    index,
+    area: {
+      cx: Math.min(1000 - 40, Math.max(40, cx + Math.cos(ang) * off)),
+      cy: Math.min(1000 - 40, Math.max(40, cy + Math.sin(ang) * off)),
+      r,
+    },
+  };
+}
+
+export function sceneOf(scenes: Record<SceneId, SceneDef>, s: PlaySession): SceneDef {
+  return scenes[s.sceneId];
+}
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 ART_SLOTS.md; Get-Content -Encoding UTF8 CODEX_ART_BRIEF.md; git status --short; rg --files -g AGENTS.md -g '*course*' -g '*character*' -g '*390x844*' -g package.json" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 274ms:
+// 画面の流れと入力。ゲームの判定は core、保存は storage に任せる。
+import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../core/characters';
+import { charArtMarkup, faceIcon, fullIcon } from './charArt';
+import { uiArt } from '../art/registry';
+import { patternMarkup } from '../core/patterns';
+import { type Difficulty, type Placement, autoLayout, freeSpots, getSpot, validateLayout } from '../core/placement';
+import type { SceneDef, SceneId } from '../core/scene';
+import { SCENES, SCENE_IDS } from '../core/scenes';
+import {
+  type PlaySession,
+  TAP_DEBOUNCE_MS,
+  currentHint,
+  isComplete,
+  newSession,
+  nextHint,
+  tap,
+} from '../core/session';
+import {
+  type HideDraft,
+  allPlaced,
+  chooseScene,
+  emptyDraft,
+  placeAt,
+  placeOnSpot,
+  select,
+  setChars,
+  setCostume,
+  toPlacements,
+  undo,
+} from '../core/hideEditor';
+import { betaEntitlements } from '../entitlements/entitlements';
+import { COURSES, FINDS_PER_COURSE, courseDef, courseRound, courseScene } from '../core/courses';
+import { COURSE_COUNT } from '../storage/schema';
+import { play, setSoundEnabled, unlockAudio } from '../audio/sound';
+import type { Store } from '../storage/storage';
+import { record } from '../storage/playtest';
+import { ICONS } from './icons';
+import { $, btn, prefersReducedMotion, toScene } from './dom';
+import { renderScene, sceneThumb } from './sceneView';
+import { ParentArea } from './parent';
+
+type Screen =
+  | 'title'
+  | 'searchSetup'
+  | 'tutorial'
+  | 'play'
+  | 'handoff'
+  | 'hideScene'
+  | 'hideChars'
+  | 'hideCostume'
+  | 'hidePlace'
+  | 'courseSelect'
+  | 'bye';
+
+const OUTLINE: Record<Difficulty, number> = { easy: 0.62, normal: 0.34 };
+
+export class App {
+  private root: HTMLElement;
+  private store: Store;
+  private screen: Screen = 'title';
+  private session: PlaySession | null = null;
+  private justFound = -1;
+  private draft: HideDraft = emptyDraft();
+  private multi = false;
+  private searchScene: SceneId = 'room';
+  private lastTap = 0;
+  private navLockUntil = 0;
+  private parent: ParentArea;
+  private drag: {
+    char: CharacterId;
+    x0: number;
+    y0: number;
+    moved: boolean;
+    pointerId: number;
+    ghost: HTMLElement | null;
+    fromScene: boolean;
+  } | null = null;
+  private resizeObs: ResizeObserver | null = null;
+  private seedCounter = 0;
+  /** コース：遊んでいるコース番号と、その中で何回目の出題か（背景を順に回す） */
+  private courseNo = 1;
+  private courseRoundIdx = 0;
+  /** このラウンドでコースをクリアした（クリア画面を出す） */
+  private courseJustCleared = false;
+  private afterTutorial: 'search' | 'course' = 'search';
+
+  constructor(root: HTMLElement, store: Store) {
+    this.root = root;
+    this.store = store;
+    setSoundEnabled(store.data.settings.sound);
+    this.parent = new ParentArea(
+      store,
+      () => this.render(),
+      () => {
+        this.session = null;
+        this.draft = emptyDraft();
+      },
+    );
+    root.addEventListener('click', (e) => this.onClick(e));
+    // 最初の操作のあとだけ音を出せるようにする
+    const unlock = () => unlockAudio();
+    window.addEventListener('pointerdown', unlock, { once: true, capture: true });
+    window.addEventListener('keydown', unlock, { once: true, capture: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        this.parent.close();
+        this.cancelDrag();
+        this.saveResume();
+      }
+    });
+    window.addEventListener('pointercancel', () => this.cancelDrag());
+    window.addEventListener('blur', () => this.cancelDrag());
+  }
+
+  start(): void {
+    this.render();
+  }
+
+  // ---------- 画面切り替え ----------
+
+  private go(s: Screen, lockMs = 350): void {
+    this.cancelDrag();
+    this.screen = s;
+    this.justFound = -1;
+    this.navLockUntil = performance.now() + lockMs;
+    this.render();
+  }
+
+  render(): void {
+    this.resizeObs?.disconnect();
+    this.resizeObs = null;
+    const html = this.screenHtml();
+    this.root.innerHTML = html;
+    this.root.dataset.current = this.screen;
+    this.bindScreen();
+    if (!this.parent.isOpen()) {
+      const focusEl = this.root.querySelector<HTMLElement>('[data-autofocus]');
+      focusEl?.focus({ preventScroll: true });
+    }
+  }
+
+  private screenHtml(): string {
+    switch (this.screen) {
+      case 'title':
+        return this.titleHtml();
+      case 'searchSetup':
+        return this.searchSetupHtml();
+      case 'tutorial':
+        return this.tutorialHtml();
+      case 'play':
+        return this.playHtml();
+      case 'handoff':
+        return this.handoffHtml();
+      case 'hideScene':
+        return this.hideSceneHtml();
+      case 'hideChars':
+        if (!this.draft.sceneId) {
+          this.screen = 'title';
+          return this.titleHtml();
+        }
+        return this.hideCharsHtml();
+      case 'hideCostume':
+        if (!this.draft.sceneId || this.draft.chars.length === 0) {
+          this.screen = 'title';
+          return this.titleHtml();
+        }
+        return this.hideCostumeHtml();
+      case 'hidePlace':
+        if (!this.draft.sceneId || this.draft.chars.length === 0) {
+          this.screen = 'title';
+          return this.titleHtml();
+        }
+        return this.hidePlaceHtml();
+      case 'courseSelect':
+        return this.courseSelectHtml();
+      case 'bye':
+        return this.byeHtml();
+    }
+  }
+
+  // ---------- 各画面 ----------
+
+  private titleHtml(): string {
+    const resume = this.store.data.resume;
+    const peek = CHARACTER_IDS.map((c) => `<div class="peek peek-${c}">${faceIcon(CHARACTERS[c])}</div>`).join('');
+    return `<main class="screen title" data-screen="title">
+      <div class="logo" aria-label="もようの かくれんぼ">
+        ${artImg('title') ?? `<div class="peeks">${peek}</div>`}
+        <h1>もようの<br>かくれんぼ</h1>
+        <p class="beta-tag">かぞく テスト ばん（かりの なまえ）</p>
+      </div>
+      <div class="title-actions">
+        ${btn('toCourse', ICONS.course, 'コースで あそぶ', 'big primary', 'data-autofocus')}
+        <div class="title-row">
+          ${btn('toSearch', ICONS.search, 'さがす', 'mid')}
+          ${btn('toHide', ICONS.hide, 'かくして わたす', 'mid secondary')}
+        </div>
+        ${resume ? btn('resume', ICONS.play, 'つづきから', 'mid') : ''}
+      </div>
+      ${btn('parent', ICONS.parent, 'おとなの かたへ', 'small parent-btn')}
+    </main>`;
+  }
+
+  private sceneCards(action: string): string {
+    return SCENE_IDS.filter((id) => betaEntitlements.canPlay(`scene:${id}`))
+      .map(
+        (id) =>
+          `<button type="button" class="scene-card" data-action="${action}" data-scene="${id}" aria-label="${SCENES[id].name}">${sceneThumb(SCENES[id])}<span class="lbl">${SCENES[id].name}</span></button>`,
+      )
+      .join('');
+  }
+
+  private searchSetupHtml(): string {
+    const d = this.store.data.settings.difficulty;
+    return `<main class="screen setup" data-screen="searchSetup">
+      <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>どこで さがす？</h2>${btn('tutorial', ICONS.question, 'あそびかた', 'round')}</header>
+      <div class="diff" role="group" aria-label="むずかしさ">
+        ${btn('diff', ICONS.easy, 'やさしい', `seg${d === 'easy' ? ' on' : ''}`, `data-diff="easy" aria-pressed="${d === 'easy'}"`)}
+        ${btn('diff', ICONS.normal, 'ふつう', `seg${d === 'normal' ? ' on' : ''}`, `data-diff="normal" aria-pressed="${d === 'normal'}"`)}
+      </div>
+      <div class="cards">${this.sceneCards('startSearch')}</div>
+    </main>`;
+  }
+
+  private courseSelectHtml(): string {
+    const p = this.store.data.course;
+    const next = Math.min(COURSE_COUNT, p.cleared + 1);
+    const tiles = COURSES.map((c) => {
+      const cleared = c.no <= p.cleared;
+      const open = c.no <= next;
+      const now = c.no === p.current && p.finds > 0 && !cleared;
+      const label = `コース${c.no}${cleared ? ' クリア' : open ? '' : ' まだ'}`;
+      const pips = now
+        ? `<span class="tile-pips" aria-hidden="true">${'<i class="on"></i>'.repeat(p.finds)}${'<i></i>'.repeat(FINDS_PER_COURSE - p.finds)}</span>`
+        : '';
+      const badge = cleared ? `<span class="badge">${ICONS.star}</span>` : open ? '' : `<span class="badge">${ICONS.lock}</span>`;
+      return `<button type="button" class="course-tile${cleared ? ' cleared' : ''}${open ? '' : ' locked'}${c.no === next && !cleared ? ' next' : ''}" data-action="pickCourse" data-course="${c.no}" aria-label="${label}" ${open ? '' : 'disabled'}${c.no === next ? ' data-autofocus' : ''}><span class="num">${c.no}</span>${badge}${courseMark(c.no)}${pips}</button>`;
+    }).join('');
+    return `<main class="screen setup course-select" data-screen="courseSelect">
+      <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>コースを えらぶ</h2><span></span></header>
+      <div class="course-grid">${tiles}</div>
+    </main>`;
+  }
+
+  /** コース中の進み具合（10この まる） */
+  private courseProgressHtml(): string {
+    const n = this.courseFindsShown();
+    return `<div class="course-progress" role="status" aria-label="コース${this.courseNo} ${n}/${FINDS_PER_COURSE}"><span class="course-no">${this.courseNo}</span>${Array.from({ length: FINDS_PER_COURSE }, (_, k) => `<i class="pip${k < n ? ' on' : ''}"></i>`).join('')}</div>`;
+  }
+
+  private courseFindsShown(): number {
+    return this.courseJustCleared ? FINDS_PER_COURSE : this.store.data.course.finds;
+  }
+
+  private tutorialHtml(): string {
+    const c = CHARACTERS.koro;
+    const stripe = patternMarkup('tut-stripe', SCENES.room.costumes[1].spec);
+    const stripeChar = patternMarkup('tut-char', SCENES.room.costumes[1].spec, 'translate(-500 -560)');
+    return `<main class="screen tutorial" data-screen="tutorial">
+      <header class="topbar">${btn('backFromTutorial', ICONS.back, 'もどる', 'round')}<h2>みつけて タッチ！</h2><span></span></header>
+      <div class="tut-stage">
+        <svg viewBox="250 300 500 360" class="tut-svg" aria-label="しまもようの カーテンに かくれた ころを タッチすると、かおを だして てを ふる">
+          <defs>${stripe}${stripeChar}</defs>
+          <rect x="250" y="300" width="500" height="360" fill="url(#tut-stripe)"/>
+          <g class="tut-char" transform="translate(500 560)">${fullCharInner(c.id, 'tut-char')}</g>
+          <g transform="translate(0 0)">${tutBox()}</g>
+          <g class="tut-stars">${[[-110, -120], [110, -110], [-80, -200], [90, -190]].map(([x, y]) => `<path transform="translate(${500 + x} ${560 + y})" d="M0 -14 L4 -4 L14 0 L4 4 L0 14 L-4 4 L-14 0 L-4 -4Z" fill="#FFD45C" stroke="#fff" stroke-width="2"/>`).join('')}</g>
+          <g class="tut-hand"><path d="M0 0 C-4 -10 6 -14 10 -6 L16 8 L18 -24 C18 -32 30 -32 30 -24 L30 4 L34 -4 C38 -10 48 -6 44 2 L40 26 C36 40 24 46 12 44 C2 42 -4 34 -6 26 Z" fill="#F5C58E" stroke="#4A3A40" stroke-width="3.5" stroke-linejoin="round"/></g>
+        </svg>
+      </div>
+      <div class="actions">${btn('tutorialDone', ICONS.play, 'やってみる', 'big primary', 'data-autofocus')}</div>
+    </main>`;
+  }
+
+  private playHtml(): string {
+    const s = this.session;
+    if (!s) return this.titleHtml();
+    const targets = s.placements
+      .map(
+        (pl, i) =>
+          `<div class="target${s.found[i] ? ' found' : ''}" data-target="${i}" aria-label="${CHARACTERS[pl.char].name}${s.found[i] ? ' みつけた' : ''}">${faceIcon(CHARACTERS[pl.char])}${s.found[i] ? `<span class="check">${ICONS.done}</span>` : ''}</div>`,
+      )
+      .join('');
+    const done = isComplete(s);
+    return `<main class="screen play" data-screen="play" data-origin="${s.origin}">
+      <div class="bar">
+        ${btn('home', ICONS.home, 'おしまい', 'round')}
+        <div class="targets" role="status" aria-label="さがす こ">${targets}</div>
+        ${btn('hint', ICONS.hint, 'ヒント', 'round hint-btn', done ? 'disabled' : '')}
+      </div>
+      ${s.origin === 'course' ? this.courseProgressHtml() : ''}
+      <div class="stage" id="stage">${this.playSvg()}</div>
+      ${done ? (s.origin === 'course' ? this.courseClearHtml() : this.clearHtml()) : ''}
+    </main>`;
+  }
+
+  private playSvg(): string {
+    const s = this.session as PlaySession;
+    const scene = SCENES[s.sceneId];
+    return renderScene(scene, {
+      prefix: 'g-',
+      placements: s.placements,
+      found: s.found,
+      outline: s.origin === 'course' ? courseDef(this.courseNo).outline : OUTLINE[s.difficulty],
+      hint: currentHint(scene, s),
+      title: `${scene.name}。かくれている こを さがして タッチ`,
+    });
+  }
+
+  private clearHtml(): string {
+    const s = this.session as PlaySession;
+    const faces = s.placements.map((pl) => `<div class="clear-face">${faceIcon(CHARACTERS[pl.char])}</div>`).join('');
+    return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="ぜんぶ みつけた">
+      <div class="clear-card">
+        <div class="clear-faces">${faces}</div>
+        <p class="clear-title">みーつけた！</p>
+        <div class="clear-actions">
+          ${btn('again', ICONS.again, 'もういちど', 'equal', 'data-autofocus')}
+          ${btn('swap', ICONS.swap, 'こうたい', 'equal')}
+          ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  private courseClearHtml(): string {
+    const s = this.session as PlaySession;
+    const faces = s.placements.map((pl) => `<div class="clear-face">${faceIcon(CHARACTERS[pl.char])}</div>`).join('');
+    if (this.courseJustCleared) {
+      const last = this.courseNo >= COURSE_COUNT;
+      return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="コース${this.courseNo} クリア">
+        <div class="clear-card">
+          <div class="medal" aria-hidden="true">${ICONS.star}<span>${this.courseNo}</span></div>
+          <p class="clear-title">コース${this.courseNo} クリア！</p>
+          ${last ? '<p class="clear-sub">ぜんぶの コースを クリアしたよ</p>' : ''}
+          <div class="clear-actions two">
+            ${last ? btn('toCourse', ICONS.course, 'コースを えらぶ', 'equal', 'data-autofocus') : btn('nextCourse', ICONS.next, 'つぎの コース', 'equal primary', 'data-autofocus')}
+            ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
+          </div>
+        </div>
+      </div>`;
+    }
+    return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="みつけた">
+      <div class="clear-card">
+        <div class="clear-faces">${faces}</div>
+        <p class="clear-title">みーつけた！</p>
+        <div class="clear-actions two">
+          ${btn('nextRound', ICONS.next, 'つぎ', 'equal primary', 'data-autofocus')}
+          ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  private handoffHtml(): string {
+    return `<main class="screen handoff" data-screen="handoff">
+      <header class="topbar">${btn('handoffBack', ICONS.back, 'かくしなおす', 'round small-lbl')}<span></span><span></span></header>
+      <div class="handoff-art" aria-hidden="true">${artImg('handoff') ?? handoffArt()}</div>
+      <p class="handoff-text">つぎの ひとに わたしてね</p>
+      <div class="actions">${btn('ready', ICONS.ready, 'じゅんび できた', 'big primary')}</div>
+    </main>`;
+  }
+
+  private hideSceneHtml(): string {
+    return `<main class="screen setup" data-screen="hideScene">
+      <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>どこに かくす？</h2><span></span></header>
+      <div class="cards">${this.sceneCards('hidePickScene')}</div>
+    </main>`;
+  }
+
+  private hideCharsHtml(): string {
+    const scene = SCENES[this.draft.sceneId as SceneId];
+    const sel = this.draft.chars;
+    const cards = CHARACTER_IDS.map((c) => {
+      const on = sel.includes(c);
+      const defs = patternMarkup(`hc-${c}`, scene.costumes[0].spec);
+      return `<button type="button" class="char-card${on ? ' on' : ''}" data-action="pickChar" data-char="${c}" aria-pressed="${on}" aria-label="${CHARACTERS[c].name}">${fullIcon(CHARACTERS[c], defs, `hc-${c}`)}<span class="lbl">${CHARACTERS[c].name}</span>${on ? `<span class="check">${ICONS.done}</span>` : ''}</button>`;
+    }).join('');
+    return `<main class="screen setup" data-screen="hideChars">
+      <header class="topbar">${btn('toHide', ICONS.back, 'もどる', 'round')}<h2>だれを かくす？</h2><span></span></header>
+      <div class="cards chars">${cards}</div>
+      <div class="actions">
+        ${btn('toggleMulti', ICONS.multi, this.multi ? 'ひとりだけ にする' : 'ふたり いじょう', `mid${this.multi ? ' on' : ''}`, `aria-pressed="${this.multi}"`)}
+        ${btn('charsNext', ICONS.next, 'つぎへ', 'mid primary', sel.length ? '' : 'disabled')}
+      </div>
+    </main>`;
+  }
+
+  private hideCostumeHtml(): string {
+    const d = this.draft;
+    const scene = SCENES[d.sceneId as SceneId];
+    const cur = d.selected ?? d.chars[0];
+    const tabs =
+      d.chars.length > 1
+        ? `<div class="tabs" role="group" aria-label="だれの ふく？">${d.chars
+            .map(
+              (c) =>
+                `<button type="button" class="tab${c === cur ? ' on' : ''}" data-action="costumeTab" data-char="${c}" aria-pressed="${c === cur}" aria-label="${CHARACTERS[c].name}">${faceIcon(CHARACTERS[c])}</button>`,
+            )
+            .join('')}</div>`
+        : '';
+    const big = (() => {
+      const cid = d.costumes[cur] as string;
+      const spec = scene.costumes.find((x) => x.id === cid)!.spec;
+      return fullIcon(CHARACTERS[cur], patternMarkup('cos-big', spec), 'cos-big');
+    })();
+    const swatches = scene.costumes
+      .map((c) => {
+        const on = d.costumes[cur] === c.id;
+        const pid = `sw-${c.id}`;
+        return `<button type="button" class="swatch${on ? ' on' : ''}" data-action="pickCostume" data-costume="${c.id}" aria-pressed="${on}" aria-label="${costumeName(c.kind)}"><svg viewBox="0 0 100 100" aria-hidden="true"><defs>${patternMarkup(pid, c.spec)}</defs><circle cx="50" cy="50" r="44" fill="url(#${pid})" stroke="#4A3A40" stroke-width="4"/></svg>${on ? `<span class="check">${ICONS.done}</span>` : ''}</button>`;
+      })
+      .join('');
+    return `<main class="screen costume" data-screen="hideCostume">
+      <header class="topbar">${btn('backToChars', ICONS.back, 'もどる', 'round')}<h2>どの ふく？</h2><span></span></header>
+      ${tabs}
+      <div class="costume-body">
+        <div class="costume-preview" aria-hidden="true">${big}</div>
+        <div class="swatches" role="group" aria-label="ふくの もよう">${swatches}</div>
+      </div>
+      <div class="actions">${btn('costumeNext', ICONS.next, 'おきに いく', 'mid primary', 'data-autofocus')}</div>
+    </main>`;
+  }
+
+  private hidePlaceHtml(): string {
+    const d = this.draft;
+    const tray = d.chars
+      .map((c) => {
+        const scene = SCENES[d.sceneId as SceneId];
+        const spec = scene.costumes.find((x) => x.id === d.costumes[c])!.spec;
+        const on = d.selected === c;
+        const placed = !!d.placed[c];
+        return `<button type="button" class="tray-char${on ? ' on' : ''}${placed ? ' placed' : ''}" data-tray="${c}" aria-pressed="${on}" aria-label="${CHARACTERS[c].name}${placed ? ' おいた' : ''}">${fullIcon(CHARACTERS[c], patternMarkup(`tr-${c}`, spec), `tr-${c}`)}</button>`;
+      })
+      .join('');
+    return `<main class="screen place" data-screen="hidePlace">
+      <div class="bar">
+        ${btn('backToCostume', ICONS.costume, 'ふくを かえる', 'round')}
+        <div class="tray" role="group" aria-label="かくす こ">${tray}</div>
+        ${btn('undo', ICONS.undo, 'とりけし', 'round', d.history.length ? '' : 'disabled')}
+        ${btn('hideDone', ICONS.done, 'できた', 'round done-btn', allPlaced(d) ? '' : 'disabled')}
+      </div>
+      <div class="stage" id="stage">${this.editSvg()}</div>
+    </main>`;
+  }
+
+  private editSvg(): string {
+    const d = this.draft;
+    const scene = SCENES[d.sceneId as SceneId];
+    const placements = d.chars
+      .filter((c) => d.placed[c])
+      .map((c) => ({ char: c, spot: d.placed[c] as string, costume: d.costumes[c] as string, variant: 'exact' as const }));
+    const occupiedByOthers = Object.entries(d.placed)
+      .filter(([c, v]) => v && c !== d.selected)
+      .map(([, v]) => v as string);
+    return renderScene(scene, {
+      prefix: 'e-',
+      placements,
+      outline: 0.7,
+      candidates: d.selected ? freeSpots(scene, occupiedByOthers) : [],
+      selectedChar: d.selected,
+      title: `${scene.name}。かくす ばしょを えらんでね`,
+    });
+  }
+
+  private byeHtml(): string {
+    const faces = CHARACTER_IDS.map((c) => `<div class="bye-face">${faceIcon(CHARACTERS[c])}</div>`).join('');
+    return `<main class="screen bye" data-screen="bye">
+      ${artImg('bye') ?? `<div class="bye-faces">${faces}</div>`}
+      <p class="bye-text">またね！</p>
+      <div class="actions">${btn('home', ICONS.home, 'はじめに もどる', 'mid', 'data-autofocus')}</div>
+    </main>`;
+  }
+
+  // ---------- 入力 ----------
+
+  private onClick(e: MouseEvent): void {
+    const el = (e.target as HTMLElement).closest<HTMLElement>('[data-action]');
+    if (!el || !this.root.contains(el) || (el as HTMLButtonElement).disabled) return;
+    if (performance.now() < this.navLockUntil) return;
+    const a = el.dataset.action as string;
+    play('pop');
+    switch (a) {
+      case 'toSearch':
+        this.go('searchSetup');
+        break;
+      case 'toCourse':
+        this.session = null;
+        this.courseJustCleared = false;
+        this.go('courseSelect');
+        break;
+      case 'pickCourse':
+        this.startCourse(Number(el.dataset.course));
+        break;
+      case 'nextRound':
+        this.startCourseRound();
+        break;
+      case 'nextCourse':
+        this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
+        break;
+      case 'toHide':
+        this.draft = emptyDraft();
+        this.multi = false;
+        this.go('hideScene');
+        break;
+      case 'resume':
+        this.resume();
+        break;
+      case 'parent':
+        this.parent.openGate(el);
+        break;
+      case 'home':
+        this.saveResume();
+        this.session = null; // 続きは保存側だけに持つ（削除後に書き戻さない）
+        this.go('title');
+        break;
+      case 'diff': {
+        const d = el.dataset.diff as Difficulty;
+        this.store.update((x) => {
+          x.settings.difficulty = d;
+        });
+        this.render();
+        break;
+      }
+      case 'tutorial':
+        this.afterTutorial = 'search';
+        this.go('tutorial');
+        break;
+      case 'backFromTutorial':
+        this.go(this.afterTutorial === 'course' ? 'courseSelect' : 'searchSetup');
+        break;
+      case 'startSearch':
+        this.searchScene = el.dataset.scene as SceneId;
+        this.afterTutorial = 'search';
+        if (!this.store.data.settings.tutorialSeen) this.go('tutorial');
+        else this.startSearch();
+        break;
+      case 'tutorialDone':
+        this.store.update((x) => {
+          x.settings.tutorialSeen = true;
+        });
+        if (this.afterTutorial === 'course') this.startCourseRound();
+        else this.startSearch();
+        break;
+      case 'hint':
+        this.onHint();
+        break;
+      case 'again':
+        this.onAgain();
+        break;
+      case 'swap':
+        this.onSwap();
+        break;
+      case 'bye':
+        this.session = null;
+        this.clearResume();
+        this.go('bye');
+        break;
+      case 'hidePickScene':
+        this.draft = chooseScene(this.draft, el.dataset.scene as SceneId);
+        this.draft = setChars(this.draft, ['koro'], SCENES[this.draft.sceneId as SceneId]);
+        this.go('hideChars');
+        break;
+      case 'pickChar':
+        this.onPickChar(el.dataset.char as CharacterId);
+        break;
+      case 'toggleMulti':
+        this.multi = !this.multi;
+        if (!this.multi && this.draft.chars.length > 1) {
+          this.draft = setChars(this.draft, [this.draft.chars[0]], this.hideScene());
+        }
+        this.render();
+        break;
+      case 'charsNext':
+        this.draft = select(this.draft, this.draft.chars[0]);
+        this.go('hideCostume');
+        break;
+      case 'costumeTab':
+        this.draft = select(this.draft, el.dataset.char as CharacterId);
+        this.render();
+        break;
+      case 'pickCostume': {
+        const c = this.draft.selected ?? this.draft.chars[0];
+        this.draft = setCostume(this.draft, c, el.dataset.costume as string, this.hideScene());
+        this.render();
+        break;
+      }
+      case 'backToChars':
+        this.go('hideChars');
+        break;
+      case 'costumeNext': {
+        const firstUnplaced = this.draft.chars.find((c) => !this.draft.placed[c]) ?? this.draft.selected;
+        this.draft = select(this.draft, firstUnplaced ?? null);
+        this.go('hidePlace');
+        break;
+      }
+      case 'backToCostume':
+        this.go('hideCostume');
+        break;
+      case 'undo':
+        this.draft = undo(this.draft);
+        this.render();
+        break;
+      case 'hideDone':
+        this.onHideDone();
+        break;
+      case 'handoffBack':
+        this.session = null;
+        this.clearResume();
+        this.go('hidePlace');
+        break;
+      case 'ready':
+        this.onReady();
+        break;
+    }
+  }
+
+  private hideScene(): SceneDef {
+    return SCENES[this.draft.sceneId as SceneId];
+  }
+
+  private onPickChar(c: CharacterId): void {
+    const cur = this.draft.chars;
+    let next: CharacterId[];
+    if (!this.multi) next = [c];
+    else if (cur.includes(c)) next = cur.length > 1 ? cur.filter((x) => x !== c) : cur;
+    else next = [...cur, c].slice(0, 3);
+    this.draft = setChars(this.draft, next, this.hideScene());
+    this.render();
+  }
+
+  private startSearch(): void {
+    const difficulty = this.store.data.settings.difficulty;
+    const scene = SCENES[this.searchScene];
+    const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
+    const placements = autoLayout(scene, difficulty, seed);
+    this.session = newSession(scene.id, difficulty, placements, 'search', Date.now());
+    record(this.store, { type: 'searchStarted' });
+    this.saveResume();
+    this.go('play');
+  }
+
+  private startCourse(no: number): void {
+    const p = this.store.data.course;
+    const open = Math.min(COURSE_COUNT, p.cleared + 1);
+    if (!Number.isInteger(no) || no < 1 || no > open) return;
+    this.courseNo = no;
+    this.courseRoundIdx = 0;
+    this.courseJustCleared = false;
+    // つづきのコースなら見つけた回数を引き継ぐ。ほかのコースは 0 から
+    if (p.current !== no) {
+      this.store.update((d) => {
+        d.course.current = no;
+        d.course.finds = 0;
+      });
+    }
+    this.afterTutorial = 'course';
+    if (!this.store.data.settings.tutorialSeen) this.go('tutorial');
+    else this.startCourseRound();
+  }
+
+  private startCourseRound(): void {
+    if (this.courseJustCleared) return this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
+    const ids = SCENE_IDS.filter((id) => betaEntitlements.canPlay(`scene:${id}`));
+    const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids)];
+    const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
+    const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
+    const placements = courseRound(scene, this.courseNo, remaining, seed);
+    const c = courseDef(this.courseNo);
+    this.session = newSession(scene.id, c.variant === 'exact' ? 'normal' : 'easy', placements, 'course', Date.now());
+    record(this.store, { type: 'searchStarted' });
+    this.go('play');
+  }
+
+  /** コース：1回見つけるごとに進める。10回でクリア */
+  private onCourseFind(): void {
+    const no = this.courseNo;
+    let cleared = false;
+    this.store.update((d) => {
+      if (d.course.current !== no) {
+        d.course.current = no;
+        d.course.finds = 0;
+      }
+      d.course.finds += 1;
+      if (d.course.finds >= FINDS_PER_COURSE) {
+        d.course.cleared = Math.max(d.course.cleared, no);
+        d.course.current = Math.min(COURSE_COUNT, no + 1);
+        d.course.finds = 0;
+        cleared = true;
+      }
+    });
+    if (cleared) this.courseJustCleared = true;
+  }
+
+  private onHint(): void {
+    if (!this.session) return;
+    this.session = nextHint(this.session);
+    record(this.store, { type: 'hint' });
+    play('soft');
+    this.refreshStage();
+  }
+
+  private onAgain(): void {
+    const s = this.session;
+    if (!s) return this.go('title');
+    if (s.origin === 'search') {
+      this.searchScene = s.sceneId;
+      this.startSearch();
+    } else {
+      // 同じ人が もういちど かくす（同じキャラクター・服のまま、置き場所から）
+      this.draft = { ...this.draft, placed: {}, history: [], selected: this.draft.chars[0] ?? null };
+      this.session = null;
+      this.clearResume();
+      this.go('hidePlace');
+    }
+  }
+
+  private onSwap(): void {
+    const s = this.session;
+    const sceneId = s?.sceneId ?? 'room';
+    this.session = null;
+    this.clearResume();
+    this.multi = false;
+    this.draft = setChars(chooseScene(emptyDraft(), sceneId), ['koro'], SCENES[sceneId]);
+    this.go('hideChars');
+  }
+
+  private onHideDone(): void {
+    const scene = this.hideScene();
+    if (!allPlaced(this.draft)) return;
+    const placements = toPlacements(this.draft);
+    const check = validateLayout(scene, placements);
+    if (!check.ok) {
+      // 起こらない想定。安全側として置き直しに戻す。
+      console.warn('layout rejected', check.problems);
+      this.draft = { ...this.draft, placed: {}, history: [], selected: this.draft.chars[0] ?? null };
+      this.render();
+      return;
+    }
+    this.session = newSession(scene.id, 'normal', placements, 'hide', Date.now());
+    this.saveResume();
+    this.go('handoff', 700);
+  }
+
+  private onReady(): void {
+    if (!this.session) return this.go('title');
+    record(this.store, { type: 'hideRound' });
+    record(this.store, { type: 'searchStarted' });
+    this.session = { ...this.session, startedAt: Date.now() };
+    this.go('play');
+  }
+
+  private resume(): void {
+    const r = this.store.data.resume;
+    if (!r) return;
+    this.session = { ...newSession(r.sceneId, r.difficulty, r.placements, r.origin, Date.now()), found: r.found.slice() };
+    if (r.origin === 'hide') this.draft = draftFromPlacements(r.sceneId, r.placements);
+    if (isComplete(this.session)) {
+      this.session = null;
+      this.clearResume();
+      this.render();
+      return;
+    }
+    // 隠したあとの再開は、受け渡しの目隠し画面から
+    this.go(r.origin === 'hide' ? 'handoff' : 'play', r.origin === 'hide' ? 700 : 350);
+  }
+
+  private saveResume(): void {
+    const s = this.session;
+    // コースは見つけた回数を別に保存している（出題そのものは続きにしない）
+    if (!s || isComplete(s) || s.origin === 'course') return;
+    const origin = s.origin;
+    this.store.update((d) => {
+      d.resume = { sceneId: s.sceneId, difficulty: s.difficulty, placements: s.placements, found: s.found, origin };
+    });
+  }
+
+  private clearResume(): void {
+    if (this.store.data.resume) {
+      this.store.update((d) => {
+        d.resume = null;
+      });
+    }
+  }
+
+  // ---------- 画面ごとのイベント ----------
+
+  private bindScreen(): void {
+    const stage = this.root.querySelector<HTMLElement>('#stage');
+    if (stage && typeof ResizeObserver !== 'undefined') {
+      this.resizeObs = new ResizeObserver(() => {
+        const r = stage.getBoundingClientRect();
+        stage.classList.toggle('compact', Math.min(r.width, r.height) < 360);
+      });
+      this.resizeObs.observe(stage);
+    }
+    if (this.screen === 'play') this.bindPlay();
+    if (this.screen === 'hidePlace') this.bindPlace();
+  }
+
+  private stageSvg(): SVGSVGElement | null {
+    return this.root.querySelector<SVGSVGElement>('#stage svg');
+  }
+
+  private bindPlay(): void {
+    const stage = $(this.root, '#stage');
+    stage.addEventListener('pointerdown', (e) => this.onPlayPointer(e));
+    this.decorateStage();
+  }
+
+  private decorateStage(): void {
+    const s = this.session;
+    if (!s) return;
+    const svg = this.stageSvg();
+    if (!svg) return;
+    if (this.justFound >= 0) svg.querySelector(`.char[data-index="${this.justFound}"]`)?.classList.add('just-found');
+    const h = currentHint(SCENES[s.sceneId], s);
+    if (h && h.level >= 2) svg.querySelector(`.char[data-index="${h.index}"]`)?.classList.add('wiggle');
+  }
+
+  private refreshStage(): void {
+    if (this.screen !== 'play' || !this.session) return;
+    const stage = this.root.querySelector<HTMLElement>('#stage');
+    if (!stage) return;
+    stage.innerHTML = this.playSvg();
+    this.decorateStage();
+  }
+
+  private onPlayPointer(e: PointerEvent): void {
+    if (!e.isPrimary || !this.session || isComplete(this.session)) return;
+    const now = performance.now();
+    if (now - this.lastTap < TAP_DEBOUNCE_MS) return;
+    this.lastTap = now;
+    const svg = this.stageSvg();
+    if (!svg) return;
+    const p = toScene(svg, e.clientX, e.clientY);
+    if (!p) return;
+    const scene = SCENES[this.session.sceneId];
+    const r = tap(scene, this.session, p);
+    if (r.foundIndex < 0) {
+      this.ripple(e.clientX, e.clientY);
+      return;
+    }
+    this.session = r.session;
+    this.justFound = r.foundIndex;
+    play('found');
+    if (this.session.origin === 'course') this.onCourseFind();
+    if (isComplete(this.session)) {
+      record(this.store, { type: 'searchCompleted', durationMs: Date.now() - this.session.startedAt });
+      this.clearResume();
+      const delay = prefersReducedMotion() ? 300 : 1300;
+      this.refreshStage();
+      this.updateTargets();
+      const s = this.session;
+      window.setTimeout(() => {
+        if (this.session === s && this.screen === 'play') {
+          play('clear');
+          this.navLockUntil = performance.now() + 400;
+          this.render();
+        }
+      }, delay);
+    } else {
+      this.saveResume();
+      this.refreshStage();
+      this.updateTargets();
+    }
+  }
+
+  private updateTargets(): void {
+    const s = this.session;
+    if (!s) return;
+    s.found.forEach((f, i) => {
+      const t = this.root.querySelector<HTMLElement>(`[data-target="${i}"]`);
+      if (t && f && !t.classList.contains('found')) {
+        t.classList.add('found');
+        t.insertAdjacentHTML('beforeend', `<span class="check">${ICONS.done}</span>`);
+        t.setAttribute('aria-label', `${CHARACTERS[s.placements[i].char].name} みつけた`);
+      }
+    });
+    const hb = this.root.querySelector<HTMLButtonElement>('[data-action="hint"]');
+    if (hb) hb.disabled = isComplete(s);
+    const cp = this.root.querySelector<HTMLElement>('.course-progress');
+    if (cp && s.origin === 'course') cp.outerHTML = this.courseProgressHtml();
+  }
+
+  /** 外れたときの、色の付かないやさしい波紋（罰ではない） */
+  private ripple(x: number, y: number): void {
+    if (prefersReducedMotion()) return;
+    const r = document.createElement('div');
+    r.className = 'ripple';
+    r.style.left = `${x}px`;
+    r.style.top = `${y}px`;
+    document.body.appendChild(r);
+    window.setTimeout(() => r.remove(), 500);
+  }
+
+  // ----- 置く（ドラッグ／タップ→タップ） -----
+
+  private bindPlace(): void {
+    this.root.querySelectorAll<HTMLElement>('[data-tray]').forEach((el) => {
+      el.addEventListener('pointerdown', (e) => this.beginDrag(e, el.dataset.tray as CharacterId, false));
+      // キーボード：Enter/Space で選ぶ
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const c = el.dataset.tray as CharacterId;
+          this.draft = select(this.draft, c);
+          this.render();
+          this.root.querySelector<HTMLElement>(`[data-tray="${c}"]`)?.focus({ preventScroll: true });
+        }
+      });
+    });
+    const stage = $(this.root, '#stage');
+    stage.querySelectorAll<SVGGElement>('.candidate').forEach((g) => {
+      g.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const c = this.draft.selected;
+          if (!c) return;
+          this.draft = placeOnSpot(this.draft, c, g.dataset.spot as string, this.hideScene());
+          this.render();
+          this.root.querySelector<HTMLElement>(`[data-tray="${c}"]`)?.focus({ preventScroll: true });
+        }
+      });
+    });
+    stage.addEventListener('pointerdown', (e) => {
+      if (!e.isPrimary) return;
+      const charEl = (e.target as Element).closest<SVGGElement>('.char');
+      if (charEl) {
+        this.beginDrag(e, charEl.dataset.char as CharacterId, true);
+        return;
+      }
+      this.beginDrag(e, null, true);
+    });
+  }
+
+  private beginDrag(e: PointerEvent, char: CharacterId | null, fromScene: boolean): void {
+    if (!e.isPrimary || this.drag) return;
+    e.preventDefault();
+    if (char === null) {
+      // シーンの空き場所のタップ：選択中の子をそこへ
+      this.tapCleanup?.();
+      const screenAtStart = this.screen;
+      const done = () => {
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onCancel);
+        this.tapCleanup = null;
+      };
+      const onUp = (ev: PointerEvent) => {
+        if (ev.pointerId !== e.pointerId) return;
+        done();
+        if (this.screen !== screenAtStart) return;
+        if (Math.hypot(ev.clientX - e.clientX, ev.clientY - e.clientY) > 24) return;
+        this.placeSelectedAt(ev.clientX, ev.clientY, (e.target as Element).closest<SVGGElement>('.candidate')?.dataset.spot);
+      };
+      const onCancel = (ev: PointerEvent) => {
+        if (ev.pointerId === e.pointerId) done();
+      };
+      this.tapCleanup = done;
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onCancel);
+      return;
+    }
+    this.drag = { char, x0: e.clientX, y0: e.clientY, moved: false, pointerId: e.pointerId, ghost: null, fromScene };
+    const move = (ev: PointerEvent) => {
+      const d = this.drag;
+      if (!d || ev.pointerId !== d.pointerId) return;
+      if (!d.moved && Math.hypot(ev.clientX - d.x0, ev.clientY - d.y0) > 12) {
+        d.moved = true;
+        d.ghost = this.makeGhost(d.char);
+      }
+      if (d.ghost) {
+        d.ghost.style.transform = `translate(${ev.clientX}px, ${ev.clientY}px)`;
+      }
+    };
+    const up = (ev: PointerEvent) => {
+      const d = this.drag;
+      if (!d || ev.pointerId !== d.pointerId) return;
+      cleanup();
+      this.drag = null;
+      d.ghost?.remove();
+      if (d.moved) {
+        const svg = this.stageSvg();
+        const rect = svg?.getBoundingClientRect();
+        const inside = rect && ev.clientX >= rect.left && ev.clientX <= rect.right && ev.clientY >= rect.top && ev.clientY <= rect.bottom;
+        if (svg && inside) {
+          const p = toScene(svg, ev.clientX, ev.clientY);
+          if (p) {
+            this.draft = placeAt(select(this.draft, d.char), d.char, p, this.hideScene());
+            play('pop');
+          }
+        }
+        this.render();
+      } else {
+        // タップ：選ぶ（タップ→タップで置く）
+        this.draft = select(this.draft, d.char);
+        this.render();
+      }
+    };
+    const cancel = (ev: PointerEvent) => {
+      if (this.drag && ev.pointerId === this.drag.pointerId) this.cancelDrag();
+    };
+    const cleanup = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', cancel);
+      this.dragCleanup = null;
+    };
+    this.dragCleanup = cleanup;
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', cancel);
+  }
+
+  private dragCleanup: (() => void) | null = null;
+  private tapCleanup: (() => void) | null = null;
+
+  private cancelDrag(): void {
+    this.tapCleanup?.();
+    if (!this.drag) return;
+    this.drag.ghost?.remove();
+    this.dragCleanup?.();
+    this.drag = null;
+  }
+
+  private makeGhost(c: CharacterId): HTMLElement {
+    const scene = this.hideScene();
+    const spec = scene.costumes.find((x) => x.id === this.draft.costumes[c])!.spec;
+    const g = document.createElement('div');
+    g.className = 'ghost';
+    g.innerHTML = fullIcon(CHARACTERS[c], patternMarkup('ghost-p', spec), 'ghost-p');
+    document.body.appendChild(g);
+    return g;
+  }
+
+  private placeSelectedAt(x: number, y: number, spotId?: string): void {
+    const c = this.draft.selected;
+    if (!c) return;
+    const scene = this.hideScene();
+    if (spotId) {
+      this.draft = placeOnSpot(this.draft, c, spotId, scene);
+    } else {
+      const svg = this.stageSvg();
+      if (!svg) return;
+      const p = toScene(svg, x, y);
+      if (!p) return;
+      this.draft = placeAt(this.draft, c, p, scene);
+    }
+    play('pop');
+    this.render();
+  }
+
+  /** テスト用：現在の配置（座標はシーン座標） */
+  debugState(): unknown {
+    return {
+      screen: this.screen,
+      session: this.session,
+      draft: this.draft,
+      spots: this.session ? this.session.placements.map((p) => getSpot(SCENES[this.session!.sceneId], p.spot)).map((s) => ({ id: s.id, x: s.x, y: s.y })) : [],
+    };
+  }
+}
+
+function draftFromPlacements(sceneId: SceneId, placements: Placement[]): HideDraft {
+  const d = emptyDraft();
+  d.sceneId = sceneId;
+  d.chars = placements.map((p) => p.char);
+  for (const p of placements) {
+    d.costumes[p.char] = p.costume;
+    d.placed[p.char] = p.spot;
+  }
+  d.selected = d.chars[0] ?? null;
+  return d;
+}
+
+function artImg(name: 'title' | 'handoff' | 'bye'): string | null {
+  const u = uiArt(name);
+  return u ? `<img class="ui-art ui-art-${name}" src="${u}" alt="" draggable="false">` : null;
+}
+
+/** コースの札の小さな目印：帽子・傘が出てくるコースが分かるように */
+function courseMark(no: number): string {
+  const c = courseDef(no);
+  const hat = c.hat
+    ? '<svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M7 30 C6 14 34 14 33 30Z" fill="#E59A86" stroke="#4A3A40" stroke-width="3" stroke-linejoin="round"/><rect x="6" y="27" width="28" height="7" rx="3" fill="#C97A68" stroke="#4A3A40" stroke-width="3"/><circle cx="20" cy="11" r="4.5" fill="#E59A86" stroke="#4A3A40" stroke-width="3"/></svg>'
+    : '';
+  const umb = c.umbrella
+    ? '<svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 20 C6 6 34 6 36 20Z" fill="#8DB7D9" stroke="#4A3A40" stroke-width="3" stroke-linejoin="round"/><path d="M20 20 V32 Q20 36 16 35" fill="none" stroke="#4A3A40" stroke-width="3" stroke-linecap="round"/></svg>'
+    : '';
+  return hat || umb ? `<span class="marks">${hat}${umb}</span>` : '';
+}
+
+function costumeName(kind: string): string {
+  return ({ plain: 'むじ', stripes: 'しましま', dots: 'みずたま', check: 'チェック', leaf: 'はっぱ', wood: 'もくめ' } as Record<string, string>)[kind] ?? kind;
+}
+
+function fullCharInner(c: CharacterId, fillId: string): string {
+  // チュートリアル用：見つかる前/後の2つを重ね、CSSで切り替える
+  const ch = CHARACTERS[c];
+  return `<g class="tut-hidden">${charInner(ch.id, fillId, false)}</g><g class="tut-found">${charInner(ch.id, fillId, true)}</g>`;
+}
+
+function charInner(c: CharacterId, fillId: string, found: boolean): string {
+  return charArtMarkup(CHARACTERS[c], { fillId, outline: 0.6, found });
+}
+
+function tutBox(): string {
+  return `<rect x="420" y="505" width="160" height="80" rx="8" fill="#E9785F" stroke="#4A3A40" stroke-width="3.5"/><rect x="414" y="500" width="172" height="20" rx="7" fill="#F29A7E" stroke="#4A3A40" stroke-width="3.5"/>`;
+}
+
+function handoffArt(): string {
+  const hand = (flip: boolean) =>
+    `<g transform="${flip ? 'translate(300 0) scale(-1 1)' : ''}"><path d="M20 120 C40 110 70 108 92 112 L110 100 C118 96 124 106 118 112 L104 124 L104 150 C80 160 50 160 20 150 Z" fill="#F5C58E" stroke="#4A3A40" stroke-width="4" stroke-linejoin="round"/></g>`;
+  return `<svg viewBox="0 0 300 200"><rect x="95" y="60" width="110" height="80" rx="12" fill="#7EA6DA" stroke="#4A3A40" stroke-width="4"/><rect x="105" y="70" width="90" height="60" rx="6" fill="#FFF6DC"/><path d="M135 98 q15 -18 30 0" stroke="#4A3A40" stroke-width="4" fill="none" stroke-linecap="round"/>${hand(false)}${hand(true)}<path d="M120 40 Q150 10 180 40" fill="none" stroke="#F2A9B8" stroke-width="6" stroke-linecap="round"/><path d="M172 26 L182 42 L164 44" fill="none" stroke="#F2A9B8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+ succeeded in 249ms:
+# 絵の差し替え口（ART_SLOTS）
+
+`art/` フォルダに決まった名前でファイルを置くと、ゲームが自動でその絵を使います。
+**置かなかった部分は、今のコードの絵のまま** 動きます（一部だけ差し替えてもよい）。
+
+- 形式：PNG（透過）／WebP／SVG。1ファイル 800KB まで、合計 8MB まで
+- SVG はスクリプト・外部参照・文字（フォント）を含めない
+- 置いたら `npm run validate:art` で検査 → `npm run build` → 画面を確認
+- 下書きガイド：`npm run art:guides` で `art-guides/` に出る（形状データから自動生成。描く位置の基準）
+
+## キャラクター `art/characters/{koro|mimi|moko}/`
+
+枠：**450×600px**（またはその整数倍。縦横比 3:4）。ゲーム内の座標 x −90〜90、y −225〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 37.5px**。ガイド `art-guides/character-*.png` に重ねて描く。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `clothes-mask.png` | ○ | 服の形だけを **白**、ほかは黒か透明。ここにゲームが背景と同じ柄を流し込む。ガイドの青い範囲（からだの判定）からはみ出さないこと |
+| `front.png` | ○ | 服より前に描くもの：顔・頭・耳・髪・手・服の上に出る線。目と口はガイドの赤い点の位置 |
+| `back.png` | | 服より後ろ：足、背中側の耳や髪など |
+| `clothes-shade.png` | | 服の陰影（乗算で重なる）。グレー〜茶系の濃淡、透過 |
+| `clothes-line.png` | | 服のふち線だけ。難易度に応じてゲームが濃さを変える（最低25%） |
+| `front-found.png` | | 見つかった時の前面（手をふるポーズ）。無ければ front を使う |
+
+`clothes-mask` と `front` がそろっていない時は、そのキャラクターはコードの絵のままです。
+
+## シーン `art/scenes/{room|garden|shop}/`
+
+枠：**1000×1000px**（2000×2000 推奨）。ガイド `art-guides/scene-*.png` の色面が「柄の領域」で、**ここはゲームが柄を塗る**（服と同じ柄にして隠れられるようにするため）。
+
+| ファイル | 中身 | 決まり |
+|---|---|---|
+| `back.png` | 柄の領域より下：空・壁の上部・床など | 不透明でよい |
+| `over.png` | 柄の領域の上・キャラクターの後ろ：家具の縁・カーテンのひだの陰・窓・棚など | 透過。キャラクターの服の後ろは薄く（平均の濃さ35%以下）、顔の後ろには描かない |
+| `minor.png` | 小さい画面では省く飾り（壁の絵・雲など） | over と同じ決まり |
+| `fore.png` | 前景の小物すべて（キャラクターの前に重なる） | 透過。ガイドの橙色の形に合わせる。**赤い円（顔）には重ねない**。服は少し（2割以上8割未満が見える程度）隠す |
+
+## 柄のタイル `art/patterns/{シーン}-{服}.png`
+
+例：`room-stripes.png`、`garden-leaf.png`。正方形 64px 以上、不透明、**上下左右がつなぎ目なく続く**こと。
+同じタイルが背景の領域と服の両方に使われます（だから隠れられる）。タイル1枚がゲーム内で表す大きさは、各シーンの柄の `size`（38〜52）です。
+
+| シーン | 服（ファイル名の後半） |
+|---|---|
+| room | plain（壁）, stripes（カーテン）, dots（ソファ）, check（ラグ） |
+| garden | plain（芝生）, stripes（柵）, dots（花だん）, leaf（生け垣） |
+| shop | plain（床）, stripes（カウンター）, dots（壁）, check（テーブルクロス） |
+
+## 画面の絵 `art/ui/`
+
+`title.png`（タイトルの絵）、`handoff.png`（受け渡し画面の絵。**隠れ場所や背景を描かない**）、`bye.png`（おしまい画面）。2000px 以内。
+# Codex への絵の制作依頼（CODEX_ART_BRIEF）
+
+> ご自宅PCで Codex に渡すための依頼文です。下の「Codex への指示」をそのまま貼り付けてください。
+
+## 事前準備（ご自宅PC）
+
+```bash
+git fetch origin
+git checkout claude/pattern-hide-family-beta
+git pull
+cd pattern-hide-family-beta
+npm ci
+npm run art:guides      # art-guides/ に下書きガイドができる
+```
+
+## Codex への指示（ここから貼り付け）
+
+あなたは、幼児向けかくれんぼゲーム「もようのかくれんぼ（仮）」の絵を作る担当です。
+作業フォルダは `pattern-hide-family-beta/` です。最初に `ART_SLOTS.md` と、この `CODEX_ART_BRIEF.md` を読んでください。
+
+### 守ること
+1. 書き込んでよいのは `pattern-hide-family-beta/art/` の中だけです。`src/` やテスト、設定ファイルは変更しないでください（別のAIが担当しています）。
+2. ファイル名・寸法・層の分け方は `ART_SLOTS.md` のとおりにしてください。描く位置は `art-guides/` のガイド画像に合わせてください。ガイドはゲームの当たり判定と同じ形から作られています。
+3. 描き終えたら `npm run validate:art` を実行し、**すべて合格するまで直してください**。結果は `art-guides/ART_CHECK.md` に出ます。そのあと `npm run build` が通ることを確認してください。
+4. 既存の作品（キャラクター、ロゴ、画面、音）をまねたり、取り込んだりしないでください。ネット上の画像も使わないでください。特定の作品に見える顔の配置や特徴は避けてください。
+5. 文字は絵に入れないでください。
+6. 追加料金が発生する手段（別料金のAPIキー、有料サービス）は使わないでください。今の契約の範囲でできないことがあれば、無理をせず、できなかったことを報告してください。
+7. 最後に、作ったファイル・使った方法（SVGをコードで書いた／画像生成を使った等）・検査結果を `art/README.md` に書いてください。
+
+### 絵の方向性
+- **かわいらしく、幼い子向け。ただし安っぽくしない。** 絵本の挿絵のような品のある仕上がりにします。
+- 形に丸みと立体感を持たせます。やわらかい陰影、ほのかなグラデーション、光は左上から、接地面にやわらかい影を入れてください。平べったいクリップアートや絵文字のようにはしないでください。
+- 線は黒ではなく濃い茶色系（目安 #4A3A40）。太さに少し強弱をつけ、全部の線を同じ太さにしないでください。
+- 色は、少しくすんだやさしいパステルを基調に、差し色を少しだけ。蛍光色や彩度の高すぎる色は使わないでください。
+- 布の縫い目、木目、葉脈など、見つけるとうれしい細部を控えめに入れます。ただし背景がうるさくなり、さがしにくくなる量にはしないでください。
+- 3体の見分けは **色だけに頼らず形で** つけます。今の形を受け継いでください：
+  - **ころ**：あたまに「くるん」とした毛。げんきでくいしんぼう。アプリコット色
+  - **みみ**：たれた長い耳（内側はピンク）。ものしりでのんびり。ミントグリーン
+  - **もこ**：くもの形のもこもこした頭と、星の髪どめ。ふわふわではずかしがり。ラベンダー
+- 3体とも、頭が大きめの約2頭身です。目は大きく、ハイライトを入れてください。表情はおだやかな笑顔です。
+- 服は **ゲームが柄を流し込む部分** なので、`clothes-mask.png`（白黒の形）として分けてください。服の陰影は `clothes-shade.png`、ふち線は `clothes-line.png` に分けると、柄の上に立体感が出ます。
+- 背景の「柄の領域」（カーテン・ソファ・ラグ、生け垣・柵・花だん・芝生、かべ・カウンター・テーブルクロス・床）は、ゲームが柄で塗ります。質感は **柄タイル**（`art/patterns/`）で出してください。布の織り目や紙の質感などを入れたタイルにします。同じタイルが服にも使われます。
+- 前景の小物（`fore.png`）は、今の小物と同じ位置・同じくらいの大きさで描き直してください（ガイドの橙色）。顔（赤い円）には絶対に重ねないでください。
+- 怖い表情、暗い影、先のとがった危なそうな物は入れないでください。
+
+### おすすめの順番
+1. `art/characters/koro/` の5層（back, clothes-mask, clothes-shade, clothes-line, front, front-found）を作る → 検査に合格させる
+2. 同じ画風で みみ・もこ を作る
+3. `art/patterns/` の柄タイル12枚
+4. `art/scenes/room/` の back / over / minor / fore → 検査 → garden → shop
+5. `art/ui/` の title / handoff / bye
+
+途中で、`npm run build && npm run preview` を実行し、`http://127.0.0.1:4173/` で見た目を確認してください。
+
+（貼り付けここまで）
+
+## 作業後
+
+- Codex の作業を `git add art && git commit` して、同じブランチに push してください。
+- Claude 側では、画面写真・操作テスト・溶け込み具合を確認し、必要なら調整案を出します。
+- 同じファイルを同時に複数のAIで編集しないため、Codex は `art/` だけ、Claude はそれ以外、と分けています。
+?? video/hide-handoff-find.webm
+AGENTS.md
+tests\unit\courses.test.ts
+tests\e2e\course.spec.ts
+codex-jobs\91-hardest-course-r1.md
+screenshots\390x844_15-parent-gate.png
+screenshots\390x844_14-find-after-handoff.png
+screenshots\390x844_13-handoff-blind.png
+screenshots\390x844_12-hide-placed.png
+screenshots\390x844_11-hide-place-candidates.png
+screenshots\390x844_10-hide-costume.png
+screenshots\390x844_09-hide-chars.png
+screenshots\390x844_08-search-shop-normal.png
+screenshots\390x844_07-clear.png
+screenshots\390x844_06-found.png
+screenshots\390x844_05-hint-outline.png
+screenshots\390x844_04-search-room-easy.png
+screenshots\390x844_03-tutorial.png
+screenshots\390x844_02-search-setup.png
+screenshots\390x844_01-title.png
+package.json
+art-guides\character-moko.svg
+art-guides\character-moko.png
+art-guides\character-mimi.svg
+art-guides\character-mimi.png
+art-guides\character-koro.svg
+art-guides\character-koro.png
+src\core\courses.ts
+src\core\characters.ts
+
+codex
+現状では、人数や傘を増やしても必ず難しくなるとは限りません。傘は大きなタップ対象になり、人数は「最大3人」で実際には1人の出題もあります。こうした逆効果も含めて提案をまとめます。今回はジョブの「1ファイルだけ」という指定を優先し、STATUS.md は更新しません。
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n 'course|hint|found|outline|wiggle' src/ui/app.ts; Get-Content -Encoding UTF8 src/ui/charArt.ts; Get-Content -Encoding UTF8 tests/unit/courses.test.ts; Get-Content -Encoding UTF8 package.json" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 223ms:
+32:import { COURSES, FINDS_PER_COURSE, courseDef, courseRound, courseScene } from '../core/courses';
+52:  | 'courseSelect'
+81:  private courseNo = 1;
+82:  private courseRoundIdx = 0;
+84:  private courseJustCleared = false;
+85:  private afterTutorial: 'search' | 'course' = 'search';
+174:      case 'courseSelect':
+175:        return this.courseSelectHtml();
+193:        ${btn('toCourse', ICONS.course, 'コースで あそぶ', 'big primary', 'data-autofocus')}
+225:  private courseSelectHtml(): string {
+226:    const p = this.store.data.course;
+237:      return `<button type="button" class="course-tile${cleared ? ' cleared' : ''}${open ? '' : ' locked'}${c.no === next && !cleared ? ' next' : ''}" data-action="pickCourse" data-course="${c.no}" aria-label="${label}" ${open ? '' : 'disabled'}${c.no === next ? ' data-autofocus' : ''}><span class="num">${c.no}</span>${badge}${courseMark(c.no)}${pips}</button>`;
+239:    return `<main class="screen setup course-select" data-screen="courseSelect">
+241:      <div class="course-grid">${tiles}</div>
+246:  private courseProgressHtml(): string {
+247:    const n = this.courseFindsShown();
+248:    return `<div class="course-progress" role="status" aria-label="コース${this.courseNo} ${n}/${FINDS_PER_COURSE}"><span class="course-no">${this.courseNo}</span>${Array.from({ length: FINDS_PER_COURSE }, (_, k) => `<i class="pip${k < n ? ' on' : ''}"></i>`).join('')}</div>`;
+251:  private courseFindsShown(): number {
+252:    return this.courseJustCleared ? FINDS_PER_COURSE : this.store.data.course.finds;
+281:          `<div class="target${s.found[i] ? ' found' : ''}" data-target="${i}" aria-label="${CHARACTERS[pl.char].name}${s.found[i] ? ' みつけた' : ''}">${faceIcon(CHARACTERS[pl.char])}${s.found[i] ? `<span class="check">${ICONS.done}</span>` : ''}</div>`,
+289:        ${btn('hint', ICONS.hint, 'ヒント', 'round hint-btn', done ? 'disabled' : '')}
+291:      ${s.origin === 'course' ? this.courseProgressHtml() : ''}
+293:      ${done ? (s.origin === 'course' ? this.courseClearHtml() : this.clearHtml()) : ''}
+303:      found: s.found,
+304:      outline: s.origin === 'course' ? courseDef(this.courseNo).outline : OUTLINE[s.difficulty],
+305:      hint: currentHint(scene, s),
+326:  private courseClearHtml(): string {
+329:    if (this.courseJustCleared) {
+330:      const last = this.courseNo >= COURSE_COUNT;
+331:      return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="コース${this.courseNo} クリア">
+333:          <div class="medal" aria-hidden="true">${ICONS.star}<span>${this.courseNo}</span></div>
+334:          <p class="clear-title">コース${this.courseNo} クリア！</p>
+337:            ${last ? btn('toCourse', ICONS.course, 'コースを えらぶ', 'equal', 'data-autofocus') : btn('nextCourse', ICONS.next, 'つぎの コース', 'equal primary', 'data-autofocus')}
+459:      outline: 0.7,
+489:        this.courseJustCleared = false;
+490:        this.go('courseSelect');
+493:        this.startCourse(Number(el.dataset.course));
+499:        this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
+530:        this.go(this.afterTutorial === 'course' ? 'courseSelect' : 'searchSetup');
+542:        if (this.afterTutorial === 'course') this.startCourseRound();
+545:      case 'hint':
+644:    const p = this.store.data.course;
+647:    this.courseNo = no;
+648:    this.courseRoundIdx = 0;
+649:    this.courseJustCleared = false;
+653:        d.course.current = no;
+654:        d.course.finds = 0;
+657:    this.afterTutorial = 'course';
+663:    if (this.courseJustCleared) return this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
+665:    const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids)];
+666:    const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
+668:    const placements = courseRound(scene, this.courseNo, remaining, seed);
+669:    const c = courseDef(this.courseNo);
+670:    this.session = newSession(scene.id, c.variant === 'exact' ? 'normal' : 'easy', placements, 'course', Date.now());
+677:    const no = this.courseNo;
+680:      if (d.course.current !== no) {
+681:        d.course.current = no;
+682:        d.course.finds = 0;
+684:      d.course.finds += 1;
+685:      if (d.course.finds >= FINDS_PER_COURSE) {
+686:        d.course.cleared = Math.max(d.course.cleared, no);
+687:        d.course.current = Math.min(COURSE_COUNT, no + 1);
+688:        d.course.finds = 0;
+692:    if (cleared) this.courseJustCleared = true;
+698:    record(this.store, { type: 'hint' });
+756:    this.session = { ...newSession(r.sceneId, r.difficulty, r.placements, r.origin, Date.now()), found: r.found.slice() };
+771:    if (!s || isComplete(s) || s.origin === 'course') return;
+774:      d.resume = { sceneId: s.sceneId, difficulty: s.difficulty, placements: s.placements, found: s.found, origin };
+816:    if (this.justFound >= 0) svg.querySelector(`.char[data-index="${this.justFound}"]`)?.classList.add('just-found');
+818:    if (h && h.level >= 2) svg.querySelector(`.char[data-index="${h.index}"]`)?.classList.add('wiggle');
+840:    if (r.foundIndex < 0) {
+845:    this.justFound = r.foundIndex;
+846:    play('found');
+847:    if (this.session.origin === 'course') this.onCourseFind();
+872:    s.found.forEach((f, i) => {
+874:      if (t && f && !t.classList.contains('found')) {
+875:        t.classList.add('found');
+880:    const hb = this.root.querySelector<HTMLButtonElement>('[data-action="hint"]');
+882:    const cp = this.root.querySelector<HTMLElement>('.course-progress');
+883:    if (cp && s.origin === 'course') cp.outerHTML = this.courseProgressHtml();
+1082:function courseMark(no: number): string {
+1083:  const c = courseDef(no);
+1100:  return `<g class="tut-hidden">${charInner(ch.id, fillId, false)}</g><g class="tut-found">${charInner(ch.id, fillId, true)}</g>`;
+1103:function charInner(c: CharacterId, fillId: string, found: boolean): string {
+1104:  return charArtMarkup(CHARACTERS[c], { fillId, outline: 0.6, found });
+// キャラクターの描画。art/ に絵があればそれを重ね、無ければコードの絵。
+// どちらの場合も、服には背景と同じ座標の柄（fillId）が入る。
+import { type CharacterDef, characterMarkup, faceIconMarkup, fullIconMarkup } from '../core/characters';
+import { CHAR_FRAME, characterArt } from '../art/registry';
+
+const F = CHAR_FRAME;
+const img = (href: string, extra = '') =>
+  `<image href="${href}" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" preserveAspectRatio="xMidYMid meet" ${extra}/>`;
+
+export function charArtMarkup(c: CharacterDef, o: { fillId: string; outline: number; found?: boolean }): string {
+  const a = characterArt(c.id);
+  if (!a) return characterMarkup(c, o);
+  const m = `m-${o.fillId}`;
+  const outline = Math.max(0.25, o.outline);
+  return (
+    `<defs><mask id="${m}" maskUnits="userSpaceOnUse" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}">${img(a.clothesMask)}</mask></defs>` +
+    `<g class="char-body">` +
+    (a.back ? img(a.back) : '') +
+    `<rect class="clothes" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" fill="url(#${o.fillId})" mask="url(#${m})"/>` +
+    (a.clothesShade ? img(a.clothesShade, 'style="mix-blend-mode:multiply"') : '') +
+    (a.clothesLine ? img(a.clothesLine, `opacity="${outline}"`) : '') +
+    `</g>` +
+    `<g class="char-head">${img(o.found && a.frontFound ? a.frontFound : a.front)}</g>`
+  );
+}
+
+export function faceIcon(c: CharacterDef): string {
+  const a = characterArt(c.id);
+  if (!a) return faceIconMarkup(c);
+  return `<svg viewBox="-70 -215 140 120" aria-hidden="true" focusable="false">${img(a.front)}</svg>`;
+}
+
+export function fullIcon(c: CharacterDef, patternDefs: string, fillId: string): string {
+  if (!characterArt(c.id)) return fullIconMarkup(c, patternDefs, fillId);
+  return `<svg viewBox="-90 -225 180 240" aria-hidden="true" focusable="false"><defs>${patternDefs}</defs>${charArtMarkup(c, { fillId, outline: 1 })}</svg>`;
+}
+// コース：全コース・多数のシードで、配置が安全（顔が見える・画面内・重ならない）で、10回でちょうど終わること
+import { describe, expect, it } from 'vitest';
+import { COURSES, FINDS_PER_COURSE, courseRound, courseScene } from '../../src/core/courses';
+import { accessoryFits, accessoryShapes } from '../../src/core/accessories';
+import { getSpot, silhouetteBBox, validateLayout } from '../../src/core/placement';
+import { SCENES, SCENE_IDS } from '../../src/core/scenes';
+import { bbox, bboxOverlap, transformShape, unionBBox } from '../../src/core/geometry';
+
+describe('courses', () => {
+  it('has 10 courses that get harder', () => {
+    expect(COURSES).toHaveLength(10);
+    for (let i = 1; i < COURSES.length; i++) expect(COURSES[i].outline).toBeLessThanOrEqual(COURSES[i - 1].outline);
+    expect(COURSES.slice(0, 3).every((c) => !c.hat && !c.umbrella)).toBe(true);
+  });
+
+  for (const c of COURSES) {
+    it(`course ${c.no}: every round is a safe layout and the course ends at exactly ${FINDS_PER_COURSE}`, () => {
+      const usage = { hat: 0, umbrella: 0, chars: 0 };
+      for (let seed = 1; seed <= 40; seed++) {
+        let found = 0;
+        let round = 0;
+        while (found < FINDS_PER_COURSE) {
+          const scene = SCENES[courseScene(c.no, round, SCENE_IDS)];
+          const pls = courseRound(scene, c.no, FINDS_PER_COURSE - found, seed * 97 + round);
+          expect(pls.length).toBeGreaterThan(0);
+          expect(pls.length).toBeLessThanOrEqual(Math.min(c.maxChars, FINDS_PER_COURSE - found));
+          const v = validateLayout(scene, pls);
+          expect(v.problems).toEqual([]);
+          for (const p of pls) {
+            const spot = getSpot(scene, p.spot);
+            if (c.spots === 'easy') expect(spot.easy).toBe(true);
+            expect(p.variant).toBe(c.variant);
+            if (p.acc?.hat) {
+              usage.hat++;
+              expect(accessoryFits(scene, spot, p.char, 'hat', p.acc.hat).problems).toEqual([]);
+            }
+            if (p.acc?.umbrella) {
+              usage.umbrella++;
+              expect(accessoryFits(scene, spot, p.char, 'umbrella', p.acc.umbrella).problems).toEqual([]);
+              // 傘がほかの子に重ならない
+              const t = { tx: spot.x, ty: spot.y, s: spot.s };
+              const ub = unionBBox(accessoryShapes({ umbrella: p.acc.umbrella }).map((s) => bbox(transformShape(t, s))));
+              for (const q of pls) if (q !== p) expect(bboxOverlap(ub, silhouetteBBox(q.char, getSpot(scene, q.spot)), 4)).toBe(false);
+            }
+          }
+          usage.chars += pls.length;
+          found += pls.length;
+          round++;
+          expect(round).toBeLessThanOrEqual(FINDS_PER_COURSE);
+        }
+        expect(found).toBe(FINDS_PER_COURSE);
+      }
+      // 帽子・傘を使うコースでは、実際にそれなりの回数出てくる
+      if (c.hat) expect(usage.hat / usage.chars).toBeGreaterThan(c.hat.rate * 0.35);
+      if (c.umbrella) expect(usage.umbrella / usage.chars).toBeGreaterThan(c.umbrella.rate * 0.25);
+      console.log(`course ${c.no}: hat ${(usage.hat / usage.chars).toFixed(2)} umbrella ${(usage.umbrella / usage.chars).toFixed(2)} chars/round avg`);
+    });
+  }
+
+  it('lists which spots allow each accessory', () => {
+    const rows: string[] = [];
+    for (const id of SCENE_IDS) {
+      for (const sp of SCENES[id].spots) {
+        const f = (k: 'hat' | 'umbrella', s: 'color' | 'camo') => (accessoryFits(SCENES[id], sp, 'moko', k, s).ok ? 'o' : '-');
+        rows.push(`${sp.id.padEnd(18)} hat:${f('hat', 'color')}${f('hat', 'camo')} umb:${f('umbrella', 'camo')} ${accessoryFits(SCENES[id], sp, 'moko', 'umbrella', 'camo').problems.join(',')}`);
+      }
+    }
+    console.log(rows.join('\n'));
+  });
+});
+
+import { validate, validateCourse } from '../../src/storage/schema';
+describe('course progress in the save data', () => {
+  it('old saves without course get a fresh start without being marked repaired', () => {
+    const r = validate({ schema: 1, settings: { sound: true, difficulty: 'easy', tutorialSeen: true }, resume: null, playtest: { enabled: false, counters: {} } });
+    expect(r.data.course).toEqual({ cleared: 0, current: 1, finds: 0 });
+  });
+  it('broken or out-of-range values are repaired', () => {
+    expect(validateCourse({ cleared: 'x', current: 1, finds: 0 }).repaired).toBe(true);
+    expect(validateCourse({ cleared: 2, current: 1, finds: 10 }).repaired).toBe(true);
+    // まだ開いていないコースは選べない
+    expect(validateCourse({ cleared: 1, current: 9, finds: 5 })).toEqual({ course: { cleared: 1, current: 2, finds: 0 }, repaired: true });
+    expect(validateCourse({ cleared: 10, current: 10, finds: 9 })).toEqual({ course: { cleared: 10, current: 10, finds: 9 }, repaired: false });
+  });
+});
+{
+  "name": "pattern-hide-family-beta",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "もようのかくれんぼ（仮）家族内テスト用ベータ。公開・課金なし。",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "verify:layouts": "vitest run tests/unit/placement.test.ts",
+    "validate:art": "node scripts/validate-art.mjs",
+    "art:guides": "node scripts/export-art-guides.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "5.0.3"
+  }
+}
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npx.cmd tsc --noEmit' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 src/ui/app.ts | Select-Object -Skip 270 -First 85; Get-Content -Encoding UTF8 src/ui/app.ts | Select-Object -Skip 640 -First 65; Get-Content -Encoding UTF8 src/ui/app.ts | Select-Object -Skip 804 -First 83; Get-Content -Encoding UTF8 tsconfig.json; rg -n 'facePoints|CHARACTER_IDS|Math.max|outline' src/core/characters.ts; rg -n 'wiggle|found|minor' src/ui/style* src/style*; rg --files audit" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 328ms:
+      <div class="actions">${btn('tutorialDone', ICONS.play, 'やってみる', 'big primary', 'data-autofocus')}</div>
+    </main>`;
+  }
+
+  private playHtml(): string {
+    const s = this.session;
+    if (!s) return this.titleHtml();
+    const targets = s.placements
+      .map(
+        (pl, i) =>
+          `<div class="target${s.found[i] ? ' found' : ''}" data-target="${i}" aria-label="${CHARACTERS[pl.char].name}${s.found[i] ? ' みつけた' : ''}">${faceIcon(CHARACTERS[pl.char])}${s.found[i] ? `<span class="check">${ICONS.done}</span>` : ''}</div>`,
+      )
+      .join('');
+    const done = isComplete(s);
+    return `<main class="screen play" data-screen="play" data-origin="${s.origin}">
+      <div class="bar">
+        ${btn('home', ICONS.home, 'おしまい', 'round')}
+        <div class="targets" role="status" aria-label="さがす こ">${targets}</div>
+        ${btn('hint', ICONS.hint, 'ヒント', 'round hint-btn', done ? 'disabled' : '')}
+      </div>
+      ${s.origin === 'course' ? this.courseProgressHtml() : ''}
+      <div class="stage" id="stage">${this.playSvg()}</div>
+      ${done ? (s.origin === 'course' ? this.courseClearHtml() : this.clearHtml()) : ''}
+    </main>`;
+  }
+
+  private playSvg(): string {
+    const s = this.session as PlaySession;
+    const scene = SCENES[s.sceneId];
+    return renderScene(scene, {
+      prefix: 'g-',
+      placements: s.placements,
+      found: s.found,
+      outline: s.origin === 'course' ? courseDef(this.courseNo).outline : OUTLINE[s.difficulty],
+      hint: currentHint(scene, s),
+      title: `${scene.name}。かくれている こを さがして タッチ`,
+    });
+  }
+
+  private clearHtml(): string {
+    const s = this.session as PlaySession;
+    const faces = s.placements.map((pl) => `<div class="clear-face">${faceIcon(CHARACTERS[pl.char])}</div>`).join('');
+    return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="ぜんぶ みつけた">
+      <div class="clear-card">
+        <div class="clear-faces">${faces}</div>
+        <p class="clear-title">みーつけた！</p>
+        <div class="clear-actions">
+          ${btn('again', ICONS.again, 'もういちど', 'equal', 'data-autofocus')}
+          ${btn('swap', ICONS.swap, 'こうたい', 'equal')}
+          ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  private courseClearHtml(): string {
+    const s = this.session as PlaySession;
+    const faces = s.placements.map((pl) => `<div class="clear-face">${faceIcon(CHARACTERS[pl.char])}</div>`).join('');
+    if (this.courseJustCleared) {
+      const last = this.courseNo >= COURSE_COUNT;
+      return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="コース${this.courseNo} クリア">
+        <div class="clear-card">
+          <div class="medal" aria-hidden="true">${ICONS.star}<span>${this.courseNo}</span></div>
+          <p class="clear-title">コース${this.courseNo} クリア！</p>
+          ${last ? '<p class="clear-sub">ぜんぶの コースを クリアしたよ</p>' : ''}
+          <div class="clear-actions two">
+            ${last ? btn('toCourse', ICONS.course, 'コースを えらぶ', 'equal', 'data-autofocus') : btn('nextCourse', ICONS.next, 'つぎの コース', 'equal primary', 'data-autofocus')}
+            ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
+          </div>
+        </div>
+      </div>`;
+    }
+    return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="みつけた">
+      <div class="clear-card">
+        <div class="clear-faces">${faces}</div>
+        <p class="clear-title">みーつけた！</p>
+        <div class="clear-actions two">
+          ${btn('nextRound', ICONS.next, 'つぎ', 'equal primary', 'data-autofocus')}
+          ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  private handoffHtml(): string {
+  }
+
+  private startCourse(no: number): void {
+    const p = this.store.data.course;
+    const open = Math.min(COURSE_COUNT, p.cleared + 1);
+    if (!Number.isInteger(no) || no < 1 || no > open) return;
+    this.courseNo = no;
+    this.courseRoundIdx = 0;
+    this.courseJustCleared = false;
+    // つづきのコースなら見つけた回数を引き継ぐ。ほかのコースは 0 から
+    if (p.current !== no) {
+      this.store.update((d) => {
+        d.course.current = no;
+        d.course.finds = 0;
+      });
+    }
+    this.afterTutorial = 'course';
+    if (!this.store.data.settings.tutorialSeen) this.go('tutorial');
+    else this.startCourseRound();
+  }
+
+  private startCourseRound(): void {
+    if (this.courseJustCleared) return this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
+    const ids = SCENE_IDS.filter((id) => betaEntitlements.canPlay(`scene:${id}`));
+    const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids)];
+    const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
+    const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
+    const placements = courseRound(scene, this.courseNo, remaining, seed);
+    const c = courseDef(this.courseNo);
+    this.session = newSession(scene.id, c.variant === 'exact' ? 'normal' : 'easy', placements, 'course', Date.now());
+    record(this.store, { type: 'searchStarted' });
+    this.go('play');
+  }
+
+  /** コース：1回見つけるごとに進める。10回でクリア */
+  private onCourseFind(): void {
+    const no = this.courseNo;
+    let cleared = false;
+    this.store.update((d) => {
+      if (d.course.current !== no) {
+        d.course.current = no;
+        d.course.finds = 0;
+      }
+      d.course.finds += 1;
+      if (d.course.finds >= FINDS_PER_COURSE) {
+        d.course.cleared = Math.max(d.course.cleared, no);
+        d.course.current = Math.min(COURSE_COUNT, no + 1);
+        d.course.finds = 0;
+        cleared = true;
+      }
+    });
+    if (cleared) this.courseJustCleared = true;
+  }
+
+  private onHint(): void {
+    if (!this.session) return;
+    this.session = nextHint(this.session);
+    record(this.store, { type: 'hint' });
+    play('soft');
+    this.refreshStage();
+  }
+
+  private onAgain(): void {
+    const s = this.session;
+    if (!s) return this.go('title');
+  private bindPlay(): void {
+    const stage = $(this.root, '#stage');
+    stage.addEventListener('pointerdown', (e) => this.onPlayPointer(e));
+    this.decorateStage();
+  }
+
+  private decorateStage(): void {
+    const s = this.session;
+    if (!s) return;
+    const svg = this.stageSvg();
+    if (!svg) return;
+    if (this.justFound >= 0) svg.querySelector(`.char[data-index="${this.justFound}"]`)?.classList.add('just-found');
+    const h = currentHint(SCENES[s.sceneId], s);
+    if (h && h.level >= 2) svg.querySelector(`.char[data-index="${h.index}"]`)?.classList.add('wiggle');
+  }
+
+  private refreshStage(): void {
+    if (this.screen !== 'play' || !this.session) return;
+    const stage = this.root.querySelector<HTMLElement>('#stage');
+    if (!stage) return;
+    stage.innerHTML = this.playSvg();
+    this.decorateStage();
+  }
+
+  private onPlayPointer(e: PointerEvent): void {
+    if (!e.isPrimary || !this.session || isComplete(this.session)) return;
+    const now = performance.now();
+    if (now - this.lastTap < TAP_DEBOUNCE_MS) return;
+    this.lastTap = now;
+    const svg = this.stageSvg();
+    if (!svg) return;
+    const p = toScene(svg, e.clientX, e.clientY);
+    if (!p) return;
+    const scene = SCENES[this.session.sceneId];
+    const r = tap(scene, this.session, p);
+    if (r.foundIndex < 0) {
+      this.ripple(e.clientX, e.clientY);
+      return;
+    }
+    this.session = r.session;
+    this.justFound = r.foundIndex;
+    play('found');
+    if (this.session.origin === 'course') this.onCourseFind();
+    if (isComplete(this.session)) {
+      record(this.store, { type: 'searchCompleted', durationMs: Date.now() - this.session.startedAt });
+      this.clearResume();
+      const delay = prefersReducedMotion() ? 300 : 1300;
+      this.refreshStage();
+      this.updateTargets();
+      const s = this.session;
+      window.setTimeout(() => {
+        if (this.session === s && this.screen === 'play') {
+          play('clear');
+          this.navLockUntil = performance.now() + 400;
+          this.render();
+        }
+      }, delay);
+    } else {
+      this.saveResume();
+      this.refreshStage();
+      this.updateTargets();
+    }
+  }
+
+  private updateTargets(): void {
+    const s = this.session;
+    if (!s) return;
+    s.found.forEach((f, i) => {
+      const t = this.root.querySelector<HTMLElement>(`[data-target="${i}"]`);
+      if (t && f && !t.classList.contains('found')) {
+        t.classList.add('found');
+        t.insertAdjacentHTML('beforeend', `<span class="check">${ICONS.done}</span>`);
+        t.setAttribute('aria-label', `${CHARACTERS[s.placements[i].char].name} みつけた`);
+      }
+    });
+    const hb = this.root.querySelector<HTMLButtonElement>('[data-action="hint"]');
+    if (hb) hb.disabled = isComplete(s);
+    const cp = this.root.querySelector<HTMLElement>('.course-progress');
+    if (cp && s.origin === 'course') cp.outerHTML = this.courseProgressHtml();
+  }
+
+  /** 外れたときの、色の付かないやさしい波紋（罰ではない） */
+  private ripple(x: number, y: number): void {
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "types": ["vite/client", "node"],
+    "noEmit": true
+  },
+  "include": ["src", "tests", "vite.config.ts", "playwright.config.ts"]
+}
+16:  facePoints: Pt[];
+58:    facePoints: FACE,
+71:    facePoints: FACE,
+83:    facePoints: FACE,
+87:export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
+134:      const outline = puffs.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c.skin}" ${st}/>`).join('');
+137:        outline +
+152:  outline: number;
+159:  const outline = Math.max(0.25, o.outline);
+162:    shapeToSvg(BODY, `class="clothes" fill="url(#${o.fillId})" stroke="${LINE}" stroke-opacity="${outline}" stroke-width="3.5" stroke-linejoin="round"`) +
+164:    `<path d="M-22 -98 Q0 -84 22 -98" fill="none" stroke="${LINE}" stroke-opacity="${outline}" stroke-width="3"/>`;
+179:  return `<svg viewBox="-90 -225 180 240" aria-hidden="true" focusable="false"><defs>${patternDefs}</defs>${characterMarkup(c, { fillId, outline: 1 })}</svg>`;
+rg: src/ui/style*: ファイル名、ディレクトリ名、またはボリューム ラベルの構文が間違っています。 (os error 123)
+rg: src/style*: ファイル名、ディレクトリ名、またはボリューム ラベルの構文が間違っています。 (os error 123)
+audit\logs\validate-art.log
+audit\logs\unit.log
+audit\logs\typecheck.log
+audit\logs\npm-audit.log
+audit\logs\home-setup.txt
+audit\logs\e2e.log
+audit\logs\codex-help.txt
+audit\logs\build.log
+audit\codex\review-2026-10-08.md
+audit\codex\2026-10-07T15-33-02-800Z-90-review-code.log
+audit\codex\2026-10-07T15-25-30-541Z-06-ui.log
+audit\codex\2026-10-07T15-12-04-021Z-05-garden-shop.log
+audit\codex\2026-10-07T14-59-00-695Z-04-room.log
+audit\codex\2026-10-07T14-52-01-696Z-feedback.log
+audit\codex\2026-10-07T14-46-37-222Z-03-patterns.log
+audit\codex\2026-10-07T14-39-00-495Z-02-mimi-moko.log
+audit\codex\2026-10-07T13-35-00-346Z-feedback.log
+audit\codex\2026-10-07T13-09-01-koro-stopped-by-claude.log
+audit\codex\2026-10-07T13-06-01-190Z-01-koro.log
+audit\codex\2026-10-07T13-05-42-261Z-01-koro.log
+audit\AGENT_STATUS.md
+
+ succeeded in 2717ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n -g '*.css' 'wiggle|found|minor' src; Get-Content -Encoding UTF8 src/core/characters.ts | Select-Object -First 90; Get-Content -Encoding UTF8 src/core/scene.ts" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 302ms:
+src\ui\styles.css:123:.target:not(.found) svg { filter: grayscale(0.15); }
+src\ui\styles.css:127:.stage.compact .minor, .scene-svg.compact .minor { display: none; }
+src\ui\styles.css:163:.char.found .wave { animation: wave 0.9s ease-in-out 2; }
+src\ui\styles.css:164:.char.just-found .char-inner { animation: pop 0.6s ease-out; }
+src\ui\styles.css:165:.char.wiggle .char-inner { animation: wiggle 0.9s ease-in-out infinite; }
+src\ui\styles.css:169:@keyframes wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
+src\ui\styles.css:197:.tut-found, .tut-stars { opacity: 0; animation: tutShow 3.2s steps(1) infinite; }
+src\ui\styles.css:239:  .tut-found, .tut-stars { opacity: 1; }
+// オリジナルキャラクター3体。形（輪郭）・顔・色・性格がそれぞれ違う。
+// ローカル座標：足もと中央が原点、上が -y。高さ約200。
+import { type Pt, type Shape, quadPoints, shapeToSvg } from './geometry';
+
+export type CharacterId = 'koro' | 'mimi' | 'moko';
+
+export interface CharacterDef {
+  id: CharacterId;
+  name: string;
+  /** 保護者・制作向けの説明（画面では読まなくても遊べる） */
+  personality: string;
+  skin: string;
+  /** 輪郭（当たり判定・可視判定・ヒント・描画で共有） */
+  silhouette: Shape[];
+  /** 顔の要点（目・口）。どの難易度でも隠さない */
+  facePoints: Pt[];
+}
+
+const B = (p0: Pt, c: Pt, p1: Pt) => quadPoints(p0, c, p1, 8);
+
+/** 回転した楕円を多角形にする（描画の rotate と同じ形を判定にも使う） */
+function rotEllipse(cx: number, cy: number, rx: number, ry: number, deg: number, ox: number, oy: number): Shape {
+  const a = (deg * Math.PI) / 180;
+  const pts: Pt[] = [];
+  for (let i = 0; i < 24; i++) {
+    const t = (i / 24) * Math.PI * 2;
+    const x = cx + rx * Math.cos(t) - ox;
+    const y = cy + ry * Math.sin(t) - oy;
+    pts.push({ x: ox + x * Math.cos(a) - y * Math.sin(a), y: oy + x * Math.sin(a) + y * Math.cos(a) });
+  }
+  return { kind: 'poly', pts };
+}
+
+/** 服（からだ）の多角形。3体共通の形で、柄が主役になる。 */
+export const BODY_POLY: Pt[] = [
+  { x: -58, y: 0 },
+  ...B({ x: -58, y: 0 }, { x: -64, y: -62 }, { x: -34, y: -94 }),
+  ...B({ x: -34, y: -94 }, { x: 0, y: -108 }, { x: 34, y: -94 }),
+  ...B({ x: 34, y: -94 }, { x: 64, y: -62 }, { x: 58, y: 0 }),
+  ...B({ x: 58, y: 0 }, { x: 0, y: 9 }, { x: -58, y: 0 }).slice(0, -1),
+];
+export const BODY: Shape = { kind: 'poly', pts: BODY_POLY };
+
+const HEAD: Shape = { kind: 'ellipse', cx: 0, cy: -142, rx: 48, ry: 45 };
+const FACE: Pt[] = [
+  { x: -16, y: -142 },
+  { x: 16, y: -142 },
+  { x: 0, y: -125 },
+];
+
+export const CHARACTERS: Record<CharacterId, CharacterDef> = {
+  koro: {
+    id: 'koro',
+    name: 'ころ',
+    personality: 'げんきで くいしんぼう。あたまの くるんとした け が めじるし。',
+    skin: '#F5C58E',
+    silhouette: [BODY, HEAD, { kind: 'ellipse', cx: 4, cy: -192, rx: 14, ry: 12 }],
+    facePoints: FACE,
+  },
+  mimi: {
+    id: 'mimi',
+    name: 'みみ',
+    personality: 'ものしりで のんびりや。たれた ながい みみ が めじるし。',
+    skin: '#BFE6CB',
+    silhouette: [
+      BODY,
+      HEAD,
+      rotEllipse(-50, -126, 16, 36, 18, -46, -158),
+      rotEllipse(50, -126, 16, 36, -18, 46, -158),
+    ],
+    facePoints: FACE,
+  },
+  moko: {
+    id: 'moko',
+    name: 'もこ',
+    personality: 'ふわふわで はずかしがりや。くもの かたちの あたまと ほしの かみどめ が めじるし。',
+    skin: '#DCCBF4',
+    silhouette: [
+      BODY,
+      { kind: 'ellipse', cx: 0, cy: -142, rx: 56, ry: 48 },
+      { kind: 'ellipse', cx: 36, cy: -184, rx: 13, ry: 13 },
+    ],
+    facePoints: FACE,
+  },
+};
+
+export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
+
+const LINE = '#4A3A40';
+
+import type { Shape } from './geometry';
+import type { PatternKind, PatternSpec } from './patterns';
+import type { Prop } from './props';
+
+export type SceneId = 'room' | 'garden' | 'shop';
+
+export interface CostumeDef {
+  id: string;
+  kind: PatternKind;
+  spec: PatternSpec;
+}
+
+/** 柄が分かっている背景の領域。配列の順に塗る（後ろほど上）。 */
+export interface RegionDef {
+  id: string;
+  costume: string;
+  shapes: Shape[];
+}
+
+/** あらかじめ検証した隠れ場所。 */
+export interface SpotDef {
+  id: string;
+  /** キャラクターの足もと */
+  x: number;
+  y: number;
+  /** 大きさ */
+  s: number;
+  /** 背中側に見える柄の領域 */
+  region: string;
+  /** 前に置く小物 */
+  prop: Prop;
+  /** 「やさしい」でも使う（顔とからだが見えやすい） */
+  easy: boolean;
+}
+
+export interface SceneDef {
+  id: SceneId;
+  name: string;
+  costumes: CostumeDef[];
+  regions: RegionDef[];
+  spots: SpotDef[];
+  /** 領域より先に塗る土台（空など） */
+  base: string;
+  /** 領域の上に塗る飾り（キャラクターより後ろ） */
+  decor: string;
+  /** 小さい画面では省く飾り */
+  minorDecor: string;
+  /** 飾り用の追加の defs。id は {P} を接頭辞にする */
+  extraDefs: string;
+}
+
+codex
+提案は、顔の見え方を保ったまま、柄がよく一致する隠れ場所を選ぶことを中心にします。通常の試遊案と限界を探る比較案を分け、変更する数値・実装箇所・採用を見送る基準まで記載します。型検査は通りました。
+apply patch
+patch: completed
+C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\audit\codex\hardest-course-r1.md
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r1.md b/pattern-hide-family-beta/audit/codex/hardest-course-r1.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..b86c53e198bafcdea0d86438698bb0c46f7f996f
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r1.md
+@@ -0,0 +1,174 @@
++# 最難関コースの議論・第1回（Codex 提案）
++
++作成日：2026-10-08。ジョブ91に基づく設計レビュー。実装・絵の変更はしていない。
++
++## 1. 提案の中心：顔を残し、柄と隠れ場所で迷わせる
++
++**まずはコース10を基準に、ふち線0.28・最大3人・迷彩帽子・難しい配置を優先する試遊版を提案する。** 限界比較は0.25まで。顔の縮小・背景色への同化・ヒントの弱体化は採用しない。難しさの上限は「何秒も見つからない」ではなく、「静止画に発見の根拠があり、ヒントで納得して見つけられる」までとする。
++
++以下の効き目は、コードから説明できる挙動を除いて**推測**。試遊に基づく結果ではない。数値目標も今回の比較用の仮説であり、年齢別の能力基準ではない。
++
++- 4〜6歳と家族の遊びを維持する。減点・時間切れ・怖い演出・課金・広告・外部通信を追加しない。ヒントは無料・無制限、好きな順で見つけられる。
++- `LIMITS` の全体可視率45%以上、服20〜92%、高さ170以上、画面内余白6、個体間のすきま4、顔が見える条件を維持する。新しい隠れ場所にも適用する。
++- 「目と口の判定点が遮られていない」だけでは不十分。実際の目・口全体が見え、顔と分かることを画像でも確認する。顔の色・線・大きさは難易度の操作対象にしない。
++- 初回は既存の3背景・3体を使う。量産より、配置の選び方と見つけた瞬間の納得感に手間をかける。方針資料の「視覚テスト型・動くと見える型をやらない」に合わせる。
++
++## 2. 現状から分かることと、数値だけでは変えられない部分
++
++| 確認した実装 | 提案への意味 |
++| --- | --- |
++| `courses.ts` のコース10：all / exact / 0.32 / 最大3人 / 帽子0.9 camo / 傘0.8 camo | すでに柄の完全一致を使っている。exactより「さらにexact」という段階はない |
++| `courseRound()` は1〜maxChars人を抽選し、残りの発見回数で切り詰める。配置競合でも人数が減る | 最大3人は常時3人ではない。残りが3以上なら希望人数の抽選平均は2人だが、実配置平均は未計測 |
++| キャラIDは3種類。`maxChars` の型と `validateLayout()` も3人上限 | 表を4にするだけでは4人出ない。重複個体IDまたは新キャラ、保存・UI・検証まで変更が必要 |
++| 帽子・傘は確率判定の後に装着適否を確認する。rate=1は候補を優先するが、両方装着の保証ではない | 設定率と実装着率を分けて測る。0.9×0.8=0.72を実際の同時装着率と呼ばない |
++| `accessoryFits()` は迷彩領域一致70%以上、画面内、顔の判定点、他の小物との重なりを検査 | 迷彩の最大30%が別領域でも合格する。目立つ縁が残る場合がある。難問選別では一致率を追加評価できる |
++| `sceneView.ts` は柄の座標を背景に合わせる。`softVariant()` は周期1.45倍・色調変更 | 色だけでなく柄の大きさも手がかり。exact化はその手がかりを減らす |
++| `charArt.ts` とコード描画の服の線、迷彩小物の線は0.25で下限処理 | 0.25未満を指定してもさらに薄くならない。0.32→0.28は指定不透明度約12.5%減、0.25は約21.9%減。知覚難度の増加率ではない |
++| 服の陰影、顔、傘の軸などはoutlineと一緒には薄くならない | 線だけで劇的に難しくなるとは限らない。特に傘の軸は発見の手がかりになり得る |
++| `hitTest()` は本体形状と帽子・傘の布を含め、許容距離22。前景で隠れた本体部分も除外しない | 傘は押せる面積を増やす。遮蔽を深くしても当たり判定は縮まらない。無作為タップの成功を発見と混同しない。傘の細い軸自体は独立した判定形状に含まれない |
++| ヒントは領域円（半径230・中心を70ずらす）→揺れ→輪郭。成功時に段階0へ戻る。対象は最初の未発見者 | ヒントの順番はあるが、発見順の強制はない。難関でもこの区別を維持する |
++| 1コースは「10人発見」。常に10画面ではない | 人数増加は1画面の負荷を増やす一方、コースの画面数を減らす。評価は1画面と1人発見を分ける |
++
++指定画像 `390x844_08-search-shop-normal.png` では、服は背景に溶けるが顔、頭の線、服の陰影が手がかりとして残っている。`390x844_05-hint-outline.png` では円と輪郭で対象を示せている。これは既存の通常モードの記録で、最難関コースや帽子・傘の実機評価ではない。
++
++## 3. 最難関コースの具体案
++
++### 推奨の1行（新しい項目を含む設計案）
++
++既存10をすぐ置換せず、試遊用の候補として比較する。下表は現行の型へそのまま貼れるコードではない。
++
++| 案 | spots | variant | outline | maxChars | hat | umbrella | 新しい項目 |
++| --- | --- | --- | --- | --- | --- | --- | --- |
++| 最難関候補H | all | exact | 0.28 | 3 | `{ rate: 1, style: 'camo' }` | `{ rate: 0.4, style: 'camo' }` | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible'`, `decoyCount: 0`, `hintStyle: 'static'` |
++
++傘0.4はコース10の0.8より低い。**傘を増やすほど難しいとはまだ言えないための比較用の値**。帽子は頭の目印を減らすが、傘は大きい輪郭・軸・タップ面積を増やす。0 / 0.4 / 0.8の比較で逆なら変更する。率1の帽子も、安全に付かない場所には付けない。
++
++### 新しい項目の仕様と作り方
++
++1. **`placementPolicy: 'hard-ranked'`（中）**
++   - `analyzeSpot()` が安全とする候補だけを対象とする。その中で服の領域一致率90%以上、服可視率25〜40%、全体可視率50%以上を「優先帯」とする。45%・20%ぎりぎりを初回の狙いにしない。
++   - 優先帯の中で領域一致率が高い順、次に服可視率が低い順で評価する。同等候補はシードで順序を変える。難しさの計算値であって知覚難度の保証ではない。
++   - 迷彩小物も領域一致率90%以上を優先する。現行の返り値 `AccFit` に一致率を追加するか、共通の測定関数を作り、検証と選別で同じ測り方を使う。70%という安全側の既存条件は緩めない。
++   - 候補不足なら既存の安全なallへ戻す。空配置を返さず、安全条件を緩めない。優先帯の成立率を制作側の試遊記録に残す。現時点で各背景に何候補あるかは未計測。
++   - 帽子rate=1による既存の装着可能候補優先と衝突するため、配置評価→帽子の適合評価を統合する。候補を単純に二重ソートしない。顔・重なり・画面内の条件を常に最優先とする。
++2. **`countPolicy: 'max-feasible'`（中）**
++   - 希望人数を `min(3, remaining)` にする。現行の最初の候補で確定する方法ではなく、競合しない候補の組合せを探索する。3人の安全な組合せがなければ2人、次に1人へ戻す。
++   - 同人数なら上記の優先帯に入る人数が多い配置を選び、同点はシードで選ぶ。人数を確保するために安全基準を下げない。人数と難しい場所が両立しない背景は記録する。
++   - 帽子・傘も含め、他の顔、本体、小物との関係を最終検証する。現行の小物判定は描画全体のピクセル検査ではなく、帽子の帯・毛糸の細部・傘の軸等には形状との差がある。最終描画も確認する。
++   - 最大人数が毎回置ければ10発見は3+3+3+1の4画面。常時3人保証や10画面保証とはしない。保存の発見数・最後の1人を確認する。
++3. **`decoyCount: 0`（初回は実装不要。導入時は中）**
++   - Hではにせものを入れず、比較実験で0→1→2個。上限2個。顔・目・口がなく、クッションや布袋と分かる独自の静物だけを使う。頭と胴の完全なコピーにしない。
++   - 導入時はシーンの装飾と位置情報を定義し、本物と同じ柄座標を使う。顔の保護範囲に描かない。他の当たり判定領域（許容距離22を含む）に重ねない。前景として遮蔽を増やす用途には使わない。
++   - にせものを押しても現行の外れと同じ。減点・専用の失敗音を足さない。上部の対象人数に含めない。
++4. **`hintStyle: 'static'`（中）**
++   - 1段階目は現行の半径230の円。2段階目は同じ対象の顔の周囲に静止した明暗2重の枠を表示。枠は目・口を覆わず、顔の外側へ余白12シーン単位以上を取る。3段階目は現行の輪郭表示。
++   - `currentHint()` の対象選択を共用し、顔の表示範囲は画像ガイドと形状から定義する。`sceneView.ts` で表示、`app.ts` のwiggle付与をこのモードでは行わない。アニメーションを止めても救済が機能することを確認する。
++   - 現行の揺れは任意の救済であり、アクション型のゲームそのものではない。ただし今回の前提をより明確に守るため静止表示を提案する。**ヒントを弱める変更ではない**。静止枠の方が弱ければ、より明確にする。
++
++試遊入口も必要。`startCourse()` は未解放コースを拒否するため、ご本人が90人探してから試す導線にしない。Claude側の実装で保護者領域に「最難関をためす」を設け、試遊中の10発見はメモリ内で数え、通常コースの解放・保存進捗を変更しない案を推す（中）。表へのno:11追加だけでは、コース数・保存仕様・画面との整合が取れない。
++
++### 限界を探る比較案X（採用決定ではない）
++
++Hから1要因ずつ、outlineを0.25、服可視率の優先帯を20〜30%、全体可視率を45%以上へ広げ、最後ににせものを最大2個追加する。顔、高さ170、色以外の手がかり、当たり判定22は維持する。小物迷彩の一致率目標は95%以上にして比較するが、成立しなければ未成立と記録する。
++
++これを成人だけで先に比較し、その後、家族が希望する場合に短く共同試遊する。全部の変更を一度に入れて「難しかった」で終えない。顔を残す以上、大人には簡単という上限があり得る。その場合も顔を消す方向には進めない。
++
++## 4. 難しくする手段の一覧（効き目・副作用・手間）
++
++手間の「小」は主に値の変更、「中」は選別・描画・検証の連携、「大」はキャラ体系・保存・背景アートまで及ぶ変更。所要日数の見積もりではない。
++
++| 手段・比較値 | 期待する効き目（推測） | 副作用・境界 | 判断／手間 |
++| --- | --- | --- | --- |
++| 服のふち線0.32→0.28→0.25 | 服の境界が読み取りにくくなる | 顔・服の陰影は残る。画面条件による差も大きい | 推奨／小 |
++| 服soft→exact | 色と周期のずれを消す | コース10は実施済み。顔だけ探す遊びへ寄りやすい | 維持／小 |
++| 服の背景一致70%→優先90%、比較95% | 異なる領域にはみ出す目印を減らす | 場所が固定化し、覚えれば簡単になる | 優先／中 |
++| 人数1〜3抽選→最大実現可能3 | 最後の1人まで探す持続性を増す | 最初の1人は見つけやすくなる可能性。10発見までの画面数は減る | 比較採用／中 |
++| 4人、さらに5〜6人 | 対象管理と探索量が増える | 3種類しかいない。重複の区別、狭い画面、判定競合。難度より混雑と疲れになり得る | 4人は別試作なら検討、5〜6人は見送り／大 |
++| 迷彩帽子0.9→1 | 頭の目印を隠す | 帽子の輪郭・ぼんぼりが新たな目印。色以外の個体識別も減る | 推奨、形の見分けを確認／小 |
++| 迷彩傘0→0.4→0.8→1 | 頭上の形を背景に寄せる | 軸と広い輪郭が目立ち、押せる面積が増える。場所を制約する | 効果の向きを比較／小 |
++| 帽子＋傘の同時装着 | 複数の目印を変える | 現状でも可能。率1ずつでは保証されない。大きなシルエットになる | 安全な組合せだけ別比較／中 |
++| マフラー | 首と服の境界をぼかす | 口へ近づく危険。布端が目印になる。服が見える面積を減らす | 顔保護範囲より下だけなら後回し／中 |
++| 手袋 | 手の色の手がかりを減らす | 効果が小さい可能性。絵と判定の一致が必要 | 優先度低／中 |
++| 背景柄の箱を身につける | 胴の輪郭を物に見せる | 服の柄を選ぶ意味が薄れ、顔穴だけだと顔を隠す抜け道になる | 頭を覆う箱は不採用。胴だけでも別試作／大 |
++| 新しい深い隠れ場所：まず各背景1か所、計3か所 | 記憶済みの場所を崩し、服の露出を減らす | 前景アートと判定の更新が必要。高い小物で口を隠しやすい | 既存配置の限界確認後／大 |
++| キャラを5%、次に最大10%縮小 | 視覚的な占有面積を減らす | 全体を縮めると顔も縮む。高さ170以上でもスマホで小さくなる | Hでは不採用。実寸確認付きの別比較／中〜大 |
++| 顔の目以外を小さくする | 顔らしさを減らす | 口の縮小・消失は前提違反。頭だけでも目口の位置、形による識別、絵の約束が崩れる | 不採用／大 |
++| 顔色を背景に寄せる・顔線を薄くする | 顔の目印を弱める | 幾何学的には見えても知覚的に隠す。色覚や明るさに依存する | 不採用 |
++| にせもの0→1→2個 | 似た静物を見比べる必要が出る | 「押せるはず」の期待を裏切る。顔に見える模様も避ける | 限界比較だけ／中 |
++| 柄の周期を現行の0.85倍／1.15倍で背景と服に共通適用 | 境界付近の読みにくさが変わる | 細密化でちらつきや縮小時の見づらさ。難しさの方向は未確定 | 後回し、柄の種類は増やさない／中 |
++| 服の陰影だけを75%へ | 明暗の境界を弱める | 立体感・絵本の質感を損なう。outlineでは変えられない | Xでも後順位／中 |
++| 見つけた子を残す／退場させる | 残すと探索対象の管理が必要 | 消すと未発見者の場所を動かした印象になる可能性。残すだけで疲れる場合もある | 現状の位置・上部チェックを維持／小 |
++| 見つけた子のチェックを消す・再び隠す | 記憶負荷を増す | 成功を取り消された感覚。押し直しの原因 | 不採用 |
++| ヒント円拡大、段階追加、待機・回数制限 | 救済に時間がかかる | 難問の質を上げず、詰まりを長引かせる | 不採用 |
++| 発見順を強制、特定の子だけ正解 | 探索対象を絞り、ルール負荷を増す | 本物を見つけても認められない。帽子で識別もしにくい | 不採用。家族の任意の声かけまで |
++| 時間・タップ数制限、探している間の移動 | 焦り・追跡負荷を増す | 本ジョブの前提と遊びの方向に反する | 不採用 |
++
++見つけた演出は難しくする対象にしない。現状は同じ位置で発見済み表示・星が出る。必要なら祝福後の星だけを約1秒で静める比較を行うが、顔と上部チェックは残し、未発見者の位置は変えない。
++
++## 5. 「難しい」と「理不尽」の境目
++
++| 観点 | 4〜6歳 | 大人・家族での挑戦 |
++| --- | --- | --- |
++| 発見の根拠 | 顔・口・輪郭を指して「いた」と言える。色名を知らなくてもよい | 柄のつながり、静物と顔の違いを注意深く見る余地がある |
++| 押した結果 | 顔や身につけ物を押せば見つかる。順番で拒否しない | 同じ。精密タップの競技にはしない |
++| にせもの | 静物として分かる形まで。人の形を精密にコピーしない | 事前に静物が混じると説明して最大2個を比較。ただし本物の顔は保護する |
++| ヒント | いつでも進められ、最終段階で納得して押せる | 利用を成績上の失敗にしない。自分で使わない選択はできる |
++| やめる・交代 | 残り人数や解放のために続ける圧力を足さない | 家族で相談・交代できる。大人向け制限を幼児画面へ持ち込まない |
++
++境界を越える具体例は、口を1点だけ残して周囲を覆う、背景色との微小な差だけに頼る、正解を押しても順番が違うので無反応、最後の1人だけ極小、ヒントを押しても救済されない、である。大人が楽しめても幼児版の通常コースへ自動採用しない。
++
++画面は1000シーン単位。表示幅360 CSS pxなら高さ170は約61 CSS px、当たり判定の余裕22は約7.9 CSS pxに相当する。これは変換例で、指定画像から実測した表示幅ではない。高さ基準だけで顔の読みやすさを保証しない。
++
++## 6. 実装順と試遊で確かめること
++
++### 段階と比較方法
++
++1. **A：現行10、B：outlineだけ0.28、C：B＋難しい配置優先**を先に比較する（小→中）。同じ背景・キャラ・配置では線の差だけを比較できるようにする。配置を変える比較では同じシードでも同じ絵になるとは限らない点を記録する。
++2. 次に帽子、傘0 / 0.4 / 0.8、人数方針を1つずつ比較し、Hを組み立てる。初回は各背景2配置の計6配置を成人で点検する。記憶による有利不利を減らすため提示順を入れ替える。
++3. 子どもの試遊は希望した家族で、1回3画面までを目安に、嫌がればその場で終える。4歳側と5〜6歳側の観察を分ける。少人数の家族試遊では全年齢への一般化はしない。大人が先に答えを言った回は自力発見と分ける。
++4. Hで納得して遊べると確認できたらXを1要因ずつ試す。新しい小物・場所・4人化はその後。Xの全要因を一度に通常コース10へ入れない。
++
++### 記録するもの
++
++- 背景、シード、希望人数と実人数、実際の帽子・傘・同時装着数、優先帯の成立／代替配置の使用。装着率の分母は出現人数。
++- 最初の1人／最後の1人までの時間、1人ごとのヒント段階、顔を認識したタップと無作為な連打の違い、見つけた子の押し直し、にせものへのタップ。
++- 「どこを見て分かったか」、ヒント後に納得したか、自発的に続けたい／交代したい／やめたいと言ったか。難しくても楽しいかを時間とは別に扱う。
++- 記録は匿名の手元メモ。子どもの氏名・写真・外部送信を追加しない。新しい通信や常時収集機能を作らない。
++
++### 試遊の暫定的な見直し基準（科学的な閾値ではない）
++
++- 成人の比較では、Hの1人発見までの中央値が現行10の1.3〜2倍程度になるかを見る。速く見つかっても失敗ではない。遅延の原因が単なる小ささ・押しにくさなら採用しない。
++- 子どもが30秒ほど手がかりを得られなければ、保護者がヒントや交代を提案する。画面内のタイマー・自動失敗・待ち時間にはしない。
++- 最終ヒントを出しても対象を指せない、顔を狙って2回続けて押しても反応しない、「いるのに違うと言われた」と受け取る場合は、その配置を候補から外して原因を調べる。
++- 3画面中2画面以上で全員に最終ヒントが必要なら、通常コース用としては戻す候補。嫌がる、顔を見分けられない場合は回数を待たずに止める。ヒント利用自体を悪い成績としない。
++- 同じ場所ばかりになるなら優先帯を緩める前に、1背景あたり安全な候補が何個残るかを見る。難問用に最低3候補を確保する目標とし、未達なら「背景追加」より既存位置の調整を検討する。
++
++### Claude側の実装後に必要な検証
++
++- 既存の安全条件、3体すべての顔、描画の小物の縁を確認。新しい前景を作る場合は絵と判定の一致も再検査する。`facePoints` の3点通過だけで目口全体の保護済みとしない。
++- 3背景×100シード×remaining 1〜10の3,000配置を候補Hで検証する案。空配置なし、人数上限、重複なし、重なりなし、画面内、10発見で終了、同じ入力で再現すること。小物同士の重なりも確認する。
++- 装着率や優先帯成立率を別に集計する。既存テストは安全性と最低限の小物出現を調べるが、「難しくなった」を保証してはいない。
++- 320×568、390×844、768×1024で顔・ヒント・対象一覧・3人時の判定を確認する。通常表示、グレースケール表示、動きを減らした表示を比較する。グレースケールだけを色覚への十分な検証とは扱わない。
++- 試遊入口で通常進捗が変わらないこと、途中で終了できること、ヒントを何度押しても追加条件なく使えること、通信なしで完了することを確認する。
++
++## 7. 自分でも危ないと思う点・Claudeに反論してほしい点
++
++1. **3人固定に近づけるのは、最難関化より作業量の増加かもしれない。** 1人だけを難しく配置した方が、1人あたりの発見は難しい可能性がある。Hの人数方針は比較で捨てられる。
++2. **帽子100%でも難しくなる保証がない。** 毎回同じ帽子なら帽子を探すゲームになる。傘を減らす判断も未検証で、実際には頭の目印を覆う効果が勝つかもしれない。
++3. **幾何学的な可視率を難しさと取り違える危険がある。** 服が20%しか見えなくても顔が孤立して目立てば簡単。評価値は候補選別に使い、最終的な採否は静止画と試遊で決める。
++4. **優先帯90%・25〜40%が現存するか未確認。** 成立しない条件を表へ足すだけではコース10と変わらない。実装前に候補分布を出し、成立が乏しければCを撤回するか各背景1か所だけ追加する。
++5. **にせものは最も反対されやすい。** 大人には面白くても4歳には意地悪に見える。顔なしでも「かくれている子」に見えたら失敗。Xからも削除してよい。
++6. **0.25は描画の下限であって遊びとして安全な下限ではない。** 端末・照明・絵の陰影で差が出る。0.28の時点で不評なら0.32へ戻す。
++7. **静止ヒントの追加は今回の難度議論には広すぎるという反論があり得る。** 現行の任意の揺れを残すなら、通常探索は静止のまま・動かなくても最終輪郭で解けることを最低条件とする。救済を弱める妥協はしない。
++8. **「顔を残すと大人には簡単」の可能性を受け入れる必要がある。** 顔を背景に溶かして難度を稼ぐと、幼児向けの約束と柄の遊びを失う。大人の探索時間だけで通常版を判断しない。
++
++第2回で決めたい順序は、(1)配置優先帯の実現性、(2)傘が難しくするか易しくするか、(3)1人と3人のどちらが狙いに合うか、(4)にせものを比較対象に残すか、である。最初の実装はA/B/Cまでに絞ってもよい。
++
++## 8. 作業記録・検査結果・未実施
++
++- 実施：指定のコア・UIソース、方針資料、`AGENTS.md`、ジョブ91、`ART_SLOTS.md`、`CODEX_ART_BRIEF.md`を読んだ。関連するキャラ描画、型、CSS、コース単体テストも参照した。指定ショップ画面とヒント輪郭画面を目視確認し、本レポートに設計案と自己反論をまとめた。
++- 方法：ローカルファイルの静的レビュー、既存スクリーンショットの目視、TypeScript型検査。画像生成、絵の制作、ネット画像・有料API・外部検索は使用していない。
++- 検査：`npx.cmd tsc --noEmit` は終了コード0で合格。これは現行コードの型検査であり、未実装のH/Xの安全性・難度の検証ではない。
++- 未実施：実装、候補分布・実装着率の実測、新コースのブラウザ／実機試遊、人による難度評価。単体テスト・E2E・ビルドは実行していない。絵を変更していないため `validate:art` は実行していない。
++- 書き込み：この `audit/codex/hardest-course-r1.md` だけ。ジョブ91の「1ファイルだけ」と今回のユーザー指定を優先し、共通指示の `STATUS.md` 更新は行っていない。コード・絵・設定・検査ツールを変更せず、commit / pushもしていない。
++- 作業開始時から未追跡の `video/hide-handoff-find.webm` が存在した。今回の作業では触れていない。
+
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r1.md b/pattern-hide-family-beta/audit/codex/hardest-course-r1.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..b86c53e198bafcdea0d86438698bb0c46f7f996f
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r1.md
+@@ -0,0 +1,174 @@
++# 最難関コースの議論・第1回（Codex 提案）
++
++作成日：2026-10-08。ジョブ91に基づく設計レビュー。実装・絵の変更はしていない。
++
++## 1. 提案の中心：顔を残し、柄と隠れ場所で迷わせる
++
++**まずはコース10を基準に、ふち線0.28・最大3人・迷彩帽子・難しい配置を優先する試遊版を提案する。** 限界比較は0.25まで。顔の縮小・背景色への同化・ヒントの弱体化は採用しない。難しさの上限は「何秒も見つからない」ではなく、「静止画に発見の根拠があり、ヒントで納得して見つけられる」までとする。
++
++以下の効き目は、コードから説明できる挙動を除いて**推測**。試遊に基づく結果ではない。数値目標も今回の比較用の仮説であり、年齢別の能力基準ではない。
++
++- 4〜6歳と家族の遊びを維持する。減点・時間切れ・怖い演出・課金・広告・外部通信を追加しない。ヒントは無料・無制限、好きな順で見つけられる。
++- `LIMITS` の全体可視率45%以上、服20〜92%、高さ170以上、画面内余白6、個体間のすきま4、顔が見える条件を維持する。新しい隠れ場所にも適用する。
++- 「目と口の判定点が遮られていない」だけでは不十分。実際の目・口全体が見え、顔と分かることを画像でも確認する。顔の色・線・大きさは難易度の操作対象にしない。
++- 初回は既存の3背景・3体を使う。量産より、配置の選び方と見つけた瞬間の納得感に手間をかける。方針資料の「視覚テスト型・動くと見える型をやらない」に合わせる。
++
++## 2. 現状から分かることと、数値だけでは変えられない部分
++
++| 確認した実装 | 提案への意味 |
++| --- | --- |
++| `courses.ts` のコース10：all / exact / 0.32 / 最大3人 / 帽子0.9 camo / 傘0.8 camo | すでに柄の完全一致を使っている。exactより「さらにexact」という段階はない |
++| `courseRound()` は1〜maxChars人を抽選し、残りの発見回数で切り詰める。配置競合でも人数が減る | 最大3人は常時3人ではない。残りが3以上なら希望人数の抽選平均は2人だが、実配置平均は未計測 |
++| キャラIDは3種類。`maxChars` の型と `validateLayout()` も3人上限 | 表を4にするだけでは4人出ない。重複個体IDまたは新キャラ、保存・UI・検証まで変更が必要 |
++| 帽子・傘は確率判定の後に装着適否を確認する。rate=1は候補を優先するが、両方装着の保証ではない | 設定率と実装着率を分けて測る。0.9×0.8=0.72を実際の同時装着率と呼ばない |
++| `accessoryFits()` は迷彩領域一致70%以上、画面内、顔の判定点、他の小物との重なりを検査 | 迷彩の最大30%が別領域でも合格する。目立つ縁が残る場合がある。難問選別では一致率を追加評価できる |
++| `sceneView.ts` は柄の座標を背景に合わせる。`softVariant()` は周期1.45倍・色調変更 | 色だけでなく柄の大きさも手がかり。exact化はその手がかりを減らす |
++| `charArt.ts` とコード描画の服の線、迷彩小物の線は0.25で下限処理 | 0.25未満を指定してもさらに薄くならない。0.32→0.28は指定不透明度約12.5%減、0.25は約21.9%減。知覚難度の増加率ではない |
++| 服の陰影、顔、傘の軸などはoutlineと一緒には薄くならない | 線だけで劇的に難しくなるとは限らない。特に傘の軸は発見の手がかりになり得る |
++| `hitTest()` は本体形状と帽子・傘の布を含め、許容距離22。前景で隠れた本体部分も除外しない | 傘は押せる面積を増やす。遮蔽を深くしても当たり判定は縮まらない。無作為タップの成功を発見と混同しない。傘の細い軸自体は独立した判定形状に含まれない |
++| ヒントは領域円（半径230・中心を70ずらす）→揺れ→輪郭。成功時に段階0へ戻る。対象は最初の未発見者 | ヒントの順番はあるが、発見順の強制はない。難関でもこの区別を維持する |
++| 1コースは「10人発見」。常に10画面ではない | 人数増加は1画面の負荷を増やす一方、コースの画面数を減らす。評価は1画面と1人発見を分ける |
++
++指定画像 `390x844_08-search-shop-normal.png` では、服は背景に溶けるが顔、頭の線、服の陰影が手がかりとして残っている。`390x844_05-hint-outline.png` では円と輪郭で対象を示せている。これは既存の通常モードの記録で、最難関コースや帽子・傘の実機評価ではない。
++
++## 3. 最難関コースの具体案
++
++### 推奨の1行（新しい項目を含む設計案）
++
++既存10をすぐ置換せず、試遊用の候補として比較する。下表は現行の型へそのまま貼れるコードではない。
++
++| 案 | spots | variant | outline | maxChars | hat | umbrella | 新しい項目 |
++| --- | --- | --- | --- | --- | --- | --- | --- |
++| 最難関候補H | all | exact | 0.28 | 3 | `{ rate: 1, style: 'camo' }` | `{ rate: 0.4, style: 'camo' }` | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible'`, `decoyCount: 0`, `hintStyle: 'static'` |
++
++傘0.4はコース10の0.8より低い。**傘を増やすほど難しいとはまだ言えないための比較用の値**。帽子は頭の目印を減らすが、傘は大きい輪郭・軸・タップ面積を増やす。0 / 0.4 / 0.8の比較で逆なら変更する。率1の帽子も、安全に付かない場所には付けない。
++
++### 新しい項目の仕様と作り方
++
++1. **`placementPolicy: 'hard-ranked'`（中）**
++   - `analyzeSpot()` が安全とする候補だけを対象とする。その中で服の領域一致率90%以上、服可視率25〜40%、全体可視率50%以上を「優先帯」とする。45%・20%ぎりぎりを初回の狙いにしない。
++   - 優先帯の中で領域一致率が高い順、次に服可視率が低い順で評価する。同等候補はシードで順序を変える。難しさの計算値であって知覚難度の保証ではない。
++   - 迷彩小物も領域一致率90%以上を優先する。現行の返り値 `AccFit` に一致率を追加するか、共通の測定関数を作り、検証と選別で同じ測り方を使う。70%という安全側の既存条件は緩めない。
++   - 候補不足なら既存の安全なallへ戻す。空配置を返さず、安全条件を緩めない。優先帯の成立率を制作側の試遊記録に残す。現時点で各背景に何候補あるかは未計測。
++   - 帽子rate=1による既存の装着可能候補優先と衝突するため、配置評価→帽子の適合評価を統合する。候補を単純に二重ソートしない。顔・重なり・画面内の条件を常に最優先とする。
++2. **`countPolicy: 'max-feasible'`（中）**
++   - 希望人数を `min(3, remaining)` にする。現行の最初の候補で確定する方法ではなく、競合しない候補の組合せを探索する。3人の安全な組合せがなければ2人、次に1人へ戻す。
++   - 同人数なら上記の優先帯に入る人数が多い配置を選び、同点はシードで選ぶ。人数を確保するために安全基準を下げない。人数と難しい場所が両立しない背景は記録する。
++   - 帽子・傘も含め、他の顔、本体、小物との関係を最終検証する。現行の小物判定は描画全体のピクセル検査ではなく、帽子の帯・毛糸の細部・傘の軸等には形状との差がある。最終描画も確認する。
++   - 最大人数が毎回置ければ10発見は3+3+3+1の4画面。常時3人保証や10画面保証とはしない。保存の発見数・最後の1人を確認する。
++3. **`decoyCount: 0`（初回は実装不要。導入時は中）**
++   - Hではにせものを入れず、比較実験で0→1→2個。上限2個。顔・目・口がなく、クッションや布袋と分かる独自の静物だけを使う。頭と胴の完全なコピーにしない。
++   - 導入時はシーンの装飾と位置情報を定義し、本物と同じ柄座標を使う。顔の保護範囲に描かない。他の当たり判定領域（許容距離22を含む）に重ねない。前景として遮蔽を増やす用途には使わない。
++   - にせものを押しても現行の外れと同じ。減点・専用の失敗音を足さない。上部の対象人数に含めない。
++4. **`hintStyle: 'static'`（中）**
++   - 1段階目は現行の半径230の円。2段階目は同じ対象の顔の周囲に静止した明暗2重の枠を表示。枠は目・口を覆わず、顔の外側へ余白12シーン単位以上を取る。3段階目は現行の輪郭表示。
++   - `currentHint()` の対象選択を共用し、顔の表示範囲は画像ガイドと形状から定義する。`sceneView.ts` で表示、`app.ts` のwiggle付与をこのモードでは行わない。アニメーションを止めても救済が機能することを確認する。
++   - 現行の揺れは任意の救済であり、アクション型のゲームそのものではない。ただし今回の前提をより明確に守るため静止表示を提案する。**ヒントを弱める変更ではない**。静止枠の方が弱ければ、より明確にする。
++
++試遊入口も必要。`startCourse()` は未解放コースを拒否するため、ご本人が90人探してから試す導線にしない。Claude側の実装で保護者領域に「最難関をためす」を設け、試遊中の10発見はメモリ内で数え、通常コースの解放・保存進捗を変更しない案を推す（中）。表へのno:11追加だけでは、コース数・保存仕様・画面との整合が取れない。
++
++### 限界を探る比較案X（採用決定ではない）
++
++Hから1要因ずつ、outlineを0.25、服可視率の優先帯を20〜30%、全体可視率を45%以上へ広げ、最後ににせものを最大2個追加する。顔、高さ170、色以外の手がかり、当たり判定22は維持する。小物迷彩の一致率目標は95%以上にして比較するが、成立しなければ未成立と記録する。
++
++これを成人だけで先に比較し、その後、家族が希望する場合に短く共同試遊する。全部の変更を一度に入れて「難しかった」で終えない。顔を残す以上、大人には簡単という上限があり得る。その場合も顔を消す方向には進めない。
++
++## 4. 難しくする手段の一覧（効き目・副作用・手間）
++
++手間の「小」は主に値の変更、「中」は選別・描画・検証の連携、「大」はキャラ体系・保存・背景アートまで及ぶ変更。所要日数の見積もりではない。
++
++| 手段・比較値 | 期待する効き目（推測） | 副作用・境界 | 判断／手間 |
++| --- | --- | --- | --- |
++| 服のふち線0.32→0.28→0.25 | 服の境界が読み取りにくくなる | 顔・服の陰影は残る。画面条件による差も大きい | 推奨／小 |
++| 服soft→exact | 色と周期のずれを消す | コース10は実施済み。顔だけ探す遊びへ寄りやすい | 維持／小 |
++| 服の背景一致70%→優先90%、比較95% | 異なる領域にはみ出す目印を減らす | 場所が固定化し、覚えれば簡単になる | 優先／中 |
++| 人数1〜3抽選→最大実現可能3 | 最後の1人まで探す持続性を増す | 最初の1人は見つけやすくなる可能性。10発見までの画面数は減る | 比較採用／中 |
++| 4人、さらに5〜6人 | 対象管理と探索量が増える | 3種類しかいない。重複の区別、狭い画面、判定競合。難度より混雑と疲れになり得る | 4人は別試作なら検討、5〜6人は見送り／大 |
++| 迷彩帽子0.9→1 | 頭の目印を隠す | 帽子の輪郭・ぼんぼりが新たな目印。色以外の個体識別も減る | 推奨、形の見分けを確認／小 |
++| 迷彩傘0→0.4→0.8→1 | 頭上の形を背景に寄せる | 軸と広い輪郭が目立ち、押せる面積が増える。場所を制約する | 効果の向きを比較／小 |
++| 帽子＋傘の同時装着 | 複数の目印を変える | 現状でも可能。率1ずつでは保証されない。大きなシルエットになる | 安全な組合せだけ別比較／中 |
++| マフラー | 首と服の境界をぼかす | 口へ近づく危険。布端が目印になる。服が見える面積を減らす | 顔保護範囲より下だけなら後回し／中 |
++| 手袋 | 手の色の手がかりを減らす | 効果が小さい可能性。絵と判定の一致が必要 | 優先度低／中 |
++| 背景柄の箱を身につける | 胴の輪郭を物に見せる | 服の柄を選ぶ意味が薄れ、顔穴だけだと顔を隠す抜け道になる | 頭を覆う箱は不採用。胴だけでも別試作／大 |
++| 新しい深い隠れ場所：まず各背景1か所、計3か所 | 記憶済みの場所を崩し、服の露出を減らす | 前景アートと判定の更新が必要。高い小物で口を隠しやすい | 既存配置の限界確認後／大 |
++| キャラを5%、次に最大10%縮小 | 視覚的な占有面積を減らす | 全体を縮めると顔も縮む。高さ170以上でもスマホで小さくなる | Hでは不採用。実寸確認付きの別比較／中〜大 |
++| 顔の目以外を小さくする | 顔らしさを減らす | 口の縮小・消失は前提違反。頭だけでも目口の位置、形による識別、絵の約束が崩れる | 不採用／大 |
++| 顔色を背景に寄せる・顔線を薄くする | 顔の目印を弱める | 幾何学的には見えても知覚的に隠す。色覚や明るさに依存する | 不採用 |
++| にせもの0→1→2個 | 似た静物を見比べる必要が出る | 「押せるはず」の期待を裏切る。顔に見える模様も避ける | 限界比較だけ／中 |
++| 柄の周期を現行の0.85倍／1.15倍で背景と服に共通適用 | 境界付近の読みにくさが変わる | 細密化でちらつきや縮小時の見づらさ。難しさの方向は未確定 | 後回し、柄の種類は増やさない／中 |
++| 服の陰影だけを75%へ | 明暗の境界を弱める | 立体感・絵本の質感を損なう。outlineでは変えられない | Xでも後順位／中 |
++| 見つけた子を残す／退場させる | 残すと探索対象の管理が必要 | 消すと未発見者の場所を動かした印象になる可能性。残すだけで疲れる場合もある | 現状の位置・上部チェックを維持／小 |
++| 見つけた子のチェックを消す・再び隠す | 記憶負荷を増す | 成功を取り消された感覚。押し直しの原因 | 不採用 |
++| ヒント円拡大、段階追加、待機・回数制限 | 救済に時間がかかる | 難問の質を上げず、詰まりを長引かせる | 不採用 |
++| 発見順を強制、特定の子だけ正解 | 探索対象を絞り、ルール負荷を増す | 本物を見つけても認められない。帽子で識別もしにくい | 不採用。家族の任意の声かけまで |
++| 時間・タップ数制限、探している間の移動 | 焦り・追跡負荷を増す | 本ジョブの前提と遊びの方向に反する | 不採用 |
++
++見つけた演出は難しくする対象にしない。現状は同じ位置で発見済み表示・星が出る。必要なら祝福後の星だけを約1秒で静める比較を行うが、顔と上部チェックは残し、未発見者の位置は変えない。
++
++## 5. 「難しい」と「理不尽」の境目
++
++| 観点 | 4〜6歳 | 大人・家族での挑戦 |
++| --- | --- | --- |
++| 発見の根拠 | 顔・口・輪郭を指して「いた」と言える。色名を知らなくてもよい | 柄のつながり、静物と顔の違いを注意深く見る余地がある |
++| 押した結果 | 顔や身につけ物を押せば見つかる。順番で拒否しない | 同じ。精密タップの競技にはしない |
++| にせもの | 静物として分かる形まで。人の形を精密にコピーしない | 事前に静物が混じると説明して最大2個を比較。ただし本物の顔は保護する |
++| ヒント | いつでも進められ、最終段階で納得して押せる | 利用を成績上の失敗にしない。自分で使わない選択はできる |
++| やめる・交代 | 残り人数や解放のために続ける圧力を足さない | 家族で相談・交代できる。大人向け制限を幼児画面へ持ち込まない |
++
++境界を越える具体例は、口を1点だけ残して周囲を覆う、背景色との微小な差だけに頼る、正解を押しても順番が違うので無反応、最後の1人だけ極小、ヒントを押しても救済されない、である。大人が楽しめても幼児版の通常コースへ自動採用しない。
++
++画面は1000シーン単位。表示幅360 CSS pxなら高さ170は約61 CSS px、当たり判定の余裕22は約7.9 CSS pxに相当する。これは変換例で、指定画像から実測した表示幅ではない。高さ基準だけで顔の読みやすさを保証しない。
++
++## 6. 実装順と試遊で確かめること
++
++### 段階と比較方法
++
++1. **A：現行10、B：outlineだけ0.28、C：B＋難しい配置優先**を先に比較する（小→中）。同じ背景・キャラ・配置では線の差だけを比較できるようにする。配置を変える比較では同じシードでも同じ絵になるとは限らない点を記録する。
++2. 次に帽子、傘0 / 0.4 / 0.8、人数方針を1つずつ比較し、Hを組み立てる。初回は各背景2配置の計6配置を成人で点検する。記憶による有利不利を減らすため提示順を入れ替える。
++3. 子どもの試遊は希望した家族で、1回3画面までを目安に、嫌がればその場で終える。4歳側と5〜6歳側の観察を分ける。少人数の家族試遊では全年齢への一般化はしない。大人が先に答えを言った回は自力発見と分ける。
++4. Hで納得して遊べると確認できたらXを1要因ずつ試す。新しい小物・場所・4人化はその後。Xの全要因を一度に通常コース10へ入れない。
++
++### 記録するもの
++
++- 背景、シード、希望人数と実人数、実際の帽子・傘・同時装着数、優先帯の成立／代替配置の使用。装着率の分母は出現人数。
++- 最初の1人／最後の1人までの時間、1人ごとのヒント段階、顔を認識したタップと無作為な連打の違い、見つけた子の押し直し、にせものへのタップ。
++- 「どこを見て分かったか」、ヒント後に納得したか、自発的に続けたい／交代したい／やめたいと言ったか。難しくても楽しいかを時間とは別に扱う。
++- 記録は匿名の手元メモ。子どもの氏名・写真・外部送信を追加しない。新しい通信や常時収集機能を作らない。
++
++### 試遊の暫定的な見直し基準（科学的な閾値ではない）
++
++- 成人の比較では、Hの1人発見までの中央値が現行10の1.3〜2倍程度になるかを見る。速く見つかっても失敗ではない。遅延の原因が単なる小ささ・押しにくさなら採用しない。
++- 子どもが30秒ほど手がかりを得られなければ、保護者がヒントや交代を提案する。画面内のタイマー・自動失敗・待ち時間にはしない。
++- 最終ヒントを出しても対象を指せない、顔を狙って2回続けて押しても反応しない、「いるのに違うと言われた」と受け取る場合は、その配置を候補から外して原因を調べる。
++- 3画面中2画面以上で全員に最終ヒントが必要なら、通常コース用としては戻す候補。嫌がる、顔を見分けられない場合は回数を待たずに止める。ヒント利用自体を悪い成績としない。
++- 同じ場所ばかりになるなら優先帯を緩める前に、1背景あたり安全な候補が何個残るかを見る。難問用に最低3候補を確保する目標とし、未達なら「背景追加」より既存位置の調整を検討する。
++
++### Claude側の実装後に必要な検証
++
++- 既存の安全条件、3体すべての顔、描画の小物の縁を確認。新しい前景を作る場合は絵と判定の一致も再検査する。`facePoints` の3点通過だけで目口全体の保護済みとしない。
++- 3背景×100シード×remaining 1〜10の3,000配置を候補Hで検証する案。空配置なし、人数上限、重複なし、重なりなし、画面内、10発見で終了、同じ入力で再現すること。小物同士の重なりも確認する。
++- 装着率や優先帯成立率を別に集計する。既存テストは安全性と最低限の小物出現を調べるが、「難しくなった」を保証してはいない。
++- 320×568、390×844、768×1024で顔・ヒント・対象一覧・3人時の判定を確認する。通常表示、グレースケール表示、動きを減らした表示を比較する。グレースケールだけを色覚への十分な検証とは扱わない。
++- 試遊入口で通常進捗が変わらないこと、途中で終了できること、ヒントを何度押しても追加条件なく使えること、通信なしで完了することを確認する。
++
++## 7. 自分でも危ないと思う点・Claudeに反論してほしい点
++
++1. **3人固定に近づけるのは、最難関化より作業量の増加かもしれない。** 1人だけを難しく配置した方が、1人あたりの発見は難しい可能性がある。Hの人数方針は比較で捨てられる。
++2. **帽子100%でも難しくなる保証がない。** 毎回同じ帽子なら帽子を探すゲームになる。傘を減らす判断も未検証で、実際には頭の目印を覆う効果が勝つかもしれない。
++3. **幾何学的な可視率を難しさと取り違える危険がある。** 服が20%しか見えなくても顔が孤立して目立てば簡単。評価値は候補選別に使い、最終的な採否は静止画と試遊で決める。
++4. **優先帯90%・25〜40%が現存するか未確認。** 成立しない条件を表へ足すだけではコース10と変わらない。実装前に候補分布を出し、成立が乏しければCを撤回するか各背景1か所だけ追加する。
++5. **にせものは最も反対されやすい。** 大人には面白くても4歳には意地悪に見える。顔なしでも「かくれている子」に見えたら失敗。Xからも削除してよい。
++6. **0.25は描画の下限であって遊びとして安全な下限ではない。** 端末・照明・絵の陰影で差が出る。0.28の時点で不評なら0.32へ戻す。
++7. **静止ヒントの追加は今回の難度議論には広すぎるという反論があり得る。** 現行の任意の揺れを残すなら、通常探索は静止のまま・動かなくても最終輪郭で解けることを最低条件とする。救済を弱める妥協はしない。
++8. **「顔を残すと大人には簡単」の可能性を受け入れる必要がある。** 顔を背景に溶かして難度を稼ぐと、幼児向けの約束と柄の遊びを失う。大人の探索時間だけで通常版を判断しない。
++
++第2回で決めたい順序は、(1)配置優先帯の実現性、(2)傘が難しくするか易しくするか、(3)1人と3人のどちらが狙いに合うか、(4)にせものを比較対象に残すか、である。最初の実装はA/B/Cまでに絞ってもよい。
++
++## 8. 作業記録・検査結果・未実施
++
++- 実施：指定のコア・UIソース、方針資料、`AGENTS.md`、ジョブ91、`ART_SLOTS.md`、`CODEX_ART_BRIEF.md`を読んだ。関連するキャラ描画、型、CSS、コース単体テストも参照した。指定ショップ画面とヒント輪郭画面を目視確認し、本レポートに設計案と自己反論をまとめた。
++- 方法：ローカルファイルの静的レビュー、既存スクリーンショットの目視、TypeScript型検査。画像生成、絵の制作、ネット画像・有料API・外部検索は使用していない。
++- 検査：`npx.cmd tsc --noEmit` は終了コード0で合格。これは現行コードの型検査であり、未実装のH/Xの安全性・難度の検証ではない。
++- 未実施：実装、候補分布・実装着率の実測、新コースのブラウザ／実機試遊、人による難度評価。単体テスト・E2E・ビルドは実行していない。絵を変更していないため `validate:art` は実行していない。
++- 書き込み：この `audit/codex/hardest-course-r1.md` だけ。ジョブ91の「1ファイルだけ」と今回のユーザー指定を優先し、共通指示の `STATUS.md` 更新は行っていない。コード・絵・設定・検査ツールを変更せず、commit / pushもしていない。
++- 作業開始時から未追跡の `video/hide-handoff-find.webm` が存在した。今回の作業では触れていない。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short; Get-Content -Encoding UTF8 audit/codex/hardest-course-r1.md | Select-Object -First 12; Get-Content -Encoding UTF8 audit/codex/hardest-course-r1.md | Select-Object -Last 12; git diff --check' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 325ms:
+?? audit/codex/hardest-course-r1.md
+?? video/hide-handoff-find.webm
+# 最難関コースの議論・第1回（Codex 提案）
+
+作成日：2026-10-08。ジョブ91に基づく設計レビュー。実装・絵の変更はしていない。
+
+## 1. 提案の中心：顔を残し、柄と隠れ場所で迷わせる
+
+**まずはコース10を基準に、ふち線0.28・最大3人・迷彩帽子・難しい配置を優先する試遊版を提案する。** 限界比較は0.25まで。顔の縮小・背景色への同化・ヒントの弱体化は採用しない。難しさの上限は「何秒も見つからない」ではなく、「静止画に発見の根拠があり、ヒントで納得して見つけられる」までとする。
+
+以下の効き目は、コードから説明できる挙動を除いて**推測**。試遊に基づく結果ではない。数値目標も今回の比較用の仮説であり、年齢別の能力基準ではない。
+
+- 4〜6歳と家族の遊びを維持する。減点・時間切れ・怖い演出・課金・広告・外部通信を追加しない。ヒントは無料・無制限、好きな順で見つけられる。
+- `LIMITS` の全体可視率45%以上、服20〜92%、高さ170以上、画面内余白6、個体間のすきま4、顔が見える条件を維持する。新しい隠れ場所にも適用する。
+8. **「顔を残すと大人には簡単」の可能性を受け入れる必要がある。** 顔を背景に溶かして難度を稼ぐと、幼児向けの約束と柄の遊びを失う。大人の探索時間だけで通常版を判断しない。
+
+第2回で決めたい順序は、(1)配置優先帯の実現性、(2)傘が難しくするか易しくするか、(3)1人と3人のどちらが狙いに合うか、(4)にせものを比較対象に残すか、である。最初の実装はA/B/Cまでに絞ってもよい。
+
+## 8. 作業記録・検査結果・未実施
+
+- 実施：指定のコア・UIソース、方針資料、`AGENTS.md`、ジョブ91、`ART_SLOTS.md`、`CODEX_ART_BRIEF.md`を読んだ。関連するキャラ描画、型、CSS、コース単体テストも参照した。指定ショップ画面とヒント輪郭画面を目視確認し、本レポートに設計案と自己反論をまとめた。
+- 方法：ローカルファイルの静的レビュー、既存スクリーンショットの目視、TypeScript型検査。画像生成、絵の制作、ネット画像・有料API・外部検索は使用していない。
+- 検査：`npx.cmd tsc --noEmit` は終了コード0で合格。これは現行コードの型検査であり、未実装のH/Xの安全性・難度の検証ではない。
+- 未実施：実装、候補分布・実装着率の実測、新コースのブラウザ／実機試遊、人による難度評価。単体テスト・E2E・ビルドは実行していない。絵を変更していないため `validate:art` は実行していない。
+- 書き込み：この `audit/codex/hardest-course-r1.md` だけ。ジョブ91の「1ファイルだけ」と今回のユーザー指定を優先し、共通指示の `STATUS.md` 更新は行っていない。コード・絵・設定・検査ツールを変更せず、commit / pushもしていない。
+- 作業開始時から未追跡の `video/hide-handoff-find.webm` が存在した。今回の作業では触れていない。
+
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r1.md b/pattern-hide-family-beta/audit/codex/hardest-course-r1.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..b86c53e198bafcdea0d86438698bb0c46f7f996f
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r1.md
+@@ -0,0 +1,174 @@
++# 最難関コースの議論・第1回（Codex 提案）
++
++作成日：2026-10-08。ジョブ91に基づく設計レビュー。実装・絵の変更はしていない。
++
++## 1. 提案の中心：顔を残し、柄と隠れ場所で迷わせる
++
++**まずはコース10を基準に、ふち線0.28・最大3人・迷彩帽子・難しい配置を優先する試遊版を提案する。** 限界比較は0.25まで。顔の縮小・背景色への同化・ヒントの弱体化は採用しない。難しさの上限は「何秒も見つからない」ではなく、「静止画に発見の根拠があり、ヒントで納得して見つけられる」までとする。
++
++以下の効き目は、コードから説明できる挙動を除いて**推測**。試遊に基づく結果ではない。数値目標も今回の比較用の仮説であり、年齢別の能力基準ではない。
++
++- 4〜6歳と家族の遊びを維持する。減点・時間切れ・怖い演出・課金・広告・外部通信を追加しない。ヒントは無料・無制限、好きな順で見つけられる。
++- `LIMITS` の全体可視率45%以上、服20〜92%、高さ170以上、画面内余白6、個体間のすきま4、顔が見える条件を維持する。新しい隠れ場所にも適用する。
++- 「目と口の判定点が遮られていない」だけでは不十分。実際の目・口全体が見え、顔と分かることを画像でも確認する。顔の色・線・大きさは難易度の操作対象にしない。
++- 初回は既存の3背景・3体を使う。量産より、配置の選び方と見つけた瞬間の納得感に手間をかける。方針資料の「視覚テスト型・動くと見える型をやらない」に合わせる。
++
++## 2. 現状から分かることと、数値だけでは変えられない部分
++
++| 確認した実装 | 提案への意味 |
++| --- | --- |
++| `courses.ts` のコース10：all / exact / 0.32 / 最大3人 / 帽子0.9 camo / 傘0.8 camo | すでに柄の完全一致を使っている。exactより「さらにexact」という段階はない |
++| `courseRound()` は1〜maxChars人を抽選し、残りの発見回数で切り詰める。配置競合でも人数が減る | 最大3人は常時3人ではない。残りが3以上なら希望人数の抽選平均は2人だが、実配置平均は未計測 |
++| キャラIDは3種類。`maxChars` の型と `validateLayout()` も3人上限 | 表を4にするだけでは4人出ない。重複個体IDまたは新キャラ、保存・UI・検証まで変更が必要 |
++| 帽子・傘は確率判定の後に装着適否を確認する。rate=1は候補を優先するが、両方装着の保証ではない | 設定率と実装着率を分けて測る。0.9×0.8=0.72を実際の同時装着率と呼ばない |
++| `accessoryFits()` は迷彩領域一致70%以上、画面内、顔の判定点、他の小物との重なりを検査 | 迷彩の最大30%が別領域でも合格する。目立つ縁が残る場合がある。難問選別では一致率を追加評価できる |
++| `sceneView.ts` は柄の座標を背景に合わせる。`softVariant()` は周期1.45倍・色調変更 | 色だけでなく柄の大きさも手がかり。exact化はその手がかりを減らす |
++| `charArt.ts` とコード描画の服の線、迷彩小物の線は0.25で下限処理 | 0.25未満を指定してもさらに薄くならない。0.32→0.28は指定不透明度約12.5%減、0.25は約21.9%減。知覚難度の増加率ではない |
++| 服の陰影、顔、傘の軸などはoutlineと一緒には薄くならない | 線だけで劇的に難しくなるとは限らない。特に傘の軸は発見の手がかりになり得る |
++| `hitTest()` は本体形状と帽子・傘の布を含め、許容距離22。前景で隠れた本体部分も除外しない | 傘は押せる面積を増やす。遮蔽を深くしても当たり判定は縮まらない。無作為タップの成功を発見と混同しない。傘の細い軸自体は独立した判定形状に含まれない |
++| ヒントは領域円（半径230・中心を70ずらす）→揺れ→輪郭。成功時に段階0へ戻る。対象は最初の未発見者 | ヒントの順番はあるが、発見順の強制はない。難関でもこの区別を維持する |
++| 1コースは「10人発見」。常に10画面ではない | 人数増加は1画面の負荷を増やす一方、コースの画面数を減らす。評価は1画面と1人発見を分ける |
++
++指定画像 `390x844_08-search-shop-normal.png` では、服は背景に溶けるが顔、頭の線、服の陰影が手がかりとして残っている。`390x844_05-hint-outline.png` では円と輪郭で対象を示せている。これは既存の通常モードの記録で、最難関コースや帽子・傘の実機評価ではない。
++
++## 3. 最難関コースの具体案
++
++### 推奨の1行（新しい項目を含む設計案）
++
++既存10をすぐ置換せず、試遊用の候補として比較する。下表は現行の型へそのまま貼れるコードではない。
++
++| 案 | spots | variant | outline | maxChars | hat | umbrella | 新しい項目 |
++| --- | --- | --- | --- | --- | --- | --- | --- |
++| 最難関候補H | all | exact | 0.28 | 3 | `{ rate: 1, style: 'camo' }` | `{ rate: 0.4, style: 'camo' }` | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible'`, `decoyCount: 0`, `hintStyle: 'static'` |
++
++傘0.4はコース10の0.8より低い。**傘を増やすほど難しいとはまだ言えないための比較用の値**。帽子は頭の目印を減らすが、傘は大きい輪郭・軸・タップ面積を増やす。0 / 0.4 / 0.8の比較で逆なら変更する。率1の帽子も、安全に付かない場所には付けない。
++
++### 新しい項目の仕様と作り方
++
++1. **`placementPolicy: 'hard-ranked'`（中）**
++   - `analyzeSpot()` が安全とする候補だけを対象とする。その中で服の領域一致率90%以上、服可視率25〜40%、全体可視率50%以上を「優先帯」とする。45%・20%ぎりぎりを初回の狙いにしない。
++   - 優先帯の中で領域一致率が高い順、次に服可視率が低い順で評価する。同等候補はシードで順序を変える。難しさの計算値であって知覚難度の保証ではない。
++   - 迷彩小物も領域一致率90%以上を優先する。現行の返り値 `AccFit` に一致率を追加するか、共通の測定関数を作り、検証と選別で同じ測り方を使う。70%という安全側の既存条件は緩めない。
++   - 候補不足なら既存の安全なallへ戻す。空配置を返さず、安全条件を緩めない。優先帯の成立率を制作側の試遊記録に残す。現時点で各背景に何候補あるかは未計測。
++   - 帽子rate=1による既存の装着可能候補優先と衝突するため、配置評価→帽子の適合評価を統合する。候補を単純に二重ソートしない。顔・重なり・画面内の条件を常に最優先とする。
++2. **`countPolicy: 'max-feasible'`（中）**
++   - 希望人数を `min(3, remaining)` にする。現行の最初の候補で確定する方法ではなく、競合しない候補の組合せを探索する。3人の安全な組合せがなければ2人、次に1人へ戻す。
++   - 同人数なら上記の優先帯に入る人数が多い配置を選び、同点はシードで選ぶ。人数を確保するために安全基準を下げない。人数と難しい場所が両立しない背景は記録する。
++   - 帽子・傘も含め、他の顔、本体、小物との関係を最終検証する。現行の小物判定は描画全体のピクセル検査ではなく、帽子の帯・毛糸の細部・傘の軸等には形状との差がある。最終描画も確認する。
++   - 最大人数が毎回置ければ10発見は3+3+3+1の4画面。常時3人保証や10画面保証とはしない。保存の発見数・最後の1人を確認する。
++3. **`decoyCount: 0`（初回は実装不要。導入時は中）**
++   - Hではにせものを入れず、比較実験で0→1→2個。上限2個。顔・目・口がなく、クッションや布袋と分かる独自の静物だけを使う。頭と胴の完全なコピーにしない。
++   - 導入時はシーンの装飾と位置情報を定義し、本物と同じ柄座標を使う。顔の保護範囲に描かない。他の当たり判定領域（許容距離22を含む）に重ねない。前景として遮蔽を増やす用途には使わない。
++   - にせものを押しても現行の外れと同じ。減点・専用の失敗音を足さない。上部の対象人数に含めない。
++4. **`hintStyle: 'static'`（中）**
++   - 1段階目は現行の半径230の円。2段階目は同じ対象の顔の周囲に静止した明暗2重の枠を表示。枠は目・口を覆わず、顔の外側へ余白12シーン単位以上を取る。3段階目は現行の輪郭表示。
++   - `currentHint()` の対象選択を共用し、顔の表示範囲は画像ガイドと形状から定義する。`sceneView.ts` で表示、`app.ts` のwiggle付与をこのモードでは行わない。アニメーションを止めても救済が機能することを確認する。
++   - 現行の揺れは任意の救済であり、アクション型のゲームそのものではない。ただし今回の前提をより明確に守るため静止表示を提案する。**ヒントを弱める変更ではない**。静止枠の方が弱ければ、より明確にする。
++
++試遊入口も必要。`startCourse()` は未解放コースを拒否するため、ご本人が90人探してから試す導線にしない。Claude側の実装で保護者領域に「最難関をためす」を設け、試遊中の10発見はメモリ内で数え、通常コースの解放・保存進捗を変更しない案を推す（中）。表へのno:11追加だけでは、コース数・保存仕様・画面との整合が取れない。
++
++### 限界を探る比較案X（採用決定ではない）
++
++Hから1要因ずつ、outlineを0.25、服可視率の優先帯を20〜30%、全体可視率を45%以上へ広げ、最後ににせものを最大2個追加する。顔、高さ170、色以外の手がかり、当たり判定22は維持する。小物迷彩の一致率目標は95%以上にして比較するが、成立しなければ未成立と記録する。
++
++これを成人だけで先に比較し、その後、家族が希望する場合に短く共同試遊する。全部の変更を一度に入れて「難しかった」で終えない。顔を残す以上、大人には簡単という上限があり得る。その場合も顔を消す方向には進めない。
++
++## 4. 難しくする手段の一覧（効き目・副作用・手間）
++
++手間の「小」は主に値の変更、「中」は選別・描画・検証の連携、「大」はキャラ体系・保存・背景アートまで及ぶ変更。所要日数の見積もりではない。
++
++| 手段・比較値 | 期待する効き目（推測） | 副作用・境界 | 判断／手間 |
++| --- | --- | --- | --- |
++| 服のふち線0.32→0.28→0.25 | 服の境界が読み取りにくくなる | 顔・服の陰影は残る。画面条件による差も大きい | 推奨／小 |
++| 服soft→exact | 色と周期のずれを消す | コース10は実施済み。顔だけ探す遊びへ寄りやすい | 維持／小 |
++| 服の背景一致70%→優先90%、比較95% | 異なる領域にはみ出す目印を減らす | 場所が固定化し、覚えれば簡単になる | 優先／中 |
++| 人数1〜3抽選→最大実現可能3 | 最後の1人まで探す持続性を増す | 最初の1人は見つけやすくなる可能性。10発見までの画面数は減る | 比較採用／中 |
++| 4人、さらに5〜6人 | 対象管理と探索量が増える | 3種類しかいない。重複の区別、狭い画面、判定競合。難度より混雑と疲れになり得る | 4人は別試作なら検討、5〜6人は見送り／大 |
++| 迷彩帽子0.9→1 | 頭の目印を隠す | 帽子の輪郭・ぼんぼりが新たな目印。色以外の個体識別も減る | 推奨、形の見分けを確認／小 |
++| 迷彩傘0→0.4→0.8→1 | 頭上の形を背景に寄せる | 軸と広い輪郭が目立ち、押せる面積が増える。場所を制約する | 効果の向きを比較／小 |
++| 帽子＋傘の同時装着 | 複数の目印を変える | 現状でも可能。率1ずつでは保証されない。大きなシルエットになる | 安全な組合せだけ別比較／中 |
++| マフラー | 首と服の境界をぼかす | 口へ近づく危険。布端が目印になる。服が見える面積を減らす | 顔保護範囲より下だけなら後回し／中 |
++| 手袋 | 手の色の手がかりを減らす | 効果が小さい可能性。絵と判定の一致が必要 | 優先度低／中 |
++| 背景柄の箱を身につける | 胴の輪郭を物に見せる | 服の柄を選ぶ意味が薄れ、顔穴だけだと顔を隠す抜け道になる | 頭を覆う箱は不採用。胴だけでも別試作／大 |
++| 新しい深い隠れ場所：まず各背景1か所、計3か所 | 記憶済みの場所を崩し、服の露出を減らす | 前景アートと判定の更新が必要。高い小物で口を隠しやすい | 既存配置の限界確認後／大 |
++| キャラを5%、次に最大10%縮小 | 視覚的な占有面積を減らす | 全体を縮めると顔も縮む。高さ170以上でもスマホで小さくなる | Hでは不採用。実寸確認付きの別比較／中〜大 |
++| 顔の目以外を小さくする | 顔らしさを減らす | 口の縮小・消失は前提違反。頭だけでも目口の位置、形による識別、絵の約束が崩れる | 不採用／大 |
++| 顔色を背景に寄せる・顔線を薄くする | 顔の目印を弱める | 幾何学的には見えても知覚的に隠す。色覚や明るさに依存する | 不採用 |
++| にせもの0→1→2個 | 似た静物を見比べる必要が出る | 「押せるはず」の期待を裏切る。顔に見える模様も避ける | 限界比較だけ／中 |
++| 柄の周期を現行の0.85倍／1.15倍で背景と服に共通適用 | 境界付近の読みにくさが変わる | 細密化でちらつきや縮小時の見づらさ。難しさの方向は未確定 | 後回し、柄の種類は増やさない／中 |
++| 服の陰影だけを75%へ | 明暗の境界を弱める | 立体感・絵本の質感を損なう。outlineでは変えられない | Xでも後順位／中 |
++| 見つけた子を残す／退場させる | 残すと探索対象の管理が必要 | 消すと未発見者の場所を動かした印象になる可能性。残すだけで疲れる場合もある | 現状の位置・上部チェックを維持／小 |
++| 見つけた子のチェックを消す・再び隠す | 記憶負荷を増す | 成功を取り消された感覚。押し直しの原因 | 不採用 |
++| ヒント円拡大、段階追加、待機・回数制限 | 救済に時間がかかる | 難問の質を上げず、詰まりを長引かせる | 不採用 |
++| 発見順を強制、特定の子だけ正解 | 探索対象を絞り、ルール負荷を増す | 本物を見つけても認められない。帽子で識別もしにくい | 不採用。家族の任意の声かけまで |
++| 時間・タップ数制限、探している間の移動 | 焦り・追跡負荷を増す | 本ジョブの前提と遊びの方向に反する | 不採用 |
++
++見つけた演出は難しくする対象にしない。現状は同じ位置で発見済み表示・星が出る。必要なら祝福後の星だけを約1秒で静める比較を行うが、顔と上部チェックは残し、未発見者の位置は変えない。
++
++## 5. 「難しい」と「理不尽」の境目
++
++| 観点 | 4〜6歳 | 大人・家族での挑戦 |
++| --- | --- | --- |
++| 発見の根拠 | 顔・口・輪郭を指して「いた」と言える。色名を知らなくてもよい | 柄のつながり、静物と顔の違いを注意深く見る余地がある |
++| 押した結果 | 顔や身につけ物を押せば見つかる。順番で拒否しない | 同じ。精密タップの競技にはしない |
++| にせもの | 静物として分かる形まで。人の形を精密にコピーしない | 事前に静物が混じると説明して最大2個を比較。ただし本物の顔は保護する |
++| ヒント | いつでも進められ、最終段階で納得して押せる | 利用を成績上の失敗にしない。自分で使わない選択はできる |
++| やめる・交代 | 残り人数や解放のために続ける圧力を足さない | 家族で相談・交代できる。大人向け制限を幼児画面へ持ち込まない |
++
++境界を越える具体例は、口を1点だけ残して周囲を覆う、背景色との微小な差だけに頼る、正解を押しても順番が違うので無反応、最後の1人だけ極小、ヒントを押しても救済されない、である。大人が楽しめても幼児版の通常コースへ自動採用しない。
++
++画面は1000シーン単位。表示幅360 CSS pxなら高さ170は約61 CSS px、当たり判定の余裕22は約7.9 CSS pxに相当する。これは変換例で、指定画像から実測した表示幅ではない。高さ基準だけで顔の読みやすさを保証しない。
++
++## 6. 実装順と試遊で確かめること
++
++### 段階と比較方法
++
++1. **A：現行10、B：outlineだけ0.28、C：B＋難しい配置優先**を先に比較する（小→中）。同じ背景・キャラ・配置では線の差だけを比較できるようにする。配置を変える比較では同じシードでも同じ絵になるとは限らない点を記録する。
++2. 次に帽子、傘0 / 0.4 / 0.8、人数方針を1つずつ比較し、Hを組み立てる。初回は各背景2配置の計6配置を成人で点検する。記憶による有利不利を減らすため提示順を入れ替える。
++3. 子どもの試遊は希望した家族で、1回3画面までを目安に、嫌がればその場で終える。4歳側と5〜6歳側の観察を分ける。少人数の家族試遊では全年齢への一般化はしない。大人が先に答えを言った回は自力発見と分ける。
++4. Hで納得して遊べると確認できたらXを1要因ずつ試す。新しい小物・場所・4人化はその後。Xの全要因を一度に通常コース10へ入れない。
++
++### 記録するもの
++
++- 背景、シード、希望人数と実人数、実際の帽子・傘・同時装着数、優先帯の成立／代替配置の使用。装着率の分母は出現人数。
++- 最初の1人／最後の1人までの時間、1人ごとのヒント段階、顔を認識したタップと無作為な連打の違い、見つけた子の押し直し、にせものへのタップ。
++- 「どこを見て分かったか」、ヒント後に納得したか、自発的に続けたい／交代したい／やめたいと言ったか。難しくても楽しいかを時間とは別に扱う。
++- 記録は匿名の手元メモ。子どもの氏名・写真・外部送信を追加しない。新しい通信や常時収集機能を作らない。
++
++### 試遊の暫定的な見直し基準（科学的な閾値ではない）
++
++- 成人の比較では、Hの1人発見までの中央値が現行10の1.3〜2倍程度になるかを見る。速く見つかっても失敗ではない。遅延の原因が単なる小ささ・押しにくさなら採用しない。
++- 子どもが30秒ほど手がかりを得られなければ、保護者がヒントや交代を提案する。画面内のタイマー・自動失敗・待ち時間にはしない。
++- 最終ヒントを出しても対象を指せない、顔を狙って2回続けて押しても反応しない、「いるのに違うと言われた」と受け取る場合は、その配置を候補から外して原因を調べる。
++- 3画面中2画面以上で全員に最終ヒントが必要なら、通常コース用としては戻す候補。嫌がる、顔を見分けられない場合は回数を待たずに止める。ヒント利用自体を悪い成績としない。
++- 同じ場所ばかりになるなら優先帯を緩める前に、1背景あたり安全な候補が何個残るかを見る。難問用に最低3候補を確保する目標とし、未達なら「背景追加」より既存位置の調整を検討する。
++
++### Claude側の実装後に必要な検証
++
++- 既存の安全条件、3体すべての顔、描画の小物の縁を確認。新しい前景を作る場合は絵と判定の一致も再検査する。`facePoints` の3点通過だけで目口全体の保護済みとしない。
++- 3背景×100シード×remaining 1〜10の3,000配置を候補Hで検証する案。空配置なし、人数上限、重複なし、重なりなし、画面内、10発見で終了、同じ入力で再現すること。小物同士の重なりも確認する。
++- 装着率や優先帯成立率を別に集計する。既存テストは安全性と最低限の小物出現を調べるが、「難しくなった」を保証してはいない。
++- 320×568、390×844、768×1024で顔・ヒント・対象一覧・3人時の判定を確認する。通常表示、グレースケール表示、動きを減らした表示を比較する。グレースケールだけを色覚への十分な検証とは扱わない。
++- 試遊入口で通常進捗が変わらないこと、途中で終了できること、ヒントを何度押しても追加条件なく使えること、通信なしで完了することを確認する。
++
++## 7. 自分でも危ないと思う点・Claudeに反論してほしい点
++
++1. **3人固定に近づけるのは、最難関化より作業量の増加かもしれない。** 1人だけを難しく配置した方が、1人あたりの発見は難しい可能性がある。Hの人数方針は比較で捨てられる。
++2. **帽子100%でも難しくなる保証がない。** 毎回同じ帽子なら帽子を探すゲームになる。傘を減らす判断も未検証で、実際には頭の目印を覆う効果が勝つかもしれない。
++3. **幾何学的な可視率を難しさと取り違える危険がある。** 服が20%しか見えなくても顔が孤立して目立てば簡単。評価値は候補選別に使い、最終的な採否は静止画と試遊で決める。
++4. **優先帯90%・25〜40%が現存するか未確認。** 成立しない条件を表へ足すだけではコース10と変わらない。実装前に候補分布を出し、成立が乏しければCを撤回するか各背景1か所だけ追加する。
++5. **にせものは最も反対されやすい。** 大人には面白くても4歳には意地悪に見える。顔なしでも「かくれている子」に見えたら失敗。Xからも削除してよい。
++6. **0.25は描画の下限であって遊びとして安全な下限ではない。** 端末・照明・絵の陰影で差が出る。0.28の時点で不評なら0.32へ戻す。
++7. **静止ヒントの追加は今回の難度議論には広すぎるという反論があり得る。** 現行の任意の揺れを残すなら、通常探索は静止のまま・動かなくても最終輪郭で解けることを最低条件とする。救済を弱める妥協はしない。
++8. **「顔を残すと大人には簡単」の可能性を受け入れる必要がある。** 顔を背景に溶かして難度を稼ぐと、幼児向けの約束と柄の遊びを失う。大人の探索時間だけで通常版を判断しない。
++
++第2回で決めたい順序は、(1)配置優先帯の実現性、(2)傘が難しくするか易しくするか、(3)1人と3人のどちらが狙いに合うか、(4)にせものを比較対象に残すか、である。最初の実装はA/B/Cまでに絞ってもよい。
++
++## 8. 作業記録・検査結果・未実施
++
++- 実施：指定のコア・UIソース、方針資料、`AGENTS.md`、ジョブ91、`ART_SLOTS.md`、`CODEX_ART_BRIEF.md`を読んだ。関連するキャラ描画、型、CSS、コース単体テストも参照した。指定ショップ画面とヒント輪郭画面を目視確認し、本レポートに設計案と自己反論をまとめた。
++- 方法：ローカルファイルの静的レビュー、既存スクリーンショットの目視、TypeScript型検査。画像生成、絵の制作、ネット画像・有料API・外部検索は使用していない。
++- 検査：`npx.cmd tsc --noEmit` は終了コード0で合格。これは現行コードの型検査であり、未実装のH/Xの安全性・難度の検証ではない。
++- 未実施：実装、候補分布・実装着率の実測、新コースのブラウザ／実機試遊、人による難度評価。単体テスト・E2E・ビルドは実行していない。絵を変更していないため `validate:art` は実行していない。
++- 書き込み：この `audit/codex/hardest-course-r1.md` だけ。ジョブ91の「1ファイルだけ」と今回のユーザー指定を優先し、共通指示の `STATUS.md` 更新は行っていない。コード・絵・設定・検査ツールを変更せず、commit / pushもしていない。
++- 作業開始時から未追跡の `video/hide-handoff-find.webm` が存在した。今回の作業では触れていない。
+
+codex
+[提案レポート](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/audit/codex/hardest-course-r1.md)を作成しました。具体的なコース案、難しくする手段と副作用、実装の手間、試遊基準、自己反論を記載しています。
+
+`npx.cmd tsc --noEmit` は合格。指定の1ファイルだけを書き込み、コード・絵・設定は変更していません。
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r1.md b/pattern-hide-family-beta/audit/codex/hardest-course-r1.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..b86c53e198bafcdea0d86438698bb0c46f7f996f
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r1.md
+@@ -0,0 +1,174 @@
++# 最難関コースの議論・第1回（Codex 提案）
++
++作成日：2026-10-08。ジョブ91に基づく設計レビュー。実装・絵の変更はしていない。
++
++## 1. 提案の中心：顔を残し、柄と隠れ場所で迷わせる
++
++**まずはコース10を基準に、ふち線0.28・最大3人・迷彩帽子・難しい配置を優先する試遊版を提案する。** 限界比較は0.25まで。顔の縮小・背景色への同化・ヒントの弱体化は採用しない。難しさの上限は「何秒も見つからない」ではなく、「静止画に発見の根拠があり、ヒントで納得して見つけられる」までとする。
++
++以下の効き目は、コードから説明できる挙動を除いて**推測**。試遊に基づく結果ではない。数値目標も今回の比較用の仮説であり、年齢別の能力基準ではない。
++
++- 4〜6歳と家族の遊びを維持する。減点・時間切れ・怖い演出・課金・広告・外部通信を追加しない。ヒントは無料・無制限、好きな順で見つけられる。
++- `LIMITS` の全体可視率45%以上、服20〜92%、高さ170以上、画面内余白6、個体間のすきま4、顔が見える条件を維持する。新しい隠れ場所にも適用する。
++- 「目と口の判定点が遮られていない」だけでは不十分。実際の目・口全体が見え、顔と分かることを画像でも確認する。顔の色・線・大きさは難易度の操作対象にしない。
++- 初回は既存の3背景・3体を使う。量産より、配置の選び方と見つけた瞬間の納得感に手間をかける。方針資料の「視覚テスト型・動くと見える型をやらない」に合わせる。
++
++## 2. 現状から分かることと、数値だけでは変えられない部分
++
++| 確認した実装 | 提案への意味 |
++| --- | --- |
++| `courses.ts` のコース10：all / exact / 0.32 / 最大3人 / 帽子0.9 camo / 傘0.8 camo | すでに柄の完全一致を使っている。exactより「さらにexact」という段階はない |
++| `courseRound()` は1〜maxChars人を抽選し、残りの発見回数で切り詰める。配置競合でも人数が減る | 最大3人は常時3人ではない。残りが3以上なら希望人数の抽選平均は2人だが、実配置平均は未計測 |
++| キャラIDは3種類。`maxChars` の型と `validateLayout()` も3人上限 | 表を4にするだけでは4人出ない。重複個体IDまたは新キャラ、保存・UI・検証まで変更が必要 |
++| 帽子・傘は確率判定の後に装着適否を確認する。rate=1は候補を優先するが、両方装着の保証ではない | 設定率と実装着率を分けて測る。0.9×0.8=0.72を実際の同時装着率と呼ばない |
++| `accessoryFits()` は迷彩領域一致70%以上、画面内、顔の判定点、他の小物との重なりを検査 | 迷彩の最大30%が別領域でも合格する。目立つ縁が残る場合がある。難問選別では一致率を追加評価できる |
++| `sceneView.ts` は柄の座標を背景に合わせる。`softVariant()` は周期1.45倍・色調変更 | 色だけでなく柄の大きさも手がかり。exact化はその手がかりを減らす |
++| `charArt.ts` とコード描画の服の線、迷彩小物の線は0.25で下限処理 | 0.25未満を指定してもさらに薄くならない。0.32→0.28は指定不透明度約12.5%減、0.25は約21.9%減。知覚難度の増加率ではない |
++| 服の陰影、顔、傘の軸などはoutlineと一緒には薄くならない | 線だけで劇的に難しくなるとは限らない。特に傘の軸は発見の手がかりになり得る |
++| `hitTest()` は本体形状と帽子・傘の布を含め、許容距離22。前景で隠れた本体部分も除外しない | 傘は押せる面積を増やす。遮蔽を深くしても当たり判定は縮まらない。無作為タップの成功を発見と混同しない。傘の細い軸自体は独立した判定形状に含まれない |
++| ヒントは領域円（半径230・中心を70ずらす）→揺れ→輪郭。成功時に段階0へ戻る。対象は最初の未発見者 | ヒントの順番はあるが、発見順の強制はない。難関でもこの区別を維持する |
++| 1コースは「10人発見」。常に10画面ではない | 人数増加は1画面の負荷を増やす一方、コースの画面数を減らす。評価は1画面と1人発見を分ける |
++
++指定画像 `390x844_08-search-shop-normal.png` では、服は背景に溶けるが顔、頭の線、服の陰影が手がかりとして残っている。`390x844_05-hint-outline.png` では円と輪郭で対象を示せている。これは既存の通常モードの記録で、最難関コースや帽子・傘の実機評価ではない。
++
++## 3. 最難関コースの具体案
++
++### 推奨の1行（新しい項目を含む設計案）
++
++既存10をすぐ置換せず、試遊用の候補として比較する。下表は現行の型へそのまま貼れるコードではない。
++
++| 案 | spots | variant | outline | maxChars | hat | umbrella | 新しい項目 |
++| --- | --- | --- | --- | --- | --- | --- | --- |
++| 最難関候補H | all | exact | 0.28 | 3 | `{ rate: 1, style: 'camo' }` | `{ rate: 0.4, style: 'camo' }` | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible'`, `decoyCount: 0`, `hintStyle: 'static'` |
++
++傘0.4はコース10の0.8より低い。**傘を増やすほど難しいとはまだ言えないための比較用の値**。帽子は頭の目印を減らすが、傘は大きい輪郭・軸・タップ面積を増やす。0 / 0.4 / 0.8の比較で逆なら変更する。率1の帽子も、安全に付かない場所には付けない。
++
++### 新しい項目の仕様と作り方
++
++1. **`placementPolicy: 'hard-ranked'`（中）**
++   - `analyzeSpot()` が安全とする候補だけを対象とする。その中で服の領域一致率90%以上、服可視率25〜40%、全体可視率50%以上を「優先帯」とする。45%・20%ぎりぎりを初回の狙いにしない。
++   - 優先帯の中で領域一致率が高い順、次に服可視率が低い順で評価する。同等候補はシードで順序を変える。難しさの計算値であって知覚難度の保証ではない。
++   - 迷彩小物も領域一致率90%以上を優先する。現行の返り値 `AccFit` に一致率を追加するか、共通の測定関数を作り、検証と選別で同じ測り方を使う。70%という安全側の既存条件は緩めない。
++   - 候補不足なら既存の安全なallへ戻す。空配置を返さず、安全条件を緩めない。優先帯の成立率を制作側の試遊記録に残す。現時点で各背景に何候補あるかは未計測。
++   - 帽子rate=1による既存の装着可能候補優先と衝突するため、配置評価→帽子の適合評価を統合する。候補を単純に二重ソートしない。顔・重なり・画面内の条件を常に最優先とする。
++2. **`countPolicy: 'max-feasible'`（中）**
++   - 希望人数を `min(3, remaining)` にする。現行の最初の候補で確定する方法ではなく、競合しない候補の組合せを探索する。3人の安全な組合せがなければ2人、次に1人へ戻す。
++   - 同人数なら上記の優先帯に入る人数が多い配置を選び、同点はシードで選ぶ。人数を確保するために安全基準を下げない。人数と難しい場所が両立しない背景は記録する。
++   - 帽子・傘も含め、他の顔、本体、小物との関係を最終検証する。現行の小物判定は描画全体のピクセル検査ではなく、帽子の帯・毛糸の細部・傘の軸等には形状との差がある。最終描画も確認する。
++   - 最大人数が毎回置ければ10発見は3+3+3+1の4画面。常時3人保証や10画面保証とはしない。保存の発見数・最後の1人を確認する。
++3. **`decoyCount: 0`（初回は実装不要。導入時は中）**
++   - Hではにせものを入れず、比較実験で0→1→2個。上限2個。顔・目・口がなく、クッションや布袋と分かる独自の静物だけを使う。頭と胴の完全なコピーにしない。
++   - 導入時はシーンの装飾と位置情報を定義し、本物と同じ柄座標を使う。顔の保護範囲に描かない。他の当たり判定領域（許容距離22を含む）に重ねない。前景として遮蔽を増やす用途には使わない。
++   - にせものを押しても現行の外れと同じ。減点・専用の失敗音を足さない。上部の対象人数に含めない。
++4. **`hintStyle: 'static'`（中）**
++   - 1段階目は現行の半径230の円。2段階目は同じ対象の顔の周囲に静止した明暗2重の枠を表示。枠は目・口を覆わず、顔の外側へ余白12シーン単位以上を取る。3段階目は現行の輪郭表示。
++   - `currentHint()` の対象選択を共用し、顔の表示範囲は画像ガイドと形状から定義する。`sceneView.ts` で表示、`app.ts` のwiggle付与をこのモードでは行わない。アニメーションを止めても救済が機能することを確認する。
++   - 現行の揺れは任意の救済であり、アクション型のゲームそのものではない。ただし今回の前提をより明確に守るため静止表示を提案する。**ヒントを弱める変更ではない**。静止枠の方が弱ければ、より明確にする。
++
++試遊入口も必要。`startCourse()` は未解放コースを拒否するため、ご本人が90人探してから試す導線にしない。Claude側の実装で保護者領域に「最難関をためす」を設け、試遊中の10発見はメモリ内で数え、通常コースの解放・保存進捗を変更しない案を推す（中）。表へのno:11追加だけでは、コース数・保存仕様・画面との整合が取れない。
++
++### 限界を探る比較案X（採用決定ではない）
++
++Hから1要因ずつ、outlineを0.25、服可視率の優先帯を20〜30%、全体可視率を45%以上へ広げ、最後ににせものを最大2個追加する。顔、高さ170、色以外の手がかり、当たり判定22は維持する。小物迷彩の一致率目標は95%以上にして比較するが、成立しなければ未成立と記録する。
++
++これを成人だけで先に比較し、その後、家族が希望する場合に短く共同試遊する。全部の変更を一度に入れて「難しかった」で終えない。顔を残す以上、大人には簡単という上限があり得る。その場合も顔を消す方向には進めない。
++
++## 4. 難しくする手段の一覧（効き目・副作用・手間）
++
++手間の「小」は主に値の変更、「中」は選別・描画・検証の連携、「大」はキャラ体系・保存・背景アートまで及ぶ変更。所要日数の見積もりではない。
++
++| 手段・比較値 | 期待する効き目（推測） | 副作用・境界 | 判断／手間 |
++| --- | --- | --- | --- |
++| 服のふち線0.32→0.28→0.25 | 服の境界が読み取りにくくなる | 顔・服の陰影は残る。画面条件による差も大きい | 推奨／小 |
++| 服soft→exact | 色と周期のずれを消す | コース10は実施済み。顔だけ探す遊びへ寄りやすい | 維持／小 |
++| 服の背景一致70%→優先90%、比較95% | 異なる領域にはみ出す目印を減らす | 場所が固定化し、覚えれば簡単になる | 優先／中 |
++| 人数1〜3抽選→最大実現可能3 | 最後の1人まで探す持続性を増す | 最初の1人は見つけやすくなる可能性。10発見までの画面数は減る | 比較採用／中 |
++| 4人、さらに5〜6人 | 対象管理と探索量が増える | 3種類しかいない。重複の区別、狭い画面、判定競合。難度より混雑と疲れになり得る | 4人は別試作なら検討、5〜6人は見送り／大 |
++| 迷彩帽子0.9→1 | 頭の目印を隠す | 帽子の輪郭・ぼんぼりが新たな目印。色以外の個体識別も減る | 推奨、形の見分けを確認／小 |
++| 迷彩傘0→0.4→0.8→1 | 頭上の形を背景に寄せる | 軸と広い輪郭が目立ち、押せる面積が増える。場所を制約する | 効果の向きを比較／小 |
++| 帽子＋傘の同時装着 | 複数の目印を変える | 現状でも可能。率1ずつでは保証されない。大きなシルエットになる | 安全な組合せだけ別比較／中 |
++| マフラー | 首と服の境界をぼかす | 口へ近づく危険。布端が目印になる。服が見える面積を減らす | 顔保護範囲より下だけなら後回し／中 |
++| 手袋 | 手の色の手がかりを減らす | 効果が小さい可能性。絵と判定の一致が必要 | 優先度低／中 |
++| 背景柄の箱を身につける | 胴の輪郭を物に見せる | 服の柄を選ぶ意味が薄れ、顔穴だけだと顔を隠す抜け道になる | 頭を覆う箱は不採用。胴だけでも別試作／大 |
++| 新しい深い隠れ場所：まず各背景1か所、計3か所 | 記憶済みの場所を崩し、服の露出を減らす | 前景アートと判定の更新が必要。高い小物で口を隠しやすい | 既存配置の限界確認後／大 |
++| キャラを5%、次に最大10%縮小 | 視覚的な占有面積を減らす | 全体を縮めると顔も縮む。高さ170以上でもスマホで小さくなる | Hでは不採用。実寸確認付きの別比較／中〜大 |
++| 顔の目以外を小さくする | 顔らしさを減らす | 口の縮小・消失は前提違反。頭だけでも目口の位置、形による識別、絵の約束が崩れる | 不採用／大 |
++| 顔色を背景に寄せる・顔線を薄くする | 顔の目印を弱める | 幾何学的には見えても知覚的に隠す。色覚や明るさに依存する | 不採用 |
++| にせもの0→1→2個 | 似た静物を見比べる必要が出る | 「押せるはず」の期待を裏切る。顔に見える模様も避ける | 限界比較だけ／中 |
++| 柄の周期を現行の0.85倍／1.15倍で背景と服に共通適用 | 境界付近の読みにくさが変わる | 細密化でちらつきや縮小時の見づらさ。難しさの方向は未確定 | 後回し、柄の種類は増やさない／中 |
++| 服の陰影だけを75%へ | 明暗の境界を弱める | 立体感・絵本の質感を損なう。outlineでは変えられない | Xでも後順位／中 |
++| 見つけた子を残す／退場させる | 残すと探索対象の管理が必要 | 消すと未発見者の場所を動かした印象になる可能性。残すだけで疲れる場合もある | 現状の位置・上部チェックを維持／小 |
++| 見つけた子のチェックを消す・再び隠す | 記憶負荷を増す | 成功を取り消された感覚。押し直しの原因 | 不採用 |
++| ヒント円拡大、段階追加、待機・回数制限 | 救済に時間がかかる | 難問の質を上げず、詰まりを長引かせる | 不採用 |
++| 発見順を強制、特定の子だけ正解 | 探索対象を絞り、ルール負荷を増す | 本物を見つけても認められない。帽子で識別もしにくい | 不採用。家族の任意の声かけまで |
++| 時間・タップ数制限、探している間の移動 | 焦り・追跡負荷を増す | 本ジョブの前提と遊びの方向に反する | 不採用 |
++
++見つけた演出は難しくする対象にしない。現状は同じ位置で発見済み表示・星が出る。必要なら祝福後の星だけを約1秒で静める比較を行うが、顔と上部チェックは残し、未発見者の位置は変えない。
++
++## 5. 「難しい」と「理不尽」の境目
++
++| 観点 | 4〜6歳 | 大人・家族での挑戦 |
++| --- | --- | --- |
++| 発見の根拠 | 顔・口・輪郭を指して「いた」と言える。色名を知らなくてもよい | 柄のつながり、静物と顔の違いを注意深く見る余地がある |
++| 押した結果 | 顔や身につけ物を押せば見つかる。順番で拒否しない | 同じ。精密タップの競技にはしない |
++| にせもの | 静物として分かる形まで。人の形を精密にコピーしない | 事前に静物が混じると説明して最大2個を比較。ただし本物の顔は保護する |
++| ヒント | いつでも進められ、最終段階で納得して押せる | 利用を成績上の失敗にしない。自分で使わない選択はできる |
++| やめる・交代 | 残り人数や解放のために続ける圧力を足さない | 家族で相談・交代できる。大人向け制限を幼児画面へ持ち込まない |
++
++境界を越える具体例は、口を1点だけ残して周囲を覆う、背景色との微小な差だけに頼る、正解を押しても順番が違うので無反応、最後の1人だけ極小、ヒントを押しても救済されない、である。大人が楽しめても幼児版の通常コースへ自動採用しない。
++
++画面は1000シーン単位。表示幅360 CSS pxなら高さ170は約61 CSS px、当たり判定の余裕22は約7.9 CSS pxに相当する。これは変換例で、指定画像から実測した表示幅ではない。高さ基準だけで顔の読みやすさを保証しない。
++
++## 6. 実装順と試遊で確かめること
++
++### 段階と比較方法
++
++1. **A：現行10、B：outlineだけ0.28、C：B＋難しい配置優先**を先に比較する（小→中）。同じ背景・キャラ・配置では線の差だけを比較できるようにする。配置を変える比較では同じシードでも同じ絵になるとは限らない点を記録する。
++2. 次に帽子、傘0 / 0.4 / 0.8、人数方針を1つずつ比較し、Hを組み立てる。初回は各背景2配置の計6配置を成人で点検する。記憶による有利不利を減らすため提示順を入れ替える。
++3. 子どもの試遊は希望した家族で、1回3画面までを目安に、嫌がればその場で終える。4歳側と5〜6歳側の観察を分ける。少人数の家族試遊では全年齢への一般化はしない。大人が先に答えを言った回は自力発見と分ける。
++4. Hで納得して遊べると確認できたらXを1要因ずつ試す。新しい小物・場所・4人化はその後。Xの全要因を一度に通常コース10へ入れない。
++
++### 記録するもの
++
++- 背景、シード、希望人数と実人数、実際の帽子・傘・同時装着数、優先帯の成立／代替配置の使用。装着率の分母は出現人数。
++- 最初の1人／最後の1人までの時間、1人ごとのヒント段階、顔を認識したタップと無作為な連打の違い、見つけた子の押し直し、にせものへのタップ。
++- 「どこを見て分かったか」、ヒント後に納得したか、自発的に続けたい／交代したい／やめたいと言ったか。難しくても楽しいかを時間とは別に扱う。
++- 記録は匿名の手元メモ。子どもの氏名・写真・外部送信を追加しない。新しい通信や常時収集機能を作らない。
++
++### 試遊の暫定的な見直し基準（科学的な閾値ではない）
++
++- 成人の比較では、Hの1人発見までの中央値が現行10の1.3〜2倍程度になるかを見る。速く見つかっても失敗ではない。遅延の原因が単なる小ささ・押しにくさなら採用しない。
++- 子どもが30秒ほど手がかりを得られなければ、保護者がヒントや交代を提案する。画面内のタイマー・自動失敗・待ち時間にはしない。
++- 最終ヒントを出しても対象を指せない、顔を狙って2回続けて押しても反応しない、「いるのに違うと言われた」と受け取る場合は、その配置を候補から外して原因を調べる。
++- 3画面中2画面以上で全員に最終ヒントが必要なら、通常コース用としては戻す候補。嫌がる、顔を見分けられない場合は回数を待たずに止める。ヒント利用自体を悪い成績としない。
++- 同じ場所ばかりになるなら優先帯を緩める前に、1背景あたり安全な候補が何個残るかを見る。難問用に最低3候補を確保する目標とし、未達なら「背景追加」より既存位置の調整を検討する。
++
++### Claude側の実装後に必要な検証
++
++- 既存の安全条件、3体すべての顔、描画の小物の縁を確認。新しい前景を作る場合は絵と判定の一致も再検査する。`facePoints` の3点通過だけで目口全体の保護済みとしない。
++- 3背景×100シード×remaining 1〜10の3,000配置を候補Hで検証する案。空配置なし、人数上限、重複なし、重なりなし、画面内、10発見で終了、同じ入力で再現すること。小物同士の重なりも確認する。
++- 装着率や優先帯成立率を別に集計する。既存テストは安全性と最低限の小物出現を調べるが、「難しくなった」を保証してはいない。
++- 320×568、390×844、768×1024で顔・ヒント・対象一覧・3人時の判定を確認する。通常表示、グレースケール表示、動きを減らした表示を比較する。グレースケールだけを色覚への十分な検証とは扱わない。
++- 試遊入口で通常進捗が変わらないこと、途中で終了できること、ヒントを何度押しても追加条件なく使えること、通信なしで完了することを確認する。
++
++## 7. 自分でも危ないと思う点・Claudeに反論してほしい点
++
++1. **3人固定に近づけるのは、最難関化より作業量の増加かもしれない。** 1人だけを難しく配置した方が、1人あたりの発見は難しい可能性がある。Hの人数方針は比較で捨てられる。
++2. **帽子100%でも難しくなる保証がない。** 毎回同じ帽子なら帽子を探すゲームになる。傘を減らす判断も未検証で、実際には頭の目印を覆う効果が勝つかもしれない。
++3. **幾何学的な可視率を難しさと取り違える危険がある。** 服が20%しか見えなくても顔が孤立して目立てば簡単。評価値は候補選別に使い、最終的な採否は静止画と試遊で決める。
++4. **優先帯90%・25〜40%が現存するか未確認。** 成立しない条件を表へ足すだけではコース10と変わらない。実装前に候補分布を出し、成立が乏しければCを撤回するか各背景1か所だけ追加する。
++5. **にせものは最も反対されやすい。** 大人には面白くても4歳には意地悪に見える。顔なしでも「かくれている子」に見えたら失敗。Xからも削除してよい。
++6. **0.25は描画の下限であって遊びとして安全な下限ではない。** 端末・照明・絵の陰影で差が出る。0.28の時点で不評なら0.32へ戻す。
++7. **静止ヒントの追加は今回の難度議論には広すぎるという反論があり得る。** 現行の任意の揺れを残すなら、通常探索は静止のまま・動かなくても最終輪郭で解けることを最低条件とする。救済を弱める妥協はしない。
++8. **「顔を残すと大人には簡単」の可能性を受け入れる必要がある。** 顔を背景に溶かして難度を稼ぐと、幼児向けの約束と柄の遊びを失う。大人の探索時間だけで通常版を判断しない。
++
++第2回で決めたい順序は、(1)配置優先帯の実現性、(2)傘が難しくするか易しくするか、(3)1人と3人のどちらが狙いに合うか、(4)にせものを比較対象に残すか、である。最初の実装はA/B/Cまでに絞ってもよい。
++
++## 8. 作業記録・検査結果・未実施
++
++- 実施：指定のコア・UIソース、方針資料、`AGENTS.md`、ジョブ91、`ART_SLOTS.md`、`CODEX_ART_BRIEF.md`を読んだ。関連するキャラ描画、型、CSS、コース単体テストも参照した。指定ショップ画面とヒント輪郭画面を目視確認し、本レポートに設計案と自己反論をまとめた。
++- 方法：ローカルファイルの静的レビュー、既存スクリーンショットの目視、TypeScript型検査。画像生成、絵の制作、ネット画像・有料API・外部検索は使用していない。
++- 検査：`npx.cmd tsc --noEmit` は終了コード0で合格。これは現行コードの型検査であり、未実装のH/Xの安全性・難度の検証ではない。
++- 未実施：実装、候補分布・実装着率の実測、新コースのブラウザ／実機試遊、人による難度評価。単体テスト・E2E・ビルドは実行していない。絵を変更していないため `validate:art` は実行していない。
++- 書き込み：この `audit/codex/hardest-course-r1.md` だけ。ジョブ91の「1ファイルだけ」と今回のユーザー指定を優先し、共通指示の `STATUS.md` 更新は行っていない。コード・絵・設定・検査ツールを変更せず、commit / pushもしていない。
++- 作業開始時から未追跡の `video/hide-handoff-find.webm` が存在した。今回の作業では触れていない。
+
+tokens used
+67,007
+[提案レポート](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/audit/codex/hardest-course-r1.md)を作成しました。具体的なコース案、難しくする手段と副作用、実装の手間、試遊基準、自己反論を記載しています。
+
+`npx.cmd tsc --noEmit` は合格。指定の1ファイルだけを書き込み、コード・絵・設定は変更していません。
