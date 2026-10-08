@@ -101,7 +101,7 @@ jobs:
         working-directory: pattern-hide-family-beta/native
         run: |
           node build-www.mjs
-          test ! -f www/sw.js || { echo "::error::アプリ版に Service Worker が入っています"; exit 1; }
+          node check-www.mjs   # 外部通信なし・Service Worker なし・テスト版の表示なし
           npx cap sync ios
           test -f ios/App/Podfile.lock || { echo "::error::Podfile.lock がありません（pod install が走っていません）"; exit 1; }
           test -d ios/App/Pods         || { echo "::error::Pods ディレクトリがありません"; exit 1; }

@@ -42,6 +42,8 @@ import { ICONS } from './icons';
 import { $, btn, prefersReducedMotion, toScene } from './dom';
 import { renderScene, sceneThumb } from './sceneView';
 import { ParentArea } from './parent';
+import { NATIVE } from './platform';
+
 
 type Screen =
   | 'title'
@@ -156,7 +158,8 @@ export class App {
     this.root.dataset.current = this.screen;
     this.gateStage();
     this.bindScreen();
-    if (!this.parent.isOpen()) {
+    // iPhone アプリ版は指でさわる前提。起動直後に青い枠が出ないよう、自動の focus はしない
+    if (!NATIVE && !this.parent.isOpen()) {
       const focusEl = this.root.querySelector<HTMLElement>('[data-autofocus]');
       focusEl?.focus({ preventScroll: true });
     }
@@ -214,7 +217,7 @@ export class App {
       <div class="logo" aria-label="もようの かくれんぼ">
         ${artImg('title') ?? `<div class="peeks">${peek}</div>`}
         <h1>もようの<br>かくれんぼ</h1>
-        <p class="beta-tag">かぞく テスト ばん（かりの なまえ）</p>
+        ${NATIVE ? '' : '<p class="beta-tag">かぞく テスト ばん（かりの なまえ）</p>'}
       </div>
       <div class="title-actions">
         ${btn('toCourse', ICONS.course, 'コースで あそぶ', 'big primary', 'data-autofocus')}

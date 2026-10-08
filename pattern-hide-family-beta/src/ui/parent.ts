@@ -2,6 +2,7 @@
 import type { Store } from '../storage/storage';
 import { resetCounters, setEnabled } from '../storage/playtest';
 import { setSoundEnabled } from '../audio/sound';
+import { NATIVE } from './platform';
 
 const KANJI = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 const HOLD_MS = 2200;
@@ -191,22 +192,28 @@ export class ParentArea {
     const d = this.store.data;
     const c = d.playtest.counters;
     const status = {
-      ok: 'この端末のブラウザに保存されています。',
+      ok: NATIVE ? 'この端末のこのアプリに保存されています。' : 'この端末のブラウザに保存されています。',
       empty: 'まだ保存されたデータはありません。',
       recovered: '保存データの一部が読めなかったため、安全な初期値に戻しました。',
       unavailable: 'このブラウザでは保存できません（プライベートモード等）。閉じると設定は元に戻ります。',
     }[this.store.status];
     const saveWarn = this.store.lastSaveOk ? '' : '<p class="warn">直前の保存ができませんでした（容量不足など）。遊ぶことはできます。</p>';
+    const where = NATIVE ? 'この端末のこのアプリの中' : 'この端末のこのブラウザの中';
     return `<div class="parent-dialog panel" role="dialog" aria-modal="true" aria-labelledby="panel-title">
       <h2 id="panel-title">保護者の方へ</h2>
       <section>
-        <h3>このベータについて</h3>
-        <p>家族内で遊びを確かめるためのテスト版です。<strong>このベータでは課金はありません。</strong>広告・購入・外部リンク・アカウント登録もありません。通信なしで遊べるように作っています。</p>
+        ${
+          NATIVE
+            ? `<h3>このアプリについて</h3>
+        <p>広告・外部リンク・アカウント登録はありません。通信なしで遊べます。名前・写真・位置などの個人の情報は集めません。</p>`
+            : `<h3>このベータについて</h3>
+        <p>家族内で遊びを確かめるためのテスト版です。<strong>このベータでは課金はありません。</strong>広告・購入・外部リンク・アカウント登録もありません。通信なしで遊べるように作っています。</p>`
+        }
         <p>学習や発達への効果をうたうものではありません。</p>
       </section>
       <section>
         <h3>最難関を ためす（大人向けのおためし）</h3>
-        <p>いちばん難しい設定を、コースを進めなくても試せます。見つけにくい場所に最大3人、服は背景と同じ柄、ふち線と服の陰影が薄く、背景の柄の帽子をかぶることがあります。<strong>10人みつけたらおしまい。進み具合やコースの記録は保存しません。</strong>顔はいつも見えていて、ヒントは何回でも使えます。</p>
+        <p>いちばん難しい設定を、コースを進めなくても試せます。見つけにくい場所に最大3人、服は背景と同じ柄、ふち線と服の陰影が薄く、家具のかげからのぞいていたり、帽子やサングラスで顔の片方がかくれていたりします。<strong>10人みつけたらおしまい。進み具合やコースの記録は保存しません。</strong>目はいつも少なくとも片方見えていて、ヒントは何回でも使えます。</p>
         <button type="button" class="pbtn" data-act="trial">最難関を ためす</button>
       </section>
       <section>
@@ -225,8 +232,8 @@ export class ParentArea {
         <h3>保存について</h3>
         <p>${status}</p>
         ${saveWarn}
-        <p>保存するのは、音・むずかしさの設定、途中のゲーム（どこに誰が隠れているか）だけです。名前・誕生日・写真・音声などは保存しません。</p>
-        <p>データはこの端末のこのブラウザの中だけにあります。<strong>アプリ（ホーム画面のアイコン）の削除、ブラウザのデータ削除、別の端末では引き継げません。</strong></p>
+        <p>保存するのは、音・むずかしさの設定、途中のゲーム（どこに誰が隠れているか）、コースの進み具合・見つけた数・シールだけです。名前・誕生日・写真・音声などは保存しません。</p>
+        <p>データは${where}だけにあります。<strong>${NATIVE ? 'アプリの削除や、別の端末では引き継げません。' : 'アプリ（ホーム画面のアイコン）の削除、ブラウザのデータ削除、別の端末では引き継げません。'}</strong></p>
         ${
           this.confirmDelete
             ? `<p class="warn">このアプリのデータだけを消します。よろしいですか？</p><div class="row"><button type="button" class="pbtn danger" data-act="deleteYes">消す</button><button type="button" class="pbtn" data-act="deleteNo">やめる</button></div>`
@@ -252,7 +259,7 @@ export class ParentArea {
       </section>
       <section>
         <h3>おわるとき</h3>
-        <p>いつでも「おしまい」で終われます。終わるときに購入や評価を求めることはありません。ブラウザのタブを閉じてもかまいません。</p>
+        <p>いつでも「おしまい」で終われます。終わるときに購入や評価を求めることはありません。${NATIVE ? '' : 'ブラウザのタブを閉じてもかまいません。'}</p>
       </section>
       <div class="row"><button type="button" class="pbtn primary" data-close data-autofocus>閉じる</button></div>
     </div>`;

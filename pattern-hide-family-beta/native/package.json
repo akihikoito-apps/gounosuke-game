@@ -5,7 +5,8 @@
   "description": "もようのかくれんぼ - Capacitor iOS の入れ物（ゲーム本体は ../src。www は ../ でビルドして作る）",
   "scripts": {
     "www": "node build-www.mjs",
-    "sync": "node build-www.mjs && npx cap sync ios"
+    "check": "node check-www.mjs",
+    "sync": "node build-www.mjs && node check-www.mjs && npx cap sync ios"
   },
   "dependencies": {
     "@capacitor/core": "^7.0.0",

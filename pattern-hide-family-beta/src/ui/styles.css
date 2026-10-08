@@ -369,3 +369,19 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
   .title-foot .btn { position: static; flex: 1 1 0; min-width: 0; font-size: 13px; padding: 4px 6px; white-space: nowrap; }
 }
 .scene-card .lbl { white-space: nowrap; font-size: clamp(15px, 2.2vw + 6px, 20px); }
+
+/* iPad など大きい画面：コースとシールを、画面に合わせて大きく見せる */
+@media (min-width: 700px) and (min-height: 700px) {
+  .course-grid { max-width: min(900px, 92vw); grid-template-columns: repeat(5, 1fr); gap: 20px; }
+  .course-tile { border-radius: 30px; }
+  .course-tile .num { font-size: clamp(42px, 5.5vw, 64px); }
+  .course-tile .mark { width: 36px; height: 36px; }
+  .course-tile .badge { width: 52px; height: 52px; top: -16px; right: -16px; }
+  .tile-pips i { width: 9px; height: 9px; }
+  .sticker-grid { max-width: min(900px, 92vw); grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px 12px; align-content: center; }
+  .sticker > svg { max-width: 160px; }
+  .sticker-q { max-width: 140px; font-size: 48px; }
+  .sticker figcaption { font-size: 16px; }
+  .sticker.locked figcaption { font-size: 15px; }
+  .sticker-note { font-size: 18px; }
+}
