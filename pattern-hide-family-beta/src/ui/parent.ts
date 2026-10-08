@@ -3,6 +3,7 @@ import type { Store } from '../storage/storage';
 import { resetCounters, setEnabled } from '../storage/playtest';
 import { setSoundEnabled } from '../audio/sound';
 import { NATIVE } from './platform';
+import { PRIVACY_POLICY_HTML } from './privacy';
 
 const KANJI = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 const HOLD_MS = 2200;
@@ -239,6 +240,13 @@ export class ParentArea {
             ? `<p class="warn">このアプリのデータだけを消します。よろしいですか？</p><div class="row"><button type="button" class="pbtn danger" data-act="deleteYes">消す</button><button type="button" class="pbtn" data-act="deleteNo">やめる</button></div>`
             : `<button type="button" class="pbtn" data-act="delete">このアプリのデータを消す</button>`
         }
+      </section>
+      <section>
+        <h3>プライバシーポリシー</h3>
+        <details class="policy" data-policy>
+          <summary>全文を読む</summary>
+          ${PRIVACY_POLICY_HTML}
+        </details>
       </section>
       <section>
         <h3>試遊用の記録（初期値：OFF）</h3>

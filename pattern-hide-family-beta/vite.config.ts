@@ -54,9 +54,23 @@ function cspPlugin(): Plugin {
   };
 }
 
+// iOS アプリ用（--mode native）：正式な名前にし、ホーム画面追加用の manifest は付けない
+function nativeHtmlPlugin(): Plugin {
+  return {
+    name: 'native-html',
+    apply: (_c, env) => env.command === 'build' && env.mode === 'native',
+    transformIndexHtml(html) {
+      return html
+        .replace(/<title>[^<]*<\/title>/, '<title>もようのかくれんぼ</title>')
+        .replace(/\s*<link rel="manifest"[^>]*>/, '')
+        .replace(/\s*<meta name="robots"[^>]*>/, '');
+    },
+  };
+}
+
 export default defineConfig({
   base: './',
-  plugins: [cspPlugin(), serviceWorkerPlugin()],
+  plugins: [cspPlugin(), serviceWorkerPlugin(), nativeHtmlPlugin()],
   build: { target: 'es2020', sourcemap: false },
   server: { host: '127.0.0.1', strictPort: false },
   preview: { host: '127.0.0.1' },

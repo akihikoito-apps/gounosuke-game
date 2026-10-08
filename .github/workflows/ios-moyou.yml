@@ -86,15 +86,18 @@ jobs:
           npm ci --no-audit --no-fund --prefix "$GAME_DIR"
           npm ci --no-audit --no-fund --prefix "$APP_DIR"
 
-      - name: ゲーム本体の単体テスト（壊れたものは出さない）
+      - name: ゲーム本体の型チェックと単体テスト（壊れたものは出さない）
         working-directory: pattern-hide-family-beta
-        run: npm test
-
-      - name: ビルド番号を設定（GitHub の実行番号を使う）
         run: |
-          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = ${{ github.run_number }};/g" "$PBXPROJ"
+          npm run typecheck
+          npm test
+
+      - name: ビルド番号を設定（GitHub の実行番号.再実行の回数。Re-run しても番号がぶつからない）
+        run: |
+          BN="${{ github.run_number }}.${{ github.run_attempt }}"
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9.]*;/CURRENT_PROJECT_VERSION = ${BN};/g" "$PBXPROJ"
           MV=$(grep -m1 MARKETING_VERSION "$PBXPROJ" | tr -d " 	;" | cut -d= -f2)
-          echo "::notice::このビルドは $MV (${{ github.run_number }}) です"
+          echo "::notice::このビルドは $MV ($BN) です"
           echo "※ App Store で公開済みのバージョン番号は使えません。公開したら MARKETING_VERSION を上げてください。"
 
       - name: www を作って iOS 側へ同期（pod install もここで走る）

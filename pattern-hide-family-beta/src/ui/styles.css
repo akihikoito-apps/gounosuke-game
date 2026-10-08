@@ -23,6 +23,8 @@ html, body {
   font-family: system-ui, -apple-system, 'Hiragino Maru Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%; /* iPhone を横にしたとき文字が勝手に大きくならないように */
+  text-size-adjust: 100%;
 }
 body { overflow: hidden; touch-action: manipulation; }
 .app {
@@ -385,3 +387,8 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
   .sticker.locked figcaption { font-size: 15px; }
   .sticker-note { font-size: 18px; }
 }
+
+/* 保護者の領域：プライバシーポリシー全文 */
+.parent-dialog .policy summary { cursor: pointer; font-weight: 700; padding: 6px 0; min-height: 44px; display: flex; align-items: center; }
+.parent-dialog .policy h4 { font-size: 15px; margin: 14px 0 4px; }
+.parent-dialog .policy p, .parent-dialog .policy li { font-size: 14px; }
