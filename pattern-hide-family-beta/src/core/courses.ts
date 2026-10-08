@@ -1,8 +1,9 @@
 // コースモード：10回みつけると1コースクリア、10コースで100回。
 // あとのコースほど、柄が背景に近づき・ふち線が薄くなり・人数が増え・ニット帽や傘が加わる。
-import { type AccStyle, type Accessories, HAT_COLORS, accessoryFits, accessoryShapes } from './accessories';
-import { CHARACTER_IDS, type CharacterId } from './characters';
-import { bbox, bboxOverlap, transformShape, unionBBox } from './geometry';
+import { type AccStyle, type Accessories, type Side, HAT_COLORS, accessoryFits, accessoryShapes } from './accessories';
+import { CHARACTERS, CHARACTER_IDS, type CharacterId } from './characters';
+import { bbox, bboxOverlap, contains, samplePoints, transformShape, unionBBox } from './geometry';
+import { PEEKS, type PeekDef, analyzePeek } from './peeks';
 import { type Placement, type SpotReport, analyzeSpot, costumeForRegion, silhouetteBBox, spotsConflict } from './placement';
 import { type Rng, mulberry32, shuffle } from './rng';
 import type { SceneDef, SceneId, SpotDef } from './scene';
@@ -237,17 +238,65 @@ export function hardestRound(scene: SceneDef, remaining: number, seed: number, a
   const all = keyed;
   const band = keyed.filter((_, i) => base.inBand[i]);
   const want = Math.min(HARDEST.maxChars, remaining);
-  for (const pool of [band, all]) {
-    for (let n = want; n >= 1; n--) {
-      const combo = bestCombo(pool, n, base.clash, avoid);
-      if (!combo) continue;
-      const hats = hatsFor(combo);
-      return combo.map((c, i) => {
-        const p: Placement = { char: c.char, spot: c.spot.id, costume: costumeForRegion(scene, c.spot.region), variant: 'exact' };
-        if (hats[i]) p.acc = { hat: 'camo' };
-        return p;
-      });
+
+  // 1) のぞき場所（物の裏・窓の奥）に1人。前のおためしで使った場所はなるべく避ける
+  const peekCands = PEEKS[scene.id]
+    .flatMap((pk) => CHARACTER_IDS.filter((ch) => analyzePeek(scene, pk, ch).ok).map((ch) => ({ pk, ch, key: rng() + (avoid.includes(pk.id) ? 1 : 0) })))
+    .sort((a, b) => a.key - b.key);
+
+  // 2) 残りは優先帯から（のぞきの子と重ならない・物の裏に入らない）
+  const pickRest = (n: number, exclude: { pk: PeekDef; ch: CharacterId } | null): HardCand[] | null => {
+    if (n <= 0) return [];
+    const ok = (c: HardCand) => {
+      if (!exclude) return true;
+      if (c.char === exclude.ch) return false;
+      if (bboxOverlap(c.bodyBox, silhouetteBBox(exclude.ch, exclude.pk), 4)) return false;
+      // のぞき場所の「前に描き直す物」の中に、ほかの子が入らない
+      const t = { tx: c.spot.x, ty: c.spot.y, s: c.spot.s };
+      const pts = CHARACTERS[c.char].silhouette.flatMap((sh) => samplePoints(transformShape(t, sh), 10));
+      return !pts.some((p) => exclude.pk.front.some((f) => contains(f, p)));
+    };
+    for (const pool of [band, all]) {
+      const combo = bestCombo(pool.filter(ok), n, base.clash, avoid);
+      if (combo) return combo;
+    }
+    return null;
+  };
+
+  let chosen: { peek: { pk: PeekDef; ch: CharacterId } | null; rest: HardCand[] } | null = null;
+  for (let n = want; n >= 1 && !chosen; n--) {
+    for (const pc of peekCands) {
+      const rest = pickRest(n - 1, pc);
+      if (rest) {
+        chosen = { peek: pc, rest };
+        break;
+      }
+    }
+    if (!chosen) {
+      const rest = pickRest(n, null);
+      if (rest) chosen = { peek: null, rest };
     }
   }
-  return [];
+  if (!chosen) return [];
+
+  // 3) のぞき以外の子は、顔の片方を隠す物を1つ：斜めに深くかぶった背景の柄の帽子か、斜めのサングラス
+  const out: Placement[] = [];
+  if (chosen.peek) {
+    const { pk, ch } = chosen.peek;
+    out.push({ char: ch, spot: pk.id, costume: costumeForRegion(scene, pk.region), variant: 'exact' });
+  }
+  const others = [...chosen.rest.map((c) => c.bodyBox), ...(chosen.peek ? [silhouetteBBox(chosen.peek.ch, chosen.peek.pk)] : [])];
+  chosen.rest.forEach((c, i) => {
+    const side: Side = rng() < 0.5 ? 'l' : 'r';
+    const p: Placement = { char: c.char, spot: c.spot.id, costume: costumeForRegion(scene, c.spot.region), variant: 'exact' };
+    let deepOk = false;
+    if (rng() < 0.5 && accessoryFits(scene, c.spot, c.char, 'hat', 'camo', side).ok) {
+      const hb = unionBBox(worldShapes(c.spot, { hat: 'camo', deep: side }).map(bbox));
+      deepOk = others.every((b, j) => j === i || !bboxOverlap(hb, b, 4));
+    }
+    p.acc = deepOk ? { hat: 'camo', deep: side } : { glasses: side };
+    out.push(p);
+  });
+  return out;
+
 }

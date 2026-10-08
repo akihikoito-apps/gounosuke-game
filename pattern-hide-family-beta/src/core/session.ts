@@ -1,6 +1,7 @@
 // 1回の「さがす」プレイの状態（純粋関数）。表示とは分けてある。
 import { type Pt, bbox, distanceTo, transformShape, unionBBox } from './geometry';
 import { accessoryShapes } from './accessories';
+import { isPeek, peekHides } from './peeks';
 import { type Difficulty, type Placement, getSpot, silhouetteWorld, spotTransform } from './placement';
 import type { SceneDef, SceneId } from './scene';
 
@@ -52,6 +53,8 @@ export function hitTest(scene: SceneDef, s: PlaySession, p: Pt, tol = HIT_TOLERA
   s.placements.forEach((pl, i) => {
     if (s.found[i]) return;
     const spot = getSpot(scene, pl.spot);
+    // 物の裏（窓の外）に隠れている部分を押しても見つからない
+    if (isPeek(spot) && peekHides(spot, p)) return;
     // 帽子や傘をタッチしても見つけたことにする
     const shapes = [...silhouetteWorld(pl.char, spot), ...accessoryShapes(pl.acc).map((sh) => transformShape(spotTransform(spot), sh))];
     const d = Math.min(...shapes.map((sh) => distanceTo(sh, p)));

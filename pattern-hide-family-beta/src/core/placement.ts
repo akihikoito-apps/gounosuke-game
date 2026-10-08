@@ -16,6 +16,7 @@ import {
 import { type Rng, mulberry32, shuffle } from './rng';
 import type { SceneDef, SpotDef } from './scene';
 import type { Accessories } from './accessories';
+import { findPeek } from './peeks';
 
 export type Difficulty = 'easy' | 'normal';
 
@@ -133,7 +134,8 @@ export function spotsConflict(a: SpotDef, b: SpotDef): boolean {
 }
 
 export function getSpot(scene: SceneDef, id: string): SpotDef {
-  const s = scene.spots.find((sp) => sp.id === id);
+  // 最難関の「のぞき場所」も同じ名前空間で探す
+  const s = scene.spots.find((sp) => sp.id === id) ?? findPeek(scene.id, id);
   if (!s) throw new Error(`unknown spot ${id}`);
   return s;
 }

@@ -7,7 +7,10 @@ import {
   HAT_POMPOM,
   UMBRELLA_CANOPY,
   UMBRELLA_SHAFT,
+  GLASSES_LENS_R,
   accessoryFits,
+  deepHatTransform,
+  glassesTransform,
 } from '../core/accessories';
 import { type Pt, r1 } from '../core/geometry';
 import { type Placement, getSpot } from '../core/placement';
@@ -52,12 +55,15 @@ function shadeDef(id: string, camo = false): string {
 }
 
 function camoFill(scene: SceneDef, pl: Placement, kind: 'hat' | 'umbrella', id: string): string | null {
+  // 傾けた帽子の中では、柄を逆に回して背景とそろえる
+  const d = kind === 'hat' && pl.acc?.deep ? deepHatTransform(pl.acc.deep) : null;
+  const pre = d ? `rotate(${-d.deg} ${d.cx} ${d.cy}) translate(0 ${-d.dy})` : '';
   const spot = getSpot(scene, pl.spot);
   const fit = accessoryFits(scene, spot, pl.char, kind, 'camo');
   if (!fit.region) return null;
   const costume = scene.regions.find((r) => r.id === fit.region)?.costume;
   if (!costume) return null;
-  return costumePatternDef(id, scene, { ...pl, costume }, spot);
+  return costumePatternDef(id, scene, { ...pl, costume }, spot, pre);
 }
 
 export interface AccArt {
@@ -67,8 +73,38 @@ export interface AccArt {
   front: string;
 }
 
+/** 斜めにかけたサングラス（片目を隠す）。レンズは濃く、少しだけ光る */
+function glassesMarkup(acc: Accessories): string {
+  if (!acc.glasses) return '';
+  const t = glassesTransform(acc.glasses);
+  const R = GLASSES_LENS_R;
+  const lens = (x: number) =>
+    `<circle cx="${x}" cy="-142" r="${R}" fill="#2F2830" fill-opacity="0.92" stroke="${LINE}" stroke-width="3"/>` +
+    `<path d="M${x - 7} -149 Q${x - 3} -153 ${x + 2} -152" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="2.4" stroke-linecap="round"/>`;
+  return (
+    `<g class="acc acc-glasses" transform="rotate(${t.deg} ${t.cx} ${t.cy})">` +
+    `<path d="M-4 -144 Q0 -148 4 -144" fill="none" stroke="${LINE}" stroke-width="3" stroke-linecap="round"/>` +
+    lens(-16) +
+    lens(16) +
+    `</g>`
+  );
+}
+
 /** ローカル座標の帽子・傘。id は prefix から作る（同じ画面で重ならない） */
 export function accessoryArt(scene: SceneDef, pl: Placement, prefix: string, outline: number): AccArt {
+  const a = accessoryArtBase(scene, pl, prefix, outline);
+  const acc = pl.acc;
+  if (!acc) return a;
+  let front = a.front;
+  // 帽子を斜めに深くかぶる（片目を隠す）
+  if (acc.deep && front) {
+    const t = deepHatTransform(acc.deep);
+    front = `<g transform="translate(0 ${t.dy}) rotate(${t.deg} ${t.cx} ${t.cy})">${front}</g>`;
+  }
+  return { behind: a.behind, front: front + glassesMarkup(acc) };
+}
+
+function accessoryArtBase(scene: SceneDef, pl: Placement, prefix: string, outline: number): AccArt {
   const acc: Accessories | undefined = pl.acc;
   if (!acc) return { behind: '', front: '' };
   const tone = HAT_COLORS[(acc.tone ?? 0) % HAT_COLORS.length];

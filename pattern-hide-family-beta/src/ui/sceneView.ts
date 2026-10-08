@@ -8,6 +8,7 @@ import { charArtMarkup } from './charArt';
 import { accessoryArt } from './accessoryArt';
 import { patternTile, sceneArt } from '../art/registry';
 import type { HintInfo } from '../core/session';
+import { isPeek } from '../core/peeks';
 
 export interface SceneRenderOpts {
   prefix: string;
@@ -43,11 +44,12 @@ export function scenePatternDefs(prefix: string, scene: SceneDef): string {
 }
 
 /** 服の柄。背景と同じ座標系にそろえる patternTransform を付ける。 */
-export function costumePatternDef(id: string, scene: SceneDef, pl: Placement, spot: SpotDef): string {
+/** pre：傾けた帽子の中など、さらに内側の座標で使うときの逆変換（背景と柄をそろえるため） */
+export function costumePatternDef(id: string, scene: SceneDef, pl: Placement, spot: SpotDef, pre = ''): string {
   const costume = scene.costumes.find((c) => c.id === pl.costume);
   if (!costume) throw new Error(`unknown costume ${pl.costume}`);
   const t = spotTransform(spot);
-  const tf = `scale(${r1(1 / t.s)}) translate(${r1(-t.tx)} ${r1(-t.ty)})`;
+  const tf = `${pre ? pre + ' ' : ''}scale(${r1(1 / t.s)}) translate(${r1(-t.tx)} ${r1(-t.ty)})`;
   if (pl.variant === 'soft') {
     // やさしい：大きさと色が少し違う柄（絵のタイルの場合は大きさだけ変え、少し暗くする）
     const soft = softVariant(costume.spec);
@@ -80,12 +82,23 @@ export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: num
   const t = spotTransform(spot);
   const fid = `${prefix}c${i}`;
   const acc = accessoryArt(scene, pl, fid, outline);
+  // のぞき場所：窓ならガラスの内側だけ見せ、物（枠）の形の中は背景をキャラクターの前に描き直す
+  const pk = isPeek(spot) ? spot : null;
+  const clipDef = pk?.clip ? `<clipPath id="${fid}-clip">${pk.clip.map((s) => shapeToSvg(s)).join('')}</clipPath>` : '';
+  const frontDef = pk ? `<clipPath id="${fid}-front">${pk.front.map((s) => shapeToSvg(s)).join('')}</clipPath>` : '';
+  const front = pk ? `<defs>${clipDef}${frontDef}</defs>` : '';
+  const tail = pk ? `<use class="peek-front" href="#${prefix}bg" clip-path="url(#${fid}-front)"/>` : '';
   return (
+    front +
+    // 窓ガラスの向こう：ガラスの中だけに見え、少し淡くなる
+    (pk?.clip ? `<g clip-path="url(#${fid}-clip)" opacity="0.8">` : '') +
     `<g class="char${found ? ' found' : ''}" data-index="${i}" data-char="${pl.char}" transform="translate(${r1(t.tx)} ${r1(t.ty)}) scale(${t.s})">` +
     `<defs>${costumePatternDef(fid, scene, pl, spot)}</defs>` +
     acc.behind +
     `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found, shade })}${acc.front}</g>` +
-    `</g>`
+    `</g>` +
+    (pk?.clip ? `</g>` : '') +
+    tail
   );
 }
 
@@ -111,7 +124,12 @@ export function hintMarkup(scene: SceneDef, placements: Placement[], hint: HintI
   if (hint.level >= 3) {
     const pl = placements[hint.index];
     const shapes = silhouetteWorld(pl.char, getSpot(scene, pl.spot));
-    out += `<g class="hint-outline">${shapes.map((s) => shapeToSvg(s, 'fill="none" stroke="#FFD45C" stroke-width="7" stroke-dasharray="14 10" stroke-linecap="round"')).join('')}</g>`;
+    const spot = getSpot(scene, pl.spot);
+    // のぞき場所では、見えている部分だけの輪郭（隠れた体を押す先として示さない）
+    const mask = isPeek(spot)
+      ? `<defs><mask id="hint-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000"><rect width="1000" height="1000" fill="#000"/>${(spot.clip ?? [{ kind: 'rect' as const, x: 0, y: 0, w: 1000, h: 1000 }]).map((s) => shapeToSvg(s, 'fill="#fff"')).join('')}${spot.front.map((s) => shapeToSvg(s, 'fill="#000"')).join('')}</mask></defs>`
+      : '';
+    out += `${mask}<g class="hint-outline"${mask ? ' mask="url(#hint-mask)"' : ''}>${shapes.map((s) => shapeToSvg(s, 'fill="none" stroke="#FFD45C" stroke-width="7" stroke-dasharray="14 10" stroke-linecap="round"')).join('')}</g>`;
   }
   return out;
 }
@@ -142,7 +160,7 @@ export function renderScene(scene: SceneDef, o: SceneRenderOpts): string {
   return (
     `<svg class="scene-svg${o.compact ? ' compact' : ''}" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${o.title ?? scene.name}">` +
     `<defs>${scenePatternDefs(P, scene)}</defs>` +
-    `<g class="bg">${backgroundMarkup(P, scene)}</g>` +
+    `<g class="bg" id="${P}bg">${backgroundMarkup(P, scene)}</g>` +
     `<g class="chars">${chars}</g>` +
     `<g class="props">${props}</g>` +
     `<g class="fx">${fx}</g>` +

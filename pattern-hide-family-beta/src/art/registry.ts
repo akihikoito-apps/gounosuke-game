@@ -102,6 +102,11 @@ export function uiArt(name: 'title' | 'handoff' | 'bye'): string | undefined {
   return find('ui', name);
 }
 
+/** すべての絵のURL（起動時の先読み用） */
+export function allArtUrls(): string[] {
+  return Object.values(files);
+}
+
 export function artSummary(): string[] {
   return Object.keys(files).map((k) => k.replace('../../art/', ''));
 }

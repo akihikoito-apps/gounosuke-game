@@ -310,3 +310,7 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 @keyframes autoNext { to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { .btn.auto-next::after { animation: none; } }
 .course-progress.trial .course-no { padding: 0 8px; font-size: 15px; background: #dccbf4; }
+
+/* 絵の読み込み中はステージを見せない・押せない（キャラクターだけが先に見えないように） */
+.stage.loading svg { visibility: hidden; }
+.stage.loading { pointer-events: none; }

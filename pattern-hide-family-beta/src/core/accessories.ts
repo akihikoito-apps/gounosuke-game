@@ -13,6 +13,51 @@ export interface Accessories {
   umbrella?: AccStyle;
   /** 色つきのときの色（HAT_COLORS / UMBRELLA_COLORS の番号） */
   tone?: number;
+  /** 最難関だけ：帽子を斜めに深くかぶり、片目（l=左 / r=右）を隠す */
+  deep?: Side;
+  /** 最難関だけ：サングラスを斜めにかけ、片目（l / r）を隠す。もう片方の目は必ず見える */
+  glasses?: Side;
+}
+
+export type Side = 'l' | 'r';
+
+/** 帽子を深くかぶるときの動かし方（左を隠すなら左に傾けて下げる） */
+export function deepHatTransform(side: Side): { dy: number; deg: number; cx: number; cy: number } {
+  return side === 'l' ? { dy: 0, deg: -38, cx: 20, cy: -162 } : { dy: 0, deg: 38, cx: -20, cy: -162 };
+}
+
+/** サングラス：隠す目の上にレンズ、もう片方のレンズはおでこへ跳ね上がる */
+export const GLASSES_LENS_R = 13;
+export function glassesTransform(side: Side): { deg: number; cx: number; cy: number } {
+  return side === 'l' ? { deg: -42, cx: -16, cy: -142 } : { deg: 42, cx: 16, cy: -142 };
+}
+
+function rot(p: Pt, cx: number, cy: number, deg: number): Pt {
+  const a = (deg * Math.PI) / 180;
+  const x = p.x - cx;
+  const y = p.y - cy;
+  return { x: cx + x * Math.cos(a) - y * Math.sin(a), y: cy + x * Math.sin(a) + y * Math.cos(a) };
+}
+
+function circlePts(cx: number, cy: number, r: number): Pt[] {
+  return Array.from({ length: 24 }, (_, i) => ({ x: cx + Math.cos((i / 24) * Math.PI * 2) * r, y: cy + Math.sin((i / 24) * Math.PI * 2) * r }));
+}
+
+export function deepHatShapes(side: Side): Shape[] {
+  const t = deepHatTransform(side);
+  const mv = (p: Pt) => {
+    const q = rot(p, t.cx, t.cy, t.deg);
+    return { x: q.x, y: q.y + t.dy };
+  };
+  return [
+    { kind: 'poly', pts: HAT_POLY.map(mv) },
+    { kind: 'poly', pts: circlePts(HAT_POMPOM.cx, HAT_POMPOM.cy, HAT_POMPOM.r).map(mv) },
+  ];
+}
+
+export function glassesShapes(side: Side): Shape[] {
+  const t = glassesTransform(side);
+  return [-16, 16].map((x) => ({ kind: 'poly' as const, pts: circlePts(x, -142, GLASSES_LENS_R).map((p) => rot(p, t.cx, t.cy, t.deg)) }));
 }
 
 /** くすみのある毛糸の色（地の色・編み目の色） */
@@ -61,7 +106,11 @@ export function umbrellaShapes(): Shape[] {
 
 export function accessoryShapes(acc: Accessories | undefined): Shape[] {
   if (!acc) return [];
-  return [...(acc.umbrella ? umbrellaShapes() : []), ...(acc.hat ? hatShapes() : [])];
+  return [
+    ...(acc.umbrella ? umbrellaShapes() : []),
+    ...(acc.hat ? (acc.deep ? deepHatShapes(acc.deep) : hatShapes()) : []),
+    ...(acc.glasses ? glassesShapes(acc.glasses) : []),
+  ];
 }
 
 /** 迷彩の柄を合わせる基準点（ローカル座標）。その点のうしろの領域の柄を使う */
@@ -81,14 +130,16 @@ export interface AccFit {
  * その隠れ場所で身につけ物が使えるか。
  * 画面の内側に収まること・顔を隠さないこと。camo なら、うしろの 7 割以上が同じ柄の領域であること。
  */
-export function accessoryFits(scene: SceneDef, spot: SpotDef, char: CharacterId, kind: 'hat' | 'umbrella', style: AccStyle): AccFit {
+export function accessoryFits(scene: SceneDef, spot: SpotDef, char: CharacterId, kind: 'hat' | 'umbrella', style: AccStyle, deep?: Side): AccFit {
   const t = { tx: spot.x, ty: spot.y, s: spot.s };
-  const shapes = (kind === 'hat' ? hatShapes() : umbrellaShapes()).map((s) => transformShape(t, s));
+  const shapes = (kind === 'hat' ? (deep ? deepHatShapes(deep) : hatShapes()) : umbrellaShapes()).map((s) => transformShape(t, s));
   const problems: string[] = [];
   const b = unionBBox(shapes.map(bbox));
   const m = 6;
   if (b.x0 < m || b.y0 < m || b.x1 > SCENE_SIZE - m || b.y1 > SCENE_SIZE - m) problems.push('out of bounds');
-  const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
+  // 深くかぶる帽子は、隠す側の目だけは覆ってよい（もう片方の目と口は必ず見える）
+  const fp = CHARACTERS[char].facePoints.filter((p) => !deep || (deep === 'l' ? p.x >= 0 : p.x <= 0) || p.x === 0);
+  const face = fp.map((p) => transformPt(t, p));
   if (face.some((p) => shapes.some((s) => contains(s, p)))) problems.push('covers face');
   let region: string | null = null;
   let match = 1;

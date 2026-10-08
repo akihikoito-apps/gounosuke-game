@@ -1,7 +1,7 @@
 // 画面の流れと入力。ゲームの判定は core、保存は storage に任せる。
 import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../core/characters';
 import { charArtMarkup, faceIcon, fullIcon } from './charArt';
-import { uiArt } from '../art/registry';
+import { allArtUrls, uiArt } from '../art/registry';
 import { patternMarkup } from '../core/patterns';
 import { type Difficulty, type Placement, autoLayout, freeSpots, getSpot, validateLayout } from '../core/placement';
 import type { SceneDef, SceneId } from '../core/scene';
@@ -121,6 +121,8 @@ export class App {
   }
 
   start(): void {
+    // 絵を先に読み込んでおく（出題の画面で、背景より先にキャラクターだけが見えないように）
+    for (const u of allArtUrls()) void decodeImage(u);
     this.render();
   }
 
@@ -141,6 +143,7 @@ export class App {
     const html = this.screenHtml();
     this.root.innerHTML = html;
     this.root.dataset.current = this.screen;
+    this.gateStage();
     this.bindScreen();
     if (!this.parent.isOpen()) {
       const focusEl = this.root.querySelector<HTMLElement>('[data-autofocus]');
@@ -895,6 +898,30 @@ export class App {
     if (this.screen === 'hidePlace') this.bindPlace();
   }
 
+  private renderToken = 0;
+
+  /**
+   * 画面に使う絵（背景・柄・小物・キャラクター）がすべて読み込まれ、展開されるまで、
+   * ステージ全体を隠して入力も止める。別の画面に移ったら、古い読み込みでは表示しない。
+   */
+  private gateStage(): void {
+    const stage = this.root.querySelector<HTMLElement>('#stage');
+    if (!stage) return;
+    const hrefs = [...new Set([...stage.querySelectorAll('image')].map((im) => im.getAttribute('href') ?? '').filter(Boolean))];
+    const token = ++this.renderToken;
+    // すでに読み込み済みの絵だけなら、隠さずそのまま（選び直しや描き直しで入力を止めない）
+    if (hrefs.every((h) => readyImages.has(h))) return;
+    stage.classList.add('loading');
+    const reveal = () => {
+      if (token !== this.renderToken) return;
+      // 展開のあと、描画が1回終わってから見せる
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (token === this.renderToken) stage.classList.remove('loading');
+      }));
+    };
+    Promise.all(hrefs.map(decodeImage)).then(reveal, reveal);
+  }
+
   private stageSvg(): SVGSVGElement | null {
     return this.root.querySelector<SVGSVGElement>('#stage svg');
   }
@@ -1159,9 +1186,28 @@ export class App {
       screen: this.screen,
       session: this.session,
       draft: this.draft,
-      spots: this.session ? this.session.placements.map((p) => getSpot(SCENES[this.session!.sceneId], p.spot)).map((s) => ({ id: s.id, x: s.x, y: s.y })) : [],
+      spots: this.session ? this.session.placements.map((p) => getSpot(SCENES[this.session!.sceneId], p.spot)).map((s) => ({ id: s.id, x: s.x, y: s.y, s: s.s })) : [],
     };
   }
+}
+
+const decoded = new Map<string, Promise<void>>();
+const readyImages = new Set<string>();
+
+/** 絵を読み込んで展開する（同じ絵は1回だけ）。失敗しても止めない */
+function decodeImage(url: string): Promise<void> {
+  let p = decoded.get(url);
+  if (!p) {
+    const im = new Image();
+    im.src = url;
+    p = (im.decode ? im.decode() : new Promise<void>((res) => (im.onload = () => res())))
+      .then(() => {
+        readyImages.add(url);
+      })
+      .catch(() => undefined);
+    decoded.set(url, p);
+  }
+  return p;
 }
 
 function draftFromPlacements(sceneId: SceneId, placements: Placement[]): HideDraft {

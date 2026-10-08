@@ -1,0 +1,1394 @@
+job: codex-jobs/93-hardest-course-r3.md
+exit: 0
+minutes: 2.0
+changed (1): audit/codex/hardest-course-r3.md
+outside allowed paths (0): -
+
+----- codex output -----
+OpenAI Codex v0.154.0
+--------
+workdir: C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a119e7-ca3c-73f1-b40c-e1420f40e512
+--------
+user
+Read the file codex-jobs/93-hardest-course-r3.md and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.
+codex
+指定のジョブと `AGENTS.md` を確認し、許可された範囲で作業を進めます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 AGENTS.md; Get-Content -Encoding UTF8 codex-jobs/93-hardest-course-r3.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 216ms:
+# Codex 向けの決まり（このフォルダ）
+
+このフォルダは幼児向けゲーム「もようのかくれんぼ（仮）」のWebベータです。Claude Code が司令塔で、Codex は **絵の制作** と **独立レビュー** を担当します。
+
+## 書き込んでよい場所
+- 絵の制作ジョブ：`art/` の中だけ
+- レビュージョブ：`audit/codex/` の中だけ（レポートを書く）
+- それ以外（`src/`, `tests/`, `scripts/`, 設定、文書）は **変更しない**。直したほうがよい点は、レポートや `art/README.md` に提案として書く
+
+## 必ず守ること
+- ジョブファイル（`codex-jobs/*.md`）の指示と、`ART_SLOTS.md`・`CODEX_ART_BRIEF.md` の決まりに従う
+- 絵を作ったら `npm run validate:art` を実行し、合格するまで直す。結果は `art-guides/ART_CHECK.md` に出る
+- 既存の作品（キャラクター・ロゴ・画面・音）をまねない／取り込まない。ネット上の画像を使わない。文字を絵に入れない
+- 子どもの個人情報・外部通信・広告・課金に関わるものを追加しない
+- 追加料金が発生する手段（別料金の API キー、有料サービス）を使わない。利用上限に達したら、そこで止めて報告する
+- git の commit / push はしない（Claude Code が確認してから行う）
+- 最後に、やったこと・使った方法（SVGをコードで書いた／画像生成を使った 等）・検査結果・できなかったことを、ジョブファイルの指定場所に書く
+
+## サンドボックスでの注意（2026-10-07 追記）
+- `art-guides/ART_CHECK.md` は `npm run validate:art` が自動で書き換える。これは許可済みなので、書き込み先を変える工夫は不要
+- 検査・ビルドの道具（node_modules、scripts、環境変数 NODE_OPTIONS など）を差し替えたり、上書きしたりする回り道はしない。サンドボックスで動かないコマンドがあれば、無理をせず、その旨を作業記録に書いて終える（検査は Claude Code が外でも実行する）
+- 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
+- Windows の PowerShell では `npm` / `npx` が実行ポリシーで止まる。代わりに `npm.cmd run validate:art`、`npm.cmd run build` を使う（設定は変えない）
+- PowerShell でファイルを読むときは `Get-Content -Encoding UTF8` を使う（指定しないと日本語が文字化けする）
+
+## 本部（_hq）との約束
+- 作業の区切りで必ず STATUS.md（リポジトリ直下）を更新すること。「状態・今やっていること・次の一手・ブロッカー・最終更新」の各行を書き換える。
+# ジョブ93：最難関コースの議論（第3回・ご本人の試遊を受けて）
+
+## 書き込んでよい場所
+`audit/codex/hardest-course-r3.md` の1ファイルだけ。コード・絵・設定は変更しない
+
+## ご本人の試遊の感想（要約）
+- 最難関も**簡単すぎる**
+- こうしてほしい：**ソファの裏・カーテンの裏に隠れて、顔がちょろっとだけ見える**／**窓の奥にいる**／**帽子やサングラスで顔を隠している**
+- 不具合：画面が出るとき、**先にキャラクターが出て、あとから背景が出る**ことがあり、すぐ見つかってしまう（Claude が直す）
+
+## ご本人の判断による前提の変更（最難関＝大人向けおためしだけ）
+「顔（目と口）はどの難易度でも全部見える」をゆるめる。**子ども用のコース1〜10は今のまま**。最難関でも、**少なくとも片目は見える**こと、ヒント（最後は輪郭）で必ず見つけられること、減点・時間制限なしは守る。
+
+## Claude Code の設計案（これを批判・改善してほしい）
+1. **のぞき場所（peek）**：背景の一部をキャラクターの「前」に描き直す。
+   - 背景の柄の領域（ソファ・カーテン・カウンター・生け垣など）の形で、**同じ座標の柄 ＋ over.png をその形で切り抜いたもの**を、キャラクターの上に重ねる。背景と完全に同じ絵なので継ぎ目が出ない
+   - 例：ソファの背もたれの上から目だけ（口は隠れる）／カーテンの端から顔の半分（片目）／カウンターの上から目だけ／生け垣の上から頭の上と目
+   - **窓**：小さく（0.5倍）、窓ガラスの内側だけに見えるよう切り抜き、窓の桟を上に描き直す
+   - 当たり判定：前に描いた背景の奥（隠れている部分）を押しても見つからない（見えている部分の近くだけ）
+2. **サングラス**：両目を覆う丸い濃いレンズ（少しハイライト）。口・頭の形・色は見える
+3. **深くかぶった帽子**：今のニット帽を下にずらし、目の上半分〜ほぼ全部を隠す（口と頬は見える）
+4. 1回の出題（最大3人）の組み合わせ：のぞき場所が使える背景なら1人はのぞき、ほかはサングラス／深い帽子／背景の柄の帽子を割り振る。同じ子に重ねすぎない（のぞき＋サングラスは「片目は見える」に反するので禁止）
+5. 読み込みの不具合：背景の絵を先に読み込み・展開してから画面を出す。読み込み中はステージ全体を隠す
+
+## 考えてほしいこと（短く、重要な順に）
+- 上の案の穴（不公平・理不尽・技術的に破綻する点）。特に「背景を前に描き直す」で継ぎ目や不自然さが出る場所
+- 「片目は見える」以外に守るべき最低線（大きさ・見える面積・ヒントの効き方）を数字で
+- 各手段の組み合わせのルール（何と何は同時に使ってよいか）
+- もっと効く別案があれば（ただし「動くと見える」「時間制限」「にせもの」以外）
+- 試遊で確かめるべきこと3つ
+
+`audit/codex/hardest-course-r3.md` に日本語で、第2回くらいの長さで。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg --files -g AGENTS.md -g '*hardest*' -g ART_SLOTS.md -g CODEX_ART_BRIEF.md -g '*peek*'; Get-Content -Encoding UTF8 audit/codex/hardest-course-r2.md; Get-Content -Encoding UTF8 ART_SLOTS.md; Get-Content -Encoding UTF8 CODEX_ART_BRIEF.md" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 188ms:
+tests\unit\hardest.test.ts
+CODEX_ART_BRIEF.md
+codex-jobs\93-hardest-course-r3.md
+codex-jobs\92-hardest-course-r2.md
+codex-jobs\91-hardest-course-r1.md
+AGENTS.md
+ART_SLOTS.md
+audit\codex\hardest-course-r2.md
+audit\codex\hardest-course-r1.md
+audit\codex\2026-10-08T03-51-45-140Z-92-hardest-course-r2.log
+audit\codex\2026-10-08T03-44-50-649Z-91-hardest-course-r1.log
+# 最難関コース・第2回：成人の試遊用仕様
+
+2026-10-08／ジョブ92。**優先帯の中で最大3人、服の陰影50%、ふち線0.25、傘なし**の1コースに確定する。通常1〜10とは別の試遊とし、10人発見で終了する。難度への効き目は仮説であり、今回の仕様確定は試遊での実証ではない。
+
+## 確定する1行
+
+以下は設計値。新項目は現行の `CourseDef` には未実装。
+
+| spots | variant | outline | maxChars と人数方針 | hat | umbrella | 新しい項目 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `all` | `exact` | `0.25` | `3`／優先帯で置ける最大人数、残り人数で切り詰める | `{ rate: 1, style: 'camo' }`／適合時のみ | `null`（装着率0） | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible-in-band'`, `clothesShadeOpacity: 0.5`, `decoyCount: 0` |
+
+- **陰影50%に賛成。** 現行 `src/ui/charArt.ts` は服の陰影を乗算で重ね、outlineでは弱まらない。陰影画像だけに opacity=0.5 を掛け、元画像の透過と乗算は維持する。服の丸い明暗を弱める効果が見込める一方、立体感・布の質感が薄くなる。顔・手・足・帽子やキャラ全体のopacityは変えない。通常モードと対象一覧の既定値は1。コード描画には対応する陰影層がないので、代わりに全体を薄くしない。
+- **傘は0に決定。** 軸を7→4にしても布の輪郭・骨・大きな当たり判定が残る。今回は傘も軸も描画・判定に出さず、軸用の新設定は作らない。通常コースの軸は現行の外線7・内線3.4、色も維持する。
+- **人数は最大3人を採用。** 最後の1人まで探す体験を選ぶ。ただし難しい配置を優先し、3人にするため帯外の見つけやすい場所を混ぜない。1人固定の別コースは作らない。
+- outline=0.25は成人用の試行値として採用する。試遊で境界が不自然・見づらい場合の次の修正値は0.28とし、今回の画面に比較切替は設けない。顔の色・線・大きさ、無制限ヒント、減点なし、時間制限なしを維持する。静止ヒントは追加せず、現行の円→揺れ→輪郭を使う。
+
+## hard-ranked の選び方
+
+1. `all` の場所×3体を `analyzeSpot` で評価し、`ok` の候補だけを残す。そのうち `regionMatch >= 0.90`、`0.25 <= bodyVisible <= 0.40`、`visible >= 0.50` を優先帯とする。丸めた表示値で判定しない。顔・高さ170・余白6・間隔4など既存の安全条件は維持する。
+2. 希望人数は `min(3, remaining)`（remaining=0なら出題しない）。優先帯だけで、キャラと場所が重複せず `spotsConflict` のない組合せを希望人数から1人まで探索する。キャラを先に固定せず、3体の割当ても調べる。最初に見つかった場所を採用する貪欲法にはしない。
+3. 同人数の組合せでは、服の一致率の合計が高い順、服可視率の合計が低い順、次に背景一致90%以上の安全な帽子を付けられる人数が多い順に選ぶ。残る同点だけシードで決める。帽子の一致率は `accessoryFits` と同じ領域・サンプリングで算出し、判定と選別で共有する。
+4. 帽子あり／なしも探索する。帽子は既存の適合条件（一致70%以上を含む）を満たし、他の本体・顔・帽子と間隔4を保てる場合だけ付ける。90%以上を優先し、同じ本体配置なら安全に付けられる帽子数が多い方を次の順位とする。帽子のために本体の優先順位や人数を落とさない。rate=1は全員装着の保証ではない。
+5. **へやで3人が無理なら優先帯の2人、次に1人。** 帯内1人も成立しない場合だけ、安全なall全体で同じ探索をやり直す。安全な1人もなければ空の探索画面に進まず、試遊できない表示と保護者画面への戻り口を出す。安全条件は緩めない。
+
+提示された実測「へや4・にわ6・みせ8、計18か所」により、優先帯を使う方針は成立すると判断する。ただし全体可視率・顔はキャラ別に再判定し、3人同時配置の成立とは区別する。へやの最大人数は組合せ検証で確定する。**帽子は「9か所」と列挙された10か所が不一致**なので、実装時にキャラ別に再集計する。この記載から装着率や一致90%以上の成立は推定しない。
+
+## 「ためす」入口と終了
+
+- 既存の保護者ゲートを通った画面に「最難関を ためす」。未解放でも開始でき、「大人向けのおためし・10人みつけたらおしまい・進み具合は保存しません」と説明する。コース11として通常一覧へ追加しない。
+- 独立した試遊セッションに `finds=0`、出題番号、シード、発見済み状態を保持する。背景はへや→にわ→みせの順で画面ごとに回す。新しい1人の発見で一度だけ加算し、発見済みの押し直しでは増やさない。画面の全員を見つけたら次へ進み、残り `10-finds` で人数を制限する。
+- 表示は「おためし n/10」。10人で「10にん みつけた！ おためし おしまい」と「もういちど」「保護者の画面へ」を出す。次コース・解放・成績順位は出さない。途中にも終了操作を置き、退出・再読込で試遊状態を破棄、再開は0からとする。
+- 試遊の開始・発見・ヒント・完了・退出で通常進捗や再開データを保存／消去しない。現行 `app.ts` の完了時には共通の `record()` と `clearResume()` があるため、通常コースの加算を止めるだけでは不十分。保存型の試遊集計がONでも、この試遊のイベントは書き込まない。独立したモードとして保存処理から分離する。
+
+## Claudeが実装後に行う検証
+
+- **配置の自動テスト：** 3背景×100シード×remaining 1〜10。非空、人数が残り以下かつ3以下、ID重複なし、`validateLayout` 合格、小物と本体・顔・小物の交差なし、傘0、同一入力で同一結果。別途組合せを列挙する検証で、帯内の最大人数・同人数の順位を照合する。3人不可→2人、2人不可→1人、帯なし→安全all、全候補不適合→出題停止、remaining=0→出題なしを個別条件として試す。実人数・帯外代替・帽子数と一致率を背景別に検証ログへ残す。
+- **描画・回帰テスト：** 試遊の陰影層0.5、服の線0.25、傘の描画／判定なし、顔層の透過不変を確認する。陰影画像なし・コード描画でも正常に表示する。通常1〜10と対象一覧の描画値、配置方針は従来どおりであることを確認する。
+- **操作・保存のE2E：** 未解放から入口へ進めること、10人ちょうどで終了、連打で二重加算なし、最後の端数、再試行0、途中退出・再読込を確認する。通常進捗と再開データあり／なし、保存集計ON／OFFで、試遊前後の保存内容が不変であること。ヒントを繰り返して最終輪郭から全員発見でき、動きを減らす設定でも完了できることを確認する。
+- **画像の目視確認：** 320×568、390×844、768×1024で、3体・3背景・実際に選ばれる帽子を確認する。目口全体が見える、顔を押せる、薄い服にも質感が残る、対象一覧とヒントが読めること。顔の3判定点が通る自動テストだけで目口全体の保護を保証しない。
+
+本人の試遊で見てほしい点は次の3つに絞る。
+
+1. 何が発見の手がかりだったか（顔・帽子・服の陰影）。服が薄くなっても絵として自然か。
+2. 最後の1人を探す楽しさがあるか、同じ場所を覚えるだけ／人数分の作業になっていないか。
+3. 詰まったときヒントで納得して発見・タップできるか。押しにくさを難しさと取り違えていないか。
+
+## 残る反対・作業記録
+
+3人を確保するために優先帯を崩す案と、傘の軸を細くするだけで最難関化とみなす案には反対する。陰影が「最大の手がかり」かは未確認だが、今回50%を試すことには賛成する。大人に簡単でも顔を隠す方向には進めない。
+
+- 実施・方法：AGENTS.md、ジョブ92、第1回、ART_SLOTS.md、CODEX_ART_BRIEF.md、および配置・コース・小物・描画・保存呼出し周辺のソースを静的レビューし、この仕様書を作成した。画像生成・外部検索・有料APIは使用していない。
+- 検査結果：要求項目と仕様の整合を文書点検した。候補数はClaude提供の実測を採用し、独立した再計測はしていない。実装・実機試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。
+- 書込みは本ファイルのみ。ジョブ92とユーザーの限定を優先してSTATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時からある未追跡の `video/hide-handoff-find.webm` は触れていない。
+# 絵の差し替え口（ART_SLOTS）
+
+`art/` フォルダに決まった名前でファイルを置くと、ゲームが自動でその絵を使います。
+**置かなかった部分は、今のコードの絵のまま** 動きます（一部だけ差し替えてもよい）。
+
+- 形式：PNG（透過）／WebP／SVG。1ファイル 800KB まで、合計 8MB まで
+- SVG はスクリプト・外部参照・文字（フォント）を含めない
+- 置いたら `npm run validate:art` で検査 → `npm run build` → 画面を確認
+- 下書きガイド：`npm run art:guides` で `art-guides/` に出る（形状データから自動生成。描く位置の基準）
+
+## キャラクター `art/characters/{koro|mimi|moko}/`
+
+枠：**450×600px**（またはその整数倍。縦横比 3:4）。ゲーム内の座標 x −90〜90、y −225〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 37.5px**。ガイド `art-guides/character-*.png` に重ねて描く。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `clothes-mask.png` | ○ | 服の形だけを **白**、ほかは黒か透明。ここにゲームが背景と同じ柄を流し込む。ガイドの青い範囲（からだの判定）からはみ出さないこと |
+| `front.png` | ○ | 服より前に描くもの：顔・頭・耳・髪・手・服の上に出る線。目と口はガイドの赤い点の位置 |
+| `back.png` | | 服より後ろ：足、背中側の耳や髪など |
+| `clothes-shade.png` | | 服の陰影（乗算で重なる）。グレー〜茶系の濃淡、透過 |
+| `clothes-line.png` | | 服のふち線だけ。難易度に応じてゲームが濃さを変える（最低25%） |
+| `front-found.png` | | 見つかった時の前面（手をふるポーズ）。無ければ front を使う |
+
+`clothes-mask` と `front` がそろっていない時は、そのキャラクターはコードの絵のままです。
+
+## シーン `art/scenes/{room|garden|shop}/`
+
+枠：**1000×1000px**（2000×2000 推奨）。ガイド `art-guides/scene-*.png` の色面が「柄の領域」で、**ここはゲームが柄を塗る**（服と同じ柄にして隠れられるようにするため）。
+
+| ファイル | 中身 | 決まり |
+|---|---|---|
+| `back.png` | 柄の領域より下：空・壁の上部・床など | 不透明でよい |
+| `over.png` | 柄の領域の上・キャラクターの後ろ：家具の縁・カーテンのひだの陰・窓・棚など | 透過。キャラクターの服の後ろは薄く（平均の濃さ35%以下）、顔の後ろには描かない |
+| `minor.png` | 小さい画面では省く飾り（壁の絵・雲など） | over と同じ決まり |
+| `fore.png` | 前景の小物すべて（キャラクターの前に重なる） | 透過。ガイドの橙色の形に合わせる。**赤い円（顔）には重ねない**。服は少し（2割以上8割未満が見える程度）隠す |
+
+## 柄のタイル `art/patterns/{シーン}-{服}.png`
+
+例：`room-stripes.png`、`garden-leaf.png`。正方形 64px 以上、不透明、**上下左右がつなぎ目なく続く**こと。
+同じタイルが背景の領域と服の両方に使われます（だから隠れられる）。タイル1枚がゲーム内で表す大きさは、各シーンの柄の `size`（38〜52）です。
+
+| シーン | 服（ファイル名の後半） |
+|---|---|
+| room | plain（壁）, stripes（カーテン）, dots（ソファ）, check（ラグ） |
+| garden | plain（芝生）, stripes（柵）, dots（花だん）, leaf（生け垣） |
+| shop | plain（床）, stripes（カウンター）, dots（壁）, check（テーブルクロス） |
+
+## 画面の絵 `art/ui/`
+
+`title.png`（タイトルの絵）、`handoff.png`（受け渡し画面の絵。**隠れ場所や背景を描かない**）、`bye.png`（おしまい画面）。2000px 以内。
+
+## 帽子・傘 `art/accessories/{hat|umbrella}/`（コースモード用。3体共通）
+
+枠：**600×720px**（またはその整数倍。縦横比 5:6）。ゲーム内の座標 x −150〜150、y −345〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 30px**。ガイド `art-guides/accessory-hat.png` / `accessory-umbrella.png` に重ねて描く（薄く3体が入っている）。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `mask.png` | ○ | 形だけを **白**、ほかは黒か透明。ゲームがここに **毛糸の色（色つきの帽子）** か **うしろの背景と同じ柄（背景の柄の帽子・傘）** を流し込む。ガイドの青い範囲からはみ出さない |
+| `shade.png` | | 陰影（乗算）。編み目・布のしわ・ぼんぼりのふくらみなどの質感もここで |
+| `line.png` | | ふち線。背景の柄のときは服と同じ薄さに、色つきのときははっきり表示される |
+| `front.png` | | いちばん前の細部（傘の先の飾り など）。形の範囲内 |
+| `back.png` | | キャラクターより後ろ（**傘の柄の棒**＝ガイドの緑。帽子では使わない） |
+
+- **顔（ガイドの赤い丸）には、どの層も重ねない**
+- 帽子はキャラクターの頭の前に、傘はキャラクターの後ろに描かれる
+- `mask` が無いときは、ゲームがコードで描いた帽子・傘を使う
+# Codex への絵の制作依頼（CODEX_ART_BRIEF）
+
+> ご自宅PCで Codex に渡すための依頼文です。下の「Codex への指示」をそのまま貼り付けてください。
+
+## 事前準備（ご自宅PC）
+
+```bash
+git fetch origin
+git checkout claude/pattern-hide-family-beta
+git pull
+cd pattern-hide-family-beta
+npm ci
+npm run art:guides      # art-guides/ に下書きガイドができる
+```
+
+## Codex への指示（ここから貼り付け）
+
+あなたは、幼児向けかくれんぼゲーム「もようのかくれんぼ（仮）」の絵を作る担当です。
+作業フォルダは `pattern-hide-family-beta/` です。最初に `ART_SLOTS.md` と、この `CODEX_ART_BRIEF.md` を読んでください。
+
+### 守ること
+1. 書き込んでよいのは `pattern-hide-family-beta/art/` の中だけです。`src/` やテスト、設定ファイルは変更しないでください（別のAIが担当しています）。
+2. ファイル名・寸法・層の分け方は `ART_SLOTS.md` のとおりにしてください。描く位置は `art-guides/` のガイド画像に合わせてください。ガイドはゲームの当たり判定と同じ形から作られています。
+3. 描き終えたら `npm run validate:art` を実行し、**すべて合格するまで直してください**。結果は `art-guides/ART_CHECK.md` に出ます。そのあと `npm run build` が通ることを確認してください。
+4. 既存の作品（キャラクター、ロゴ、画面、音）をまねたり、取り込んだりしないでください。ネット上の画像も使わないでください。特定の作品に見える顔の配置や特徴は避けてください。
+5. 文字は絵に入れないでください。
+6. 追加料金が発生する手段（別料金のAPIキー、有料サービス）は使わないでください。今の契約の範囲でできないことがあれば、無理をせず、できなかったことを報告してください。
+7. 最後に、作ったファイル・使った方法（SVGをコードで書いた／画像生成を使った等）・検査結果を `art/README.md` に書いてください。
+
+### 絵の方向性
+- **かわいらしく、幼い子向け。ただし安っぽくしない。** 絵本の挿絵のような品のある仕上がりにします。
+- 形に丸みと立体感を持たせます。やわらかい陰影、ほのかなグラデーション、光は左上から、接地面にやわらかい影を入れてください。平べったいクリップアートや絵文字のようにはしないでください。
+- 線は黒ではなく濃い茶色系（目安 #4A3A40）。太さに少し強弱をつけ、全部の線を同じ太さにしないでください。
+- 色は、少しくすんだやさしいパステルを基調に、差し色を少しだけ。蛍光色や彩度の高すぎる色は使わないでください。
+- 布の縫い目、木目、葉脈など、見つけるとうれしい細部を控えめに入れます。ただし背景がうるさくなり、さがしにくくなる量にはしないでください。
+- 3体の見分けは **色だけに頼らず形で** つけます。今の形を受け継いでください：
+  - **ころ**：あたまに「くるん」とした毛。げんきでくいしんぼう。アプリコット色
+  - **みみ**：たれた長い耳（内側はピンク）。ものしりでのんびり。ミントグリーン
+  - **もこ**：くもの形のもこもこした頭と、星の髪どめ。ふわふわではずかしがり。ラベンダー
+- 3体とも、頭が大きめの約2頭身です。目は大きく、ハイライトを入れてください。表情はおだやかな笑顔です。
+- 服は **ゲームが柄を流し込む部分** なので、`clothes-mask.png`（白黒の形）として分けてください。服の陰影は `clothes-shade.png`、ふち線は `clothes-line.png` に分けると、柄の上に立体感が出ます。
+- 背景の「柄の領域」（カーテン・ソファ・ラグ、生け垣・柵・花だん・芝生、かべ・カウンター・テーブルクロス・床）は、ゲームが柄で塗ります。質感は **柄タイル**（`art/patterns/`）で出してください。布の織り目や紙の質感などを入れたタイルにします。同じタイルが服にも使われます。
+- 前景の小物（`fore.png`）は、今の小物と同じ位置・同じくらいの大きさで描き直してください（ガイドの橙色）。顔（赤い円）には絶対に重ねないでください。
+- 怖い表情、暗い影、先のとがった危なそうな物は入れないでください。
+
+### おすすめの順番
+1. `art/characters/koro/` の5層（back, clothes-mask, clothes-shade, clothes-line, front, front-found）を作る → 検査に合格させる
+2. 同じ画風で みみ・もこ を作る
+3. `art/patterns/` の柄タイル12枚
+4. `art/scenes/room/` の back / over / minor / fore → 検査 → garden → shop
+5. `art/ui/` の title / handoff / bye
+
+途中で、`npm run build && npm run preview` を実行し、`http://127.0.0.1:4173/` で見た目を確認してください。
+
+（貼り付けここまで）
+
+## 作業後
+
+- Codex の作業を `git add art && git commit` して、同じブランチに push してください。
+- Claude 側では、画面写真・操作テスト・溶け込み具合を確認し、必要なら調整案を出します。
+- 同じファイルを同時に複数のAIで編集しないため、Codex は `art/` だけ、Claude はそれ以外、と分けています。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "git status --short; rg -n 'over|minor|fore|decode|hint|outline|hardest|hitTest' src/ui/sceneArt.ts src/ui/charArt.ts src/ui src/game -g '*.ts'" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 214ms:
+?? video/hide-handoff-find.webm
+rg: src/ui/sceneArt.ts: 指定されたファイルが見つかりません。 (os error 2)
+rg: src/game: 指定されたファイルが見つかりません。 (os error 2)
+src/ui/charArt.ts:11:export function charArtMarkup(c: CharacterDef, o: { fillId: string; outline: number; found?: boolean; shade?: number }): string {
+src/ui/charArt.ts:15:  const outline = Math.max(0.25, o.outline);
+src/ui/charArt.ts:22:    (a.clothesLine ? img(a.clothesLine, `opacity="${outline}"`) : '') +
+src/ui/charArt.ts:36:  return `<svg viewBox="-90 -225 180 240" aria-hidden="true" focusable="false"><defs>${patternDefs}</defs>${charArtMarkup(c, { fillId, outline: 1 })}</svg>`;
+src/ui\accessoryArt.ts:71:export function accessoryArt(scene: SceneDef, pl: Placement, prefix: string, outline: number): AccArt {
+src/ui\accessoryArt.ts:78:  const camoLine = Math.max(0.25, outline);
+src/ui\app.ts:32:import { COURSES, FINDS_PER_COURSE, HARDEST, courseDef, courseRound, courseScene, hardestRound } from '../core/courses';
+src/ui\app.ts:298:        ${btn('hint', ICONS.hint, 'ヒント', 'round hint-btn', done ? 'disabled' : '')}
+src/ui\app.ts:313:      outline: s.origin === 'course' ? courseDef(this.courseNo).outline : s.origin === 'trial' ? HARDEST.outline : OUTLINE[s.difficulty],
+src/ui\app.ts:315:      hint: currentHint(scene, s),
+src/ui\app.ts:323:    return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="ぜんぶ みつけた">
+src/ui\app.ts:341:      return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="コース${this.courseNo} クリア">
+src/ui\app.ts:353:    return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="みつけた">
+src/ui\app.ts:381:      return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="10にん みつけた">
+src/ui\app.ts:394:    return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="みつけた">
+src/ui\app.ts:510:      outline: 0.7,
+src/ui\app.ts:603:      case 'hint':
+src/ui\app.ts:767:    const placements = hardestRound(SCENES[sceneId], HARDEST.finds - t.finds, seed, t.used[sceneId] ?? []);
+src/ui\app.ts:795:    if (this.session.origin !== 'trial') record(this.store, { type: 'hint' });
+src/ui\app.ts:978:        t.insertAdjacentHTML('beforeend', `<span class="check">${ICONS.done}</span>`);
+src/ui\app.ts:982:    const hb = this.root.querySelector<HTMLButtonElement>('[data-action="hint"]');
+src/ui\app.ts:1207:  return charArtMarkup(CHARACTERS[c], { fillId, outline: 0.6, found });
+src/ui\charArt.ts:11:export function charArtMarkup(c: CharacterDef, o: { fillId: string; outline: number; found?: boolean; shade?: number }): string {
+src/ui\charArt.ts:15:  const outline = Math.max(0.25, o.outline);
+src/ui\charArt.ts:22:    (a.clothesLine ? img(a.clothesLine, `opacity="${outline}"`) : '') +
+src/ui\charArt.ts:36:  return `<svg viewBox="-90 -225 180 240" aria-hidden="true" focusable="false"><defs>${patternDefs}</defs>${charArtMarkup(c, { fillId, outline: 1 })}</svg>`;
+src/ui\icons.ts:9:  hint: S(`<path d="M32 8 C20 8 14 17 14 25 C14 33 21 37 23 44 H41 C43 37 50 33 50 25 C50 17 44 8 32 8Z" fill="#FFE07A" ${L}/><rect x="23" y="46" width="18" height="8" rx="3" fill="#DCCBF4" ${L}/><path d="M28 30 L32 36 L36 30" fill="none" ${L}/>`),
+src/ui\parent.ts:196:      recovered: '保存データの一部が読めなかったため、安全な初期値に戻しました。',
+src/ui\parent.ts:245:          <tr><th>ヒントを使った</th><td data-count="hintsUsed">${c.hintsUsed}</td></tr>
+src/ui\parent.ts:337:      this.el!.querySelector('[data-act="delete"]')?.before(p);
+src/ui\sceneView.ts:17:  outline?: number;
+src/ui\sceneView.ts:23:  hint?: HintInfo | null;
+src/ui\sceneView.ts:73:    (art?.over ? full(art.over) : sub(scene.decor)) +
+src/ui\sceneView.ts:74:    `<g class="minor">${art?.minor ? full(art.minor) : art?.over ? '' : sub(scene.minorDecor)}</g>`
+src/ui\sceneView.ts:78:export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: number, found: boolean, outline: number, shade = 1): string {
+src/ui\sceneView.ts:82:  const acc = accessoryArt(scene, pl, fid, outline);
+src/ui\sceneView.ts:87:    `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found, shade })}${acc.front}</g>` +
+src/ui\sceneView.ts:107:export function hintMarkup(scene: SceneDef, placements: Placement[], hint: HintInfo | null | undefined): string {
+src/ui\sceneView.ts:108:  if (!hint) return '';
+src/ui\sceneView.ts:109:  const { cx, cy, r } = hint.area;
+src/ui\sceneView.ts:110:  let out = `<circle class="hint-area" cx="${r1(cx)}" cy="${r1(cy)}" r="${r}" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="10" stroke-dasharray="4 18" stroke-linecap="round"/>`;
+src/ui\sceneView.ts:111:  if (hint.level >= 3) {
+src/ui\sceneView.ts:112:    const pl = placements[hint.index];
+src/ui\sceneView.ts:114:    out += `<g class="hint-outline">${shapes.map((s) => shapeToSvg(s, 'fill="none" stroke="#FFD45C" stroke-width="7" stroke-dasharray="14 10" stroke-linecap="round"')).join('')}</g>`;
+src/ui\sceneView.ts:123:  const outline = o.outline ?? 0.6;
+src/ui\sceneView.ts:124:  const chars = placements.map((pl, i) => charGroup(P, scene, pl, i, !!found[i], outline, o.shade ?? 1)).join('');
+src/ui\sceneView.ts:125:  const fore = sceneArt(scene.id)?.fore;
+src/ui\sceneView.ts:126:  const props = fore ? full(fore, 'fore') : scene.spots.map((s) => `<g class="prop" data-spot="${s.id}">${s.prop.markup}</g>`).join('');
+src/ui\sceneView.ts:150:    `<g class="hint-layer">${hintMarkup(scene, placements, o.hint)}</g>` +
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 src/ui/sceneView.ts; rg -n 'hit|face|visible|170|hint|window' src/core src/data src/ui/app.ts; rg --files src" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 243ms:
+// シーンのSVGを組み立てる。形状・座標は core の定義をそのまま使う。
+import { CHARACTERS, type CharacterId } from '../core/characters';
+import { r1, shapeToSvg } from '../core/geometry';
+import { type PatternSpec, patternMarkup, softVariant } from '../core/patterns';
+import { type Placement, getSpot, silhouetteWorld, spotAnchor, spotTransform } from '../core/placement';
+import type { SceneDef, SpotDef } from '../core/scene';
+import { charArtMarkup } from './charArt';
+import { accessoryArt } from './accessoryArt';
+import { patternTile, sceneArt } from '../art/registry';
+import type { HintInfo } from '../core/session';
+
+export interface SceneRenderOpts {
+  prefix: string;
+  placements?: Placement[];
+  found?: boolean[];
+  /** 服のふちの濃さ（難易度で変える。0にはしない） */
+  outline?: number;
+  /** 服の陰影の濃さ（最難関だけ下げる） */
+  shade?: number;
+  /** 編集中だけ：置ける候補 */
+  candidates?: SpotDef[];
+  selectedChar?: CharacterId | null;
+  hint?: HintInfo | null;
+  compact?: boolean;
+  title?: string;
+}
+
+export function scenePatternId(prefix: string, scene: SceneDef, costume: string): string {
+  return `${prefix}p-${scene.id}-${costume}`;
+}
+
+/** 柄の定義。art/patterns に絵のタイルがあればそれを使う（背景と服で同じタイル） */
+export function tiledPatternMarkup(id: string, scene: SceneDef, costumeId: string, spec: PatternSpec, transform = ''): string {
+  const tile = patternTile(scene.id, costumeId);
+  if (!tile) return patternMarkup(id, spec, transform);
+  const s = spec.size;
+  const tf = transform ? ` patternTransform="${transform}"` : '';
+  return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${r1(s)}" height="${r1(s)}"${tf}><image href="${tile}" width="${r1(s)}" height="${r1(s)}" preserveAspectRatio="none"/></pattern>`;
+}
+
+export function scenePatternDefs(prefix: string, scene: SceneDef): string {
+  return scene.costumes.map((c) => tiledPatternMarkup(scenePatternId(prefix, scene, c.id), scene, c.id, c.spec)).join('') + scene.extraDefs.split('{P}').join(prefix);
+}
+
+/** 服の柄。背景と同じ座標系にそろえる patternTransform を付ける。 */
+export function costumePatternDef(id: string, scene: SceneDef, pl: Placement, spot: SpotDef): string {
+  const costume = scene.costumes.find((c) => c.id === pl.costume);
+  if (!costume) throw new Error(`unknown costume ${pl.costume}`);
+  const t = spotTransform(spot);
+  const tf = `scale(${r1(1 / t.s)}) translate(${r1(-t.tx)} ${r1(-t.ty)})`;
+  if (pl.variant === 'soft') {
+    // やさしい：大きさと色が少し違う柄（絵のタイルの場合は大きさだけ変え、少し暗くする）
+    const soft = softVariant(costume.spec);
+    if (patternTile(scene.id, costume.id)) {
+      return tiledPatternMarkup(id, scene, costume.id, soft, tf).replace('<image ', '<image style="filter:brightness(0.86) saturate(1.15)" ');
+    }
+    return patternMarkup(id, soft, tf);
+  }
+  return tiledPatternMarkup(id, scene, costume.id, costume.spec, tf);
+}
+
+const full = (href: string, cls = '') => `<image${cls ? ` class="${cls}"` : ''} href="${href}" x="0" y="0" width="1000" height="1000" preserveAspectRatio="none"/>`;
+
+function backgroundMarkup(prefix: string, scene: SceneDef): string {
+  const sub = (s: string) => s.split('{P}').join(prefix);
+  const art = sceneArt(scene.id);
+  const regions = scene.regions
+    .map((r) => r.shapes.map((sh) => shapeToSvg(sh, `fill="url(#${scenePatternId(prefix, scene, r.costume)})"`)).join(''))
+    .join('');
+  return (
+    (art?.back ? full(art.back) : sub(scene.base)) +
+    regions +
+    (art?.over ? full(art.over) : sub(scene.decor)) +
+    `<g class="minor">${art?.minor ? full(art.minor) : art?.over ? '' : sub(scene.minorDecor)}</g>`
+  );
+}
+
+export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: number, found: boolean, outline: number, shade = 1): string {
+  const spot = getSpot(scene, pl.spot);
+  const t = spotTransform(spot);
+  const fid = `${prefix}c${i}`;
+  const acc = accessoryArt(scene, pl, fid, outline);
+  return (
+    `<g class="char${found ? ' found' : ''}" data-index="${i}" data-char="${pl.char}" transform="translate(${r1(t.tx)} ${r1(t.ty)}) scale(${t.s})">` +
+    `<defs>${costumePatternDef(fid, scene, pl, spot)}</defs>` +
+    acc.behind +
+    `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found, shade })}${acc.front}</g>` +
+    `</g>`
+  );
+}
+
+function sparkles(scene: SceneDef, pl: Placement): string {
+  const a = spotAnchor(getSpot(scene, pl.spot));
+  return [
+    [-80, -110],
+    [86, -96],
+    [-60, -170],
+    [70, -168],
+  ]
+    .map(
+      ([dx, dy], k) =>
+        `<path class="sparkle" style="animation-delay:${k * 80}ms" transform="translate(${r1(a.x + dx)} ${r1(a.y + dy)})" d="M0 -14 L4 -4 L14 0 L4 4 L0 14 L-4 4 L-14 0 L-4 -4Z" fill="#FFD45C" stroke="#fff" stroke-width="2"/>`,
+    )
+    .join('');
+}
+
+export function hintMarkup(scene: SceneDef, placements: Placement[], hint: HintInfo | null | undefined): string {
+  if (!hint) return '';
+  const { cx, cy, r } = hint.area;
+  let out = `<circle class="hint-area" cx="${r1(cx)}" cy="${r1(cy)}" r="${r}" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="10" stroke-dasharray="4 18" stroke-linecap="round"/>`;
+  if (hint.level >= 3) {
+    const pl = placements[hint.index];
+    const shapes = silhouetteWorld(pl.char, getSpot(scene, pl.spot));
+    out += `<g class="hint-outline">${shapes.map((s) => shapeToSvg(s, 'fill="none" stroke="#FFD45C" stroke-width="7" stroke-dasharray="14 10" stroke-linecap="round"')).join('')}</g>`;
+  }
+  return out;
+}
+
+export function renderScene(scene: SceneDef, o: SceneRenderOpts): string {
+  const P = o.prefix;
+  const placements = o.placements ?? [];
+  const found = o.found ?? placements.map(() => false);
+  const outline = o.outline ?? 0.6;
+  const chars = placements.map((pl, i) => charGroup(P, scene, pl, i, !!found[i], outline, o.shade ?? 1)).join('');
+  const fore = sceneArt(scene.id)?.fore;
+  const props = fore ? full(fore, 'fore') : scene.spots.map((s) => `<g class="prop" data-spot="${s.id}">${s.prop.markup}</g>`).join('');
+  const fx = placements.map((pl, i) => (found[i] ? sparkles(scene, pl) : '')).join('');
+  const cand = (o.candidates ?? [])
+    .map((s) => {
+      const a = spotAnchor(s);
+      return `<g class="candidate" data-spot="${s.id}" tabindex="0" role="button" aria-label="ここに かくす"><circle cx="${r1(a.x)}" cy="${r1(a.y)}" r="70" fill="#FFFFFF" fill-opacity="0.35" stroke="#FFFFFF" stroke-width="7" stroke-dasharray="10 10"/><circle cx="${r1(a.x)}" cy="${r1(a.y)}" r="14" fill="#FFFFFF"/></g>`;
+    })
+    .join('');
+  let sel = '';
+  if (o.selectedChar) {
+    const i = placements.findIndex((p) => p.char === o.selectedChar);
+    if (i >= 0) {
+      const a = spotAnchor(getSpot(scene, placements[i].spot));
+      sel = `<ellipse class="selected-ring" cx="${r1(a.x)}" cy="${r1(a.y - 20)}" rx="96" ry="128" fill="none" stroke="#FFD45C" stroke-width="8"/>`;
+    }
+  }
+  return (
+    `<svg class="scene-svg${o.compact ? ' compact' : ''}" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${o.title ?? scene.name}">` +
+    `<defs>${scenePatternDefs(P, scene)}</defs>` +
+    `<g class="bg">${backgroundMarkup(P, scene)}</g>` +
+    `<g class="chars">${chars}</g>` +
+    `<g class="props">${props}</g>` +
+    `<g class="fx">${fx}</g>` +
+    `<g class="edit-layer">${cand}${sel}</g>` +
+    `<g class="hint-layer">${hintMarkup(scene, placements, o.hint)}</g>` +
+    `</svg>`
+  );
+}
+
+/** シーン選択用の小さい絵（キャラクターなし） */
+export function sceneThumb(scene: SceneDef): string {
+  return renderScene(scene, { prefix: `t-${scene.id}-`, compact: true });
+}
+rg: src/data: 指定されたファイルが見つかりません。 (os error 2)
+src/ui/app.ts:3:import { charArtMarkup, faceIcon, fullIcon } from './charArt';
+src/ui/app.ts:110:    window.addEventListener('pointerdown', unlock, { once: true, capture: true });
+src/ui/app.ts:111:    window.addEventListener('keydown', unlock, { once: true, capture: true });
+src/ui/app.ts:119:    window.addEventListener('pointercancel', () => this.cancelDrag());
+src/ui/app.ts:120:    window.addEventListener('blur', () => this.cancelDrag());
+src/ui/app.ts:131:    window.clearTimeout(this.autoTimer);
+src/ui/app.ts:194:    const peek = CHARACTER_IDS.map((c) => `<div class="peek peek-${c}">${faceIcon(CHARACTERS[c])}</div>`).join('');
+src/ui/app.ts:298:        ${btn('hint', ICONS.hint, 'ヒント', 'round hint-btn', done ? 'disabled' : '')}
+src/ui/app.ts:315:      hint: currentHint(scene, s),
+src/ui/app.ts:322:    const faces = s.placements.map((pl, i) => `<div class="clear-face">${this.targetIcon(pl, i, 'cf')}</div>`).join('');
+src/ui/app.ts:325:        <div class="clear-faces">${faces}</div>
+src/ui/app.ts:338:    const faces = s.placements.map((pl, i) => `<div class="clear-face">${this.targetIcon(pl, i, 'cf')}</div>`).join('');
+src/ui/app.ts:355:        <div class="clear-faces">${faces}</div>
+src/ui/app.ts:367:    const base = faceIcon(CHARACTERS[pl.char]);
+src/ui/app.ts:393:    const faces = s.placements.map((pl, i) => `<div class="clear-face">${this.targetIcon(pl, i, 'cf')}</div>`).join('');
+src/ui/app.ts:396:        <div class="clear-faces">${faces}</div>
+src/ui/app.ts:449:                `<button type="button" class="tab${c === cur ? ' on' : ''}" data-action="costumeTab" data-char="${c}" aria-pressed="${c === cur}" aria-label="${CHARACTERS[c].name}">${faceIcon(CHARACTERS[c])}</button>`,
+src/ui/app.ts:518:    const faces = CHARACTER_IDS.map((c) => `<div class="bye-face">${faceIcon(CHARACTERS[c])}</div>`).join('');
+src/ui/app.ts:520:      ${artImg('bye') ?? `<div class="bye-faces">${faces}</div>`}
+src/ui/app.ts:603:      case 'hint':
+src/ui/app.ts:780:    window.clearTimeout(this.autoTimer);
+src/ui/app.ts:785:    this.autoTimer = window.setTimeout(() => {
+src/ui/app.ts:795:    if (this.session.origin !== 'trial') record(this.store, { type: 'hint' });
+src/ui/app.ts:956:      window.setTimeout(() => {
+src/ui/app.ts:982:    const hb = this.root.querySelector<HTMLButtonElement>('[data-action="hint"]');
+src/ui/app.ts:997:    window.setTimeout(() => r.remove(), 500);
+src/ui/app.ts:1048:        window.removeEventListener('pointerup', onUp);
+src/ui/app.ts:1049:        window.removeEventListener('pointercancel', onCancel);
+src/ui/app.ts:1063:      window.addEventListener('pointerup', onUp);
+src/ui/app.ts:1064:      window.addEventListener('pointercancel', onCancel);
+src/ui/app.ts:1107:      window.removeEventListener('pointermove', move);
+src/ui/app.ts:1108:      window.removeEventListener('pointerup', up);
+src/ui/app.ts:1109:      window.removeEventListener('pointercancel', cancel);
+src/ui/app.ts:1113:    window.addEventListener('pointermove', move);
+src/ui/app.ts:1114:    window.addEventListener('pointerup', up);
+src/ui/app.ts:1115:    window.addEventListener('pointercancel', cancel);
+src/core\characters.ts:7:export interface CharacterDef {
+src/core\characters.ts:16:  facePoints: Pt[];
+src/core\characters.ts:58:    facePoints: FACE,
+src/core\characters.ts:71:    facePoints: FACE,
+src/core\characters.ts:83:    facePoints: FACE,
+src/core\characters.ts:148:export interface DrawOpts {
+src/core\characters.ts:173:export function faceIconMarkup(c: CharacterDef): string {
+src/core\accessories.ts:11:export interface Accessories {
+src/core\accessories.ts:71:export interface AccFit {
+src/core\accessories.ts:91:  const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
+src/core\accessories.ts:92:  if (face.some((p) => shapes.some((s) => contains(s, p)))) problems.push('covers face');
+src/core\courses.ts:12:export interface CourseDef {
+src/core\courses.ts:120:export const HARDEST_BAND = { match: 0.9, bodyMin: 0.25, bodyMax: 0.4, visible: 0.5 } as const;
+src/core\courses.ts:122:interface HardCand {
+src/core\courses.ts:137:  return r.ok && r.regionMatch >= b.match && r.bodyVisible >= b.bodyMin && r.bodyVisible <= b.bodyMax && r.visible >= b.visible;
+src/core\courses.ts:192:  const hit = candCache.get(scene);
+src/core\courses.ts:193:  if (hit) return hit;
+src/core\geometry.ts:4:export interface Pt {
+src/core\geometry.ts:14:export interface BBox {
+src/core\geometry.ts:77:export interface Placement2D {
+src/core\geometry.ts:181:export interface Mat {
+src/core\hideEditor.ts:9:export interface HideDraft {
+src/core\patterns.ts:7:export interface PatternSpec {
+src/core\placement.ts:22:export interface Placement {
+src/core\placement.ts:44:  minHeight: 170,
+src/core\placement.ts:80:export interface SpotReport {
+src/core\placement.ts:83:  visible: number;
+src/core\placement.ts:85:  faceVisible: boolean;
+src/core\placement.ts:108:  const visiblePts = pts.filter((p) => !occluded(scene, p));
+src/core\placement.ts:111:  const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
+src/core\placement.ts:112:  const faceVisible = face.every((p) => !occluded(scene, p));
+src/core\placement.ts:117:  const visible = visiblePts.length / pts.length;
+src/core\placement.ts:121:  if (visible < LIMITS.minVisible) problems.push(`visible ${visible.toFixed(2)} < ${LIMITS.minVisible}`);
+src/core\placement.ts:124:  if (!faceVisible) problems.push('face hidden');
+src/core\placement.ts:128:  return { spot: spot.id, char, visible, bodyVisible, faceVisible, inBounds, height, regionMatch, ok: problems.length === 0, problems };
+src/core\placement.ts:147:export interface LayoutCheck {
+src/core\props.ts:14:export interface Prop {
+src/core\scene.ts:7:export interface CostumeDef {
+src/core\scene.ts:14:export interface RegionDef {
+src/core\scene.ts:21:export interface SpotDef {
+src/core\scene.ts:36:export interface SceneDef {
+src/core\session.ts:13:export interface PlaySession {
+src/core\session.ts:19:  hintLevel: number;
+src/core\session.ts:20:  hintsUsed: number;
+src/core\session.ts:37:    hintLevel: 0,
+src/core\session.ts:38:    hintsUsed: 0,
+src/core\session.ts:49:export function hitTest(scene: SceneDef, s: PlaySession, p: Pt, tol = HIT_TOLERANCE): number {
+src/core\session.ts:66:export interface TapResult {
+src/core\session.ts:72:  const i = hitTest(scene, s, p);
+src/core\session.ts:76:  return { session: { ...s, found, hintLevel: 0 }, foundIndex: i };
+src/core\session.ts:81:  return { ...s, hintLevel: Math.min(MAX_HINT, s.hintLevel + 1), hintsUsed: s.hintsUsed + 1 };
+src/core\session.ts:84:export interface HintInfo {
+src/core\session.ts:92:  if (s.hintLevel === 0) return null;
+src/core\session.ts:104:    level: s.hintLevel,
+src/core\scenes\room.ts:69:    `<path d="M574 200 L606 160 L630 186 L646 170 L668 200Z" fill="#8CCB9B"/><circle cx="650" cy="146" r="10" fill="#F2B84B"/>` +
+src/core\scenes\garden.ts:47:    `<g fill="#FFFFFF" opacity="0.9"><ellipse cx="200" cy="120" rx="70" ry="28"/><ellipse cx="250" cy="100" rx="50" ry="30"/><ellipse cx="560" cy="170" rx="60" ry="24"/></g>` +
+src\ui\styles.css
+src\ui\sceneView.ts
+src\ui\parent.ts
+src\ui\icons.ts
+src\ui\dom.ts
+src\ui\charArt.ts
+src\ui\app.ts
+src\ui\accessoryArt.ts
+src\sw-template.js
+src\storage\storage.ts
+src\storage\schema.ts
+src\storage\playtest.ts
+src\main.ts
+src\entitlements\entitlements.ts
+src\core\session.ts
+src\core\scenes\shop.ts
+src\core\scenes\room.ts
+src\core\scenes\index.ts
+src\core\scenes\garden.ts
+src\core\scene.ts
+src\core\rng.ts
+src\core\props.ts
+src\core\placement.ts
+src\core\patterns.ts
+src\core\hideEditor.ts
+src\core\geometry.ts
+src\core\courses.ts
+src\core\characters.ts
+src\core\accessories.ts
+src\audio\sound.ts
+src\art\registry.ts
+
+codex
+サングラスで両目を隠す案は、今回の「少なくとも片目は見える」という条件と矛盾しています。また、背景の重ね直しは透過や家具の縁で継ぎ目が出る可能性があります。現行の描画・当たり判定も確認し、修正案と数値付きの最低条件をまとめます。書き込みはジョブ指定の1ファイルに限定します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 src/core/session.ts; Get-Content -Encoding UTF8 src/core/scenes/room.ts; Get-Content -Encoding UTF8 src/core/placement.ts | Select-Object -First 145; Get-Content -Encoding UTF8 src/core/scenes/garden.ts | Select-Object -First 65; Get-Content -Encoding UTF8 src/core/scenes/shop.ts | Select-Object -First 75' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 231ms:
+// 1回の「さがす」プレイの状態（純粋関数）。表示とは分けてある。
+import { type Pt, bbox, distanceTo, transformShape, unionBBox } from './geometry';
+import { accessoryShapes } from './accessories';
+import { type Difficulty, type Placement, getSpot, silhouetteWorld, spotTransform } from './placement';
+import type { SceneDef, SceneId } from './scene';
+
+/** 見える形より少しだけ広い当たり判定（シーン座標）。巨大な矩形にはしない。 */
+export const HIT_TOLERANCE = 22;
+/** チャタリング防止（罰ではない） */
+export const TAP_DEBOUNCE_MS = 120;
+export const MAX_HINT = 3;
+
+export interface PlaySession {
+  sceneId: SceneId;
+  difficulty: Difficulty;
+  placements: Placement[];
+  found: boolean[];
+  /** 0: ヒントなし / 1: このあたり / 2: ちょっと うごく / 3: りんかく */
+  hintLevel: number;
+  hintsUsed: number;
+  origin: 'search' | 'hide' | 'course' | 'trial';
+  startedAt: number;
+}
+
+export function newSession(
+  sceneId: SceneId,
+  difficulty: Difficulty,
+  placements: Placement[],
+  origin: 'search' | 'hide' | 'course' | 'trial',
+  now: number,
+): PlaySession {
+  return {
+    sceneId,
+    difficulty,
+    placements: placements.map((p) => ({ ...p, ...(p.acc ? { acc: { ...p.acc } } : {}) })),
+    found: placements.map(() => false),
+    hintLevel: 0,
+    hintsUsed: 0,
+    origin,
+    startedAt: now,
+  };
+}
+
+export function isComplete(s: PlaySession): boolean {
+  return s.found.length > 0 && s.found.every(Boolean);
+}
+
+/** タップ位置にいる、まだ見つかっていないキャラクターの番号。いなければ -1。 */
+export function hitTest(scene: SceneDef, s: PlaySession, p: Pt, tol = HIT_TOLERANCE): number {
+  let best = -1;
+  let bd = Infinity;
+  s.placements.forEach((pl, i) => {
+    if (s.found[i]) return;
+    const spot = getSpot(scene, pl.spot);
+    // 帽子や傘をタッチしても見つけたことにする
+    const shapes = [...silhouetteWorld(pl.char, spot), ...accessoryShapes(pl.acc).map((sh) => transformShape(spotTransform(spot), sh))];
+    const d = Math.min(...shapes.map((sh) => distanceTo(sh, p)));
+    if (d <= tol && d < bd) {
+      bd = d;
+      best = i;
+    }
+  });
+  return best;
+}
+
+export interface TapResult {
+  session: PlaySession;
+  foundIndex: number;
+}
+
+export function tap(scene: SceneDef, s: PlaySession, p: Pt): TapResult {
+  const i = hitTest(scene, s, p);
+  if (i < 0) return { session: s, foundIndex: -1 }; // 外れても何も減らない
+  const found = s.found.slice();
+  found[i] = true;
+  return { session: { ...s, found, hintLevel: 0 }, foundIndex: i };
+}
+
+export function nextHint(s: PlaySession): PlaySession {
+  if (isComplete(s)) return s;
+  return { ...s, hintLevel: Math.min(MAX_HINT, s.hintLevel + 1), hintsUsed: s.hintsUsed + 1 };
+}
+
+export interface HintInfo {
+  level: number;
+  index: number;
+  /** レベル1：おおまかな まる（中心は対象から少しずらす） */
+  area: { cx: number; cy: number; r: number };
+}
+
+export function currentHint(scene: SceneDef, s: PlaySession): HintInfo | null {
+  if (s.hintLevel === 0) return null;
+  const index = s.found.findIndex((f) => !f);
+  if (index < 0) return null;
+  const pl = s.placements[index];
+  const b = unionBBox(silhouetteWorld(pl.char, getSpot(scene, pl.spot)).map(bbox));
+  const cx = (b.x0 + b.x1) / 2;
+  const cy = (b.y0 + b.y1) / 2;
+  // 対象がちょうど中心にならないよう、位置から決まる量だけずらす（毎回同じ）
+  const ang = ((pl.spot.length * 37 + index * 101) % 360) * (Math.PI / 180);
+  const r = 230;
+  const off = 70;
+  return {
+    level: s.hintLevel,
+    index,
+    area: {
+      cx: Math.min(1000 - 40, Math.max(40, cx + Math.cos(ang) * off)),
+      cy: Math.min(1000 - 40, Math.max(40, cy + Math.sin(ang) * off)),
+      r,
+    },
+  };
+}
+
+export function sceneOf(scenes: Record<SceneId, SceneDef>, s: PlaySession): SceneDef {
+  return scenes[s.sceneId];
+}
+// へや：布（カーテン・ソファ・ラグ）と木目のある部屋
+import type { SceneDef, CostumeDef } from '../scene';
+import { patternMarkup } from '../patterns';
+import { basket, ball, blanket, blocks, cushion, pot, toyBox } from '../props';
+
+const costumes: CostumeDef[] = [
+  { id: 'plain', kind: 'plain', spec: { kind: 'plain', bg: '#F6E4C8', fg: '#F6E4C8', size: 40 } },
+  { id: 'stripes', kind: 'stripes', spec: { kind: 'stripes', bg: '#FCE4E9', fg: '#F2A9B8', size: 38 } },
+  { id: 'dots', kind: 'dots', spec: { kind: 'dots', bg: '#7EA6DA', fg: '#EAF2FC', size: 46 } },
+  { id: 'check', kind: 'check', spec: { kind: 'check', bg: '#FFF6DC', fg: '#F2B84B', size: 52 } },
+];
+
+export const room: SceneDef = {
+  id: 'room',
+  name: 'へや',
+  costumes,
+  base:
+    // 床（木目）
+    `<rect x="0" y="650" width="1000" height="350" fill="url(#{P}wood-room)"/>` +
+    `<path d="M0 760 H1000 M0 880 H1000" stroke="#C99A68" stroke-width="3" opacity="0.6"/>`,
+  extraDefs:
+    patternMarkup('{P}wood-room', { kind: 'wood', bg: '#E8C194', fg: '#CFA06C', size: 120 }) +
+    patternMarkup('{P}wood-room-dark', { kind: 'wood', bg: '#C08A57', fg: '#9E6C3E', size: 90 }),
+  regions: [
+    { id: 'wall', costume: 'plain', shapes: [{ kind: 'rect', x: 0, y: 0, w: 1000, h: 650 }] },
+    {
+      id: 'curtain',
+      costume: 'stripes',
+      shapes: [
+        {
+          kind: 'poly',
+          pts: [
+            { x: 24, y: 40 },
+            { x: 218, y: 40 },
+            { x: 226, y: 644 },
+            { x: 16, y: 644 },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'sofa',
+      costume: 'dots',
+      shapes: [
+        { kind: 'rect', x: 360, y: 400, w: 400, h: 240, rx: 42 },
+        { kind: 'rect', x: 326, y: 480, w: 70, h: 190, rx: 30 },
+        { kind: 'rect', x: 724, y: 480, w: 70, h: 190, rx: 30 },
+      ],
+    },
+    { id: 'rug', costume: 'check', shapes: [{ kind: 'ellipse', cx: 530, cy: 868, rx: 380, ry: 112 }] },
+  ],
+  decor:
+    // はば木
+    `<rect x="0" y="632" width="1000" height="22" fill="#D7B48A"/>` +
+    // まど
+    `<rect x="250" y="80" width="250" height="230" rx="14" fill="#CFEFFF" stroke="#C99A68" stroke-width="12"/>` +
+    `<path d="M375 86 V304 M256 195 H494" stroke="#C99A68" stroke-width="8"/>` +
+    `<circle cx="440" cy="140" r="26" fill="#FFF2A8"/>` +
+    // カーテンレール
+    `<rect x="8" y="28" width="230" height="16" rx="8" fill="#B07A4A"/>` +
+    // ソファの脚
+    `<rect x="350" y="664" width="18" height="22" rx="4" fill="#7A5A3A"/><rect x="752" y="664" width="18" height="22" rx="4" fill="#7A5A3A"/>` +
+    // 低い戸だな（木目）
+    `<rect x="812" y="474" width="176" height="180" rx="10" fill="url(#{P}wood-room-dark)" stroke="#7A5A3A" stroke-width="5"/>` +
+    `<path d="M900 480 V648" stroke="#7A5A3A" stroke-width="4"/><circle cx="886" cy="566" r="6" fill="#7A5A3A"/><circle cx="914" cy="566" r="6" fill="#7A5A3A"/>`,
+  minorDecor:
+    // かべの絵と時計
+    `<rect x="560" y="120" width="120" height="96" rx="8" fill="#FFFFFF" stroke="#C99A68" stroke-width="8"/>` +
+    `<path d="M574 200 L606 160 L630 186 L646 170 L668 200Z" fill="#8CCB9B"/><circle cx="650" cy="146" r="10" fill="#F2B84B"/>` +
+    `<circle cx="790" cy="140" r="40" fill="#FFFFFF" stroke="#B07A4A" stroke-width="8"/><path d="M790 140 V114 M790 140 L808 150" stroke="#4A3A40" stroke-width="5" stroke-linecap="round"/>`,
+  spots: [
+    { id: 'room-curtain', x: 120, y: 646, s: 1, region: 'curtain', prop: toyBox(120, 590), easy: true },
+    { id: 'room-plant', x: 290, y: 652, s: 1, region: 'wall', prop: pot(290, 588), easy: true },
+    { id: 'room-sofa-l', x: 470, y: 600, s: 1, region: 'sofa', prop: cushion(470, 602), easy: true },
+    { id: 'room-sofa-r', x: 650, y: 600, s: 1, region: 'sofa', prop: blanket(650, 566), easy: false },
+    { id: 'room-cabinet', x: 900, y: 476, s: 0.95, region: 'wall', prop: pot(900, 418, 104, 62, '#7FB8F0'), easy: false },
+    { id: 'room-rug-1', x: 260, y: 880, s: 1, region: 'rug', prop: blocks(260, 912), easy: true },
+    { id: 'room-rug-2', x: 440, y: 950, s: 1, region: 'rug', prop: ball(440, 920), easy: false },
+    { id: 'room-rug-3', x: 630, y: 878, s: 1, region: 'rug', prop: basket(630, 832), easy: true },
+    { id: 'room-rug-4', x: 810, y: 930, s: 1, region: 'rug', prop: cushion(810, 920, 78, 44, '#F6A5B8'), easy: false },
+  ],
+};
+// 隠れ場所の検証と自動配置。描画・当たり判定と同じ形状定義を使う。
+import { CHARACTERS, BODY, type CharacterId, CHARACTER_IDS } from './characters';
+import {
+  type BBox,
+  type Pt,
+  type Shape,
+  SCENE_SIZE,
+  bbox,
+  bboxOverlap,
+  contains,
+  samplePoints,
+  transformPt,
+  transformShape,
+  unionBBox,
+} from './geometry';
+import { type Rng, mulberry32, shuffle } from './rng';
+import type { SceneDef, SpotDef } from './scene';
+import type { Accessories } from './accessories';
+
+export type Difficulty = 'easy' | 'normal';
+
+export interface Placement {
+  char: CharacterId;
+  spot: string;
+  costume: string;
+  /** exact: 背景と同じ柄 / soft: 同じ種類で少し違う柄 */
+  variant: 'exact' | 'soft';
+  /** コースだけ：ニット帽・傘 */
+  acc?: Accessories;
+}
+
+export const LIMITS = {
+  /** 画面の端から最低これだけ内側 */
+  margin: 6,
+  /** キャラクター全体のうち見えている割合の下限（全面を隠さない） */
+  minVisible: 0.45,
+  /** からだ（服）が少しは隠れている */
+  maxBodyVisible: 0.92,
+  /** からだ（服）が見えている割合の下限（柄を選ぶ意味を残す） */
+  minBodyVisible: 0.2,
+  /** 見えている服の後ろが、狙った柄の領域である割合 */
+  minRegionMatch: 0.7,
+  /** シーン座標での最小の高さ（極端に小さくしない） */
+  minHeight: 170,
+  /** 複数体の間のすきま */
+  gap: 4,
+};
+
+const STEP = 6;
+
+export function spotTransform(spot: SpotDef) {
+  return { tx: spot.x, ty: spot.y, s: spot.s };
+}
+
+export function silhouetteWorld(char: CharacterId, spot: SpotDef): Shape[] {
+  const t = spotTransform(spot);
+  return CHARACTERS[char].silhouette.map((s) => transformShape(t, s));
+}
+
+export function silhouetteBBox(char: CharacterId, spot: SpotDef): BBox {
+  return unionBBox(silhouetteWorld(char, spot).map(bbox));
+}
+
+/** どのキャラクターが来ても入る外枠 */
+export function spotBBox(spot: SpotDef): BBox {
+  return unionBBox(CHARACTER_IDS.map((c) => silhouetteBBox(c, spot)));
+}
+
+export function regionAt(scene: SceneDef, p: Pt): string | null {
+  for (let i = scene.regions.length - 1; i >= 0; i--) {
+    if (scene.regions[i].shapes.some((s) => contains(s, p))) return scene.regions[i].id;
+  }
+  return null;
+}
+
+function occluded(scene: SceneDef, p: Pt): boolean {
+  return scene.spots.some((sp) => sp.prop.shapes.some((s) => contains(s, p)));
+}
+
+export interface SpotReport {
+  spot: string;
+  char: CharacterId;
+  visible: number;
+  bodyVisible: number;
+  faceVisible: boolean;
+  inBounds: boolean;
+  height: number;
+  regionMatch: number;
+  ok: boolean;
+  problems: string[];
+}
+
+export function analyzeSpot(scene: SceneDef, spot: SpotDef, char: CharacterId): SpotReport {
+  const t = spotTransform(spot);
+  const shapes = silhouetteWorld(char, spot);
+  // 重なりを数えないよう、全形状のサンプル点を一意化
+  const seen = new Set<string>();
+  const pts: Pt[] = [];
+  for (const s of shapes) {
+    for (const p of samplePoints(s, STEP)) {
+      const k = `${Math.round(p.x)}:${Math.round(p.y)}`;
+      if (!seen.has(k)) {
+        seen.add(k);
+        pts.push(p);
+      }
+    }
+  }
+  const visiblePts = pts.filter((p) => !occluded(scene, p));
+  const body = samplePoints(transformShape(t, BODY), STEP);
+  const bodyVis = body.filter((p) => !occluded(scene, p));
+  const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
+  const faceVisible = face.every((p) => !occluded(scene, p));
+  const b = unionBBox(shapes.map(bbox));
+  const m = LIMITS.margin;
+  const inBounds = b.x0 >= m && b.y0 >= m && b.x1 <= SCENE_SIZE - m && b.y1 <= SCENE_SIZE - m;
+  const regionMatch = bodyVis.length === 0 ? 0 : bodyVis.filter((p) => regionAt(scene, p) === spot.region).length / bodyVis.length;
+  const visible = visiblePts.length / pts.length;
+  const bodyVisible = bodyVis.length / body.length;
+  const height = b.y1 - b.y0;
+  const problems: string[] = [];
+  if (visible < LIMITS.minVisible) problems.push(`visible ${visible.toFixed(2)} < ${LIMITS.minVisible}`);
+  if (bodyVisible > LIMITS.maxBodyVisible) problems.push(`bodyVisible ${bodyVisible.toFixed(2)} > ${LIMITS.maxBodyVisible}`);
+  if (bodyVisible < LIMITS.minBodyVisible) problems.push(`bodyVisible ${bodyVisible.toFixed(2)} < ${LIMITS.minBodyVisible}`);
+  if (!faceVisible) problems.push('face hidden');
+  if (!inBounds) problems.push('out of bounds');
+  if (height < LIMITS.minHeight) problems.push(`height ${height.toFixed(0)} < ${LIMITS.minHeight}`);
+  if (regionMatch < LIMITS.minRegionMatch) problems.push(`regionMatch ${regionMatch.toFixed(2)} < ${LIMITS.minRegionMatch}`);
+  return { spot: spot.id, char, visible, bodyVisible, faceVisible, inBounds, height, regionMatch, ok: problems.length === 0, problems };
+}
+
+export function spotsConflict(a: SpotDef, b: SpotDef): boolean {
+  return a.id === b.id || bboxOverlap(spotBBox(a), spotBBox(b), LIMITS.gap);
+}
+
+export function getSpot(scene: SceneDef, id: string): SpotDef {
+  const s = scene.spots.find((sp) => sp.id === id);
+  if (!s) throw new Error(`unknown spot ${id}`);
+  return s;
+}
+
+export function costumeForRegion(scene: SceneDef, region: string): string {
+  const r = scene.regions.find((x) => x.id === region);
+  if (!r) throw new Error(`unknown region ${region}`);
+  return r.costume;
+}
+// にわ：葉もようの生け垣、しまの柵、水玉の花だん
+import type { SceneDef, CostumeDef } from '../scene';
+import { bucket, crate, flowerClump, pot, stones, stump, wateringCan } from '../props';
+
+const costumes: CostumeDef[] = [
+  { id: 'plain', kind: 'plain', spec: { kind: 'plain', bg: '#9DD481', fg: '#9DD481', size: 40 } },
+  { id: 'stripes', kind: 'stripes', spec: { kind: 'stripes', bg: '#FFF7E8', fg: '#E9D2AE', size: 40 } },
+  { id: 'dots', kind: 'dots', spec: { kind: 'dots', bg: '#79BE68', fg: '#F7A8C4', size: 42 } },
+  { id: 'leaf', kind: 'leaf', spec: { kind: 'leaf', bg: '#67B067', fg: '#3F8E4C', size: 48 } },
+];
+
+const hedgeTop = (() => {
+  const pts = [{ x: 0, y: 660 }];
+  for (let x = 0; x <= 570; x += 57) pts.push({ x, y: x % 114 === 0 ? 300 : 278 });
+  pts.push({ x: 570, y: 660 });
+  return pts;
+})();
+
+const fence = (() => {
+  const pts = [{ x: 570, y: 660 }];
+  for (let x = 570; x < 1000; x += 40) {
+    pts.push({ x, y: 380 }, { x: x + 20, y: 356 });
+  }
+  pts.push({ x: 1000, y: 380 }, { x: 1000, y: 660 });
+  return pts;
+})();
+
+export const garden: SceneDef = {
+  id: 'garden',
+  name: 'にわ',
+  costumes,
+  base:
+    `<rect x="0" y="0" width="1000" height="660" fill="#CDEBFA"/>` +
+    `<circle cx="860" cy="120" r="56" fill="#FFE07A"/>`,
+  extraDefs: '',
+  regions: [
+    { id: 'lawn', costume: 'plain', shapes: [{ kind: 'rect', x: 0, y: 650, w: 1000, h: 350 }] },
+    { id: 'hedge', costume: 'leaf', shapes: [{ kind: 'poly', pts: hedgeTop }] },
+    { id: 'fence', costume: 'stripes', shapes: [{ kind: 'poly', pts: fence }] },
+    { id: 'flowers', costume: 'dots', shapes: [{ kind: 'rect', x: 40, y: 770, w: 470, h: 176, rx: 60 }] },
+  ],
+  decor:
+    `<path d="M570 400 H1000 M570 600 H1000" stroke="#D9BE94" stroke-width="10"/>` +
+    // 飛び石
+    `<ellipse cx="560" cy="770" rx="44" ry="18" fill="#D9D3E2"/><ellipse cx="720" cy="820" rx="44" ry="18" fill="#D9D3E2"/><ellipse cx="650" cy="980" rx="44" ry="18" fill="#D9D3E2"/>`,
+  minorDecor:
+    `<g fill="#FFFFFF" opacity="0.9"><ellipse cx="200" cy="120" rx="70" ry="28"/><ellipse cx="250" cy="100" rx="50" ry="30"/><ellipse cx="560" cy="170" rx="60" ry="24"/></g>` +
+    `<path d="M380 180 q12 -12 24 0 q12 -12 24 0" stroke="#4A3A40" stroke-width="4" fill="none"/>`,
+  spots: [
+    { id: 'garden-hedge-1', x: 110, y: 662, s: 1, region: 'hedge', prop: bucket(110, 600), easy: true },
+    { id: 'garden-hedge-2', x: 290, y: 662, s: 1, region: 'hedge', prop: stones(290, 638), easy: false },
+    { id: 'garden-hedge-3', x: 470, y: 662, s: 1, region: 'hedge', prop: pot(470, 598, 116, 70, '#C77E4E'), easy: true },
+    { id: 'garden-fence-1', x: 670, y: 662, s: 1, region: 'fence', prop: crate(670, 598), easy: true },
+    { id: 'garden-fence-2', x: 870, y: 662, s: 1, region: 'fence', prop: wateringCan(856, 598), easy: false },
+    { id: 'garden-flowers-1', x: 150, y: 900, s: 1, region: 'flowers', prop: flowerClump(150, 884), easy: true },
+    { id: 'garden-flowers-2', x: 390, y: 900, s: 1, region: 'flowers', prop: flowerClump(390, 888, 74, 38), easy: false },
+    { id: 'garden-lawn-1', x: 640, y: 905, s: 1, region: 'lawn', prop: stump(640, 862), easy: true },
+    { id: 'garden-lawn-2', x: 870, y: 870, s: 1, region: 'lawn', prop: bucket(870, 826, 124, 74), easy: false },
+  ],
+};
+// おやつのみせ：水玉のかべ、しまのカウンター、チェックのテーブルクロス
+import type { SceneDef, CostumeDef } from '../scene';
+import { breadBasket, cakeStand, jar, sack, stool } from '../props';
+
+const costumes: CostumeDef[] = [
+  { id: 'plain', kind: 'plain', spec: { kind: 'plain', bg: '#F2DDBE', fg: '#F2DDBE', size: 40 } },
+  { id: 'stripes', kind: 'stripes', spec: { kind: 'stripes', bg: '#E6F7F0', fg: '#9CD8C2', size: 40 } },
+  { id: 'dots', kind: 'dots', spec: { kind: 'dots', bg: '#FCE5EC', fg: '#F4AFC4', size: 46 } },
+  { id: 'check', kind: 'check', spec: { kind: 'check', bg: '#FFFFFF', fg: '#EE8C8C', size: 46 } },
+];
+
+const awning = (() => {
+  let d = 'M0 40 H1000 V150';
+  for (let x = 1000; x > 0; x -= 50) d += ` Q${x - 25} 190 ${x - 50} 150`;
+  return d + 'Z';
+})();
+
+export const shop: SceneDef = {
+  id: 'shop',
+  name: 'おやつのみせ',
+  costumes,
+  base: '',
+  extraDefs: `<clipPath id="{P}awning-clip"><path d="${awning}"/></clipPath>`,
+  regions: [
+    { id: 'wall', costume: 'dots', shapes: [{ kind: 'rect', x: 0, y: 0, w: 1000, h: 600 }] },
+    { id: 'floor', costume: 'plain', shapes: [{ kind: 'rect', x: 0, y: 790, w: 1000, h: 210 }] },
+    { id: 'counter', costume: 'stripes', shapes: [{ kind: 'rect', x: 60, y: 590, w: 880, h: 210 }] },
+    { id: 'cloth', costume: 'check', shapes: [{ kind: 'poly', pts: [{ x: 640, y: 730 }, { x: 960, y: 730 }, { x: 980, y: 975 }, { x: 620, y: 975 }] }] },
+  ],
+  decor:
+    // ひさし
+    `<path d="${awning}" fill="#FFFFFF" stroke="#4A3A40" stroke-width="3"/>` +
+    `<g clip-path="url(#{P}awning-clip)">${Array.from({ length: 10 }, (_, i) => `<rect x="${i * 100}" y="40" width="50" height="160" fill="#F7B267"/>`).join('')}</g>` +
+    // カウンターの天板
+    `<rect x="40" y="572" width="920" height="26" rx="8" fill="#C98F5A" stroke="#4A3A40" stroke-width="3"/>` +
+    // テーブルの天板
+    `<rect x="624" y="716" width="352" height="20" rx="8" fill="#B07A4A" stroke="#4A3A40" stroke-width="3"/>`,
+  minorDecor:
+    // かべのたなと びん
+    `<rect x="120" y="270" width="300" height="14" rx="5" fill="#C98F5A"/>` +
+    `<rect x="150" y="214" width="46" height="56" rx="12" fill="#EAF6FB" stroke="#4A3A40" stroke-width="3"/><circle cx="173" cy="250" r="12" fill="#F07D7D"/>` +
+    `<rect x="230" y="224" width="46" height="46" rx="12" fill="#EAF6FB" stroke="#4A3A40" stroke-width="3"/><circle cx="253" cy="250" r="12" fill="#FFD45C"/>` +
+    `<rect x="310" y="210" width="46" height="60" rx="12" fill="#EAF6FB" stroke="#4A3A40" stroke-width="3"/><circle cx="333" cy="250" r="12" fill="#8CCB9B"/>` +
+    `<circle cx="760" cy="310" r="64" fill="#FFF3D6" stroke="#4A3A40" stroke-width="3"/><path d="M724 330 q36 -70 72 0z" fill="#F8D6A8" stroke="#4A3A40" stroke-width="3"/><circle cx="760" cy="290" r="9" fill="#F07D7D"/>`,
+  spots: [
+    { id: 'shop-wall-1', x: 190, y: 578, s: 1, region: 'wall', prop: jar(190, 532), easy: true },
+    { id: 'shop-wall-2', x: 470, y: 578, s: 1, region: 'wall', prop: cakeStand(470, 498), easy: false },
+    { id: 'shop-wall-3', x: 790, y: 578, s: 1, region: 'wall', prop: breadBasket(790, 538), easy: true },
+    { id: 'shop-counter-1', x: 250, y: 800, s: 1, region: 'counter', prop: stool(250, 728), easy: true },
+    { id: 'shop-counter-2', x: 470, y: 800, s: 1, region: 'counter', prop: sack(470, 734), easy: false },
+    { id: 'shop-cloth-1', x: 720, y: 960, s: 1, region: 'cloth', prop: sack(720, 896), easy: true },
+    { id: 'shop-cloth-2', x: 880, y: 962, s: 1, region: 'cloth', prop: stool(880, 872), easy: false },
+    { id: 'shop-floor-1', x: 90, y: 985, s: 0.95, region: 'floor', prop: jar(90, 942, 120, 54), easy: true },
+    { id: 'shop-floor-2', x: 560, y: 985, s: 0.95, region: 'floor', prop: breadBasket(560, 948), easy: false },
+  ],
+};
+
+apply patch
+patch: completed
+C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\audit\codex\hardest-course-r3.md
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r3.md b/pattern-hide-family-beta/audit/codex/hardest-course-r3.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..69e94f7e5fa953afc66a61bc88c99ea30e97a371
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r3.md
+@@ -0,0 +1,62 @@
++# 最難関コース・第3回：顔の一部を隠す成人用試遊
++
++2026-10-08／ジョブ93。**主役は家具の裏からのぞく配置にする。両目を覆うサングラスは不採用、深い帽子は片目全体を残す形に修正する。** 第2回の「顔を隠さない」は今回の本人判断で更新する。通常コース1〜10には適用せず、最大3人・10人発見で終了・減点なし・時間制限なし・通常進捗を変えない方針を維持する。以下の数値は試遊用の提案値であり、実証済みの見やすさ基準ではない。
++
++## 重要な穴と修正案
++
++1. **サングラス単独でも条件違反。** 「のぞき＋サングラス」だけを禁止しても、濃い両レンズが両目を隠す時点で「片目は見える」を満たさない。額に上げる／傾けて片目全体を出す案に置き換える。深い帽子も両目を半分ずつ残す仕様にはせず、片目の輪郭・瞳を丸ごと残す。ハイライトだけ見える状態を片目可視と数えない。まずはのぞきと片目を残す帽子で試す。
++2. **「同じ絵だから継ぎ目なし」は条件付き。** 現行 `src/ui/sceneView.ts` の背景は back→柄領域→over→minor、キャラの後にforeを描く。柄＋overだけでは最終背景の復元にならず、重なった別の柄、minor、境界外に伸びる縁や影を落とす。透過したoverを元のover上に直接足すと濃くなる箇所があり、不透明な柄で覆い直せる内側とは事情が違う。座標が同じでもクリップの半透明な端ではキャラの色が細く漏れ得る。
++3. **柄の領域と、物が隠す形を分ける。** ソファは背・肘・丸い角・縁の影まで、カーテンはひだの外縁まで、生け垣は葉先までが対象。単純な柄領域で切ると輪郭だけがキャラの後ろに残る。コード描画では店のカウンター柄が y=590 からなのに天板は y=572〜598、x方向にも柄より広い。柄の四角だけを再描画すると天板の上側を顔が突き抜ける。ラグ・床・壁の柄は、裏に立てる家具として扱わない。
++4. **窓は独立した構造が必要。** 現行のへやの窓はdecorにガラス面と桟がまとまっており、窓は柄領域でも既存spotでもない。overを窓全体に再描画すると、ガラスや景色ごとキャラを消すおそれがある。「奥の景色→ガラス内で切ったキャラ→桟・枠」の順を専用に定義する。透明ガラスや反射を重ねるなら、最後の合成で目が読めることも確認する。0.5倍の固定は採用せず、下の画面上の最低寸法を満たす倍率にする。
++5. **判定とヒントを一緒に直さないと不公平になる。** 現行 `src/core/session.ts` のhitTestは全身・小物の形までの距離を使い、隠れた胴体も当たる。前景にpointer-eventsを設定するだけでは直らない。また現行の最終ヒントは全身の輪郭なので、そのままでは押しても当たらない胴体を強調する。配置の採否・描画・当たり判定・ヒントが、同じ最終可視形状を参照する必要がある。
++
++## のぞきの描画を成立させる条件
++
++- **物ごとの前面マスクを先に確定する。** キャラがいない完成背景を、表示中と同じ柄の原点・倍率・描画順・minorの表示条件で一度合成し、対象の物が覆う部分だけ復元する案を推す。別案は背景を奥と手前に分離して手前を一度だけ描くこと。どちらも、キャラの表示領域は同じマスクの補集合で切り、縁の色漏れ・二重合成を縮小表示で確認する。影だけの半透明部分は、完全遮蔽の領域として扱わない。
++- 全背景をキャラの上に戻さない。物より上や横に出た顔まで消える。物の裏に入るキャラと、物の前に立つ別のキャラは描画順を分ける。今回まずは復元マスクが他の人物・小物と交差する配置を候補から外す。foreを後段で重ねる場合、その下地の復元へforeを含めて二重に描かない。
++- PNG使用時とコード描画時で家具の縁は一致するとは限らない。専用マスクは実際に使う背景ごとに検証し、未対応の背景表現ではそののぞき候補を使わない。単純にクリップを一律に広げる対処は、目まで削るので避ける。
++- 背景の読み込み対策は優先して実施する。backだけでなく柄タイル・over・必要なforeなど、今回の完成画面が使う画像の読み込みとデコードを待ち、マスクと配置も揃った画面をまとめて公開する。待機中はステージの表示と入力を止める。失敗時は完成した代替画面か再試行・戻り口へ進み、キャラだけを出さない。画面遷移後に古い読み込み完了処理が画面を公開しないことも確認する。
++
++## 最低線：シーン座標ではなく表示後の大きさでも判定
++
++画面上の数値はすべてCSS px。端末の画素倍率では増やさず、SVGの実表示倍率で換算する。窓枠・帽子・foreをすべて反映した**最終状態**で測る。
++
++| 項目 | 成人用試遊の下限・扱い |
++| --- | --- |
++| 片目 | 片方の目全体が無遮蔽。実描画の目の幅・高さが各3px以上、遮蔽物の境界から1px以上離す。点だけの判定をしない |
++| 可視の大きさ | 目を含む連続した頭部の可視部分が幅24px×高さ12px以上の外接枠を持ち、実際の可視面積が180px²以上。細い線だけで枠を満たさない |
++| 見える割合 | 遮蔽前の頭部面積の20%以上、全身面積の5%以上を残す。双方とも透明余白・小物を除く。割合だけで極小表示を合格にしない |
++| 見分け | 片目に加えて、耳・くるん毛・もこもこの頭の縁など、色以外の特徴を1つ残す。対象一覧は識別できる通常の顔を維持 |
++| タップ | 可視形状から最大8pxの許容幅。ただし家具・桟の不透明な遮蔽部分を除外する。残った判定領域に24×24pxの押せる範囲を1つ確保できない候補は不採用。他の人物の判定領域との間隔は8px以上 |
++| 最終ヒント | 可視部分の輪郭を2px以上の線で背景より前に静止表示。必要なら明暗の二重線。上記の押せる範囲に重なるマーカーも出し、隠れた胴体をタップ先として示さない |
++
++ヒントは成人用だけ「周辺の円→見えている顔の周辺に静止マーカー→可視輪郭＋押せる位置」にする。3回以内に最終段階へ到達し、発見まで消さず、何回でも使える。動きによる露出を難度設計に使わない。ヒントを出したことでマーカーが入力を遮らないことも必須。
++
++第2回の優先帯（全体可視50%以上、服25〜40%）や現行 `analyzeSpot` の全顔・高さ170・服20%以上の条件を、そのままのぞきへ適用すると狙う配置が落ちる。**成人用ののぞき・窓にだけ別の検証を設け、上記条件に置き換える。** 服が全く見えない候補では柄一致率を計算・順位付けの必須条件にしない。通常配置には従来の検証を残す。画面が狭く下限を割る場合は倍率か露出を増やし、それでも成立しなければ別候補にする。
++
++## 組み合わせの規則
++
++| 手段 | 同じ子に重ねてよいもの | 今回重ねないもの |
++| --- | --- | --- |
++| 家具のぞき | 服の背景柄、目を隠さない通常位置の背景柄帽子（最終可視条件を満たす場合のみ） | 窓、深い帽子、サングラス |
++| 窓の奥 | 服の柄。倍率は最低寸法から決める | 家具のぞき、深い帽子、サングラス、追加の縮小 |
++| 片目を残す深い帽子 | 帽子自体の背景柄、服の背景柄 | 顔を隠す前景、窓、サングラス、別の帽子 |
++| 片目を出すよう傾けたサングラス | 服の背景柄 | のぞき、窓、深い帽子。濃い両レンズで両目を隠す形は単独でも禁止 |
++
++顔を隠す主な手段は1人1種類。背景に成立する候補があれば、最大3人のうち**1人を家具のぞきまたは窓**にする。残りは片目帽子か通常の背景柄帽子を使い、サングラス修正版は別途見た目を確認してから加える。人数を揃えるため最低線を割らず、安全に置ける2人・1人へ減らす。のぞき候補がない場合の通常配置への代替は試遊記録で区別し、難化が成功したと数えない。
++
++## さらに効きそうな案
++
++**隠す量だけでなく、探す高さと向きを変える。** 現行の足元付近のspotに加え、ソファ背の上・カーテンの左右端・窓の左右の区画など、物理的に自然な場所を候補化する。同じ家具でも前回と異なる端や高さを選び、「いつもの足元を順番に見る」だけで解けないようにする。顔の色を薄める、点ほどに縮める、動きで知らせる、にせものを置くことには頼らない。窓は専用マスクが必要なので、最初はソファ・カーテン・カウンターの3種を優先する。
++
++## 本人の試遊で確かめること：3つ
++
++1. **初見の探し方が変わったか。** 第2回配置とのぞき配置で、どこを探したか・何が手がかりだったか・ヒントを何段階使ったかを比較する。順序を入れ替え、覚えた同一配置だけで比較しない。発見までの時間は観察記録に限り、制限や採点にはしない。
++2. **見つけた後に迷わず押せるか。** 320×568、390×844、768×1024で、3体それぞれの片目・特徴を読めるか確認する。見えている顔付近への意図したタップ10回中9回以上が成功することを試行目標とし、失敗は難しさの成果に数えない。隠れた胴体・窓の桟では成功しないこと、3段目ヒントで全員を発見できることも確認する。
++3. **初表示も完成後も自然か。** 初回読み込み・低速相当・再訪・画像失敗で、キャラだけの露出が1フレームもないか録画で確認する。家具の縁、葉先、天板、窓の桟に色漏れ・切れ目・二重の影がないか、PNGとコード描画、狭い画面でminorが省かれる状態でも確認する。通常1〜10の見え方・判定・ヒントも変わっていないことを確認する。
++
++## 作業記録
++
++- 実施・方法：AGENTS.md、ジョブ93、第2回レポート、ART_SLOTS.md、CODEX_ART_BRIEF.mdを読み、描画・配置・当たり判定・ヒントと3背景のソースを静的レビューして本提案を作成した。画像制作・画像生成・外部検索・有料APIは使用していない。
++- 検査結果：要求された5項目、片目条件、通常コースとの分離、描画と判定の整合を文書点検した。数値は提案であり、実画像のマスク測定・実装・ブラウザ試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。継ぎ目が実際に発生するかは実装後の画面検証が必要。
++- 書込みは本ファイルのみ。ジョブ93の「1ファイルだけ」とユーザーの限定を優先し、STATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時から存在する未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r3.md b/pattern-hide-family-beta/audit/codex/hardest-course-r3.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..69e94f7e5fa953afc66a61bc88c99ea30e97a371
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r3.md
+@@ -0,0 +1,62 @@
++# 最難関コース・第3回：顔の一部を隠す成人用試遊
++
++2026-10-08／ジョブ93。**主役は家具の裏からのぞく配置にする。両目を覆うサングラスは不採用、深い帽子は片目全体を残す形に修正する。** 第2回の「顔を隠さない」は今回の本人判断で更新する。通常コース1〜10には適用せず、最大3人・10人発見で終了・減点なし・時間制限なし・通常進捗を変えない方針を維持する。以下の数値は試遊用の提案値であり、実証済みの見やすさ基準ではない。
++
++## 重要な穴と修正案
++
++1. **サングラス単独でも条件違反。** 「のぞき＋サングラス」だけを禁止しても、濃い両レンズが両目を隠す時点で「片目は見える」を満たさない。額に上げる／傾けて片目全体を出す案に置き換える。深い帽子も両目を半分ずつ残す仕様にはせず、片目の輪郭・瞳を丸ごと残す。ハイライトだけ見える状態を片目可視と数えない。まずはのぞきと片目を残す帽子で試す。
++2. **「同じ絵だから継ぎ目なし」は条件付き。** 現行 `src/ui/sceneView.ts` の背景は back→柄領域→over→minor、キャラの後にforeを描く。柄＋overだけでは最終背景の復元にならず、重なった別の柄、minor、境界外に伸びる縁や影を落とす。透過したoverを元のover上に直接足すと濃くなる箇所があり、不透明な柄で覆い直せる内側とは事情が違う。座標が同じでもクリップの半透明な端ではキャラの色が細く漏れ得る。
++3. **柄の領域と、物が隠す形を分ける。** ソファは背・肘・丸い角・縁の影まで、カーテンはひだの外縁まで、生け垣は葉先までが対象。単純な柄領域で切ると輪郭だけがキャラの後ろに残る。コード描画では店のカウンター柄が y=590 からなのに天板は y=572〜598、x方向にも柄より広い。柄の四角だけを再描画すると天板の上側を顔が突き抜ける。ラグ・床・壁の柄は、裏に立てる家具として扱わない。
++4. **窓は独立した構造が必要。** 現行のへやの窓はdecorにガラス面と桟がまとまっており、窓は柄領域でも既存spotでもない。overを窓全体に再描画すると、ガラスや景色ごとキャラを消すおそれがある。「奥の景色→ガラス内で切ったキャラ→桟・枠」の順を専用に定義する。透明ガラスや反射を重ねるなら、最後の合成で目が読めることも確認する。0.5倍の固定は採用せず、下の画面上の最低寸法を満たす倍率にする。
++5. **判定とヒントを一緒に直さないと不公平になる。** 現行 `src/core/session.ts` のhitTestは全身・小物の形までの距離を使い、隠れた胴体も当たる。前景にpointer-eventsを設定するだけでは直らない。また現行の最終ヒントは全身の輪郭なので、そのままでは押しても当たらない胴体を強調する。配置の採否・描画・当たり判定・ヒントが、同じ最終可視形状を参照する必要がある。
++
++## のぞきの描画を成立させる条件
++
++- **物ごとの前面マスクを先に確定する。** キャラがいない完成背景を、表示中と同じ柄の原点・倍率・描画順・minorの表示条件で一度合成し、対象の物が覆う部分だけ復元する案を推す。別案は背景を奥と手前に分離して手前を一度だけ描くこと。どちらも、キャラの表示領域は同じマスクの補集合で切り、縁の色漏れ・二重合成を縮小表示で確認する。影だけの半透明部分は、完全遮蔽の領域として扱わない。
++- 全背景をキャラの上に戻さない。物より上や横に出た顔まで消える。物の裏に入るキャラと、物の前に立つ別のキャラは描画順を分ける。今回まずは復元マスクが他の人物・小物と交差する配置を候補から外す。foreを後段で重ねる場合、その下地の復元へforeを含めて二重に描かない。
++- PNG使用時とコード描画時で家具の縁は一致するとは限らない。専用マスクは実際に使う背景ごとに検証し、未対応の背景表現ではそののぞき候補を使わない。単純にクリップを一律に広げる対処は、目まで削るので避ける。
++- 背景の読み込み対策は優先して実施する。backだけでなく柄タイル・over・必要なforeなど、今回の完成画面が使う画像の読み込みとデコードを待ち、マスクと配置も揃った画面をまとめて公開する。待機中はステージの表示と入力を止める。失敗時は完成した代替画面か再試行・戻り口へ進み、キャラだけを出さない。画面遷移後に古い読み込み完了処理が画面を公開しないことも確認する。
++
++## 最低線：シーン座標ではなく表示後の大きさでも判定
++
++画面上の数値はすべてCSS px。端末の画素倍率では増やさず、SVGの実表示倍率で換算する。窓枠・帽子・foreをすべて反映した**最終状態**で測る。
++
++| 項目 | 成人用試遊の下限・扱い |
++| --- | --- |
++| 片目 | 片方の目全体が無遮蔽。実描画の目の幅・高さが各3px以上、遮蔽物の境界から1px以上離す。点だけの判定をしない |
++| 可視の大きさ | 目を含む連続した頭部の可視部分が幅24px×高さ12px以上の外接枠を持ち、実際の可視面積が180px²以上。細い線だけで枠を満たさない |
++| 見える割合 | 遮蔽前の頭部面積の20%以上、全身面積の5%以上を残す。双方とも透明余白・小物を除く。割合だけで極小表示を合格にしない |
++| 見分け | 片目に加えて、耳・くるん毛・もこもこの頭の縁など、色以外の特徴を1つ残す。対象一覧は識別できる通常の顔を維持 |
++| タップ | 可視形状から最大8pxの許容幅。ただし家具・桟の不透明な遮蔽部分を除外する。残った判定領域に24×24pxの押せる範囲を1つ確保できない候補は不採用。他の人物の判定領域との間隔は8px以上 |
++| 最終ヒント | 可視部分の輪郭を2px以上の線で背景より前に静止表示。必要なら明暗の二重線。上記の押せる範囲に重なるマーカーも出し、隠れた胴体をタップ先として示さない |
++
++ヒントは成人用だけ「周辺の円→見えている顔の周辺に静止マーカー→可視輪郭＋押せる位置」にする。3回以内に最終段階へ到達し、発見まで消さず、何回でも使える。動きによる露出を難度設計に使わない。ヒントを出したことでマーカーが入力を遮らないことも必須。
++
++第2回の優先帯（全体可視50%以上、服25〜40%）や現行 `analyzeSpot` の全顔・高さ170・服20%以上の条件を、そのままのぞきへ適用すると狙う配置が落ちる。**成人用ののぞき・窓にだけ別の検証を設け、上記条件に置き換える。** 服が全く見えない候補では柄一致率を計算・順位付けの必須条件にしない。通常配置には従来の検証を残す。画面が狭く下限を割る場合は倍率か露出を増やし、それでも成立しなければ別候補にする。
++
++## 組み合わせの規則
++
++| 手段 | 同じ子に重ねてよいもの | 今回重ねないもの |
++| --- | --- | --- |
++| 家具のぞき | 服の背景柄、目を隠さない通常位置の背景柄帽子（最終可視条件を満たす場合のみ） | 窓、深い帽子、サングラス |
++| 窓の奥 | 服の柄。倍率は最低寸法から決める | 家具のぞき、深い帽子、サングラス、追加の縮小 |
++| 片目を残す深い帽子 | 帽子自体の背景柄、服の背景柄 | 顔を隠す前景、窓、サングラス、別の帽子 |
++| 片目を出すよう傾けたサングラス | 服の背景柄 | のぞき、窓、深い帽子。濃い両レンズで両目を隠す形は単独でも禁止 |
++
++顔を隠す主な手段は1人1種類。背景に成立する候補があれば、最大3人のうち**1人を家具のぞきまたは窓**にする。残りは片目帽子か通常の背景柄帽子を使い、サングラス修正版は別途見た目を確認してから加える。人数を揃えるため最低線を割らず、安全に置ける2人・1人へ減らす。のぞき候補がない場合の通常配置への代替は試遊記録で区別し、難化が成功したと数えない。
++
++## さらに効きそうな案
++
++**隠す量だけでなく、探す高さと向きを変える。** 現行の足元付近のspotに加え、ソファ背の上・カーテンの左右端・窓の左右の区画など、物理的に自然な場所を候補化する。同じ家具でも前回と異なる端や高さを選び、「いつもの足元を順番に見る」だけで解けないようにする。顔の色を薄める、点ほどに縮める、動きで知らせる、にせものを置くことには頼らない。窓は専用マスクが必要なので、最初はソファ・カーテン・カウンターの3種を優先する。
++
++## 本人の試遊で確かめること：3つ
++
++1. **初見の探し方が変わったか。** 第2回配置とのぞき配置で、どこを探したか・何が手がかりだったか・ヒントを何段階使ったかを比較する。順序を入れ替え、覚えた同一配置だけで比較しない。発見までの時間は観察記録に限り、制限や採点にはしない。
++2. **見つけた後に迷わず押せるか。** 320×568、390×844、768×1024で、3体それぞれの片目・特徴を読めるか確認する。見えている顔付近への意図したタップ10回中9回以上が成功することを試行目標とし、失敗は難しさの成果に数えない。隠れた胴体・窓の桟では成功しないこと、3段目ヒントで全員を発見できることも確認する。
++3. **初表示も完成後も自然か。** 初回読み込み・低速相当・再訪・画像失敗で、キャラだけの露出が1フレームもないか録画で確認する。家具の縁、葉先、天板、窓の桟に色漏れ・切れ目・二重の影がないか、PNGとコード描画、狭い画面でminorが省かれる状態でも確認する。通常1〜10の見え方・判定・ヒントも変わっていないことを確認する。
++
++## 作業記録
++
++- 実施・方法：AGENTS.md、ジョブ93、第2回レポート、ART_SLOTS.md、CODEX_ART_BRIEF.mdを読み、描画・配置・当たり判定・ヒントと3背景のソースを静的レビューして本提案を作成した。画像制作・画像生成・外部検索・有料APIは使用していない。
++- 検査結果：要求された5項目、片目条件、通常コースとの分離、描画と判定の整合を文書点検した。数値は提案であり、実画像のマスク測定・実装・ブラウザ試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。継ぎ目が実際に発生するかは実装後の画面検証が必要。
++- 書込みは本ファイルのみ。ジョブ93の「1ファイルだけ」とユーザーの限定を優先し、STATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時から存在する未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short; Get-Content -Encoding UTF8 audit/codex/hardest-course-r3.md | Select-Object -Last 6; git diff --stat' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 302ms:
+?? audit/codex/hardest-course-r3.md
+?? video/hide-handoff-find.webm
+
+## 作業記録
+
+- 実施・方法：AGENTS.md、ジョブ93、第2回レポート、ART_SLOTS.md、CODEX_ART_BRIEF.mdを読み、描画・配置・当たり判定・ヒントと3背景のソースを静的レビューして本提案を作成した。画像制作・画像生成・外部検索・有料APIは使用していない。
+- 検査結果：要求された5項目、片目条件、通常コースとの分離、描画と判定の整合を文書点検した。数値は提案であり、実画像のマスク測定・実装・ブラウザ試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。継ぎ目が実際に発生するかは実装後の画面検証が必要。
+- 書込みは本ファイルのみ。ジョブ93の「1ファイルだけ」とユーザーの限定を優先し、STATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時から存在する未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r3.md b/pattern-hide-family-beta/audit/codex/hardest-course-r3.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..69e94f7e5fa953afc66a61bc88c99ea30e97a371
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r3.md
+@@ -0,0 +1,62 @@
++# 最難関コース・第3回：顔の一部を隠す成人用試遊
++
++2026-10-08／ジョブ93。**主役は家具の裏からのぞく配置にする。両目を覆うサングラスは不採用、深い帽子は片目全体を残す形に修正する。** 第2回の「顔を隠さない」は今回の本人判断で更新する。通常コース1〜10には適用せず、最大3人・10人発見で終了・減点なし・時間制限なし・通常進捗を変えない方針を維持する。以下の数値は試遊用の提案値であり、実証済みの見やすさ基準ではない。
++
++## 重要な穴と修正案
++
++1. **サングラス単独でも条件違反。** 「のぞき＋サングラス」だけを禁止しても、濃い両レンズが両目を隠す時点で「片目は見える」を満たさない。額に上げる／傾けて片目全体を出す案に置き換える。深い帽子も両目を半分ずつ残す仕様にはせず、片目の輪郭・瞳を丸ごと残す。ハイライトだけ見える状態を片目可視と数えない。まずはのぞきと片目を残す帽子で試す。
++2. **「同じ絵だから継ぎ目なし」は条件付き。** 現行 `src/ui/sceneView.ts` の背景は back→柄領域→over→minor、キャラの後にforeを描く。柄＋overだけでは最終背景の復元にならず、重なった別の柄、minor、境界外に伸びる縁や影を落とす。透過したoverを元のover上に直接足すと濃くなる箇所があり、不透明な柄で覆い直せる内側とは事情が違う。座標が同じでもクリップの半透明な端ではキャラの色が細く漏れ得る。
++3. **柄の領域と、物が隠す形を分ける。** ソファは背・肘・丸い角・縁の影まで、カーテンはひだの外縁まで、生け垣は葉先までが対象。単純な柄領域で切ると輪郭だけがキャラの後ろに残る。コード描画では店のカウンター柄が y=590 からなのに天板は y=572〜598、x方向にも柄より広い。柄の四角だけを再描画すると天板の上側を顔が突き抜ける。ラグ・床・壁の柄は、裏に立てる家具として扱わない。
++4. **窓は独立した構造が必要。** 現行のへやの窓はdecorにガラス面と桟がまとまっており、窓は柄領域でも既存spotでもない。overを窓全体に再描画すると、ガラスや景色ごとキャラを消すおそれがある。「奥の景色→ガラス内で切ったキャラ→桟・枠」の順を専用に定義する。透明ガラスや反射を重ねるなら、最後の合成で目が読めることも確認する。0.5倍の固定は採用せず、下の画面上の最低寸法を満たす倍率にする。
++5. **判定とヒントを一緒に直さないと不公平になる。** 現行 `src/core/session.ts` のhitTestは全身・小物の形までの距離を使い、隠れた胴体も当たる。前景にpointer-eventsを設定するだけでは直らない。また現行の最終ヒントは全身の輪郭なので、そのままでは押しても当たらない胴体を強調する。配置の採否・描画・当たり判定・ヒントが、同じ最終可視形状を参照する必要がある。
++
++## のぞきの描画を成立させる条件
++
++- **物ごとの前面マスクを先に確定する。** キャラがいない完成背景を、表示中と同じ柄の原点・倍率・描画順・minorの表示条件で一度合成し、対象の物が覆う部分だけ復元する案を推す。別案は背景を奥と手前に分離して手前を一度だけ描くこと。どちらも、キャラの表示領域は同じマスクの補集合で切り、縁の色漏れ・二重合成を縮小表示で確認する。影だけの半透明部分は、完全遮蔽の領域として扱わない。
++- 全背景をキャラの上に戻さない。物より上や横に出た顔まで消える。物の裏に入るキャラと、物の前に立つ別のキャラは描画順を分ける。今回まずは復元マスクが他の人物・小物と交差する配置を候補から外す。foreを後段で重ねる場合、その下地の復元へforeを含めて二重に描かない。
++- PNG使用時とコード描画時で家具の縁は一致するとは限らない。専用マスクは実際に使う背景ごとに検証し、未対応の背景表現ではそののぞき候補を使わない。単純にクリップを一律に広げる対処は、目まで削るので避ける。
++- 背景の読み込み対策は優先して実施する。backだけでなく柄タイル・over・必要なforeなど、今回の完成画面が使う画像の読み込みとデコードを待ち、マスクと配置も揃った画面をまとめて公開する。待機中はステージの表示と入力を止める。失敗時は完成した代替画面か再試行・戻り口へ進み、キャラだけを出さない。画面遷移後に古い読み込み完了処理が画面を公開しないことも確認する。
++
++## 最低線：シーン座標ではなく表示後の大きさでも判定
++
++画面上の数値はすべてCSS px。端末の画素倍率では増やさず、SVGの実表示倍率で換算する。窓枠・帽子・foreをすべて反映した**最終状態**で測る。
++
++| 項目 | 成人用試遊の下限・扱い |
++| --- | --- |
++| 片目 | 片方の目全体が無遮蔽。実描画の目の幅・高さが各3px以上、遮蔽物の境界から1px以上離す。点だけの判定をしない |
++| 可視の大きさ | 目を含む連続した頭部の可視部分が幅24px×高さ12px以上の外接枠を持ち、実際の可視面積が180px²以上。細い線だけで枠を満たさない |
++| 見える割合 | 遮蔽前の頭部面積の20%以上、全身面積の5%以上を残す。双方とも透明余白・小物を除く。割合だけで極小表示を合格にしない |
++| 見分け | 片目に加えて、耳・くるん毛・もこもこの頭の縁など、色以外の特徴を1つ残す。対象一覧は識別できる通常の顔を維持 |
++| タップ | 可視形状から最大8pxの許容幅。ただし家具・桟の不透明な遮蔽部分を除外する。残った判定領域に24×24pxの押せる範囲を1つ確保できない候補は不採用。他の人物の判定領域との間隔は8px以上 |
++| 最終ヒント | 可視部分の輪郭を2px以上の線で背景より前に静止表示。必要なら明暗の二重線。上記の押せる範囲に重なるマーカーも出し、隠れた胴体をタップ先として示さない |
++
++ヒントは成人用だけ「周辺の円→見えている顔の周辺に静止マーカー→可視輪郭＋押せる位置」にする。3回以内に最終段階へ到達し、発見まで消さず、何回でも使える。動きによる露出を難度設計に使わない。ヒントを出したことでマーカーが入力を遮らないことも必須。
++
++第2回の優先帯（全体可視50%以上、服25〜40%）や現行 `analyzeSpot` の全顔・高さ170・服20%以上の条件を、そのままのぞきへ適用すると狙う配置が落ちる。**成人用ののぞき・窓にだけ別の検証を設け、上記条件に置き換える。** 服が全く見えない候補では柄一致率を計算・順位付けの必須条件にしない。通常配置には従来の検証を残す。画面が狭く下限を割る場合は倍率か露出を増やし、それでも成立しなければ別候補にする。
++
++## 組み合わせの規則
++
++| 手段 | 同じ子に重ねてよいもの | 今回重ねないもの |
++| --- | --- | --- |
++| 家具のぞき | 服の背景柄、目を隠さない通常位置の背景柄帽子（最終可視条件を満たす場合のみ） | 窓、深い帽子、サングラス |
++| 窓の奥 | 服の柄。倍率は最低寸法から決める | 家具のぞき、深い帽子、サングラス、追加の縮小 |
++| 片目を残す深い帽子 | 帽子自体の背景柄、服の背景柄 | 顔を隠す前景、窓、サングラス、別の帽子 |
++| 片目を出すよう傾けたサングラス | 服の背景柄 | のぞき、窓、深い帽子。濃い両レンズで両目を隠す形は単独でも禁止 |
++
++顔を隠す主な手段は1人1種類。背景に成立する候補があれば、最大3人のうち**1人を家具のぞきまたは窓**にする。残りは片目帽子か通常の背景柄帽子を使い、サングラス修正版は別途見た目を確認してから加える。人数を揃えるため最低線を割らず、安全に置ける2人・1人へ減らす。のぞき候補がない場合の通常配置への代替は試遊記録で区別し、難化が成功したと数えない。
++
++## さらに効きそうな案
++
++**隠す量だけでなく、探す高さと向きを変える。** 現行の足元付近のspotに加え、ソファ背の上・カーテンの左右端・窓の左右の区画など、物理的に自然な場所を候補化する。同じ家具でも前回と異なる端や高さを選び、「いつもの足元を順番に見る」だけで解けないようにする。顔の色を薄める、点ほどに縮める、動きで知らせる、にせものを置くことには頼らない。窓は専用マスクが必要なので、最初はソファ・カーテン・カウンターの3種を優先する。
++
++## 本人の試遊で確かめること：3つ
++
++1. **初見の探し方が変わったか。** 第2回配置とのぞき配置で、どこを探したか・何が手がかりだったか・ヒントを何段階使ったかを比較する。順序を入れ替え、覚えた同一配置だけで比較しない。発見までの時間は観察記録に限り、制限や採点にはしない。
++2. **見つけた後に迷わず押せるか。** 320×568、390×844、768×1024で、3体それぞれの片目・特徴を読めるか確認する。見えている顔付近への意図したタップ10回中9回以上が成功することを試行目標とし、失敗は難しさの成果に数えない。隠れた胴体・窓の桟では成功しないこと、3段目ヒントで全員を発見できることも確認する。
++3. **初表示も完成後も自然か。** 初回読み込み・低速相当・再訪・画像失敗で、キャラだけの露出が1フレームもないか録画で確認する。家具の縁、葉先、天板、窓の桟に色漏れ・切れ目・二重の影がないか、PNGとコード描画、狭い画面でminorが省かれる状態でも確認する。通常1〜10の見え方・判定・ヒントも変わっていないことを確認する。
++
++## 作業記録
++
++- 実施・方法：AGENTS.md、ジョブ93、第2回レポート、ART_SLOTS.md、CODEX_ART_BRIEF.mdを読み、描画・配置・当たり判定・ヒントと3背景のソースを静的レビューして本提案を作成した。画像制作・画像生成・外部検索・有料APIは使用していない。
++- 検査結果：要求された5項目、片目条件、通常コースとの分離、描画と判定の整合を文書点検した。数値は提案であり、実画像のマスク測定・実装・ブラウザ試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。継ぎ目が実際に発生するかは実装後の画面検証が必要。
++- 書込みは本ファイルのみ。ジョブ93の「1ファイルだけ」とユーザーの限定を優先し、STATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時から存在する未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+codex
+[レビュー報告書](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/audit/codex/hardest-course-r3.md)を作成しました。
+
+案の矛盾、背景の継ぎ目、数値付き最低条件、組み合わせ規則、別案、試遊項目3つを記載しています。
+
+書き込みは指定の1ファイルのみです。静的レビューと文書点検を実施し、実機検証は未実施として記録しました。
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r3.md b/pattern-hide-family-beta/audit/codex/hardest-course-r3.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..69e94f7e5fa953afc66a61bc88c99ea30e97a371
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r3.md
+@@ -0,0 +1,62 @@
++# 最難関コース・第3回：顔の一部を隠す成人用試遊
++
++2026-10-08／ジョブ93。**主役は家具の裏からのぞく配置にする。両目を覆うサングラスは不採用、深い帽子は片目全体を残す形に修正する。** 第2回の「顔を隠さない」は今回の本人判断で更新する。通常コース1〜10には適用せず、最大3人・10人発見で終了・減点なし・時間制限なし・通常進捗を変えない方針を維持する。以下の数値は試遊用の提案値であり、実証済みの見やすさ基準ではない。
++
++## 重要な穴と修正案
++
++1. **サングラス単独でも条件違反。** 「のぞき＋サングラス」だけを禁止しても、濃い両レンズが両目を隠す時点で「片目は見える」を満たさない。額に上げる／傾けて片目全体を出す案に置き換える。深い帽子も両目を半分ずつ残す仕様にはせず、片目の輪郭・瞳を丸ごと残す。ハイライトだけ見える状態を片目可視と数えない。まずはのぞきと片目を残す帽子で試す。
++2. **「同じ絵だから継ぎ目なし」は条件付き。** 現行 `src/ui/sceneView.ts` の背景は back→柄領域→over→minor、キャラの後にforeを描く。柄＋overだけでは最終背景の復元にならず、重なった別の柄、minor、境界外に伸びる縁や影を落とす。透過したoverを元のover上に直接足すと濃くなる箇所があり、不透明な柄で覆い直せる内側とは事情が違う。座標が同じでもクリップの半透明な端ではキャラの色が細く漏れ得る。
++3. **柄の領域と、物が隠す形を分ける。** ソファは背・肘・丸い角・縁の影まで、カーテンはひだの外縁まで、生け垣は葉先までが対象。単純な柄領域で切ると輪郭だけがキャラの後ろに残る。コード描画では店のカウンター柄が y=590 からなのに天板は y=572〜598、x方向にも柄より広い。柄の四角だけを再描画すると天板の上側を顔が突き抜ける。ラグ・床・壁の柄は、裏に立てる家具として扱わない。
++4. **窓は独立した構造が必要。** 現行のへやの窓はdecorにガラス面と桟がまとまっており、窓は柄領域でも既存spotでもない。overを窓全体に再描画すると、ガラスや景色ごとキャラを消すおそれがある。「奥の景色→ガラス内で切ったキャラ→桟・枠」の順を専用に定義する。透明ガラスや反射を重ねるなら、最後の合成で目が読めることも確認する。0.5倍の固定は採用せず、下の画面上の最低寸法を満たす倍率にする。
++5. **判定とヒントを一緒に直さないと不公平になる。** 現行 `src/core/session.ts` のhitTestは全身・小物の形までの距離を使い、隠れた胴体も当たる。前景にpointer-eventsを設定するだけでは直らない。また現行の最終ヒントは全身の輪郭なので、そのままでは押しても当たらない胴体を強調する。配置の採否・描画・当たり判定・ヒントが、同じ最終可視形状を参照する必要がある。
++
++## のぞきの描画を成立させる条件
++
++- **物ごとの前面マスクを先に確定する。** キャラがいない完成背景を、表示中と同じ柄の原点・倍率・描画順・minorの表示条件で一度合成し、対象の物が覆う部分だけ復元する案を推す。別案は背景を奥と手前に分離して手前を一度だけ描くこと。どちらも、キャラの表示領域は同じマスクの補集合で切り、縁の色漏れ・二重合成を縮小表示で確認する。影だけの半透明部分は、完全遮蔽の領域として扱わない。
++- 全背景をキャラの上に戻さない。物より上や横に出た顔まで消える。物の裏に入るキャラと、物の前に立つ別のキャラは描画順を分ける。今回まずは復元マスクが他の人物・小物と交差する配置を候補から外す。foreを後段で重ねる場合、その下地の復元へforeを含めて二重に描かない。
++- PNG使用時とコード描画時で家具の縁は一致するとは限らない。専用マスクは実際に使う背景ごとに検証し、未対応の背景表現ではそののぞき候補を使わない。単純にクリップを一律に広げる対処は、目まで削るので避ける。
++- 背景の読み込み対策は優先して実施する。backだけでなく柄タイル・over・必要なforeなど、今回の完成画面が使う画像の読み込みとデコードを待ち、マスクと配置も揃った画面をまとめて公開する。待機中はステージの表示と入力を止める。失敗時は完成した代替画面か再試行・戻り口へ進み、キャラだけを出さない。画面遷移後に古い読み込み完了処理が画面を公開しないことも確認する。
++
++## 最低線：シーン座標ではなく表示後の大きさでも判定
++
++画面上の数値はすべてCSS px。端末の画素倍率では増やさず、SVGの実表示倍率で換算する。窓枠・帽子・foreをすべて反映した**最終状態**で測る。
++
++| 項目 | 成人用試遊の下限・扱い |
++| --- | --- |
++| 片目 | 片方の目全体が無遮蔽。実描画の目の幅・高さが各3px以上、遮蔽物の境界から1px以上離す。点だけの判定をしない |
++| 可視の大きさ | 目を含む連続した頭部の可視部分が幅24px×高さ12px以上の外接枠を持ち、実際の可視面積が180px²以上。細い線だけで枠を満たさない |
++| 見える割合 | 遮蔽前の頭部面積の20%以上、全身面積の5%以上を残す。双方とも透明余白・小物を除く。割合だけで極小表示を合格にしない |
++| 見分け | 片目に加えて、耳・くるん毛・もこもこの頭の縁など、色以外の特徴を1つ残す。対象一覧は識別できる通常の顔を維持 |
++| タップ | 可視形状から最大8pxの許容幅。ただし家具・桟の不透明な遮蔽部分を除外する。残った判定領域に24×24pxの押せる範囲を1つ確保できない候補は不採用。他の人物の判定領域との間隔は8px以上 |
++| 最終ヒント | 可視部分の輪郭を2px以上の線で背景より前に静止表示。必要なら明暗の二重線。上記の押せる範囲に重なるマーカーも出し、隠れた胴体をタップ先として示さない |
++
++ヒントは成人用だけ「周辺の円→見えている顔の周辺に静止マーカー→可視輪郭＋押せる位置」にする。3回以内に最終段階へ到達し、発見まで消さず、何回でも使える。動きによる露出を難度設計に使わない。ヒントを出したことでマーカーが入力を遮らないことも必須。
++
++第2回の優先帯（全体可視50%以上、服25〜40%）や現行 `analyzeSpot` の全顔・高さ170・服20%以上の条件を、そのままのぞきへ適用すると狙う配置が落ちる。**成人用ののぞき・窓にだけ別の検証を設け、上記条件に置き換える。** 服が全く見えない候補では柄一致率を計算・順位付けの必須条件にしない。通常配置には従来の検証を残す。画面が狭く下限を割る場合は倍率か露出を増やし、それでも成立しなければ別候補にする。
++
++## 組み合わせの規則
++
++| 手段 | 同じ子に重ねてよいもの | 今回重ねないもの |
++| --- | --- | --- |
++| 家具のぞき | 服の背景柄、目を隠さない通常位置の背景柄帽子（最終可視条件を満たす場合のみ） | 窓、深い帽子、サングラス |
++| 窓の奥 | 服の柄。倍率は最低寸法から決める | 家具のぞき、深い帽子、サングラス、追加の縮小 |
++| 片目を残す深い帽子 | 帽子自体の背景柄、服の背景柄 | 顔を隠す前景、窓、サングラス、別の帽子 |
++| 片目を出すよう傾けたサングラス | 服の背景柄 | のぞき、窓、深い帽子。濃い両レンズで両目を隠す形は単独でも禁止 |
++
++顔を隠す主な手段は1人1種類。背景に成立する候補があれば、最大3人のうち**1人を家具のぞきまたは窓**にする。残りは片目帽子か通常の背景柄帽子を使い、サングラス修正版は別途見た目を確認してから加える。人数を揃えるため最低線を割らず、安全に置ける2人・1人へ減らす。のぞき候補がない場合の通常配置への代替は試遊記録で区別し、難化が成功したと数えない。
++
++## さらに効きそうな案
++
++**隠す量だけでなく、探す高さと向きを変える。** 現行の足元付近のspotに加え、ソファ背の上・カーテンの左右端・窓の左右の区画など、物理的に自然な場所を候補化する。同じ家具でも前回と異なる端や高さを選び、「いつもの足元を順番に見る」だけで解けないようにする。顔の色を薄める、点ほどに縮める、動きで知らせる、にせものを置くことには頼らない。窓は専用マスクが必要なので、最初はソファ・カーテン・カウンターの3種を優先する。
++
++## 本人の試遊で確かめること：3つ
++
++1. **初見の探し方が変わったか。** 第2回配置とのぞき配置で、どこを探したか・何が手がかりだったか・ヒントを何段階使ったかを比較する。順序を入れ替え、覚えた同一配置だけで比較しない。発見までの時間は観察記録に限り、制限や採点にはしない。
++2. **見つけた後に迷わず押せるか。** 320×568、390×844、768×1024で、3体それぞれの片目・特徴を読めるか確認する。見えている顔付近への意図したタップ10回中9回以上が成功することを試行目標とし、失敗は難しさの成果に数えない。隠れた胴体・窓の桟では成功しないこと、3段目ヒントで全員を発見できることも確認する。
++3. **初表示も完成後も自然か。** 初回読み込み・低速相当・再訪・画像失敗で、キャラだけの露出が1フレームもないか録画で確認する。家具の縁、葉先、天板、窓の桟に色漏れ・切れ目・二重の影がないか、PNGとコード描画、狭い画面でminorが省かれる状態でも確認する。通常1〜10の見え方・判定・ヒントも変わっていないことを確認する。
++
++## 作業記録
++
++- 実施・方法：AGENTS.md、ジョブ93、第2回レポート、ART_SLOTS.md、CODEX_ART_BRIEF.mdを読み、描画・配置・当たり判定・ヒントと3背景のソースを静的レビューして本提案を作成した。画像制作・画像生成・外部検索・有料APIは使用していない。
++- 検査結果：要求された5項目、片目条件、通常コースとの分離、描画と判定の整合を文書点検した。数値は提案であり、実画像のマスク測定・実装・ブラウザ試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。継ぎ目が実際に発生するかは実装後の画面検証が必要。
++- 書込みは本ファイルのみ。ジョブ93の「1ファイルだけ」とユーザーの限定を優先し、STATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時から存在する未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+tokens used
+52,421
+[レビュー報告書](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/audit/codex/hardest-course-r3.md)を作成しました。
+
+案の矛盾、背景の継ぎ目、数値付き最低条件、組み合わせ規則、別案、試遊項目3つを記載しています。
+
+書き込みは指定の1ファイルのみです。静的レビューと文書点検を実施し、実機検証は未実施として記録しました。

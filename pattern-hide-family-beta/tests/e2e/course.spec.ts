@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { act, faceCenter, fresh, state, tapAt } from './helpers';
+import { act, eyePoints, faceCenter, fresh, state, tapAt } from './helpers';
 
 const KEY = 'moyou-kakurenbo-beta';
 
@@ -119,9 +119,11 @@ test('hardest trial: opens from the parent area while locked, counts exactly 10,
     const s = await state(page);
     expect(s.session.placements.length).toBeLessThanOrEqual(Math.min(3, 10 - total));
     for (let i = 0; i < s.session.placements.length; i++) {
-      const p = await faceCenter(page, i);
-      await tapAt(page, p);
-      if (i === 0) await tapAt(page, p); // 見つけた子をもう一度押しても増えない
+      // 物の裏からのぞく子もいるので、見えている目を押す（隠れている目を押しても何も起きない）
+      const eyes = await eyePoints(page, i);
+      for (const e of eyes) await tapAt(page, e);
+      await tapAt(page, eyes[0]); // 見つけた子をもう一度押しても増えない
+      await tapAt(page, eyes[1]);
       total++;
       await expect(page.locator('.course-progress .pip.on')).toHaveCount(total);
     }
@@ -158,4 +160,28 @@ test('course rounds advance on their own after a short wait', async ({ page }) =
   const second = await state(page);
   expect(second.session.found.every((f: boolean) => !f)).toBe(true);
   expect(second.session.sceneId).not.toBe(first.session.sceneId);
+});
+
+test('regression: characters never show before the background (slow image loading)', async ({ browser }) => {
+  // Service Worker が絵を先に保存していると遅延を再現できないので止める（初めて開いたときと同じ状態）
+  const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  // 背景などの絵の読み込みを 5 秒遅らせる（起動時の先読みも間に合わない状態）
+  await page.route('**/*.png', async (route) => {
+    await new Promise((r) => setTimeout(r, 5000));
+    await route.continue();
+  });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ schema: 1, settings: { sound: false, difficulty: 'easy', tutorialSeen: true }, resume: null, playtest: { enabled: false, counters: {} } })), KEY);
+  // 絵の読み込み完了を待たずに操作する（実際の人と同じ）
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await act(page, 'toCourse');
+  await act(page, 'pickCourse', '[data-course="1"]');
+  // 読み込み中：ステージは見えず（キャラクターも見えない）、押せない
+  await expect(page.locator('#stage.loading')).toHaveCount(1);
+  await expect(page.locator('#stage svg')).toBeHidden();
+  // 読み込みが終わると、背景とキャラクターが一緒に出る
+  await expect(page.locator("#stage.loading")).toHaveCount(0, { timeout: 15000 });
+  await expect(page.locator('#stage svg')).toBeVisible();
+  await ctx.close();
 });
