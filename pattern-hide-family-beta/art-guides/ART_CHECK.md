@@ -1,8 +1,8 @@
 # 絵の自動検査結果
 
-対象：`art/`（79ファイル、合計 4070KB） 実行：2026-10-08T09:42:29.996Z
+対象：`art/`（87ファイル、合計 4115KB） 実行：2026-10-08T13:49:23.942Z
 
-**すべて合格**
+**不合格 4 件**
 
 | 結果 | ファイル | 内容 |
 |---|---|---|
@@ -63,6 +63,10 @@
 | OK | art\scenes\shop\over.png | 全 9 か所 × 3体で問題なし |
 | OK | art\scenes\shop\minor.png | 全 9 か所 × 3体で問題なし |
 | OK | art\scenes\shop\fore.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\beach\back.svg | 寸法確認のみ |
+| OK | art\scenes\beach\over.svg | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\beach\minor.svg | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\beach\fore.svg | 全 9 か所 × 3体で問題なし |
 | OK | art\accessories\hat\mask.svg | 形の判定からはみ出す割合 0.0%（5%以下） |
 | OK | art\accessories\hat\mask.svg | 形の判定を白が覆う割合 97%（70%以上） |
 | OK | art\accessories\hat\mask.svg | 顔に重ならない |
@@ -79,6 +83,10 @@
 | OK | art\accessories\umbrella\line.svg | 顔に重ならない |
 | OK | art\accessories\umbrella\back.svg | 形の判定からはみ出す割合 0.0%（4%以下） |
 | OK | art\accessories\umbrella\back.svg | 顔に重ならない |
+| NG | art\patterns\beach-check.svg | ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png） |
+| NG | art\patterns\beach-dots.svg | ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png） |
+| NG | art\patterns\beach-plain.svg | ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png） |
+| NG | art\patterns\beach-stripes.svg | ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png） |
 | OK | art\patterns\garden-dots.svg | つなぎ目の差 0.0（28未満） |
 | OK | art\patterns\garden-dots.svg | 不透明 |
 | OK | art\patterns\garden-leaf.svg | つなぎ目の差 0.0（28未満） |
