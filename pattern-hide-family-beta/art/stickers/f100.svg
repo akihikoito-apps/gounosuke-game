@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#e5edf8"/><stop offset=".48" stop-color="#bccde4"/><stop offset=".82" stop-color="#a8bdd8"/><stop offset="1" stop-color="#8c9fbe"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#f1f4fa" stop-opacity=".62"/><stop offset="1" stop-color="#f1f4fa" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+
+<linearGradient id="ear" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#d7e3f2"/><stop offset=".55" stop-color="#b3c6df"/><stop offset="1" stop-color="#8b9fbd"/></linearGradient>
+<radialGradient id="pink" cx=".3" cy=".25" r=".8"><stop stop-color="#f5d8d6"/><stop offset="1" stop-color="#dcaeaf"/></radialGradient>
+<radialGradient id="rose" cx=".25" cy=".18" r=".95"><stop stop-color="#f8dcd7"/><stop offset="1" stop-color="#ce909e"/></radialGradient><radialGradient id="sage" cx=".25" cy=".18" r=".95"><stop stop-color="#e2edce"/><stop offset="1" stop-color="#97b79d"/></radialGradient><radialGradient id="cream" cx=".25" cy=".18" r=".95"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#ddd6c8"/></radialGradient><radialGradient id="gold" cx=".25" cy=".18" r=".95"><stop stop-color="#fff0c1"/><stop offset="1" stop-color="#d1ae69"/></radialGradient><radialGradient id="sky" cx=".25" cy=".18" r=".95"><stop stop-color="#dceaf1"/><stop offset="1" stop-color="#9bb9cd"/></radialGradient><radialGradient id="toast" cx=".25" cy=".18" r=".95"><stop stop-color="#f5deb0"/><stop offset="1" stop-color="#cb9563"/></radialGradient><radialGradient id="shirt" cx=".25" cy=".18" r=".95"><stop stop-color="#fff5df"/><stop offset="1" stop-color="#daceb5"/></radialGradient><radialGradient id="ground"><stop stop-color="#6b5666" stop-opacity=".18"/><stop offset="1" stop-color="#6b5666" stop-opacity="0"/></radialGradient><radialGradient id="paperLight" cx=".25" cy=".15" r=".9"><stop stop-color="#fffdf5" stop-opacity=".32"/><stop offset="1" stop-color="#fffdf5" stop-opacity="0"/></radialGradient></defs>
+<circle cx="240" cy="240" r="216" fill="#ffffff"/>
+<circle cx="240" cy="240" r="201" fill="#D8E4F2"/>
+<circle cx="240" cy="240" r="201" fill="url(#paperLight)"/>
+<circle cx="240" cy="240" r="207" fill="none" stroke="#c9aa70" stroke-width="3"/>
+<ellipse cx="240" cy="401" rx="132" ry="24" fill="url(#ground)" />
+<g stroke="#4a3a40" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round">
+<path d="M191 285 Q240 266 289 285 Q316 324 310 386 Q240 419 170 386 Q165 325 191 285Z" fill="url(#shirt)" />
+<path d="M211 292 Q239 320 269 292" fill="none" stroke="#a89984" stroke-width="2.4"/>
+<g stroke="none" transform="rotate(-6 240 222) translate(240 480) scale(1.85)"><path d="M-44-164 L-42.5-208 Q-42.5-210-41-208.5 L-14-184Z M44-164 L42.5-208 Q42.5-210 41-208.5 L14-184Z" fill="url(#ear)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M-39-175 L-38.5-199 Q-38.5-201-37-199 L-23-185Z M39-175 L38.5-199 Q38.5-201 37-199 L23-185Z" fill="url(#pink)"/>
+<path d="M-40-202 L-41-182" fill="none" stroke="#edf3fc" stroke-width="1.2" stroke-linecap="round" opacity=".7"/>
+<path d="M-46-142 C-46-166-26-185 0-185 C26-185 46-166 46-142 C46-118 25-99 0-99 C-25-99-46-118-46-142Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6"/>
+<path d="M46-142 C46-118 25-99 0-99 C-14-99-27-105-35-113" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round"/>
+<path d="M-41-151 C-38-167-24-178-10-180" fill="none" stroke="#eef4fc" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>
+<path d="M39-125 Q28-106 10-104" fill="none" stroke="#8294b2" stroke-width="1.15" stroke-linecap="round" opacity=".5"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-155 Q-17-158-12-156 M12-155 Q17-156 22-154" fill="none" stroke="#7e8aa3" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#b8cbe4" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#b8cbe4" opacity=".75"/>
+<path d="M-2.5-131 Q0-132 2.5-131 Q2-129 0-128 Q-2-129-2.5-131Z" fill="#ce96a5"/>
+<path d="M-8-126 C-9-122-3-120 0-125 C3-120 9-122 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#8a9bb5" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<path d="M-31-130 Q-42-131-53-134 M-31-124 Q-42-123-52-121 M31-130 Q42-131 53-134 M31-124 Q42-123 52-121" fill="none" stroke="#6e6070" stroke-width="1.45" stroke-linecap="round"/>
+<g fill="#889ab5" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(282 319) scale(.95)"><path d="M2 37 Q-34 56-10 77 Q10 94-6 110" fill="none" stroke="#8d8291" stroke-width="2.4"/><ellipse cx="0" cy="-19" rx="51" ry="65" fill="url(#rose)" /><path d="M0 44 L-8 53 Q0 58 8 53Z" fill="url(#rose)" /><path d="M-34-34 Q-32-57-13-63" fill="none" stroke="#ffeadf" stroke-width="5"/></g>
+<ellipse cx="267" cy="378" rx="20" ry="14" fill="url(#skin)" /><ellipse cx="188" cy="338" rx="18" ry="23" fill="url(#skin)" />
+</g>
+<g fill="#c1a268"><path d="M111 133 Q114 144 124 147 Q113 149 111 161 Q108 149 98 147 Q109 144 111 133Z"/><path d="M361 187 Q364 195 372 198 Q363 200 361 209 Q359 200 351 198 Q359 195 361 187Z"/></g>
+</svg>
