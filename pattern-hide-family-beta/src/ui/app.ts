@@ -29,6 +29,8 @@ import {
   undo,
 } from '../core/hideEditor';
 import { betaEntitlements } from '../entitlements/entitlements';
+import { COURSES, FINDS_PER_COURSE, courseDef, courseRound, courseScene } from '../core/courses';
+import { COURSE_COUNT } from '../storage/schema';
 import { play, setSoundEnabled, unlockAudio } from '../audio/sound';
 import type { Store } from '../storage/storage';
 import { record } from '../storage/playtest';
@@ -47,6 +49,7 @@ type Screen =
   | 'hideChars'
   | 'hideCostume'
   | 'hidePlace'
+  | 'courseSelect'
   | 'bye';
 
 const OUTLINE: Record<Difficulty, number> = { easy: 0.62, normal: 0.34 };
@@ -74,6 +77,12 @@ export class App {
   } | null = null;
   private resizeObs: ResizeObserver | null = null;
   private seedCounter = 0;
+  /** コース：遊んでいるコース番号と、その中で何回目の出題か（背景を順に回す） */
+  private courseNo = 1;
+  private courseRoundIdx = 0;
+  /** このラウンドでコースをクリアした（クリア画面を出す） */
+  private courseJustCleared = false;
+  private afterTutorial: 'search' | 'course' = 'search';
 
   constructor(root: HTMLElement, store: Store) {
     this.root = root;
@@ -162,6 +171,8 @@ export class App {
           return this.titleHtml();
         }
         return this.hidePlaceHtml();
+      case 'courseSelect':
+        return this.courseSelectHtml();
       case 'bye':
         return this.byeHtml();
     }
@@ -179,8 +190,11 @@ export class App {
         <p class="beta-tag">かぞく テスト ばん（かりの なまえ）</p>
       </div>
       <div class="title-actions">
-        ${btn('toSearch', ICONS.search, 'さがす', 'big primary', 'data-autofocus')}
-        ${btn('toHide', ICONS.hide, 'かくして わたす', 'big secondary')}
+        ${btn('toCourse', ICONS.course, 'コースで あそぶ', 'big primary', 'data-autofocus')}
+        <div class="title-row">
+          ${btn('toSearch', ICONS.search, 'さがす', 'mid')}
+          ${btn('toHide', ICONS.hide, 'かくして わたす', 'mid secondary')}
+        </div>
         ${resume ? btn('resume', ICONS.play, 'つづきから', 'mid') : ''}
       </div>
       ${btn('parent', ICONS.parent, 'おとなの かたへ', 'small parent-btn')}
@@ -206,6 +220,36 @@ export class App {
       </div>
       <div class="cards">${this.sceneCards('startSearch')}</div>
     </main>`;
+  }
+
+  private courseSelectHtml(): string {
+    const p = this.store.data.course;
+    const next = Math.min(COURSE_COUNT, p.cleared + 1);
+    const tiles = COURSES.map((c) => {
+      const cleared = c.no <= p.cleared;
+      const open = c.no <= next;
+      const now = c.no === p.current && p.finds > 0 && !cleared;
+      const label = `コース${c.no}${cleared ? ' クリア' : open ? '' : ' まだ'}`;
+      const pips = now
+        ? `<span class="tile-pips" aria-hidden="true">${'<i class="on"></i>'.repeat(p.finds)}${'<i></i>'.repeat(FINDS_PER_COURSE - p.finds)}</span>`
+        : '';
+      const badge = cleared ? `<span class="badge">${ICONS.star}</span>` : open ? '' : `<span class="badge">${ICONS.lock}</span>`;
+      return `<button type="button" class="course-tile${cleared ? ' cleared' : ''}${open ? '' : ' locked'}${c.no === next && !cleared ? ' next' : ''}" data-action="pickCourse" data-course="${c.no}" aria-label="${label}" ${open ? '' : 'disabled'}${c.no === next ? ' data-autofocus' : ''}><span class="num">${c.no}</span>${badge}${courseMark(c.no)}${pips}</button>`;
+    }).join('');
+    return `<main class="screen setup course-select" data-screen="courseSelect">
+      <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>コースを えらぶ</h2><span></span></header>
+      <div class="course-grid">${tiles}</div>
+    </main>`;
+  }
+
+  /** コース中の進み具合（10この まる） */
+  private courseProgressHtml(): string {
+    const n = this.courseFindsShown();
+    return `<div class="course-progress" role="status" aria-label="コース${this.courseNo} ${n}/${FINDS_PER_COURSE}"><span class="course-no">${this.courseNo}</span>${Array.from({ length: FINDS_PER_COURSE }, (_, k) => `<i class="pip${k < n ? ' on' : ''}"></i>`).join('')}</div>`;
+  }
+
+  private courseFindsShown(): number {
+    return this.courseJustCleared ? FINDS_PER_COURSE : this.store.data.course.finds;
   }
 
   private tutorialHtml(): string {
@@ -244,8 +288,9 @@ export class App {
         <div class="targets" role="status" aria-label="さがす こ">${targets}</div>
         ${btn('hint', ICONS.hint, 'ヒント', 'round hint-btn', done ? 'disabled' : '')}
       </div>
+      ${s.origin === 'course' ? this.courseProgressHtml() : ''}
       <div class="stage" id="stage">${this.playSvg()}</div>
-      ${done ? this.clearHtml() : ''}
+      ${done ? (s.origin === 'course' ? this.courseClearHtml() : this.clearHtml()) : ''}
     </main>`;
   }
 
@@ -256,7 +301,7 @@ export class App {
       prefix: 'g-',
       placements: s.placements,
       found: s.found,
-      outline: OUTLINE[s.difficulty],
+      outline: s.origin === 'course' ? courseDef(this.courseNo).outline : OUTLINE[s.difficulty],
       hint: currentHint(scene, s),
       title: `${scene.name}。かくれている こを さがして タッチ`,
     });
@@ -272,6 +317,35 @@ export class App {
         <div class="clear-actions">
           ${btn('again', ICONS.again, 'もういちど', 'equal', 'data-autofocus')}
           ${btn('swap', ICONS.swap, 'こうたい', 'equal')}
+          ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  private courseClearHtml(): string {
+    const s = this.session as PlaySession;
+    const faces = s.placements.map((pl) => `<div class="clear-face">${faceIcon(CHARACTERS[pl.char])}</div>`).join('');
+    if (this.courseJustCleared) {
+      const last = this.courseNo >= COURSE_COUNT;
+      return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="コース${this.courseNo} クリア">
+        <div class="clear-card">
+          <div class="medal" aria-hidden="true">${ICONS.star}<span>${this.courseNo}</span></div>
+          <p class="clear-title">コース${this.courseNo} クリア！</p>
+          ${last ? '<p class="clear-sub">ぜんぶの コースを クリアしたよ</p>' : ''}
+          <div class="clear-actions two">
+            ${last ? btn('toCourse', ICONS.course, 'コースを えらぶ', 'equal', 'data-autofocus') : btn('nextCourse', ICONS.next, 'つぎの コース', 'equal primary', 'data-autofocus')}
+            ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
+          </div>
+        </div>
+      </div>`;
+    }
+    return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="みつけた">
+      <div class="clear-card">
+        <div class="clear-faces">${faces}</div>
+        <p class="clear-title">みーつけた！</p>
+        <div class="clear-actions two">
+          ${btn('nextRound', ICONS.next, 'つぎ', 'equal primary', 'data-autofocus')}
           ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
         </div>
       </div>
@@ -410,6 +484,20 @@ export class App {
       case 'toSearch':
         this.go('searchSetup');
         break;
+      case 'toCourse':
+        this.session = null;
+        this.courseJustCleared = false;
+        this.go('courseSelect');
+        break;
+      case 'pickCourse':
+        this.startCourse(Number(el.dataset.course));
+        break;
+      case 'nextRound':
+        this.startCourseRound();
+        break;
+      case 'nextCourse':
+        this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
+        break;
       case 'toHide':
         this.draft = emptyDraft();
         this.multi = false;
@@ -435,13 +523,15 @@ export class App {
         break;
       }
       case 'tutorial':
+        this.afterTutorial = 'search';
         this.go('tutorial');
         break;
       case 'backFromTutorial':
-        this.go('searchSetup');
+        this.go(this.afterTutorial === 'course' ? 'courseSelect' : 'searchSetup');
         break;
       case 'startSearch':
         this.searchScene = el.dataset.scene as SceneId;
+        this.afterTutorial = 'search';
         if (!this.store.data.settings.tutorialSeen) this.go('tutorial');
         else this.startSearch();
         break;
@@ -449,7 +539,8 @@ export class App {
         this.store.update((x) => {
           x.settings.tutorialSeen = true;
         });
-        this.startSearch();
+        if (this.afterTutorial === 'course') this.startCourseRound();
+        else this.startSearch();
         break;
       case 'hint':
         this.onHint();
@@ -549,6 +640,58 @@ export class App {
     this.go('play');
   }
 
+  private startCourse(no: number): void {
+    const p = this.store.data.course;
+    const open = Math.min(COURSE_COUNT, p.cleared + 1);
+    if (!Number.isInteger(no) || no < 1 || no > open) return;
+    this.courseNo = no;
+    this.courseRoundIdx = 0;
+    this.courseJustCleared = false;
+    // つづきのコースなら見つけた回数を引き継ぐ。ほかのコースは 0 から
+    if (p.current !== no) {
+      this.store.update((d) => {
+        d.course.current = no;
+        d.course.finds = 0;
+      });
+    }
+    this.afterTutorial = 'course';
+    if (!this.store.data.settings.tutorialSeen) this.go('tutorial');
+    else this.startCourseRound();
+  }
+
+  private startCourseRound(): void {
+    if (this.courseJustCleared) return this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
+    const ids = SCENE_IDS.filter((id) => betaEntitlements.canPlay(`scene:${id}`));
+    const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids)];
+    const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
+    const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
+    const placements = courseRound(scene, this.courseNo, remaining, seed);
+    const c = courseDef(this.courseNo);
+    this.session = newSession(scene.id, c.variant === 'exact' ? 'normal' : 'easy', placements, 'course', Date.now());
+    record(this.store, { type: 'searchStarted' });
+    this.go('play');
+  }
+
+  /** コース：1回見つけるごとに進める。10回でクリア */
+  private onCourseFind(): void {
+    const no = this.courseNo;
+    let cleared = false;
+    this.store.update((d) => {
+      if (d.course.current !== no) {
+        d.course.current = no;
+        d.course.finds = 0;
+      }
+      d.course.finds += 1;
+      if (d.course.finds >= FINDS_PER_COURSE) {
+        d.course.cleared = Math.max(d.course.cleared, no);
+        d.course.current = Math.min(COURSE_COUNT, no + 1);
+        d.course.finds = 0;
+        cleared = true;
+      }
+    });
+    if (cleared) this.courseJustCleared = true;
+  }
+
   private onHint(): void {
     if (!this.session) return;
     this.session = nextHint(this.session);
@@ -624,9 +767,11 @@ export class App {
 
   private saveResume(): void {
     const s = this.session;
-    if (!s || isComplete(s)) return;
+    // コースは見つけた回数を別に保存している（出題そのものは続きにしない）
+    if (!s || isComplete(s) || s.origin === 'course') return;
+    const origin = s.origin;
     this.store.update((d) => {
-      d.resume = { sceneId: s.sceneId, difficulty: s.difficulty, placements: s.placements, found: s.found, origin: s.origin };
+      d.resume = { sceneId: s.sceneId, difficulty: s.difficulty, placements: s.placements, found: s.found, origin };
     });
   }
 
@@ -699,6 +844,7 @@ export class App {
     this.session = r.session;
     this.justFound = r.foundIndex;
     play('found');
+    if (this.session.origin === 'course') this.onCourseFind();
     if (isComplete(this.session)) {
       record(this.store, { type: 'searchCompleted', durationMs: Date.now() - this.session.startedAt });
       this.clearResume();
@@ -733,6 +879,8 @@ export class App {
     });
     const hb = this.root.querySelector<HTMLButtonElement>('[data-action="hint"]');
     if (hb) hb.disabled = isComplete(s);
+    const cp = this.root.querySelector<HTMLElement>('.course-progress');
+    if (cp && s.origin === 'course') cp.outerHTML = this.courseProgressHtml();
   }
 
   /** 外れたときの、色の付かないやさしい波紋（罰ではない） */
@@ -928,6 +1076,18 @@ function draftFromPlacements(sceneId: SceneId, placements: Placement[]): HideDra
 function artImg(name: 'title' | 'handoff' | 'bye'): string | null {
   const u = uiArt(name);
   return u ? `<img class="ui-art ui-art-${name}" src="${u}" alt="" draggable="false">` : null;
+}
+
+/** コースの札の小さな目印：帽子・傘が出てくるコースが分かるように */
+function courseMark(no: number): string {
+  const c = courseDef(no);
+  const hat = c.hat
+    ? '<svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M7 30 C6 14 34 14 33 30Z" fill="#E59A86" stroke="#4A3A40" stroke-width="3" stroke-linejoin="round"/><rect x="6" y="27" width="28" height="7" rx="3" fill="#C97A68" stroke="#4A3A40" stroke-width="3"/><circle cx="20" cy="11" r="4.5" fill="#E59A86" stroke="#4A3A40" stroke-width="3"/></svg>'
+    : '';
+  const umb = c.umbrella
+    ? '<svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 20 C6 6 34 6 36 20Z" fill="#8DB7D9" stroke="#4A3A40" stroke-width="3" stroke-linejoin="round"/><path d="M20 20 V32 Q20 36 16 35" fill="none" stroke="#4A3A40" stroke-width="3" stroke-linecap="round"/></svg>'
+    : '';
+  return hat || umb ? `<span class="marks">${hat}${umb}</span>` : '';
 }
 
 function costumeName(kind: string): string {

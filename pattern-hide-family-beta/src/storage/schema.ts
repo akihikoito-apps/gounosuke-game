@@ -37,6 +37,35 @@ export interface SaveData {
   settings: Settings;
   resume: ResumeState | null;
   playtest: { enabled: boolean; counters: PlaytestCounters };
+  course: CourseProgress;
+}
+
+/** コースの進み具合。cleared：クリアした最後のコース（0〜10）。current の finds：そのコースで見つけた回数 */
+export interface CourseProgress {
+  cleared: number;
+  current: number;
+  finds: number;
+}
+
+export const COURSE_COUNT = 10;
+export const COURSE_FINDS = 10;
+
+export function emptyCourse(): CourseProgress {
+  return { cleared: 0, current: 1, finds: 0 };
+}
+
+const isInt = (v: unknown, lo: number, hi: number): v is number => typeof v === 'number' && Number.isInteger(v) && v >= lo && v <= hi;
+
+/** 壊れた値は使える範囲に直す。遊べるのは「クリアした次」まで */
+export function validateCourse(v: unknown): { course: CourseProgress; repaired: boolean } {
+  if (v === undefined) return { course: emptyCourse(), repaired: false }; // 以前の保存データ（コース追加前）
+  if (typeof v !== 'object' || v === null) return { course: emptyCourse(), repaired: true };
+  const o = v as Record<string, unknown>;
+  if (!isInt(o.cleared, 0, COURSE_COUNT) || !isInt(o.current, 1, COURSE_COUNT) || !isInt(o.finds, 0, COURSE_FINDS - 1)) {
+    return { course: emptyCourse(), repaired: true };
+  }
+  if (o.current > Math.min(COURSE_COUNT, o.cleared + 1)) return { course: { cleared: o.cleared, current: Math.min(COURSE_COUNT, o.cleared + 1), finds: 0 }, repaired: true };
+  return { course: { cleared: o.cleared, current: o.current, finds: o.finds }, repaired: false };
 }
 
 export const COUNTER_MAX = 9999;
@@ -51,6 +80,7 @@ export function defaults(): SaveData {
     settings: { sound: true, difficulty: 'easy', tutorialSeen: false },
     resume: null,
     playtest: { enabled: false, counters: emptyCounters() },
+    course: emptyCourse(),
   };
 }
 
@@ -130,5 +160,8 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
     // OFF のときは集計を持たない
     if (!d.playtest.enabled) d.playtest.counters = emptyCounters();
   } else if (p !== undefined) repaired = true;
+  const course = validateCourse(raw.course);
+  d.course = course.course;
+  if (course.repaired) repaired = true;
   return { data: d, repaired };
 }

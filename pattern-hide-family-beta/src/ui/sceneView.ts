@@ -5,6 +5,7 @@ import { type PatternSpec, patternMarkup, softVariant } from '../core/patterns';
 import { type Placement, getSpot, silhouetteWorld, spotAnchor, spotTransform } from '../core/placement';
 import type { SceneDef, SpotDef } from '../core/scene';
 import { charArtMarkup } from './charArt';
+import { accessoryArt } from './accessoryArt';
 import { patternTile, sceneArt } from '../art/registry';
 import type { HintInfo } from '../core/session';
 
@@ -76,10 +77,12 @@ export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: num
   const spot = getSpot(scene, pl.spot);
   const t = spotTransform(spot);
   const fid = `${prefix}c${i}`;
+  const acc = accessoryArt(scene, pl, fid, outline);
   return (
     `<g class="char${found ? ' found' : ''}" data-index="${i}" data-char="${pl.char}" transform="translate(${r1(t.tx)} ${r1(t.ty)}) scale(${t.s})">` +
     `<defs>${costumePatternDef(fid, scene, pl, spot)}</defs>` +
-    `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found })}</g>` +
+    acc.behind +
+    `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found })}${acc.front}</g>` +
     `</g>`
   );
 }

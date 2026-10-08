@@ -15,6 +15,7 @@ import {
 } from './geometry';
 import { type Rng, mulberry32, shuffle } from './rng';
 import type { SceneDef, SpotDef } from './scene';
+import type { Accessories } from './accessories';
 
 export type Difficulty = 'easy' | 'normal';
 
@@ -24,6 +25,8 @@ export interface Placement {
   costume: string;
   /** exact: 背景と同じ柄 / soft: 同じ種類で少し違う柄 */
   variant: 'exact' | 'soft';
+  /** コースだけ：ニット帽・傘 */
+  acc?: Accessories;
 }
 
 export const LIMITS = {

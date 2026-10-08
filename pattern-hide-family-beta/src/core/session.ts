@@ -1,6 +1,7 @@
 // 1回の「さがす」プレイの状態（純粋関数）。表示とは分けてある。
-import { type Pt, bbox, distanceTo, unionBBox } from './geometry';
-import { type Difficulty, type Placement, getSpot, silhouetteWorld } from './placement';
+import { type Pt, bbox, distanceTo, transformShape, unionBBox } from './geometry';
+import { accessoryShapes } from './accessories';
+import { type Difficulty, type Placement, getSpot, silhouetteWorld, spotTransform } from './placement';
 import type { SceneDef, SceneId } from './scene';
 
 /** 見える形より少しだけ広い当たり判定（シーン座標）。巨大な矩形にはしない。 */
@@ -17,7 +18,7 @@ export interface PlaySession {
   /** 0: ヒントなし / 1: このあたり / 2: ちょっと うごく / 3: りんかく */
   hintLevel: number;
   hintsUsed: number;
-  origin: 'search' | 'hide';
+  origin: 'search' | 'hide' | 'course';
   startedAt: number;
 }
 
@@ -25,13 +26,13 @@ export function newSession(
   sceneId: SceneId,
   difficulty: Difficulty,
   placements: Placement[],
-  origin: 'search' | 'hide',
+  origin: 'search' | 'hide' | 'course',
   now: number,
 ): PlaySession {
   return {
     sceneId,
     difficulty,
-    placements: placements.map((p) => ({ ...p })),
+    placements: placements.map((p) => ({ ...p, ...(p.acc ? { acc: { ...p.acc } } : {}) })),
     found: placements.map(() => false),
     hintLevel: 0,
     hintsUsed: 0,
@@ -50,7 +51,9 @@ export function hitTest(scene: SceneDef, s: PlaySession, p: Pt, tol = HIT_TOLERA
   let bd = Infinity;
   s.placements.forEach((pl, i) => {
     if (s.found[i]) return;
-    const shapes = silhouetteWorld(pl.char, getSpot(scene, pl.spot));
+    const spot = getSpot(scene, pl.spot);
+    // 帽子や傘をタッチしても見つけたことにする
+    const shapes = [...silhouetteWorld(pl.char, spot), ...accessoryShapes(pl.acc).map((sh) => transformShape(spotTransform(spot), sh))];
     const d = Math.min(...shapes.map((sh) => distanceTo(sh, p)));
     if (d <= tol && d < bd) {
       bd = d;
