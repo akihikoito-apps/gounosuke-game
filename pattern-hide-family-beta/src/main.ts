@@ -15,7 +15,8 @@ if (import.meta.env.DEV || import.meta.env.MODE === 'e2e') {
 }
 
 // オフライン用 Service Worker：本番ビルドかつ安全なコンテキスト（HTTPS/localhost）のときだけ
-if (import.meta.env.PROD && 'serviceWorker' in navigator && window.isSecureContext) {
+// iOS アプリ（--mode native）では使わない（アプリの中に絵がすべて入っている）
+if (import.meta.env.PROD && import.meta.env.MODE !== 'native' && 'serviceWorker' in navigator && window.isSecureContext) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => undefined);
   });

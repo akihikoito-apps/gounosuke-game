@@ -12,7 +12,8 @@ function serviceWorkerPlugin(): Plugin {
   let outDir = 'dist';
   return {
     name: 'local-service-worker',
-    apply: 'build',
+    // iOS アプリ用（--mode native）では作らない
+    apply: (_c, env) => env.command === 'build' && env.mode !== 'native',
     configResolved(c) {
       outDir = resolve(c.root, c.build.outDir);
     },

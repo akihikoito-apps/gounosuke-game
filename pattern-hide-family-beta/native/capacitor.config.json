@@ -1,0 +1,13 @@
+{
+  "appId": "com.akihikoito.moyoukakurenbo",
+  "appName": "もようのかくれんぼ",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#fff6e8",
+    "scrollEnabled": false
+  },
+  "server": {
+    "iosScheme": "capacitor"
+  }
+}
