@@ -1,6 +1,6 @@
 # 絵の自動検査結果
 
-対象：`art/`（73ファイル、合計 4057KB） 実行：2026-10-08T09:21:01.034Z
+対象：`art/`（79ファイル、合計 4070KB） 実行：2026-10-08T09:42:29.996Z
 
 **すべて合格**
 
@@ -42,6 +42,15 @@
 | OK | art\characters\nyako\front.svg | 顔の位置に絵がある |
 | OK | art\characters\nyako\front-found.svg | 輪郭の判定からはみ出す割合 6.0%（12%以下） |
 | OK | art\characters\nyako\front-found.svg | 顔の位置に絵がある |
+| OK | art\characters\popo\back.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\popo\clothes-mask.svg | 服の白い部分がからだの判定内 100%（95%以上） |
+| OK | art\characters\popo\clothes-mask.svg | からだの判定を服が覆う割合 100%（70%以上） |
+| OK | art\characters\popo\clothes-shade.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\popo\clothes-line.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\popo\front.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\popo\front.svg | 顔の位置に絵がある |
+| OK | art\characters\popo\front-found.svg | 輪郭の判定からはみ出す割合 6.3%（12%以下） |
+| OK | art\characters\popo\front-found.svg | 顔の位置に絵がある |
 | OK | art\scenes\room\back.png | 寸法確認のみ |
 | OK | art\scenes\room\over.png | 全 9 か所 × 3体で問題なし |
 | OK | art\scenes\room\minor.png | 全 9 か所 × 3体で問題なし |

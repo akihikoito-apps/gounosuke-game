@@ -346,3 +346,6 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 .toast-sticker > svg { width: 56px; height: 56px; }
 @keyframes toastIn { 0% { opacity: 0; transform: translate(-50%, -12px); } 10%, 85% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -6px); } }
 @media (prefers-reduced-motion: reduce) { .toast, .reward-sticker > svg, .new-friend > svg { animation: none; } }
+/* 友だちが4体以上のとき：カードを小さく3列に */
+.cards.chars.many .char-card { width: clamp(100px, 29vw, 190px); padding: 6px; font-size: 17px; }
+.cards.chars.many .char-card svg { max-height: 24dvh; }

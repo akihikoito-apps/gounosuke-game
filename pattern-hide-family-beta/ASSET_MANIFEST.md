@@ -39,6 +39,8 @@
 | `art/scenes/garden/`・`art/scenes/shop/`（各 PNG 4枚、2000×2000） | Codex がSVGをコードで記述し、ローカルの Chromium で PNG に書き出し。画像生成・ネット画像は不使用 | 2026-10-08 | validate:art 合格、npm test / test:e2e 合格 |
 | `art/ui/`（title / handoff / bye の PNG） | Codex がコードで描画しPNGに書き出し。画像生成・ネット画像は不使用。文字なし | 2026-10-08 | validate:art 合格、npm test / test:e2e 合格 |
 | `art/accessories/hat/`・`art/accessories/umbrella/`（コースの帽子・傘。mask/shade/line/back の SVG） | Codex がSVGをコードで記述。画像生成・ネット画像は不使用 | 2026-10-08 | validate:art 合格（顔に重ならない・形の判定内）、npm test / test:e2e 合格 |
+| `art/characters/nyako/`・`art/characters/popo/`（新しい友だち。各 SVG 6枚） | Codex がSVGをコードで記述。画像生成・ネット画像は不使用 | 2026-10-08 | validate:art 合格 |
+| `art/stickers/`（シール15枚 SVG） | Codex がSVGをコードで記述（c5 はぽぽ用に描き直し） | 2026-10-08 | validate:art 合格 |
 `art-guides/` は形状データから自動生成した下書きガイドで、ゲームには含まれません。
 
 ## 外部の画像生成について

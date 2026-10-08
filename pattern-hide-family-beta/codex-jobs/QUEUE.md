@@ -11,7 +11,7 @@
 - [x] 07-accessories.md — ニット帽と傘（コースモード） 2026-10-08 完了。修正依頼なし
 - [x] 08-nyako.md — 新しい友だち にゃこ 2026-10-08 完了
 - [x] 09-stickers.md — シールちょうのシール15枚 2026-10-08 完了（c5 はぽぽ用に描き直し）
-- [ ] 10-popo.md — 5体目 ぽぽ と コース5のシール
+- [x] 10-popo.md — 5体目 ぽぽ と コース5のシール 2026-10-08 完了。修正依頼なし
 - [x] 90-review-code.md — コードの独立レビュー（状態遷移・入力・保存・情報流出・課金境界） 2026-10-08 完了。指摘3件を Claude が修正（audit/codex/review-2026-10-08.md）
 - [x] 91-hardest-course-r1.md — 最難関コースの議論・第1回 2026-10-08（audit/codex/hardest-course-r1.md）
 - [x] 92-hardest-course-r2.md — 最難関コースの議論・第2回（仕様確定）2026-10-08（audit/codex/hardest-course-r2.md）

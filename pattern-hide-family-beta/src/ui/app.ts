@@ -471,7 +471,7 @@ export class App {
     }).join('');
     return `<main class="screen setup" data-screen="hideChars">
       <header class="topbar">${btn('toHide', ICONS.back, 'もどる', 'round')}<h2>だれを かくす？</h2><span></span></header>
-      <div class="cards chars">${cards}</div>
+      <div class="cards chars${this.allowedChars().length > 3 ? ' many' : ''}">${cards}</div>
       <div class="actions">
         ${btn('toggleMulti', ICONS.multi, this.multi ? 'ひとりだけ にする' : 'ふたり いじょう', `mid${this.multi ? ' on' : ''}`, `aria-pressed="${this.multi}"`)}
         ${btn('charsNext', ICONS.next, 'つぎへ', 'mid primary', sel.length ? '' : 'disabled')}
