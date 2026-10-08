@@ -186,11 +186,11 @@ for (const sid of G.SCENE_IDS) {
         }
       }
     }
-    if (!bad) ok(f, `全 ${sc.spots.length} か所 × 3体で問題なし`);
+    if (!bad) ok(f, `全 ${sc.spots.length} か所 × ${G.CHARACTER_IDS.length}体で問題なし`);
   }
 }
 
-// ---- 帽子・傘（3体共通。枠 600×720px ＝ ローカル座標 x -150〜150, y -345〜15）
+// ---- 帽子・傘（全員共通。枠 600×720px ＝ ローカル座標 x -150〜150, y -345〜15）
 const AF = G.ACC_FRAME;
 const AC_SCALE = 1; // 1単位 = 1px で検査
 const shaftRect = { kind: 'rect', x: G.UMBRELLA_SHAFT.x - 6, y: G.UMBRELLA_SHAFT.y1 - 6, w: 12, h: G.UMBRELLA_SHAFT.y0 - G.UMBRELLA_SHAFT.y1 + 12 };
@@ -210,7 +210,7 @@ for (const kind of ['hat', 'umbrella']) {
   const grid = [];
   for (let y = AF.y + 1; y < AF.y + AF.h; y += 2) for (let x = AF.x + 1; x < AF.x + AF.w; x += 2) grid.push({ x, y });
   const dist = (sh, p) => Math.min(...sh.map((s) => G.distanceTo(s, p)));
-  // 顔（3体共通の目と口）とその周り
+  // 顔（全員共通の目と口）とその周り
   const face = G.CHARACTERS.koro.facePoints;
   for (const n of ['mask', 'shade', 'line', 'front', 'back']) {
     const f = pick(n);
@@ -237,9 +237,10 @@ for (const kind of ['hat', 'umbrella']) {
 // ---- 柄タイル
 const pdir = join(ART, 'patterns');
 for (const f of list(pdir)) {
-  const m = basename(f).match(/^(room|garden|shop)-(plain|stripes|dots|check|leaf)\.(png|webp|svg)$/);
+  // 背景の一覧はゲームの定義から（背景パックが増えても検査できる）
+  const m = basename(f).match(new RegExp(`^(${G.SCENE_IDS.join('|')})-(plain|stripes|dots|check|leaf)\\.(png|webp|svg)$`));
   if (!m) {
-    ng(f, 'ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png）');
+    ng(f, `ファイル名は {${G.SCENE_IDS.join('|')}}-{costume}.png の形（例 room-stripes.png）`);
     continue;
   }
   if (!G.SCENES[m[1]].costumes.some((c) => c.id === m[2])) ng(f, `${m[1]} に ${m[2]} の服はありません`);

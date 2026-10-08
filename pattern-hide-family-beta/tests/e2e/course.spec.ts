@@ -218,10 +218,41 @@ test('clearing course 5 gives its sticker and brings popo; the sticker book show
   await act(page, 'home');
   await act(page, 'toStickers');
   await expect(page.locator('.sticker.got')).toHaveCount(7); // コース1〜5 ＋ 10回・30回
-  await expect(page.locator('.sticker.locked')).toHaveCount(8);
+  await expect(page.locator('.sticker.locked')).toHaveCount(11); // 残り8枚＋うみべの3枚
   // 仲間になったあとは、かくす画面に ぽぽ がいる
   await act(page, 'home');
   await act(page, 'toHide');
   await act(page, 'hidePickScene', '[data-scene="room"]');
   await expect(page.locator('[data-action="pickChar"][data-char="popo"]')).toBeVisible();
+});
+
+test('beach pack: first find at the beach brings choki and the b1 sticker; notices do not overlap', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ schema: 1, settings: { sound: false, difficulty: 'easy', tutorialSeen: true }, resume: null, playtest: { enabled: false, counters: {} }, course: { cleared: 0, current: 1, finds: 0 }, collection: { totalFinds: 0, sceneFinds: {} } })), KEY);
+  await page.reload();
+  // うみべで見つける前は、ちょき はいない
+  await act(page, 'toHide');
+  await act(page, 'hidePickScene', '[data-scene="beach"]');
+  await expect(page.locator('[data-action="pickChar"][data-char="choki"]')).toHaveCount(0);
+  await act(page, 'toHide');
+  await act(page, 'home');
+  await act(page, 'toSearch');
+  await act(page, 'startSearch', '[data-scene="beach"]');
+  const s = await state(page);
+  expect(s.session.sceneId).toBe('beach');
+  expect(s.session.placements.some((p: any) => p.char === 'choki')).toBe(false);
+  const eyes = await eyePoints(page, 0);
+  await tapAt(page, { x: (eyes[0].x + eyes[1].x) / 2, y: eyes[0].y });
+  // 知らせは1つずつ：まず ちょき、次にシール
+  await expect(page.locator('.toast')).toHaveCount(1);
+  await expect(page.locator('.toast')).toContainText('ちょき');
+  await expect(page.locator('.toast')).toContainText('シール', { timeout: 5000 });
+  await expect(page.locator('.toast')).toHaveCount(1);
+  const saved = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
+  expect(saved.collection.sceneFinds.beach).toBe(1);
+  await act(page, 'bye');
+  await act(page, 'home');
+  await act(page, 'toHide');
+  await act(page, 'hidePickScene', '[data-scene="beach"]');
+  await expect(page.locator('[data-action="pickChar"][data-char="choki"]')).toBeVisible();
 });

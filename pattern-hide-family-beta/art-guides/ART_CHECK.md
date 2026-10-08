@@ -1,8 +1,8 @@
 # 絵の自動検査結果
 
-対象：`art/`（87ファイル、合計 4115KB） 実行：2026-10-08T13:49:23.942Z
+対象：`art/`（96ファイル、合計 4143KB） 実行：2026-10-08T13:54:29.533Z
 
-**不合格 4 件**
+**すべて合格**
 
 | 結果 | ファイル | 内容 |
 |---|---|---|
@@ -51,22 +51,31 @@
 | OK | art\characters\popo\front.svg | 顔の位置に絵がある |
 | OK | art\characters\popo\front-found.svg | 輪郭の判定からはみ出す割合 6.3%（12%以下） |
 | OK | art\characters\popo\front-found.svg | 顔の位置に絵がある |
+| OK | art\characters\choki\back.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\choki\clothes-mask.svg | 服の白い部分がからだの判定内 100%（95%以上） |
+| OK | art\characters\choki\clothes-mask.svg | からだの判定を服が覆う割合 100%（70%以上） |
+| OK | art\characters\choki\clothes-shade.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\choki\clothes-line.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\choki\front.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\choki\front.svg | 顔の位置に絵がある |
+| OK | art\characters\choki\front-found.svg | 輪郭の判定からはみ出す割合 5.9%（12%以下） |
+| OK | art\characters\choki\front-found.svg | 顔の位置に絵がある |
 | OK | art\scenes\room\back.png | 寸法確認のみ |
-| OK | art\scenes\room\over.png | 全 9 か所 × 3体で問題なし |
-| OK | art\scenes\room\minor.png | 全 9 か所 × 3体で問題なし |
-| OK | art\scenes\room\fore.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\room\over.png | 全 9 か所 × 6体で問題なし |
+| OK | art\scenes\room\minor.png | 全 9 か所 × 6体で問題なし |
+| OK | art\scenes\room\fore.png | 全 9 か所 × 6体で問題なし |
 | OK | art\scenes\garden\back.png | 寸法確認のみ |
-| OK | art\scenes\garden\over.png | 全 9 か所 × 3体で問題なし |
-| OK | art\scenes\garden\minor.png | 全 9 か所 × 3体で問題なし |
-| OK | art\scenes\garden\fore.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\garden\over.png | 全 9 か所 × 6体で問題なし |
+| OK | art\scenes\garden\minor.png | 全 9 か所 × 6体で問題なし |
+| OK | art\scenes\garden\fore.png | 全 9 か所 × 6体で問題なし |
 | OK | art\scenes\shop\back.png | 寸法確認のみ |
-| OK | art\scenes\shop\over.png | 全 9 か所 × 3体で問題なし |
-| OK | art\scenes\shop\minor.png | 全 9 か所 × 3体で問題なし |
-| OK | art\scenes\shop\fore.png | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\shop\over.png | 全 9 か所 × 6体で問題なし |
+| OK | art\scenes\shop\minor.png | 全 9 か所 × 6体で問題なし |
+| OK | art\scenes\shop\fore.png | 全 9 か所 × 6体で問題なし |
 | OK | art\scenes\beach\back.svg | 寸法確認のみ |
-| OK | art\scenes\beach\over.svg | 全 9 か所 × 3体で問題なし |
-| OK | art\scenes\beach\minor.svg | 全 9 か所 × 3体で問題なし |
-| OK | art\scenes\beach\fore.svg | 全 9 か所 × 3体で問題なし |
+| OK | art\scenes\beach\over.svg | 全 9 か所 × 6体で問題なし |
+| OK | art\scenes\beach\minor.svg | 全 9 か所 × 6体で問題なし |
+| OK | art\scenes\beach\fore.svg | 全 9 か所 × 6体で問題なし |
 | OK | art\accessories\hat\mask.svg | 形の判定からはみ出す割合 0.0%（5%以下） |
 | OK | art\accessories\hat\mask.svg | 形の判定を白が覆う割合 97%（70%以上） |
 | OK | art\accessories\hat\mask.svg | 顔に重ならない |
@@ -83,10 +92,14 @@
 | OK | art\accessories\umbrella\line.svg | 顔に重ならない |
 | OK | art\accessories\umbrella\back.svg | 形の判定からはみ出す割合 0.0%（4%以下） |
 | OK | art\accessories\umbrella\back.svg | 顔に重ならない |
-| NG | art\patterns\beach-check.svg | ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png） |
-| NG | art\patterns\beach-dots.svg | ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png） |
-| NG | art\patterns\beach-plain.svg | ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png） |
-| NG | art\patterns\beach-stripes.svg | ファイル名は {room|garden|shop}-{costume}.png の形（例 room-stripes.png） |
+| OK | art\patterns\beach-check.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\beach-check.svg | 不透明 |
+| OK | art\patterns\beach-dots.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\beach-dots.svg | 不透明 |
+| OK | art\patterns\beach-plain.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\beach-plain.svg | 不透明 |
+| OK | art\patterns\beach-stripes.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\beach-stripes.svg | 不透明 |
 | OK | art\patterns\garden-dots.svg | つなぎ目の差 0.0（28未満） |
 | OK | art\patterns\garden-dots.svg | 不透明 |
 | OK | art\patterns\garden-leaf.svg | つなぎ目の差 0.0（28未満） |

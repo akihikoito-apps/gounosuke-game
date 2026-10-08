@@ -798,14 +798,31 @@ export class App {
     for (const st of newStickers(before, after)) this.toast(`<div class="toast-sticker">${stickerSvg(st)}</div><p>シール ゲット！<br>${st.name}</p>`);
   }
 
-  /** 画面のじゃまをしない小さな知らせ（2.6秒で消える） */
+  /** 画面のじゃまをしない小さな知らせ（2.6秒で消える）。重ならないよう1つずつ順番に出す */
+  private toastQueue: string[] = [];
+  private toastBusy = false;
+
   private toast(html: string): void {
+    this.toastQueue.push(html);
+    if (!this.toastBusy) this.nextToast();
+  }
+
+  private nextToast(): void {
+    const html = this.toastQueue.shift();
+    if (html === undefined) {
+      this.toastBusy = false;
+      return;
+    }
+    this.toastBusy = true;
     const t = document.createElement('div');
     t.className = 'toast';
     t.setAttribute('role', 'status');
     t.innerHTML = html;
     document.body.appendChild(t);
-    window.setTimeout(() => t.remove(), 2600);
+    window.setTimeout(() => {
+      t.remove();
+      this.nextToast();
+    }, 2600);
   }
 
   /** コース：1回見つけるごとに進める。10回でクリア */
