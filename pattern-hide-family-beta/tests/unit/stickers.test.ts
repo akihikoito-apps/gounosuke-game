@@ -14,20 +14,25 @@ describe('sticker book and the new friend', () => {
     expect(earnedStickers(10, 150)).toHaveLength(15);
     expect(earnedStickers(3, 30).map((s) => s.id)).toEqual(['c1', 'c2', 'c3', 'f10', 'f30']);
     expect(newStickers({ cleared: 4, totalFinds: 29 }, { cleared: 5, totalFinds: 30 }).map((s) => s.id)).toEqual(['c5', 'f30']);
+    expect(STICKERS.find((s) => s.id === 'c5')?.char).toBe('popo');
   });
 
-  it('nyako joins only after course 5 and never appears before that', () => {
-    expect(unlockedCharacters(4)).toEqual(BASE_CHARACTER_IDS);
+  it('nyako joins after course 1, popo after course 5, and never before that', () => {
+    expect(unlockedCharacters(0)).toEqual(BASE_CHARACTER_IDS);
+    expect(unlockedCharacters(1)).toEqual([...BASE_CHARACTER_IDS, 'nyako']);
+    expect(unlockedCharacters(4)).toEqual([...BASE_CHARACTER_IDS, 'nyako']);
     expect(unlockedCharacters(5)).toEqual(CHARACTER_IDS);
     for (const id of SCENE_IDS) {
       for (let seed = 1; seed <= 60; seed++) {
-        expect(autoLayout(SCENES[id], 'normal', seed).some((p) => p.char === 'nyako')).toBe(false);
-        expect(courseRound(SCENES[id], 9, 3, seed).some((p) => p.char === 'nyako')).toBe(false);
+        expect(autoLayout(SCENES[id], 'normal', seed).some((p) => p.char === 'nyako' || p.char === 'popo')).toBe(false);
+        expect(courseRound(SCENES[id], 9, 3, seed, unlockedCharacters(1)).some((p) => p.char === 'popo')).toBe(false);
       }
     }
     // 仲間になったあとは出てくる
-    const seen = SCENE_IDS.some((id) => Array.from({ length: 60 }, (_, s) => courseRound(SCENES[id], 9, 3, s + 1, CHARACTER_IDS)).flat().some((p) => p.char === 'nyako'));
-    expect(seen).toBe(true);
+    for (const who of ['nyako', 'popo']) {
+      const seen = SCENE_IDS.some((id) => Array.from({ length: 60 }, (_, s) => courseRound(SCENES[id], 9, 3, s + 1, CHARACTER_IDS)).flat().some((p) => p.char === who));
+      expect(seen).toBe(true);
+    }
   });
 
   it('total finds is kept, repaired when broken, and old saves start at 0', () => {

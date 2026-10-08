@@ -40,6 +40,8 @@ test('course 1: 10 finds clear the course, unlock course 2, and progress survive
   expect(total).toBe(10);
   await expect(page.locator('.course-clear')).toBeVisible({ timeout: 4000 });
   await expect(page.locator('.course-clear')).toContainText('コース1 クリア');
+  // 最初のクリアで、新しい友だち にゃこ が仲間に
+  await expect(page.locator('.course-clear .new-friend')).toContainText('にゃこ');
   const saved = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).course, KEY);
   expect(saved).toEqual({ cleared: 1, current: 2, finds: 0 });
   await act(page, 'nextCourse');
@@ -186,27 +188,28 @@ test('regression: characters never show before the background (slow image loadin
   await ctx.close();
 });
 
-test('clearing course 5 gives its sticker and brings nyako; the sticker book shows what was earned', async ({ page }) => {
+test('clearing course 5 gives its sticker and brings popo; the sticker book shows what was earned', async ({ page }) => {
   await page.goto('/');
   await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ schema: 1, settings: { sound: false, difficulty: 'easy', tutorialSeen: true }, resume: null, playtest: { enabled: false, counters: {} }, course: { cleared: 4, current: 5, finds: 9 }, collection: { totalFinds: 29 } })), KEY);
   await page.reload();
-  // 仲間になる前は、かくす画面に にゃこ はいない
+  // コース1をクリア済みなので にゃこ はいる。ぽぽ はまだ
   await act(page, 'toHide');
   await act(page, 'hidePickScene', '[data-scene="room"]');
-  await expect(page.locator('[data-action="pickChar"]')).toHaveCount(3);
+  await expect(page.locator('[data-action="pickChar"]')).toHaveCount(4);
+  await expect(page.locator('[data-action="pickChar"][data-char="popo"]')).toHaveCount(0);
   await act(page, 'toHide');
   await act(page, 'home');
   await act(page, 'toCourse');
   await act(page, 'pickCourse', '[data-course="5"]');
   const s = await state(page);
-  expect(s.session.placements.some((p: any) => p.char === 'nyako')).toBe(false);
+  expect(s.session.placements.some((p: any) => p.char === 'popo')).toBe(false);
   const eyes = await eyePoints(page, 0);
   await tapAt(page, { x: (eyes[0].x + eyes[1].x) / 2, y: eyes[0].y });
   // 30かい みつけた のシールの知らせ
   await expect(page.locator('.toast')).toContainText('シール ゲット');
   await expect(page.locator('.course-clear')).toBeVisible({ timeout: 4000 });
   await expect(page.locator('.course-clear .reward-sticker')).toBeVisible();
-  await expect(page.locator('.course-clear .new-friend')).toContainText('にゃこ');
+  await expect(page.locator('.course-clear .new-friend')).toContainText('ぽぽ');
   const saved = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
   expect(saved.collection.totalFinds).toBe(30);
   expect(saved.course.cleared).toBe(5);
@@ -216,9 +219,9 @@ test('clearing course 5 gives its sticker and brings nyako; the sticker book sho
   await act(page, 'toStickers');
   await expect(page.locator('.sticker.got')).toHaveCount(7); // コース1〜5 ＋ 10回・30回
   await expect(page.locator('.sticker.locked')).toHaveCount(8);
-  // 仲間になったあとは、かくす画面に にゃこ がいる
+  // 仲間になったあとは、かくす画面に ぽぽ がいる
   await act(page, 'home');
   await act(page, 'toHide');
   await act(page, 'hidePickScene', '[data-scene="room"]');
-  await expect(page.locator('[data-action="pickChar"][data-char="nyako"]')).toBeVisible();
+  await expect(page.locator('[data-action="pickChar"][data-char="popo"]')).toBeVisible();
 });

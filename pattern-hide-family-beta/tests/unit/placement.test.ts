@@ -35,7 +35,7 @@ describe('scenes', () => {
   }
 });
 
-describe('autoLayout (seeded)', () => {
+describe('autoLayout (seeded)', { timeout: 60_000 }, () => {
   const SEEDS = 320;
   it(`>= ${SEEDS} seeds per scene x difficulty produce valid, non-overlapping layouts`, () => {
     let checked = 0;

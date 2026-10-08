@@ -2,7 +2,7 @@
 // ローカル座標：足もと中央が原点、上が -y。高さ約200。
 import { type Pt, type Shape, quadPoints, shapeToSvg } from './geometry';
 
-export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako';
+export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo';
 
 export interface CharacterDef {
   id: CharacterId;
@@ -89,7 +89,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     ],
     facePoints: FACE,
   },
-  // コース5をクリアすると仲間になる、4体目
+  // コース1をクリアすると仲間になる、4体目
   nyako: {
     id: 'nyako',
     name: 'にゃこ',
@@ -98,17 +98,34 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     silhouette: [BODY, HEAD, { kind: 'poly', pts: EAR_L }, { kind: 'poly', pts: EAR_R }],
     facePoints: FACE,
   },
+  // コース5をクリアすると仲間になる、5体目
+  popo: {
+    id: 'popo',
+    name: 'ぽぽ',
+    personality: 'やさしくて ちからもち。あたまの まあるい みみ が めじるし。',
+    skin: '#E6C3BE',
+    silhouette: [
+      BODY,
+      HEAD,
+      { kind: 'ellipse', cx: -36, cy: -180, rx: 15, ry: 15 },
+      { kind: 'ellipse', cx: 36, cy: -180, rx: 15, ry: 15 },
+    ],
+    facePoints: FACE,
+  },
 };
 
-export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako'];
+export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo'];
 /** 最初からいる3体 */
 export const BASE_CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
-/** にゃこが仲間になるコース（このコースをクリアしたら） */
-export const NYAKO_UNLOCK_COURSE = 5;
+/** 新しい友だちが仲間になるコース（このコースをクリアしたら）。最初のクリアで1体目が来る */
+export const FRIEND_UNLOCKS: { course: number; char: CharacterId }[] = [
+  { course: 1, char: 'nyako' },
+  { course: 5, char: 'popo' },
+];
 
 /** いま遊べるキャラクター（コースの進み具合で増える） */
 export function unlockedCharacters(cleared: number): CharacterId[] {
-  return cleared >= NYAKO_UNLOCK_COURSE ? CHARACTER_IDS : BASE_CHARACTER_IDS;
+  return [...BASE_CHARACTER_IDS, ...FRIEND_UNLOCKS.filter((f) => cleared >= f.course).map((f) => f.char)];
 }
 
 const LINE = '#4A3A40';
@@ -163,6 +180,19 @@ function headMarkup(c: CharacterDef): string {
         `<path d="M-9 -124 Q-4.5 -119 0 -124 Q4.5 -119 9 -124" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>` +
         whisk(1) +
         whisk(-1)
+      );
+    }
+    case 'popo': {
+      const ear = (x: number) => `<circle cx="${x}" cy="-180" r="15" fill="${c.skin}" ${st}/><circle cx="${x}" cy="-179" r="8" fill="#F2D6D2"/>`;
+      return (
+        ear(-36) +
+        ear(36) +
+        `<ellipse cx="0" cy="-142" rx="48" ry="45" fill="${c.skin}" ${st}/>` +
+        `<ellipse cx="0" cy="-126" rx="17" ry="12" fill="#F6E3DE"/>` +
+        eyes() +
+        cheeks() +
+        `<ellipse cx="0" cy="-132" rx="5" ry="3.6" fill="#6B4E4A"/>` +
+        `<path d="M-7 -124 Q0 -117 7 -124" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
       );
     }
     case 'moko': {

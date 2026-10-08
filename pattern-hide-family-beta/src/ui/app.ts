@@ -1,5 +1,5 @@
 // 画面の流れと入力。ゲームの判定は core、保存は storage に任せる。
-import { CHARACTERS, CHARACTER_IDS, NYAKO_UNLOCK_COURSE, type CharacterId, unlockedCharacters } from '../core/characters';
+import { CHARACTERS, CHARACTER_IDS, FRIEND_UNLOCKS, type CharacterId, unlockedCharacters } from '../core/characters';
 import { STICKERS, hasSticker, newStickers, stickerHint } from '../core/stickers';
 import { stickerSvg } from './stickerArt';
 import { charArtMarkup, faceIcon, fullIcon } from './charArt';
@@ -401,14 +401,14 @@ export class App {
     return base.replace('viewBox="-70 -215 140 120"', 'viewBox="-78 -250 156 155"').replace(/<\/svg>$/, `${hat}</svg>`);
   }
 
-  /** コースクリアのごほうび：そのコースのシール、コース5ではにゃこが仲間に */
+  /** コースクリアのごほうび：そのコースのシール、コース1・5では新しい友だち */
   private courseRewardHtml(): string {
     const st = STICKERS.find((x) => x.kind === 'course' && x.need === this.courseNo);
     const sticker = st ? `<div class="reward-sticker">${stickerSvg(st)}<p>シールを もらったよ！</p></div>` : '';
-    const friend =
-      this.courseNo === NYAKO_UNLOCK_COURSE
-        ? `<div class="new-friend">${faceIcon(CHARACTERS.nyako)}<p>あたらしい ともだち<br><strong>にゃこ</strong>が なかまに なったよ！</p></div>`
-        : '';
+    const nf = FRIEND_UNLOCKS.find((f) => f.course === this.courseNo);
+    const friend = nf
+      ? `<div class="new-friend">${faceIcon(CHARACTERS[nf.char])}<p>あたらしい ともだち<br><strong>${CHARACTERS[nf.char].name}</strong>が なかまに なったよ！</p></div>`
+      : '';
     return `<div class="rewards">${sticker}${friend}</div>`;
   }
 
@@ -775,7 +775,7 @@ export class App {
     this.go('play');
   }
 
-  /** いま遊べるキャラクター（にゃこはコース5をクリアしてから） */
+  /** いま遊べるキャラクター（コース1でにゃこ、コース5でぽぽが仲間に） */
   private allowedChars(): CharacterId[] {
     return unlockedCharacters(this.store.data.course.cleared);
   }
