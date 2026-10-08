@@ -1,5 +1,7 @@
 // 画面の流れと入力。ゲームの判定は core、保存は storage に任せる。
-import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../core/characters';
+import { CHARACTERS, CHARACTER_IDS, NYAKO_UNLOCK_COURSE, type CharacterId, unlockedCharacters } from '../core/characters';
+import { STICKERS, hasSticker, newStickers, stickerHint } from '../core/stickers';
+import { stickerSvg } from './stickerArt';
 import { charArtMarkup, faceIcon, fullIcon } from './charArt';
 import { allArtUrls, uiArt } from '../art/registry';
 import { patternMarkup } from '../core/patterns';
@@ -51,6 +53,7 @@ type Screen =
   | 'hideCostume'
   | 'hidePlace'
   | 'courseSelect'
+  | 'stickers'
   | 'bye';
 
 const OUTLINE: Record<Difficulty, number> = { easy: 0.62, normal: 0.34 };
@@ -185,6 +188,8 @@ export class App {
         return this.hidePlaceHtml();
       case 'courseSelect':
         return this.courseSelectHtml();
+      case 'stickers':
+        return this.stickersHtml();
       case 'bye':
         return this.byeHtml();
     }
@@ -209,6 +214,7 @@ export class App {
         </div>
         ${resume ? btn('resume', ICONS.play, 'つづきから', 'mid') : ''}
       </div>
+      ${btn('toStickers', ICONS.sticker, `シールちょう ${this.stickerCount()}/${STICKERS.length}`, 'small sticker-btn')}
       ${btn('parent', ICONS.parent, 'おとなの かたへ', 'small parent-btn')}
     </main>`;
   }
@@ -262,6 +268,27 @@ export class App {
 
   private courseFindsShown(): number {
     return this.courseJustCleared ? FINDS_PER_COURSE : this.store.data.course.finds;
+  }
+
+  private stickerCount(): number {
+    const d = this.store.data;
+    return STICKERS.filter((x) => hasSticker(x, d.course.cleared, d.collection.totalFinds)).length;
+  }
+
+  /** シールちょう：もらったシールと、まだのシール（何をするともらえるか） */
+  private stickersHtml(): string {
+    const d = this.store.data;
+    const cells = STICKERS.map((x) => {
+      const got = hasSticker(x, d.course.cleared, d.collection.totalFinds);
+      return got
+        ? `<figure class="sticker got" aria-label="${x.name}">${stickerSvg(x)}<figcaption>${x.name}</figcaption></figure>`
+        : `<figure class="sticker locked" aria-label="まだ。${stickerHint(x)}"><div class="sticker-q" aria-hidden="true">？</div><figcaption>${stickerHint(x)}</figcaption></figure>`;
+    }).join('');
+    return `<main class="screen setup stickers" data-screen="stickers">
+      <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>シールちょう <span class="count">${this.stickerCount()}/${STICKERS.length}</span></h2><span></span></header>
+      <p class="sticker-note">みつけた かず：${d.collection.totalFinds}かい</p>
+      <div class="sticker-grid">${cells}</div>
+    </main>`;
   }
 
   private tutorialHtml(): string {
@@ -345,6 +372,7 @@ export class App {
         <div class="clear-card">
           <div class="medal" aria-hidden="true">${ICONS.star}<span>${this.courseNo}</span></div>
           <p class="clear-title">コース${this.courseNo} クリア！</p>
+          ${this.courseRewardHtml()}
           ${last ? '<p class="clear-sub">ぜんぶの コースを クリアしたよ</p>' : ''}
           <div class="clear-actions two">
             ${last ? btn('toCourse', ICONS.course, 'コースを えらぶ', 'equal', 'data-autofocus') : btn('nextCourse', ICONS.next, 'つぎの コース', 'equal primary', 'data-autofocus')}
@@ -371,6 +399,17 @@ export class App {
     if (!pl.acc?.hat || !this.session) return base;
     const hat = accessoryArt(SCENES[this.session.sceneId], { ...pl, acc: { hat: pl.acc.hat, tone: pl.acc.tone } }, `${prefix}${i}`, 1).front;
     return base.replace('viewBox="-70 -215 140 120"', 'viewBox="-78 -250 156 155"').replace(/<\/svg>$/, `${hat}</svg>`);
+  }
+
+  /** コースクリアのごほうび：そのコースのシール、コース5ではにゃこが仲間に */
+  private courseRewardHtml(): string {
+    const st = STICKERS.find((x) => x.kind === 'course' && x.need === this.courseNo);
+    const sticker = st ? `<div class="reward-sticker">${stickerSvg(st)}<p>シールを もらったよ！</p></div>` : '';
+    const friend =
+      this.courseNo === NYAKO_UNLOCK_COURSE
+        ? `<div class="new-friend">${faceIcon(CHARACTERS.nyako)}<p>あたらしい ともだち<br><strong>にゃこ</strong>が なかまに なったよ！</p></div>`
+        : '';
+    return `<div class="rewards">${sticker}${friend}</div>`;
   }
 
   private trialProgressHtml(): string {
@@ -425,7 +464,7 @@ export class App {
   private hideCharsHtml(): string {
     const scene = SCENES[this.draft.sceneId as SceneId];
     const sel = this.draft.chars;
-    const cards = CHARACTER_IDS.map((c) => {
+    const cards = this.allowedChars().map((c) => {
       const on = sel.includes(c);
       const defs = patternMarkup(`hc-${c}`, scene.costumes[0].spec);
       return `<button type="button" class="char-card${on ? ' on' : ''}" data-action="pickChar" data-char="${c}" aria-pressed="${on}" aria-label="${CHARACTERS[c].name}">${fullIcon(CHARACTERS[c], defs, `hc-${c}`)}<span class="lbl">${CHARACTERS[c].name}</span>${on ? `<span class="check">${ICONS.done}</span>` : ''}</button>`;
@@ -537,6 +576,9 @@ export class App {
     switch (a) {
       case 'toSearch':
         this.go('searchSetup');
+        break;
+      case 'toStickers':
+        this.go('stickers');
         break;
       case 'toCourse':
         this.session = null;
@@ -694,7 +736,7 @@ export class App {
     const difficulty = this.store.data.settings.difficulty;
     const scene = SCENES[this.searchScene];
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
-    const placements = autoLayout(scene, difficulty, seed);
+    const placements = autoLayout(scene, difficulty, seed, this.allowedChars());
     this.session = newSession(scene.id, difficulty, placements, 'search', Date.now());
     record(this.store, { type: 'searchStarted' });
     this.saveResume();
@@ -726,11 +768,36 @@ export class App {
     const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids)];
     const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
-    const placements = courseRound(scene, this.courseNo, remaining, seed);
+    const placements = courseRound(scene, this.courseNo, remaining, seed, this.allowedChars());
     const c = courseDef(this.courseNo);
     this.session = newSession(scene.id, c.variant === 'exact' ? 'normal' : 'easy', placements, 'course', Date.now());
     record(this.store, { type: 'searchStarted' });
     this.go('play');
+  }
+
+  /** いま遊べるキャラクター（にゃこはコース5をクリアしてから） */
+  private allowedChars(): CharacterId[] {
+    return unlockedCharacters(this.store.data.course.cleared);
+  }
+
+  /** 見つけた合計回数を数え、回数のシールをもらえたら知らせる（コースクリアのシールはクリア画面で） */
+  private countFind(): void {
+    const before = { cleared: this.store.data.course.cleared, totalFinds: this.store.data.collection.totalFinds };
+    this.store.update((d) => {
+      d.collection.totalFinds = Math.min(9999, d.collection.totalFinds + 1);
+    });
+    const after = { cleared: before.cleared, totalFinds: this.store.data.collection.totalFinds };
+    for (const st of newStickers(before, after)) this.toast(`<div class="toast-sticker">${stickerSvg(st)}</div><p>シール ゲット！<br>${st.name}</p>`);
+  }
+
+  /** 画面のじゃまをしない小さな知らせ（2.6秒で消える） */
+  private toast(html: string): void {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.setAttribute('role', 'status');
+    t.innerHTML = html;
+    document.body.appendChild(t);
+    window.setTimeout(() => t.remove(), 2600);
   }
 
   /** コース：1回見つけるごとに進める。10回でクリア */
@@ -767,7 +834,7 @@ export class App {
     const sceneId = ids[t.round % ids.length];
     t.round++;
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
-    const placements = hardestRound(SCENES[sceneId], HARDEST.finds - t.finds, seed, t.used[sceneId] ?? []);
+    const placements = hardestRound(SCENES[sceneId], HARDEST.finds - t.finds, seed, t.used[sceneId] ?? [], this.allowedChars());
     if (placements.length === 0) {
       // 安全に置ける場所がない（起こらない想定）。空の画面は出さない
       this.trial = null;
@@ -970,6 +1037,7 @@ export class App {
     play('found');
     if (this.session.origin === 'course') this.onCourseFind();
     if (this.session.origin === 'trial' && this.trial) this.trial.finds++;
+    else this.countFind();
     if (isComplete(this.session)) {
       // おためしは保存も集計もしない
       if (this.session.origin !== 'trial') {

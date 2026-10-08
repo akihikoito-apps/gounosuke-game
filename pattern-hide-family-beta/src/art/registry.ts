@@ -4,7 +4,7 @@
 import type { CharacterId } from '../core/characters';
 import type { SceneId } from '../core/scene';
 
-const files = import.meta.glob('../../art/{characters,scenes,patterns,ui,accessories}/**/*.{png,webp,svg}', {
+const files = import.meta.glob('../../art/{characters,scenes,patterns,ui,accessories,stickers}/**/*.{png,webp,svg}', {
   eager: true,
   query: '?url',
   import: 'default',
@@ -100,6 +100,11 @@ export function accessoryArtFiles(kind: 'hat' | 'umbrella'): AccessoryArt | null
 
 export function uiArt(name: 'title' | 'handoff' | 'bye'): string | undefined {
   return find('ui', name);
+}
+
+/** シールの絵（art/stickers/{id}.png、正方形） */
+export function stickerArtFile(id: string): string | undefined {
+  return find('stickers', id);
 }
 
 /** すべての絵のURL（起動時の先読み用） */

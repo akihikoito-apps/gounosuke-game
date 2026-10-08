@@ -17,6 +17,7 @@ export const ICONS = {
   next: S(`<path d="M24 12 L44 32 L24 52" fill="none" ${L} stroke-width="7"/>`),
   play: S(`<path d="M22 12 L50 32 L22 52Z" fill="#8CCB9B" ${L}/>`),
   course: S(`<path d="M8 50 Q20 40 32 46 T56 40" fill="none" ${L} stroke-dasharray="1 9"/><path d="M44 40 V10" ${L}/><path d="M44 11 L58 17 L44 23Z" fill="#F2A9B8" ${L}/><circle cx="14" cy="47" r="6" fill="#FFD66B" ${L}/>`),
+  sticker: S(`<rect x="10" y="8" width="44" height="50" rx="6" fill="#FFF6DC" ${L}/><circle cx="25" cy="25" r="8" fill="#F7C6CF" ${L} stroke-width="3"/><circle cx="41" cy="27" r="7" fill="#CFE9D6" ${L} stroke-width="3"/><circle cx="32" cy="43" r="8" fill="#E4D9F4" ${L} stroke-width="3"/>`),
   star: S(`<path d="M32 8 L38.5 23.5 L55 24.5 L42.5 35 L46.5 51.5 L32 42.5 L17.5 51.5 L21.5 35 L9 24.5 L25.5 23.5Z" fill="#FFD45C" ${L}/>`),
   lock: S(`<rect x="16" y="28" width="32" height="26" rx="6" fill="#DCCBF4" ${L}/><path d="M23 28 V21 C23 15 27 11 32 11 C37 11 41 15 41 21 V28" fill="none" ${L}/><circle cx="32" cy="40" r="3.5" fill="#4A3A40"/>`),
   ready: S(`<circle cx="32" cy="32" r="24" fill="#FFE07A" ${L}/><circle cx="24" cy="28" r="3.5" fill="#4A3A40"/><circle cx="40" cy="28" r="3.5" fill="#4A3A40"/><path d="M22 38 Q32 48 42 38" fill="none" ${L}/>`),

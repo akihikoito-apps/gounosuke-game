@@ -38,6 +38,8 @@ export interface SaveData {
   resume: ResumeState | null;
   playtest: { enabled: boolean; counters: PlaytestCounters };
   course: CourseProgress;
+  /** シールちょう用：見つけた合計回数（コース・さがす・かくして わたす。おためしは数えない） */
+  collection: { totalFinds: number };
 }
 
 /** コースの進み具合。cleared：クリアした最後のコース（0〜10）。current の finds：そのコースで見つけた回数 */
@@ -81,6 +83,7 @@ export function defaults(): SaveData {
     resume: null,
     playtest: { enabled: false, counters: emptyCounters() },
     course: emptyCourse(),
+    collection: { totalFinds: 0 },
   };
 }
 
@@ -160,6 +163,13 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
     // OFF のときは集計を持たない
     if (!d.playtest.enabled) d.playtest.counters = emptyCounters();
   } else if (p !== undefined) repaired = true;
+  const col = raw.collection;
+  if (col !== undefined) {
+    const tf = typeof col === 'object' && col !== null ? (col as Record<string, unknown>).totalFinds : undefined;
+    const v = validCount(tf);
+    if (v !== tf) repaired = true;
+    d.collection.totalFinds = v;
+  }
   const course = validateCourse(raw.course);
   d.course = course.course;
   if (course.repaired) repaired = true;

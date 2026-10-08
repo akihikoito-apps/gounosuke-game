@@ -1,5 +1,5 @@
 // 隠れ場所の検証と自動配置。描画・当たり判定と同じ形状定義を使う。
-import { CHARACTERS, BODY, type CharacterId, CHARACTER_IDS } from './characters';
+import { CHARACTERS, BODY, type CharacterId, CHARACTER_IDS, BASE_CHARACTER_IDS } from './characters';
 import {
   type BBox,
   type Pt,
@@ -177,10 +177,11 @@ export function validateLayout(scene: SceneDef, placements: Placement[]): Layout
 }
 
 /** 「さがす」モードの自動配置。シードが同じなら同じ結果。 */
-export function autoLayout(scene: SceneDef, difficulty: Difficulty, seed: number): Placement[] {
+/** chars：出てよいキャラクター（にゃこは仲間になってから） */
+export function autoLayout(scene: SceneDef, difficulty: Difficulty, seed: number, chars0: readonly CharacterId[] = BASE_CHARACTER_IDS): Placement[] {
   const rng: Rng = mulberry32(seed);
   const count = difficulty === 'easy' ? 1 : rng() < 0.5 ? 2 : 3;
-  const chars = shuffle(rng, CHARACTER_IDS).slice(0, count);
+  const chars = shuffle(rng, chars0).slice(0, count);
   const pool = shuffle(
     rng,
     scene.spots.filter((s) => difficulty === 'normal' || s.easy),

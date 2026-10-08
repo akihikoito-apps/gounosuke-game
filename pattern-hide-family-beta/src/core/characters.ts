@@ -2,7 +2,7 @@
 // ローカル座標：足もと中央が原点、上が -y。高さ約200。
 import { type Pt, type Shape, quadPoints, shapeToSvg } from './geometry';
 
-export type CharacterId = 'koro' | 'mimi' | 'moko';
+export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako';
 
 export interface CharacterDef {
   id: CharacterId;
@@ -42,6 +42,13 @@ export const BODY_POLY: Pt[] = [
 export const BODY: Shape = { kind: 'poly', pts: BODY_POLY };
 
 const HEAD: Shape = { kind: 'ellipse', cx: 0, cy: -142, rx: 48, ry: 45 };
+/** にゃこの三角の耳 */
+const EAR_L: Pt[] = [
+  { x: -46, y: -158 },
+  { x: -44, y: -214 },
+  { x: -10, y: -184 },
+];
+const EAR_R: Pt[] = EAR_L.map((p) => ({ x: -p.x, y: p.y })).reverse();
 const FACE: Pt[] = [
   { x: -16, y: -142 },
   { x: 16, y: -142 },
@@ -82,9 +89,27 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     ],
     facePoints: FACE,
   },
+  // コース5をクリアすると仲間になる、4体目
+  nyako: {
+    id: 'nyako',
+    name: 'にゃこ',
+    personality: 'きままで あそびずき。ぴんと たった さんかくの みみ が めじるし。',
+    skin: '#BCCDE4',
+    silhouette: [BODY, HEAD, { kind: 'poly', pts: EAR_L }, { kind: 'poly', pts: EAR_R }],
+    facePoints: FACE,
+  },
 };
 
-export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
+export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako'];
+/** 最初からいる3体 */
+export const BASE_CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
+/** にゃこが仲間になるコース（このコースをクリアしたら） */
+export const NYAKO_UNLOCK_COURSE = 5;
+
+/** いま遊べるキャラクター（コースの進み具合で増える） */
+export function unlockedCharacters(cleared: number): CharacterId[] {
+  return cleared >= NYAKO_UNLOCK_COURSE ? CHARACTER_IDS : BASE_CHARACTER_IDS;
+}
 
 const LINE = '#4A3A40';
 
@@ -122,6 +147,24 @@ function headMarkup(c: CharacterDef): string {
         cheeks() +
         `<path d="M-9 -127 Q-4.5 -120 0 -126 Q4.5 -120 9 -127" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
       );
+    case 'nyako': {
+      const ear = (sx: number) =>
+        `<path d="M${-46 * sx} -158 L${-44 * sx} -214 L${-10 * sx} -184 Z" fill="${c.skin}" ${st}/>` +
+        `<path d="M${-40 * sx} -168 L${-39 * sx} -200 L${-20 * sx} -184 Z" fill="#F7C6CF"/>`;
+      const whisk = (sx: number) =>
+        `<path d="M${30 * sx} -130 L${54 * sx} -134 M${30 * sx} -124 L${54 * sx} -122" stroke="#6E6070" stroke-width="2" stroke-linecap="round"/>`;
+      return (
+        ear(1) +
+        ear(-1) +
+        `<ellipse cx="0" cy="-142" rx="48" ry="45" fill="${c.skin}" ${st}/>` +
+        eyes() +
+        cheeks() +
+        `<path d="M-3 -131 L3 -131 L0 -127 Z" fill="#E79AAA"/>` +
+        `<path d="M-9 -124 Q-4.5 -119 0 -124 Q4.5 -119 9 -124" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>` +
+        whisk(1) +
+        whisk(-1)
+      );
+    }
     case 'moko': {
       const puffs: [number, number, number][] = [
         [0, -160, 34],

@@ -1,7 +1,7 @@
 // コースモード：10回みつけると1コースクリア、10コースで100回。
 // あとのコースほど、柄が背景に近づき・ふち線が薄くなり・人数が増え・ニット帽や傘が加わる。
 import { type AccStyle, type Accessories, type Side, HAT_COLORS, accessoryFits, accessoryShapes } from './accessories';
-import { CHARACTERS, CHARACTER_IDS, type CharacterId } from './characters';
+import { BASE_CHARACTER_IDS, CHARACTERS, CHARACTER_IDS, type CharacterId } from './characters';
 import { bbox, bboxOverlap, contains, samplePoints, transformShape, unionBBox } from './geometry';
 import { PEEKS, type PeekDef, analyzePeek } from './peeks';
 import { type Placement, type SpotReport, analyzeSpot, costumeForRegion, silhouetteBBox, spotsConflict } from './placement';
@@ -59,11 +59,11 @@ function worldShapes(spot: SpotDef, acc: Accessories) {
  * コースの1回分の配置。remaining（このコースで残りの「みつける」回数）を超えない人数にする。
  * シードが同じなら同じ結果。
  */
-export function courseRound(scene: SceneDef, no: number, remaining: number, seed: number): Placement[] {
+export function courseRound(scene: SceneDef, no: number, remaining: number, seed: number, allowed: readonly CharacterId[] = BASE_CHARACTER_IDS): Placement[] {
   const c = courseDef(no);
   const rng: Rng = mulberry32(seed);
   const want = Math.max(1, Math.min(remaining, 1 + Math.floor(rng() * c.maxChars)));
-  const chars = shuffle(rng, CHARACTER_IDS).slice(0, want);
+  const chars = shuffle(rng, allowed).slice(0, want);
   const pool = shuffle(
     rng,
     scene.spots.filter((s) => c.spots === 'all' || s.easy),
@@ -229,19 +229,19 @@ function hardCandidates(scene: SceneDef): { all: HardCand[]; inBand: boolean[]; 
  * 帯の中で1人も置けないときだけ、安全な場所全体でやり直す。それでも無ければ空（出題しない）。
  * avoid：このおためしで前に使った場所。人数が減らない限り避ける（同じ場所を覚えるだけにしない）。
  */
-export function hardestRound(scene: SceneDef, remaining: number, seed: number, avoid: readonly string[] = []): Placement[] {
+export function hardestRound(scene: SceneDef, remaining: number, seed: number, avoid: readonly string[] = [], allowed: readonly CharacterId[] = BASE_CHARACTER_IDS): Placement[] {
   if (remaining <= 0) return [];
   const rng = mulberry32(seed);
   // 場所ごとの測定はシードに関係ないので背景ごとに1回だけ。順番の同点決めだけシードで
   const base = hardCandidates(scene);
   const keyed = base.all.map((c) => ({ ...c, key: rng() }));
-  const all = keyed;
-  const band = keyed.filter((_, i) => base.inBand[i]);
+  const all = keyed.filter((c) => allowed.includes(c.char));
+  const band = keyed.filter((c, i) => base.inBand[i] && allowed.includes(c.char));
   const want = Math.min(HARDEST.maxChars, remaining);
 
   // 1) のぞき場所（物の裏・窓の奥）に1人。前のおためしで使った場所はなるべく避ける
   const peekCands = PEEKS[scene.id]
-    .flatMap((pk) => CHARACTER_IDS.filter((ch) => analyzePeek(scene, pk, ch).ok).map((ch) => ({ pk, ch, key: rng() + (avoid.includes(pk.id) ? 1 : 0) })))
+    .flatMap((pk) => allowed.filter((ch) => analyzePeek(scene, pk, ch).ok).map((ch) => ({ pk, ch, key: rng() + (avoid.includes(pk.id) ? 1 : 0) })))
     .sort((a, b) => a.key - b.key);
 
   // 2) 残りは優先帯から（のぞきの子と重ならない・物の裏に入らない）

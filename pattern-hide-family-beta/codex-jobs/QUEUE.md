@@ -9,6 +9,8 @@
 - [x] 05-garden-shop.md — にわ・おやつのみせ 2026-10-08 完了。修正依頼なし
 - [x] 06-ui.md — タイトル・受け渡し・おしまいの絵 2026-10-08 完了。修正依頼なし
 - [x] 07-accessories.md — ニット帽と傘（コースモード） 2026-10-08 完了。修正依頼なし
+- [ ] 08-nyako.md — 新しい友だち にゃこ
+- [ ] 09-stickers.md — シールちょうのシール15枚
 - [x] 90-review-code.md — コードの独立レビュー（状態遷移・入力・保存・情報流出・課金境界） 2026-10-08 完了。指摘3件を Claude が修正（audit/codex/review-2026-10-08.md）
 - [x] 91-hardest-course-r1.md — 最難関コースの議論・第1回 2026-10-08（audit/codex/hardest-course-r1.md）
 - [x] 92-hardest-course-r2.md — 最難関コースの議論・第2回（仕様確定）2026-10-08（audit/codex/hardest-course-r2.md）
