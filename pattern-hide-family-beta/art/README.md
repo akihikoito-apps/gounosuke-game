@@ -4,6 +4,18 @@
 現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
 
 ## 作業記録
+### 2026-10-08：ジョブ08（新しい友だち「にゃこ」）
+
+- 作成ファイル：`characters/nyako/` に `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層。すべて450×600px、viewBoxは `-90 -225 180 240`、背景は透明。本READMEも更新。
+- 方法：SVGをコードで記述。ガイドPNG・SVGと既存のころ・みみ・もこのSVGを参照。服の3層、足と接地影は既存3体と共通の形を使用し、頭・三角耳・耳の内側・鼻・ωの口・ひげを記述。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。絵に文字・外部参照・スクリプトなし。
+- 画風：くすんだ水色 #BCCDE4、左上からの光、濃茶色 #4A3A40 の輪郭（基本2.6、影側3.4）、目のハイライト、淡い頬を既存3体に合わせた。目はガイドの (±16, -142)、口は (0, -125) 付近。内側がピンクの立ち耳と左右2本ずつのひげで形からも区別できる。発見時は片手を上げてふる。
+- 迷った点：三角耳の先は立った印象を保ちつつ少し丸め、輪郭線を含めて橙色の三角形の内側に収めた。既存作品を参照せず、このゲームの顔の配置と画風を引き継いだ。服の柄への溶け込みを優先し、新しい服の装飾や尾は追加しなかった。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む58ファイル・合計3967KBで「すべて合格」。にゃこの白いマスクは判定内100%、被覆率100%。back・clothes-shade・clothes-line・frontのはみ出し0.0%、front-foundは6.0%（許容12%以下）、両frontで顔位置の検査合格。形状データの組み立てに失敗し、保存済みデータを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- 目視確認：ローカルChromiumのCanvasで6層を合成し、既存3体とにゃこの通常・発見ポーズを225×300pxで並べて、画風・耳・ひげ・顔・手を確認。合成データはメモリ内のみで、一時ファイルは残していない。ゲーム実画面の確認とは別。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。
+- できなかったこと：ビルド成功、preview、ゲーム実画面の表示確認は未達。AGENTS.mdの指示に従い、道具・設定・環境変数の変更や回避策は行っていない。Claude Code側で最新形状データによる再検査・ビルド・実画面確認が必要。
+- 書き込み範囲：手動の書き込みはジョブ08指定の `art/characters/nyako/` と本READMEのみ。AGENTS.mdのSTATUS.md更新の一般指示より、ジョブ08とユーザーの限定指定を優先し、存在しないルートSTATUS.mdは作成していない。他作業者のファイルは保持。commit / push は行っていない。
+
 ### 2026-10-08：ジョブ07（ニット帽と傘）
 
 - 作成ファイル：`accessories/hat/` に `mask.svg`、`shade.svg`、`line.svg`、`accessories/umbrella/` に `mask.svg`、`shade.svg`、`line.svg`、`back.svg`、計7枚。すべて600×720px、viewBoxは `-150 -345 300 360`、背景は透明。本READMEも更新。

@@ -1,6 +1,6 @@
 # 絵の自動検査結果
 
-対象：`art/`（52ファイル、合計 3954KB） 実行：2026-10-08T05:38:08.257Z
+対象：`art/`（58ファイル、合計 3967KB） 実行：2026-10-08T09:14:46.947Z
 
 **すべて合格**
 
@@ -33,6 +33,15 @@
 | OK | art\characters\moko\front.svg | 顔の位置に絵がある |
 | OK | art\characters\moko\front-found.svg | 輪郭の判定からはみ出す割合 5.4%（12%以下） |
 | OK | art\characters\moko\front-found.svg | 顔の位置に絵がある |
+| OK | art\characters\nyako\back.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\nyako\clothes-mask.svg | 服の白い部分がからだの判定内 100%（95%以上） |
+| OK | art\characters\nyako\clothes-mask.svg | からだの判定を服が覆う割合 100%（70%以上） |
+| OK | art\characters\nyako\clothes-shade.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\nyako\clothes-line.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\nyako\front.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\nyako\front.svg | 顔の位置に絵がある |
+| OK | art\characters\nyako\front-found.svg | 輪郭の判定からはみ出す割合 6.0%（12%以下） |
+| OK | art\characters\nyako\front-found.svg | 顔の位置に絵がある |
 | OK | art\scenes\room\back.png | 寸法確認のみ |
 | OK | art\scenes\room\over.png | 全 9 か所 × 3体で問題なし |
 | OK | art\scenes\room\minor.png | 全 9 か所 × 3体で問題なし |
