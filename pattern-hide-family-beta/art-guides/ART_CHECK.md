@@ -1,6 +1,6 @@
 # 絵の自動検査結果
 
-対象：`art/`（45ファイル、合計 3941KB） 実行：2026-10-08T04:14:02.324Z
+対象：`art/`（52ファイル、合計 3954KB） 実行：2026-10-08T04:18:26.919Z
 
 **すべて合格**
 
@@ -45,6 +45,22 @@
 | OK | art\scenes\shop\over.png | 全 9 か所 × 3体で問題なし |
 | OK | art\scenes\shop\minor.png | 全 9 か所 × 3体で問題なし |
 | OK | art\scenes\shop\fore.png | 全 9 か所 × 3体で問題なし |
+| OK | art\accessories\hat\mask.svg | 形の判定からはみ出す割合 0.0%（5%以下） |
+| OK | art\accessories\hat\mask.svg | 形の判定を白が覆う割合 97%（70%以上） |
+| OK | art\accessories\hat\mask.svg | 顔に重ならない |
+| OK | art\accessories\hat\shade.svg | 形の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\accessories\hat\shade.svg | 顔に重ならない |
+| OK | art\accessories\hat\line.svg | 形の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\accessories\hat\line.svg | 顔に重ならない |
+| OK | art\accessories\umbrella\mask.svg | 形の判定からはみ出す割合 0.0%（5%以下） |
+| OK | art\accessories\umbrella\mask.svg | 形の判定を白が覆う割合 98%（70%以上） |
+| OK | art\accessories\umbrella\mask.svg | 顔に重ならない |
+| OK | art\accessories\umbrella\shade.svg | 形の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\accessories\umbrella\shade.svg | 顔に重ならない |
+| OK | art\accessories\umbrella\line.svg | 形の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\accessories\umbrella\line.svg | 顔に重ならない |
+| OK | art\accessories\umbrella\back.svg | 形の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\accessories\umbrella\back.svg | 顔に重ならない |
 | OK | art\patterns\garden-dots.svg | つなぎ目の差 0.0（28未満） |
 | OK | art\patterns\garden-dots.svg | 不透明 |
 | OK | art\patterns\garden-leaf.svg | つなぎ目の差 0.0（28未満） |
