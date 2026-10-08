@@ -14,7 +14,7 @@
 - [x] 10-popo.md — 5体目 ぽぽ と コース5のシール 2026-10-08 完了。修正依頼なし
 - [x] 11-beach.md — 背景パック1 うみべ（背景4層＋柄タイル4枚） 2026-10-08 完了
 - [x] 12-choki.md — うみべの友だち ちょき とシール3枚 2026-10-08 完了
-- [ ] 94-review-pack1.md — 総合レビュー（うみべパックとこれまでの追加分）
+- [x] 94-review-pack1.md — 総合レビュー（うみべパックとこれまでの追加分） 2026-10-08 完了。指摘7件を Claude が対応
 - [x] 90-review-code.md — コードの独立レビュー（状態遷移・入力・保存・情報流出・課金境界） 2026-10-08 完了。指摘3件を Claude が修正（audit/codex/review-2026-10-08.md）
 - [x] 91-hardest-course-r1.md — 最難関コースの議論・第1回 2026-10-08（audit/codex/hardest-course-r1.md）
 - [x] 92-hardest-course-r2.md — 最難関コースの議論・第2回（仕様確定）2026-10-08（audit/codex/hardest-course-r2.md）

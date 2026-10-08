@@ -1,7 +1,8 @@
 // 画面の流れと入力。ゲームの判定は core、保存は storage に任せる。
-import { CHARACTERS, CHARACTER_IDS, FRIEND_UNLOCKS, SCENE_FRIENDS, type CharacterId, unlockedCharacters } from '../core/characters';
-import { STICKERS, hasSticker, newStickers, stickerHint } from '../core/stickers';
+import { CHARACTERS, CHARACTER_IDS, FRIEND_UNLOCKS, SCENE_FRIENDS, type CharacterId } from '../core/characters';
+import { hasSticker, newStickers, stickerHint } from '../core/stickers';
 import { stickerSvg } from './stickerArt';
+import { availableCharacters, canPlayCourse, canResume, visibleStickers } from '../core/access';
 import { charArtMarkup, faceIcon, fullIcon } from './charArt';
 import { allArtUrls, uiArt } from '../art/registry';
 import { patternMarkup } from '../core/patterns';
@@ -30,7 +31,7 @@ import {
   toPlacements,
   undo,
 } from '../core/hideEditor';
-import { betaEntitlements } from '../entitlements/entitlements';
+import { type ContentId, betaEntitlements } from '../entitlements/entitlements';
 import { COURSES, FINDS_PER_COURSE, HARDEST, courseDef, courseRound, courseScene, hardestRound } from '../core/courses';
 import { accessoryArt } from './accessoryArt';
 import { COURSE_COUNT } from '../storage/schema';
@@ -89,6 +90,10 @@ export class App {
   /** このラウンドでコースをクリアした（クリア画面を出す） */
   private courseJustCleared = false;
   private afterTutorial: 'search' | 'course' = 'search';
+  /** このクリアが初めてか（ごほうびの表示に使う） */
+  private courseFirstClear = false;
+  /** パックの利用権限（ベータは全開放。本番では正規の購入確認に差し替える） */
+  private can = (id: ContentId) => betaEntitlements.canPlay(id);
   /** 最難関のおためし（保存しない。メモリ内だけ） */
   private trial: { finds: number; round: number; used: Partial<Record<SceneId, string[]>> } | null = null;
   /** 「みーつけた」のあと、少し待って自動で次へ */
@@ -104,6 +109,9 @@ export class App {
       () => {
         this.session = null;
         this.draft = emptyDraft();
+        // データを消したら、待っている知らせも消す（消す前の「もらったよ」を出さない）
+        this.toastQueue = [];
+        document.querySelectorAll('.toast').forEach((t) => t.remove());
       },
       () => this.startTrial(),
     );
@@ -198,7 +206,9 @@ export class App {
   // ---------- 各画面 ----------
 
   private titleHtml(): string {
-    const resume = this.store.data.resume;
+    const r0 = this.store.data.resume;
+    // 遊べない（パックが無い）背景・友だちの途中は「つづきから」に出さない
+    const resume = r0 && canResume(r0, this.can) ? r0 : null;
     const peek = CHARACTER_IDS.map((c) => `<div class="peek peek-${c}">${faceIcon(CHARACTERS[c])}</div>`).join('');
     return `<main class="screen title" data-screen="title">
       <div class="logo" aria-label="もようの かくれんぼ">
@@ -214,13 +224,15 @@ export class App {
         </div>
         ${resume ? btn('resume', ICONS.play, 'つづきから', 'mid') : ''}
       </div>
-      ${btn('toStickers', ICONS.sticker, `シールちょう ${this.stickerCount()}/${STICKERS.length}`, 'small sticker-btn')}
-      ${btn('parent', ICONS.parent, 'おとなの かたへ', 'small parent-btn')}
+      <div class="title-foot">
+        ${btn('toStickers', ICONS.sticker, `シールちょう ${this.stickerCount()}/${visibleStickers(this.can).length}`, 'small sticker-btn')}
+        ${btn('parent', ICONS.parent, 'おとなの かたへ', 'small parent-btn')}
+      </div>
     </main>`;
   }
 
   private sceneCards(action: string): string {
-    return SCENE_IDS.filter((id) => betaEntitlements.canPlay(`scene:${id}`))
+    return SCENE_IDS.filter((id) => this.can(`scene:${id}`))
       .map(
         (id) =>
           `<button type="button" class="scene-card" data-action="${action}" data-scene="${id}" aria-label="${SCENES[id].name}">${sceneThumb(SCENES[id])}<span class="lbl">${SCENES[id].name}</span></button>`,
@@ -245,7 +257,8 @@ export class App {
     const next = Math.min(COURSE_COUNT, p.cleared + 1);
     const tiles = COURSES.map((c) => {
       const cleared = c.no <= p.cleared;
-      const open = c.no <= next;
+      // 進み具合で開いていて、しかもパックで遊べるコース
+      const open = c.no <= next && canPlayCourse(c.no, this.can);
       const now = c.no === p.current && p.finds > 0 && !cleared;
       const label = `コース${c.no}${cleared ? ' クリア' : open ? '' : ' まだ'}`;
       const pips = now
@@ -272,20 +285,20 @@ export class App {
 
   private stickerCount(): number {
     const d = this.store.data;
-    return STICKERS.filter((x) => hasSticker(x, d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds)).length;
+    return visibleStickers(this.can).filter((x) => hasSticker(x, d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds)).length;
   }
 
   /** シールちょう：もらったシールと、まだのシール（何をするともらえるか） */
   private stickersHtml(): string {
     const d = this.store.data;
-    const cells = STICKERS.map((x) => {
+    const cells = visibleStickers(this.can).map((x) => {
       const got = hasSticker(x, d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds);
       return got
         ? `<figure class="sticker got" aria-label="${x.name}">${stickerSvg(x)}<figcaption>${x.name}</figcaption></figure>`
         : `<figure class="sticker locked" aria-label="まだ。${stickerHint(x)}"><div class="sticker-q" aria-hidden="true">？</div><figcaption>${stickerHint(x)}</figcaption></figure>`;
     }).join('');
     return `<main class="screen setup stickers" data-screen="stickers">
-      <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>シールちょう <span class="count">${this.stickerCount()}/${STICKERS.length}</span></h2><span></span></header>
+      <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>シールちょう <span class="count">${this.stickerCount()}/${visibleStickers(this.can).length}</span></h2><span></span></header>
       <p class="sticker-note">みつけた かず：${d.collection.totalFinds}かい</p>
       <div class="sticker-grid">${cells}</div>
     </main>`;
@@ -403,9 +416,11 @@ export class App {
 
   /** コースクリアのごほうび：そのコースのシール、コース1・5では新しい友だち */
   private courseRewardHtml(): string {
-    const st = STICKERS.find((x) => x.kind === 'course' && x.need === this.courseNo);
+    // 初めてクリアしたときだけ（もう一度クリアしても「あたらしい」とは言わない）
+    if (!this.courseFirstClear) return '';
+    const st = visibleStickers(this.can).find((x) => x.kind === 'course' && x.need === this.courseNo);
     const sticker = st ? `<div class="reward-sticker">${stickerSvg(st)}<p>シールを もらったよ！</p></div>` : '';
-    const nf = FRIEND_UNLOCKS.find((f) => f.course === this.courseNo);
+    const nf = FRIEND_UNLOCKS.find((f) => f.course === this.courseNo && this.can(`char:${f.char}`));
     const friend = nf
       ? `<div class="new-friend">${faceIcon(CHARACTERS[nf.char])}<p>あたらしい ともだち<br><strong>${CHARACTERS[nf.char].name}</strong>が なかまに なったよ！</p></div>`
       : '';
@@ -591,6 +606,9 @@ export class App {
       case 'nextRound':
         this.startCourseRound();
         break;
+      case 'retryLoad':
+        this.render();
+        break;
       case 'nextTrialRound':
         this.startTrialRound();
         break;
@@ -747,6 +765,8 @@ export class App {
     const p = this.store.data.course;
     const open = Math.min(COURSE_COUNT, p.cleared + 1);
     if (!Number.isInteger(no) || no < 1 || no > open) return;
+    // パックで遊べないコースは始めない（「つぎの コース」からも同じ）
+    if (!canPlayCourse(no, this.can)) return this.go('courseSelect');
     this.courseNo = no;
     this.courseRoundIdx = 0;
     this.courseJustCleared = false;
@@ -764,7 +784,7 @@ export class App {
 
   private startCourseRound(): void {
     if (this.courseJustCleared) return this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
-    const ids = SCENE_IDS.filter((id) => betaEntitlements.canPlay(`scene:${id}`));
+    const ids = SCENE_IDS.filter((id) => this.can(`scene:${id}`));
     const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids)];
     const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
@@ -777,7 +797,7 @@ export class App {
 
   /** いま遊べるキャラクター（コース1でにゃこ、コース5でぽぽが仲間に） */
   private allowedChars(): CharacterId[] {
-    return unlockedCharacters(this.store.data.course.cleared, this.store.data.collection.sceneFinds);
+    return availableCharacters(this.store.data.course.cleared, this.store.data.collection.sceneFinds, this.can);
   }
 
   /** 見つけた合計回数を数え、回数のシールをもらえたら知らせる（コースクリアのシールはクリア画面で） */
@@ -791,11 +811,11 @@ export class App {
     const after = { cleared: before.cleared, totalFinds: this.store.data.collection.totalFinds, sceneFinds: this.store.data.collection.sceneFinds };
     // 背景パックの友だち：その背景で初めて見つけたら仲間に
     for (const f of SCENE_FRIENDS) {
-      if ((before.sceneFinds[f.scene] ?? 0) === 0 && (after.sceneFinds[f.scene] ?? 0) >= 1) {
+      if ((before.sceneFinds[f.scene] ?? 0) === 0 && (after.sceneFinds[f.scene] ?? 0) >= 1 && this.can(`char:${f.char}`)) {
         this.toast(`<div class="toast-sticker">${faceIcon(CHARACTERS[f.char])}</div><p>あたらしい ともだち<br>${CHARACTERS[f.char].name}が なかまに なったよ！</p>`);
       }
     }
-    for (const st of newStickers(before, after)) this.toast(`<div class="toast-sticker">${stickerSvg(st)}</div><p>シール ゲット！<br>${st.name}</p>`);
+    for (const st of newStickers(before, after).filter((x) => visibleStickers(this.can).includes(x))) this.toast(`<div class="toast-sticker">${stickerSvg(st)}</div><p>シール ゲット！<br>${st.name}</p>`);
   }
 
   /** 画面のじゃまをしない小さな知らせ（2.6秒で消える）。重ならないよう1つずつ順番に出す */
@@ -836,6 +856,7 @@ export class App {
       }
       d.course.finds += 1;
       if (d.course.finds >= FINDS_PER_COURSE) {
+        this.courseFirstClear = d.course.cleared < no;
         d.course.cleared = Math.max(d.course.cleared, no);
         d.course.current = Math.min(COURSE_COUNT, no + 1);
         d.course.finds = 0;
@@ -848,6 +869,7 @@ export class App {
   /** 最難関のおためし：保護者の画面から。進み具合は保存しない */
   startTrial(): void {
     this.parent.close();
+    if (!this.can('trial:hardest')) return this.go('title');
     this.trial = { finds: 0, round: 0, used: {} };
     this.startTrialRound();
   }
@@ -855,7 +877,7 @@ export class App {
   private startTrialRound(): void {
     const t = this.trial;
     if (!t || t.finds >= HARDEST.finds) return this.go('title');
-    const ids = SCENE_IDS.filter((id) => betaEntitlements.canPlay(`scene:${id}`));
+    const ids = SCENE_IDS.filter((id) => this.can(`scene:${id}`));
     const sceneId = ids[t.round % ids.length];
     t.round++;
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
@@ -945,6 +967,8 @@ export class App {
   private resume(): void {
     const r = this.store.data.resume;
     if (!r) return;
+    // 遊べない背景・友だちの途中からは再開しない（保存データは購入の証明ではない）
+    if (!canResume(r, this.can)) return this.render();
     this.session = { ...newSession(r.sceneId, r.difficulty, r.placements, r.origin, Date.now()), found: r.found.slice() };
     if (r.origin === 'hide') this.draft = draftFromPlacements(r.sceneId, r.placements);
     if (isComplete(this.session)) {
@@ -1011,7 +1035,22 @@ export class App {
         if (token === this.renderToken) stage.classList.remove('loading');
       }));
     };
-    Promise.all(hrefs.map(decodeImage)).then(reveal, reveal);
+    Promise.all(hrefs.map(decodeImage)).then((oks) => {
+      if (token !== this.renderToken) return;
+      // 1枚でも読めなければ出題しない（小物や顔が欠けたまま遊ばせない）
+      if (oks.every(Boolean)) reveal();
+      else this.showLoadError();
+    });
+  }
+
+  /** 絵を読めなかったとき：ステージは隠したまま、もういちど／もどる を出す */
+  private showLoadError(): void {
+    const main = this.root.querySelector('main');
+    if (!main || main.querySelector('.load-error')) return;
+    main.insertAdjacentHTML(
+      'beforeend',
+      `<div class="overlay load-error" role="alertdialog" aria-label="えを よみこめませんでした"><div class="clear-card"><p class="clear-sub">えを よみこめませんでした</p><div class="clear-actions two">${btn('retryLoad', ICONS.again, 'もういちど', 'equal primary', 'data-autofocus')}${btn('home', ICONS.home, 'もどる', 'equal')}</div></div></div>`,
+    );
   }
 
   private stageSvg(): SVGSVGElement | null {
@@ -1284,20 +1323,25 @@ export class App {
   }
 }
 
-const decoded = new Map<string, Promise<void>>();
+const decoded = new Map<string, Promise<boolean>>();
 const readyImages = new Set<string>();
 
 /** 絵を読み込んで展開する（同じ絵は1回だけ）。失敗しても止めない */
-function decodeImage(url: string): Promise<void> {
+/** 読めたら true。失敗したものは覚えておかない（もういちどで読み直せる） */
+function decodeImage(url: string): Promise<boolean> {
   let p = decoded.get(url);
   if (!p) {
     const im = new Image();
     im.src = url;
-    p = (im.decode ? im.decode() : new Promise<void>((res) => (im.onload = () => res())))
+    p = (im.decode ? im.decode() : new Promise<void>((res, rej) => ((im.onload = () => res()), (im.onerror = () => rej()))))
       .then(() => {
         readyImages.add(url);
+        return true;
       })
-      .catch(() => undefined);
+      .catch(() => {
+        decoded.delete(url);
+        return false;
+      });
     decoded.set(url, p);
   }
   return p;

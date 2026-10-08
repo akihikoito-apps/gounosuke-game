@@ -41,6 +41,7 @@
 | `art/accessories/hat/`・`art/accessories/umbrella/`（コースの帽子・傘。mask/shade/line/back の SVG） | Codex がSVGをコードで記述。画像生成・ネット画像は不使用 | 2026-10-08 | validate:art 合格（顔に重ならない・形の判定内）、npm test / test:e2e 合格 |
 | `art/characters/nyako/`・`art/characters/popo/`（新しい友だち。各 SVG 6枚） | Codex がSVGをコードで記述。画像生成・ネット画像は不使用 | 2026-10-08 | validate:art 合格 |
 | `art/stickers/`（シール15枚 SVG） | Codex がSVGをコードで記述（c5 はぽぽ用に描き直し） | 2026-10-08 | validate:art 合格 |
+| `art/scenes/beach/`・`art/patterns/beach-*`・`art/characters/choki/`・`art/stickers/b*`（背景パック1 うみべ） | Codex がSVGをコードで記述。画像生成・ネット画像は不使用 | 2026-10-08 | validate:art 合格（9か所×6体）、総合レビュー済み |
 `art-guides/` は形状データから自動生成した下書きガイドで、ゲームには含まれません。
 
 ## 外部の画像生成について

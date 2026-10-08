@@ -105,3 +105,29 @@ describe('hardest trial: variety', () => {
     }
   });
 });
+
+import { CHARACTER_IDS as ALL } from '../../src/core/characters';
+describe('hardest trial with all six friends', { timeout: 120_000 }, () => {
+  for (const id of SCENE_IDS) {
+    it(`${id}: peeks, deep hats and glasses stay safe for every friend`, () => {
+      const sc = SCENES[id];
+      const seen = new Set<string>();
+      for (let seed = 1; seed <= 60; seed++) {
+        for (const remaining of [1, 2, 3]) {
+          const pls = hardestRound(sc, remaining, seed * 17 + remaining, [], ALL);
+          expect(pls.length).toBe(remaining);
+          const normal = pls.filter((p) => !isPeek(getSpot(sc, p.spot)));
+          if (normal.length) expect(validateLayout(sc, normal).problems).toEqual([]);
+          for (const p of pls) {
+            seen.add(p.char);
+            const spot = getSpot(sc, p.spot);
+            if (isPeek(spot)) expect(analyzePeek(sc, spot, p.char).problems).toEqual([]);
+            if (p.acc?.deep) expect(accessoryFits(sc, spot, p.char, 'hat', 'camo', p.acc.deep).problems).toEqual([]);
+          }
+        }
+      }
+      // 新しい3体も、最難関に出てくる
+      for (const c of ['nyako', 'popo', 'choki']) expect(seen.has(c), c).toBe(true);
+    });
+  }
+});

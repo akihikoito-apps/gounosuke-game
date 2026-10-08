@@ -349,3 +349,23 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 /* 友だちが4体以上のとき：カードを小さく3列に */
 .cards.chars.many .char-card { width: clamp(100px, 29vw, 190px); padding: 6px; font-size: 17px; }
 .cards.chars.many .char-card svg { max-height: 24dvh; }
+
+/* 友だちが4体以上：3列のグリッドで1画面に（小さい画面でもスクロールしない） */
+.cards.chars.many { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: center; max-width: 620px; margin: 0 auto; }
+.cards.chars.many .char-card { width: auto; min-width: 0; }
+.cards.chars.many .char-card svg { max-height: 22dvh; }
+@media (orientation: landscape) and (max-height: 600px) {
+  .cards.chars.many { grid-template-columns: repeat(6, minmax(0, 1fr)); max-width: none; }
+  .cards.chars.many .char-card svg { max-height: 40dvh; }
+}
+
+/* とても小さい画面（320×568 など）：タイトルの下のボタンを重ねずに並べる */
+@media (max-height: 640px) and (orientation: portrait) {
+  .title { justify-content: flex-start; gap: 12px; padding-top: 14px; }
+  .title .ui-art-title { max-height: 18dvh; width: auto; }
+  .title .logo h1 { font-size: clamp(28px, 8vw, 40px); }
+  .title .btn.big { min-height: 76px; }
+  .title-foot { display: flex; gap: 8px; width: min(420px, 94vw); }
+  .title-foot .btn { position: static; flex: 1 1 0; min-width: 0; font-size: 13px; padding: 4px 6px; white-space: nowrap; }
+}
+.scene-card .lbl { white-space: nowrap; font-size: clamp(15px, 2.2vw + 6px, 20px); }

@@ -83,3 +83,28 @@ describe('course progress in the save data', () => {
     expect(validateCourse({ cleared: 10, current: 10, finds: 9 })).toEqual({ course: { cleared: 10, current: 10, finds: 9 }, repaired: false });
   });
 });
+
+import { CHARACTER_IDS as ALL_CHARS } from '../../src/core/characters';
+describe('courses with all six friends', { timeout: 120_000 }, () => {
+  for (const c of COURSES) {
+    it(`course ${c.no}: safe layouts when all six friends can appear`, () => {
+      for (let seed = 1; seed <= 25; seed++) {
+        let found = 0;
+        let round = 0;
+        while (found < FINDS_PER_COURSE) {
+          const scene = SCENES[courseScene(c.no, round, SCENE_IDS)];
+          const pls = courseRound(scene, c.no, FINDS_PER_COURSE - found, seed * 131 + round, ALL_CHARS);
+          expect(pls.length).toBeGreaterThan(0);
+          expect(validateLayout(scene, pls).problems).toEqual([]);
+          for (const p of pls) {
+            const spot = getSpot(scene, p.spot);
+            if (p.acc?.hat) expect(accessoryFits(scene, spot, p.char, 'hat', p.acc.hat).problems).toEqual([]);
+            if (p.acc?.umbrella) expect(accessoryFits(scene, spot, p.char, 'umbrella', p.acc.umbrella).problems).toEqual([]);
+          }
+          found += pls.length;
+          round++;
+        }
+      }
+    });
+  }
+});

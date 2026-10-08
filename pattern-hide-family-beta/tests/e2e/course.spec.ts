@@ -256,3 +256,35 @@ test('beach pack: first find at the beach brings choki and the b1 sticker; notic
   await act(page, 'hidePickScene', '[data-scene="beach"]');
   await expect(page.locator('[data-action="pickChar"][data-char="choki"]')).toBeVisible();
 });
+
+test('if a picture cannot be loaded, the round is not shown; "もういちど" loads it again', async ({ browser }) => {
+  const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  let block = true;
+  await page.route('**/*.png', async (route) => (block ? route.abort() : route.continue()));
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ schema: 1, settings: { sound: false, difficulty: 'easy', tutorialSeen: true }, resume: null, playtest: { enabled: false, counters: {} } })), KEY);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await act(page, 'toSearch');
+  await act(page, 'startSearch', '[data-scene="room"]');
+  await expect(page.locator('.load-error')).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('#stage.loading')).toHaveCount(1); // ステージは隠れたまま
+  block = false;
+  await act(page, 'retryLoad');
+  await expect(page.locator('#stage.loading')).toHaveCount(0, { timeout: 8000 });
+  await expect(page.locator('.load-error')).toHaveCount(0);
+  await ctx.close();
+});
+
+test('clearing a course again does not announce the friend or the sticker as new', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ schema: 1, settings: { sound: false, difficulty: 'easy', tutorialSeen: true }, resume: null, playtest: { enabled: false, counters: {} }, course: { cleared: 3, current: 1, finds: 9 }, collection: { totalFinds: 50, sceneFinds: {} } })), KEY);
+  await page.reload();
+  await act(page, 'toCourse');
+  await act(page, 'pickCourse', '[data-course="1"]');
+  const eyes = await eyePoints(page, 0);
+  await tapAt(page, { x: (eyes[0].x + eyes[1].x) / 2, y: eyes[0].y });
+  await expect(page.locator('.course-clear')).toBeVisible({ timeout: 4000 });
+  await expect(page.locator('.course-clear .new-friend')).toHaveCount(0);
+  await expect(page.locator('.course-clear .reward-sticker')).toHaveCount(0);
+});
