@@ -7,7 +7,8 @@ const F = CHAR_FRAME;
 const img = (href: string, extra = '') =>
   `<image href="${href}" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" preserveAspectRatio="xMidYMid meet" ${extra}/>`;
 
-export function charArtMarkup(c: CharacterDef, o: { fillId: string; outline: number; found?: boolean }): string {
+/** shade：服の陰影の濃さ（最難関だけ 0.5。通常は 1） */
+export function charArtMarkup(c: CharacterDef, o: { fillId: string; outline: number; found?: boolean; shade?: number }): string {
   const a = characterArt(c.id);
   if (!a) return characterMarkup(c, o);
   const m = `m-${o.fillId}`;
@@ -17,7 +18,7 @@ export function charArtMarkup(c: CharacterDef, o: { fillId: string; outline: num
     `<g class="char-body">` +
     (a.back ? img(a.back) : '') +
     `<rect class="clothes" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" fill="url(#${o.fillId})" mask="url(#${m})"/>` +
-    (a.clothesShade ? img(a.clothesShade, 'style="mix-blend-mode:multiply"') : '') +
+    (a.clothesShade ? img(a.clothesShade, `style="mix-blend-mode:multiply"${o.shade !== undefined && o.shade < 1 ? ` opacity="${o.shade}"` : ''}`) : '') +
     (a.clothesLine ? img(a.clothesLine, `opacity="${outline}"`) : '') +
     `</g>` +
     `<g class="char-head">${img(o.found && a.frontFound ? a.frontFound : a.front)}</g>`

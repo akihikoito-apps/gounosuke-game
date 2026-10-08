@@ -36,10 +36,13 @@ export class ParentArea {
   private failures = 0;
   private cooldownUntil = 0;
 
-  constructor(store: Store, onChange: () => void, onCleared: () => void = () => undefined) {
+  private onTrial: () => void;
+
+  constructor(store: Store, onChange: () => void, onCleared: () => void = () => undefined, onTrial: () => void = () => undefined) {
     this.store = store;
     this.onChange = onChange;
     this.onCleared = onCleared;
+    this.onTrial = onTrial;
   }
 
   isOpen(): boolean {
@@ -202,6 +205,11 @@ export class ParentArea {
         <p>学習や発達への効果をうたうものではありません。</p>
       </section>
       <section>
+        <h3>最難関を ためす（大人向けのおためし）</h3>
+        <p>いちばん難しい設定を、コースを進めなくても試せます。見つけにくい場所に最大3人、服は背景と同じ柄、ふち線と服の陰影が薄く、背景の柄の帽子をかぶることがあります。<strong>10人みつけたらおしまい。進み具合やコースの記録は保存しません。</strong>顔はいつも見えていて、ヒントは何回でも使えます。</p>
+        <button type="button" class="pbtn" data-act="trial">最難関を ためす</button>
+      </section>
+      <section>
         <h3>音</h3>
         <label class="switch"><input type="checkbox" data-set="sound" ${d.settings.sound ? 'checked' : ''}> 音を出す</label>
       </section>
@@ -302,6 +310,9 @@ export class ParentArea {
             );
             break;
           }
+            break;
+          case 'trial':
+            this.onTrial();
             break;
           case 'resetCounts':
             resetCounters(this.store);

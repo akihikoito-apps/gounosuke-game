@@ -18,7 +18,7 @@ export interface PlaySession {
   /** 0: ヒントなし / 1: このあたり / 2: ちょっと うごく / 3: りんかく */
   hintLevel: number;
   hintsUsed: number;
-  origin: 'search' | 'hide' | 'course';
+  origin: 'search' | 'hide' | 'course' | 'trial';
   startedAt: number;
 }
 
@@ -26,7 +26,7 @@ export function newSession(
   sceneId: SceneId,
   difficulty: Difficulty,
   placements: Placement[],
-  origin: 'search' | 'hide' | 'course',
+  origin: 'search' | 'hide' | 'course' | 'trial',
   now: number,
 ): PlaySession {
   return {

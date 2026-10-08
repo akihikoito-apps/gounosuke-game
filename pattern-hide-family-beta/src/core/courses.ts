@@ -3,7 +3,7 @@
 import { type AccStyle, type Accessories, HAT_COLORS, accessoryFits, accessoryShapes } from './accessories';
 import { CHARACTER_IDS, type CharacterId } from './characters';
 import { bbox, bboxOverlap, transformShape, unionBBox } from './geometry';
-import { type Placement, costumeForRegion, silhouetteBBox, spotsConflict } from './placement';
+import { type Placement, type SpotReport, analyzeSpot, costumeForRegion, silhouetteBBox, spotsConflict } from './placement';
 import { type Rng, mulberry32, shuffle } from './rng';
 import type { SceneDef, SceneId, SpotDef } from './scene';
 
@@ -104,4 +104,150 @@ export function courseRound(scene: SceneDef, no: number, remaining: number, seed
     if (!placed) break;
   }
   return out;
+}
+
+// ---------- 最難関（大人向けのおためし。通常コースとは別。Codex との議論で決めた仕様：audit/codex/hardest-course-r2.md） ----------
+
+export const HARDEST = {
+  finds: 10,
+  outline: 0.25,
+  /** 服の陰影の濃さ（通常は 1） */
+  shade: 0.5,
+  maxChars: 3,
+} as const;
+
+/** 見つけにくい場所の「優先帯」 */
+export const HARDEST_BAND = { match: 0.9, bodyMin: 0.25, bodyMax: 0.4, visible: 0.5 } as const;
+
+interface HardCand {
+  spot: SpotDef;
+  char: CharacterId;
+  match: number;
+  body: number;
+  hatOk: boolean;
+  hatMatch: number;
+  key: number;
+  /** 帽子・からだの外枠（重なりの判定用に先に計算） */
+  hatBox: ReturnType<typeof bbox> | null;
+  bodyBox: ReturnType<typeof bbox>;
+}
+
+export function inHardestBand(r: SpotReport): boolean {
+  const b = HARDEST_BAND;
+  return r.ok && r.regionMatch >= b.match && r.bodyVisible >= b.bodyMin && r.bodyVisible <= b.bodyMax && r.visible >= b.visible;
+}
+
+/** 組み合わせの中で、帽子をかぶれる子（ほかの子に帽子が重ならない） */
+function hatsFor(combo: HardCand[]): boolean[] {
+  return combo.map((c, i) => {
+    if (!c.hatOk || !c.hatBox) return false;
+    const hb = c.hatBox;
+    return combo.every((o, j) => j === i || !bboxOverlap(hb, o.bodyBox, 4));
+  });
+}
+
+function better(a: { r: number; m: number; b: number; h: number; k: number }, z: { r: number; m: number; b: number; h: number; k: number }): boolean {
+  const e = 1e-9;
+  if (a.r !== z.r) return a.r < z.r; // 前に使った場所が少ない
+  if (Math.abs(a.m - z.m) > e) return a.m > z.m; // 服の背景一致が高い
+  if (Math.abs(a.b - z.b) > e) return a.b < z.b; // 服の見える割合が低い
+  if (a.h !== z.h) return a.h > z.h; // 背景にとけこむ帽子が多い
+  return a.k < z.k; // 残りの同点はシードで
+}
+
+function bestCombo(pool: HardCand[], n: number, clash: (a: SpotDef, b: SpotDef) => boolean, avoid: readonly string[]): HardCand[] | null {
+  let best: HardCand[] | null = null;
+  let bs = { r: 0, m: 0, b: 0, h: 0, k: 0 };
+  const pick = (start: number, cur: HardCand[]) => {
+    if (cur.length === n) {
+      const hats = hatsFor(cur);
+      const s = {
+        r: cur.filter((c) => avoid.includes(c.spot.id)).length,
+        m: cur.reduce((t, c) => t + c.match, 0),
+        b: cur.reduce((t, c) => t + c.body, 0),
+        h: cur.filter((c, i) => hats[i] && c.hatMatch >= 0.9).length,
+        k: cur.reduce((t, c) => t + c.key, 0),
+      };
+      if (!best || better(s, bs)) {
+        best = cur.slice();
+        bs = s;
+      }
+      return;
+    }
+    for (let i = start; i < pool.length; i++) {
+      const c = pool[i];
+      if (cur.some((o) => o.char === c.char || clash(o.spot, c.spot))) continue;
+      cur.push(c);
+      pick(i + 1, cur);
+      cur.pop();
+    }
+  };
+  pick(0, []);
+  return best;
+}
+
+const candCache = new WeakMap<SceneDef, { all: HardCand[]; inBand: boolean[]; clash: (a: SpotDef, b: SpotDef) => boolean }>();
+
+function hardCandidates(scene: SceneDef): { all: HardCand[]; inBand: boolean[]; clash: (a: SpotDef, b: SpotDef) => boolean } {
+  const hit = candCache.get(scene);
+  if (hit) return hit;
+  const all: HardCand[] = [];
+  const inBand: boolean[] = [];
+  for (const sp of scene.spots) {
+    for (const ch of CHARACTER_IDS) {
+      const r = analyzeSpot(scene, sp, ch);
+      if (!r.ok) continue;
+      const hat = accessoryFits(scene, sp, ch, 'hat', 'camo');
+      all.push({
+        spot: sp,
+        char: ch,
+        match: r.regionMatch,
+        body: r.bodyVisible,
+        hatOk: hat.ok,
+        hatMatch: hat.match,
+        key: 0,
+        hatBox: hat.ok ? unionBBox(worldShapes(sp, { hat: 'camo' }).map(bbox)) : null,
+        bodyBox: silhouetteBBox(ch, sp),
+      });
+      inBand.push(inHardestBand(r));
+    }
+  }
+  // 場所どうしの重なりも先に表にしておく（組み合わせ探索で何度も使う）
+
+  const table = new Map<string, boolean>();
+  for (const a of scene.spots) for (const b of scene.spots) table.set(`${a.id}|${b.id}`, spotsConflict(a, b));
+  const clash = (a: SpotDef, b: SpotDef) => table.get(`${a.id}|${b.id}`) ?? spotsConflict(a, b);
+
+  const v = { all, inBand, clash };
+  candCache.set(scene, v);
+  return v;
+}
+
+/**
+ * 最難関の1回分。優先帯の中で置ける最大の人数（3人まで・残り回数まで）を、すべての組み合わせから選ぶ。
+ * 帯の中で1人も置けないときだけ、安全な場所全体でやり直す。それでも無ければ空（出題しない）。
+ * avoid：このおためしで前に使った場所。人数が減らない限り避ける（同じ場所を覚えるだけにしない）。
+ */
+export function hardestRound(scene: SceneDef, remaining: number, seed: number, avoid: readonly string[] = []): Placement[] {
+  if (remaining <= 0) return [];
+  const rng = mulberry32(seed);
+  // 場所ごとの測定はシードに関係ないので背景ごとに1回だけ。順番の同点決めだけシードで
+  const base = hardCandidates(scene);
+  const keyed = base.all.map((c) => ({ ...c, key: rng() }));
+  const all = keyed;
+  const band = keyed.filter((_, i) => base.inBand[i]);
+  const want = Math.min(HARDEST.maxChars, remaining);
+  for (const pool of [band, all]) {
+    for (let n = want; n >= 1; n--) {
+      const combo = bestCombo(pool, n, base.clash, avoid);
+      if (!combo) continue;
+      const hats = hatsFor(combo);
+      return combo.map((c, i) => {
+        const p: Placement = { char: c.char, spot: c.spot.id, costume: costumeForRegion(scene, c.spot.region), variant: 'exact' };
+        if (hats[i]) p.acc = { hat: 'camo' };
+        return p;
+      });
+    }
+  }
+  return [];
 }

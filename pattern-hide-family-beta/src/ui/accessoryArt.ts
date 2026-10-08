@@ -13,6 +13,24 @@ import { type Pt, r1 } from '../core/geometry';
 import { type Placement, getSpot } from '../core/placement';
 import type { SceneDef } from '../core/scene';
 import { costumePatternDef } from './sceneView';
+import { ACC_FRAME, type AccessoryArt, accessoryArtFiles } from '../art/registry';
+
+/** art/accessories に絵があれば、それを重ねる（形は mask、色や柄はゲームが流し込む） */
+function imageAcc(files: AccessoryArt, cls: string, fillDefs: string, fid: string, lineOpacity: number): string {
+  const F = ACC_FRAME;
+  const img = (href: string, extra = '') =>
+    `<image href="${href}" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" preserveAspectRatio="xMidYMid meet" ${extra}/>`;
+  const m = `${fid}-m`;
+  return (
+    `<g class="acc ${cls}"><defs>${fillDefs}<mask id="${m}" maskUnits="userSpaceOnUse" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}">${img(files.mask)}</mask></defs>` +
+    (files.back ? img(files.back) : '') +
+    `<rect x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" fill="url(#${fid})" mask="url(#${m})"/>` +
+    (files.shade ? img(files.shade, 'style="mix-blend-mode:multiply"') : '') +
+    (files.line ? img(files.line, `opacity="${r1(lineOpacity)}"`) : '') +
+    (files.front ? img(files.front) : '') +
+    `</g>`
+  );
+}
 
 const LINE = '#4A3A40';
 const path = (pts: Pt[]) => 'M' + pts.map((p) => `${r1(p.x)} ${r1(p.y)}`).join(' L') + 'Z';
@@ -65,11 +83,13 @@ export function accessoryArt(scene: SceneDef, pl: Placement, prefix: string, out
     const camo = acc.umbrella === 'camo' ? camoFill(scene, pl, 'umbrella', fid) : null;
     const defs = (camo ?? `<pattern id="${fid}" patternUnits="userSpaceOnUse" width="10" height="10"><rect width="10" height="10" fill="${tone[0]}"/></pattern>`) + shadeDef(sid, !!camo);
     const lo = camo ? camoLine : 1;
+    const files = accessoryArtFiles('umbrella');
+    if (files) behind = imageAcc(files, 'acc-umbrella', camo ?? `<pattern id="${fid}" patternUnits="userSpaceOnUse" width="10" height="10"><rect width="10" height="10" fill="${tone[0]}"/></pattern>`, fid, lo);
     const apex = { x: -6, y: -322 };
     const ribs = [-67, -6, 55]
       .map((x) => `<path d="M${apex.x} ${apex.y} Q${r1((apex.x + x) / 2 + (x - apex.x) * 0.18)} -280 ${x} -232" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo * 0.45)}" stroke-width="2.2" stroke-linecap="round"/>`)
       .join('');
-    behind =
+    if (!files) behind =
       `<g class="acc acc-umbrella"><defs>${defs}</defs>` +
       // 柄（手の中へ）
       `<path d="M${UMBRELLA_SHAFT.x} ${UMBRELLA_SHAFT.y0} V${UMBRELLA_SHAFT.y1}" stroke="${LINE}" stroke-width="7" stroke-linecap="round"/>` +
@@ -89,6 +109,8 @@ export function accessoryArt(scene: SceneDef, pl: Placement, prefix: string, out
     const camo = acc.hat === 'camo' ? camoFill(scene, pl, 'hat', fid) : null;
     const defs = (camo ? camo + stitchOverlayDef(kid) : knitDef(fid, tone[0], tone[1])) + shadeDef(sid, !!camo);
     const lo = camo ? camoLine : 1;
+    const hatFiles = accessoryArtFiles('hat');
+    if (hatFiles) return { behind, front: imageAcc(hatFiles, 'acc-hat', camo ?? knitDef(fid, tone[0], tone[1]), fid, lo) };
     const band = `M-56 -160 Q0 -149 56 -160 L57 -178 Q0 -168 -57 -178Z`;
     const ribs = Array.from({ length: 13 }, (_, k) => {
       const x = -48 + k * 8;

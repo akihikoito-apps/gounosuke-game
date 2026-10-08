@@ -15,6 +15,8 @@ export interface SceneRenderOpts {
   found?: boolean[];
   /** 服のふちの濃さ（難易度で変える。0にはしない） */
   outline?: number;
+  /** 服の陰影の濃さ（最難関だけ下げる） */
+  shade?: number;
   /** 編集中だけ：置ける候補 */
   candidates?: SpotDef[];
   selectedChar?: CharacterId | null;
@@ -73,7 +75,7 @@ function backgroundMarkup(prefix: string, scene: SceneDef): string {
   );
 }
 
-export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: number, found: boolean, outline: number): string {
+export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: number, found: boolean, outline: number, shade = 1): string {
   const spot = getSpot(scene, pl.spot);
   const t = spotTransform(spot);
   const fid = `${prefix}c${i}`;
@@ -82,7 +84,7 @@ export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: num
     `<g class="char${found ? ' found' : ''}" data-index="${i}" data-char="${pl.char}" transform="translate(${r1(t.tx)} ${r1(t.ty)}) scale(${t.s})">` +
     `<defs>${costumePatternDef(fid, scene, pl, spot)}</defs>` +
     acc.behind +
-    `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found })}${acc.front}</g>` +
+    `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found, shade })}${acc.front}</g>` +
     `</g>`
   );
 }
@@ -119,7 +121,7 @@ export function renderScene(scene: SceneDef, o: SceneRenderOpts): string {
   const placements = o.placements ?? [];
   const found = o.found ?? placements.map(() => false);
   const outline = o.outline ?? 0.6;
-  const chars = placements.map((pl, i) => charGroup(P, scene, pl, i, !!found[i], outline)).join('');
+  const chars = placements.map((pl, i) => charGroup(P, scene, pl, i, !!found[i], outline, o.shade ?? 1)).join('');
   const fore = sceneArt(scene.id)?.fore;
   const props = fore ? full(fore, 'fore') : scene.spots.map((s) => `<g class="prop" data-spot="${s.id}">${s.prop.markup}</g>`).join('');
   const fx = placements.map((pl, i) => (found[i] ? sparkles(scene, pl) : '')).join('');

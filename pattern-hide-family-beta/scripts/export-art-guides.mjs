@@ -71,5 +71,26 @@ function labelPos(s) {
   if (s.kind === 'ellipse') return { x: s.cx - s.rx + 20, y: s.cy };
   return { x: Math.min(...s.pts.map((p) => p.x)) + 8, y: Math.min(...s.pts.map((p) => p.y)) + 28 };
 }
+// ---- 帽子・傘（600×720px ＝ ローカル座標 -150,-345 から 300×360 の 2倍。3体共通）
+{
+  const AF = G.ACC_FRAME;
+  for (const kind of ['hat', 'umbrella']) {
+    const shapes = kind === 'hat' ? G.hatShapes() : G.umbrellaShapes();
+    const pat = G.patternMarkup('ga', { kind: 'plain', bg: '#eeeeee', fg: '#eeeeee', size: 40 });
+    const chars = G.CHARACTER_IDS.map((id) => `<g opacity="0.22">${G.characterMarkup(G.CHARACTERS[id], { fillId: 'ga', outline: 1 })}</g>`).join('');
+    const area = shapes.map((sh) => G.shapeToSvg(sh, 'fill="#5b8def" fill-opacity="0.3" stroke="#2b5fd0" stroke-width="1.2"')).join('');
+    const shaft = kind === 'umbrella' ? `<path d="M${G.UMBRELLA_SHAFT.x} ${G.UMBRELLA_SHAFT.y0} V${G.UMBRELLA_SHAFT.y1}" stroke="#18a058" stroke-width="5" stroke-dasharray="6 4"/>` : '';
+    const face = G.CHARACTERS.koro.facePoints.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="7" fill="none" stroke="#e00000" stroke-width="2"/><circle cx="${p.x}" cy="${p.y}" r="2.6" fill="#e00000"/>`).join('');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="720" viewBox="${AF.x} ${AF.y} ${AF.w} ${AF.h}">
+      <defs>${pat}</defs><rect x="${AF.x}" y="${AF.y}" width="${AF.w}" height="${AF.h}" fill="#fff"/>
+      ${chars}${area}${shaft}${face}
+      <path d="M-6 0 H6 M0 -6 V6" stroke="#000" stroke-width="1"/>
+      <text x="${AF.x + 4}" y="${AF.y + 12}" font-size="9" fill="#333">${kind} 600x720 青=形(mask) 緑=傘の棒(back) 赤=顔（何も重ねない） 薄い絵=3体</text>
+    </svg>`;
+    writeFileSync(`art-guides/accessory-${kind}.svg`, svg);
+    await png(svg, 600, 720, `art-guides/accessory-${kind}.png`);
+  }
+}
+
 await browser.close();
 console.log('art-guides written');

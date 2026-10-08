@@ -29,7 +29,8 @@ import {
   undo,
 } from '../core/hideEditor';
 import { betaEntitlements } from '../entitlements/entitlements';
-import { COURSES, FINDS_PER_COURSE, courseDef, courseRound, courseScene } from '../core/courses';
+import { COURSES, FINDS_PER_COURSE, HARDEST, courseDef, courseRound, courseScene, hardestRound } from '../core/courses';
+import { accessoryArt } from './accessoryArt';
 import { COURSE_COUNT } from '../storage/schema';
 import { play, setSoundEnabled, unlockAudio } from '../audio/sound';
 import type { Store } from '../storage/storage';
@@ -53,6 +54,8 @@ type Screen =
   | 'bye';
 
 const OUTLINE: Record<Difficulty, number> = { easy: 0.62, normal: 0.34 };
+/** 「みーつけた」から自動で次へ進むまで */
+const AUTO_NEXT_MS = 2800;
 
 export class App {
   private root: HTMLElement;
@@ -83,6 +86,10 @@ export class App {
   /** このラウンドでコースをクリアした（クリア画面を出す） */
   private courseJustCleared = false;
   private afterTutorial: 'search' | 'course' = 'search';
+  /** 最難関のおためし（保存しない。メモリ内だけ） */
+  private trial: { finds: number; round: number; used: Partial<Record<SceneId, string[]>> } | null = null;
+  /** 「みーつけた」のあと、少し待って自動で次へ */
+  private autoTimer = 0;
 
   constructor(root: HTMLElement, store: Store) {
     this.root = root;
@@ -95,6 +102,7 @@ export class App {
         this.session = null;
         this.draft = emptyDraft();
       },
+      () => this.startTrial(),
     );
     root.addEventListener('click', (e) => this.onClick(e));
     // 最初の操作のあとだけ音を出せるようにする
@@ -120,6 +128,7 @@ export class App {
 
   private go(s: Screen, lockMs = 350): void {
     this.cancelDrag();
+    window.clearTimeout(this.autoTimer);
     this.screen = s;
     this.justFound = -1;
     this.navLockUntil = performance.now() + lockMs;
@@ -278,7 +287,7 @@ export class App {
     const targets = s.placements
       .map(
         (pl, i) =>
-          `<div class="target${s.found[i] ? ' found' : ''}" data-target="${i}" aria-label="${CHARACTERS[pl.char].name}${s.found[i] ? ' みつけた' : ''}">${faceIcon(CHARACTERS[pl.char])}${s.found[i] ? `<span class="check">${ICONS.done}</span>` : ''}</div>`,
+          `<div class="target${s.found[i] ? ' found' : ''}" data-target="${i}" aria-label="${CHARACTERS[pl.char].name}${pl.acc?.hat ? '（ぼうし）' : ''}${s.found[i] ? ' みつけた' : ''}">${this.targetIcon(pl, i)}${s.found[i] ? `<span class="check">${ICONS.done}</span>` : ''}</div>`,
       )
       .join('');
     const done = isComplete(s);
@@ -288,9 +297,9 @@ export class App {
         <div class="targets" role="status" aria-label="さがす こ">${targets}</div>
         ${btn('hint', ICONS.hint, 'ヒント', 'round hint-btn', done ? 'disabled' : '')}
       </div>
-      ${s.origin === 'course' ? this.courseProgressHtml() : ''}
+      ${s.origin === 'course' ? this.courseProgressHtml() : s.origin === 'trial' ? this.trialProgressHtml() : ''}
       <div class="stage" id="stage">${this.playSvg()}</div>
-      ${done ? (s.origin === 'course' ? this.courseClearHtml() : this.clearHtml()) : ''}
+      ${done ? (s.origin === 'course' ? this.courseClearHtml() : s.origin === 'trial' ? this.trialClearHtml() : this.clearHtml()) : ''}
     </main>`;
   }
 
@@ -301,7 +310,8 @@ export class App {
       prefix: 'g-',
       placements: s.placements,
       found: s.found,
-      outline: s.origin === 'course' ? courseDef(this.courseNo).outline : OUTLINE[s.difficulty],
+      outline: s.origin === 'course' ? courseDef(this.courseNo).outline : s.origin === 'trial' ? HARDEST.outline : OUTLINE[s.difficulty],
+      shade: s.origin === 'trial' ? HARDEST.shade : 1,
       hint: currentHint(scene, s),
       title: `${scene.name}。かくれている こを さがして タッチ`,
     });
@@ -309,7 +319,7 @@ export class App {
 
   private clearHtml(): string {
     const s = this.session as PlaySession;
-    const faces = s.placements.map((pl) => `<div class="clear-face">${faceIcon(CHARACTERS[pl.char])}</div>`).join('');
+    const faces = s.placements.map((pl, i) => `<div class="clear-face">${this.targetIcon(pl, i, 'cf')}</div>`).join('');
     return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="ぜんぶ みつけた">
       <div class="clear-card">
         <div class="clear-faces">${faces}</div>
@@ -325,7 +335,7 @@ export class App {
 
   private courseClearHtml(): string {
     const s = this.session as PlaySession;
-    const faces = s.placements.map((pl) => `<div class="clear-face">${faceIcon(CHARACTERS[pl.char])}</div>`).join('');
+    const faces = s.placements.map((pl, i) => `<div class="clear-face">${this.targetIcon(pl, i, 'cf')}</div>`).join('');
     if (this.courseJustCleared) {
       const last = this.courseNo >= COURSE_COUNT;
       return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="コース${this.courseNo} クリア">
@@ -345,8 +355,49 @@ export class App {
         <div class="clear-faces">${faces}</div>
         <p class="clear-title">みーつけた！</p>
         <div class="clear-actions two">
-          ${btn('nextRound', ICONS.next, 'つぎ', 'equal primary', 'data-autofocus')}
+          ${btn('nextRound', ICONS.next, 'つぎ', 'equal primary auto-next', 'data-autofocus')}
           ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /** 探す子のアイコン。帽子をかぶっていれば、アイコンにも帽子（何を探すか分かるように） */
+  private targetIcon(pl: Placement, i: number, prefix = 'ti'): string {
+    const base = faceIcon(CHARACTERS[pl.char]);
+    if (!pl.acc?.hat || !this.session) return base;
+    const hat = accessoryArt(SCENES[this.session.sceneId], { ...pl, acc: { hat: pl.acc.hat, tone: pl.acc.tone } }, `${prefix}${i}`, 1).front;
+    return base.replace('viewBox="-70 -215 140 120"', 'viewBox="-78 -250 156 155"').replace(/<\/svg>$/, `${hat}</svg>`);
+  }
+
+  private trialProgressHtml(): string {
+    const n = Math.min(HARDEST.finds, this.trial?.finds ?? 0);
+    return `<div class="course-progress trial" role="status" aria-label="おためし ${n}/${HARDEST.finds}"><span class="course-no">おためし</span>${Array.from({ length: HARDEST.finds }, (_, k) => `<i class="pip${k < n ? ' on' : ''}"></i>`).join('')}</div>`;
+  }
+
+  private trialClearHtml(): string {
+    const s = this.session as PlaySession;
+    if ((this.trial?.finds ?? 0) >= HARDEST.finds) {
+      return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="10にん みつけた">
+        <div class="clear-card">
+          <div class="medal" aria-hidden="true">${ICONS.star}<span>10</span></div>
+          <p class="clear-title">10にん みつけた！</p>
+          <p class="clear-sub">おためし おしまい</p>
+          <div class="clear-actions two">
+            ${btn('trialAgain', ICONS.again, 'もういちど', 'equal', 'data-autofocus')}
+            ${btn('parent', ICONS.parent, 'おとなの かたへ', 'equal')}
+          </div>
+        </div>
+      </div>`;
+    }
+    const faces = s.placements.map((pl, i) => `<div class="clear-face">${this.targetIcon(pl, i, 'cf')}</div>`).join('');
+    return `<div class="overlay clear" role="dialog" aria-modal="true" aria-label="みつけた">
+      <div class="clear-card">
+        <div class="clear-faces">${faces}</div>
+        <p class="clear-title">みーつけた！</p>
+        <div class="clear-actions two">
+          ${btn('nextTrialRound', ICONS.next, 'つぎ', 'equal primary auto-next', 'data-autofocus')}
+          ${btn('home', ICONS.home, 'おしまい', 'equal')}
         </div>
       </div>
     </div>`;
@@ -495,6 +546,12 @@ export class App {
       case 'nextRound':
         this.startCourseRound();
         break;
+      case 'nextTrialRound':
+        this.startTrialRound();
+        break;
+      case 'trialAgain':
+        this.startTrial();
+        break;
       case 'nextCourse':
         this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
         break;
@@ -510,6 +567,7 @@ export class App {
         this.parent.openGate(el);
         break;
       case 'home':
+        this.trial = null;
         this.saveResume();
         this.session = null; // 続きは保存側だけに持つ（削除後に書き戻さない）
         this.go('title');
@@ -692,10 +750,49 @@ export class App {
     if (cleared) this.courseJustCleared = true;
   }
 
+  /** 最難関のおためし：保護者の画面から。進み具合は保存しない */
+  startTrial(): void {
+    this.parent.close();
+    this.trial = { finds: 0, round: 0, used: {} };
+    this.startTrialRound();
+  }
+
+  private startTrialRound(): void {
+    const t = this.trial;
+    if (!t || t.finds >= HARDEST.finds) return this.go('title');
+    const ids = SCENE_IDS.filter((id) => betaEntitlements.canPlay(`scene:${id}`));
+    const sceneId = ids[t.round % ids.length];
+    t.round++;
+    const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
+    const placements = hardestRound(SCENES[sceneId], HARDEST.finds - t.finds, seed, t.used[sceneId] ?? []);
+    if (placements.length === 0) {
+      // 安全に置ける場所がない（起こらない想定）。空の画面は出さない
+      this.trial = null;
+      return this.go('title');
+    }
+    t.used[sceneId] = [...(t.used[sceneId] ?? []), ...placements.map((p) => p.spot)];
+    this.session = newSession(sceneId, 'normal', placements, 'trial', Date.now());
+    this.go('play');
+  }
+
+  /** コース・おためしの「みーつけた」：少し待って自動で次へ（ボタンでもすぐ進める） */
+  private scheduleAutoNext(): void {
+    window.clearTimeout(this.autoTimer);
+    const s = this.session;
+    if (!s || (s.origin !== 'course' && s.origin !== 'trial')) return;
+    const btnEl = this.root.querySelector<HTMLElement>('[data-action="nextRound"], [data-action="nextTrialRound"]');
+    if (!btnEl) return; // コースクリア・おためし終了の画面では待つ
+    this.autoTimer = window.setTimeout(() => {
+      if (this.session !== s || this.screen !== 'play' || this.parent.isOpen()) return;
+      if (s.origin === 'course') this.startCourseRound();
+      else this.startTrialRound();
+    }, AUTO_NEXT_MS);
+  }
+
   private onHint(): void {
     if (!this.session) return;
     this.session = nextHint(this.session);
-    record(this.store, { type: 'hint' });
+    if (this.session.origin !== 'trial') record(this.store, { type: 'hint' });
     play('soft');
     this.refreshStage();
   }
@@ -767,8 +864,8 @@ export class App {
 
   private saveResume(): void {
     const s = this.session;
-    // コースは見つけた回数を別に保存している（出題そのものは続きにしない）
-    if (!s || isComplete(s) || s.origin === 'course') return;
+    // コースは見つけた回数を別に保存している（出題そのものは続きにしない）。おためしは何も保存しない
+    if (!s || isComplete(s) || s.origin === 'course' || s.origin === 'trial') return;
     const origin = s.origin;
     this.store.update((d) => {
       d.resume = { sceneId: s.sceneId, difficulty: s.difficulty, placements: s.placements, found: s.found, origin };
@@ -845,9 +942,13 @@ export class App {
     this.justFound = r.foundIndex;
     play('found');
     if (this.session.origin === 'course') this.onCourseFind();
+    if (this.session.origin === 'trial' && this.trial) this.trial.finds++;
     if (isComplete(this.session)) {
-      record(this.store, { type: 'searchCompleted', durationMs: Date.now() - this.session.startedAt });
-      this.clearResume();
+      // おためしは保存も集計もしない
+      if (this.session.origin !== 'trial') {
+        record(this.store, { type: 'searchCompleted', durationMs: Date.now() - this.session.startedAt });
+        this.clearResume();
+      }
       const delay = prefersReducedMotion() ? 300 : 1300;
       this.refreshStage();
       this.updateTargets();
@@ -857,6 +958,7 @@ export class App {
           play('clear');
           this.navLockUntil = performance.now() + 400;
           this.render();
+          this.scheduleAutoNext();
         }
       }, delay);
     } else {
@@ -881,6 +983,7 @@ export class App {
     if (hb) hb.disabled = isComplete(s);
     const cp = this.root.querySelector<HTMLElement>('.course-progress');
     if (cp && s.origin === 'course') cp.outerHTML = this.courseProgressHtml();
+    if (cp && s.origin === 'trial') cp.outerHTML = this.trialProgressHtml();
   }
 
   /** 外れたときの、色の付かないやさしい波紋（罰ではない） */

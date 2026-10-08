@@ -80,3 +80,82 @@ test('a broken course save is repaired and locked courses cannot be started', as
   await expect(page.locator('[data-action="pickCourse"][data-course="9"]')).toBeDisabled();
   await expect(page.locator('[data-action="pickCourse"][data-course="2"]')).toBeEnabled();
 });
+
+async function passGate(page: import('@playwright/test').Page) {
+  await act(page, 'parent');
+  const nums = await page.locator('.gate-nums').innerText();
+  const K = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  for (const n of nums.split('・').map((k) => K.indexOf(k)).sort((a, b) => a - b)) await page.locator(`[data-key="${n}"]`).click();
+  await page.locator('[data-hold]').hover();
+  await page.mouse.down();
+  await page.waitForTimeout(2600);
+  await page.mouse.up();
+  await expect(page.locator('.panel')).toBeVisible();
+}
+
+test('hardest trial: opens from the parent area while locked, counts exactly 10, saves nothing', async ({ page }) => {
+  await page.goto('/');
+  const saved = JSON.stringify({
+    schema: 1,
+    settings: { sound: false, difficulty: 'easy', tutorialSeen: true },
+    resume: { sceneId: 'room', difficulty: 'easy', placements: [{ char: 'koro', spot: 'room-plant', costume: 'plain', variant: 'soft' }], found: [false], origin: 'search' },
+    playtest: { enabled: true, counters: { searchStarted: 1, searchCompleted: 0, hintsUsed: 0, hideRounds: 0, durationUnder1m: 0, duration1to3m: 0, durationOver3m: 0 } },
+    course: { cleared: 0, current: 1, finds: 3 },
+  });
+  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, saved]);
+  await page.reload();
+  const before = await page.evaluate((k) => localStorage.getItem(k), KEY);
+  await passGate(page);
+  await page.locator('[data-act="trial"]').click();
+  await expect(page.locator('[data-screen="play"][data-origin="trial"]')).toBeVisible();
+  await expect(page.locator('.course-progress.trial')).toContainText('おためし');
+  // 最難関の描画：傘なし、服の陰影 0.5、ふち線 0.25
+  await expect(page.locator('#stage .acc-umbrella')).toHaveCount(0);
+  const shade = await page.locator('#stage .char .char-body image[style*="multiply"]').first().getAttribute('opacity');
+  expect(shade).toBe('0.5');
+  let total = 0;
+  for (let round = 0; round < 10 && total < 10; round++) {
+    await expect(page.locator('[data-screen="play"][data-origin="trial"]')).toBeVisible();
+    const s = await state(page);
+    expect(s.session.placements.length).toBeLessThanOrEqual(Math.min(3, 10 - total));
+    for (let i = 0; i < s.session.placements.length; i++) {
+      const p = await faceCenter(page, i);
+      await tapAt(page, p);
+      if (i === 0) await tapAt(page, p); // 見つけた子をもう一度押しても増えない
+      total++;
+      await expect(page.locator('.course-progress .pip.on')).toHaveCount(total);
+    }
+    if (total < 10) {
+      // 自動で次へ進む（ボタンを押さない）
+      await expect(page.locator('[data-action="nextTrialRound"]')).toBeVisible({ timeout: 4000 });
+      await expect(page.locator('[data-action="nextTrialRound"]')).toHaveCount(0, { timeout: 5000 });
+    }
+  }
+  expect(total).toBe(10);
+  await expect(page.locator('.course-clear')).toContainText('10にん みつけた');
+  await expect(page.locator('[data-action="nextTrialRound"]')).toHaveCount(0);
+  // 保存データはまったく変わらない（再開データ・コース・集計を含む）
+  expect(await page.evaluate((k) => localStorage.getItem(k), KEY)).toBe(before);
+  // もういちど：0 から
+  await act(page, 'trialAgain');
+  await expect(page.locator('.course-progress .pip.on')).toHaveCount(0);
+  // 途中で再読み込みすると、おためしは消えて通常のタイトルへ
+  await page.reload();
+  await expect(page.locator('[data-screen="title"]')).toBeVisible();
+  expect(await page.evaluate((k) => localStorage.getItem(k), KEY)).toBe(before);
+});
+
+test('course rounds advance on their own after a short wait', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ schema: 1, settings: { sound: false, difficulty: 'easy', tutorialSeen: true }, resume: null, playtest: { enabled: false, counters: {} } })), KEY);
+  await page.reload();
+  await act(page, 'toCourse');
+  await act(page, 'pickCourse', '[data-course="1"]');
+  const first = await state(page);
+  await findRound(page);
+  await expect(page.locator('[data-action="nextRound"]')).toBeVisible({ timeout: 4000 });
+  await expect(page.locator('[data-action="nextRound"]')).toHaveCount(0, { timeout: 5000 });
+  const second = await state(page);
+  expect(second.session.found.every((f: boolean) => !f)).toBe(true);
+  expect(second.session.sceneId).not.toBe(first.session.sceneId);
+});

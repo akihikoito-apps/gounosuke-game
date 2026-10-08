@@ -190,6 +190,50 @@ for (const sid of G.SCENE_IDS) {
   }
 }
 
+// ---- 帽子・傘（3体共通。枠 600×720px ＝ ローカル座標 x -150〜150, y -345〜15）
+const AF = G.ACC_FRAME;
+const AC_SCALE = 1; // 1単位 = 1px で検査
+const shaftRect = { kind: 'rect', x: G.UMBRELLA_SHAFT.x - 6, y: G.UMBRELLA_SHAFT.y1 - 6, w: 12, h: G.UMBRELLA_SHAFT.y0 - G.UMBRELLA_SHAFT.y1 + 12 };
+for (const kind of ['hat', 'umbrella']) {
+  const d = join(ART, 'accessories', kind);
+  if (!existsSync(d)) continue;
+  const pick = (n) => ['webp', 'png', 'svg'].map((e) => join(d, `${n}.${e}`)).find(existsSync);
+  const shapes = kind === 'hat' ? G.hatShapes() : G.umbrellaShapes();
+  const allowed = kind === 'hat' ? shapes : [...shapes, shaftRect];
+  if (!pick('mask')) {
+    ng(d, 'mask が必要（無いと使われません）');
+    continue;
+  }
+  const W = AF.w * AC_SCALE;
+  const H = AF.h * AC_SCALE;
+  const toPx = (p) => ({ x: (p.x - AF.x) * AC_SCALE, y: (p.y - AF.y) * AC_SCALE });
+  const grid = [];
+  for (let y = AF.y + 1; y < AF.y + AF.h; y += 2) for (let x = AF.x + 1; x < AF.x + AF.w; x += 2) grid.push({ x, y });
+  const dist = (sh, p) => Math.min(...sh.map((s) => G.distanceTo(s, p)));
+  // 顔（3体共通の目と口）とその周り
+  const face = G.CHARACTERS.koro.facePoints;
+  for (const n of ['mask', 'shade', 'line', 'front', 'back']) {
+    const f = pick(n);
+    if (!f) continue;
+    const px = await pixels(f, W, H);
+    const ar = px.nw / px.nh;
+    if (Math.abs(ar - AF.w / AF.h) > 0.01 || px.nw < 600) ng(f, `寸法 ${px.nw}×${px.nh}（600×720 か、その整数倍）`);
+    const on = n === 'mask' ? (p) => px.l[at(px, toPx(p).x, toPx(p).y)] > 128 : (p) => px.a[at(px, toPx(p).x, toPx(p).y)] > 128;
+    const pts = grid.filter(on);
+    const out = pts.filter((p) => dist(allowed, p) > (n === 'mask' ? 6 : 10)).length;
+    const r = pts.length ? out / pts.length : 0;
+    const lim = n === 'mask' ? 0.05 : 0.04;
+    (r <= lim ? ok : ng)(f, `形の判定からはみ出す割合 ${(r * 100).toFixed(1)}%（${lim * 100}%以下）`);
+    if (n === 'mask') {
+      const inner = shapes.flatMap((s) => G.samplePoints(s, 3));
+      const cover = inner.filter(on).length / inner.length;
+      (cover >= 0.7 ? ok : ng)(f, `形の判定を白が覆う割合 ${(cover * 100).toFixed(0)}%（70%以上）`);
+    }
+    const faceHit = face.some((p) => near(px, n === 'mask' ? 'l' : 'a', toPx(p).x, toPx(p).y, 6) > 60);
+    (faceHit ? ng : ok)(f, faceHit ? '顔（目・口）の位置に絵がある' : '顔に重ならない');
+  }
+}
+
 // ---- 柄タイル
 const pdir = join(ART, 'patterns');
 for (const f of list(pdir)) {

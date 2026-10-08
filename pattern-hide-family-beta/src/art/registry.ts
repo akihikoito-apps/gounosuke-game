@@ -4,7 +4,7 @@
 import type { CharacterId } from '../core/characters';
 import type { SceneId } from '../core/scene';
 
-const files = import.meta.glob('../../art/{characters,scenes,patterns,ui}/**/*.{png,webp,svg}', {
+const files = import.meta.glob('../../art/{characters,scenes,patterns,ui,accessories}/**/*.{png,webp,svg}', {
   eager: true,
   query: '?url',
   import: 'default',
@@ -73,6 +73,29 @@ export function sceneArt(id: SceneId): SceneArt | null {
 /** 柄のタイル（scene-costume）。正方形で、つなぎ目なく敷き詰められること */
 export function patternTile(scene: SceneId, costume: string): string | undefined {
   return find('patterns', `${scene}-${costume}`);
+}
+
+/** 帽子・傘の絵の枠（ローカル座標）。画像は 600×720px（2倍）を基準にする。3体共通 */
+export const ACC_FRAME = { x: -150, y: -345, w: 300, h: 360 };
+
+export interface AccessoryArt {
+  /** 形（白＝ゲームが毛糸の色・背景の柄を流し込む部分） */
+  mask: string;
+  /** 陰影（乗算）。任意 */
+  shade?: string;
+  /** ふち線。背景の柄のときは服と同じ薄さになる。任意 */
+  line?: string;
+  /** いちばん前の細部（ぼんぼりの毛・傘の先 など）。任意 */
+  front?: string;
+  /** キャラクターより後ろ（傘の柄の棒 など）。任意 */
+  back?: string;
+}
+
+export function accessoryArtFiles(kind: 'hat' | 'umbrella'): AccessoryArt | null {
+  const d = `accessories/${kind}`;
+  const mask = find(d, 'mask');
+  if (!mask) return null;
+  return { mask, shade: find(d, 'shade'), line: find(d, 'line'), front: find(d, 'front'), back: find(d, 'back') };
 }
 
 export function uiArt(name: 'title' | 'handoff' | 'bye'): string | undefined {

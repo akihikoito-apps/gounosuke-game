@@ -1,0 +1,1549 @@
+job: codex-jobs/92-hardest-course-r2.md
+exit: 0
+minutes: 2.2
+changed (1): audit/codex/hardest-course-r2.md
+outside allowed paths (0): -
+
+----- codex output -----
+OpenAI Codex v0.154.0
+--------
+workdir: C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a119a3-75f4-7aa1-b4f6-accd40b1c396
+--------
+user
+Read the file codex-jobs/92-hardest-course-r2.md and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.
+codex
+指定のジョブと AGENTS.md を確認し、許可された範囲でレビューを進めます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 AGENTS.md; Get-Content -Encoding UTF8 codex-jobs/92-hardest-course-r2.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 174ms:
+# Codex 向けの決まり（このフォルダ）
+
+このフォルダは幼児向けゲーム「もようのかくれんぼ（仮）」のWebベータです。Claude Code が司令塔で、Codex は **絵の制作** と **独立レビュー** を担当します。
+
+## 書き込んでよい場所
+- 絵の制作ジョブ：`art/` の中だけ
+- レビュージョブ：`audit/codex/` の中だけ（レポートを書く）
+- それ以外（`src/`, `tests/`, `scripts/`, 設定、文書）は **変更しない**。直したほうがよい点は、レポートや `art/README.md` に提案として書く
+
+## 必ず守ること
+- ジョブファイル（`codex-jobs/*.md`）の指示と、`ART_SLOTS.md`・`CODEX_ART_BRIEF.md` の決まりに従う
+- 絵を作ったら `npm run validate:art` を実行し、合格するまで直す。結果は `art-guides/ART_CHECK.md` に出る
+- 既存の作品（キャラクター・ロゴ・画面・音）をまねない／取り込まない。ネット上の画像を使わない。文字を絵に入れない
+- 子どもの個人情報・外部通信・広告・課金に関わるものを追加しない
+- 追加料金が発生する手段（別料金の API キー、有料サービス）を使わない。利用上限に達したら、そこで止めて報告する
+- git の commit / push はしない（Claude Code が確認してから行う）
+- 最後に、やったこと・使った方法（SVGをコードで書いた／画像生成を使った 等）・検査結果・できなかったことを、ジョブファイルの指定場所に書く
+
+## サンドボックスでの注意（2026-10-07 追記）
+- `art-guides/ART_CHECK.md` は `npm run validate:art` が自動で書き換える。これは許可済みなので、書き込み先を変える工夫は不要
+- 検査・ビルドの道具（node_modules、scripts、環境変数 NODE_OPTIONS など）を差し替えたり、上書きしたりする回り道はしない。サンドボックスで動かないコマンドがあれば、無理をせず、その旨を作業記録に書いて終える（検査は Claude Code が外でも実行する）
+- 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
+- Windows の PowerShell では `npm` / `npx` が実行ポリシーで止まる。代わりに `npm.cmd run validate:art`、`npm.cmd run build` を使う（設定は変えない）
+- PowerShell でファイルを読むときは `Get-Content -Encoding UTF8` を使う（指定しないと日本語が文字化けする）
+
+## 本部（_hq）との約束
+- 作業の区切りで必ず STATUS.md（リポジトリ直下）を更新すること。「状態・今やっていること・次の一手・ブロッカー・最終更新」の各行を書き換える。
+# ジョブ92：最難関コースの議論（第2回・仕様の確定）
+
+## 書き込んでよい場所
+`audit/codex/hardest-course-r2.md` の1ファイルだけ。コード・絵・設定は変更しない
+
+## 読むもの
+- あなたの第1回：`audit/codex/hardest-course-r1.md`
+- 下の「Claude Code からの返答」
+- 必要に応じて src/ 以下
+
+## Claude Code からの返答（第1回への反論・修正・データ）
+
+### 0. 前提の追加（ご本人の意図）
+ご本人の依頼は「次回は最難関コースを**試しに**遊ばせて。どれほど難しくできるかは Codex とよく議論して」。最初に遊ぶのは**ご本人（大人）**で、子どもの通常コース（1〜10）とは別の「ためし」の入口にする。だから第1回より一歩踏み込んでよい。ただし前提（顔は隠さない・ヒント無制限・減点なし・時間制限なし）は守る。
+→ あなたの提案どおり、**保護者の画面に「最難関を ためす」**を置き、進み具合はメモリ内だけで数え、通常コースの解放・保存は変えない。これは採用する。
+
+### 1. 優先帯の実在（あなたの「未確認」への回答・実測）
+27か所×3体を `analyzeSpot` で測った（服の見える割合は体の形が共通なので3体同じ）：
+- 優先帯（服の背景一致≥0.90、服の見える割合0.25〜0.40、全体≥0.50）に入る場所：**へや4・にわ6・みせ8＝計18か所**
+  - へや：curtain(0.33), cabinet(0.40), rug-2(0.26), rug-3(0.35)
+  - にわ：hedge-2, hedge-3, fence-1(0.27), fence-2, lawn-1, lawn-2
+  - みせ：wall-1/2/3, counter-1/2, cloth-1, floor-1(0.30), floor-2
+- 帯の外：room-plant(一致0.83), sofa-l/r(服0.57), rug-1(0.86), rug-4(0.42), garden-hedge-1(0.21), flowers-1/2, shop-cloth-2(0.24)
+- 背景の柄の帽子が付く場所：上の18か所のうち 9か所（curtain, cabinet, hedge-2/3, fence-1/2, wall-1/2/3, cloth-1）。傘は 8か所
+→ hard-ranked は成立する。ただし3人を同時に置くと、へやは候補が少ない（4か所、重なり制約あり）。
+
+### 2. 反論・修正の提案
+1. **服の陰影（clothes-shade）が最大の手がかりではないか。** 画面を見ると、ふち線を薄くしても、服の陰影（乗算）で胴体の丸い形がはっきり浮く。最難関だけ陰影を 100%→50% に下げることを提案（絵の質感はまだ残る程度）。効き目と副作用を評価してほしい
+2. **傘の柄（軸）が強い手がかり**というあなたの指摘に同意。最難関では軸を細く（7→4）、色を背景寄りに、を提案。または傘は0にする。どちらがよいか
+3. **ふち線**：大人の「ためし」なので 0.25 で始め、不評なら 0.28 に戻す、を提案
+4. **人数**：あなたの「1人を深く隠す方が難しいかも」に一理ある。大人のためしでは「3人（置ける限り）」にして、全員見つけるまでの総量で難しさを出す案と、比べる価値は認める。1つに決めてほしい（今回は比較用に2コースは作らない）
+5. **にせもの**：今回は入れない（同意）
+6. **ヒントの静止表示**：今回は範囲外にする（同意しつつ後回し）
+
+## やること
+上を踏まえ、**次回ご本人に遊んでもらう「最難関」1コースの確定仕様**を書く：
+- 表の1行（spots / variant / outline / maxChars と人数方針 / hat / umbrella / 新しい項目の値）
+- 陰影・傘の軸についての結論と、具体的な値
+- hard-ranked の選び方の手順（上の実測で成立するか、へやで3人が置けないときの扱い）
+- 「ためす」入口の仕様（保護者の画面、メモリ内の数え方、終わったときの表示）
+- 実装後に Claude がやるべき検証（自動テストの条件）と、ご本人の試遊で見てほしい点（3つまで）
+- まだ反対の点があれば、はっきり書く
+
+`audit/codex/hardest-course-r2.md` に日本語で。第1回より短く（要点だけ）。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 audit/codex/hardest-course-r1.md; rg --files -g AGENTS.md -g '*ART*' -g '*BRIEF*' -g '*course*' -g '*spot*' -g '*Scene*' -g '*Character*'; rg -n 'hard-ranked|clothes-shade|maxChars|umbrella|analyzeSpot|outline' src" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 294ms:
+# 最難関コースの議論・第1回（Codex 提案）
+
+作成日：2026-10-08。ジョブ91に基づく設計レビュー。実装・絵の変更はしていない。
+
+## 1. 提案の中心：顔を残し、柄と隠れ場所で迷わせる
+
+**まずはコース10を基準に、ふち線0.28・最大3人・迷彩帽子・難しい配置を優先する試遊版を提案する。** 限界比較は0.25まで。顔の縮小・背景色への同化・ヒントの弱体化は採用しない。難しさの上限は「何秒も見つからない」ではなく、「静止画に発見の根拠があり、ヒントで納得して見つけられる」までとする。
+
+以下の効き目は、コードから説明できる挙動を除いて**推測**。試遊に基づく結果ではない。数値目標も今回の比較用の仮説であり、年齢別の能力基準ではない。
+
+- 4〜6歳と家族の遊びを維持する。減点・時間切れ・怖い演出・課金・広告・外部通信を追加しない。ヒントは無料・無制限、好きな順で見つけられる。
+- `LIMITS` の全体可視率45%以上、服20〜92%、高さ170以上、画面内余白6、個体間のすきま4、顔が見える条件を維持する。新しい隠れ場所にも適用する。
+- 「目と口の判定点が遮られていない」だけでは不十分。実際の目・口全体が見え、顔と分かることを画像でも確認する。顔の色・線・大きさは難易度の操作対象にしない。
+- 初回は既存の3背景・3体を使う。量産より、配置の選び方と見つけた瞬間の納得感に手間をかける。方針資料の「視覚テスト型・動くと見える型をやらない」に合わせる。
+
+## 2. 現状から分かることと、数値だけでは変えられない部分
+
+| 確認した実装 | 提案への意味 |
+| --- | --- |
+| `courses.ts` のコース10：all / exact / 0.32 / 最大3人 / 帽子0.9 camo / 傘0.8 camo | すでに柄の完全一致を使っている。exactより「さらにexact」という段階はない |
+| `courseRound()` は1〜maxChars人を抽選し、残りの発見回数で切り詰める。配置競合でも人数が減る | 最大3人は常時3人ではない。残りが3以上なら希望人数の抽選平均は2人だが、実配置平均は未計測 |
+| キャラIDは3種類。`maxChars` の型と `validateLayout()` も3人上限 | 表を4にするだけでは4人出ない。重複個体IDまたは新キャラ、保存・UI・検証まで変更が必要 |
+| 帽子・傘は確率判定の後に装着適否を確認する。rate=1は候補を優先するが、両方装着の保証ではない | 設定率と実装着率を分けて測る。0.9×0.8=0.72を実際の同時装着率と呼ばない |
+| `accessoryFits()` は迷彩領域一致70%以上、画面内、顔の判定点、他の小物との重なりを検査 | 迷彩の最大30%が別領域でも合格する。目立つ縁が残る場合がある。難問選別では一致率を追加評価できる |
+| `sceneView.ts` は柄の座標を背景に合わせる。`softVariant()` は周期1.45倍・色調変更 | 色だけでなく柄の大きさも手がかり。exact化はその手がかりを減らす |
+| `charArt.ts` とコード描画の服の線、迷彩小物の線は0.25で下限処理 | 0.25未満を指定してもさらに薄くならない。0.32→0.28は指定不透明度約12.5%減、0.25は約21.9%減。知覚難度の増加率ではない |
+| 服の陰影、顔、傘の軸などはoutlineと一緒には薄くならない | 線だけで劇的に難しくなるとは限らない。特に傘の軸は発見の手がかりになり得る |
+| `hitTest()` は本体形状と帽子・傘の布を含め、許容距離22。前景で隠れた本体部分も除外しない | 傘は押せる面積を増やす。遮蔽を深くしても当たり判定は縮まらない。無作為タップの成功を発見と混同しない。傘の細い軸自体は独立した判定形状に含まれない |
+| ヒントは領域円（半径230・中心を70ずらす）→揺れ→輪郭。成功時に段階0へ戻る。対象は最初の未発見者 | ヒントの順番はあるが、発見順の強制はない。難関でもこの区別を維持する |
+| 1コースは「10人発見」。常に10画面ではない | 人数増加は1画面の負荷を増やす一方、コースの画面数を減らす。評価は1画面と1人発見を分ける |
+
+指定画像 `390x844_08-search-shop-normal.png` では、服は背景に溶けるが顔、頭の線、服の陰影が手がかりとして残っている。`390x844_05-hint-outline.png` では円と輪郭で対象を示せている。これは既存の通常モードの記録で、最難関コースや帽子・傘の実機評価ではない。
+
+## 3. 最難関コースの具体案
+
+### 推奨の1行（新しい項目を含む設計案）
+
+既存10をすぐ置換せず、試遊用の候補として比較する。下表は現行の型へそのまま貼れるコードではない。
+
+| 案 | spots | variant | outline | maxChars | hat | umbrella | 新しい項目 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 最難関候補H | all | exact | 0.28 | 3 | `{ rate: 1, style: 'camo' }` | `{ rate: 0.4, style: 'camo' }` | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible'`, `decoyCount: 0`, `hintStyle: 'static'` |
+
+傘0.4はコース10の0.8より低い。**傘を増やすほど難しいとはまだ言えないための比較用の値**。帽子は頭の目印を減らすが、傘は大きい輪郭・軸・タップ面積を増やす。0 / 0.4 / 0.8の比較で逆なら変更する。率1の帽子も、安全に付かない場所には付けない。
+
+### 新しい項目の仕様と作り方
+
+1. **`placementPolicy: 'hard-ranked'`（中）**
+   - `analyzeSpot()` が安全とする候補だけを対象とする。その中で服の領域一致率90%以上、服可視率25〜40%、全体可視率50%以上を「優先帯」とする。45%・20%ぎりぎりを初回の狙いにしない。
+   - 優先帯の中で領域一致率が高い順、次に服可視率が低い順で評価する。同等候補はシードで順序を変える。難しさの計算値であって知覚難度の保証ではない。
+   - 迷彩小物も領域一致率90%以上を優先する。現行の返り値 `AccFit` に一致率を追加するか、共通の測定関数を作り、検証と選別で同じ測り方を使う。70%という安全側の既存条件は緩めない。
+   - 候補不足なら既存の安全なallへ戻す。空配置を返さず、安全条件を緩めない。優先帯の成立率を制作側の試遊記録に残す。現時点で各背景に何候補あるかは未計測。
+   - 帽子rate=1による既存の装着可能候補優先と衝突するため、配置評価→帽子の適合評価を統合する。候補を単純に二重ソートしない。顔・重なり・画面内の条件を常に最優先とする。
+2. **`countPolicy: 'max-feasible'`（中）**
+   - 希望人数を `min(3, remaining)` にする。現行の最初の候補で確定する方法ではなく、競合しない候補の組合せを探索する。3人の安全な組合せがなければ2人、次に1人へ戻す。
+   - 同人数なら上記の優先帯に入る人数が多い配置を選び、同点はシードで選ぶ。人数を確保するために安全基準を下げない。人数と難しい場所が両立しない背景は記録する。
+   - 帽子・傘も含め、他の顔、本体、小物との関係を最終検証する。現行の小物判定は描画全体のピクセル検査ではなく、帽子の帯・毛糸の細部・傘の軸等には形状との差がある。最終描画も確認する。
+   - 最大人数が毎回置ければ10発見は3+3+3+1の4画面。常時3人保証や10画面保証とはしない。保存の発見数・最後の1人を確認する。
+3. **`decoyCount: 0`（初回は実装不要。導入時は中）**
+   - Hではにせものを入れず、比較実験で0→1→2個。上限2個。顔・目・口がなく、クッションや布袋と分かる独自の静物だけを使う。頭と胴の完全なコピーにしない。
+   - 導入時はシーンの装飾と位置情報を定義し、本物と同じ柄座標を使う。顔の保護範囲に描かない。他の当たり判定領域（許容距離22を含む）に重ねない。前景として遮蔽を増やす用途には使わない。
+   - にせものを押しても現行の外れと同じ。減点・専用の失敗音を足さない。上部の対象人数に含めない。
+4. **`hintStyle: 'static'`（中）**
+   - 1段階目は現行の半径230の円。2段階目は同じ対象の顔の周囲に静止した明暗2重の枠を表示。枠は目・口を覆わず、顔の外側へ余白12シーン単位以上を取る。3段階目は現行の輪郭表示。
+   - `currentHint()` の対象選択を共用し、顔の表示範囲は画像ガイドと形状から定義する。`sceneView.ts` で表示、`app.ts` のwiggle付与をこのモードでは行わない。アニメーションを止めても救済が機能することを確認する。
+   - 現行の揺れは任意の救済であり、アクション型のゲームそのものではない。ただし今回の前提をより明確に守るため静止表示を提案する。**ヒントを弱める変更ではない**。静止枠の方が弱ければ、より明確にする。
+
+試遊入口も必要。`startCourse()` は未解放コースを拒否するため、ご本人が90人探してから試す導線にしない。Claude側の実装で保護者領域に「最難関をためす」を設け、試遊中の10発見はメモリ内で数え、通常コースの解放・保存進捗を変更しない案を推す（中）。表へのno:11追加だけでは、コース数・保存仕様・画面との整合が取れない。
+
+### 限界を探る比較案X（採用決定ではない）
+
+Hから1要因ずつ、outlineを0.25、服可視率の優先帯を20〜30%、全体可視率を45%以上へ広げ、最後ににせものを最大2個追加する。顔、高さ170、色以外の手がかり、当たり判定22は維持する。小物迷彩の一致率目標は95%以上にして比較するが、成立しなければ未成立と記録する。
+
+これを成人だけで先に比較し、その後、家族が希望する場合に短く共同試遊する。全部の変更を一度に入れて「難しかった」で終えない。顔を残す以上、大人には簡単という上限があり得る。その場合も顔を消す方向には進めない。
+
+## 4. 難しくする手段の一覧（効き目・副作用・手間）
+
+手間の「小」は主に値の変更、「中」は選別・描画・検証の連携、「大」はキャラ体系・保存・背景アートまで及ぶ変更。所要日数の見積もりではない。
+
+| 手段・比較値 | 期待する効き目（推測） | 副作用・境界 | 判断／手間 |
+| --- | --- | --- | --- |
+| 服のふち線0.32→0.28→0.25 | 服の境界が読み取りにくくなる | 顔・服の陰影は残る。画面条件による差も大きい | 推奨／小 |
+| 服soft→exact | 色と周期のずれを消す | コース10は実施済み。顔だけ探す遊びへ寄りやすい | 維持／小 |
+| 服の背景一致70%→優先90%、比較95% | 異なる領域にはみ出す目印を減らす | 場所が固定化し、覚えれば簡単になる | 優先／中 |
+| 人数1〜3抽選→最大実現可能3 | 最後の1人まで探す持続性を増す | 最初の1人は見つけやすくなる可能性。10発見までの画面数は減る | 比較採用／中 |
+| 4人、さらに5〜6人 | 対象管理と探索量が増える | 3種類しかいない。重複の区別、狭い画面、判定競合。難度より混雑と疲れになり得る | 4人は別試作なら検討、5〜6人は見送り／大 |
+| 迷彩帽子0.9→1 | 頭の目印を隠す | 帽子の輪郭・ぼんぼりが新たな目印。色以外の個体識別も減る | 推奨、形の見分けを確認／小 |
+| 迷彩傘0→0.4→0.8→1 | 頭上の形を背景に寄せる | 軸と広い輪郭が目立ち、押せる面積が増える。場所を制約する | 効果の向きを比較／小 |
+| 帽子＋傘の同時装着 | 複数の目印を変える | 現状でも可能。率1ずつでは保証されない。大きなシルエットになる | 安全な組合せだけ別比較／中 |
+| マフラー | 首と服の境界をぼかす | 口へ近づく危険。布端が目印になる。服が見える面積を減らす | 顔保護範囲より下だけなら後回し／中 |
+| 手袋 | 手の色の手がかりを減らす | 効果が小さい可能性。絵と判定の一致が必要 | 優先度低／中 |
+| 背景柄の箱を身につける | 胴の輪郭を物に見せる | 服の柄を選ぶ意味が薄れ、顔穴だけだと顔を隠す抜け道になる | 頭を覆う箱は不採用。胴だけでも別試作／大 |
+| 新しい深い隠れ場所：まず各背景1か所、計3か所 | 記憶済みの場所を崩し、服の露出を減らす | 前景アートと判定の更新が必要。高い小物で口を隠しやすい | 既存配置の限界確認後／大 |
+| キャラを5%、次に最大10%縮小 | 視覚的な占有面積を減らす | 全体を縮めると顔も縮む。高さ170以上でもスマホで小さくなる | Hでは不採用。実寸確認付きの別比較／中〜大 |
+| 顔の目以外を小さくする | 顔らしさを減らす | 口の縮小・消失は前提違反。頭だけでも目口の位置、形による識別、絵の約束が崩れる | 不採用／大 |
+| 顔色を背景に寄せる・顔線を薄くする | 顔の目印を弱める | 幾何学的には見えても知覚的に隠す。色覚や明るさに依存する | 不採用 |
+| にせもの0→1→2個 | 似た静物を見比べる必要が出る | 「押せるはず」の期待を裏切る。顔に見える模様も避ける | 限界比較だけ／中 |
+| 柄の周期を現行の0.85倍／1.15倍で背景と服に共通適用 | 境界付近の読みにくさが変わる | 細密化でちらつきや縮小時の見づらさ。難しさの方向は未確定 | 後回し、柄の種類は増やさない／中 |
+| 服の陰影だけを75%へ | 明暗の境界を弱める | 立体感・絵本の質感を損なう。outlineでは変えられない | Xでも後順位／中 |
+| 見つけた子を残す／退場させる | 残すと探索対象の管理が必要 | 消すと未発見者の場所を動かした印象になる可能性。残すだけで疲れる場合もある | 現状の位置・上部チェックを維持／小 |
+| 見つけた子のチェックを消す・再び隠す | 記憶負荷を増す | 成功を取り消された感覚。押し直しの原因 | 不採用 |
+| ヒント円拡大、段階追加、待機・回数制限 | 救済に時間がかかる | 難問の質を上げず、詰まりを長引かせる | 不採用 |
+| 発見順を強制、特定の子だけ正解 | 探索対象を絞り、ルール負荷を増す | 本物を見つけても認められない。帽子で識別もしにくい | 不採用。家族の任意の声かけまで |
+| 時間・タップ数制限、探している間の移動 | 焦り・追跡負荷を増す | 本ジョブの前提と遊びの方向に反する | 不採用 |
+
+見つけた演出は難しくする対象にしない。現状は同じ位置で発見済み表示・星が出る。必要なら祝福後の星だけを約1秒で静める比較を行うが、顔と上部チェックは残し、未発見者の位置は変えない。
+
+## 5. 「難しい」と「理不尽」の境目
+
+| 観点 | 4〜6歳 | 大人・家族での挑戦 |
+| --- | --- | --- |
+| 発見の根拠 | 顔・口・輪郭を指して「いた」と言える。色名を知らなくてもよい | 柄のつながり、静物と顔の違いを注意深く見る余地がある |
+| 押した結果 | 顔や身につけ物を押せば見つかる。順番で拒否しない | 同じ。精密タップの競技にはしない |
+| にせもの | 静物として分かる形まで。人の形を精密にコピーしない | 事前に静物が混じると説明して最大2個を比較。ただし本物の顔は保護する |
+| ヒント | いつでも進められ、最終段階で納得して押せる | 利用を成績上の失敗にしない。自分で使わない選択はできる |
+| やめる・交代 | 残り人数や解放のために続ける圧力を足さない | 家族で相談・交代できる。大人向け制限を幼児画面へ持ち込まない |
+
+境界を越える具体例は、口を1点だけ残して周囲を覆う、背景色との微小な差だけに頼る、正解を押しても順番が違うので無反応、最後の1人だけ極小、ヒントを押しても救済されない、である。大人が楽しめても幼児版の通常コースへ自動採用しない。
+
+画面は1000シーン単位。表示幅360 CSS pxなら高さ170は約61 CSS px、当たり判定の余裕22は約7.9 CSS pxに相当する。これは変換例で、指定画像から実測した表示幅ではない。高さ基準だけで顔の読みやすさを保証しない。
+
+## 6. 実装順と試遊で確かめること
+
+### 段階と比較方法
+
+1. **A：現行10、B：outlineだけ0.28、C：B＋難しい配置優先**を先に比較する（小→中）。同じ背景・キャラ・配置では線の差だけを比較できるようにする。配置を変える比較では同じシードでも同じ絵になるとは限らない点を記録する。
+2. 次に帽子、傘0 / 0.4 / 0.8、人数方針を1つずつ比較し、Hを組み立てる。初回は各背景2配置の計6配置を成人で点検する。記憶による有利不利を減らすため提示順を入れ替える。
+3. 子どもの試遊は希望した家族で、1回3画面までを目安に、嫌がればその場で終える。4歳側と5〜6歳側の観察を分ける。少人数の家族試遊では全年齢への一般化はしない。大人が先に答えを言った回は自力発見と分ける。
+4. Hで納得して遊べると確認できたらXを1要因ずつ試す。新しい小物・場所・4人化はその後。Xの全要因を一度に通常コース10へ入れない。
+
+### 記録するもの
+
+- 背景、シード、希望人数と実人数、実際の帽子・傘・同時装着数、優先帯の成立／代替配置の使用。装着率の分母は出現人数。
+- 最初の1人／最後の1人までの時間、1人ごとのヒント段階、顔を認識したタップと無作為な連打の違い、見つけた子の押し直し、にせものへのタップ。
+- 「どこを見て分かったか」、ヒント後に納得したか、自発的に続けたい／交代したい／やめたいと言ったか。難しくても楽しいかを時間とは別に扱う。
+- 記録は匿名の手元メモ。子どもの氏名・写真・外部送信を追加しない。新しい通信や常時収集機能を作らない。
+
+### 試遊の暫定的な見直し基準（科学的な閾値ではない）
+
+- 成人の比較では、Hの1人発見までの中央値が現行10の1.3〜2倍程度になるかを見る。速く見つかっても失敗ではない。遅延の原因が単なる小ささ・押しにくさなら採用しない。
+- 子どもが30秒ほど手がかりを得られなければ、保護者がヒントや交代を提案する。画面内のタイマー・自動失敗・待ち時間にはしない。
+- 最終ヒントを出しても対象を指せない、顔を狙って2回続けて押しても反応しない、「いるのに違うと言われた」と受け取る場合は、その配置を候補から外して原因を調べる。
+- 3画面中2画面以上で全員に最終ヒントが必要なら、通常コース用としては戻す候補。嫌がる、顔を見分けられない場合は回数を待たずに止める。ヒント利用自体を悪い成績としない。
+- 同じ場所ばかりになるなら優先帯を緩める前に、1背景あたり安全な候補が何個残るかを見る。難問用に最低3候補を確保する目標とし、未達なら「背景追加」より既存位置の調整を検討する。
+
+### Claude側の実装後に必要な検証
+
+- 既存の安全条件、3体すべての顔、描画の小物の縁を確認。新しい前景を作る場合は絵と判定の一致も再検査する。`facePoints` の3点通過だけで目口全体の保護済みとしない。
+- 3背景×100シード×remaining 1〜10の3,000配置を候補Hで検証する案。空配置なし、人数上限、重複なし、重なりなし、画面内、10発見で終了、同じ入力で再現すること。小物同士の重なりも確認する。
+- 装着率や優先帯成立率を別に集計する。既存テストは安全性と最低限の小物出現を調べるが、「難しくなった」を保証してはいない。
+- 320×568、390×844、768×1024で顔・ヒント・対象一覧・3人時の判定を確認する。通常表示、グレースケール表示、動きを減らした表示を比較する。グレースケールだけを色覚への十分な検証とは扱わない。
+- 試遊入口で通常進捗が変わらないこと、途中で終了できること、ヒントを何度押しても追加条件なく使えること、通信なしで完了することを確認する。
+
+## 7. 自分でも危ないと思う点・Claudeに反論してほしい点
+
+1. **3人固定に近づけるのは、最難関化より作業量の増加かもしれない。** 1人だけを難しく配置した方が、1人あたりの発見は難しい可能性がある。Hの人数方針は比較で捨てられる。
+2. **帽子100%でも難しくなる保証がない。** 毎回同じ帽子なら帽子を探すゲームになる。傘を減らす判断も未検証で、実際には頭の目印を覆う効果が勝つかもしれない。
+3. **幾何学的な可視率を難しさと取り違える危険がある。** 服が20%しか見えなくても顔が孤立して目立てば簡単。評価値は候補選別に使い、最終的な採否は静止画と試遊で決める。
+4. **優先帯90%・25〜40%が現存するか未確認。** 成立しない条件を表へ足すだけではコース10と変わらない。実装前に候補分布を出し、成立が乏しければCを撤回するか各背景1か所だけ追加する。
+5. **にせものは最も反対されやすい。** 大人には面白くても4歳には意地悪に見える。顔なしでも「かくれている子」に見えたら失敗。Xからも削除してよい。
+6. **0.25は描画の下限であって遊びとして安全な下限ではない。** 端末・照明・絵の陰影で差が出る。0.28の時点で不評なら0.32へ戻す。
+7. **静止ヒントの追加は今回の難度議論には広すぎるという反論があり得る。** 現行の任意の揺れを残すなら、通常探索は静止のまま・動かなくても最終輪郭で解けることを最低条件とする。救済を弱める妥協はしない。
+8. **「顔を残すと大人には簡単」の可能性を受け入れる必要がある。** 顔を背景に溶かして難度を稼ぐと、幼児向けの約束と柄の遊びを失う。大人の探索時間だけで通常版を判断しない。
+
+第2回で決めたい順序は、(1)配置優先帯の実現性、(2)傘が難しくするか易しくするか、(3)1人と3人のどちらが狙いに合うか、(4)にせものを比較対象に残すか、である。最初の実装はA/B/Cまでに絞ってもよい。
+
+## 8. 作業記録・検査結果・未実施
+
+- 実施：指定のコア・UIソース、方針資料、`AGENTS.md`、ジョブ91、`ART_SLOTS.md`、`CODEX_ART_BRIEF.md`を読んだ。関連するキャラ描画、型、CSS、コース単体テストも参照した。指定ショップ画面とヒント輪郭画面を目視確認し、本レポートに設計案と自己反論をまとめた。
+- 方法：ローカルファイルの静的レビュー、既存スクリーンショットの目視、TypeScript型検査。画像生成、絵の制作、ネット画像・有料API・外部検索は使用していない。
+- 検査：`npx.cmd tsc --noEmit` は終了コード0で合格。これは現行コードの型検査であり、未実装のH/Xの安全性・難度の検証ではない。
+- 未実施：実装、候補分布・実装着率の実測、新コースのブラウザ／実機試遊、人による難度評価。単体テスト・E2E・ビルドは実行していない。絵を変更していないため `validate:art` は実行していない。
+- 書き込み：この `audit/codex/hardest-course-r1.md` だけ。ジョブ91の「1ファイルだけ」と今回のユーザー指定を優先し、共通指示の `STATUS.md` 更新は行っていない。コード・絵・設定・検査ツールを変更せず、commit / pushもしていない。
+- 作業開始時から未追跡の `video/hide-handoff-find.webm` が存在した。今回の作業では触れていない。
+tests\unit\courses.test.ts
+tests\e2e\course.spec.ts
+src\core\courses.ts
+AGENTS.md
+art-guides\ART_CHECK.md
+ART_SLOTS.md
+CODEX_ART_BRIEF.md
+codex-jobs\92-hardest-course-r2.md
+codex-jobs\91-hardest-course-r1.md
+audit\codex\hardest-course-r1.md
+audit\codex\2026-10-08T03-44-50-649Z-91-hardest-course-r1.log
+src\ui\accessoryArt.ts:36:function camoFill(scene: SceneDef, pl: Placement, kind: 'hat' | 'umbrella', id: string): string | null {
+src\ui\accessoryArt.ts:53:export function accessoryArt(scene: SceneDef, pl: Placement, prefix: string, outline: number): AccArt {
+src\ui\accessoryArt.ts:60:  const camoLine = Math.max(0.25, outline);
+src\ui\accessoryArt.ts:62:  if (acc.umbrella) {
+src\ui\accessoryArt.ts:65:    const camo = acc.umbrella === 'camo' ? camoFill(scene, pl, 'umbrella', fid) : null;
+src\ui\accessoryArt.ts:73:      `<g class="acc acc-umbrella"><defs>${defs}</defs>` +
+src\ui\app.ts:304:      outline: s.origin === 'course' ? courseDef(this.courseNo).outline : OUTLINE[s.difficulty],
+src\ui\app.ts:459:      outline: 0.7,
+src\ui\app.ts:1087:  const umb = c.umbrella
+src\ui\app.ts:1104:  return charArtMarkup(CHARACTERS[c], { fillId, outline: 0.6, found });
+src\ui\charArt.ts:10:export function charArtMarkup(c: CharacterDef, o: { fillId: string; outline: number; found?: boolean }): string {
+src\ui\charArt.ts:14:  const outline = Math.max(0.25, o.outline);
+src\ui\charArt.ts:21:    (a.clothesLine ? img(a.clothesLine, `opacity="${outline}"`) : '') +
+src\ui\charArt.ts:35:  return `<svg viewBox="-90 -225 180 240" aria-hidden="true" focusable="false"><defs>${patternDefs}</defs>${charArtMarkup(c, { fillId, outline: 1 })}</svg>`;
+src\core\accessories.ts:13:  umbrella?: AccStyle;
+src\core\accessories.ts:58:export function umbrellaShapes(): Shape[] {
+src\core\accessories.ts:64:  return [...(acc.umbrella ? umbrellaShapes() : []), ...(acc.hat ? hatShapes() : [])];
+src\core\accessories.ts:82:export function accessoryFits(scene: SceneDef, spot: SpotDef, char: CharacterId, kind: 'hat' | 'umbrella', style: AccStyle): AccFit {
+src\core\accessories.ts:84:  const shapes = (kind === 'hat' ? hatShapes() : umbrellaShapes()).map((s) => transformShape(t, s));
+src\art\registry.ts:49:    clothesShade: find(d, 'clothes-shade'),
+src\core\characters.ts:134:      const outline = puffs.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c.skin}" ${st}/>`).join('');
+src\core\characters.ts:137:        outline +
+src\core\characters.ts:152:  outline: number;
+src\core\characters.ts:159:  const outline = Math.max(0.25, o.outline);
+src\core\characters.ts:162:    shapeToSvg(BODY, `class="clothes" fill="url(#${o.fillId})" stroke="${LINE}" stroke-opacity="${outline}" stroke-width="3.5" stroke-linejoin="round"`) +
+src\core\characters.ts:164:    `<path d="M-22 -98 Q0 -84 22 -98" fill="none" stroke="${LINE}" stroke-opacity="${outline}" stroke-width="3"/>`;
+src\core\characters.ts:179:  return `<svg viewBox="-90 -225 180 240" aria-hidden="true" focusable="false"><defs>${patternDefs}</defs>${characterMarkup(c, { fillId, outline: 1 })}</svg>`;
+src\core\courses.ts:19:  outline: number;
+src\core\courses.ts:21:  maxChars: 1 | 2 | 3;
+src\core\courses.ts:24:  umbrella: { rate: number; style: AccStyle } | null;
+src\core\courses.ts:28:  { no: 1, spots: 'easy', variant: 'soft', outline: 0.72, maxChars: 1, hat: null, umbrella: null },
+src\core\courses.ts:29:  { no: 2, spots: 'easy', variant: 'soft', outline: 0.62, maxChars: 1, hat: null, umbrella: null },
+src\core\courses.ts:30:  { no: 3, spots: 'all', variant: 'soft', outline: 0.56, maxChars: 1, hat: null, umbrella: null },
+src\core\courses.ts:32:  { no: 4, spots: 'easy', variant: 'soft', outline: 0.56, maxChars: 1, hat: { rate: 1, style: 'color' }, umbrella: null },
+src\core\courses.ts:33:  { no: 5, spots: 'all', variant: 'soft', outline: 0.5, maxChars: 2, hat: { rate: 0.8, style: 'color' }, umbrella: null },
+src\core\courses.ts:35:  { no: 6, spots: 'easy', variant: 'soft', outline: 0.5, maxChars: 1, hat: null, umbrella: { rate: 1, style: 'camo' } },
+src\core\courses.ts:36:  { no: 7, spots: 'all', variant: 'exact', outline: 0.44, maxChars: 2, hat: { rate: 0.7, style: 'color' }, umbrella: { rate: 0.6, style: 'camo' } },
+src\core\courses.ts:38:  { no: 8, spots: 'all', variant: 'exact', outline: 0.4, maxChars: 2, hat: { rate: 0.8, style: 'camo' }, umbrella: { rate: 0.6, style: 'camo' } },
+src\core\courses.ts:39:  { no: 9, spots: 'all', variant: 'exact', outline: 0.36, maxChars: 3, hat: { rate: 0.8, style: 'camo' }, umbrella: { rate: 0.7, style: 'camo' } },
+src\core\courses.ts:40:  { no: 10, spots: 'all', variant: 'exact', outline: 0.32, maxChars: 3, hat: { rate: 0.9, style: 'camo' }, umbrella: { rate: 0.8, style: 'camo' } },
+src\core\courses.ts:64:  const want = Math.max(1, Math.min(remaining, 1 + Math.floor(rng() * c.maxChars)));
+src\core\courses.ts:73:    (c.umbrella?.rate === 1 && accessoryFits(scene, sp, ch, 'umbrella', c.umbrella.style).ok);
+src\core\courses.ts:87:      if (c.umbrella && rng() < c.umbrella.rate && accessoryFits(scene, sp, ch, 'umbrella', c.umbrella.style).ok) {
+src\core\courses.ts:89:        const ub = unionBBox(worldShapes(sp, { umbrella: c.umbrella.style }).map(bbox));
+src\core\courses.ts:90:        if (!used.some((u, k) => bboxOverlap(ub, silhouetteBBox(out[k].char, u), 4))) acc.umbrella = c.umbrella.style;
+src\core\courses.ts:92:      if (acc.hat === 'color' || acc.umbrella === 'color') acc.tone = Math.floor(rng() * HAT_COLORS.length);
+src\core\courses.ts:94:      if (acc.hat || acc.umbrella) {
+src\ui\sceneView.ts:17:  outline?: number;
+src\ui\sceneView.ts:76:export function charGroup(prefix: string, scene: SceneDef, pl: Placement, i: number, found: boolean, outline: number): string {
+src\ui\sceneView.ts:80:  const acc = accessoryArt(scene, pl, fid, outline);
+src\ui\sceneView.ts:85:    `<g class="char-inner">${charArtMarkup(CHARACTERS[pl.char], { fillId: fid, outline, found })}${acc.front}</g>` +
+src\ui\sceneView.ts:112:    out += `<g class="hint-outline">${shapes.map((s) => shapeToSvg(s, 'fill="none" stroke="#FFD45C" stroke-width="7" stroke-dasharray="14 10" stroke-linecap="round"')).join('')}</g>`;
+src\ui\sceneView.ts:121:  const outline = o.outline ?? 0.6;
+src\ui\sceneView.ts:122:  const chars = placements.map((pl, i) => charGroup(P, scene, pl, i, !!found[i], outline)).join('');
+src\ui\styles.css:56:  outline: 5px solid #5b8def; outline-offset: 3px;
+src\ui\styles.css:135:.candidate:focus-visible { outline: none; }
+src\ui\styles.css:223:.pbtn:focus-visible, .key:focus-visible, .hold-btn:focus-visible, .parent-dialog input:focus-visible { outline: 3px solid #5b8def; outline-offset: 2px; }
+src\ui\styles.css:266:.course-tile:focus-visible { outline: 5px solid #5b8def; outline-offset: 3px; }
+src\core\placement.ts:93:export function analyzeSpot(scene: SceneDef, spot: SpotDef, char: CharacterId): SpotReport {
+src\core\placement.ts:164:    const r = analyzeSpot(scene, spot, p.char);
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Encoding UTF8 ART_SLOTS.md; Get-Content -Encoding UTF8 CODEX_ART_BRIEF.md; Get-Content -Encoding UTF8 src/core/courses.ts; Get-Content -Encoding UTF8 src/core/placement.ts; Get-Content -Encoding UTF8 src/ui/charArt.ts; Get-Content -Encoding UTF8 src/ui/accessoryArt.ts; git status --short; rg --files audit -g AGENTS.md; rg -n 'course|save|storage|parent' src/ui/app.ts" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 285ms:
+# 絵の差し替え口（ART_SLOTS）
+
+`art/` フォルダに決まった名前でファイルを置くと、ゲームが自動でその絵を使います。
+**置かなかった部分は、今のコードの絵のまま** 動きます（一部だけ差し替えてもよい）。
+
+- 形式：PNG（透過）／WebP／SVG。1ファイル 800KB まで、合計 8MB まで
+- SVG はスクリプト・外部参照・文字（フォント）を含めない
+- 置いたら `npm run validate:art` で検査 → `npm run build` → 画面を確認
+- 下書きガイド：`npm run art:guides` で `art-guides/` に出る（形状データから自動生成。描く位置の基準）
+
+## キャラクター `art/characters/{koro|mimi|moko}/`
+
+枠：**450×600px**（またはその整数倍。縦横比 3:4）。ゲーム内の座標 x −90〜90、y −225〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 37.5px**。ガイド `art-guides/character-*.png` に重ねて描く。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `clothes-mask.png` | ○ | 服の形だけを **白**、ほかは黒か透明。ここにゲームが背景と同じ柄を流し込む。ガイドの青い範囲（からだの判定）からはみ出さないこと |
+| `front.png` | ○ | 服より前に描くもの：顔・頭・耳・髪・手・服の上に出る線。目と口はガイドの赤い点の位置 |
+| `back.png` | | 服より後ろ：足、背中側の耳や髪など |
+| `clothes-shade.png` | | 服の陰影（乗算で重なる）。グレー〜茶系の濃淡、透過 |
+| `clothes-line.png` | | 服のふち線だけ。難易度に応じてゲームが濃さを変える（最低25%） |
+| `front-found.png` | | 見つかった時の前面（手をふるポーズ）。無ければ front を使う |
+
+`clothes-mask` と `front` がそろっていない時は、そのキャラクターはコードの絵のままです。
+
+## シーン `art/scenes/{room|garden|shop}/`
+
+枠：**1000×1000px**（2000×2000 推奨）。ガイド `art-guides/scene-*.png` の色面が「柄の領域」で、**ここはゲームが柄を塗る**（服と同じ柄にして隠れられるようにするため）。
+
+| ファイル | 中身 | 決まり |
+|---|---|---|
+| `back.png` | 柄の領域より下：空・壁の上部・床など | 不透明でよい |
+| `over.png` | 柄の領域の上・キャラクターの後ろ：家具の縁・カーテンのひだの陰・窓・棚など | 透過。キャラクターの服の後ろは薄く（平均の濃さ35%以下）、顔の後ろには描かない |
+| `minor.png` | 小さい画面では省く飾り（壁の絵・雲など） | over と同じ決まり |
+| `fore.png` | 前景の小物すべて（キャラクターの前に重なる） | 透過。ガイドの橙色の形に合わせる。**赤い円（顔）には重ねない**。服は少し（2割以上8割未満が見える程度）隠す |
+
+## 柄のタイル `art/patterns/{シーン}-{服}.png`
+
+例：`room-stripes.png`、`garden-leaf.png`。正方形 64px 以上、不透明、**上下左右がつなぎ目なく続く**こと。
+同じタイルが背景の領域と服の両方に使われます（だから隠れられる）。タイル1枚がゲーム内で表す大きさは、各シーンの柄の `size`（38〜52）です。
+
+| シーン | 服（ファイル名の後半） |
+|---|---|
+| room | plain（壁）, stripes（カーテン）, dots（ソファ）, check（ラグ） |
+| garden | plain（芝生）, stripes（柵）, dots（花だん）, leaf（生け垣） |
+| shop | plain（床）, stripes（カウンター）, dots（壁）, check（テーブルクロス） |
+
+## 画面の絵 `art/ui/`
+
+`title.png`（タイトルの絵）、`handoff.png`（受け渡し画面の絵。**隠れ場所や背景を描かない**）、`bye.png`（おしまい画面）。2000px 以内。
+# Codex への絵の制作依頼（CODEX_ART_BRIEF）
+
+> ご自宅PCで Codex に渡すための依頼文です。下の「Codex への指示」をそのまま貼り付けてください。
+
+## 事前準備（ご自宅PC）
+
+```bash
+git fetch origin
+git checkout claude/pattern-hide-family-beta
+git pull
+cd pattern-hide-family-beta
+npm ci
+npm run art:guides      # art-guides/ に下書きガイドができる
+```
+
+## Codex への指示（ここから貼り付け）
+
+あなたは、幼児向けかくれんぼゲーム「もようのかくれんぼ（仮）」の絵を作る担当です。
+作業フォルダは `pattern-hide-family-beta/` です。最初に `ART_SLOTS.md` と、この `CODEX_ART_BRIEF.md` を読んでください。
+
+### 守ること
+1. 書き込んでよいのは `pattern-hide-family-beta/art/` の中だけです。`src/` やテスト、設定ファイルは変更しないでください（別のAIが担当しています）。
+2. ファイル名・寸法・層の分け方は `ART_SLOTS.md` のとおりにしてください。描く位置は `art-guides/` のガイド画像に合わせてください。ガイドはゲームの当たり判定と同じ形から作られています。
+3. 描き終えたら `npm run validate:art` を実行し、**すべて合格するまで直してください**。結果は `art-guides/ART_CHECK.md` に出ます。そのあと `npm run build` が通ることを確認してください。
+4. 既存の作品（キャラクター、ロゴ、画面、音）をまねたり、取り込んだりしないでください。ネット上の画像も使わないでください。特定の作品に見える顔の配置や特徴は避けてください。
+5. 文字は絵に入れないでください。
+6. 追加料金が発生する手段（別料金のAPIキー、有料サービス）は使わないでください。今の契約の範囲でできないことがあれば、無理をせず、できなかったことを報告してください。
+7. 最後に、作ったファイル・使った方法（SVGをコードで書いた／画像生成を使った等）・検査結果を `art/README.md` に書いてください。
+
+### 絵の方向性
+- **かわいらしく、幼い子向け。ただし安っぽくしない。** 絵本の挿絵のような品のある仕上がりにします。
+- 形に丸みと立体感を持たせます。やわらかい陰影、ほのかなグラデーション、光は左上から、接地面にやわらかい影を入れてください。平べったいクリップアートや絵文字のようにはしないでください。
+- 線は黒ではなく濃い茶色系（目安 #4A3A40）。太さに少し強弱をつけ、全部の線を同じ太さにしないでください。
+- 色は、少しくすんだやさしいパステルを基調に、差し色を少しだけ。蛍光色や彩度の高すぎる色は使わないでください。
+- 布の縫い目、木目、葉脈など、見つけるとうれしい細部を控えめに入れます。ただし背景がうるさくなり、さがしにくくなる量にはしないでください。
+- 3体の見分けは **色だけに頼らず形で** つけます。今の形を受け継いでください：
+  - **ころ**：あたまに「くるん」とした毛。げんきでくいしんぼう。アプリコット色
+  - **みみ**：たれた長い耳（内側はピンク）。ものしりでのんびり。ミントグリーン
+  - **もこ**：くもの形のもこもこした頭と、星の髪どめ。ふわふわではずかしがり。ラベンダー
+- 3体とも、頭が大きめの約2頭身です。目は大きく、ハイライトを入れてください。表情はおだやかな笑顔です。
+- 服は **ゲームが柄を流し込む部分** なので、`clothes-mask.png`（白黒の形）として分けてください。服の陰影は `clothes-shade.png`、ふち線は `clothes-line.png` に分けると、柄の上に立体感が出ます。
+- 背景の「柄の領域」（カーテン・ソファ・ラグ、生け垣・柵・花だん・芝生、かべ・カウンター・テーブルクロス・床）は、ゲームが柄で塗ります。質感は **柄タイル**（`art/patterns/`）で出してください。布の織り目や紙の質感などを入れたタイルにします。同じタイルが服にも使われます。
+- 前景の小物（`fore.png`）は、今の小物と同じ位置・同じくらいの大きさで描き直してください（ガイドの橙色）。顔（赤い円）には絶対に重ねないでください。
+- 怖い表情、暗い影、先のとがった危なそうな物は入れないでください。
+
+### おすすめの順番
+1. `art/characters/koro/` の5層（back, clothes-mask, clothes-shade, clothes-line, front, front-found）を作る → 検査に合格させる
+2. 同じ画風で みみ・もこ を作る
+3. `art/patterns/` の柄タイル12枚
+4. `art/scenes/room/` の back / over / minor / fore → 検査 → garden → shop
+5. `art/ui/` の title / handoff / bye
+
+途中で、`npm run build && npm run preview` を実行し、`http://127.0.0.1:4173/` で見た目を確認してください。
+
+（貼り付けここまで）
+
+## 作業後
+
+- Codex の作業を `git add art && git commit` して、同じブランチに push してください。
+- Claude 側では、画面写真・操作テスト・溶け込み具合を確認し、必要なら調整案を出します。
+- 同じファイルを同時に複数のAIで編集しないため、Codex は `art/` だけ、Claude はそれ以外、と分けています。
+// コースモード：10回みつけると1コースクリア、10コースで100回。
+// あとのコースほど、柄が背景に近づき・ふち線が薄くなり・人数が増え・ニット帽や傘が加わる。
+import { type AccStyle, type Accessories, HAT_COLORS, accessoryFits, accessoryShapes } from './accessories';
+import { CHARACTER_IDS, type CharacterId } from './characters';
+import { bbox, bboxOverlap, transformShape, unionBBox } from './geometry';
+import { type Placement, costumeForRegion, silhouetteBBox, spotsConflict } from './placement';
+import { type Rng, mulberry32, shuffle } from './rng';
+import type { SceneDef, SceneId, SpotDef } from './scene';
+
+export const FINDS_PER_COURSE = 10;
+
+export interface CourseDef {
+  no: number;
+  /** easy：見えやすい場所だけ / all：すべての場所 */
+  spots: 'easy' | 'all';
+  /** soft：少し違う柄 / exact：背景と同じ柄 */
+  variant: 'soft' | 'exact';
+  /** 服のふち線の濃さ */
+  outline: number;
+  /** 1回に隠れる最大の人数 */
+  maxChars: 1 | 2 | 3;
+  /** rate：1人ごとにかぶる割合 */
+  hat: { rate: number; style: AccStyle } | null;
+  umbrella: { rate: number; style: AccStyle } | null;
+}
+
+export const COURSES: CourseDef[] = [
+  { no: 1, spots: 'easy', variant: 'soft', outline: 0.72, maxChars: 1, hat: null, umbrella: null },
+  { no: 2, spots: 'easy', variant: 'soft', outline: 0.62, maxChars: 1, hat: null, umbrella: null },
+  { no: 3, spots: 'all', variant: 'soft', outline: 0.56, maxChars: 1, hat: null, umbrella: null },
+  // ニット帽のはじまり：色つきの帽子で、頭の目印（くるん毛・耳・星）が見えにくくなる
+  { no: 4, spots: 'easy', variant: 'soft', outline: 0.56, maxChars: 1, hat: { rate: 1, style: 'color' }, umbrella: null },
+  { no: 5, spots: 'all', variant: 'soft', outline: 0.5, maxChars: 2, hat: { rate: 0.8, style: 'color' }, umbrella: null },
+  // 傘のはじまり：うしろの背景と同じ柄の傘
+  { no: 6, spots: 'easy', variant: 'soft', outline: 0.5, maxChars: 1, hat: null, umbrella: { rate: 1, style: 'camo' } },
+  { no: 7, spots: 'all', variant: 'exact', outline: 0.44, maxChars: 2, hat: { rate: 0.7, style: 'color' }, umbrella: { rate: 0.6, style: 'camo' } },
+  // 帽子も背景の柄に
+  { no: 8, spots: 'all', variant: 'exact', outline: 0.4, maxChars: 2, hat: { rate: 0.8, style: 'camo' }, umbrella: { rate: 0.6, style: 'camo' } },
+  { no: 9, spots: 'all', variant: 'exact', outline: 0.36, maxChars: 3, hat: { rate: 0.8, style: 'camo' }, umbrella: { rate: 0.7, style: 'camo' } },
+  { no: 10, spots: 'all', variant: 'exact', outline: 0.32, maxChars: 3, hat: { rate: 0.9, style: 'camo' }, umbrella: { rate: 0.8, style: 'camo' } },
+];
+
+export function courseDef(no: number): CourseDef {
+  return COURSES[Math.min(COURSES.length, Math.max(1, Math.floor(no))) - 1];
+}
+
+/** 何回目の出題で、どの背景を使うか（同じ背景が続かないよう順番に回す） */
+export function courseScene(no: number, round: number, sceneIds: SceneId[]): SceneId {
+  return sceneIds[(no - 1 + round) % sceneIds.length];
+}
+
+function worldShapes(spot: SpotDef, acc: Accessories) {
+  const t = { tx: spot.x, ty: spot.y, s: spot.s };
+  return accessoryShapes(acc).map((s) => transformShape(t, s));
+}
+
+/**
+ * コースの1回分の配置。remaining（このコースで残りの「みつける」回数）を超えない人数にする。
+ * シードが同じなら同じ結果。
+ */
+export function courseRound(scene: SceneDef, no: number, remaining: number, seed: number): Placement[] {
+  const c = courseDef(no);
+  const rng: Rng = mulberry32(seed);
+  const want = Math.max(1, Math.min(remaining, 1 + Math.floor(rng() * c.maxChars)));
+  const chars = shuffle(rng, CHARACTER_IDS).slice(0, want);
+  const pool = shuffle(
+    rng,
+    scene.spots.filter((s) => c.spots === 'all' || s.easy),
+  );
+  // 初めて帽子・傘が出るコース（割合 1）は、それが使える場所から先に選ぶ
+  const first = (sp: SpotDef, ch: CharacterId) =>
+    (c.hat?.rate === 1 && accessoryFits(scene, sp, ch, 'hat', c.hat.style).ok) ||
+    (c.umbrella?.rate === 1 && accessoryFits(scene, sp, ch, 'umbrella', c.umbrella.style).ok);
+  const out: Placement[] = [];
+  const used: SpotDef[] = [];
+  const accBoxes: ReturnType<typeof bbox>[] = [];
+  for (const ch of chars) {
+    const ordered = [...pool.filter((sp) => first(sp, ch)), ...pool.filter((sp) => !first(sp, ch))];
+    let placed = false;
+    for (const sp of ordered) {
+      if (used.some((u) => spotsConflict(u, sp))) continue;
+      const charBox = silhouetteBBox(ch, sp);
+      // ほかの子の傘の下に入らない
+      if (accBoxes.some((b) => bboxOverlap(b, charBox, 4))) continue;
+      const acc: Accessories = {};
+      if (c.hat && rng() < c.hat.rate && accessoryFits(scene, sp, ch, 'hat', c.hat.style).ok) acc.hat = c.hat.style;
+      if (c.umbrella && rng() < c.umbrella.rate && accessoryFits(scene, sp, ch, 'umbrella', c.umbrella.style).ok) {
+        // 傘がほかの子に重ならないときだけ
+        const ub = unionBBox(worldShapes(sp, { umbrella: c.umbrella.style }).map(bbox));
+        if (!used.some((u, k) => bboxOverlap(ub, silhouetteBBox(out[k].char, u), 4))) acc.umbrella = c.umbrella.style;
+      }
+      if (acc.hat === 'color' || acc.umbrella === 'color') acc.tone = Math.floor(rng() * HAT_COLORS.length);
+      const p: Placement = { char: ch, spot: sp.id, costume: costumeForRegion(scene, sp.region), variant: c.variant };
+      if (acc.hat || acc.umbrella) {
+        p.acc = acc;
+        const shapes = worldShapes(sp, acc);
+        if (shapes.length) accBoxes.push(unionBBox(shapes.map(bbox)));
+      }
+      out.push(p);
+      used.push(sp);
+      placed = true;
+      break;
+    }
+    if (!placed) break;
+  }
+  return out;
+}
+// 隠れ場所の検証と自動配置。描画・当たり判定と同じ形状定義を使う。
+import { CHARACTERS, BODY, type CharacterId, CHARACTER_IDS } from './characters';
+import {
+  type BBox,
+  type Pt,
+  type Shape,
+  SCENE_SIZE,
+  bbox,
+  bboxOverlap,
+  contains,
+  samplePoints,
+  transformPt,
+  transformShape,
+  unionBBox,
+} from './geometry';
+import { type Rng, mulberry32, shuffle } from './rng';
+import type { SceneDef, SpotDef } from './scene';
+import type { Accessories } from './accessories';
+
+export type Difficulty = 'easy' | 'normal';
+
+export interface Placement {
+  char: CharacterId;
+  spot: string;
+  costume: string;
+  /** exact: 背景と同じ柄 / soft: 同じ種類で少し違う柄 */
+  variant: 'exact' | 'soft';
+  /** コースだけ：ニット帽・傘 */
+  acc?: Accessories;
+}
+
+export const LIMITS = {
+  /** 画面の端から最低これだけ内側 */
+  margin: 6,
+  /** キャラクター全体のうち見えている割合の下限（全面を隠さない） */
+  minVisible: 0.45,
+  /** からだ（服）が少しは隠れている */
+  maxBodyVisible: 0.92,
+  /** からだ（服）が見えている割合の下限（柄を選ぶ意味を残す） */
+  minBodyVisible: 0.2,
+  /** 見えている服の後ろが、狙った柄の領域である割合 */
+  minRegionMatch: 0.7,
+  /** シーン座標での最小の高さ（極端に小さくしない） */
+  minHeight: 170,
+  /** 複数体の間のすきま */
+  gap: 4,
+};
+
+const STEP = 6;
+
+export function spotTransform(spot: SpotDef) {
+  return { tx: spot.x, ty: spot.y, s: spot.s };
+}
+
+export function silhouetteWorld(char: CharacterId, spot: SpotDef): Shape[] {
+  const t = spotTransform(spot);
+  return CHARACTERS[char].silhouette.map((s) => transformShape(t, s));
+}
+
+export function silhouetteBBox(char: CharacterId, spot: SpotDef): BBox {
+  return unionBBox(silhouetteWorld(char, spot).map(bbox));
+}
+
+/** どのキャラクターが来ても入る外枠 */
+export function spotBBox(spot: SpotDef): BBox {
+  return unionBBox(CHARACTER_IDS.map((c) => silhouetteBBox(c, spot)));
+}
+
+export function regionAt(scene: SceneDef, p: Pt): string | null {
+  for (let i = scene.regions.length - 1; i >= 0; i--) {
+    if (scene.regions[i].shapes.some((s) => contains(s, p))) return scene.regions[i].id;
+  }
+  return null;
+}
+
+function occluded(scene: SceneDef, p: Pt): boolean {
+  return scene.spots.some((sp) => sp.prop.shapes.some((s) => contains(s, p)));
+}
+
+export interface SpotReport {
+  spot: string;
+  char: CharacterId;
+  visible: number;
+  bodyVisible: number;
+  faceVisible: boolean;
+  inBounds: boolean;
+  height: number;
+  regionMatch: number;
+  ok: boolean;
+  problems: string[];
+}
+
+export function analyzeSpot(scene: SceneDef, spot: SpotDef, char: CharacterId): SpotReport {
+  const t = spotTransform(spot);
+  const shapes = silhouetteWorld(char, spot);
+  // 重なりを数えないよう、全形状のサンプル点を一意化
+  const seen = new Set<string>();
+  const pts: Pt[] = [];
+  for (const s of shapes) {
+    for (const p of samplePoints(s, STEP)) {
+      const k = `${Math.round(p.x)}:${Math.round(p.y)}`;
+      if (!seen.has(k)) {
+        seen.add(k);
+        pts.push(p);
+      }
+    }
+  }
+  const visiblePts = pts.filter((p) => !occluded(scene, p));
+  const body = samplePoints(transformShape(t, BODY), STEP);
+  const bodyVis = body.filter((p) => !occluded(scene, p));
+  const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
+  const faceVisible = face.every((p) => !occluded(scene, p));
+  const b = unionBBox(shapes.map(bbox));
+  const m = LIMITS.margin;
+  const inBounds = b.x0 >= m && b.y0 >= m && b.x1 <= SCENE_SIZE - m && b.y1 <= SCENE_SIZE - m;
+  const regionMatch = bodyVis.length === 0 ? 0 : bodyVis.filter((p) => regionAt(scene, p) === spot.region).length / bodyVis.length;
+  const visible = visiblePts.length / pts.length;
+  const bodyVisible = bodyVis.length / body.length;
+  const height = b.y1 - b.y0;
+  const problems: string[] = [];
+  if (visible < LIMITS.minVisible) problems.push(`visible ${visible.toFixed(2)} < ${LIMITS.minVisible}`);
+  if (bodyVisible > LIMITS.maxBodyVisible) problems.push(`bodyVisible ${bodyVisible.toFixed(2)} > ${LIMITS.maxBodyVisible}`);
+  if (bodyVisible < LIMITS.minBodyVisible) problems.push(`bodyVisible ${bodyVisible.toFixed(2)} < ${LIMITS.minBodyVisible}`);
+  if (!faceVisible) problems.push('face hidden');
+  if (!inBounds) problems.push('out of bounds');
+  if (height < LIMITS.minHeight) problems.push(`height ${height.toFixed(0)} < ${LIMITS.minHeight}`);
+  if (regionMatch < LIMITS.minRegionMatch) problems.push(`regionMatch ${regionMatch.toFixed(2)} < ${LIMITS.minRegionMatch}`);
+  return { spot: spot.id, char, visible, bodyVisible, faceVisible, inBounds, height, regionMatch, ok: problems.length === 0, problems };
+}
+
+export function spotsConflict(a: SpotDef, b: SpotDef): boolean {
+  return a.id === b.id || bboxOverlap(spotBBox(a), spotBBox(b), LIMITS.gap);
+}
+
+export function getSpot(scene: SceneDef, id: string): SpotDef {
+  const s = scene.spots.find((sp) => sp.id === id);
+  if (!s) throw new Error(`unknown spot ${id}`);
+  return s;
+}
+
+export function costumeForRegion(scene: SceneDef, region: string): string {
+  const r = scene.regions.find((x) => x.id === region);
+  if (!r) throw new Error(`unknown region ${region}`);
+  return r.costume;
+}
+
+export interface LayoutCheck {
+  ok: boolean;
+  problems: string[];
+}
+
+export function validateLayout(scene: SceneDef, placements: Placement[]): LayoutCheck {
+  const problems: string[] = [];
+  if (placements.length < 1 || placements.length > 3) problems.push(`count ${placements.length}`);
+  const chars = new Set(placements.map((p) => p.char));
+  if (chars.size !== placements.length) problems.push('duplicate character');
+  for (const p of placements) {
+    const spot = scene.spots.find((s) => s.id === p.spot);
+    if (!spot) {
+      problems.push(`unknown spot ${p.spot}`);
+      continue;
+    }
+    if (!scene.costumes.some((c) => c.id === p.costume)) problems.push(`unknown costume ${p.costume}`);
+    const r = analyzeSpot(scene, spot, p.char);
+    if (!r.ok) problems.push(`${p.char}@${p.spot}: ${r.problems.join(', ')}`);
+  }
+  for (let i = 0; i < placements.length; i++) {
+    for (let j = i + 1; j < placements.length; j++) {
+      const a = scene.spots.find((s) => s.id === placements[i].spot);
+      const b = scene.spots.find((s) => s.id === placements[j].spot);
+      if (a && b && spotsConflict(a, b)) problems.push(`overlap ${a.id} / ${b.id}`);
+    }
+  }
+  return { ok: problems.length === 0, problems };
+}
+
+/** 「さがす」モードの自動配置。シードが同じなら同じ結果。 */
+export function autoLayout(scene: SceneDef, difficulty: Difficulty, seed: number): Placement[] {
+  const rng: Rng = mulberry32(seed);
+  const count = difficulty === 'easy' ? 1 : rng() < 0.5 ? 2 : 3;
+  const chars = shuffle(rng, CHARACTER_IDS).slice(0, count);
+  const pool = shuffle(
+    rng,
+    scene.spots.filter((s) => difficulty === 'normal' || s.easy),
+  );
+  const chosen: SpotDef[] = [];
+  for (const sp of pool) {
+    if (chosen.length === count) break;
+    if (chosen.some((c) => spotsConflict(c, sp))) continue;
+    chosen.push(sp);
+  }
+  return chosen.map((sp, i) => ({
+    char: chars[i],
+    spot: sp.id,
+    costume: costumeForRegion(scene, sp.region),
+    variant: difficulty === 'easy' ? 'soft' : 'exact',
+  }));
+}
+
+/** 体の中心（スナップの基準点） */
+export function spotAnchor(spot: SpotDef): Pt {
+  return { x: spot.x, y: spot.y - 100 * spot.s };
+}
+
+/**
+ * 指を離した場所に近い、空いている隠れ場所を返す。
+ * シーンの外や無効な場所でも、いちばん近い安全な候補に戻す。
+ */
+export function snapToSpot(scene: SceneDef, p: Pt, occupied: string[]): SpotDef | null {
+  const occ = occupied.map((id) => getSpot(scene, id));
+  const free = scene.spots.filter((s) => !occ.some((o) => spotsConflict(o, s)));
+  if (free.length === 0) return null;
+  const cx = Math.min(SCENE_SIZE, Math.max(0, p.x));
+  const cy = Math.min(SCENE_SIZE, Math.max(0, p.y));
+  let best = free[0];
+  let bd = Infinity;
+  for (const s of free) {
+    const a = spotAnchor(s);
+    const d = Math.hypot(a.x - cx, a.y - cy);
+    if (d < bd) {
+      bd = d;
+      best = s;
+    }
+  }
+  return best;
+}
+
+/** 置ける候補（編集中だけ表示） */
+export function freeSpots(scene: SceneDef, occupied: string[]): SpotDef[] {
+  const occ = occupied.map((id) => getSpot(scene, id));
+  return scene.spots.filter((s) => !occ.some((o) => spotsConflict(o, s)));
+}
+// キャラクターの描画。art/ に絵があればそれを重ね、無ければコードの絵。
+// どちらの場合も、服には背景と同じ座標の柄（fillId）が入る。
+import { type CharacterDef, characterMarkup, faceIconMarkup, fullIconMarkup } from '../core/characters';
+import { CHAR_FRAME, characterArt } from '../art/registry';
+
+const F = CHAR_FRAME;
+const img = (href: string, extra = '') =>
+  `<image href="${href}" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" preserveAspectRatio="xMidYMid meet" ${extra}/>`;
+
+export function charArtMarkup(c: CharacterDef, o: { fillId: string; outline: number; found?: boolean }): string {
+  const a = characterArt(c.id);
+  if (!a) return characterMarkup(c, o);
+  const m = `m-${o.fillId}`;
+  const outline = Math.max(0.25, o.outline);
+  return (
+    `<defs><mask id="${m}" maskUnits="userSpaceOnUse" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}">${img(a.clothesMask)}</mask></defs>` +
+    `<g class="char-body">` +
+    (a.back ? img(a.back) : '') +
+    `<rect class="clothes" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" fill="url(#${o.fillId})" mask="url(#${m})"/>` +
+    (a.clothesShade ? img(a.clothesShade, 'style="mix-blend-mode:multiply"') : '') +
+    (a.clothesLine ? img(a.clothesLine, `opacity="${outline}"`) : '') +
+    `</g>` +
+    `<g class="char-head">${img(o.found && a.frontFound ? a.frontFound : a.front)}</g>`
+  );
+}
+
+export function faceIcon(c: CharacterDef): string {
+  const a = characterArt(c.id);
+  if (!a) return faceIconMarkup(c);
+  return `<svg viewBox="-70 -215 140 120" aria-hidden="true" focusable="false">${img(a.front)}</svg>`;
+}
+
+export function fullIcon(c: CharacterDef, patternDefs: string, fillId: string): string {
+  if (!characterArt(c.id)) return fullIconMarkup(c, patternDefs, fillId);
+  return `<svg viewBox="-90 -225 180 240" aria-hidden="true" focusable="false"><defs>${patternDefs}</defs>${charArtMarkup(c, { fillId, outline: 1 })}</svg>`;
+}
+// ニット帽と傘の絵（コードで描く）。形は core/accessories と同じ点列を使う。
+// 色つきは毛糸・布の質感、camo は背景と同じ座標の柄に、うっすら編み目・骨だけを重ねる。
+import {
+  type Accessories,
+  HAT_COLORS,
+  HAT_POLY,
+  HAT_POMPOM,
+  UMBRELLA_CANOPY,
+  UMBRELLA_SHAFT,
+  accessoryFits,
+} from '../core/accessories';
+import { type Pt, r1 } from '../core/geometry';
+import { type Placement, getSpot } from '../core/placement';
+import type { SceneDef } from '../core/scene';
+import { costumePatternDef } from './sceneView';
+
+const LINE = '#4A3A40';
+const path = (pts: Pt[]) => 'M' + pts.map((p) => `${r1(p.x)} ${r1(p.y)}`).join(' L') + 'Z';
+
+function knitDef(id: string, bg: string, fg: string): string {
+  return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="9" height="8"><rect width="9" height="8" fill="${bg}"/><path d="M0.8 0.8 L4.5 6.6 L8.2 0.8" fill="none" stroke="${fg}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></pattern>`;
+}
+
+function stitchOverlayDef(id: string): string {
+  return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="9" height="8"><path d="M0.8 0.8 L4.5 6.6 L8.2 0.8" fill="none" stroke="${LINE}" stroke-opacity="0.13" stroke-width="1.3" stroke-linecap="round"/></pattern>`;
+}
+
+/** 左上から光が当たる立体感（どの色の上にも重ねられる） */
+function shadeDef(id: string, camo = false): string {
+  // 背景の柄のときは陰影を弱くする（灰色に浮いて見えないように）
+  const hi = camo ? 0.2 : 0.38;
+  const lo = camo ? 0.07 : 0.22;
+  return `<radialGradient id="${id}" cx="0.3" cy="0.22" r="0.95"><stop offset="0" stop-color="#FFFFFF" stop-opacity="${hi}"/><stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#4A3A40" stop-opacity="${lo}"/></radialGradient>`;
+}
+
+function camoFill(scene: SceneDef, pl: Placement, kind: 'hat' | 'umbrella', id: string): string | null {
+  const spot = getSpot(scene, pl.spot);
+  const fit = accessoryFits(scene, spot, pl.char, kind, 'camo');
+  if (!fit.region) return null;
+  const costume = scene.regions.find((r) => r.id === fit.region)?.costume;
+  if (!costume) return null;
+  return costumePatternDef(id, scene, { ...pl, costume }, spot);
+}
+
+export interface AccArt {
+  /** キャラクターより後ろ（傘） */
+  behind: string;
+  /** キャラクターより前（帽子） */
+  front: string;
+}
+
+/** ローカル座標の帽子・傘。id は prefix から作る（同じ画面で重ならない） */
+export function accessoryArt(scene: SceneDef, pl: Placement, prefix: string, outline: number): AccArt {
+  const acc: Accessories | undefined = pl.acc;
+  if (!acc) return { behind: '', front: '' };
+  const tone = HAT_COLORS[(acc.tone ?? 0) % HAT_COLORS.length];
+  let behind = '';
+  let front = '';
+  // camo のふち線は服と同じ濃さ（溶け込ませる）。色つきははっきり
+  const camoLine = Math.max(0.25, outline);
+
+  if (acc.umbrella) {
+    const fid = `${prefix}-umb`;
+    const sid = `${prefix}-umbs`;
+    const camo = acc.umbrella === 'camo' ? camoFill(scene, pl, 'umbrella', fid) : null;
+    const defs = (camo ?? `<pattern id="${fid}" patternUnits="userSpaceOnUse" width="10" height="10"><rect width="10" height="10" fill="${tone[0]}"/></pattern>`) + shadeDef(sid, !!camo);
+    const lo = camo ? camoLine : 1;
+    const apex = { x: -6, y: -322 };
+    const ribs = [-67, -6, 55]
+      .map((x) => `<path d="M${apex.x} ${apex.y} Q${r1((apex.x + x) / 2 + (x - apex.x) * 0.18)} -280 ${x} -232" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo * 0.45)}" stroke-width="2.2" stroke-linecap="round"/>`)
+      .join('');
+    behind =
+      `<g class="acc acc-umbrella"><defs>${defs}</defs>` +
+      // 柄（手の中へ）
+      `<path d="M${UMBRELLA_SHAFT.x} ${UMBRELLA_SHAFT.y0} V${UMBRELLA_SHAFT.y1}" stroke="${LINE}" stroke-width="7" stroke-linecap="round"/>` +
+      `<path d="M${UMBRELLA_SHAFT.x} ${UMBRELLA_SHAFT.y0} V${UMBRELLA_SHAFT.y1}" stroke="#B58C69" stroke-width="3.4" stroke-linecap="round"/>` +
+      `<path d="${path(UMBRELLA_CANOPY)}" fill="url(#${fid})"/>` +
+      `<path d="${path(UMBRELLA_CANOPY)}" fill="url(#${sid})"/>` +
+      ribs +
+      `<path d="${path(UMBRELLA_CANOPY)}" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo)}" stroke-width="3.6" stroke-linejoin="round"/>` +
+      `<circle cx="${apex.x}" cy="${apex.y - 5}" r="5" fill="#B58C69" stroke="${LINE}" stroke-opacity="${r1(lo)}" stroke-width="2.4"/>` +
+      `</g>`;
+  }
+
+  if (acc.hat) {
+    const fid = `${prefix}-hat`;
+    const sid = `${prefix}-hats`;
+    const kid = `${prefix}-hatk`;
+    const camo = acc.hat === 'camo' ? camoFill(scene, pl, 'hat', fid) : null;
+    const defs = (camo ? camo + stitchOverlayDef(kid) : knitDef(fid, tone[0], tone[1])) + shadeDef(sid, !!camo);
+    const lo = camo ? camoLine : 1;
+    const band = `M-56 -160 Q0 -149 56 -160 L57 -178 Q0 -168 -57 -178Z`;
+    const ribs = Array.from({ length: 13 }, (_, k) => {
+      const x = -48 + k * 8;
+      const y0 = -175 + Math.abs(x) * 0.06 + (1 - (x / 56) ** 2) * 6;
+      return `<path d="M${x} ${r1(y0 + 1)} V${r1(y0 + 15)}" stroke="${LINE}" stroke-opacity="${r1(lo * 0.22)}" stroke-width="1.6" stroke-linecap="round"/>`;
+    }).join('');
+    const { cx, cy, r } = HAT_POMPOM;
+    const fluff = Array.from({ length: 10 }, (_, k) => {
+      const a = (k / 10) * Math.PI * 2;
+      return `<circle cx="${r1(cx + Math.cos(a) * r * 0.82)}" cy="${r1(cy + Math.sin(a) * r * 0.82)}" r="${r1(r * 0.42)}" fill="url(#${fid})"/>`;
+    }).join('');
+    front =
+      `<g class="acc acc-hat"><defs>${defs}</defs>` +
+      `<path d="${path(HAT_POLY)}" fill="url(#${fid})"/>` +
+      (camo ? `<path d="${path(HAT_POLY)}" fill="url(#${kid})"/>` : '') +
+      `<path d="${path(HAT_POLY)}" fill="url(#${sid})"/>` +
+      `<path d="${band}" fill="url(#${fid})"/>` +
+      ribs +
+      `<path d="${band}" fill="url(#${sid})" opacity="0.7"/>` +
+      `<path d="${path(HAT_POLY)}" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo)}" stroke-width="3.4" stroke-linejoin="round"/>` +
+      `<path d="M-57 -178 Q0 -168 57 -178" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo * 0.6)}" stroke-width="2.4"/>` +
+      // ぼんぼり
+      `<g>${fluff}<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${fid})"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${sid})"/>` +
+      `<circle cx="${cx}" cy="${cy}" r="${r + 2}" fill="none" stroke="${LINE}" stroke-opacity="${r1(lo * 0.8)}" stroke-width="2.6" stroke-dasharray="5 3"/></g>` +
+      `</g>`;
+  }
+  return { behind, front };
+}
+?? video/hide-handoff-find.webm
+1:// 画面の流れと入力。ゲームの判定は core、保存は storage に任せる。
+32:import { COURSES, FINDS_PER_COURSE, courseDef, courseRound, courseScene } from '../core/courses';
+33:import { COURSE_COUNT } from '../storage/schema';
+35:import type { Store } from '../storage/storage';
+36:import { record } from '../storage/playtest';
+40:import { ParentArea } from './parent';
+52:  | 'courseSelect'
+68:  private parent: ParentArea;
+81:  private courseNo = 1;
+82:  private courseRoundIdx = 0;
+84:  private courseJustCleared = false;
+85:  private afterTutorial: 'search' | 'course' = 'search';
+91:    this.parent = new ParentArea(
+106:        this.parent.close();
+108:        this.saveResume();
+136:    if (!this.parent.isOpen()) {
+174:      case 'courseSelect':
+175:        return this.courseSelectHtml();
+193:        ${btn('toCourse', ICONS.course, 'コースで あそぶ', 'big primary', 'data-autofocus')}
+200:      ${btn('parent', ICONS.parent, 'おとなの かたへ', 'small parent-btn')}
+225:  private courseSelectHtml(): string {
+226:    const p = this.store.data.course;
+237:      return `<button type="button" class="course-tile${cleared ? ' cleared' : ''}${open ? '' : ' locked'}${c.no === next && !cleared ? ' next' : ''}" data-action="pickCourse" data-course="${c.no}" aria-label="${label}" ${open ? '' : 'disabled'}${c.no === next ? ' data-autofocus' : ''}><span class="num">${c.no}</span>${badge}${courseMark(c.no)}${pips}</button>`;
+239:    return `<main class="screen setup course-select" data-screen="courseSelect">
+241:      <div class="course-grid">${tiles}</div>
+246:  private courseProgressHtml(): string {
+247:    const n = this.courseFindsShown();
+248:    return `<div class="course-progress" role="status" aria-label="コース${this.courseNo} ${n}/${FINDS_PER_COURSE}"><span class="course-no">${this.courseNo}</span>${Array.from({ length: FINDS_PER_COURSE }, (_, k) => `<i class="pip${k < n ? ' on' : ''}"></i>`).join('')}</div>`;
+251:  private courseFindsShown(): number {
+252:    return this.courseJustCleared ? FINDS_PER_COURSE : this.store.data.course.finds;
+291:      ${s.origin === 'course' ? this.courseProgressHtml() : ''}
+293:      ${done ? (s.origin === 'course' ? this.courseClearHtml() : this.clearHtml()) : ''}
+304:      outline: s.origin === 'course' ? courseDef(this.courseNo).outline : OUTLINE[s.difficulty],
+326:  private courseClearHtml(): string {
+329:    if (this.courseJustCleared) {
+330:      const last = this.courseNo >= COURSE_COUNT;
+331:      return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="コース${this.courseNo} クリア">
+333:          <div class="medal" aria-hidden="true">${ICONS.star}<span>${this.courseNo}</span></div>
+334:          <p class="clear-title">コース${this.courseNo} クリア！</p>
+337:            ${last ? btn('toCourse', ICONS.course, 'コースを えらぶ', 'equal', 'data-autofocus') : btn('nextCourse', ICONS.next, 'つぎの コース', 'equal primary', 'data-autofocus')}
+489:        this.courseJustCleared = false;
+490:        this.go('courseSelect');
+493:        this.startCourse(Number(el.dataset.course));
+499:        this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
+509:      case 'parent':
+510:        this.parent.openGate(el);
+513:        this.saveResume();
+530:        this.go(this.afterTutorial === 'course' ? 'courseSelect' : 'searchSetup');
+542:        if (this.afterTutorial === 'course') this.startCourseRound();
+639:    this.saveResume();
+644:    const p = this.store.data.course;
+647:    this.courseNo = no;
+648:    this.courseRoundIdx = 0;
+649:    this.courseJustCleared = false;
+653:        d.course.current = no;
+654:        d.course.finds = 0;
+657:    this.afterTutorial = 'course';
+663:    if (this.courseJustCleared) return this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
+665:    const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids)];
+666:    const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
+668:    const placements = courseRound(scene, this.courseNo, remaining, seed);
+669:    const c = courseDef(this.courseNo);
+670:    this.session = newSession(scene.id, c.variant === 'exact' ? 'normal' : 'easy', placements, 'course', Date.now());
+677:    const no = this.courseNo;
+680:      if (d.course.current !== no) {
+681:        d.course.current = no;
+682:        d.course.finds = 0;
+684:      d.course.finds += 1;
+685:      if (d.course.finds >= FINDS_PER_COURSE) {
+686:        d.course.cleared = Math.max(d.course.cleared, no);
+687:        d.course.current = Math.min(COURSE_COUNT, no + 1);
+688:        d.course.finds = 0;
+692:    if (cleared) this.courseJustCleared = true;
+741:    this.saveResume();
+768:  private saveResume(): void {
+771:    if (!s || isComplete(s) || s.origin === 'course') return;
+847:    if (this.session.origin === 'course') this.onCourseFind();
+863:      this.saveResume();
+882:    const cp = this.root.querySelector<HTMLElement>('.course-progress');
+883:    if (cp && s.origin === 'course') cp.outerHTML = this.courseProgressHtml();
+1082:function courseMark(no: number): string {
+1083:  const c = courseDef(no);
+
+codex
+服の陰影を50%、ふち線を0.25、傘なしとし、優先帯の中で最大3人を置く仕様にまとめます。へやで3人が入らない場合は人数を減らす方針です。ジョブの「1ファイルだけ」を優先し、STATUS.md は更新しません。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 src/core/accessories.ts | Select-Object -Skip 70 -First 90; Get-Content -Encoding UTF8 src/core/placement.ts | Select-Object -Skip 78 -First 65; Get-Content -Encoding UTF8 src/ui/app.ts | Select-Object -Skip 820 -First 50; Get-Content -Encoding UTF8 src/storage/playtest.ts | Select-Object -First 100; Get-Content -Encoding UTF8 src/core/characters.ts | Select-Object -Skip 150 -First 25' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 268ms:
+export interface AccFit {
+  ok: boolean;
+  /** 迷彩に使う領域（camo のとき） */
+  region: string | null;
+  problems: string[];
+}
+
+/**
+ * その隠れ場所で身につけ物が使えるか。
+ * 画面の内側に収まること・顔を隠さないこと。camo なら、うしろの 7 割以上が同じ柄の領域であること。
+ */
+export function accessoryFits(scene: SceneDef, spot: SpotDef, char: CharacterId, kind: 'hat' | 'umbrella', style: AccStyle): AccFit {
+  const t = { tx: spot.x, ty: spot.y, s: spot.s };
+  const shapes = (kind === 'hat' ? hatShapes() : umbrellaShapes()).map((s) => transformShape(t, s));
+  const problems: string[] = [];
+  const b = unionBBox(shapes.map(bbox));
+  const m = 6;
+  if (b.x0 < m || b.y0 < m || b.x1 > SCENE_SIZE - m || b.y1 > SCENE_SIZE - m) problems.push('out of bounds');
+  const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
+  if (face.some((p) => shapes.some((s) => contains(s, p)))) problems.push('covers face');
+  let region: string | null = null;
+  if (style === 'camo') {
+    const anchor = transformPt(t, kind === 'hat' ? HAT_ANCHOR : UMBRELLA_ANCHOR);
+    region = regionAt(scene, anchor);
+    const pts = shapes.flatMap((s) => samplePoints(s, 8));
+    const match = region === null || pts.length === 0 ? 0 : pts.filter((p) => regionAt(scene, p) === region).length / pts.length;
+    if (match < 0.7) problems.push(`camo match ${match.toFixed(2)}`);
+  }
+  // ほかの隠れ場所の小物（手前に描かれる）と重なると、奥にある物が傘の上に乗って見えるので使わない
+  const others = scene.spots.filter((sp) => sp.id !== spot.id);
+  const pts = shapes.flatMap((s) => samplePoints(s, 8));
+  if (pts.some((p) => others.some((o) => o.prop.shapes.some((s) => contains(s, p))))) problems.push('under another prop');
+  return { ok: problems.length === 0, region, problems };
+}
+
+export interface SpotReport {
+  spot: string;
+  char: CharacterId;
+  visible: number;
+  bodyVisible: number;
+  faceVisible: boolean;
+  inBounds: boolean;
+  height: number;
+  regionMatch: number;
+  ok: boolean;
+  problems: string[];
+}
+
+export function analyzeSpot(scene: SceneDef, spot: SpotDef, char: CharacterId): SpotReport {
+  const t = spotTransform(spot);
+  const shapes = silhouetteWorld(char, spot);
+  // 重なりを数えないよう、全形状のサンプル点を一意化
+  const seen = new Set<string>();
+  const pts: Pt[] = [];
+  for (const s of shapes) {
+    for (const p of samplePoints(s, STEP)) {
+      const k = `${Math.round(p.x)}:${Math.round(p.y)}`;
+      if (!seen.has(k)) {
+        seen.add(k);
+        pts.push(p);
+      }
+    }
+  }
+  const visiblePts = pts.filter((p) => !occluded(scene, p));
+  const body = samplePoints(transformShape(t, BODY), STEP);
+  const bodyVis = body.filter((p) => !occluded(scene, p));
+  const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
+  const faceVisible = face.every((p) => !occluded(scene, p));
+  const b = unionBBox(shapes.map(bbox));
+  const m = LIMITS.margin;
+  const inBounds = b.x0 >= m && b.y0 >= m && b.x1 <= SCENE_SIZE - m && b.y1 <= SCENE_SIZE - m;
+  const regionMatch = bodyVis.length === 0 ? 0 : bodyVis.filter((p) => regionAt(scene, p) === spot.region).length / bodyVis.length;
+  const visible = visiblePts.length / pts.length;
+  const bodyVisible = bodyVis.length / body.length;
+  const height = b.y1 - b.y0;
+  const problems: string[] = [];
+  if (visible < LIMITS.minVisible) problems.push(`visible ${visible.toFixed(2)} < ${LIMITS.minVisible}`);
+  if (bodyVisible > LIMITS.maxBodyVisible) problems.push(`bodyVisible ${bodyVisible.toFixed(2)} > ${LIMITS.maxBodyVisible}`);
+  if (bodyVisible < LIMITS.minBodyVisible) problems.push(`bodyVisible ${bodyVisible.toFixed(2)} < ${LIMITS.minBodyVisible}`);
+  if (!faceVisible) problems.push('face hidden');
+  if (!inBounds) problems.push('out of bounds');
+  if (height < LIMITS.minHeight) problems.push(`height ${height.toFixed(0)} < ${LIMITS.minHeight}`);
+  if (regionMatch < LIMITS.minRegionMatch) problems.push(`regionMatch ${regionMatch.toFixed(2)} < ${LIMITS.minRegionMatch}`);
+  return { spot: spot.id, char, visible, bodyVisible, faceVisible, inBounds, height, regionMatch, ok: problems.length === 0, problems };
+}
+
+export function spotsConflict(a: SpotDef, b: SpotDef): boolean {
+  return a.id === b.id || bboxOverlap(spotBBox(a), spotBBox(b), LIMITS.gap);
+}
+
+export function getSpot(scene: SceneDef, id: string): SpotDef {
+  const s = scene.spots.find((sp) => sp.id === id);
+  if (!s) throw new Error(`unknown spot ${id}`);
+  return s;
+}
+
+export function costumeForRegion(scene: SceneDef, region: string): string {
+  const r = scene.regions.find((x) => x.id === region);
+  if (!r) throw new Error(`unknown region ${region}`);
+  private refreshStage(): void {
+    if (this.screen !== 'play' || !this.session) return;
+    const stage = this.root.querySelector<HTMLElement>('#stage');
+    if (!stage) return;
+    stage.innerHTML = this.playSvg();
+    this.decorateStage();
+  }
+
+  private onPlayPointer(e: PointerEvent): void {
+    if (!e.isPrimary || !this.session || isComplete(this.session)) return;
+    const now = performance.now();
+    if (now - this.lastTap < TAP_DEBOUNCE_MS) return;
+    this.lastTap = now;
+    const svg = this.stageSvg();
+    if (!svg) return;
+    const p = toScene(svg, e.clientX, e.clientY);
+    if (!p) return;
+    const scene = SCENES[this.session.sceneId];
+    const r = tap(scene, this.session, p);
+    if (r.foundIndex < 0) {
+      this.ripple(e.clientX, e.clientY);
+      return;
+    }
+    this.session = r.session;
+    this.justFound = r.foundIndex;
+    play('found');
+    if (this.session.origin === 'course') this.onCourseFind();
+    if (isComplete(this.session)) {
+      record(this.store, { type: 'searchCompleted', durationMs: Date.now() - this.session.startedAt });
+      this.clearResume();
+      const delay = prefersReducedMotion() ? 300 : 1300;
+      this.refreshStage();
+      this.updateTargets();
+      const s = this.session;
+      window.setTimeout(() => {
+        if (this.session === s && this.screen === 'play') {
+          play('clear');
+          this.navLockUntil = performance.now() + 400;
+          this.render();
+        }
+      }, delay);
+    } else {
+      this.saveResume();
+      this.refreshStage();
+      this.updateTargets();
+    }
+  }
+
+  private updateTargets(): void {
+    const s = this.session;
+// 試遊用の最小集計。既定OFF。端末外へは送らない（送信処理そのものが無い）。
+import type { Store } from './storage';
+import { COUNTER_MAX, type PlaytestCounters, emptyCounters } from './schema';
+
+export type PlaytestEvent =
+  | { type: 'searchStarted' }
+  | { type: 'searchCompleted'; durationMs: number }
+  | { type: 'hint' }
+  | { type: 'hideRound' };
+
+export function record(store: Store, ev: PlaytestEvent): void {
+  if (!store.data.playtest.enabled) return;
+  store.update((d) => {
+    const c = d.playtest.counters;
+    const inc = (k: keyof PlaytestCounters) => {
+      c[k] = Math.min(COUNTER_MAX, c[k] + 1);
+    };
+    switch (ev.type) {
+      case 'searchStarted':
+        inc('searchStarted');
+        break;
+      case 'searchCompleted':
+        inc('searchCompleted');
+        if (ev.durationMs < 60_000) inc('durationUnder1m');
+        else if (ev.durationMs < 180_000) inc('duration1to3m');
+        else inc('durationOver3m');
+        break;
+      case 'hint':
+        inc('hintsUsed');
+        break;
+      case 'hideRound':
+        inc('hideRounds');
+        break;
+    }
+  });
+}
+
+export function setEnabled(store: Store, enabled: boolean): void {
+  store.update((d) => {
+    d.playtest.enabled = enabled;
+    // OFF に戻したら集計も消す
+    if (!enabled) d.playtest.counters = emptyCounters();
+  });
+}
+
+export function resetCounters(store: Store): void {
+  store.update((d) => {
+    d.playtest.counters = emptyCounters();
+  });
+}
+  /** 服のふちの濃さ。0 にはしない（不可視にしない） */
+  outline: number;
+  /** 見つかった（手をふる） */
+  found?: boolean;
+}
+
+/** キャラクター本体（ローカル座標）。服の柄は fillId で受け取る。 */
+export function characterMarkup(c: CharacterDef, o: DrawOpts): string {
+  const outline = Math.max(0.25, o.outline);
+  const body =
+    `<ellipse cx="-24" cy="2" rx="17" ry="8" fill="#6B5B60"/><ellipse cx="24" cy="2" rx="17" ry="8" fill="#6B5B60"/>` +
+    shapeToSvg(BODY, `class="clothes" fill="url(#${o.fillId})" stroke="${LINE}" stroke-opacity="${outline}" stroke-width="3.5" stroke-linejoin="round"`) +
+    // えり（服の上に少しだけ顔の色をのぞかせる）
+    `<path d="M-22 -98 Q0 -84 22 -98" fill="none" stroke="${LINE}" stroke-opacity="${outline}" stroke-width="3"/>`;
+  const hands = o.found
+    ? `<circle cx="-50" cy="-46" r="11" fill="${c.skin}" stroke="${LINE}" stroke-width="3"/>` +
+      `<g class="wave"><path d="M40 -80 Q60 -100 64 -124" stroke="${LINE}" stroke-width="15" stroke-linecap="round" fill="none"/><path d="M40 -80 Q60 -100 64 -124" stroke="${c.skin}" stroke-width="9" stroke-linecap="round" fill="none"/><circle cx="64" cy="-128" r="12" fill="${c.skin}" stroke="${LINE}" stroke-width="3"/></g>`
+    : `<circle cx="-50" cy="-46" r="11" fill="${c.skin}" stroke="${LINE}" stroke-width="3"/><circle cx="50" cy="-46" r="11" fill="${c.skin}" stroke="${LINE}" stroke-width="3"/>`;
+  return `<g class="char-body">${body}${hands}</g><g class="char-head">${headMarkup(c)}</g>`;
+}
+
+/** 探す対象の表示用（顔だけ） */
+export function faceIconMarkup(c: CharacterDef): string {
+  return `<svg viewBox="-70 -215 140 120" aria-hidden="true" focusable="false">${headMarkup(c)}</svg>`;
+}
+
+apply patch
+patch: completed
+C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\audit\codex\hardest-course-r2.md
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r2.md b/pattern-hide-family-beta/audit/codex/hardest-course-r2.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd211b6a27742fc84e1548ed3489e4b35b9209b5
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r2.md
+@@ -0,0 +1,54 @@
++# 最難関コース・第2回：成人の試遊用仕様
++
++2026-10-08／ジョブ92。**優先帯の中で最大3人、服の陰影50%、ふち線0.25、傘なし**の1コースに確定する。通常1〜10とは別の試遊とし、10人発見で終了する。難度への効き目は仮説であり、今回の仕様確定は試遊での実証ではない。
++
++## 確定する1行
++
++以下は設計値。新項目は現行の `CourseDef` には未実装。
++
++| spots | variant | outline | maxChars と人数方針 | hat | umbrella | 新しい項目 |
++| --- | --- | --- | --- | --- | --- | --- |
++| `all` | `exact` | `0.25` | `3`／優先帯で置ける最大人数、残り人数で切り詰める | `{ rate: 1, style: 'camo' }`／適合時のみ | `null`（装着率0） | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible-in-band'`, `clothesShadeOpacity: 0.5`, `decoyCount: 0` |
++
++- **陰影50%に賛成。** 現行 `src/ui/charArt.ts` は服の陰影を乗算で重ね、outlineでは弱まらない。陰影画像だけに opacity=0.5 を掛け、元画像の透過と乗算は維持する。服の丸い明暗を弱める効果が見込める一方、立体感・布の質感が薄くなる。顔・手・足・帽子やキャラ全体のopacityは変えない。通常モードと対象一覧の既定値は1。コード描画には対応する陰影層がないので、代わりに全体を薄くしない。
++- **傘は0に決定。** 軸を7→4にしても布の輪郭・骨・大きな当たり判定が残る。今回は傘も軸も描画・判定に出さず、軸用の新設定は作らない。通常コースの軸は現行の外線7・内線3.4、色も維持する。
++- **人数は最大3人を採用。** 最後の1人まで探す体験を選ぶ。ただし難しい配置を優先し、3人にするため帯外の見つけやすい場所を混ぜない。1人固定の別コースは作らない。
++- outline=0.25は成人用の試行値として採用する。試遊で境界が不自然・見づらい場合の次の修正値は0.28とし、今回の画面に比較切替は設けない。顔の色・線・大きさ、無制限ヒント、減点なし、時間制限なしを維持する。静止ヒントは追加せず、現行の円→揺れ→輪郭を使う。
++
++## hard-ranked の選び方
++
++1. `all` の場所×3体を `analyzeSpot` で評価し、`ok` の候補だけを残す。そのうち `regionMatch >= 0.90`、`0.25 <= bodyVisible <= 0.40`、`visible >= 0.50` を優先帯とする。丸めた表示値で判定しない。顔・高さ170・余白6・間隔4など既存の安全条件は維持する。
++2. 希望人数は `min(3, remaining)`（remaining=0なら出題しない）。優先帯だけで、キャラと場所が重複せず `spotsConflict` のない組合せを希望人数から1人まで探索する。キャラを先に固定せず、3体の割当ても調べる。最初に見つかった場所を採用する貪欲法にはしない。
++3. 同人数の組合せでは、服の一致率の合計が高い順、服可視率の合計が低い順、次に背景一致90%以上の安全な帽子を付けられる人数が多い順に選ぶ。残る同点だけシードで決める。帽子の一致率は `accessoryFits` と同じ領域・サンプリングで算出し、判定と選別で共有する。
++4. 帽子あり／なしも探索する。帽子は既存の適合条件（一致70%以上を含む）を満たし、他の本体・顔・帽子と間隔4を保てる場合だけ付ける。90%以上を優先し、同じ本体配置なら安全に付けられる帽子数が多い方を次の順位とする。帽子のために本体の優先順位や人数を落とさない。rate=1は全員装着の保証ではない。
++5. **へやで3人が無理なら優先帯の2人、次に1人。** 帯内1人も成立しない場合だけ、安全なall全体で同じ探索をやり直す。安全な1人もなければ空の探索画面に進まず、試遊できない表示と保護者画面への戻り口を出す。安全条件は緩めない。
++
++提示された実測「へや4・にわ6・みせ8、計18か所」により、優先帯を使う方針は成立すると判断する。ただし全体可視率・顔はキャラ別に再判定し、3人同時配置の成立とは区別する。へやの最大人数は組合せ検証で確定する。**帽子は「9か所」と列挙された10か所が不一致**なので、実装時にキャラ別に再集計する。この記載から装着率や一致90%以上の成立は推定しない。
++
++## 「ためす」入口と終了
++
++- 既存の保護者ゲートを通った画面に「最難関を ためす」。未解放でも開始でき、「大人向けのおためし・10人みつけたらおしまい・進み具合は保存しません」と説明する。コース11として通常一覧へ追加しない。
++- 独立した試遊セッションに `finds=0`、出題番号、シード、発見済み状態を保持する。背景はへや→にわ→みせの順で画面ごとに回す。新しい1人の発見で一度だけ加算し、発見済みの押し直しでは増やさない。画面の全員を見つけたら次へ進み、残り `10-finds` で人数を制限する。
++- 表示は「おためし n/10」。10人で「10にん みつけた！ おためし おしまい」と「もういちど」「保護者の画面へ」を出す。次コース・解放・成績順位は出さない。途中にも終了操作を置き、退出・再読込で試遊状態を破棄、再開は0からとする。
++- 試遊の開始・発見・ヒント・完了・退出で通常進捗や再開データを保存／消去しない。現行 `app.ts` の完了時には共通の `record()` と `clearResume()` があるため、通常コースの加算を止めるだけでは不十分。保存型の試遊集計がONでも、この試遊のイベントは書き込まない。独立したモードとして保存処理から分離する。
++
++## Claudeが実装後に行う検証
++
++- **配置の自動テスト：** 3背景×100シード×remaining 1〜10。非空、人数が残り以下かつ3以下、ID重複なし、`validateLayout` 合格、小物と本体・顔・小物の交差なし、傘0、同一入力で同一結果。別途組合せを列挙する検証で、帯内の最大人数・同人数の順位を照合する。3人不可→2人、2人不可→1人、帯なし→安全all、全候補不適合→出題停止、remaining=0→出題なしを個別条件として試す。実人数・帯外代替・帽子数と一致率を背景別に検証ログへ残す。
++- **描画・回帰テスト：** 試遊の陰影層0.5、服の線0.25、傘の描画／判定なし、顔層の透過不変を確認する。陰影画像なし・コード描画でも正常に表示する。通常1〜10と対象一覧の描画値、配置方針は従来どおりであることを確認する。
++- **操作・保存のE2E：** 未解放から入口へ進めること、10人ちょうどで終了、連打で二重加算なし、最後の端数、再試行0、途中退出・再読込を確認する。通常進捗と再開データあり／なし、保存集計ON／OFFで、試遊前後の保存内容が不変であること。ヒントを繰り返して最終輪郭から全員発見でき、動きを減らす設定でも完了できることを確認する。
++- **画像の目視確認：** 320×568、390×844、768×1024で、3体・3背景・実際に選ばれる帽子を確認する。目口全体が見える、顔を押せる、薄い服にも質感が残る、対象一覧とヒントが読めること。顔の3判定点が通る自動テストだけで目口全体の保護を保証しない。
++
++本人の試遊で見てほしい点は次の3つに絞る。
++
++1. 何が発見の手がかりだったか（顔・帽子・服の陰影）。服が薄くなっても絵として自然か。
++2. 最後の1人を探す楽しさがあるか、同じ場所を覚えるだけ／人数分の作業になっていないか。
++3. 詰まったときヒントで納得して発見・タップできるか。押しにくさを難しさと取り違えていないか。
++
++## 残る反対・作業記録
++
++3人を確保するために優先帯を崩す案と、傘の軸を細くするだけで最難関化とみなす案には反対する。陰影が「最大の手がかり」かは未確認だが、今回50%を試すことには賛成する。大人に簡単でも顔を隠す方向には進めない。
++
++- 実施・方法：AGENTS.md、ジョブ92、第1回、ART_SLOTS.md、CODEX_ART_BRIEF.md、および配置・コース・小物・描画・保存呼出し周辺のソースを静的レビューし、この仕様書を作成した。画像生成・外部検索・有料APIは使用していない。
++- 検査結果：要求項目と仕様の整合を文書点検した。候補数はClaude提供の実測を採用し、独立した再計測はしていない。実装・実機試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。
++- 書込みは本ファイルのみ。ジョブ92とユーザーの限定を優先してSTATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時からある未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r2.md b/pattern-hide-family-beta/audit/codex/hardest-course-r2.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd211b6a27742fc84e1548ed3489e4b35b9209b5
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r2.md
+@@ -0,0 +1,54 @@
++# 最難関コース・第2回：成人の試遊用仕様
++
++2026-10-08／ジョブ92。**優先帯の中で最大3人、服の陰影50%、ふち線0.25、傘なし**の1コースに確定する。通常1〜10とは別の試遊とし、10人発見で終了する。難度への効き目は仮説であり、今回の仕様確定は試遊での実証ではない。
++
++## 確定する1行
++
++以下は設計値。新項目は現行の `CourseDef` には未実装。
++
++| spots | variant | outline | maxChars と人数方針 | hat | umbrella | 新しい項目 |
++| --- | --- | --- | --- | --- | --- | --- |
++| `all` | `exact` | `0.25` | `3`／優先帯で置ける最大人数、残り人数で切り詰める | `{ rate: 1, style: 'camo' }`／適合時のみ | `null`（装着率0） | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible-in-band'`, `clothesShadeOpacity: 0.5`, `decoyCount: 0` |
++
++- **陰影50%に賛成。** 現行 `src/ui/charArt.ts` は服の陰影を乗算で重ね、outlineでは弱まらない。陰影画像だけに opacity=0.5 を掛け、元画像の透過と乗算は維持する。服の丸い明暗を弱める効果が見込める一方、立体感・布の質感が薄くなる。顔・手・足・帽子やキャラ全体のopacityは変えない。通常モードと対象一覧の既定値は1。コード描画には対応する陰影層がないので、代わりに全体を薄くしない。
++- **傘は0に決定。** 軸を7→4にしても布の輪郭・骨・大きな当たり判定が残る。今回は傘も軸も描画・判定に出さず、軸用の新設定は作らない。通常コースの軸は現行の外線7・内線3.4、色も維持する。
++- **人数は最大3人を採用。** 最後の1人まで探す体験を選ぶ。ただし難しい配置を優先し、3人にするため帯外の見つけやすい場所を混ぜない。1人固定の別コースは作らない。
++- outline=0.25は成人用の試行値として採用する。試遊で境界が不自然・見づらい場合の次の修正値は0.28とし、今回の画面に比較切替は設けない。顔の色・線・大きさ、無制限ヒント、減点なし、時間制限なしを維持する。静止ヒントは追加せず、現行の円→揺れ→輪郭を使う。
++
++## hard-ranked の選び方
++
++1. `all` の場所×3体を `analyzeSpot` で評価し、`ok` の候補だけを残す。そのうち `regionMatch >= 0.90`、`0.25 <= bodyVisible <= 0.40`、`visible >= 0.50` を優先帯とする。丸めた表示値で判定しない。顔・高さ170・余白6・間隔4など既存の安全条件は維持する。
++2. 希望人数は `min(3, remaining)`（remaining=0なら出題しない）。優先帯だけで、キャラと場所が重複せず `spotsConflict` のない組合せを希望人数から1人まで探索する。キャラを先に固定せず、3体の割当ても調べる。最初に見つかった場所を採用する貪欲法にはしない。
++3. 同人数の組合せでは、服の一致率の合計が高い順、服可視率の合計が低い順、次に背景一致90%以上の安全な帽子を付けられる人数が多い順に選ぶ。残る同点だけシードで決める。帽子の一致率は `accessoryFits` と同じ領域・サンプリングで算出し、判定と選別で共有する。
++4. 帽子あり／なしも探索する。帽子は既存の適合条件（一致70%以上を含む）を満たし、他の本体・顔・帽子と間隔4を保てる場合だけ付ける。90%以上を優先し、同じ本体配置なら安全に付けられる帽子数が多い方を次の順位とする。帽子のために本体の優先順位や人数を落とさない。rate=1は全員装着の保証ではない。
++5. **へやで3人が無理なら優先帯の2人、次に1人。** 帯内1人も成立しない場合だけ、安全なall全体で同じ探索をやり直す。安全な1人もなければ空の探索画面に進まず、試遊できない表示と保護者画面への戻り口を出す。安全条件は緩めない。
++
++提示された実測「へや4・にわ6・みせ8、計18か所」により、優先帯を使う方針は成立すると判断する。ただし全体可視率・顔はキャラ別に再判定し、3人同時配置の成立とは区別する。へやの最大人数は組合せ検証で確定する。**帽子は「9か所」と列挙された10か所が不一致**なので、実装時にキャラ別に再集計する。この記載から装着率や一致90%以上の成立は推定しない。
++
++## 「ためす」入口と終了
++
++- 既存の保護者ゲートを通った画面に「最難関を ためす」。未解放でも開始でき、「大人向けのおためし・10人みつけたらおしまい・進み具合は保存しません」と説明する。コース11として通常一覧へ追加しない。
++- 独立した試遊セッションに `finds=0`、出題番号、シード、発見済み状態を保持する。背景はへや→にわ→みせの順で画面ごとに回す。新しい1人の発見で一度だけ加算し、発見済みの押し直しでは増やさない。画面の全員を見つけたら次へ進み、残り `10-finds` で人数を制限する。
++- 表示は「おためし n/10」。10人で「10にん みつけた！ おためし おしまい」と「もういちど」「保護者の画面へ」を出す。次コース・解放・成績順位は出さない。途中にも終了操作を置き、退出・再読込で試遊状態を破棄、再開は0からとする。
++- 試遊の開始・発見・ヒント・完了・退出で通常進捗や再開データを保存／消去しない。現行 `app.ts` の完了時には共通の `record()` と `clearResume()` があるため、通常コースの加算を止めるだけでは不十分。保存型の試遊集計がONでも、この試遊のイベントは書き込まない。独立したモードとして保存処理から分離する。
++
++## Claudeが実装後に行う検証
++
++- **配置の自動テスト：** 3背景×100シード×remaining 1〜10。非空、人数が残り以下かつ3以下、ID重複なし、`validateLayout` 合格、小物と本体・顔・小物の交差なし、傘0、同一入力で同一結果。別途組合せを列挙する検証で、帯内の最大人数・同人数の順位を照合する。3人不可→2人、2人不可→1人、帯なし→安全all、全候補不適合→出題停止、remaining=0→出題なしを個別条件として試す。実人数・帯外代替・帽子数と一致率を背景別に検証ログへ残す。
++- **描画・回帰テスト：** 試遊の陰影層0.5、服の線0.25、傘の描画／判定なし、顔層の透過不変を確認する。陰影画像なし・コード描画でも正常に表示する。通常1〜10と対象一覧の描画値、配置方針は従来どおりであることを確認する。
++- **操作・保存のE2E：** 未解放から入口へ進めること、10人ちょうどで終了、連打で二重加算なし、最後の端数、再試行0、途中退出・再読込を確認する。通常進捗と再開データあり／なし、保存集計ON／OFFで、試遊前後の保存内容が不変であること。ヒントを繰り返して最終輪郭から全員発見でき、動きを減らす設定でも完了できることを確認する。
++- **画像の目視確認：** 320×568、390×844、768×1024で、3体・3背景・実際に選ばれる帽子を確認する。目口全体が見える、顔を押せる、薄い服にも質感が残る、対象一覧とヒントが読めること。顔の3判定点が通る自動テストだけで目口全体の保護を保証しない。
++
++本人の試遊で見てほしい点は次の3つに絞る。
++
++1. 何が発見の手がかりだったか（顔・帽子・服の陰影）。服が薄くなっても絵として自然か。
++2. 最後の1人を探す楽しさがあるか、同じ場所を覚えるだけ／人数分の作業になっていないか。
++3. 詰まったときヒントで納得して発見・タップできるか。押しにくさを難しさと取り違えていないか。
++
++## 残る反対・作業記録
++
++3人を確保するために優先帯を崩す案と、傘の軸を細くするだけで最難関化とみなす案には反対する。陰影が「最大の手がかり」かは未確認だが、今回50%を試すことには賛成する。大人に簡単でも顔を隠す方向には進めない。
++
++- 実施・方法：AGENTS.md、ジョブ92、第1回、ART_SLOTS.md、CODEX_ART_BRIEF.md、および配置・コース・小物・描画・保存呼出し周辺のソースを静的レビューし、この仕様書を作成した。画像生成・外部検索・有料APIは使用していない。
++- 検査結果：要求項目と仕様の整合を文書点検した。候補数はClaude提供の実測を採用し、独立した再計測はしていない。実装・実機試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。
++- 書込みは本ファイルのみ。ジョブ92とユーザーの限定を優先してSTATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時からある未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short; $r1 = Get-Content -Raw -Encoding UTF8 audit/codex/hardest-course-r1.md; $r2 = Get-Content -Raw -Encoding UTF8 audit/codex/hardest-course-r2.md; [pscustomobject]@{Round1Characters=$r1.Length; Round2Characters=$r2.Length; Round2IsShorter=($r2.Length -lt $r1.Length)}; Get-Content -Encoding UTF8 audit/codex/hardest-course-r2.md | Select-Object -Last 7' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 258ms:
+?? audit/codex/hardest-course-r2.md
+?? video/hide-handoff-find.webm
+
+Round1Characters Round2Characters Round2IsShorter
+---------------- ---------------- ---------------
+           10327             3920            True
+## 残る反対・作業記録
+
+3人を確保するために優先帯を崩す案と、傘の軸を細くするだけで最難関化とみなす案には反対する。陰影が「最大の手がかり」かは未確認だが、今回50%を試すことには賛成する。大人に簡単でも顔を隠す方向には進めない。
+
+- 実施・方法：AGENTS.md、ジョブ92、第1回、ART_SLOTS.md、CODEX_ART_BRIEF.md、および配置・コース・小物・描画・保存呼出し周辺のソースを静的レビューし、この仕様書を作成した。画像生成・外部検索・有料APIは使用していない。
+- 検査結果：要求項目と仕様の整合を文書点検した。候補数はClaude提供の実測を採用し、独立した再計測はしていない。実装・実機試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。
+- 書込みは本ファイルのみ。ジョブ92とユーザーの限定を優先してSTATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時からある未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+
+
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r2.md b/pattern-hide-family-beta/audit/codex/hardest-course-r2.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd211b6a27742fc84e1548ed3489e4b35b9209b5
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r2.md
+@@ -0,0 +1,54 @@
++# 最難関コース・第2回：成人の試遊用仕様
++
++2026-10-08／ジョブ92。**優先帯の中で最大3人、服の陰影50%、ふち線0.25、傘なし**の1コースに確定する。通常1〜10とは別の試遊とし、10人発見で終了する。難度への効き目は仮説であり、今回の仕様確定は試遊での実証ではない。
++
++## 確定する1行
++
++以下は設計値。新項目は現行の `CourseDef` には未実装。
++
++| spots | variant | outline | maxChars と人数方針 | hat | umbrella | 新しい項目 |
++| --- | --- | --- | --- | --- | --- | --- |
++| `all` | `exact` | `0.25` | `3`／優先帯で置ける最大人数、残り人数で切り詰める | `{ rate: 1, style: 'camo' }`／適合時のみ | `null`（装着率0） | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible-in-band'`, `clothesShadeOpacity: 0.5`, `decoyCount: 0` |
++
++- **陰影50%に賛成。** 現行 `src/ui/charArt.ts` は服の陰影を乗算で重ね、outlineでは弱まらない。陰影画像だけに opacity=0.5 を掛け、元画像の透過と乗算は維持する。服の丸い明暗を弱める効果が見込める一方、立体感・布の質感が薄くなる。顔・手・足・帽子やキャラ全体のopacityは変えない。通常モードと対象一覧の既定値は1。コード描画には対応する陰影層がないので、代わりに全体を薄くしない。
++- **傘は0に決定。** 軸を7→4にしても布の輪郭・骨・大きな当たり判定が残る。今回は傘も軸も描画・判定に出さず、軸用の新設定は作らない。通常コースの軸は現行の外線7・内線3.4、色も維持する。
++- **人数は最大3人を採用。** 最後の1人まで探す体験を選ぶ。ただし難しい配置を優先し、3人にするため帯外の見つけやすい場所を混ぜない。1人固定の別コースは作らない。
++- outline=0.25は成人用の試行値として採用する。試遊で境界が不自然・見づらい場合の次の修正値は0.28とし、今回の画面に比較切替は設けない。顔の色・線・大きさ、無制限ヒント、減点なし、時間制限なしを維持する。静止ヒントは追加せず、現行の円→揺れ→輪郭を使う。
++
++## hard-ranked の選び方
++
++1. `all` の場所×3体を `analyzeSpot` で評価し、`ok` の候補だけを残す。そのうち `regionMatch >= 0.90`、`0.25 <= bodyVisible <= 0.40`、`visible >= 0.50` を優先帯とする。丸めた表示値で判定しない。顔・高さ170・余白6・間隔4など既存の安全条件は維持する。
++2. 希望人数は `min(3, remaining)`（remaining=0なら出題しない）。優先帯だけで、キャラと場所が重複せず `spotsConflict` のない組合せを希望人数から1人まで探索する。キャラを先に固定せず、3体の割当ても調べる。最初に見つかった場所を採用する貪欲法にはしない。
++3. 同人数の組合せでは、服の一致率の合計が高い順、服可視率の合計が低い順、次に背景一致90%以上の安全な帽子を付けられる人数が多い順に選ぶ。残る同点だけシードで決める。帽子の一致率は `accessoryFits` と同じ領域・サンプリングで算出し、判定と選別で共有する。
++4. 帽子あり／なしも探索する。帽子は既存の適合条件（一致70%以上を含む）を満たし、他の本体・顔・帽子と間隔4を保てる場合だけ付ける。90%以上を優先し、同じ本体配置なら安全に付けられる帽子数が多い方を次の順位とする。帽子のために本体の優先順位や人数を落とさない。rate=1は全員装着の保証ではない。
++5. **へやで3人が無理なら優先帯の2人、次に1人。** 帯内1人も成立しない場合だけ、安全なall全体で同じ探索をやり直す。安全な1人もなければ空の探索画面に進まず、試遊できない表示と保護者画面への戻り口を出す。安全条件は緩めない。
++
++提示された実測「へや4・にわ6・みせ8、計18か所」により、優先帯を使う方針は成立すると判断する。ただし全体可視率・顔はキャラ別に再判定し、3人同時配置の成立とは区別する。へやの最大人数は組合せ検証で確定する。**帽子は「9か所」と列挙された10か所が不一致**なので、実装時にキャラ別に再集計する。この記載から装着率や一致90%以上の成立は推定しない。
++
++## 「ためす」入口と終了
++
++- 既存の保護者ゲートを通った画面に「最難関を ためす」。未解放でも開始でき、「大人向けのおためし・10人みつけたらおしまい・進み具合は保存しません」と説明する。コース11として通常一覧へ追加しない。
++- 独立した試遊セッションに `finds=0`、出題番号、シード、発見済み状態を保持する。背景はへや→にわ→みせの順で画面ごとに回す。新しい1人の発見で一度だけ加算し、発見済みの押し直しでは増やさない。画面の全員を見つけたら次へ進み、残り `10-finds` で人数を制限する。
++- 表示は「おためし n/10」。10人で「10にん みつけた！ おためし おしまい」と「もういちど」「保護者の画面へ」を出す。次コース・解放・成績順位は出さない。途中にも終了操作を置き、退出・再読込で試遊状態を破棄、再開は0からとする。
++- 試遊の開始・発見・ヒント・完了・退出で通常進捗や再開データを保存／消去しない。現行 `app.ts` の完了時には共通の `record()` と `clearResume()` があるため、通常コースの加算を止めるだけでは不十分。保存型の試遊集計がONでも、この試遊のイベントは書き込まない。独立したモードとして保存処理から分離する。
++
++## Claudeが実装後に行う検証
++
++- **配置の自動テスト：** 3背景×100シード×remaining 1〜10。非空、人数が残り以下かつ3以下、ID重複なし、`validateLayout` 合格、小物と本体・顔・小物の交差なし、傘0、同一入力で同一結果。別途組合せを列挙する検証で、帯内の最大人数・同人数の順位を照合する。3人不可→2人、2人不可→1人、帯なし→安全all、全候補不適合→出題停止、remaining=0→出題なしを個別条件として試す。実人数・帯外代替・帽子数と一致率を背景別に検証ログへ残す。
++- **描画・回帰テスト：** 試遊の陰影層0.5、服の線0.25、傘の描画／判定なし、顔層の透過不変を確認する。陰影画像なし・コード描画でも正常に表示する。通常1〜10と対象一覧の描画値、配置方針は従来どおりであることを確認する。
++- **操作・保存のE2E：** 未解放から入口へ進めること、10人ちょうどで終了、連打で二重加算なし、最後の端数、再試行0、途中退出・再読込を確認する。通常進捗と再開データあり／なし、保存集計ON／OFFで、試遊前後の保存内容が不変であること。ヒントを繰り返して最終輪郭から全員発見でき、動きを減らす設定でも完了できることを確認する。
++- **画像の目視確認：** 320×568、390×844、768×1024で、3体・3背景・実際に選ばれる帽子を確認する。目口全体が見える、顔を押せる、薄い服にも質感が残る、対象一覧とヒントが読めること。顔の3判定点が通る自動テストだけで目口全体の保護を保証しない。
++
++本人の試遊で見てほしい点は次の3つに絞る。
++
++1. 何が発見の手がかりだったか（顔・帽子・服の陰影）。服が薄くなっても絵として自然か。
++2. 最後の1人を探す楽しさがあるか、同じ場所を覚えるだけ／人数分の作業になっていないか。
++3. 詰まったときヒントで納得して発見・タップできるか。押しにくさを難しさと取り違えていないか。
++
++## 残る反対・作業記録
++
++3人を確保するために優先帯を崩す案と、傘の軸を細くするだけで最難関化とみなす案には反対する。陰影が「最大の手がかり」かは未確認だが、今回50%を試すことには賛成する。大人に簡単でも顔を隠す方向には進めない。
++
++- 実施・方法：AGENTS.md、ジョブ92、第1回、ART_SLOTS.md、CODEX_ART_BRIEF.md、および配置・コース・小物・描画・保存呼出し周辺のソースを静的レビューし、この仕様書を作成した。画像生成・外部検索・有料APIは使用していない。
++- 検査結果：要求項目と仕様の整合を文書点検した。候補数はClaude提供の実測を採用し、独立した再計測はしていない。実装・実機試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。
++- 書込みは本ファイルのみ。ジョブ92とユーザーの限定を優先してSTATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時からある未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+codex
+指定のレビューを完了し、[確定仕様書](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/audit/codex/hardest-course-r2.md)を作成しました。
+
+陰影50%、ふち線0.25、傘なし、優先帯で最大3人に決定。配置手順・試遊入口・実装後の検証条件も記載しました。
+
+書き込みは指定の1ファイルのみ。第1回より短いことを確認済みです。実装・テスト実行は行っていません。
+diff --git a/pattern-hide-family-beta/audit/codex/hardest-course-r2.md b/pattern-hide-family-beta/audit/codex/hardest-course-r2.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd211b6a27742fc84e1548ed3489e4b35b9209b5
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/hardest-course-r2.md
+@@ -0,0 +1,54 @@
++# 最難関コース・第2回：成人の試遊用仕様
++
++2026-10-08／ジョブ92。**優先帯の中で最大3人、服の陰影50%、ふち線0.25、傘なし**の1コースに確定する。通常1〜10とは別の試遊とし、10人発見で終了する。難度への効き目は仮説であり、今回の仕様確定は試遊での実証ではない。
++
++## 確定する1行
++
++以下は設計値。新項目は現行の `CourseDef` には未実装。
++
++| spots | variant | outline | maxChars と人数方針 | hat | umbrella | 新しい項目 |
++| --- | --- | --- | --- | --- | --- | --- |
++| `all` | `exact` | `0.25` | `3`／優先帯で置ける最大人数、残り人数で切り詰める | `{ rate: 1, style: 'camo' }`／適合時のみ | `null`（装着率0） | `placementPolicy: 'hard-ranked'`, `countPolicy: 'max-feasible-in-band'`, `clothesShadeOpacity: 0.5`, `decoyCount: 0` |
++
++- **陰影50%に賛成。** 現行 `src/ui/charArt.ts` は服の陰影を乗算で重ね、outlineでは弱まらない。陰影画像だけに opacity=0.5 を掛け、元画像の透過と乗算は維持する。服の丸い明暗を弱める効果が見込める一方、立体感・布の質感が薄くなる。顔・手・足・帽子やキャラ全体のopacityは変えない。通常モードと対象一覧の既定値は1。コード描画には対応する陰影層がないので、代わりに全体を薄くしない。
++- **傘は0に決定。** 軸を7→4にしても布の輪郭・骨・大きな当たり判定が残る。今回は傘も軸も描画・判定に出さず、軸用の新設定は作らない。通常コースの軸は現行の外線7・内線3.4、色も維持する。
++- **人数は最大3人を採用。** 最後の1人まで探す体験を選ぶ。ただし難しい配置を優先し、3人にするため帯外の見つけやすい場所を混ぜない。1人固定の別コースは作らない。
++- outline=0.25は成人用の試行値として採用する。試遊で境界が不自然・見づらい場合の次の修正値は0.28とし、今回の画面に比較切替は設けない。顔の色・線・大きさ、無制限ヒント、減点なし、時間制限なしを維持する。静止ヒントは追加せず、現行の円→揺れ→輪郭を使う。
++
++## hard-ranked の選び方
++
++1. `all` の場所×3体を `analyzeSpot` で評価し、`ok` の候補だけを残す。そのうち `regionMatch >= 0.90`、`0.25 <= bodyVisible <= 0.40`、`visible >= 0.50` を優先帯とする。丸めた表示値で判定しない。顔・高さ170・余白6・間隔4など既存の安全条件は維持する。
++2. 希望人数は `min(3, remaining)`（remaining=0なら出題しない）。優先帯だけで、キャラと場所が重複せず `spotsConflict` のない組合せを希望人数から1人まで探索する。キャラを先に固定せず、3体の割当ても調べる。最初に見つかった場所を採用する貪欲法にはしない。
++3. 同人数の組合せでは、服の一致率の合計が高い順、服可視率の合計が低い順、次に背景一致90%以上の安全な帽子を付けられる人数が多い順に選ぶ。残る同点だけシードで決める。帽子の一致率は `accessoryFits` と同じ領域・サンプリングで算出し、判定と選別で共有する。
++4. 帽子あり／なしも探索する。帽子は既存の適合条件（一致70%以上を含む）を満たし、他の本体・顔・帽子と間隔4を保てる場合だけ付ける。90%以上を優先し、同じ本体配置なら安全に付けられる帽子数が多い方を次の順位とする。帽子のために本体の優先順位や人数を落とさない。rate=1は全員装着の保証ではない。
++5. **へやで3人が無理なら優先帯の2人、次に1人。** 帯内1人も成立しない場合だけ、安全なall全体で同じ探索をやり直す。安全な1人もなければ空の探索画面に進まず、試遊できない表示と保護者画面への戻り口を出す。安全条件は緩めない。
++
++提示された実測「へや4・にわ6・みせ8、計18か所」により、優先帯を使う方針は成立すると判断する。ただし全体可視率・顔はキャラ別に再判定し、3人同時配置の成立とは区別する。へやの最大人数は組合せ検証で確定する。**帽子は「9か所」と列挙された10か所が不一致**なので、実装時にキャラ別に再集計する。この記載から装着率や一致90%以上の成立は推定しない。
++
++## 「ためす」入口と終了
++
++- 既存の保護者ゲートを通った画面に「最難関を ためす」。未解放でも開始でき、「大人向けのおためし・10人みつけたらおしまい・進み具合は保存しません」と説明する。コース11として通常一覧へ追加しない。
++- 独立した試遊セッションに `finds=0`、出題番号、シード、発見済み状態を保持する。背景はへや→にわ→みせの順で画面ごとに回す。新しい1人の発見で一度だけ加算し、発見済みの押し直しでは増やさない。画面の全員を見つけたら次へ進み、残り `10-finds` で人数を制限する。
++- 表示は「おためし n/10」。10人で「10にん みつけた！ おためし おしまい」と「もういちど」「保護者の画面へ」を出す。次コース・解放・成績順位は出さない。途中にも終了操作を置き、退出・再読込で試遊状態を破棄、再開は0からとする。
++- 試遊の開始・発見・ヒント・完了・退出で通常進捗や再開データを保存／消去しない。現行 `app.ts` の完了時には共通の `record()` と `clearResume()` があるため、通常コースの加算を止めるだけでは不十分。保存型の試遊集計がONでも、この試遊のイベントは書き込まない。独立したモードとして保存処理から分離する。
++
++## Claudeが実装後に行う検証
++
++- **配置の自動テスト：** 3背景×100シード×remaining 1〜10。非空、人数が残り以下かつ3以下、ID重複なし、`validateLayout` 合格、小物と本体・顔・小物の交差なし、傘0、同一入力で同一結果。別途組合せを列挙する検証で、帯内の最大人数・同人数の順位を照合する。3人不可→2人、2人不可→1人、帯なし→安全all、全候補不適合→出題停止、remaining=0→出題なしを個別条件として試す。実人数・帯外代替・帽子数と一致率を背景別に検証ログへ残す。
++- **描画・回帰テスト：** 試遊の陰影層0.5、服の線0.25、傘の描画／判定なし、顔層の透過不変を確認する。陰影画像なし・コード描画でも正常に表示する。通常1〜10と対象一覧の描画値、配置方針は従来どおりであることを確認する。
++- **操作・保存のE2E：** 未解放から入口へ進めること、10人ちょうどで終了、連打で二重加算なし、最後の端数、再試行0、途中退出・再読込を確認する。通常進捗と再開データあり／なし、保存集計ON／OFFで、試遊前後の保存内容が不変であること。ヒントを繰り返して最終輪郭から全員発見でき、動きを減らす設定でも完了できることを確認する。
++- **画像の目視確認：** 320×568、390×844、768×1024で、3体・3背景・実際に選ばれる帽子を確認する。目口全体が見える、顔を押せる、薄い服にも質感が残る、対象一覧とヒントが読めること。顔の3判定点が通る自動テストだけで目口全体の保護を保証しない。
++
++本人の試遊で見てほしい点は次の3つに絞る。
++
++1. 何が発見の手がかりだったか（顔・帽子・服の陰影）。服が薄くなっても絵として自然か。
++2. 最後の1人を探す楽しさがあるか、同じ場所を覚えるだけ／人数分の作業になっていないか。
++3. 詰まったときヒントで納得して発見・タップできるか。押しにくさを難しさと取り違えていないか。
++
++## 残る反対・作業記録
++
++3人を確保するために優先帯を崩す案と、傘の軸を細くするだけで最難関化とみなす案には反対する。陰影が「最大の手がかり」かは未確認だが、今回50%を試すことには賛成する。大人に簡単でも顔を隠す方向には進めない。
++
++- 実施・方法：AGENTS.md、ジョブ92、第1回、ART_SLOTS.md、CODEX_ART_BRIEF.md、および配置・コース・小物・描画・保存呼出し周辺のソースを静的レビューし、この仕様書を作成した。画像生成・外部検索・有料APIは使用していない。
++- 検査結果：要求項目と仕様の整合を文書点検した。候補数はClaude提供の実測を採用し、独立した再計測はしていない。実装・実機試遊・自動テスト・ビルドは未実施。絵を変更していないためvalidate:artは対象外。
++- 書込みは本ファイルのみ。ジョブ92とユーザーの限定を優先してSTATUS.mdは更新していない。コード・絵・設定・検査ツールの変更、commit／pushは行っていない。開始時からある未追跡の `video/hide-handoff-find.webm` は触れていない。
+
+tokens used
+40,851
+指定のレビューを完了し、[確定仕様書](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/audit/codex/hardest-course-r2.md)を作成しました。
+
+陰影50%、ふち線0.25、傘なし、優先帯で最大3人に決定。配置手順・試遊入口・実装後の検証条件も記載しました。
+
+書き込みは指定の1ファイルのみ。第1回より短いことを確認済みです。実装・テスト実行は行っていません。

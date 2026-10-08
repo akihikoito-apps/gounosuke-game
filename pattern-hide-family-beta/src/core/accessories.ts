@@ -72,6 +72,8 @@ export interface AccFit {
   ok: boolean;
   /** 迷彩に使う領域（camo のとき） */
   region: string | null;
+  /** camo のとき、うしろが同じ柄の領域である割合（color は 1） */
+  match: number;
   problems: string[];
 }
 
@@ -89,16 +91,17 @@ export function accessoryFits(scene: SceneDef, spot: SpotDef, char: CharacterId,
   const face = CHARACTERS[char].facePoints.map((p) => transformPt(t, p));
   if (face.some((p) => shapes.some((s) => contains(s, p)))) problems.push('covers face');
   let region: string | null = null;
+  let match = 1;
   if (style === 'camo') {
     const anchor = transformPt(t, kind === 'hat' ? HAT_ANCHOR : UMBRELLA_ANCHOR);
     region = regionAt(scene, anchor);
     const pts = shapes.flatMap((s) => samplePoints(s, 8));
-    const match = region === null || pts.length === 0 ? 0 : pts.filter((p) => regionAt(scene, p) === region).length / pts.length;
+    match = region === null || pts.length === 0 ? 0 : pts.filter((p) => regionAt(scene, p) === region).length / pts.length;
     if (match < 0.7) problems.push(`camo match ${match.toFixed(2)}`);
   }
   // ほかの隠れ場所の小物（手前に描かれる）と重なると、奥にある物が傘の上に乗って見えるので使わない
   const others = scene.spots.filter((sp) => sp.id !== spot.id);
   const pts = shapes.flatMap((s) => samplePoints(s, 8));
   if (pts.some((p) => others.some((o) => o.prop.shapes.some((s) => contains(s, p))))) problems.push('under another prop');
-  return { ok: problems.length === 0, region, problems };
+  return { ok: problems.length === 0, region, match, problems };
 }
