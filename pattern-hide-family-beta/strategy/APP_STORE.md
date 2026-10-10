@@ -6,21 +6,25 @@ Bundle ID：`com.akihikoito.moyoukakurenbo`（native/capacitor.config.json と X
 
 ---
 
-## 1. 決めてもらうこと（持ち主）
+## 1. 決まったこと（持ち主 2026-10-09〜10）
 
-| # | 決めること | おすすめ | 理由 |
-|---|---|---|---|
-| A | 1.0 を **全部無料**で出すか、**課金（追加パック）を入れてから**出すか | まず TestFlight で家族テスト → 課金を入れてから 1.0 提出 | 今のアプリ版は「全部遊べる」設定。課金（StoreKit）はまだ作っていない。先に無料で全部出すと、あとから有料にしにくい |
-| B | プライバシーポリシーとサポートのページをどこに置くか | My柔道と同じ GitHub Pages に置く | どちらもストア提出に必須。ページの中身は `site/privacy.html`・`site/support.html` に用意済み。**公開になる**ので持ち主の許可が必要 |
-| C | サポートの連絡先メール | 持ち主が決める | `site/support.html` の「（連絡先）」を置き換える |
-| D | キッズカテゴリに入れるか | 入れる（年齢帯「5歳以下」） | 小さい子向けの棚に並ぶ。条件（広告・外部分析なし、外部リンクと購入の前に保護者ゲート）はすでに満たしている。**入れた後に外すのは制限がある**ので慎重に |
-| E | 著作権表示（©）の名前 | App Store Connect の販売者名と同じ | 例：「2026 （販売者名）」 |
+| # | 内容 | 決定 |
+|---|---|---|
+| A | 1.0 の出し方 | まず全部遊べる版で TestFlight の家族テスト → 課金（追加パック）を入れてから 1.0 を提出 |
+| B | ページの置き場 | 専用リポジトリ `akihikoito-apps/moyou-kakurenbo`（公開）の GitHub Pages。中身は `site/`（index・privacy・support） |
+| C | 連絡先 | akihikoito.apps@gmail.com（My柔道 と同じ） |
+| D | キッズカテゴリ | 入れる（5歳以下） |
+| E | 著作権 | © 2026 AKIHIKO ITO |
+
+公開後のアドレス（予定）：
+- サポート：https://akihikoito-apps.github.io/moyou-kakurenbo/support.html
+- プライバシーポリシー：https://akihikoito-apps.github.io/moyou-kakurenbo/privacy.html
 
 ## 2. App 情報（日本語）
 
 - **名前**（30文字まで）：もようのかくれんぼ
 - **サブタイトル**（30文字まで）：もように まぎれた ともだちを さがそう
-- **カテゴリ**：ゲーム（サブ：ファミリー / パズル）。キッズカテゴリは上の D
+- **カテゴリ**：ゲーム（サブ：ファミリー / パズル）。キッズカテゴリ：5歳以下
 - **プロモーション用テキスト**（170文字まで・審査なしで変えられる）：
   > 新しい背景「うみべ」と、なかまの ちょきが きました。カーテンや ソファの もように まぎれた ともだちを、ゆびで タッチして みつけよう。
 - **説明**（4000文字まで）：
@@ -46,9 +50,9 @@ Bundle ID：`com.akihikoito.moyoukakurenbo`（native/capacitor.config.json と X
 - **キーワード**（100文字まで・カンマ区切り・名前に入っている語は入れない）：
   `さがしもの,絵探し,幼児,子ども,こども,キッズ,未就学,親子,模様,パズル,オフライン,広告なし,ひらがな,ふたりあそび,3歳,4歳,5歳,ファミリー`（約80文字）
   （「知育」は効果をうたう印象になるので入れていない。ほかのアプリ名・商標は入れない）
-- **サポートURL**：B で決めた場所の `support.html`
-- **プライバシーポリシーURL**：B で決めた場所の `privacy.html`
-- **著作権**：E
+- **サポートURL**：https://akihikoito-apps.github.io/moyou-kakurenbo/support.html
+- **プライバシーポリシーURL**：https://akihikoito-apps.github.io/moyou-kakurenbo/privacy.html
+- **著作権**：2026 AKIHIKO ITO
 
 ## 3. 年齢制限（質問票の答え）
 
