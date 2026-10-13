@@ -15026,3 +15026,144 @@ Object.assign(DRAWERS, {
   acrobat:    drawAcrobat,
   pierrot:    drawPierrot,
 });
+
+
+/* =====================================================================
+   ★ネコソ ── ネコスの おとうと。
+
+   あにの ネコスと おなじ かおの かたち ですが、
+     ・かみは ★ちゃいろ★ で みじかい（あには くろい もじゃもじゃ）
+     ・おでこに ★ゴーグル★
+     ・きいろい ★さぎょうエプロン★ と どうぐベルト
+     ・りょうては やじるし ではなく ★スパナ★
+   「ごうのすけの かいはつしつ」で そうびひんを つくって くれます。
+   (0,0) は あしもと。うえが マイナス。                                */
+function drawNekoso(ctx, st) {
+  const t = (st && st.t) || 0;
+  const GREY = '#d2cfc5', INK = '#20201e';
+  const wobble = Math.sin(t * 2.4) * 1.4;
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 2.2;
+  ctx.fillStyle = GREY;
+
+  /* --- あし（あにと おなじ かたち。すこし みじかい）--- */
+  ctx.beginPath();
+  ctx.moveTo(-16, -58);
+  ctx.lineTo(-28, -36);
+  ctx.lineTo(-12, 0);
+  ctx.lineTo(-4, -15);
+  ctx.lineTo(4, -15);
+  ctx.lineTo(12, 0);
+  ctx.lineTo(28, -36);
+  ctx.lineTo(16, -58);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  /* --- からだ --- */
+  roundRect(ctx, -18, -118, 36, 62, 8);
+  ctx.fill(); ctx.stroke();
+
+  /* --- さぎょうエプロン（きいろ）--- */
+  ctx.save();
+  ctx.fillStyle = '#f0c14b';
+  ctx.beginPath();
+  ctx.moveTo(-15, -112);
+  ctx.lineTo(15, -112);
+  ctx.lineTo(13, -52);
+  ctx.lineTo(-13, -52);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  /* むねの ポケット */
+  ctx.fillStyle = '#d9a72f';
+  roundRect(ctx, -9, -104, 18, 14, 2); ctx.fill(); ctx.stroke();
+  /* どうぐベルト（こしの あたり）*/
+  ctx.fillStyle = '#6d4c41';
+  roundRect(ctx, -16, -74, 32, 9, 3); ctx.fill(); ctx.stroke();
+  /* ベルトに ささった ドライバー 2ほん */
+  ctx.fillStyle = '#9e9e9e';
+  for (const dx of [-9, 4]) { roundRect(ctx, dx, -82, 4, 10, 1.5); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+
+  /* --- りょうての スパナ --- */
+  for (const d of [-1, 1]) {
+    ctx.save();
+    ctx.scale(d, 1);
+    ctx.translate(0, wobble * (d > 0 ? 1 : -1));
+    ctx.fillStyle = '#b0bec5';
+    /* え（ぼう）*/
+    roundRect(ctx, 16, -106, 28, 9, 3);
+    ctx.fill(); ctx.stroke();
+    /* あたま（くちが あいた わ）*/
+    ctx.beginPath();
+    ctx.moveTo(42, -113);
+    ctx.lineTo(58, -113);
+    ctx.lineTo(58, -107);
+    ctx.lineTo(50, -107);
+    ctx.lineTo(50, -96);
+    ctx.lineTo(58, -96);
+    ctx.lineTo(58, -90);
+    ctx.lineTo(42, -90);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* --- あたま --- */
+  ctx.fillStyle = GREY;
+  ctx.beginPath();
+  ctx.arc(0, -150, 33, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  /* --- め（あにと おなじ たてぼう 2ほん）--- */
+  ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-9, -161); ctx.lineTo(-8, -142);
+  ctx.moveTo(9, -161);  ctx.lineTo(10, -142);
+  ctx.stroke();
+
+  /* --- くち（にっこり）--- */
+  ctx.beginPath();
+  ctx.arc(0, -136, 12, 0.22 * Math.PI, 0.78 * Math.PI);
+  ctx.stroke();
+
+  /* --- かみ（ちゃいろ・みじかい）--- */
+  ctx.save();
+  ctx.fillStyle = '#7b4a24'; ctx.strokeStyle = '#5d3618';
+  ctx.lineWidth = 2.0; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  for (let i = 0; i <= 22; i++) {
+    const a = Math.PI + (i / 22) * Math.PI;
+    ctx.lineTo(Math.cos(a) * 33.5, -150 + Math.sin(a) * 33.5);
+  }
+  /* まえがみ（みぎ → ひだり。ぎざぎざは あにより ちいさい）*/
+  [[30, -166], [22, -160], [14, -168], [5, -159], [-4, -167],
+   [-14, -159], [-22, -167], [-30, -162]].forEach(p => ctx.lineTo(p[0], p[1]));
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.restore();
+
+  /* --- ゴーグル（おでこに あげて いる）--- */
+  ctx.save();
+  ctx.strokeStyle = '#3e2723'; ctx.lineWidth = 4.0;
+  ctx.beginPath();
+  ctx.moveTo(-33, -164); ctx.quadraticCurveTo(0, -176, 33, -164);
+  ctx.stroke();
+  ctx.fillStyle = '#4fc3f7'; ctx.strokeStyle = '#3e2723'; ctx.lineWidth = 2.2;
+  for (const dx of [-13, 13]) {
+    ctx.beginPath();
+    ctx.ellipse(dx, -169, 11, 9, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+  }
+  /* レンズの ひかり */
+  ctx.fillStyle = 'rgba(255,255,255,.65)';
+  for (const dx of [-16, 10]) {
+    ctx.beginPath(); ctx.ellipse(dx, -172, 3.4, 2.4, -0.5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+
+  ctx.restore();
+}
+Object.assign(DRAWERS, { nekoso: drawNekoso });

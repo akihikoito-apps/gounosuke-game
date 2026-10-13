@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.55';
+  const GAME_VERSION = '6.56';
 
 
   /* =================================================
@@ -127,6 +127,7 @@
     const map = {
       'screen-tower': 'gacha', 'screen-gacha': 'gacha',
       'screen-room': 'room', 'screen-garden': 'room', 'screen-shop': 'room',
+      'screen-lab': 'room',
       'screen-battle': 'battle',
       'screen-result': null, 'screen-movie': null,
     };
@@ -199,6 +200,11 @@
     if (!s.evolved) s.evolved = {};
     if (!s.evolved2) s.evolved2 = {};
     if (!s.seenEnemies) s.seenEnemies = {};
+    /* ★v6.56 かいはつしつ（そうびひん）*/
+    if (typeof s.core !== 'number') s.core = 0;   // そうびのもと
+    if (!s.gear)   s.gear = {};                   // つくった そうび { id: かず }
+    if (!s.equip)  s.equip = {};                  // だれが なにを つけて いるか
+    if (!s.nekoso) s.nekoso = { at: 0 };          // ネコソに もらった ひ
     /* ★v6.44 に あった「142〜144 → 501〜503」の ひきつぎは はずしました。
          v6.47 から 142・143 は「ターツーマーキーが支配する平原」なので、
          のこして おくと ★へいげんを クリアする たびに その きろくが
@@ -441,7 +447,10 @@
      がめんの きりかえ
      ================================================= */
   function show(id) {
-    $('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+    /* ★ドルマーク 1つは「はじめの 1つだけ」、2つは「ぜんぶ」を とって
+         くる どうぐ です。ここは がめん ぜんぶを みるので 2つの ほうが
+         ただしい かきかた です（1つだと forEach が つかえません）。 */
+    $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     bgmFor(id);
   }
 
@@ -1586,6 +1595,19 @@
     ctx.restore();
   }
 
+  /* ★その なかまが つけて いる そうびの え（なければ ''）。
+       せんとうの ボタンや へんせいの わくの かたすみに だします。 */
+  function gearIconOf(id) {
+    const s = slot();
+    if (!s || !s.equip || !s.equip[id]) return '';
+    const g = (typeof GEARS !== 'undefined') ? GEARS.find(x => x.id === s.equip[id]) : null;
+    return g ? g.icon : '';
+  }
+  function gearBadge(id, cls) {
+    const ic = gearIconOf(id);
+    return ic ? ('<span class="' + cls + '">' + ic + '</span>') : '';
+  }
+
   let unitButtons = [];
   function buildUnitButtons() {
     const box = $('#unit-buttons');
@@ -1600,8 +1622,10 @@
       b.innerHTML =
         '<canvas class="u-icon"></canvas>' +
         markHtml(def, 'u-mark') +
+        gearBadge(id, 'u-gear') +
         '<span class="u-name">' + (shownDef(id) || def).shortName + '</span>' +
-        '<span class="u-cost">' + ((shownDef(id) || def).cost) + '</span>' +
+        /* ★そうびで コストが かわる ので、せんとうで つかう すうじを だします */
+        '<span class="u-cost">' + ((Game.defOf(id) || shownDef(id) || def).cost) + '</span>' +
         '<span class="cd-mask" style="display:none"></span>';
       b.addEventListener('click', (ev) => { ev.preventDefault(); Game.summon(id); });
       box.appendChild(b);
@@ -1819,6 +1843,7 @@
       if (id) {
         el.innerHTML = '<span class="ps-no">' + (i + 1) + '</span>' +
           markHtml(UNITS[id], 'ps-mark') +
+          gearBadge(id, 'ps-gear') +
           '<canvas></canvas>' +
           '<span class="ps-name">' + shownDef(id).shortName + '</span>' +
           '<span class="ps-lv">Lv.' + (s.levels[id] || 1) + '</span>' +
@@ -1852,6 +1877,7 @@
       el.className = 'pool-item' + (used >= 0 ? ' used' : '');
       el.innerHTML = '<canvas></canvas>' +
         markHtml(UNITS[id], 'pi-mark') +
+        gearBadge(id, 'pi-gear') +
         '<span class="pi-name">' + shownDef(id).shortName + '</span>' +
         '<span class="pi-lv">Lv.' + (s.levels[id] || 1) + '</span>' +
         '<span class="pi-cost">コスト ' + UNITS[id].cost + '</span>';
@@ -2135,6 +2161,7 @@
     Game.levels = s ? effLevelMap(s) : {};
     Game.evolved = (s && s.evolved) ? s.evolved : {};
     Game.evolved2 = (s && s.evolved2) ? s.evolved2 : {};
+    applyGear();                       /* ★そうびひん */
     applyUnitLayout();
     buildUnitButtons();
     requestAnimationFrame(redrawIcons);
@@ -2467,6 +2494,13 @@
     if (t) t.textContent = isGarden() ? '🌳 ごうのすけの にわ' : '🛋️ ごうのすけの へや';
     const b = $('#btn-room-scene');
     if (b) b.textContent = isGarden() ? '🏠 へやへ' : '🌳 にわへ';
+    /* ★にわの ときだけ「おくへ（かいはつしつ）」ボタンを だします */
+    const lb = $('#btn-room-lab');
+    if (lb) {
+      const open = labUnlocked();
+      lb.classList.toggle('hidden', !isGarden());
+      lb.textContent = open ? '🔧 おくへ' : '🔒 おくへ';
+    }
     const h = $('#room-hint');
     if (h) h.textContent = isGarden()
       ? 'なかまを にわに おくと 24じかんで レベルが 1つ あがるよ（1たい ＋10まで）'
@@ -2538,6 +2572,39 @@
     else { drawRoomBg(ctx, W, H); }
     drawStorage(ctx, W, H);
     drawRoomStuff(ctx, W, H);
+  }
+
+  /* ★にわの おくに たって いる こうぼう（ごうのすけの かいはつしつ）。
+       まだ あいて いない ときは かぎが かかって います。          */
+  function drawLabHut(ctx, W, H) {
+    const open = labUnlocked();
+    const hx = W * 0.72, hy = H * (GARDEN_FLOOR - 0.02);   // とびらの したの まんなか
+    const w = Math.min(W * 0.17, H * 0.34), h = w * 0.95;
+    ctx.save();
+    /* こや */
+    ctx.fillStyle = '#8d6e4a'; ctx.strokeStyle = '#4e342e';
+    ctx.lineWidth = Math.max(1.5, H * 0.006);
+    ctx.beginPath();
+    ctx.rect(hx - w / 2, hy - h, w, h);
+    ctx.fill(); ctx.stroke();
+    /* やね */
+    ctx.fillStyle = '#5d4037';
+    ctx.beginPath();
+    ctx.moveTo(hx - w * 0.62, hy - h);
+    ctx.lineTo(hx, hy - h * 1.42);
+    ctx.lineTo(hx + w * 0.62, hy - h);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    /* とびら */
+    ctx.fillStyle = open ? '#ffcc80' : '#6d4c41';
+    ctx.beginPath();
+    ctx.rect(hx - w * 0.22, hy - h * 0.70, w * 0.44, h * 0.70);
+    ctx.fill(); ctx.stroke();
+    /* かんばん（🔧 か かぎ）*/
+    ctx.font = (w * 0.34) + 'px system-ui, "Apple Color Emoji", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(open ? '🔧' : '🔒', hx, hy - h * 1.02);
+    ctx.restore();
   }
 
   /* ---- へやの はいけい（かべ・まど・ゆか）---- */
@@ -2630,6 +2697,9 @@
     ctx.lineTo(W * 0.80, H * gy);
     ctx.lineTo(W, H * ey);
     ctx.stroke();
+
+    /* ★にわの おくに ある こうぼう（かいはつしつ）の とびら */
+    drawLabHut(ctx, W, H);
 
     /* とおくの くも */
     ctx.fillStyle = 'rgba(255,255,255,.7)';
@@ -3670,6 +3740,7 @@
       Game.levels = levelMapWithGuests(s);
       Game.evolved = (s && s.evolved) ? s.evolved : {};
       Game.evolved2 = (s && s.evolved2) ? s.evolved2 : {};
+      applyGear();                     /* ★そうびひん */
       applyUnitLayout();
       buildUnitButtons();
       requestAnimationFrame(redrawIcons);
@@ -3698,6 +3769,7 @@
     Game.levels = s ? effLevelMap(s) : {};
     Game.evolved = (s && s.evolved) ? s.evolved : {};
     Game.evolved2 = (s && s.evolved2) ? s.evolved2 : {};
+    applyGear();                       /* そうびひん */
     applyUnitLayout();
     buildUnitButtons();
     requestAnimationFrame(redrawIcons);
@@ -3760,9 +3832,9 @@
     cb.disabled = !Game.chudonReady || Game.finished;
 
     for (const u of unitButtons) {
-      /* ★しんかで コスト／さいせいさんが かわる ことが あるので、
+      /* ★しんかや そうびで コスト／さいせいさんが かわる ことが あるので、
          いまの すがたの すうじを つかいます（もとの すがたでは ない）*/
-      const def = shownDef(u.id) || UNITS[u.id];
+      const def = Game.defOf(u.id) || shownDef(u.id) || UNITS[u.id];
       const cd = Game.cooldown[u.id];
       if (cd > 0) {
         u.mask.style.display = 'flex';
@@ -5127,6 +5199,473 @@
      にんげんの ひとり。1にちに 1かい、そざいを 5つ わけて くれます
      （よる 0じで リセット）。
      ================================================= */
+  /* =================================================
+     ★ごうのすけの かいはつしつ（うけつけ：ネコソ）
+
+     にわの いちばん おくに ある こうぼう です。
+     ★そうびのもと★ 1つ ＋ そざい すこし で、そうびひんを 1つ つくれます。
+     できた そうびは なかま 1たいに つき 1つ もたせられます。
+
+     ・あく じょうけん … LAB.needStages（さいごの しょうぶ ＋ ふしぎ遊園地 7）
+     ・そうびのもと   … ふしぎ遊園地 7コースめの はじめての クリアで 1つ。
+                        そのあとは ネコソに はなしかけて 1日 1つ。
+     ================================================= */
+
+  /* ---- そうびのもと（s.core に かずを もつ）---- */
+  function coreCount() { const s = slot(); return s ? (s.core || 0) : 0; }
+  function addCore(n) {
+    const s = slot(); if (!s) return;
+    s.core = Math.max(0, (s.core || 0) + n);
+  }
+
+  /* ---- つくった そうび（s.gear = { そうびの id: かず }）---- */
+  function gearBag() {
+    const s = slot(); if (!s) return {};
+    if (!s.gear) s.gear = {};
+    return s.gear;
+  }
+  /* ---- だれが なにを つけて いるか（s.equip = { なかまの id: そうびの id }）---- */
+  function equipMap() {
+    const s = slot(); if (!s) return {};
+    if (!s.equip) s.equip = {};
+    return s.equip;
+  }
+  function gearDef(id) {
+    if (typeof GEARS === 'undefined') return null;
+    return GEARS.find(g => g.id === id) || null;
+  }
+  /* その そうびを いま なんたいが つけて いるか */
+  function gearWorn(id) {
+    const e = equipMap();
+    return Object.keys(e).filter(k => e[k] === id).length;
+  }
+  /* まだ だれも つけて いない かず */
+  function gearFree(id) { return Math.max(0, (gearBag()[id] || 0) - gearWorn(id)); }
+
+  /* ★かいはつしつが あいて いるか
+       「さいごの しょうぶ」と「ふしぎ遊園地 7コースめ」の りょうほうを
+       クリアして いる ときだけ あきます。                       */
+  function labUnlocked() {
+    const s = slot();
+    if (!s || !s.cleared) return false;
+    const need = (typeof LAB !== 'undefined' && Array.isArray(LAB.needStages)) ? LAB.needStages : [];
+    if (!need.length) return false;
+    return need.every(no => !!s.cleared[no]);
+  }
+
+  /* ---- そうびを せんとうに はんえい ---- */
+  function applyGear() { Game.gear = equipMap(); }
+
+  /* ---- つくれるか ---- */
+  function canDev(g) {
+    const c = g.cost || {};
+    return Object.keys(c).every(k => (k === 'core') ? (coreCount() >= c[k]) : (matCount(k) >= c[k]));
+  }
+  function devCostText(c) {
+    return Object.keys(c).map(k => (k === 'core')
+      ? (GEAR_CORE.icon + c[k])
+      : (MATERIALS[k] ? (MATERIALS[k].icon + c[k]) : (k + c[k]))).join(' ');
+  }
+  function doDevNow(g) {
+    if (!canDev(g)) return false;
+    const c = g.cost || {};
+    Object.keys(c).forEach(k => { if (k === 'core') addCore(-c[k]); else addMat(k, -c[k]); });
+    const bag = gearBag();
+    bag[g.id] = (bag[g.id] || 0) + 1;
+    storeSave();
+    return true;
+  }
+
+  /* ---- ネコソ（1日に 1つ そうびのもとを くれる）---- */
+  function nekosoState() {
+    const s = slot(); if (!s) return null;
+    if (!s.nekoso) s.nekoso = { at: 0 };
+    return s.nekoso;
+  }
+  function nekosoReady() {
+    const n = nekosoState();
+    return !!n && !gotToday(n.at);
+  }
+  let nekosoLast = -1;
+  function nekosoPick() {
+    const list = (typeof NEKOSO_TALKS !== 'undefined') ? NEKOSO_TALKS : [];
+    if (!list.length) return 'よう、いらっしゃい。';
+    if (list.length === 1) return list[0];
+    let i = nekosoLast;
+    while (i === nekosoLast) i = Math.floor(Math.random() * list.length);
+    nekosoLast = i;
+    return list[i];
+  }
+  function labSay(text) {
+    const p = $('#lab-speech');
+    if (p) p.textContent = text;
+  }
+  function nekosoTalk() {
+    const give = (typeof LAB !== 'undefined' && LAB.give) ? LAB.give : 1;
+    if (nekosoReady()) {
+      const n = nekosoState();
+      addCore(give);
+      n.at = Date.now();
+      storeSave();
+      labSay('きょう みつけた ' + GEAR_CORE.name + ' だよ。はい、どうぞ！（' +
+             GEAR_CORE.icon + GEAR_CORE.name + ' ＋' + give + '）');
+      if (typeof Sound !== 'undefined') Sound.se('rare');
+      buildLabMats(); buildLabTray(); drawLab();
+    } else {
+      labSay(nekosoPick());
+    }
+  }
+
+  /* ---- がめんを あける・とじる ---- */
+  let labTab = 'dev';
+  let labRaf = null, labLastFrame = 0;
+
+  function openLab() {
+    labTab = 'dev';
+    labSay(nekosoReady()
+      ? 'やあ！　ぼくは ネコソ、ネコスの おとうと だよ。　あにきに「おまえの どうぐが あれば みんなが たすかる」って よばれて、ここに こうぼうを ひらいたんだ。　そうびのもとが あれば なんでも つくるよ！'
+      : 'おかえり！　なにを つくろうか。');
+    show('screen-lab');
+    buildLabTabs(); buildLabMats(); buildLabTray();
+    startLabLoop();
+    requestAnimationFrame(() => { drawLab(); buildLabTray(); });
+  }
+  function closeLab() {
+    closeGearPick(); closeDevAsk(); stopLabLoop(); storeSave();
+    roomScene = 'garden';
+    show('screen-room');
+    refreshSceneUi(); buildRoomTabs(); buildRoomTray();
+    startRoomLoop();
+    requestAnimationFrame(drawRoom);
+  }
+  function startLabLoop() {
+    stopLabLoop();
+    labLastFrame = 0;
+    labRaf = requestAnimationFrame(labLoop);
+  }
+  function stopLabLoop() { if (labRaf) cancelAnimationFrame(labRaf); labRaf = null; }
+  function labLoop(now) {
+    const sc = $('#screen-lab');
+    if (!sc || !sc.classList.contains('active')) { labRaf = null; return; }
+    labRaf = requestAnimationFrame(labLoop);
+    if (labLastFrame && now - labLastFrame < 125) return;
+    labLastFrame = now;
+    drawLab();
+  }
+
+  /* ---- タブ ---- */
+  function buildLabTabs() {
+    const box = $('#lab-tabs');
+    if (!box) return;
+    const tabs = [['dev', '🔨 かいはつ'], ['wear', '🎽 そうびを つける']];
+    box.innerHTML = '';
+    tabs.forEach(([k, label]) => {
+      const b = document.createElement('button');
+      b.className = 'room-tab' + (labTab === k ? ' on' : '');
+      b.textContent = label;
+      b.addEventListener('click', () => { labTab = k; buildLabTabs(); buildLabTray(); });
+      box.appendChild(b);
+    });
+  }
+
+  /* ---- もちもの（そうびのもと ＋ そざい）---- */
+  function buildLabMats() {
+    const bar = $('#lab-mats');
+    if (!bar) return;
+    bar.innerHTML = '';
+    const core = document.createElement('span');
+    core.className = 'mat-chip';
+    core.innerHTML = GEAR_CORE.icon + GEAR_CORE.name + ' <b>' + coreCount() + '</b>';
+    bar.appendChild(core);
+    MATERIAL_ORDER.forEach(id => {
+      const mt = MATERIALS[id];
+      const chip = document.createElement('span');
+      chip.className = 'mat-chip';
+      chip.innerHTML = mt.icon + mt.name + ' <b>' + matCount(id) + '</b>';
+      bar.appendChild(chip);
+    });
+  }
+
+  /* ---- もちものの いちらん ---- */
+  function buildLabTray() {
+    const box = $('#lab-tray');
+    if (!box) return;
+    buildLabMats();
+    box.innerHTML = '';
+    if (labTab === 'wear') { buildWearTray(box); return; }
+
+    /* ★かいはつ：そうびひんの いちらん */
+    (typeof GEARS !== 'undefined' ? GEARS : []).forEach(g => {
+      const have = gearBag()[g.id] || 0;
+      const can = canDev(g);
+      const b = document.createElement('button');
+      b.className = 'room-item gear-item' + (have ? ' have' : '') + (can ? '' : ' cant');
+      b.innerHTML =
+        (have ? '<span class="gi-n">×' + have + '</span>' : '') +
+        '<span class="gi-ico">' + g.icon + '</span>' +
+        '<span class="ri-name">' + g.name + '</span>' +
+        '<span class="gi-eff">' + g.desc + '</span>' +
+        '<span class="ri-cost">' + devCostText(g.cost) + '</span>';
+      b.addEventListener('click', () => {
+        if (!canDev(g)) {
+          const need = (g.cost.core || 0);
+          labSay(coreCount() < need
+            ? (GEAR_CORE.name + 'が たりないな…。あした また もって くるよ。')
+            : 'そざいが たりないよ。あにきの おみせか、ステージで あつめて おいで。');
+          return;
+        }
+        askDev(g);
+      });
+      box.appendChild(b);
+    });
+  }
+
+  /* ---- そうびを つける：なかまの いちらん ---- */
+  function buildWearTray(box) {
+    const s = slot();
+    const own = (s && Array.isArray(s.owned) && s.owned.length) ? s.owned : DEFAULT_PARTY;
+    const eq = equipMap();
+    const lead = document.createElement('p');
+    lead.className = 'size-lead';
+    lead.textContent = 'なかまを タップすると、そうびを えらべるよ（1たいに 1つ）';
+    box.appendChild(lead);
+    own.forEach(id => {
+      if (!UNITS[id]) return;
+      const g = eq[id] ? gearDef(eq[id]) : null;
+      const b = document.createElement('button');
+      b.className = 'room-item wear-item' + (g ? ' on' : '');
+      b.innerHTML = '<canvas></canvas>' +
+        '<span class="ri-name">' + (shownDef(id) || UNITS[id]).shortName + '</span>' +
+        (g ? '<span class="wi-gear">' + g.icon + '</span>'
+           : '<span class="wi-none">なし</span>');
+      b.addEventListener('click', () => openGearPick(id));
+      box.appendChild(b);
+      paintCharBust(b.querySelector('canvas'), id);
+    });
+  }
+
+  /* ---- そうびを えらぶ まど ---- */
+  let gearPickFor = null;
+  function openGearPick(unitId) {
+    gearPickFor = unitId;
+    const m = $('#gear-modal'); if (!m) return;
+    const ask = $('#gear-ask');
+    const def = shownDef(unitId) || UNITS[unitId];
+    if (ask) ask.innerHTML = def.name + ' の そうび<br><small>つけたい ものを タップ（1たいに 1つ）</small>';
+    const grid = $('#gear-grid');
+    grid.innerHTML = '';
+    const eq = equipMap();
+    const now = eq[unitId] || null;
+
+    /* 「はずす」*/
+    const off = document.createElement('button');
+    off.className = 'room-item gear-item' + (now ? '' : ' have');
+    off.innerHTML = '<span class="gi-ico">🚫</span><span class="ri-name">そうび なし</span>';
+    off.addEventListener('click', () => {
+      delete eq[unitId]; storeSave(); applyGear();
+      closeGearPick(); buildLabTray();
+      toast(def.shortName + ' の そうびを はずした');
+    });
+    grid.appendChild(off);
+
+    let any = 0;
+    (typeof GEARS !== 'undefined' ? GEARS : []).forEach(g => {
+      const free = gearFree(g.id);
+      const isNow = (now === g.id);
+      if (free <= 0 && !isNow) return;          // もって いない ものは ださない
+      any++;
+      const b = document.createElement('button');
+      b.className = 'room-item gear-item' + (isNow ? ' have' : '');
+      b.innerHTML =
+        '<span class="gi-n">' + (isNow ? 'つけてる' : '×' + free) + '</span>' +
+        '<span class="gi-ico">' + g.icon + '</span>' +
+        '<span class="ri-name">' + g.name + '</span>' +
+        '<span class="gi-eff">' + g.desc + '</span>';
+      b.addEventListener('click', () => {
+        if (isNow) { closeGearPick(); return; }
+        eq[unitId] = g.id; storeSave(); applyGear();
+        closeGearPick(); buildLabTray();
+        if (typeof Sound !== 'undefined') Sound.se('summon');
+        toast(def.shortName + ' に 「' + g.name + '」を つけた！');
+      });
+      grid.appendChild(b);
+    });
+    if (!any) {
+      const p = document.createElement('p');
+      p.className = 'size-lead';
+      p.textContent = 'まだ そうびが ないよ。「🔨 かいはつ」で つくって みてね！';
+      grid.appendChild(p);
+    }
+    m.classList.remove('hidden');
+  }
+  function closeGearPick() {
+    const m = $('#gear-modal'); if (m) m.classList.add('hidden');
+    gearPickFor = null;
+  }
+
+  /* ---- 「ほんとうに かいはつする？」 ---- */
+  let devAsk = null;
+  function askDev(g) {
+    devAsk = g;
+    const m = $('#dev-modal'); if (!m) return;
+    $('#dev-ask').innerHTML = g.icon + ' 「' + g.name + '」を かいはつ しますか？';
+    $('#dev-eff').textContent = g.desc;
+    $('#dev-need').textContent = 'つかう もの：' + devCostText(g.cost);
+    m.classList.remove('hidden');
+  }
+  function closeDevAsk() {
+    const m = $('#dev-modal'); if (m) m.classList.add('hidden');
+    devAsk = null;
+  }
+  function doDevConfirmed() {
+    const g = devAsk;
+    closeDevAsk();
+    if (!g) return;
+    if (!doDevNow(g)) { labSay('あれ、ざいりょうが たりないよ。'); return; }
+    if (typeof Sound !== 'undefined') Sound.se('rare');
+    labSay('できた！　「' + g.name + '」だ。　「🎽 そうびを つける」で なかまに もたせて ね。');
+    toast('「' + g.name + '」が できた！');
+    buildLabTray();
+  }
+
+  /* ---- こうぼうの え ---- */
+  function drawLab() {
+    const cv = $('#lab-canvas');
+    if (!cv) return;
+    const W = cv.clientWidth, H = cv.clientHeight;
+    if (W < 2 || H < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    drawLabScene(ctx, W, H);
+  }
+
+  function drawLabScene(ctx, W, H) {
+    const u = Math.min(W, H);
+    const t = (Date.now() % 100000) / 1000;
+
+    /* かべ（いたばりの こうぼう）*/
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#5b4630'); g.addColorStop(1, '#3b2c1d');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(0,0,0,.20)'; ctx.lineWidth = Math.max(1, H * 0.004);
+    for (let y = H * 0.06; y < H * 0.72; y += u * 0.085) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    /* どうぐが かかった かべ（のこぎり・スパナ・ハンマー）*/
+    ctx.strokeStyle = '#2b1f14'; ctx.lineWidth = Math.max(2, u * 0.008);
+    ctx.beginPath(); ctx.moveTo(W * 0.04, H * 0.20); ctx.lineTo(W * 0.30, H * 0.20); ctx.stroke();
+    ['🔧', '🔨', '🪛', '📏'].forEach((ic, i) => {
+      ctx.font = (u * 0.075) + 'px system-ui, "Apple Color Emoji", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(ic, W * (0.07 + i * 0.065), H * 0.21);
+    });
+
+    /* たな（できた そうびが ならんで いる）*/
+    ctx.fillStyle = '#6b5236';
+    ctx.fillRect(W * 0.62, H * 0.30, W * 0.34, H * 0.022);
+    const bag = gearBag();
+    const names = Object.keys(bag).filter(k => bag[k] > 0).slice(0, 5);
+    names.forEach((k, i) => {
+      const gd = gearDef(k);
+      if (!gd) return;
+      ctx.font = (u * 0.062) + 'px system-ui, "Apple Color Emoji", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(gd.icon, W * (0.66 + i * 0.065), H * 0.30);
+    });
+
+    /* かんばん */
+    ctx.save();
+    ctx.translate(W * 0.5, H * 0.095);
+    ctx.fillStyle = '#2a1c10'; ctx.strokeStyle = '#ffb74d';
+    ctx.lineWidth = Math.max(2, u * 0.008);
+    roundRectPath(ctx, -u * 0.24, -u * 0.05, u * 0.48, u * 0.10, u * 0.02);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ffe0b2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '900 ' + (u * 0.05) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText('かいはつしつ', 0, 0);
+    ctx.restore();
+
+    /* ネコソ（さぎょうだいの むこうがわ）*/
+    const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS.nekoso : null;
+    if (fn) {
+      ctx.save();
+      ctx.translate(W * 0.5, H * 0.88);
+      const sc = (H * 0.60) / 180;
+      ctx.scale(sc, sc);
+      fn(ctx, { t: t });
+      ctx.restore();
+    }
+
+    /* さぎょうだい */
+    const cy = H * 0.70;
+    ctx.fillStyle = '#4e3a24';
+    ctx.fillRect(0, cy + H * 0.05, W, H - cy - H * 0.05);
+    ctx.fillStyle = '#8d6e4a';
+    roundRectPath(ctx, -W * 0.02, cy, W * 1.04, H * 0.075, H * 0.02);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.14)';
+    ctx.fillRect(0, cy + H * 0.006, W, H * 0.012);
+    /* だいの うえの かなづちと ねじ */
+    ctx.font = (u * 0.075) + 'px system-ui, "Apple Color Emoji", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText('🔩', W * 0.14, cy + H * 0.002);
+    ctx.fillText('🧰', W * 0.86, cy + H * 0.004);
+
+    /* ★そうびのもと（きょうの ぶんが まだ の ときだけ キラキラ）*/
+    if (nekosoReady()) drawCoreGem(ctx, u, W * 0.74, cy - u * 0.01, t);
+
+    /* てもとの あかり */
+    const warm = ctx.createRadialGradient(W * 0.5, H * 0.42, u * 0.05, W * 0.5, H * 0.60, Math.max(W, H) * 0.8);
+    warm.addColorStop(0, 'rgba(255,214,140,.14)');
+    warm.addColorStop(1, 'rgba(0,0,0,.34)');
+    ctx.fillStyle = warm; ctx.fillRect(0, 0, W, H);
+  }
+
+  /* --- そうびのもと（さぎょうだいの うえで ひかって いる）--- */
+  function drawCoreGem(ctx, u, cx, cy, t) {
+    const r = u * 0.055;
+    const pulse = 0.85 + Math.sin(t * 3) * 0.15;
+    ctx.save();
+    const glow = ctx.createRadialGradient(cx, cy - r, 1, cx, cy - r, r * 3.0 * pulse);
+    glow.addColorStop(0, 'rgba(206,147,216,.55)');
+    glow.addColorStop(1, 'rgba(206,147,216,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(cx, cy - r, r * 3.0 * pulse, 0, Math.PI * 2); ctx.fill();
+    /* ひしがたの たま */
+    ctx.fillStyle = '#ba68c8'; ctx.strokeStyle = '#4a148c';
+    ctx.lineWidth = Math.max(1.5, u * 0.006);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 2.1);
+    ctx.lineTo(cx + r, cy - r);
+    ctx.lineTo(cx, cy);
+    ctx.lineTo(cx - r, cy - r);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.6)';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.3, cy - r * 1.5);
+    ctx.lineTo(cx + r * 0.1, cy - r * 1.1);
+    ctx.lineTo(cx - r * 0.3, cy - r * 0.7);
+    ctx.lineTo(cx - r * 0.55, cy - r * 1.1);
+    ctx.closePath(); ctx.fill();
+    /* キラキラ */
+    ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = Math.max(1, u * 0.004);
+    for (let i = 0; i < 3; i++) {
+      const a = t * 1.4 + i * 2.1;
+      const d = r * (1.9 + 0.3 * Math.sin(t * 2 + i));
+      const x = cx + Math.cos(a) * d, y = cy - r + Math.sin(a) * d * 0.7;
+      ctx.beginPath();
+      ctx.moveTo(x - 3, y); ctx.lineTo(x + 3, y);
+      ctx.moveTo(x, y - 3); ctx.lineTo(x, y + 3);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   /* =================================================
      ★「1日 1かい」の かぞえかた（v6.33 で かえました）
 
@@ -7744,6 +8283,14 @@
         $('#result-sub').textContent += '　／　★' + w.icon + w.name + 'の たま を てにいれた！';
         if (typeof Sound !== 'undefined') Sound.se('rare');
       }
+      /* ★ふしぎ遊園地の 7コースめを はじめて クリアすると
+           「そうびのもと」が 1つ もらえます（かいはつしつの かなめ）*/
+      if (Game.stage.gearCore && !(slot() && slot().cleared && slot().cleared[Game.stage.no])) {
+        addCore(Game.stage.gearCore);
+        $('#result-sub').textContent +=
+          '　／　★' + GEAR_CORE.icon + GEAR_CORE.name + ' ＋' + Game.stage.gearCore + '！　にわの おくの かいはつしつで つかえるよ';
+        if (typeof Sound !== 'undefined') Sound.se('rare');
+      }
       markCleared(Game.stage.no);
       recordSeen();
       const rush = giveBossRushReward();      // ★ボスラッシュ ぜんクリアの ごほうび
@@ -7881,6 +8428,21 @@
     const sb = $('#btn-room-scene'); if (sb) sb.addEventListener('click', switchScene);
     const sc = $('#btn-store-close'); if (sc) sc.addEventListener('click', closeStore);
     const mb = $('#btn-room-mix');   if (mb) mb.addEventListener('click', openMix);
+    /* ★にわの おくの かいはつしつ */
+    const lg = $('#btn-room-lab');
+    if (lg) lg.addEventListener('click', () => {
+      if (!labUnlocked()) {
+        toast('まだ とびらが あかないよ。' + ((typeof LAB !== 'undefined') ? LAB.needText : ''));
+        return;
+      }
+      stopRoomLoop();
+      openLab();
+    });
+    const lbk = $('#btn-lab-back');   if (lbk) lbk.addEventListener('click', closeLab);
+    const lnk = $('#btn-lab-nekoso'); if (lnk) lnk.addEventListener('click', nekosoTalk);
+    const gc  = $('#btn-gear-close'); if (gc)  gc.addEventListener('click', closeGearPick);
+    const dy  = $('#btn-dev-yes');    if (dy)  dy.addEventListener('click', doDevConfirmed);
+    const dn  = $('#btn-dev-no');     if (dn)  dn.addEventListener('click', closeDevAsk);
     const mc = $('#btn-mix-close');  if (mc) mc.addEventListener('click', closeMix);
     const mg = $('#btn-mix-go');     if (mg) mg.addEventListener('click', askMix);
     const my = $('#btn-mixask-yes'); if (my) my.addEventListener('click', doMix);

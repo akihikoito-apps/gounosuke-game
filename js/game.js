@@ -107,6 +107,16 @@ const Game = {
 
   /* みかたを しょうかんする */
   /* しんかずみ なら しんかごの データを かえす */
+  /* ★そうびひん（かいはつしつで つくった もの）
+       Game.gear = { なかまの id: そうびの id } の かたちで もらいます。
+       ついて いなければ null。                                      */
+  gearEffOf(id) {
+    if (!this.gear || !this.gear[id]) return null;
+    if (typeof GEARS === 'undefined') return null;
+    const g = GEARS.find(x => x.id === this.gear[id]);
+    return (g && g.eff) ? g.eff : null;
+  },
+
   defOf(id) {
     const base = UNITS[id];
     if (!base) return null;
@@ -115,7 +125,24 @@ const Game = {
     let d = null;
     if (this.evolved  && this.evolved[id]  && base.evolve)  d = Object.assign({}, base, base.evolve);
     if (this.evolved2 && this.evolved2[id] && base.evolve2) d = Object.assign({}, d || base, base.evolve2);
-    return d ? Object.assign(d, { id: id }) : base;
+    let out = d ? Object.assign(d, { id: id }) : base;
+
+    /* ★そうびひんの ぶんを うわのせ します。
+       もとの UNITS は さわらない ように、かならず コピーに かきます。
+       のこりの こうか（vs・guard・crit・pierce）は gearEff に いれて
+       おいて、ダメージの ところで つかいます。                    */
+    const ge = this.gearEffOf(id);
+    if (ge) {
+      out = Object.assign({}, out, { id: id, gearEff: ge });
+      if (ge.hp)       out.hp       = Math.round(out.hp  * ge.hp);
+      if (ge.atk)      out.atk      = Math.round(out.atk * ge.atk);
+      if (ge.speed)    out.speed    = Math.max(1, Math.round(out.speed * ge.speed));
+      if (ge.range)    out.range    = out.range + ge.range;
+      if (ge.kb)       out.kbCount  = (out.kbCount || 1) + ge.kb;
+      if (ge.recharge) out.recharge = Math.max(0.5, Math.round(out.recharge * ge.recharge * 10) / 10);
+      if (ge.cost)     out.cost     = Math.max(1, Math.round(out.cost * ge.cost));
+    }
+    return out;
   },
 
   summon(id) {
@@ -810,6 +837,7 @@ const Game = {
       x: x, y: y, dir: u.forward, side: u.side,
       atk: this.liveAtk(u) * (w.damageRate === undefined ? 1 : w.damageRate),
       attr: u.def.attr,
+      pierce: !!(u.def.gearEff && u.def.gearEff.pierce),   /* ★そうびひんの つきぬけ */
       left: (w.level || 1) * cf.step,     // あと どれだけ すすめるか
       hit: [],                             // もう あてた あいて
       age: 0,
@@ -913,6 +941,17 @@ const Game = {
     const bonus  = src.def ? (src.def.bonusVs || null) : (src.bonusVs || null);
     const weaken = src.def ? (src.def.weaken || null) : (src.weaken || null);
     const burn   = src.def ? (src.def.burn   || null) : (src.burn   || null);
+    /* ★そうびひんの こうか（vs＝とくいな あいて／crit＝かいしん／pierce＝つきぬけ）*/
+    const ge     = (src.def && src.def.gearEff) ? src.def.gearEff : null;
+    const gearVs = ge ? (ge.vs || null) : null;
+    const pierce = !!(ge && ge.pierce);
+    let critUse = crit;
+    if (ge && ge.crit) {
+      critUse = crit
+        ? Object.assign({}, crit, {
+            chance: Math.min(1, (crit.chance === undefined ? 1 : crit.chance) + (ge.crit.chance || 0)) })
+        : ge.crit;
+    }
 
     if (target && target.castle) {
       const dmg = Math.round(atk * CONFIG.castleDamageRate);
@@ -944,6 +983,10 @@ const Game = {
       }
       // ★きめられた ぞくせいの こうげきを おさえる（たたみん）
       //   ふつうより ちいさく なる ときだけ てきよう します
+      /* ★そうびひん：きめた ぞくせいの あいてに よぶんに ダメージ */
+      if (gearVs && gearVs.attrs && attrList(v.def.attr).some(x => gearVs.attrs.indexOf(x) >= 0)) {
+        mult *= (gearVs.mult || 1.1);
+      }
       const rs = v.def.resist;
       if (rs && rs.attrs && attrList(attr).some(x => rs.attrs.indexOf(x) >= 0)) {
         mult = Math.min(mult, rs.mult);
@@ -952,14 +995,14 @@ const Game = {
       const wmul = this.weatherMult ? this.weatherMult(attr) : 1;
       let dmg = Math.round(atk * mult * wmul);
       let isCrit = false;
-      if (crit && Math.random() < ((crit.chance === undefined) ? 1 : crit.chance)) {
+      if (critUse && Math.random() < ((critUse.chance === undefined) ? 1 : critUse.chance)) {
         // ignoreAttr の とき は「もとの こうげきりょく × ばいりつ」。
         // あいしょうの ゆうり／ふりは まったく けいさんに いれない
-        dmg = crit.ignoreAttr ? Math.round(atk * (crit.mult || 2) * wmul)
-                              : Math.round(dmg * (crit.mult || 2));
+        dmg = critUse.ignoreAttr ? Math.round(atk * (critUse.mult || 2) * wmul)
+                                 : Math.round(dmg * (critUse.mult || 2));
         isCrit = true;
       }
-      this.damageUnit(v, dmg, attr, mult, false, isCrit);
+      this.damageUnit(v, dmg, attr, mult, false, isCrit, pierce);
       /* ★きゅうけつ：あたえた ダメージの ぶんだけ じぶんが かいふく する
            （チューチューは ちを すって こうげきします）*/
       const drain = src.def ? (src.def.drain || null) : (src.drain || null);
@@ -1046,7 +1089,7 @@ const Game = {
   },
 
   /* ---- ダメージ ---- */
-  damageUnit(u, dmg, attr, mult, noNumber, isCrit) {
+  damageUnit(u, dmg, attr, mult, noNumber, isCrit, pierce) {
     if (u.dead) return;
 
     /* ★かいひ：きめられた かくりつで こうげきを かわす（チューチュー）*/
@@ -1063,14 +1106,21 @@ const Game = {
     if (nu && attr && nu.attrs) {
       const list = attrList(attr);
       if (list.length === 1 && nu.attrs.indexOf(list[0]) >= 0) {
-        /* ★ここが いちばん だいじ：こうげきが まったく きいて いない。
-           「すりぬけ！」では わかりにくい ので、はっきり しらせます。 */
-        if (typeof Sound !== 'undefined') Sound.se('nullify');
-        this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 118 - u.lane,
-                         text: 'きかない！', color: '#b39ddb', life: 1.0, big: true });
-        this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 60 - u.lane,
-                         text: 'すりぬけ', color: '#b39ddb', life: 0.75 });
-        return;
+        /* ★そうびひん「おはらいの おふだ」を もって いる なかまの こうげきは、
+             むこうかを つきぬけて ふつうに ダメージを あたえます。      */
+        if (pierce) {
+          this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 118 - u.lane,
+                           text: 'つきぬけた！', color: '#ffd54f', life: 0.9, big: true });
+        } else {
+          /* ★ここが いちばん だいじ：こうげきが まったく きいて いない。
+             「すりぬけ！」では わかりにくい ので、はっきり しらせます。 */
+          if (typeof Sound !== 'undefined') Sound.se('nullify');
+          this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 118 - u.lane,
+                           text: 'きかない！', color: '#b39ddb', life: 1.0, big: true });
+          this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 60 - u.lane,
+                           text: 'すりぬけ', color: '#b39ddb', life: 0.75 });
+          return;
+        }
       }
     }
 
@@ -1088,6 +1138,15 @@ const Game = {
                        text: got > 0 ? ('＋' + got) : 'すいとった！',
                        color: '#69f0ae', life: 0.75, big: true });
       return;
+    }
+
+    /* ★そうびひんの まもり（みずよけの マント など）。
+         きめた ぞくせいの こうげきを うけにくく なります。          */
+    const gg = (u.def.gearEff && u.def.gearEff.guard) ? u.def.gearEff.guard : null;
+    if (gg && gg.attrs && attr && attrList(attr).some(x => gg.attrs.indexOf(x) >= 0)) {
+      dmg = Math.max(1, Math.round(dmg * (gg.mult === undefined ? 0.7 : gg.mult)));
+      this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 100 - u.lane,
+                       text: 'まもった！', color: '#4fc3f7', life: 0.7 });
     }
 
     // きゅうけいちゅうは よけいに ダメージを うける
@@ -1220,7 +1279,7 @@ const Game = {
         }
         const mult = attrMultiplier(w.attr, o.def.attr);
         const wm = this.weatherMult ? this.weatherMult(w.attr) : 1;
-        this.damageUnit(o, Math.round(w.atk * mult * wm), w.attr, mult, false, false);
+        this.damageUnit(o, Math.round(w.atk * mult * wm), w.attr, mult, false, false, w.pierce);
       }
       if (stopped) { this.shocks.splice(i, 1); continue; }
       if (w.left <= 0 || w.x < -60 || w.x > CONFIG.fieldLength + 60) this.shocks.splice(i, 1);

@@ -1,14 +1,28 @@
 # STATUS — ごうのすけゲーム
 
 状態: 🟢 順調
-今やっていること: 効果音（sound.js）の自動チェック tests/sound.test.js（11件）を追加（10/7・ゲーム本体は変更なし）
-次の一手: `node tests/sound.test.js` と `node tests/gimmicks.test.js` を実行して全件 ok を確認し、本部ランナーに tests\*.test.js の実行を足す
-ブロッカー: 作業環境で node の実行が許可されず、tests/ の2本とも未実行（手で読んで確認のみ）。本部ランナーは js\*.js の構文チェックだけなので tests\ は対象外
-最終更新: 2026-10-07（Claude）
+今やっていること: v6.56「ごうのすけの かいはつしつ」（そうびひん16種・ネコソ）を実装し、あわせて v6.53〜6.55 の画面切り替えが壊れていた不具合を修正（10/14）
+次の一手: ユーザーに v6.56 を報告。希望があれば装備品の追加（属性別の特効・回復系）とレベル20→30の経験値傾斜の見直し
+ブロッカー: なし（node 実行可。tests/ 4本=43件すべて実行して ok）
+最終更新: 2026-10-14（Claude）
 
 <!-- 上の5行は本部（_hq）が読む。行の頭の言葉は変えないこと。詳しいメモはこの下に自由に書いてよい。 -->
 
+## v6.53〜6.55 の不具合（重要・修正済み）
+- 症状: タイトルで「はじめる」を押しても画面が変わらない。以降すべての画面遷移が動かない。
+- 原因: `js/main.js` の `show()` が `$$('.screen').forEach(...)` だったものが `$('.screen').forEach(...)` に変わっていた。`$` は querySelector（1件）なので forEach が無く TypeError。
+- 混入経路: v6.53 の作業で使ったパッチスクリプトが `String.replace(a, b)` を使っており、置換文字列の `$$` が「$ 1個」として解釈された（JS の置換パターン仕様）。
+- 対策: パッチ用 `sub()` は `replace(a, () => b)` に変更。さらに `tests/selectors.test.js` を追加して、`$(...)` に forEach/map 等を繋いでいないか・`show()` が `$$` を使っているか・main.js が参照する id が index.html に存在するか・main.js と sw.js のバージョンが揃っているかを自動チェックするようにした。
+
+## テスト（すべて node で実行、2026-10-14）
+- `node tests/gear.test.js` 17件 ok（装備品の定義・ステータス反映・UNITS 非破壊・vs/pierce/guard の戦闘内挙動・開放条件）
+- `node tests/gimmicks.test.js` 10件 ok
+- `node tests/selectors.test.js` 5件 ok
+- `node tests/sound.test.js` 11件 ok
+- 画面操作の通しテスト（jsdom、scratchpad の uitest.js）: タイトル→庭→開発室→開発→装備→編成表示→外す まで全 ok
+- 全コース描画・ロジックの通しテスト（scratchpad の rt.js）: 130コース・描画 12,574回 エラーなし
+
 ## 本部の作業記録
-- 2026-10-07 Claude: 天気（てんきだま含む）と動く床のチェック10件を入れた tests/gimmicks.test.js を追加したが、node の実行が許可されず未実行のまま。
-- 2026-10-07 Claude: tests/sound.test.js を追加（にせ AudioContext で鳴った音の数を数える方式）。確かめる内容：AudioContext がない環境・最初のタップ前でもエラーにならず鳴らない／主な効果音24種とゲーム内で呼んでいる名前がすべて鳴る／知らない名前は無視／効果音オフ・BGMオフでは鳴らず予約もしない／最初のタップで目覚めて頼まれていた BGM が流れる。node の実行が許可されず未実行。手で sound.js と突き合わせて、にせ AudioContext が使われるメソッド（createGain・createOscillator・createBuffer・createBufferSource・createBiquadFilter・各 param の ramp 系）を全部そろえていることを確認した。
-- 2026-10-07 Claude: 効果音（sound.js）を確かめる tests/sound.test.js（11件）を追加し、node が使えないため未実行と明記して手で読んだ確認内容を STATUS.md に記録した（ゲーム本体は変更なし）
+- 2026-10-14 Claude: v6.56 ごうのすけの かいはつしつ（にわの奥・受付ネコソ）。装備品16種、そうびのもと（ふしぎ遊園地7コース目クリアで1つ＋ネコソが1日1つ）、装備の戦闘反映（hp/atk/speed/range/kb/recharge/cost/vs/guard/crit/pierce）。あわせて v6.53〜6.55 の画面遷移バグを修正し、再発防止の自動チェックを追加。
+- 2026-10-07 Claude: 天気（てんきだま含む）と動く床のチェック10件を入れた tests/gimmicks.test.js を追加したが、node の実行が許可されず未実行のまま。→ 10/14 に実行して10件 ok を確認。
+- 2026-10-07 Claude: tests/sound.test.js を追加（にせ AudioContext で鳴った音の数を数える方式）。確かめる内容：AudioContext がない環境・最初のタップ前でもエラーにならず鳴らない／主な効果音24種とゲーム内で呼んでいる名前がすべて鳴る／知らない名前は無視／効果音オフ・BGMオフでは鳴らず予約もしない／最初のタップで目覚めて頼まれていた BGM が流れる。→ 10/14 に実行して11件 ok を確認。
