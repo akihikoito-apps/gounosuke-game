@@ -38,7 +38,8 @@ export const forest: SceneDef = {
   regions: [
     { id: 'ground', costume: 'plain', shapes: [{ kind: 'rect', x: 0, y: 460, w: 1000, h: 540 }] },
     { id: 'tent', costume: 'stripes', shapes: [{ kind: 'rect', x: 30, y: 250, w: 330, h: 404, rx: 8 }] },
-    { id: 'mushroom', costume: 'dots', shapes: [{ kind: 'rect', x: 580, y: 410, w: 390, h: 244, rx: 40 }] },
+    // ジャンボきのこの傘：上は まるい ドーム、下は 平ら（四角い板に見えないように）
+    { id: 'mushroom', costume: 'dots', shapes: [{ kind: 'poly', pts: [{ x: 563, y: 600 }, { x: 567, y: 563 }, { x: 579, y: 527 }, { x: 599, y: 494 }, { x: 625, y: 465 }, { x: 657, y: 441 }, { x: 694, y: 424 }, { x: 734, y: 413 }, { x: 775, y: 409 }, { x: 816, y: 413 }, { x: 856, y: 424 }, { x: 893, y: 441 }, { x: 925, y: 465 }, { x: 951, y: 494 }, { x: 971, y: 527 }, { x: 983, y: 563 }, { x: 987, y: 600 }, { x: 987, y: 654 }, { x: 563, y: 654 }] }] },
     { id: 'bush', costume: 'leaf', shapes: [{ kind: 'rect', x: 370, y: 760, w: 560, h: 212, rx: 48 }] },
   ],
   decor:
