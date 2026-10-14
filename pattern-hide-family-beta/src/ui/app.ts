@@ -44,8 +44,8 @@ import { renderScene, sceneThumb } from './sceneView';
 import { ParentArea } from './parent';
 import { NATIVE } from './platform';
 import { type UpcomingReward, friendAtCourse, upcomingRewards } from '../core/rewards';
-import { type MoverDef, pickMovers } from '../core/movers';
-import { moversMarkup } from './moverView';
+import { HIDE_MOVERS_MAX, MOVERS, MOVER_NAMES, type MoverDef, pickMovers } from '../core/movers';
+import { moverIcon, moversMarkup } from './moverView';
 import { MyRoomView } from './myroomView';
 import { ROOMS, itemForSticker, openRooms, ownedItems } from '../core/myroom';
 
@@ -97,6 +97,8 @@ export class App {
   private courseRoundIdx = 0;
   /** コースの うごくもの と、出題が始まった時刻（描き直しても位置が飛ばないように） */
   private movers: MoverDef[] = [];
+  /** かくして わたす：隠す人が選んだ うごくもの（id） */
+  private hideMovers: string[] = [];
   private myroom = new MyRoomView({
     chars: () => this.allowedChars(),
     items: () => ownedItems(this.progress(), this.can),
@@ -247,7 +249,7 @@ export class App {
       <div class="title-actions">
         ${btn('toCourse', ICONS.course, 'コースで あそぶ', 'big primary', 'data-autofocus')}
         <div class="title-row">
-          ${btn('toSearch', ICONS.search, 'さがす', 'mid')}
+          ${btn('toSearch', ICONS.search, 'じゆうに さがす', 'mid')}
           ${btn('toHide', ICONS.hide, 'かくして わたす', 'mid secondary')}
         </div>
         ${btn('toMyRoom', ICONS.room, 'じぶんの へや', 'mid myroom-btn')}
@@ -425,7 +427,7 @@ export class App {
       shade: s.origin === 'trial' ? HARDEST.shade : 1,
       hint: currentHint(scene, s),
       title: `${scene.name}。かくれている こを さがして タッチ`,
-      movers: s.origin === 'course' && this.movers.length ? moversMarkup('g-', this.movers, (performance.now() - this.moverStart) / 1000) : undefined,
+      movers: (s.origin === 'course' || s.origin === 'hide') && this.movers.length ? moversMarkup('g-', this.movers, (performance.now() - this.moverStart) / 1000) : undefined,
     });
   }
 
@@ -621,8 +623,28 @@ export class App {
         ${btn('undo', ICONS.undo, 'とりけし', 'round', d.history.length ? '' : 'disabled')}
         ${btn('hideDone', ICONS.done, 'できた', 'round done-btn', allPlaced(d) ? '' : 'disabled')}
       </div>
+      ${this.hideMoversHtml()}
       <div class="stage" id="stage">${this.editSvg()}</div>
     </main>`;
+  }
+
+  /** かくして わたす：うごくもの を足す（3つまで）。前を通っても すぐ いなくなるので、ずっと隠れることはない */
+  private hideMoversHtml(): string {
+    const scene = this.draft.sceneId as SceneId | null;
+    if (!scene) return '';
+    const full = this.hideMovers.length >= HIDE_MOVERS_MAX;
+    const chips = MOVERS[scene]
+      .map((m) => {
+        const on = this.hideMovers.includes(m.id);
+        return `<button type="button" class="mv-chip${on ? ' on' : ''}" data-action="toggleMover" data-mover="${m.id}" aria-pressed="${on}" aria-label="${MOVER_NAMES[m.kind]}" ${!on && full ? 'disabled' : ''}>${moverIcon(m.kind)}</button>`;
+      })
+      .join('');
+    return `<div class="mv-pick" role="group" aria-label="うごくもの"><span class="mv-pick-lbl">うごくもの<small>${this.hideMovers.length}/${HIDE_MOVERS_MAX}</small></span>${chips}</div>`;
+  }
+
+  private selectedHideMovers(): MoverDef[] {
+    const scene = this.draft.sceneId as SceneId | null;
+    return scene ? MOVERS[scene].filter((m) => this.hideMovers.includes(m.id)) : [];
   }
 
   private editSvg(): string {
@@ -641,6 +663,7 @@ export class App {
       candidates: d.selected ? freeSpots(scene, occupiedByOthers) : [],
       selectedChar: d.selected,
       title: `${scene.name}。かくす ばしょを えらんでね`,
+      movers: this.hideMovers.length ? moversMarkup('e-', this.selectedHideMovers(), (performance.now() - this.moverStart) / 1000) : undefined,
     });
   }
 
@@ -697,6 +720,7 @@ export class App {
         break;
       case 'toHide':
         this.draft = emptyDraft();
+        this.hideMovers = [];
         this.multi = false;
         this.go('hideScene');
         break;
@@ -756,6 +780,7 @@ export class App {
         break;
       case 'hidePickScene':
         this.draft = chooseScene(this.draft, el.dataset.scene as SceneId);
+        this.hideMovers = [];
         this.draft = setChars(this.draft, ['koro'], SCENES[this.draft.sceneId as SceneId]);
         this.go('hideChars');
         break;
@@ -802,6 +827,14 @@ export class App {
       case 'hideDone':
         this.onHideDone();
         break;
+      case 'toggleMover': {
+        const id = el.dataset.mover as string;
+        if (this.hideMovers.includes(id)) this.hideMovers = this.hideMovers.filter((x) => x !== id);
+        else if (this.hideMovers.length < HIDE_MOVERS_MAX && MOVERS[this.draft.sceneId as SceneId]?.some((m) => m.id === id)) this.hideMovers = [...this.hideMovers, id];
+        if (this.hideMovers.length === 1) this.moverStart = performance.now();
+        this.render();
+        break;
+      }
       case 'handoffBack':
         this.session = null;
         this.clearResume();
@@ -1036,6 +1069,7 @@ export class App {
       return;
     }
     this.session = newSession(scene.id, 'normal', placements, 'hide', Date.now());
+    this.movers = this.selectedHideMovers();
     this.saveResume();
     this.go('handoff', 700);
   }
@@ -1045,12 +1079,15 @@ export class App {
     record(this.store, { type: 'hideRound' });
     record(this.store, { type: 'searchStarted' });
     this.session = { ...this.session, startedAt: Date.now() };
+    this.moverStart = performance.now();
     this.go('play');
   }
 
   private resume(): void {
     const r = this.store.data.resume;
     if (!r) return;
+    // 途中からの再開では、うごくもの は出さない（保存していない）
+    this.movers = [];
     // 遊べない背景・友だちの途中からは再開しない（保存データは購入の証明ではない）
     if (!canResume(r, this.can)) return this.render();
     this.session = { ...newSession(r.sceneId, r.difficulty, r.placements, r.origin, Date.now()), found: r.found.slice() };

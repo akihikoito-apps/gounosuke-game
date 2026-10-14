@@ -56,6 +56,22 @@ export const MOVERS: Record<SceneId, MoverDef[]> = {
   ],
 };
 
+/** かくして わたす で、隠す人が選べる うごくもの の数 */
+export const HIDE_MOVERS_MAX = 3;
+
+export const MOVER_NAMES: Record<MoverKind, string> = {
+  bird: 'ことり',
+  butterfly: 'ちょうちょ',
+  cloud: 'くも',
+  cat: 'ねこ',
+  puppy: 'こいぬ',
+  balloon: 'ふうせん',
+  seagull: 'かもめ',
+  sailboat: 'ヨット',
+  crab: 'かに',
+  ball: 'ボール',
+};
+
 /** コースごとの うごくものの数（コース1は なし） */
 export const COURSE_MOVERS = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5];
 /** このコースから、友だちの前を通るもの も出る */

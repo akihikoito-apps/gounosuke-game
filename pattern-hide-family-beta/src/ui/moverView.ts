@@ -61,6 +61,29 @@ function one(P: string, m: MoverDef, elapsed: number): string {
   return `<clipPath id="${id}"><rect x="${m.clip.x}" y="${m.clip.y}" width="${m.clip.w}" height="${m.clip.h}"/></clipPath><g clip-path="url(#${id})">${g}</g>`;
 }
 
+/** 絵の実際の範囲（x, y, 幅, 高さ。art/movers を測った値）。選ぶボタンで大きく見せるため */
+const BOX: Record<MoverKind, [number, number, number, number]> = {
+  balloon: [-34, -128, 67, 127],
+  bird: [-32, -58, 66, 55],
+  butterfly: [-30, -42, 60, 43],
+  cat: [-63, -75, 127, 75],
+  cloud: [-119, -91, 238, 90],
+  crab: [-44, -51, 87, 51],
+  puppy: [-57, -69, 116, 69],
+  sailboat: [-53, -103, 106, 101],
+  seagull: [-44, -62, 88, 60],
+  ball: [-30, -62, 60, 62],
+};
+
+/** 選ぶボタン用の絵（その絵の大きさに合わせて切り取る） */
+export function moverIcon(kind: MoverKind): string {
+  const [x, y, w, h] = BOX[kind];
+  const size = Math.max(w, h) * 1.15;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  return `<svg viewBox="${cx - size / 2} ${cy - size / 2} ${size} ${size}" aria-hidden="true" focusable="false">${art(kind)}</svg>`;
+}
+
 export function moversMarkup(P: string, movers: MoverDef[], elapsed: number): { back: string; front: string } {
   return {
     back: movers.filter((m) => m.layer === 'back').map((m) => one(P, m, elapsed)).join(''),
