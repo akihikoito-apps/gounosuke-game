@@ -43,7 +43,16 @@ describe('じぶんの へや', () => {
     expect(validLayouts({ living: [{ ref: 'char:koro', x: 'a', y: 1 }] }, CHARACTER_IDS)).toEqual({});
     expect(validLayouts({ living: [{ ref: 'char:koro', x: 1, y: 1, on: { idx: 0, seat: 0 } }] }, CHARACTER_IDS)).toEqual({}); // 自分の上には座れない
     expect(validLayouts({ living: [{ ref: 'item:sofa', x: 1, y: 1 }, { ref: 'char:koro', x: 1, y: 1, on: { idx: 0, seat: 1 } }] }, CHARACTER_IDS).living).toHaveLength(2);
-    expect(validLayouts({ living: Array.from({ length: 41 }, () => ({ ref: 'item:ball', x: 1, y: 1 })) }, CHARACTER_IDS)).toEqual({});
+    expect(validLayouts({ living: Array.from({ length: 41 }, (_, i) => ({ ref: i % 2 ? 'item:ball' : 'item:sofa', x: 1, y: 1 })) }, CHARACTER_IDS)).toEqual({});
     expect(validLayouts(null, CHARACTER_IDS)).toEqual({});
+    // Codex レビュー96 指摘3：無い座席・物どうし・お互いに座る・同じ席・同じ物2つ・部屋の外
+    const sw = { ref: 'item:swing', x: 500, y: 800 };
+    expect(validLayouts({ living: [sw, { ref: 'char:koro', x: 1, y: 1, on: { idx: 0, seat: 99 } }] }, CHARACTER_IDS)).toEqual({});
+    expect(validLayouts({ living: [sw, { ref: 'item:ball', x: 1, y: 1, on: { idx: 0, seat: 0 } }] }, CHARACTER_IDS)).toEqual({});
+    expect(validLayouts({ living: [{ ref: 'char:koro', x: 1, y: 1, on: { idx: 1, seat: 0 } }, { ref: 'char:mimi', x: 1, y: 1, on: { idx: 0, seat: 0 } }] }, CHARACTER_IDS)).toEqual({});
+    expect(validLayouts({ living: [sw, { ref: 'char:koro', x: 1, y: 1, on: { idx: 0, seat: 0 } }, { ref: 'char:mimi', x: 1, y: 1, on: { idx: 0, seat: 0 } }] }, CHARACTER_IDS)).toEqual({});
+    expect(validLayouts({ living: [sw, sw] }, CHARACTER_IDS)).toEqual({});
+    expect(validLayouts({ living: [{ ref: 'item:ball', x: -5, y: 1 }] }, CHARACTER_IDS)).toEqual({});
+    expect(validLayouts({ living: [{ ref: 'item:ballx', x: 5, y: 1 }] }, CHARACTER_IDS)).toEqual({});
   });
 });

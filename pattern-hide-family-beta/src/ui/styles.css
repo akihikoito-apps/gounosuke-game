@@ -574,3 +574,12 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
   .screen.myroom > .mr-tray { grid-column: 2; grid-row: 2; border-top: none; border-left: 4px solid var(--line); border-radius: 22px 0 0 0; min-height: 0; padding: 6px 8px calc(6px + var(--safe-b)); }
   .screen.myroom .mr-cells { flex-wrap: wrap; overflow-x: hidden; overflow-y: auto; align-content: flex-start; touch-action: pan-y; justify-content: center; }
 }
+/* Codex レビュー96：棚はセルの上からでも横に送れる（部屋へは上へ動かして出す）。横向きは縦に送る */
+.mr-cell { touch-action: pan-x; }
+@media (orientation: landscape) and (max-height: 600px) {
+  .screen.myroom .mr-cell { touch-action: pan-y; }
+}
+/* 視差効果を減らす：前を横切るものは出さない（止まったまま顔を隠さないように） */
+@media (prefers-reduced-motion: reduce) {
+  .movers.front { display: none; }
+}

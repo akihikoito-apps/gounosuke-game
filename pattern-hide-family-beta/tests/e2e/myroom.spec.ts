@@ -133,3 +133,56 @@ test('壊れた保存データでも開ける（その部屋だけ初めから�
   await expect(page.locator('[data-screen="myroom"]')).toBeVisible();
   await expect(page.locator('.mr-obj')).toHaveCount(4);
 });
+
+// ---- Codex レビュー96 の指摘の再現 ----
+test('ブランコの子を引っぱると、指の所へ降りる（二重にずれない）', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 9, { layouts: { yard: [{ ref: 'item:swing', x: 500, y: 760 }, { ref: 'char:koro', x: 500, y: 760, on: { idx: 0, seat: 0 } }] }, current: 'yard' });
+  await act(page, 'toMyRoom');
+  await expect(page.locator('#stage.loading')).toHaveCount(0);
+  const rb = (await page.locator('.mr-obj.rider').boundingBox())!;
+  const sx = rb.x + rb.width / 2;
+  const sy = rb.y + rb.height * 0.5;
+  await page.mouse.move(sx, sy);
+  await page.mouse.down();
+  await page.mouse.move(sx + 120, sy + 60, { steps: 8 });
+  const mid = (await page.locator('.mr-obj.mr-char.dragging').boundingBox())!;
+  // 指から大きく離れない（体の中に指がある）
+  expect(Math.abs(mid.x + mid.width / 2 - (sx + 120))).toBeLessThan(mid.width);
+  await page.mouse.up();
+  const m = await saved(page);
+  const k = m.layouts.yard.find((p: { ref: string }) => p.ref === 'char:koro');
+  expect(k.on).toBeUndefined();
+  await expect(page.locator('.mr-obj.rider')).toHaveCount(0);
+});
+
+test('操作の途中で中断（pointercancel）すると、元の並びに もどる', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 0);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('#stage.loading')).toHaveCount(0);
+  const before = await saved(page);
+  const kb = (await page.locator('.mr-obj.mr-char').first().boundingBox())!;
+  await page.mouse.move(kb.x + kb.width / 2, kb.y + kb.height * 0.7);
+  await page.mouse.down();
+  await page.mouse.move(kb.x + kb.width / 2 - 100, kb.y - 300, { steps: 6 });
+  await page.evaluate(() => document.querySelector('main')!.dispatchEvent(new PointerEvent('pointercancel', { pointerId: 1, bubbles: true })));
+  await page.mouse.up();
+  expect(await saved(page)).toEqual(before);
+  const kb2 = (await page.locator('.mr-obj.mr-char').first().boundingBox())!;
+  expect(Math.abs(kb2.x - kb.x)).toBeLessThan(2);
+});
+
+test('横向き：棚の中で指を動かしても、部屋の物は しまわれない', async ({ page }) => {
+  await page.setViewportSize({ width: 852, height: 393 });
+  await fresh(page);
+  await seed(page, 0);
+  await act(page, 'toMyRoom');
+  await page.locator('[data-mr-tab="items"]').click();
+  const cell = (await page.locator('[data-mr-ref="item:sofa"]').boundingBox())!;
+  await page.mouse.move(cell.x + cell.width / 2, cell.y + cell.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(cell.x + cell.width / 2, cell.y + cell.height / 2 + 40, { steps: 6 });
+  await page.mouse.up();
+  await expect(page.locator('.mr-obj')).toHaveCount(4);
+});

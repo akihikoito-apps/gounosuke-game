@@ -143,27 +143,47 @@ export function clampToFloor(room: RoomDef, x: number, y: number): { x: number; 
   return { x: Math.min(960, Math.max(40, x)), y: Math.min(985, Math.max(room.floorTop, y)) };
 }
 
-/** 保存データの検査：壊れていたら、その部屋だけ消す */
+/**
+ * 保存データの検査：壊れていたら、その部屋だけ消す。
+ * 同じ物は1つだけ・座標は部屋の中・座れるのは「友だち」が「座席のある物（それ自体は座っていない）」の「実在する空いた座席」だけ。
+ */
 export function validLayouts(v: unknown, charIds: readonly CharacterId[]): RoomLayouts {
   const out: RoomLayouts = {};
   if (typeof v !== 'object' || v === null) return out;
   for (const r of ROOMS) {
     const arr = (v as Record<string, unknown>)[r.id];
     if (!Array.isArray(arr) || arr.length > MAX_PLACED) continue;
-    const ok = arr.every((p, i) => {
+    const refs = new Set<string>();
+    const shape = arr.every((p) => {
       if (typeof p !== 'object' || p === null) return false;
       const o = p as Record<string, unknown>;
-      if (typeof o.ref !== 'string' || typeof o.x !== 'number' || typeof o.y !== 'number' || !Number.isFinite(o.x) || !Number.isFinite(o.y)) return false;
-      const [kind, id] = o.ref.split(':');
-      if (kind === 'item' ? !ITEM_BY_ID[id] : kind === 'char' ? !charIds.includes(id as CharacterId) : true) return false;
+      if (typeof o.ref !== 'string' || refs.has(o.ref)) return false;
+      refs.add(o.ref);
+      const m = /^(item|char):([a-z0-9-]+)$/.exec(o.ref);
+      if (!m || (m[1] === 'item' ? !ITEM_BY_ID[m[2]] : !charIds.includes(m[2] as CharacterId))) return false;
+      if (typeof o.x !== 'number' || typeof o.y !== 'number' || !(o.x >= 0 && o.x <= 1000 && o.y >= 0 && o.y <= 1000)) return false;
       if (o.flip !== undefined && typeof o.flip !== 'boolean') return false;
-      if (o.on !== undefined) {
-        const on = o.on as Record<string, unknown>;
-        if (typeof on !== 'object' || on === null || !Number.isInteger(on.idx) || !Number.isInteger(on.seat) || (on.idx as number) < 0 || (on.idx as number) >= arr.length || on.idx === i) return false;
-      }
       return true;
     });
-    if (ok) out[r.id] = arr as Placed[];
+    if (!shape) continue;
+    const list = arr as Placed[];
+    const used = new Set<string>();
+    const seats = list.every((p, i) => {
+      if (p.on === undefined) return true;
+      const on = p.on as unknown as Record<string, unknown>;
+      if (typeof on !== 'object' || on === null || !Number.isInteger(on.idx) || !Number.isInteger(on.seat)) return false;
+      const idx = on.idx as number;
+      const seat = on.seat as number;
+      if (!p.ref.startsWith('char:') || idx < 0 || idx >= list.length || idx === i) return false;
+      const base = list[idx];
+      const it = base.ref.startsWith('item:') ? ITEM_BY_ID[base.ref.slice(5)] : undefined;
+      if (!it?.seats || base.on !== undefined || seat < 0 || seat >= it.seats.length) return false;
+      const key = idx + ':' + seat;
+      if (used.has(key)) return false;
+      used.add(key);
+      return true;
+    });
+    if (seats) out[r.id] = list;
   }
   return out;
 }

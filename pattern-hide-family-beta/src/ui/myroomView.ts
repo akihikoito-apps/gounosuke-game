@@ -59,6 +59,7 @@ export interface MyRoomDeps {
 }
 
 type Drag = {
+  /** -1：棚から出す途中（まだ部屋に無い） */
   idx: number;
   pointerId: number;
   dx: number;
@@ -66,7 +67,12 @@ type Drag = {
   startX: number;
   startY: number;
   moved: boolean;
-  fromTray?: boolean;
+  /** 棚から出す物 */
+  ref?: string;
+  /** どの部屋での操作か（切りかえ後に届いた指は無視） */
+  room: RoomId;
+  /** 指を置く前の並び（中断したら もどす） */
+  snapshot: Placed[];
 };
 
 export class MyRoomView {
@@ -83,6 +89,7 @@ export class MyRoomView {
     const open = this.deps.rooms();
     const cur = this.deps.current();
     this.room = open.some((r) => r.id === cur) ? cur : 'living';
+    this.drag = null;
     this.loadRoom();
   }
 
@@ -171,7 +178,7 @@ export class MyRoomView {
       // ブランコ：座っている友だちも板といっしょに ゆれる
       const riders = this.list
         .map((q, j) => ({ q, j }))
-        .filter(({ q }) => q.on?.idx === i)
+        .filter(({ q }) => q.on?.idx === i && !!it.seats?.[q.on.seat])
         .map(({ q, j }) => {
           const seat = it.seats![q.on!.seat];
           const c = CHARACTERS[q.ref.split(':')[1] as CharacterId];
@@ -252,16 +259,19 @@ export class MyRoomView {
   }
 
   // ---------- 操作 ----------
+  // 1本の指だけで操作する。指を置いた時点の並びを覚えておき、中断（pointercancel など）なら元に戻す。
+  // ポインターは画面（main）で受ける（描き直しで押した要素が入れかわっても、離した指を取りこぼさない）。
 
   bind(main: HTMLElement): void {
     this.el = main;
-    const stage = main.querySelector<HTMLElement>('#stage');
-    stage?.addEventListener('pointerdown', (e) => this.onStageDown(e));
+    this.drag = null;
+    main.querySelector<HTMLElement>('#stage')?.addEventListener('pointerdown', (e) => this.onStageDown(e));
     main.addEventListener('pointermove', (e) => this.onMove(e));
     main.addEventListener('pointerup', (e) => this.onUp(e));
-    main.addEventListener('pointercancel', () => this.cancelDrag());
+    main.addEventListener('pointercancel', (e) => this.onCancel(e));
+    main.addEventListener('lostpointercapture', (e) => this.onCancel(e));
     main.addEventListener('click', (e) => this.onClick(e));
-    main.querySelector('.mr-cells')?.addEventListener('pointerdown', (e) => this.onTrayDown(e as PointerEvent));
+    main.addEventListener('pointerdown', (e) => this.onTrayDown(e));
   }
 
   private svgEl(): SVGSVGElement | null {
@@ -273,12 +283,21 @@ export class MyRoomView {
     if (stage) stage.innerHTML = this.svg();
     const tray = this.el?.querySelector<HTMLElement>('.mr-tray');
     if (tray) {
+      const scroll = tray.querySelector('.mr-cells');
+      const sx = scroll?.scrollLeft ?? 0;
+      const sy = scroll?.scrollTop ?? 0;
       tray.outerHTML = this.trayHtml();
-      this.el?.querySelector('.mr-cells')?.addEventListener('pointerdown', (e) => this.onTrayDown(e as PointerEvent));
+      const n = this.el?.querySelector('.mr-cells');
+      if (n) {
+        n.scrollLeft = sx;
+        n.scrollTop = sy;
+      }
     }
   }
 
   private onClick(e: MouseEvent): void {
+    // 操作の途中で、タブや部屋を切りかえない（別の部屋の物を動かしてしまうため）
+    if (this.drag) return;
     const t = e.target as HTMLElement;
     const tab = t.closest<HTMLElement>('[data-mr-tab]');
     if (tab) {
@@ -288,23 +307,29 @@ export class MyRoomView {
       return;
     }
     const rt = t.closest<HTMLElement>('[data-mr-room]');
-    if (rt && rt.dataset.mrRoom !== this.room) {
+    if (rt && rt.dataset.mrRoom !== this.room && this.deps.rooms().some((r) => r.id === rt.dataset.mrRoom)) {
       this.room = rt.dataset.mrRoom as RoomId;
       this.loadRoom();
-      this.deps.save(this.room, this.list, this.room);
+      this.persist();
       this.deps.sound('pop');
       this.deps.rerender();
-      return;
     }
   }
 
-  /** 棚から：押したまま部屋へ動かすと置ける。タップだけなら、空いている所に置く／もう置いてあれば しまう */
+  private begin(e: PointerEvent, d: Omit<Drag, 'room' | 'snapshot' | 'pointerId' | 'startX' | 'startY' | 'moved'>): void {
+    this.drag = { ...d, room: this.room, snapshot: this.list.map((p) => ({ ...p, ...(p.on ? { on: { ...p.on } } : {}) })), pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, moved: false };
+    try {
+      this.el?.setPointerCapture(e.pointerId);
+    } catch {
+      /* 取れなくても動く */
+    }
+  }
+
+  /** 棚から：押したまま部屋の上まで動かすと置ける（置いてある物なら、そこへ移る）。タップだけなら置く／しまう */
   private onTrayDown(e: PointerEvent): void {
     const cell = (e.target as HTMLElement).closest<HTMLElement>('[data-mr-ref]');
-    if (!cell || this.drag) return;
-    const ref = cell.dataset.mrRef as string;
-    this.drag = { idx: -1, pointerId: e.pointerId, dx: 0, dy: 0, startX: e.clientX, startY: e.clientY, moved: false, fromTray: true };
-    (this.drag as Drag & { ref: string }).ref = ref;
+    if (!cell || this.drag || !e.isPrimary) return;
+    this.begin(e, { idx: -1, dx: 0, dy: 0, ref: cell.dataset.mrRef as string });
   }
 
   private onStageDown(e: PointerEvent): void {
@@ -314,77 +339,105 @@ export class MyRoomView {
     if (!g || !svg) return;
     const idx = Number(g.dataset.idx);
     const p = this.list[idx];
-    if (!p) return;
     const pt = toScene(svg, e.clientX, e.clientY);
-    if (!pt) return;
+    if (!p || !pt) return;
     const pos = this.seatPos(p) ?? p;
-    this.drag = { idx, pointerId: e.pointerId, dx: pos.x - pt.x, dy: pos.y - pt.y, startX: e.clientX, startY: e.clientY, moved: false };
-    (e.target as Element).setPointerCapture?.(e.pointerId);
+    this.begin(e, { idx, dx: pos.x - pt.x, dy: pos.y - pt.y });
     e.preventDefault();
   }
 
-  private onMove(e: PointerEvent): void {
+  /** ポインターが 部屋の絵の上にあるか（余白や棚の上は ふくまない） */
+  private overRoom(x: number, y: number): { x: number; y: number } | null {
+    const svg = this.svgEl();
+    if (!svg) return null;
+    const r = svg.getBoundingClientRect();
+    if (x < r.left || x > r.right || y < r.top || y > r.bottom) return null;
+    const pt = toScene(svg, x, y);
+    if (!pt || pt.x < 0 || pt.x > 1000 || pt.y < 0 || pt.y > 1000) return null;
+    return pt;
+  }
+
+  private overTray(x: number, y: number): boolean {
+    const t = this.el?.querySelector('.mr-tray')?.getBoundingClientRect();
+    return !!t && x >= t.left && x <= t.right && y >= t.top && y <= t.bottom;
+  }
+
+  private mine(e: PointerEvent): Drag | null {
     const d = this.drag;
-    if (!d || e.pointerId !== d.pointerId) return;
+    if (!d || e.pointerId !== d.pointerId) return null;
+    if (d.room !== this.room) {
+      this.drag = null;
+      return null;
+    }
+    return d;
+  }
+
+  private onMove(e: PointerEvent): void {
+    const d = this.mine(e);
+    if (!d) return;
     if (!d.moved && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < 10) return;
     const svg = this.svgEl();
     if (!svg) return;
-    d.moved = true;
-    const pt = toScene(svg, e.clientX, e.clientY);
-    if (!pt) return;
-    if (d.fromTray && d.idx < 0) {
-      // 棚から部屋の上に来たら、そこに出す
-      const r = svg.getBoundingClientRect();
-      if (e.clientY > r.bottom - 4 || this.list.length >= MAX_PLACED) return;
-      const ref = (d as Drag & { ref: string }).ref;
-      const old = this.list.findIndex((p) => p.ref === ref);
-      if (old >= 0) this.removeAt(old);
-      this.list.push({ ref, x: pt.x, y: Math.max(this.def().floorTop, pt.y) });
-      d.idx = this.list.length - 1;
+    if (d.idx < 0) {
+      // 棚から：部屋の絵の上に来たときだけ出す
+      const at = this.overRoom(e.clientX, e.clientY);
+      if (!at || !d.ref) return;
+      const old = this.list.findIndex((p) => p.ref === d.ref);
+      if (old >= 0) {
+        this.unseat(old);
+        d.idx = old;
+      } else {
+        if (this.list.length >= MAX_PLACED) return;
+        this.list.push({ ref: d.ref, x: at.x, y: Math.max(this.def().floorTop, at.y) });
+        d.idx = this.list.length - 1;
+      }
       d.dx = 0;
       d.dy = 0;
+      d.moved = true;
       this.redraw();
+    } else if (!d.moved) {
+      // 座っている子を動かし始めたら、まず降ろして 部屋の上に出す（ブランコの板の中から外へ）
+      d.moved = true;
+      if (this.list[d.idx]?.on) {
+        this.unseat(d.idx);
+        this.redraw();
+      }
     }
+    const pt = toScene(svg, e.clientX, e.clientY);
     const p = this.list[d.idx];
-    if (!p) return;
-    if (p.on) delete p.on;
+    if (!pt || !p) return;
     p.x = pt.x + d.dx;
     p.y = pt.y + d.dy;
-    // 動かしている物だけ描き直す（座っている子もいっしょに）
-    const g = svg.querySelector<SVGGElement>(`.mr-obj[data-idx="${d.idx}"]`);
-    if (g) {
-      const s = depthScale(this.def(), Math.max(this.def().floorTop, p.y));
+    const room = this.def();
+    const live = this.svgEl();
+    const g = live?.querySelector<SVGGElement>(`.mr-obj[data-idx="${d.idx}"]:not(.rider)`);
+    if (live && g) {
+      const s = depthScale(room, Math.max(room.floorTop, p.y));
       const f = p.flip ? -1 : 1;
       g.setAttribute('transform', `translate(${r1(p.x)} ${r1(p.y)}) scale(${r1s(s * f)} ${r1s(s)})`);
       g.classList.add('dragging');
-      // ずっと前に出す
       g.parentNode?.appendChild(g);
+      // 座っている子も いっしょに（ブランコの子は板の中なので そのまま）
       this.list.forEach((q, j) => {
-        if (q.on?.idx === d.idx && q.ref !== 'item:swing') {
-          const sp = this.seatPos(q);
-          const cg = svg.querySelector<SVGGElement>(`.mr-obj[data-idx="${j}"]:not(.rider)`);
-          if (sp && cg) {
-            cg.setAttribute('transform', `translate(${r1(sp.x)} ${r1(sp.y)}) scale(${r1s(s)} ${r1s(s)})`);
-            g.parentNode?.appendChild(cg);
-          }
+        if (q.on?.idx !== d.idx || p.ref === 'item:swing') return;
+        const sp = this.seatPos(q);
+        const cg = live.querySelector<SVGGElement>(`.mr-obj[data-idx="${j}"]:not(.rider)`);
+        if (sp && cg) {
+          cg.setAttribute('transform', `translate(${r1(sp.x)} ${r1(sp.y)}) scale(${r1s(s)} ${r1s(s)})`);
+          g.parentNode?.appendChild(cg);
         }
       });
     }
     this.el?.querySelector('.mr-tray')?.classList.toggle('drop-here', this.overTray(e.clientX, e.clientY));
   }
 
-  private overTray(x: number, y: number): boolean {
-    const t = this.el?.querySelector('.mr-tray')?.getBoundingClientRect();
-    return !!t && y >= t.top && x >= t.left && x <= t.right;
-  }
-
   private onUp(e: PointerEvent): void {
-    const d = this.drag;
-    if (!d || e.pointerId !== d.pointerId) return;
+    const d = this.mine(e);
+    if (!d) return;
     this.drag = null;
     this.el?.querySelector('.mr-tray')?.classList.remove('drop-here');
-    if (d.fromTray && d.idx < 0) {
-      if (!d.moved) this.tapTray((d as Drag & { ref: string }).ref);
+    if (d.idx < 0) {
+      if (!d.moved && d.ref && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < 10) this.tapTray(d.ref);
       return;
     }
     const p = this.list[d.idx];
@@ -395,23 +448,40 @@ export class MyRoomView {
     }
     if (this.overTray(e.clientX, e.clientY)) {
       this.removeAt(d.idx);
-      this.deps.sound('pop');
     } else {
       const c = clampToFloor(this.def(), p.x, p.y);
       p.x = c.x;
       p.y = c.y;
       if (p.ref.startsWith('char:')) this.trySeat(d.idx);
-      this.deps.sound('pop');
     }
+    this.deps.sound('pop');
     this.persist();
     this.redraw();
   }
 
-  private cancelDrag(): void {
-    if (!this.drag) return;
+  /** 中断：指を置く前の並びに もどす（保存は前のまま） */
+  private onCancel(e: PointerEvent): void {
+    const d = this.drag;
+    if (!d || e.pointerId !== d.pointerId) return;
     this.drag = null;
-    this.persist();
+    if (d.room === this.room) this.list = d.snapshot;
+    this.el?.querySelector('.mr-tray')?.classList.remove('drop-here');
     this.redraw();
+  }
+
+  /** 座っている子を その場に降ろす */
+  private unseat(i: number): void {
+    const p = this.list[i];
+    if (!p?.on) {
+      // 座られている物なら、上の子は そのまま（いっしょに動く）
+      return;
+    }
+    const sp = this.seatPos(p);
+    if (sp) {
+      p.x = sp.x;
+      p.y = sp.y;
+    }
+    delete p.on;
   }
 
   /** 友だちを 座れる物の近くで はなしたら、空いている座席に座る */
@@ -420,7 +490,7 @@ export class MyRoomView {
     let best: { idx: number; seat: number; d: number } | null = null;
     this.list.forEach((q, j) => {
       const it = ITEM_BY_ID[q.ref.split(':')[1]];
-      if (j === i || !q.ref.startsWith('item:') || !it?.seats) return;
+      if (j === i || !q.ref.startsWith('item:') || !it?.seats || q.on) return;
       const s = depthScale(this.def(), q.y);
       it.seats.forEach((seat, k) => {
         if (this.list.some((o) => o.on?.idx === j && o.on.seat === k)) return;
@@ -478,10 +548,8 @@ export class MyRoomView {
     this.list.forEach((q) => {
       if (q.on?.idx === i) {
         const sp = this.seatPos(q);
-        if (sp) {
-          q.x = sp.x;
-          q.y = Math.max(this.def().floorTop, base.y + 30);
-        }
+        if (sp) q.x = sp.x;
+        q.y = Math.min(985, Math.max(this.def().floorTop, base.y + 30));
         delete q.on;
       }
     });

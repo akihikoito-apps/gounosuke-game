@@ -1,0 +1,3118 @@
+job: codex-jobs/96-review-myroom.md
+exit: 0
+minutes: 2.4
+changed (1): audit/codex/review-myroom.md
+outside allowed paths (0): -
+
+----- codex output -----
+OpenAI Codex v0.154.0
+--------
+workdir: C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a13c6f-3e50-7f93-b491-fcba2f7c5fd2
+--------
+user
+Read the file codex-jobs/96-review-myroom.md and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.
+codex
+指定のジョブと AGENTS.md を読み、許可された範囲でレビューと記録を進めます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 AGENTS.md; Get-Content -Encoding UTF8 codex-jobs/96-review-myroom.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 233ms:
+# Codex 向けの決まり（このフォルダ）このフォルダは幼児向けゲーム「もようのかくれんぼ（仮）」のWebベータです。Claude Code が司令塔で、Codex は **絵の制作** と **独立レビュー** を担当します。
+
+## 書き込んでよい場所
+- 絵の制作ジョブ：`art/` の中だけ
+- レビュージョブ：`audit/codex/` の中だけ（レポートを書く）
+- それ以外（`src/`, `tests/`, `scripts/`, 設定、文書）は **変更しない**。直したほうがよい点は、レポートや `art/README.md` に提案として書く
+
+## 必ず守ること
+- ジョブファイル（`codex-jobs/*.md`）の指示と、`ART_SLOTS.md`・`CODEX_ART_BRIEF.md` の決まりに従う
+- 絵を作ったら `npm run validate:art` を実行し、合格するまで直す。結果は `art-guides/ART_CHECK.md` に出る
+- 既存の作品（キャラクター・ロゴ・画面・音）をまねない／取り込まない。ネット上の画像を使わない。文字を絵に入れない
+- 子どもの個人情報・外部通信・広告・課金に関わるものを追加しない
+- 追加料金が発生する手段（別料金の API キー、有料サービス）を使わない。利用上限に達したら、そこで止めて報告する
+- git の commit / push はしない（Claude Code が確認してから行う）
+- 最後に、やったこと・使った方法（SVGをコードで書いた／画像生成を使った 等）・検査結果・できなかったことを、ジョブファイルの指定場所に書く
+
+## サンドボックスでの注意（2026-10-07 追記）
+- `art-guides/ART_CHECK.md` は `npm run validate:art` が自動で書き換える。これは許可済みなので、書き込み先を変える工夫は不要
+- 検査・ビルドの道具（node_modules、scripts、環境変数 NODE_OPTIONS など）を差し替えたり、上書きしたりする回り道はしない。サンドボックスで動かないコマンドがあれば、無理をせず、その旨を作業記録に書いて終える（検査は Claude Code が外でも実行する）
+- 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
+- Windows の PowerShell では `npm` / `npx` が実行ポリシーで止まる。代わりに `npm.cmd run validate:art`、`npm.cmd run build` を使う（設定は変えない）
+- PowerShell でファイルを読むときは `Get-Content -Encoding UTF8` を使う（指定しないと日本語が文字化けする）
+
+## 本部（_hq）との約束
+- 作業の区切りで必ず STATUS.md（リポジトリ直下）を更新すること。「状態・今やっていること・次の一手・ブロッカー・最終更新」の各行を書き換える。
+# ジョブ96：総合レビュー（つぎの ごほうび・うごくもの・じぶんの へや）
+
+## 書き込んでよい場所
+`audit/codex/review-myroom.md` の1ファイルだけ。コード・絵・設定は変更しない（読むのは自由。`npx.cmd tsc --noEmit`、`npm.cmd test` など読むだけのコマンドは可。ネット接続・公開・push はしない）
+
+## 背景
+ご本人（持ち主）が iPhone で遊んで出した要望を実装した。ご本人の希望は「クオリティは高く、総合チェックも忘れずに」。遊ぶのは幼い子ども（3〜6歳くらい）。
+1. つぎの ごほうびの告知（`src/core/rewards.ts`、`src/ui/app.ts` の upcomingHtml / courseRewardHtml、「を みつけてね」）
+2. コースの うごくもの（`src/core/movers.ts`、`src/ui/moverView.ts`、`src/ui/styles.css` の mv-、保護者の切りかえ `src/ui/parent.ts`）
+3. じぶんの へや（`src/core/myroom.ts`、`src/ui/myroomView.ts`、`src/storage/schema.ts` の myroom、`src/entitlements/entitlements.ts` の room:）。無料は2部屋まで、ほかは追加パック。シール1枚に もの1つ
+
+## 見るところ（重要な順に）
+1. **じぶんの へや の操作**：ドラッグ・タップ・座る・しまう・部屋の切りかえで、物が消える／増える／座った子が宙に浮く／番号（on.idx）がずれる 経路が無いか。マルチタッチ・pointercancel・すばやい連打。保存データの壊れ方（validLayouts）と、パックが外れたときの表示
+2. **うごくもの**：顔を長く隠さないか（moverPos とテスト）、タップを さえぎらないか、描き直しで位置が飛ばないか、視差効果を減らす のとき、iOS の WKWebView で CSS の transform（px・transform-box: view-box・変数入りの keyframes）が期待どおり動くか（推測なら推測と書く）
+3. **パックの境界**：無料の人に おにわ・追加パックの もの が出ないか（告知・棚・クリア画面）
+4. **幼い子にとって**：棚の大きさ、ドラッグのしやすさ、誤操作、意味が分かるか、こわい・危ない表現がないか
+5. **性能**：部屋に物が多いとき、うごくものが5つのときの描画の重さ（推測でよい）
+
+## 書き方
+`audit/codex/review-myroom.md` に、重要な順に「場所（ファイル:行）・何が起きるか・再現・最小の直し方」。推測は推測と書く。良い点も短く。最後に「すぐ直すべきもの」「あとでよいもの」に分ける
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "git status --short; rg --files -g AGENTS.md -g '*myroom*' -g '*mover*' -g '*reward*' -g '*ART*' -g '*BRIEF*'; Get-Content -Encoding UTF8 package.json; Get-Content -Encoding UTF8 src/core/myroom.ts; Get-Content -Encoding UTF8 src/ui/myroomView.ts" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 240ms:
+ M codex-jobs/QUEUE.md
+?? codex-jobs/96-review-myroom.md
+?? video/hide-handoff-find.webm
+tests\unit\rewards.test.ts
+tests\unit\myroom.test.ts
+tests\unit\movers.test.ts
+tests\e2e\rewards.spec.ts
+ART_SLOTS.md
+tests\e2e\myroom.spec.ts
+tests\e2e\movers.spec.ts
+art-guides\ART_CHECK.md
+src\ui\myroomView.ts
+src\ui\moverView.ts
+codex-jobs\96-review-myroom.md
+src\core\myroom.ts
+codex-jobs\14-movers-myroom.md
+src\core\movers.ts
+src\core\rewards.ts
+AGENTS.md
+audit\codex\2026-10-14T21-42-07-813Z-14-movers-myroom.log
+CODEX_ART_BRIEF.md
+{
+  "name": "pattern-hide-family-beta",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "もようのかくれんぼ（仮）家族内テスト用ベータ。公開・課金なし。",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "verify:layouts": "vitest run tests/unit/placement.test.ts",
+    "validate:art": "node scripts/validate-art.mjs",
+    "art:guides": "node scripts/export-art-guides.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "5.0.3"
+  }
+}
+// じぶんの へや：仲間にした友だちと、シールでもらった「もの」を、好きな場所に置いて遊ぶ（おままごと）。
+// 勝ち負け・時間制限・正解はない。コースで遊ぶほど、置ける もの と へや が増える。
+// 座標は 1000×1000 の部屋の中。もの と 友だち は「足もと中央」を基準に置く（ゲームの他の画面と同じ単位）。
+import type { ContentId } from '../entitlements/entitlements';
+import type { CanPlay } from './access';
+import type { CharacterId } from './characters';
+import { STICKERS, hasSticker } from './stickers';
+import type { SceneId } from './scene';
+
+export type RoomId = 'living' | 'bedroom' | 'yard';
+export type Motion = 'walk' | 'swing' | 'bob' | 'sway' | 'roll' | 'swim';
+
+export interface RoomDef {
+  id: RoomId;
+  name: string;
+  /** この部屋が開くクリア数（0：はじめから） */
+  needCleared: number;
+  /** どのパックの中身か */
+  content: ContentId;
+  /** 置ける床の範囲（足もとの y）。これより上には置けない */
+  floorTop: number;
+  /** 奥（floorTop）と手前（1000）での大きさ */
+  scaleBack: number;
+  scaleFront: number;
+}
+
+/** 無課金で遊べるのは 2部屋まで（リビング・しんしつ）。ほかは追加パックで増える（ご本人の方針 2026-10-15） */
+export const ROOMS: RoomDef[] = [
+  { id: 'living', name: 'リビング', needCleared: 0, content: 'room:living', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
+  { id: 'bedroom', name: 'しんしつ', needCleared: 3, content: 'room:bedroom', floorTop: 580, scaleBack: 1.0, scaleFront: 1.5 },
+  { id: 'yard', name: 'おにわ', needCleared: 6, content: 'room:yard', floorTop: 540, scaleBack: 0.95, scaleFront: 1.45 },
+];
+
+export interface Seat {
+  /** もの の足もとから見た、座る位置（足もとが来る所） */
+  x: number;
+  y: number;
+}
+
+export interface ItemDef {
+  id: string;
+  name: string;
+  /** どのシールでもらえるか。null ははじめから持っている */
+  sticker: string | null;
+  /** 置いたときの横幅のめやす（ローカル座標。友だちの横幅は 約150） */
+  w: number;
+  /** 床に敷くもの（いつも いちばん奥に描く） */
+  flat?: boolean;
+  /** 座れる場所（ソファ・ベッド・ブランコ） */
+  seats?: Seat[];
+  motion?: Motion;
+}
+
+// 絵の枠は全部同じ：viewBox "-150 -300 300 300"、足もと中央が (0, 0)。友だちと同じ大きさの単位で描く。
+export const ITEMS: ItemDef[] = [
+  // はじめから
+  { id: 'sofa', name: 'ソファ', sticker: null, w: 280, seats: [{ x: -62, y: -62 }, { x: 62, y: -62 }] },
+  { id: 'table', name: 'テーブル', sticker: null, w: 190 },
+  { id: 'rug', name: 'ラグ', sticker: null, w: 300, flat: true },
+  // コースのシール
+  { id: 'ball', name: 'ボール', sticker: 'c1', w: 64, motion: 'roll' },
+  { id: 'cushion', name: 'クッション', sticker: 'c2', w: 90 },
+  { id: 'bed', name: 'ベッド', sticker: 'c3', w: 290, seats: [{ x: -40, y: -70 }, { x: 60, y: -70 }] },
+  { id: 'flowerpot', name: 'はなの はちうえ', sticker: 'c4', w: 80, motion: 'sway' },
+  { id: 'present', name: 'プレゼント', sticker: 'c5', w: 90 },
+  { id: 'cake', name: 'ケーキ', sticker: 'c6', w: 90 },
+  { id: 'moonlamp', name: 'おつきさまの ランプ', sticker: 'c7', w: 90, motion: 'bob' },
+  { id: 'fishtank', name: 'すいそう', sticker: 'c8', w: 150, motion: 'swim' },
+  { id: 'swing', name: 'ブランコ', sticker: 'c9', w: 260, seats: [{ x: 0, y: -62 }], motion: 'swing' },
+  { id: 'puppy', name: 'こいぬ', sticker: 'c10', w: 120, motion: 'walk' },
+  // 見つけた回数のシール
+  { id: 'plant', name: 'うえき', sticker: 'f10', w: 100, motion: 'sway' },
+  { id: 'breadbasket', name: 'パンの かご', sticker: 'f30', w: 100 },
+  { id: 'heartcushion', name: 'ハートの クッション', sticker: 'f60', w: 90 },
+  { id: 'balloon', name: 'ふうせん', sticker: 'f100', w: 80, motion: 'bob' },
+  { id: 'starmobile', name: 'ほしの メリー', sticker: 'f150', w: 110, motion: 'sway' },
+  // うみべパック
+  { id: 'shell', name: 'かいがら', sticker: 'b1', w: 70 },
+  { id: 'floatring', name: 'うきわ', sticker: 'b10', w: 120 },
+  { id: 'beachball', name: 'ビーチボール', sticker: 'b30', w: 80, motion: 'roll' },
+];
+
+export const ITEM_BY_ID: Record<string, ItemDef> = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
+
+export interface ProgressLike {
+  cleared: number;
+  totalFinds: number;
+  sceneFinds?: Partial<Record<SceneId, number>>;
+}
+
+/** いま使える もの（シールを持っていて、そのシールのパックも遊べる） */
+export function ownedItems(p: ProgressLike, can: CanPlay): ItemDef[] {
+  return ITEMS.filter((it) => {
+    if (!it.sticker) return true;
+    const s = STICKERS.find((x) => x.id === it.sticker);
+    if (!s || !can(`char:${s.char}`)) return false;
+    if (s.kind === 'course' && !can(`course:${s.need}`)) return false;
+    if (s.kind === 'scene' && s.scene && !can(`scene:${s.scene}`)) return false;
+    return hasSticker(s, p.cleared, p.totalFinds, p.sceneFinds);
+  });
+}
+
+/** シールでもらえる もの（シールちょう・ごほうびの告知で使う） */
+export function itemForSticker(stickerId: string): ItemDef | undefined {
+  return ITEMS.find((i) => i.sticker === stickerId);
+}
+
+export function openRooms(cleared: number, can: CanPlay): RoomDef[] {
+  return ROOMS.filter((r) => can(r.content) && cleared >= r.needCleared);
+}
+
+/** 奥ほど小さく（遠近） */
+export function depthScale(room: RoomDef, y: number): number {
+  const t = Math.min(1, Math.max(0, (y - room.floorTop) / (1000 - room.floorTop)));
+  return room.scaleBack + (room.scaleFront - room.scaleBack) * t;
+}
+
+// ---- 置いたもの（保存する形）
+
+export interface Placed {
+  /** 'item:sofa' / 'char:koro' */
+  ref: string;
+  x: number;
+  y: number;
+  flip?: boolean;
+  /** 座っている もの（その Placed の番号）と座席の番号 */
+  on?: { idx: number; seat: number };
+}
+
+export type RoomLayouts = Partial<Record<RoomId, Placed[]>>;
+
+export const MAX_PLACED = 40;
+
+/** はじめて開いたときの部屋（からっぽだと何をすればいいか分からないので、少し置いておく） */
+export function starterLayout(room: RoomId): Placed[] {
+  if (room === 'living') return [{ ref: 'item:rug', x: 520, y: 900 }, { ref: 'item:sofa', x: 470, y: 690 }, { ref: 'item:table', x: 520, y: 900 }, { ref: 'char:koro', x: 830, y: 960 }];
+  if (room === 'bedroom') return [{ ref: 'item:rug', x: 500, y: 900 }];
+  return [];
+}
+
+/** 置き場所を床の中に収める */
+export function clampToFloor(room: RoomDef, x: number, y: number): { x: number; y: number } {
+  return { x: Math.min(960, Math.max(40, x)), y: Math.min(985, Math.max(room.floorTop, y)) };
+}
+
+/** 保存データの検査：壊れていたら、その部屋だけ消す */
+export function validLayouts(v: unknown, charIds: readonly CharacterId[]): RoomLayouts {
+  const out: RoomLayouts = {};
+  if (typeof v !== 'object' || v === null) return out;
+  for (const r of ROOMS) {
+    const arr = (v as Record<string, unknown>)[r.id];
+    if (!Array.isArray(arr) || arr.length > MAX_PLACED) continue;
+    const ok = arr.every((p, i) => {
+      if (typeof p !== 'object' || p === null) return false;
+      const o = p as Record<string, unknown>;
+      if (typeof o.ref !== 'string' || typeof o.x !== 'number' || typeof o.y !== 'number' || !Number.isFinite(o.x) || !Number.isFinite(o.y)) return false;
+      const [kind, id] = o.ref.split(':');
+      if (kind === 'item' ? !ITEM_BY_ID[id] : kind === 'char' ? !charIds.includes(id as CharacterId) : true) return false;
+      if (o.flip !== undefined && typeof o.flip !== 'boolean') return false;
+      if (o.on !== undefined) {
+        const on = o.on as Record<string, unknown>;
+        if (typeof on !== 'object' || on === null || !Number.isInteger(on.idx) || !Number.isInteger(on.seat) || (on.idx as number) < 0 || (on.idx as number) >= arr.length || on.idx === i) return false;
+      }
+      return true;
+    });
+    if (ok) out[r.id] = arr as Placed[];
+  }
+  return out;
+}
+// じぶんの へや（おままごと）の画面。
+// 下の「ともだち／もの」から部屋へ動かして置く。置いたものは指で動かせる。
+// 友だちをソファ・ベッド・ブランコの近くで はなすと座る。下の棚へ もどすと しまえる。
+// もの をタップすると 左右が入れかわり、友だちをタップすると ぴょんと はねる。
+import { itemArtFile, roomArtFile } from '../art/registry';
+import { CHARACTERS, type CharacterId } from '../core/characters';
+import {
+  ITEM_BY_ID,
+  MAX_PLACED,
+  type ItemDef,
+  type Placed,
+  type RoomDef,
+  type RoomId,
+  ROOMS,
+  clampToFloor,
+  depthScale,
+  starterLayout,
+} from '../core/myroom';
+import { patternMarkup } from '../core/patterns';
+import type { PatternSpec } from '../core/patterns';
+import { charArtMarkup, faceIcon } from './charArt';
+import { toScene } from './dom';
+
+/** 部屋での友だちの服（いつもの服。柄は背景にまぎれない、やさしい色） */
+const OUTFIT: Record<string, PatternSpec> = {
+  koro: { kind: 'stripes', bg: '#FFF1D6', fg: '#F2B880', size: 30 },
+  mimi: { kind: 'dots', bg: '#DDF0E2', fg: '#FFFFFF', size: 30 },
+  moko: { kind: 'check', bg: '#EEE6FA', fg: '#CDBDEB', size: 34 },
+  nyako: { kind: 'stripes', bg: '#DCEAF6', fg: '#A9C9E6', size: 28 },
+  popo: { kind: 'dots', bg: '#F8E0E0', fg: '#FFFFFF', size: 30 },
+  choki: { kind: 'check', bg: '#FDE6DA', fg: '#F4B9A0', size: 32 },
+};
+
+const L = 'stroke="#4A3A40" stroke-width="5" stroke-linejoin="round"';
+
+function itemArt(it: ItemDef, part = ''): string {
+  const f = itemArtFile(part ? `${it.id}-${part}` : it.id);
+  if (f) return `<image href="${f}" x="-150" y="-300" width="300" height="300"/>`;
+  if (part) return '';
+  // 絵が無いときの かんたんな形
+  const w = it.w;
+  const h = it.flat ? 30 : Math.min(200, w * 0.6);
+  return it.flat
+    ? `<ellipse cx="0" cy="-${h / 2}" rx="${w / 2}" ry="${h / 2}" fill="#F3D9B8" ${L}/>`
+    : `<rect x="${-w / 2}" y="${-h}" width="${w}" height="${h}" rx="18" fill="#F6E4C8" ${L}/>`;
+}
+
+export interface MyRoomDeps {
+  /** 置ける友だち・もの・へや（進み具合とパック） */
+  chars: () => CharacterId[];
+  items: () => ItemDef[];
+  rooms: () => RoomDef[];
+  current: () => RoomId;
+  load: (room: RoomId) => Placed[] | undefined;
+  save: (room: RoomId, list: Placed[], current: RoomId) => void;
+  sound: (name: 'pop' | 'found') => void;
+  /** 部屋を切りかえたとき、画面ごと描き直す */
+  rerender: () => void;
+}
+
+type Drag = {
+  idx: number;
+  pointerId: number;
+  dx: number;
+  dy: number;
+  startX: number;
+  startY: number;
+  moved: boolean;
+  fromTray?: boolean;
+};
+
+export class MyRoomView {
+  private room: RoomId = 'living';
+  private list: Placed[] = [];
+  private tab: 'chars' | 'items' = 'chars';
+  private drag: Drag | null = null;
+  private el: HTMLElement | null = null;
+
+  constructor(private deps: MyRoomDeps) {}
+
+  /** 開くとき：前に開いていた部屋（まだ開いていなければ リビング） */
+  open(): void {
+    const open = this.deps.rooms();
+    const cur = this.deps.current();
+    this.room = open.some((r) => r.id === cur) ? cur : 'living';
+    this.loadRoom();
+  }
+
+  private def(): RoomDef {
+    return ROOMS.find((r) => r.id === this.room) ?? ROOMS[0];
+  }
+
+  private loadRoom(): void {
+    const saved = this.deps.load(this.room);
+    const chars = new Set(this.deps.chars());
+    const items = new Set(this.deps.items().map((i) => i.id));
+    const usable = (p: Placed) => {
+      const [k, id] = p.ref.split(':');
+      return k === 'char' ? chars.has(id as CharacterId) : items.has(id);
+    };
+    const base = saved ?? starterLayout(this.room);
+    // 使えなくなったもの（パック外など）は出さない。座っている先が消えたら床に下ろす
+    const keep = base.map((p, i) => ({ p, i })).filter(({ p }) => usable(p));
+    const map = new Map(keep.map(({ i }, j) => [i, j]));
+    this.list = keep.map(({ p }) => {
+      const q: Placed = { ...p };
+      if (q.on) {
+        const ni = map.get(q.on.idx);
+        if (ni === undefined) delete q.on;
+        else q.on = { idx: ni, seat: q.on.seat };
+      }
+      return q;
+    });
+    if (!saved) this.persist();
+  }
+
+  private persist(): void {
+    this.deps.save(this.room, this.list, this.room);
+  }
+
+  // ---------- 描画 ----------
+
+  html(backBtn: string): string {
+    const rooms = this.deps.rooms();
+    const tabs =
+      rooms.length > 1
+        ? `<div class="mr-rooms" role="tablist" aria-label="へや">${rooms
+            .map((r) => `<button type="button" class="mr-room-tab${r.id === this.room ? ' on' : ''}" data-mr-room="${r.id}" role="tab" aria-selected="${r.id === this.room}">${r.name}</button>`)
+            .join('')}</div>`
+        : `<h2>${this.def().name}</h2>`;
+    return `<main class="screen myroom" data-screen="myroom">
+      <header class="topbar">${backBtn}${tabs}<span></span></header>
+      <div class="stage mr-stage" id="stage">${this.svg()}</div>
+      ${this.trayHtml()}
+    </main>`;
+  }
+
+  private placedScale(i: number): number {
+    const p = this.list[i];
+    if (p.on) return this.placedScale(p.on.idx);
+    return depthScale(this.def(), p.y);
+  }
+
+  /** 座っている友だちの位置（座る もの と座席から） */
+  private seatPos(p: Placed): { x: number; y: number } | null {
+    if (!p.on) return null;
+    const base = this.list[p.on.idx];
+    const it = base && ITEM_BY_ID[base.ref.split(':')[1]];
+    const seat = it?.seats?.[p.on.seat];
+    if (!seat) return null;
+    const s = depthScale(this.def(), base.y);
+    const f = base.flip ? -1 : 1;
+    return { x: base.x + seat.x * s * f, y: base.y + seat.y * s };
+  }
+
+  private objMarkup(i: number): string {
+    const p = this.list[i];
+    const [kind, id] = p.ref.split(':');
+    const pos = this.seatPos(p) ?? { x: p.x, y: p.y };
+    const s = this.placedScale(i);
+    const f = p.flip ? -1 : 1;
+    const tf = `translate(${r1(pos.x)} ${r1(pos.y)}) scale(${r1s(s * f)} ${r1s(s)})`;
+    if (kind === 'char') {
+      const c = CHARACTERS[id as CharacterId];
+      const fill = `mr-fill-${id}`;
+      return `<g class="mr-obj mr-char${p.on ? ' seated' : ''}" data-idx="${i}" transform="${tf}"><g class="mr-hop"><ellipse cx="0" cy="2" rx="60" ry="9" fill="#4A3A40" opacity="${p.on ? 0 : 0.12}"/>${charArtMarkup(c, { fillId: fill, outline: 1, found: true })}</g></g>`;
+    }
+    const it = ITEM_BY_ID[id];
+    const motion = it.motion ? ` mr-m-${it.motion}` : '';
+    if (it.id === 'swing') {
+      // ブランコ：座っている友だちも板といっしょに ゆれる
+      const riders = this.list
+        .map((q, j) => ({ q, j }))
+        .filter(({ q }) => q.on?.idx === i)
+        .map(({ q, j }) => {
+          const seat = it.seats![q.on!.seat];
+          const c = CHARACTERS[q.ref.split(':')[1] as CharacterId];
+          return `<g class="mr-obj mr-char seated rider" data-idx="${j}" transform="translate(${seat.x} ${seat.y})">${charArtMarkup(c, { fillId: `mr-fill-${c.id}`, outline: 1, found: true })}</g>`;
+        })
+        .join('');
+      return `<g class="mr-obj mr-item" data-idx="${i}" transform="${tf}">${itemArt(it)}<g class="mr-swing-seat">${itemArt(it, 'seat')}${riders}</g></g>`;
+    }
+    const extra = it.id === 'fishtank' ? `<g class="mr-fish">${itemArt(it, 'fish')}</g>` : '';
+    return `<g class="mr-obj mr-item${motion}" data-idx="${i}" transform="${tf}"><g class="mr-move">${itemArt(it)}${extra}</g></g>`;
+  }
+
+  /** 奥から順に描く。敷物がいちばん奥。座っている子は、座っている もの のすぐ後 */
+  private order(): number[] {
+    const idx = this.list.map((_, i) => i);
+    const isFlat = (i: number) => {
+      const [k, id] = this.list[i].ref.split(':');
+      return k === 'item' && !!ITEM_BY_ID[id]?.flat;
+    };
+    const roots = idx.filter((i) => !this.list[i].on).sort((a, b) => Number(isFlat(b)) - Number(isFlat(a)) || this.list[a].y - this.list[b].y);
+    const out: number[] = [];
+    for (const r of roots) {
+      out.push(r);
+      const base = this.list[r];
+      if (base.ref === 'item:swing') continue; // ブランコの子は板の中で描く
+      out.push(...idx.filter((i) => this.list[i].on?.idx === r));
+    }
+    return out;
+  }
+
+  private svg(): string {
+    const room = this.def();
+    const bg = roomArtFile(room.id);
+    const back = bg
+      ? `<image href="${bg}" x="0" y="0" width="1000" height="1000"/>`
+      : `<rect width="1000" height="${room.floorTop}" fill="#F6E4C8"/><rect y="${room.floorTop}" width="1000" height="${1000 - room.floorTop}" fill="#E8C194"/>`;
+    const defs = Object.entries(OUTFIT)
+      .map(([c, spec]) => patternMarkup(`mr-fill-${c}`, spec))
+      .join('');
+    const objs = this.order().map((i) => this.objMarkup(i)).join('');
+    const empty = this.list.length === 0 ? '' : '';
+    return `<svg class="scene-svg mr-svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${room.name}。したの ともだちや ものを うごかして おいてね"><defs>${defs}</defs><g class="bg">${back}</g><g class="mr-objs">${objs}</g>${empty}</svg>`;
+  }
+
+  private placedRefs(): Set<string> {
+    return new Set(this.list.map((p) => p.ref));
+  }
+
+  private trayHtml(): string {
+    const placed = this.placedRefs();
+    const cells =
+      this.tab === 'chars'
+        ? this.deps
+            .chars()
+            .map((c) => {
+              const on = placed.has(`char:${c}`);
+              return `<button type="button" class="mr-cell${on ? ' placed' : ''}" data-mr-ref="char:${c}" aria-label="${CHARACTERS[c].name}${on ? '（へやに いる）' : ''}">${faceIcon(CHARACTERS[c])}</button>`;
+            })
+            .join('')
+        : this.deps
+            .items()
+            .map((it) => {
+              const on = placed.has(`item:${it.id}`);
+              const f = itemArtFile(it.id);
+              // 小さい物も大きく見えるよう、物の大きさに合わせて切り取る
+              const side = TALL[it.id] ?? Math.max(it.w * 1.15, 100);
+              const icon = f ? `<svg viewBox="${-side / 2} ${-side + 8} ${side} ${side}" aria-hidden="true"><image href="${f}" x="-150" y="-300" width="300" height="300"/>${it.id === 'swing' && itemArtFile('swing-seat') ? `<image href="${itemArtFile('swing-seat')}" x="-150" y="-300" width="300" height="300"/>` : ''}</svg>` : `<span>${it.name}</span>`;
+              return `<button type="button" class="mr-cell item${on ? ' placed' : ''}" data-mr-ref="item:${it.id}" aria-label="${it.name}${on ? '（へやに ある）' : ''}">${icon}</button>`;
+            })
+            .join('');
+    return `<div class="mr-tray" aria-label="おくもの">
+      <div class="mr-tabs" role="tablist">
+        <button type="button" class="mr-tab${this.tab === 'chars' ? ' on' : ''}" data-mr-tab="chars" role="tab" aria-selected="${this.tab === 'chars'}">ともだち</button>
+        <button type="button" class="mr-tab${this.tab === 'items' ? ' on' : ''}" data-mr-tab="items" role="tab" aria-selected="${this.tab === 'items'}">もの</button>
+      </div>
+      <div class="mr-cells">${cells}</div>
+    </div>`;
+  }
+
+  // ---------- 操作 ----------
+
+  bind(main: HTMLElement): void {
+    this.el = main;
+    const stage = main.querySelector<HTMLElement>('#stage');
+    stage?.addEventListener('pointerdown', (e) => this.onStageDown(e));
+    main.addEventListener('pointermove', (e) => this.onMove(e));
+    main.addEventListener('pointerup', (e) => this.onUp(e));
+    main.addEventListener('pointercancel', () => this.cancelDrag());
+    main.addEventListener('click', (e) => this.onClick(e));
+    main.querySelector('.mr-cells')?.addEventListener('pointerdown', (e) => this.onTrayDown(e as PointerEvent));
+  }
+
+  private svgEl(): SVGSVGElement | null {
+    return this.el?.querySelector<SVGSVGElement>('#stage svg') ?? null;
+  }
+
+  private redraw(): void {
+    const stage = this.el?.querySelector<HTMLElement>('#stage');
+    if (stage) stage.innerHTML = this.svg();
+    const tray = this.el?.querySelector<HTMLElement>('.mr-tray');
+    if (tray) {
+      tray.outerHTML = this.trayHtml();
+      this.el?.querySelector('.mr-cells')?.addEventListener('pointerdown', (e) => this.onTrayDown(e as PointerEvent));
+    }
+  }
+
+  private onClick(e: MouseEvent): void {
+    const t = e.target as HTMLElement;
+    const tab = t.closest<HTMLElement>('[data-mr-tab]');
+    if (tab) {
+      this.tab = tab.dataset.mrTab === 'items' ? 'items' : 'chars';
+      this.deps.sound('pop');
+      this.redraw();
+      return;
+    }
+    const rt = t.closest<HTMLElement>('[data-mr-room]');
+    if (rt && rt.dataset.mrRoom !== this.room) {
+      this.room = rt.dataset.mrRoom as RoomId;
+      this.loadRoom();
+      this.deps.save(this.room, this.list, this.room);
+      this.deps.sound('pop');
+      this.deps.rerender();
+      return;
+    }
+  }
+
+  /** 棚から：押したまま部屋へ動かすと置ける。タップだけなら、空いている所に置く／もう置いてあれば しまう */
+  private onTrayDown(e: PointerEvent): void {
+    const cell = (e.target as HTMLElement).closest<HTMLElement>('[data-mr-ref]');
+    if (!cell || this.drag) return;
+    const ref = cell.dataset.mrRef as string;
+    this.drag = { idx: -1, pointerId: e.pointerId, dx: 0, dy: 0, startX: e.clientX, startY: e.clientY, moved: false, fromTray: true };
+    (this.drag as Drag & { ref: string }).ref = ref;
+  }
+
+  private onStageDown(e: PointerEvent): void {
+    if (!e.isPrimary || this.drag) return;
+    const g = (e.target as Element).closest<SVGGElement>('.mr-obj');
+    const svg = this.svgEl();
+    if (!g || !svg) return;
+    const idx = Number(g.dataset.idx);
+    const p = this.list[idx];
+    if (!p) return;
+    const pt = toScene(svg, e.clientX, e.clientY);
+    if (!pt) return;
+    const pos = this.seatPos(p) ?? p;
+    this.drag = { idx, pointerId: e.pointerId, dx: pos.x - pt.x, dy: pos.y - pt.y, startX: e.clientX, startY: e.clientY, moved: false };
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    e.preventDefault();
+  }
+
+  private onMove(e: PointerEvent): void {
+    const d = this.drag;
+    if (!d || e.pointerId !== d.pointerId) return;
+    if (!d.moved && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < 10) return;
+    const svg = this.svgEl();
+    if (!svg) return;
+    d.moved = true;
+    const pt = toScene(svg, e.clientX, e.clientY);
+    if (!pt) return;
+    if (d.fromTray && d.idx < 0) {
+      // 棚から部屋の上に来たら、そこに出す
+      const r = svg.getBoundingClientRect();
+      if (e.clientY > r.bottom - 4 || this.list.length >= MAX_PLACED) return;
+      const ref = (d as Drag & { ref: string }).ref;
+      const old = this.list.findIndex((p) => p.ref === ref);
+      if (old >= 0) this.removeAt(old);
+      this.list.push({ ref, x: pt.x, y: Math.max(this.def().floorTop, pt.y) });
+      d.idx = this.list.length - 1;
+      d.dx = 0;
+      d.dy = 0;
+      this.redraw();
+    }
+    const p = this.list[d.idx];
+    if (!p) return;
+    if (p.on) delete p.on;
+    p.x = pt.x + d.dx;
+    p.y = pt.y + d.dy;
+    // 動かしている物だけ描き直す（座っている子もいっしょに）
+    const g = svg.querySelector<SVGGElement>(`.mr-obj[data-idx="${d.idx}"]`);
+    if (g) {
+      const s = depthScale(this.def(), Math.max(this.def().floorTop, p.y));
+      const f = p.flip ? -1 : 1;
+      g.setAttribute('transform', `translate(${r1(p.x)} ${r1(p.y)}) scale(${r1s(s * f)} ${r1s(s)})`);
+      g.classList.add('dragging');
+      // ずっと前に出す
+      g.parentNode?.appendChild(g);
+      this.list.forEach((q, j) => {
+        if (q.on?.idx === d.idx && q.ref !== 'item:swing') {
+          const sp = this.seatPos(q);
+          const cg = svg.querySelector<SVGGElement>(`.mr-obj[data-idx="${j}"]:not(.rider)`);
+          if (sp && cg) {
+            cg.setAttribute('transform', `translate(${r1(sp.x)} ${r1(sp.y)}) scale(${r1s(s)} ${r1s(s)})`);
+            g.parentNode?.appendChild(cg);
+          }
+        }
+      });
+    }
+    this.el?.querySelector('.mr-tray')?.classList.toggle('drop-here', this.overTray(e.clientX, e.clientY));
+  }
+
+  private overTray(x: number, y: number): boolean {
+    const t = this.el?.querySelector('.mr-tray')?.getBoundingClientRect();
+    return !!t && y >= t.top && x >= t.left && x <= t.right;
+  }
+
+  private onUp(e: PointerEvent): void {
+    const d = this.drag;
+    if (!d || e.pointerId !== d.pointerId) return;
+    this.drag = null;
+    this.el?.querySelector('.mr-tray')?.classList.remove('drop-here');
+    if (d.fromTray && d.idx < 0) {
+      if (!d.moved) this.tapTray((d as Drag & { ref: string }).ref);
+      return;
+    }
+    const p = this.list[d.idx];
+    if (!p) return;
+    if (!d.moved) {
+      this.tapObject(d.idx);
+      return;
+    }
+    if (this.overTray(e.clientX, e.clientY)) {
+      this.removeAt(d.idx);
+      this.deps.sound('pop');
+    } else {
+      const c = clampToFloor(this.def(), p.x, p.y);
+      p.x = c.x;
+      p.y = c.y;
+      if (p.ref.startsWith('char:')) this.trySeat(d.idx);
+      this.deps.sound('pop');
+    }
+    this.persist();
+    this.redraw();
+  }
+
+  private cancelDrag(): void {
+    if (!this.drag) return;
+    this.drag = null;
+    this.persist();
+    this.redraw();
+  }
+
+  /** 友だちを 座れる物の近くで はなしたら、空いている座席に座る */
+  private trySeat(i: number): void {
+    const p = this.list[i];
+    let best: { idx: number; seat: number; d: number } | null = null;
+    this.list.forEach((q, j) => {
+      const it = ITEM_BY_ID[q.ref.split(':')[1]];
+      if (j === i || !q.ref.startsWith('item:') || !it?.seats) return;
+      const s = depthScale(this.def(), q.y);
+      it.seats.forEach((seat, k) => {
+        if (this.list.some((o) => o.on?.idx === j && o.on.seat === k)) return;
+        const sx = q.x + seat.x * s * (q.flip ? -1 : 1);
+        const sy = q.y + seat.y * s;
+        const dist = Math.hypot(p.x - sx, (p.y - sy) * 0.8);
+        if (dist < 95 * s && (!best || dist < best.d)) best = { idx: j, seat: k, d: dist };
+      });
+    });
+    if (best) {
+      const b = best as { idx: number; seat: number };
+      p.on = { idx: b.idx, seat: b.seat };
+      this.deps.sound('found');
+    }
+  }
+
+  private tapObject(i: number): void {
+    const p = this.list[i];
+    if (p.ref.startsWith('item:')) {
+      p.flip = !p.flip;
+      this.deps.sound('pop');
+      this.persist();
+      this.redraw();
+      return;
+    }
+    // 友だち：ぴょんと はねる
+    const g = this.svgEl()?.querySelector(`.mr-obj[data-idx="${i}"] .mr-hop, .mr-obj.rider[data-idx="${i}"]`);
+    g?.classList.remove('hop');
+    void (g as SVGGElement | undefined)?.getBBox?.();
+    g?.classList.add('hop');
+    this.deps.sound('found');
+  }
+
+  private tapTray(ref: string): void {
+    const old = this.list.findIndex((p) => p.ref === ref);
+    if (old >= 0) {
+      this.removeAt(old);
+    } else {
+      if (this.list.length >= MAX_PLACED) return;
+      const room = this.def();
+      // 空いていそうな所（手前の真ん中から 少しずつ ずらす）
+      const n = this.list.length;
+      const x = 500 + ((n * 137) % 600) - 300;
+      const y = room.floorTop + (1000 - room.floorTop) * (0.45 + ((n * 0.23) % 0.4));
+      this.list.push({ ref, x, y });
+    }
+    this.deps.sound('pop');
+    this.persist();
+    this.redraw();
+  }
+
+  /** i 番目を しまう。座っていた子は床に下ろし、番号を つめる */
+  private removeAt(i: number): void {
+    const base = this.list[i];
+    this.list.forEach((q) => {
+      if (q.on?.idx === i) {
+        const sp = this.seatPos(q);
+        if (sp) {
+          q.x = sp.x;
+          q.y = Math.max(this.def().floorTop, base.y + 30);
+        }
+        delete q.on;
+      }
+    });
+    this.list.splice(i, 1);
+    this.list.forEach((q) => {
+      if (q.on && q.on.idx > i) q.on = { idx: q.on.idx - 1, seat: q.on.seat };
+    });
+  }
+}
+
+/** 横幅より背が高い物（棚の絵の切り取り） */
+const TALL: Record<string, number> = { swing: 300, plant: 170, flowerpot: 140, balloon: 170, starmobile: 190, moonlamp: 140, puppy: 140, fishtank: 170 };
+const r1 = (n: number) => Math.round(n * 10) / 10;
+const r1s = (n: number) => Math.round(n * 1000) / 1000;
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 src/core/movers.ts; Get-Content -Encoding UTF8 src/ui/moverView.ts; Get-Content -Encoding UTF8 src/core/rewards.ts; Get-Content -Encoding UTF8 src/entitlements/entitlements.ts; Get-Content -Encoding UTF8 src/storage/schema.ts; Get-Content -Encoding UTF8 tests/e2e/myroom.spec.ts; Get-Content -Encoding UTF8 tests/unit/myroom.test.ts; Get-Content -Encoding UTF8 ART_SLOTS.md; Get-Content -Encoding UTF8 CODEX_ART_BRIEF.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 176ms:
+// うごくもの：コースが進むと、背景に 鳥・雲・子犬 などが動く（ご本人の要望 2026-10-15）。
+// 目を引いて、探すのを少し難しくする。後半は友だちの前を一瞬だけ横切る（ずっと隠しはしない）。
+// タップは さえぎらない（うごくものの上から押しても、うしろの友だちが見つかる）。
+import { type Rng, mulberry32, shuffle } from './rng';
+import type { SceneId } from './scene';
+
+export type MoverKind = 'bird' | 'butterfly' | 'cloud' | 'cat' | 'puppy' | 'balloon' | 'seagull' | 'sailboat' | 'crab' | 'ball';
+/** cross：端から端へ通りぬけて、また最初から / patrol：行って もどる（向きを変える） */
+export type MoverMove = 'cross' | 'patrol';
+
+export interface MoverDef {
+  id: string;
+  kind: MoverKind;
+  move: MoverMove;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  /** 片道の秒数 */
+  sec: number;
+  scale: number;
+  /** front：友だちの前を通る（後半のコースだけ） */
+  layer: 'back' | 'front';
+  /** 窓の中だけに見せる など */
+  clip?: { x: number; y: number; w: number; h: number };
+}
+
+const WIN = { x: 262, y: 92, w: 226, h: 206 };
+
+export const MOVERS: Record<SceneId, MoverDef[]> = {
+  room: [
+    { id: 'room-bird', kind: 'bird', move: 'cross', from: { x: 200, y: 200 }, to: { x: 560, y: 160 }, sec: 9, scale: 0.75, layer: 'back', clip: WIN },
+    { id: 'room-cloud', kind: 'cloud', move: 'cross', from: { x: 130, y: 210 }, to: { x: 640, y: 210 }, sec: 30, scale: 0.69, layer: 'back', clip: WIN },
+    { id: 'room-cat', kind: 'cat', move: 'patrol', from: { x: -90, y: 900 }, to: { x: 1090, y: 900 }, sec: 16, scale: 1.12, layer: 'front' },
+    { id: 'room-ball', kind: 'ball', move: 'patrol', from: { x: -90, y: 830 }, to: { x: 1090, y: 830 }, sec: 7, scale: 1.12, layer: 'front' },
+    { id: 'room-butterfly', kind: 'butterfly', move: 'patrol', from: { x: -90, y: 450 }, to: { x: 1090, y: 380 }, sec: 11, scale: 1.05, layer: 'front' },
+  ],
+  garden: [
+    { id: 'garden-cloud', kind: 'cloud', move: 'cross', from: { x: -150, y: 110 }, to: { x: 1150, y: 110 }, sec: 40, scale: 1.26, layer: 'back' },
+    { id: 'garden-bird', kind: 'bird', move: 'cross', from: { x: -80, y: 230 }, to: { x: 1080, y: 170 }, sec: 12, scale: 1.12, layer: 'back' },
+    { id: 'garden-butterfly', kind: 'butterfly', move: 'patrol', from: { x: -90, y: 520 }, to: { x: 1090, y: 600 }, sec: 12, scale: 1.12, layer: 'front' },
+    { id: 'garden-puppy', kind: 'puppy', move: 'patrol', from: { x: -90, y: 850 }, to: { x: 1090, y: 850 }, sec: 15, scale: 1.19, layer: 'front' },
+    { id: 'garden-butterfly2', kind: 'butterfly', move: 'patrol', from: { x: 1090, y: 860 }, to: { x: -90, y: 830 }, sec: 14, scale: 0.98, layer: 'front' },
+  ],
+  shop: [
+    { id: 'shop-balloon', kind: 'balloon', move: 'cross', from: { x: 600, y: 1100 }, to: { x: 680, y: -60 }, sec: 18, scale: 1.12, layer: 'back' },
+    { id: 'shop-balloon2', kind: 'balloon', move: 'cross', from: { x: 330, y: 1100 }, to: { x: 260, y: -60 }, sec: 22, scale: 0.98, layer: 'back' },
+    { id: 'shop-puppy', kind: 'puppy', move: 'patrol', from: { x: -90, y: 920 }, to: { x: 1090, y: 920 }, sec: 15, scale: 1.19, layer: 'front' },
+    { id: 'shop-cat', kind: 'cat', move: 'patrol', from: { x: 1090, y: 770 }, to: { x: -90, y: 770 }, sec: 17, scale: 1.05, layer: 'front' },
+    { id: 'shop-butterfly', kind: 'butterfly', move: 'patrol', from: { x: -90, y: 520 }, to: { x: 1090, y: 540 }, sec: 12, scale: 0.98, layer: 'front' },
+  ],
+  beach: [
+    { id: 'beach-cloud', kind: 'cloud', move: 'cross', from: { x: -150, y: 90 }, to: { x: 1150, y: 90 }, sec: 40, scale: 1.26, layer: 'back' },
+    { id: 'beach-sailboat', kind: 'sailboat', move: 'patrol', from: { x: 380, y: 410 }, to: { x: 640, y: 410 }, sec: 24, scale: 0.84, layer: 'back' },
+    { id: 'beach-seagull', kind: 'seagull', move: 'cross', from: { x: -100, y: 200 }, to: { x: 1100, y: 140 }, sec: 11, scale: 1.12, layer: 'back' },
+    { id: 'beach-crab', kind: 'crab', move: 'patrol', from: { x: -90, y: 850 }, to: { x: 1090, y: 850 }, sec: 14, scale: 1.19, layer: 'front' },
+    { id: 'beach-seagull2', kind: 'seagull', move: 'cross', from: { x: 1100, y: 600 }, to: { x: -100, y: 520 }, sec: 10, scale: 1.05, layer: 'front' },
+  ],
+};
+
+/** コースごとの うごくものの数（コース1は なし） */
+export const COURSE_MOVERS = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5];
+/** このコースから、友だちの前を通るもの も出る */
+export const FRONT_FROM_COURSE = 6;
+
+/** コース no の1回分に出す うごくもの（シードが同じなら同じ） */
+export function pickMovers(scene: SceneId, courseNo: number, seed: number): MoverDef[] {
+  const n = COURSE_MOVERS[Math.min(COURSE_MOVERS.length, Math.max(1, courseNo)) - 1];
+  if (!n) return [];
+  const rng: Rng = mulberry32(seed ^ 0x5eed);
+  const list = MOVERS[scene];
+  const back = shuffle(rng, list.filter((m) => m.layer === 'back'));
+  const front = courseNo >= FRONT_FROM_COURSE ? shuffle(rng, list.filter((m) => m.layer === 'front')) : [];
+  // 前半は うしろの物だけ。後半は 前を通る物を先に1つ以上
+  const order = courseNo >= FRONT_FROM_COURSE ? [front[0], ...back, ...front.slice(1)] : back;
+  return order.filter(Boolean).slice(0, n) as MoverDef[];
+}
+
+/** その時刻（秒）での位置。テストと、うしろの友だちを長く隠さないことの確認に使う */
+export function moverPos(m: MoverDef, t: number): { x: number; y: number } {
+  const period = m.move === 'patrol' ? m.sec * 2 : m.sec;
+  let u = (((t % period) + period) % period) / m.sec;
+  if (m.move === 'patrol' && u > 1) u = 2 - u;
+  return { x: m.from.x + (m.to.x - m.from.x) * u, y: m.from.y + (m.to.y - m.from.y) * u };
+}
+// うごくもの の描画。動きは CSS（styles.css の mv-）でつける。
+// 画面を描き直しても位置が飛ばないよう、出題の開始時刻からの経過で animation-delay を負にする。
+import { moverArtFile } from '../art/registry';
+import type { MoverDef, MoverKind } from '../core/movers';
+
+const L = 'stroke="#4A3A40" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"';
+
+/** art/movers が無いときの、コードで描いた かんたんな絵（枠 -150 -300 300 300、足もと中央が 0,0） */
+function fallback(kind: MoverKind): string {
+  switch (kind) {
+    case 'bird':
+      return `<path d="M-34 -40 Q-16 -62 0 -42 Q16 -62 34 -40" fill="none" ${L}/><ellipse cx="0" cy="-36" rx="16" ry="10" fill="#F2B880" ${L}/><path d="M14 -38 L24 -34 L14 -32 Z" fill="#E9A23B"/>`;
+    case 'seagull':
+      return `<path d="M-46 -44 Q-22 -70 0 -44 Q22 -70 46 -44" fill="#FFFFFF" ${L}/><ellipse cx="0" cy="-40" rx="14" ry="8" fill="#FFFFFF" ${L}/>`;
+    case 'butterfly':
+      return `<ellipse cx="-14" cy="-46" rx="15" ry="20" fill="#F7C6CF" ${L}/><ellipse cx="14" cy="-46" rx="15" ry="20" fill="#F7C6CF" ${L}/><ellipse cx="-11" cy="-22" rx="10" ry="12" fill="#F6D7B8" ${L}/><ellipse cx="11" cy="-22" rx="10" ry="12" fill="#F6D7B8" ${L}/><path d="M0 -60 V-14" ${L}/>`;
+    case 'cloud':
+      return `<path d="M-110 -30 Q-120 -70 -78 -72 Q-66 -112 -18 -100 Q14 -130 52 -98 Q100 -104 104 -66 Q130 -50 110 -30 Z" fill="#FFFDF6" stroke="#E8DCCB" stroke-width="4"/>`;
+    case 'cat':
+    case 'puppy': {
+      const c = kind === 'cat' ? '#F2C08A' : '#E8D2B4';
+      const ears = kind === 'cat' ? `<path d="M30 -96 L36 -122 L50 -100 M54 -98 L66 -120 L70 -94" fill="${c}" ${L}/>` : `<path d="M28 -98 Q22 -76 34 -74 M68 -98 Q78 -78 66 -74" fill="${c}" ${L}/>`;
+      return `<ellipse cx="0" cy="-2" rx="54" ry="6" fill="#4A3A40" opacity="0.1"/><path d="M-40 -6 V-36 M-20 -6 V-36 M14 -6 V-36 M32 -6 V-36" ${L}/><ellipse cx="-4" cy="-48" rx="50" ry="24" fill="${c}" ${L}/><path d="M-52 -54 Q-74 -80 -60 -96" fill="none" ${L}/>${ears}<circle cx="50" cy="-82" r="26" fill="${c}" ${L}/><circle cx="44" cy="-84" r="3.5" fill="#4A3A40"/><circle cx="60" cy="-84" r="3.5" fill="#4A3A40"/>`;
+    }
+    case 'balloon':
+      return `<path d="M0 0 Q-8 -30 0 -60" fill="none" stroke="#4A3A40" stroke-width="3"/><ellipse cx="0" cy="-96" rx="30" ry="36" fill="#F4A6A6" ${L}/><path d="M-4 -60 L4 -60 L0 -66 Z" fill="#F4A6A6" ${L}/>`;
+    case 'sailboat':
+      return `<path d="M-50 -20 H50 L36 0 H-36 Z" fill="#E9967A" ${L}/><path d="M0 -22 V-120 L44 -30 Z" fill="#FFFFFF" ${L}/><path d="M-4 -110 L-40 -30 H-4 Z" fill="#A9D3E8" ${L}/>`;
+    case 'crab':
+      return `<ellipse cx="0" cy="-4" rx="40" ry="5" fill="#4A3A40" opacity="0.1"/><path d="M-26 -14 L-40 -2 M-14 -12 L-24 0 M26 -14 L40 -2 M14 -12 L24 0" ${L}/><ellipse cx="0" cy="-26" rx="32" ry="20" fill="#F08C78" ${L}/><path d="M-30 -36 Q-50 -60 -36 -66 Q-28 -56 -40 -50 M30 -36 Q50 -60 36 -66 Q28 -56 40 -50" fill="#F08C78" ${L}/><circle cx="-10" cy="-30" r="3.5" fill="#4A3A40"/><circle cx="10" cy="-30" r="3.5" fill="#4A3A40"/>`;
+    case 'ball':
+      return `<ellipse cx="0" cy="-2" rx="26" ry="5" fill="#4A3A40" opacity="0.1"/><circle cx="0" cy="-32" r="30" fill="#FFF6E8" ${L}/><path d="M-10 -60 Q-22 -32 -10 -4 M10 -60 Q22 -32 10 -4" fill="none" stroke="#E07B7B" stroke-width="7"/>`;
+  }
+}
+
+function art(kind: MoverKind): string {
+  const f = moverArtFile(kind);
+  return f ? `<image href="${f}" x="-150" y="-300" width="300" height="300"/>` : fallback(kind);
+}
+
+const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon'];
+
+/** うごくもの1つ。elapsed：出題が始まってからの秒数 */
+function one(P: string, m: MoverDef, elapsed: number): string {
+  const period = m.move === 'patrol' ? m.sec * 2 : m.sec;
+  const right = m.to.x >= m.from.x;
+  const vars = [
+    `--x0:${m.from.x}px`,
+    `--y0:${m.from.y}px`,
+    `--x1:${m.to.x}px`,
+    `--y1:${m.to.y}px`,
+    `--f0:${right ? 1 : -1}`,
+    `--f1:${right ? -1 : 1}`,
+    `--period:${period}s`,
+    `--delay:${-(elapsed % period).toFixed(2)}s`,
+  ].join(';');
+  const inner = `<g class="mv-inner${FLY.includes(m.kind) ? ' fly' : m.kind === 'cloud' || m.kind === 'sailboat' ? ' drift' : ' step'}"><g transform="scale(${m.scale})">${art(m.kind)}</g></g>`;
+  const g = `<g class="mv mv-${m.move}" data-mover="${m.id}" style="${vars}" aria-hidden="true">${inner}</g>`;
+  if (!m.clip) return g;
+  const id = `${P}mvclip-${m.id}`;
+  return `<clipPath id="${id}"><rect x="${m.clip.x}" y="${m.clip.y}" width="${m.clip.w}" height="${m.clip.h}"/></clipPath><g clip-path="url(#${id})">${g}</g>`;
+}
+
+export function moversMarkup(P: string, movers: MoverDef[], elapsed: number): { back: string; front: string } {
+  return {
+    back: movers.filter((m) => m.layer === 'back').map((m) => one(P, m, elapsed)).join(''),
+    front: movers.filter((m) => m.layer === 'front').map((m) => one(P, m, elapsed)).join(''),
+  };
+}
+// つぎの ごほうび：「あと なんコースで だれが なかまに／どのシール」を、前もって見せるための計算。
+// 突然「なかまに なったよ」と出るのではなく、目標が見えて、近づいていくのが分かるようにする（ご本人の要望 2026-10-15）。
+import { FRIEND_UNLOCKS, type CharacterId } from './characters';
+import { type CanPlay, canPlayCourse, visibleStickers } from './access';
+import type { SceneId } from './scene';
+import { type StickerDef, hasSticker } from './stickers';
+import { ROOMS, type RoomDef } from './myroom';
+
+export type UpcomingReward =
+  /** コース at をクリアすると、なかまが ふえる。remaining：あと何コース */
+  | { kind: 'friend'; char: CharacterId; at: number; remaining: number }
+  /** コース at をクリアすると、シール */
+  | { kind: 'courseSticker'; sticker: StickerDef; at: number; remaining: number }
+  /** 見つけた合計が at 回になると、シール。done：いまの回数 */
+  | { kind: 'findsSticker'; sticker: StickerDef; at: number; remaining: number; done: number }
+  /** コース at をクリアすると、じぶんの へや に部屋が ふえる */
+  | { kind: 'room'; room: RoomDef; at: number; remaining: number };
+
+export interface RewardProgress {
+  cleared: number;
+  totalFinds: number;
+  sceneFinds?: Partial<Record<SceneId, number>>;
+}
+
+/** つぎに もらえる ごほうび（なかま・コースのシール・回数のシール の順に、それぞれいちばん近いもの） */
+export function upcomingRewards(p: RewardProgress, can: CanPlay): UpcomingReward[] {
+  const out: UpcomingReward[] = [];
+  const friend = FRIEND_UNLOCKS.filter((f) => f.course > p.cleared && can(`char:${f.char}`) && canPlayCourse(f.course, can)).sort((a, b) => a.course - b.course)[0];
+  if (friend) out.push({ kind: 'friend', char: friend.char, at: friend.course, remaining: friend.course - p.cleared });
+  const stickers = visibleStickers(can).filter((s) => !hasSticker(s, p.cleared, p.totalFinds, p.sceneFinds));
+  const cs = stickers.filter((s) => s.kind === 'course' && canPlayCourse(s.need, can)).sort((a, b) => a.need - b.need)[0];
+  if (cs) out.push({ kind: 'courseSticker', sticker: cs, at: cs.need, remaining: cs.need - p.cleared });
+  const fs = stickers.filter((s) => s.kind === 'finds').sort((a, b) => a.need - b.need)[0];
+  if (fs) out.push({ kind: 'findsSticker', sticker: fs, at: fs.need, remaining: fs.need - p.totalFinds, done: p.totalFinds });
+  const room = ROOMS.filter((r) => r.needCleared > p.cleared && can(r.content) && canPlayCourse(r.needCleared, can)).sort((a, b) => a.needCleared - b.needCleared)[0];
+  if (room) out.push({ kind: 'room', room, at: room.needCleared, remaining: room.needCleared - p.cleared });
+  return out;
+}
+
+/** コース no をクリアすると なかまに なる友だち（コースのタイルに顔を出す） */
+export function friendAtCourse(no: number, can: CanPlay): CharacterId | null {
+  const f = FRIEND_UNLOCKS.find((x) => x.course === no && can(`char:${x.char}`));
+  return f ? f.char : null;
+}
+// 将来の「追加パック（買い切り）」との境界。方針：strategy/MONETIZATION.md
+// このベータでは課金を実装しない。ここにある値は購入の証明ではない。
+// 本番で購入を扱う場合は、StoreKit / Google Play Billing など正規の決済経路の
+// 検証結果だけを根拠にし、端末内のフラグ（localStorage等）を購入証明にしてはいけない。
+import type { CharacterId } from '../core/characters';
+import type { SceneId } from '../core/scene';
+
+export type ContentId = `scene:${SceneId}` | `course:${number}` | `char:${CharacterId}` | 'trial:hardest' | `costume-pack:${string}` | `room:${string}`;
+
+export type PackId = 'base' | 'more-courses' | 'beach';
+
+export interface PackDef {
+  id: PackId;
+  /** 保護者の画面などで使う名前 */
+  name: string;
+  /** 無料（最初から遊べる） */
+  free: boolean;
+  contents: ContentId[];
+}
+
+const courses = (from: number, to: number): ContentId[] => Array.from({ length: to - from + 1 }, (_, i) => `course:${from + i}` as ContentId);
+
+/**
+ * パックの一覧。どの中身も、ちょうど1つのパックに入る。
+ * 基本（無料）には「最初のごほうび（コース1で仲間になる にゃこ）」まで必ず入れる。
+ * 追加パックは、新しい背景＋新しい友だち＋シール、の形で足していく。
+ */
+export const PACKS: PackDef[] = [
+  {
+    id: 'base',
+    name: 'きほん',
+    free: true,
+    // コース1・5で仲間になる にゃこ・ぽぽ は、無料の範囲のごほうび
+    contents: ['scene:room', 'scene:garden', 'scene:shop', ...courses(1, 5), 'char:koro', 'char:mimi', 'char:moko', 'char:nyako', 'char:popo', 'room:living', 'room:bedroom'],
+  },
+  {
+    id: 'more-courses',
+    name: 'つづきの コース',
+    free: false,
+    contents: [...courses(6, 10), 'trial:hardest', 'room:yard'],
+  },
+  {
+    id: 'beach',
+    name: 'うみべ パック',
+    free: false,
+    contents: ['scene:beach', 'char:choki'],
+  },
+];
+
+export function packOf(id: ContentId): PackDef | undefined {
+  return PACKS.find((p) => p.contents.includes(id));
+}
+
+export interface EntitlementSource {
+  /** 'beta-all-unlocked' はベータの全開放であり、購入状態ではない */
+  readonly kind: 'beta-all-unlocked';
+  canPlay(id: ContentId): boolean;
+}
+
+export const betaEntitlements: EntitlementSource = {
+  kind: 'beta-all-unlocked',
+  canPlay: () => true,
+};
+// 端末内保存のスキーマ。子どもの氏名・誕生日・写真・音声・端末IDは持たない。
+import { CHARACTER_IDS, type CharacterId } from '../core/characters';
+import type { Difficulty, Placement } from '../core/placement';
+import type { SceneId } from '../core/scene';
+import { SCENES, SCENE_IDS } from '../core/scenes';
+import { ROOMS, type RoomId, type RoomLayouts, validLayouts } from '../core/myroom';
+
+export const STORAGE_KEY = 'moyou-kakurenbo-beta';
+export const SCHEMA_VERSION = 1;
+
+export interface Settings {
+  sound: boolean;
+  difficulty: Difficulty;
+  tutorialSeen: boolean;
+  /** コースの うごくもの（保護者が切れる。初期値 ON） */
+  movers: boolean;
+}
+
+export interface ResumeState {
+  sceneId: SceneId;
+  difficulty: Difficulty;
+  placements: Placement[];
+  found: boolean[];
+  origin: 'search' | 'hide';
+}
+
+export interface PlaytestCounters {
+  searchStarted: number;
+  searchCompleted: number;
+  hintsUsed: number;
+  hideRounds: number;
+  /** 1回のプレイ時間のおおまかな区分（秒は残さない） */
+  durationUnder1m: number;
+  duration1to3m: number;
+  durationOver3m: number;
+}
+
+export interface SaveData {
+  schema: typeof SCHEMA_VERSION;
+  settings: Settings;
+  resume: ResumeState | null;
+  playtest: { enabled: boolean; counters: PlaytestCounters };
+  course: CourseProgress;
+  /** シールちょう用：見つけた合計回数（コース・さがす・かくして わたす。おためしは数えない） */
+  collection: { totalFinds: number; sceneFinds: Partial<Record<SceneId, number>> };
+  /** じぶんの へや：部屋ごとの置き方と、いま開いている部屋 */
+  myroom: { layouts: RoomLayouts; current: RoomId };
+}
+
+/** コースの進み具合。cleared：クリアした最後のコース（0〜10）。current の finds：そのコースで見つけた回数 */
+export interface CourseProgress {
+  cleared: number;
+  current: number;
+  finds: number;
+}
+
+export const COURSE_COUNT = 10;
+export const COURSE_FINDS = 10;
+
+export function emptyCourse(): CourseProgress {
+  return { cleared: 0, current: 1, finds: 0 };
+}
+
+const isInt = (v: unknown, lo: number, hi: number): v is number => typeof v === 'number' && Number.isInteger(v) && v >= lo && v <= hi;
+
+/** 壊れた値は使える範囲に直す。遊べるのは「クリアした次」まで */
+export function validateCourse(v: unknown): { course: CourseProgress; repaired: boolean } {
+  if (v === undefined) return { course: emptyCourse(), repaired: false }; // 以前の保存データ（コース追加前）
+  if (typeof v !== 'object' || v === null) return { course: emptyCourse(), repaired: true };
+  const o = v as Record<string, unknown>;
+  if (!isInt(o.cleared, 0, COURSE_COUNT) || !isInt(o.current, 1, COURSE_COUNT) || !isInt(o.finds, 0, COURSE_FINDS - 1)) {
+    return { course: emptyCourse(), repaired: true };
+  }
+  if (o.current > Math.min(COURSE_COUNT, o.cleared + 1)) return { course: { cleared: o.cleared, current: Math.min(COURSE_COUNT, o.cleared + 1), finds: 0 }, repaired: true };
+  return { course: { cleared: o.cleared, current: o.current, finds: o.finds }, repaired: false };
+}
+
+export const COUNTER_MAX = 9999;
+
+export function emptyCounters(): PlaytestCounters {
+  return { searchStarted: 0, searchCompleted: 0, hintsUsed: 0, hideRounds: 0, durationUnder1m: 0, duration1to3m: 0, durationOver3m: 0 };
+}
+
+export function defaults(): SaveData {
+  return {
+    schema: SCHEMA_VERSION,
+    settings: { sound: true, difficulty: 'easy', tutorialSeen: false, movers: true },
+    resume: null,
+    playtest: { enabled: false, counters: emptyCounters() },
+    course: emptyCourse(),
+    collection: { totalFinds: 0, sceneFinds: {} },
+    myroom: { layouts: {}, current: 'living' },
+  };
+}
+
+const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
+const isBool = (v: unknown): v is boolean => typeof v === 'boolean';
+const isDiff = (v: unknown): v is Difficulty => v === 'easy' || v === 'normal';
+
+function validPlacement(sceneId: SceneId, v: unknown): v is Placement {
+  if (!isObj(v)) return false;
+  const scene = SCENES[sceneId];
+  return (
+    CHARACTER_IDS.includes(v.char as CharacterId) &&
+    typeof v.spot === 'string' &&
+    scene.spots.some((s) => s.id === v.spot) &&
+    typeof v.costume === 'string' &&
+    scene.costumes.some((c) => c.id === v.costume) &&
+    (v.variant === 'exact' || v.variant === 'soft')
+  );
+}
+
+export function validateResume(v: unknown): ResumeState | null {
+  if (!isObj(v)) return null;
+  if (!SCENE_IDS.includes(v.sceneId as SceneId)) return null;
+  const sceneId = v.sceneId as SceneId;
+  if (!isDiff(v.difficulty)) return null;
+  if (v.origin !== 'search' && v.origin !== 'hide') return null;
+  if (!Array.isArray(v.placements) || v.placements.length < 1 || v.placements.length > 3) return null;
+  if (!v.placements.every((p) => validPlacement(sceneId, p))) return null;
+  if (!Array.isArray(v.found) || v.found.length !== v.placements.length || !v.found.every(isBool)) return null;
+  const chars = new Set((v.placements as Placement[]).map((p) => p.char));
+  const spots = new Set((v.placements as Placement[]).map((p) => p.spot));
+  if (chars.size !== v.placements.length || spots.size !== v.placements.length) return null;
+  return {
+    sceneId,
+    difficulty: v.difficulty,
+    origin: v.origin,
+    placements: (v.placements as Placement[]).map((p) => ({ char: p.char, spot: p.spot, costume: p.costume, variant: p.variant })),
+    found: (v.found as boolean[]).slice(),
+  };
+}
+
+function validCount(v: unknown): number {
+  return typeof v === 'number' && Number.isInteger(v) && v >= 0 ? Math.min(v, COUNTER_MAX) : 0;
+}
+
+/**
+ * 読み込んだ値を検証する。部分的に壊れていても、使える部分だけ残して既定値で補う。
+ * 返り値の repaired が true なら何かを直した。
+ */
+export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
+  const d = defaults();
+  if (!isObj(raw) || raw.schema !== SCHEMA_VERSION) return { data: d, repaired: true };
+  let repaired = false;
+  const s = raw.settings;
+  if (isObj(s)) {
+    if (isBool(s.sound)) d.settings.sound = s.sound;
+    else repaired = true;
+    if (isDiff(s.difficulty)) d.settings.difficulty = s.difficulty;
+    else repaired = true;
+    if (isBool(s.tutorialSeen)) d.settings.tutorialSeen = s.tutorialSeen;
+    else repaired = true;
+    // 以前の保存データには無い（そのときは ON のまま）
+    if (isBool(s.movers)) d.settings.movers = s.movers;
+    else if (s.movers !== undefined) repaired = true;
+  } else repaired = true;
+  if (raw.resume !== null && raw.resume !== undefined) {
+    const r = validateResume(raw.resume);
+    if (r) d.resume = r;
+    else repaired = true;
+  }
+  const p = raw.playtest;
+  if (isObj(p) && isBool(p.enabled) && isObj(p.counters)) {
+    d.playtest.enabled = p.enabled;
+    const c = p.counters;
+    for (const k of Object.keys(d.playtest.counters) as (keyof PlaytestCounters)[]) {
+      const v = validCount(c[k]);
+      if (v !== c[k]) repaired = true;
+      d.playtest.counters[k] = v;
+    }
+    // OFF のときは集計を持たない
+    if (!d.playtest.enabled) d.playtest.counters = emptyCounters();
+  } else if (p !== undefined) repaired = true;
+  const col = raw.collection;
+  if (col !== undefined) {
+    const tf = typeof col === 'object' && col !== null ? (col as Record<string, unknown>).totalFinds : undefined;
+    const v = validCount(tf);
+    if (v !== tf) repaired = true;
+    d.collection.totalFinds = v;
+    const sf = typeof col === 'object' && col !== null ? (col as Record<string, unknown>).sceneFinds : undefined;
+    if (sf !== undefined) {
+      if (typeof sf !== 'object' || sf === null) repaired = true;
+      else
+        for (const [k, n] of Object.entries(sf as Record<string, unknown>)) {
+          if (!SCENE_IDS.includes(k as SceneId)) {
+            repaired = true;
+            continue;
+          }
+          const c = validCount(n);
+          if (c !== n) repaired = true;
+          d.collection.sceneFinds[k as SceneId] = c;
+        }
+    }
+  }
+  const course = validateCourse(raw.course);
+  d.course = course.course;
+  if (course.repaired) repaired = true;
+  // じぶんの へや：壊れた部屋だけ消す（ほかの部屋と進み具合は残す）
+  if (raw.myroom !== undefined) {
+    const m = raw.myroom;
+    if (isObj(m)) {
+      d.myroom.layouts = validLayouts(m.layouts, CHARACTER_IDS);
+      if (isObj(m.layouts) && Object.keys(m.layouts).length !== Object.keys(d.myroom.layouts).length) repaired = true;
+      if (ROOMS.some((r) => r.id === m.current)) d.myroom.current = m.current as RoomId;
+    } else repaired = true;
+  }
+  return { data: d, repaired };
+}
+// じぶんの へや：開く・棚から置く・動かす・座らせる・しまう・保存・部屋の数（無料は2部屋まで）
+import { expect, test } from '@playwright/test';
+import { act, fresh } from './helpers';
+
+const KEY = 'moyou-kakurenbo-beta';
+const SHOTS = 'test-results/myroom';
+
+async function seed(page: import('@playwright/test').Page, cleared: number, myroom?: unknown) {
+  await page.evaluate(
+    ([k, cleared, myroom]) => {
+      localStorage.setItem(
+        k as string,
+        JSON.stringify({
+          schema: 1,
+          settings: { sound: false, difficulty: 'easy', tutorialSeen: true, movers: true },
+          resume: null,
+          playtest: { enabled: false, counters: {} },
+          course: { cleared, current: Math.min(10, (cleared as number) + 1), finds: 0 },
+          collection: { totalFinds: (cleared as number) * 10, sceneFinds: {} },
+          ...(myroom ? { myroom } : {}),
+        }),
+      );
+    },
+    [KEY, cleared, myroom ?? null] as const,
+  );
+  await page.reload();
+}
+
+const saved = (page: import('@playwright/test').Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).myroom, KEY);
+
+test('はじめて開くと リビングに ソファ・テーブル・ラグ と ころ。コース0なら部屋は1つ', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 0);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('[data-screen="myroom"]')).toBeVisible();
+  await expect(page.locator('#stage.loading')).toHaveCount(0);
+  await expect(page.locator('.mr-obj')).toHaveCount(4);
+  await expect(page.locator('.mr-room-tab')).toHaveCount(0);
+  const m = await saved(page);
+  expect(m.layouts.living.map((p: { ref: string }) => p.ref).sort()).toEqual(['char:koro', 'item:rug', 'item:sofa', 'item:table']);
+  await page.screenshot({ path: `${SHOTS}/start.png` });
+});
+
+test('棚の友だちをタップすると置け、もう一度タップで しまえる。もの は シールの分だけ', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 4);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('.mr-cell')).toHaveCount(4); // ころ・みみ・もこ・にゃこ
+  await page.locator('[data-mr-ref="char:mimi"]').click();
+  await expect(page.locator('.mr-obj.mr-char')).toHaveCount(2);
+  await page.locator('[data-mr-ref="char:mimi"]').click();
+  await expect(page.locator('.mr-obj.mr-char')).toHaveCount(1);
+  await page.locator('[data-mr-tab="items"]').click();
+  // はじめから3つ＋コース1〜4のシール4つ＋10・30かい の2つ
+  await expect(page.locator('.mr-cell')).toHaveCount(9);
+  await expect(page.locator('[data-mr-ref="item:bed"]')).toHaveCount(1);
+  await expect(page.locator('[data-mr-ref="item:swing"]')).toHaveCount(0);
+});
+
+test('友だちを ソファへ ドラッグすると座り、ソファを動かすと いっしょに動く。保存される', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 0);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('#stage.loading')).toHaveCount(0);
+  const koro = page.locator('.mr-obj.mr-char').first();
+  const sofaIdx = (await saved(page)).layouts.living.findIndex((p: { ref: string }) => p.ref === 'item:sofa');
+  const sofa = page.locator(`.mr-obj.mr-item[data-idx="${sofaIdx}"]`);
+  const kb = (await koro.boundingBox())!;
+  const sb = (await sofa.boundingBox())!;
+  await page.mouse.move(kb.x + kb.width / 2, kb.y + kb.height * 0.7);
+  await page.mouse.down();
+  await page.mouse.move(sb.x + sb.width * 0.3, sb.y + sb.height * 0.62, { steps: 8 });
+  await page.mouse.up();
+  let m = await saved(page);
+  expect(m.layouts.living.find((p: { ref: string }) => p.ref === 'char:koro').on).toBeTruthy();
+  await page.screenshot({ path: `${SHOTS}/seated.png` });
+  // ソファを右へ（座ったまま）
+  const sb2 = (await page.locator(`.mr-obj.mr-item[data-idx="${sofaIdx}"]`).boundingBox())!;
+  await page.mouse.move(sb2.x + sb2.width * 0.85, sb2.y + sb2.height * 0.9);
+  await page.mouse.down();
+  await page.mouse.move(sb2.x + sb2.width * 0.85 + 50, sb2.y + sb2.height * 0.9 + 20, { steps: 6 });
+  await page.mouse.up();
+  m = await saved(page);
+  expect(m.layouts.living.find((p: { ref: string }) => p.ref === 'char:koro').on).toBeTruthy();
+  await page.reload();
+  await act(page, 'toMyRoom');
+  await expect(page.locator('.mr-obj.seated')).toHaveCount(1);
+});
+
+test('棚へ ドラッグして もどすと しまえる', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 0);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('#stage.loading')).toHaveCount(0);
+  const tableIdx = (await saved(page)).layouts.living.findIndex((p: { ref: string }) => p.ref === 'item:table');
+  const t = (await page.locator(`.mr-obj.mr-item[data-idx="${tableIdx}"]`).boundingBox())!;
+  const tray = (await page.locator('.mr-tray').boundingBox())!;
+  await page.mouse.move(t.x + t.width / 2, t.y + t.height * 0.7);
+  await page.mouse.down();
+  await page.mouse.move(tray.x + tray.width / 2, tray.y + tray.height / 2, { steps: 10 });
+  await page.mouse.up();
+  await expect(page.locator('.mr-obj')).toHaveCount(3);
+});
+
+test('コース3で しんしつ、無料の範囲は2部屋まで。コース6以降で おにわ（追加パック）', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 3);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('.mr-room-tab')).toHaveCount(2);
+  await page.locator('[data-mr-room="bedroom"]').click();
+  await expect(page.locator('.mr-room-tab.on')).toHaveText('しんしつ');
+  await page.locator('[data-mr-tab="items"]').click();
+  await page.locator('[data-mr-ref="item:bed"]').click();
+  await page.locator('[data-mr-tab="chars"]').click();
+  await page.locator('[data-mr-ref="char:moko"]').click();
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: `${SHOTS}/bedroom.png` });
+  await seed(page, 9);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('.mr-room-tab')).toHaveCount(3);
+  await page.locator('[data-mr-room="yard"]').click();
+  await page.locator('[data-mr-tab="items"]').click();
+  await page.locator('[data-mr-ref="item:swing"]').click();
+  await page.locator('[data-mr-ref="item:plant"]').click();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `${SHOTS}/yard.png` });
+});
+
+test('壊れた保存データでも開ける（その部屋だけ初めからに）', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 3, { layouts: { living: [{ ref: 'item:nope', x: 'a', y: 1 }], bedroom: 'x' }, current: 'zzz' });
+  await act(page, 'toMyRoom');
+  await expect(page.locator('[data-screen="myroom"]')).toBeVisible();
+  await expect(page.locator('.mr-obj')).toHaveCount(4);
+});
+import { describe, expect, it } from 'vitest';
+import { ITEMS, ROOMS, depthScale, itemForSticker, openRooms, ownedItems, starterLayout, validLayouts } from '../../src/core/myroom';
+import { CHARACTER_IDS } from '../../src/core/characters';
+import { STICKERS } from '../../src/core/stickers';
+import { type ContentId, PACKS } from '../../src/entitlements/entitlements';
+
+const all = () => true;
+const baseOnly = (id: ContentId) => PACKS.find((p) => p.id === 'base')!.contents.includes(id);
+
+describe('じぶんの へや', () => {
+  it('無料（きほん）では 部屋は2つまで。おにわ は追加パック', () => {
+    expect(openRooms(10, baseOnly).map((r) => r.id)).toEqual(['living', 'bedroom']);
+    expect(openRooms(0, all).map((r) => r.id)).toEqual(['living']);
+    expect(openRooms(3, all).map((r) => r.id)).toEqual(['living', 'bedroom']);
+    expect(openRooms(6, all).map((r) => r.id)).toEqual(['living', 'bedroom', 'yard']);
+    // どの部屋も、ちょうど1つのパックに入っている
+    for (const r of ROOMS) expect(PACKS.filter((p) => p.contents.includes(r.content)).length, r.id).toBe(1);
+  });
+
+  it('シール1枚に もの1つ。はじめから3つ。シールの数だけ増える', () => {
+    for (const s of STICKERS) expect(itemForSticker(s.id), s.id).toBeTruthy();
+    expect(new Set(ITEMS.map((i) => i.id)).size).toBe(ITEMS.length);
+    expect(ownedItems({ cleared: 0, totalFinds: 0 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug']);
+    expect(ownedItems({ cleared: 3, totalFinds: 12 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'ball', 'cushion', 'bed', 'plant']);
+    // パックが無ければ、そのパックのシールの もの は出ない（コース10のこいぬ・うみべ）
+    const base = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99 } }, baseOnly).map((i) => i.id);
+    expect(base).not.toContain('puppy');
+    expect(base).not.toContain('shell');
+    expect(base).toContain('balloon');
+  });
+
+  it('奥ほど小さく、手前ほど大きい', () => {
+    const r = ROOMS[0];
+    expect(depthScale(r, r.floorTop)).toBeCloseTo(r.scaleBack);
+    expect(depthScale(r, 1000)).toBeCloseTo(r.scaleFront);
+    expect(depthScale(r, 0)).toBeCloseTo(r.scaleBack);
+  });
+
+  it('保存データの検査：正しいものは残し、壊れた部屋だけ消す', () => {
+    const living = starterLayout('living');
+    expect(validLayouts({ living }, CHARACTER_IDS)).toEqual({ living });
+    expect(validLayouts({ living, bedroom: [{ ref: 'item:nope', x: 1, y: 1 }] }, CHARACTER_IDS)).toEqual({ living });
+    expect(validLayouts({ living: [{ ref: 'char:koro', x: 'a', y: 1 }] }, CHARACTER_IDS)).toEqual({});
+    expect(validLayouts({ living: [{ ref: 'char:koro', x: 1, y: 1, on: { idx: 0, seat: 0 } }] }, CHARACTER_IDS)).toEqual({}); // 自分の上には座れない
+    expect(validLayouts({ living: [{ ref: 'item:sofa', x: 1, y: 1 }, { ref: 'char:koro', x: 1, y: 1, on: { idx: 0, seat: 1 } }] }, CHARACTER_IDS).living).toHaveLength(2);
+    expect(validLayouts({ living: Array.from({ length: 41 }, () => ({ ref: 'item:ball', x: 1, y: 1 })) }, CHARACTER_IDS)).toEqual({});
+    expect(validLayouts(null, CHARACTER_IDS)).toEqual({});
+  });
+});
+# 絵の差し替え口（ART_SLOTS）
+
+`art/` フォルダに決まった名前でファイルを置くと、ゲームが自動でその絵を使います。
+**置かなかった部分は、今のコードの絵のまま** 動きます（一部だけ差し替えてもよい）。
+
+- 形式：PNG（透過）／WebP／SVG。1ファイル 800KB まで、合計 8MB まで
+- SVG はスクリプト・外部参照・文字（フォント）を含めない
+- 置いたら `npm run validate:art` で検査 → `npm run build` → 画面を確認
+- 下書きガイド：`npm run art:guides` で `art-guides/` に出る（形状データから自動生成。描く位置の基準）
+
+## キャラクター `art/characters/{koro|mimi|moko}/`
+
+枠：**450×600px**（またはその整数倍。縦横比 3:4）。ゲーム内の座標 x −90〜90、y −225〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 37.5px**。ガイド `art-guides/character-*.png` に重ねて描く。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `clothes-mask.png` | ○ | 服の形だけを **白**、ほかは黒か透明。ここにゲームが背景と同じ柄を流し込む。ガイドの青い範囲（からだの判定）からはみ出さないこと |
+| `front.png` | ○ | 服より前に描くもの：顔・頭・耳・髪・手・服の上に出る線。目と口はガイドの赤い点の位置 |
+| `back.png` | | 服より後ろ：足、背中側の耳や髪など |
+| `clothes-shade.png` | | 服の陰影（乗算で重なる）。グレー〜茶系の濃淡、透過 |
+| `clothes-line.png` | | 服のふち線だけ。難易度に応じてゲームが濃さを変える（最低25%） |
+| `front-found.png` | | 見つかった時の前面（手をふるポーズ）。無ければ front を使う |
+
+`clothes-mask` と `front` がそろっていない時は、そのキャラクターはコードの絵のままです。
+
+## シーン `art/scenes/{room|garden|shop}/`
+
+枠：**1000×1000px**（2000×2000 推奨）。ガイド `art-guides/scene-*.png` の色面が「柄の領域」で、**ここはゲームが柄を塗る**（服と同じ柄にして隠れられるようにするため）。
+
+| ファイル | 中身 | 決まり |
+|---|---|---|
+| `back.png` | 柄の領域より下：空・壁の上部・床など | 不透明でよい |
+| `over.png` | 柄の領域の上・キャラクターの後ろ：家具の縁・カーテンのひだの陰・窓・棚など | 透過。キャラクターの服の後ろは薄く（平均の濃さ35%以下）、顔の後ろには描かない |
+| `minor.png` | 小さい画面では省く飾り（壁の絵・雲など） | over と同じ決まり |
+| `fore.png` | 前景の小物すべて（キャラクターの前に重なる） | 透過。ガイドの橙色の形に合わせる。**赤い円（顔）には重ねない**。服は少し（2割以上8割未満が見える程度）隠す |
+
+## 柄のタイル `art/patterns/{シーン}-{服}.png`
+
+例：`room-stripes.png`、`garden-leaf.png`。正方形 64px 以上、不透明、**上下左右がつなぎ目なく続く**こと。
+同じタイルが背景の領域と服の両方に使われます（だから隠れられる）。タイル1枚がゲーム内で表す大きさは、各シーンの柄の `size`（38〜52）です。
+
+| シーン | 服（ファイル名の後半） |
+|---|---|
+| room | plain（壁）, stripes（カーテン）, dots（ソファ）, check（ラグ） |
+| garden | plain（芝生）, stripes（柵）, dots（花だん）, leaf（生け垣） |
+| shop | plain（床）, stripes（カウンター）, dots（壁）, check（テーブルクロス） |
+
+## 画面の絵 `art/ui/`
+
+`title.png`（タイトルの絵）、`handoff.png`（受け渡し画面の絵。**隠れ場所や背景を描かない**）、`bye.png`（おしまい画面）。2000px 以内。
+
+## 帽子・傘 `art/accessories/{hat|umbrella}/`（コースモード用。3体共通）
+
+枠：**600×720px**（またはその整数倍。縦横比 5:6）。ゲーム内の座標 x −150〜150、y −345〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 30px**。ガイド `art-guides/accessory-hat.png` / `accessory-umbrella.png` に重ねて描く（薄く3体が入っている）。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `mask.png` | ○ | 形だけを **白**、ほかは黒か透明。ゲームがここに **毛糸の色（色つきの帽子）** か **うしろの背景と同じ柄（背景の柄の帽子・傘）** を流し込む。ガイドの青い範囲からはみ出さない |
+| `shade.png` | | 陰影（乗算）。編み目・布のしわ・ぼんぼりのふくらみなどの質感もここで |
+| `line.png` | | ふち線。背景の柄のときは服と同じ薄さに、色つきのときははっきり表示される |
+| `front.png` | | いちばん前の細部（傘の先の飾り など）。形の範囲内 |
+| `back.png` | | キャラクターより後ろ（**傘の柄の棒**＝ガイドの緑。帽子では使わない） |
+
+- **顔（ガイドの赤い丸）には、どの層も重ねない**
+- 帽子はキャラクターの頭の前に、傘はキャラクターの後ろに描かれる
+- `mask` が無いときは、ゲームがコードで描いた帽子・傘を使う
+
+## シール `art/stickers/{id}.png`（シールちょう）
+
+正方形（480×480px 推奨、透過PNGかSVG）。ファイル名は `src/core/stickers.ts` の id：`c1`〜`c10`（コースクリア）、`f10` `f30` `f60` `f100` `f150`（見つけた回数）。
+- 白いふちのある丸いシール（直径は枠の約9割）。ふちの外は透明
+- そのシールのキャラクターとモチーフ（stickers.ts の char / motif / color）を、キャラクターと同じ画風で
+- 文字は入れない（名前はゲームが下に表示する）
+- 置かなかったシールは、コードで描いたシールを使う
+# Codex への絵の制作依頼（CODEX_ART_BRIEF）
+
+> ご自宅PCで Codex に渡すための依頼文です。下の「Codex への指示」をそのまま貼り付けてください。
+
+## 事前準備（ご自宅PC）
+
+```bash
+git fetch origin
+git checkout claude/pattern-hide-family-beta
+git pull
+cd pattern-hide-family-beta
+npm ci
+npm run art:guides      # art-guides/ に下書きガイドができる
+```
+
+## Codex への指示（ここから貼り付け）
+
+あなたは、幼児向けかくれんぼゲーム「もようのかくれんぼ（仮）」の絵を作る担当です。
+作業フォルダは `pattern-hide-family-beta/` です。最初に `ART_SLOTS.md` と、この `CODEX_ART_BRIEF.md` を読んでください。
+
+### 守ること
+1. 書き込んでよいのは `pattern-hide-family-beta/art/` の中だけです。`src/` やテスト、設定ファイルは変更しないでください（別のAIが担当しています）。
+2. ファイル名・寸法・層の分け方は `ART_SLOTS.md` のとおりにしてください。描く位置は `art-guides/` のガイド画像に合わせてください。ガイドはゲームの当たり判定と同じ形から作られています。
+3. 描き終えたら `npm run validate:art` を実行し、**すべて合格するまで直してください**。結果は `art-guides/ART_CHECK.md` に出ます。そのあと `npm run build` が通ることを確認してください。
+4. 既存の作品（キャラクター、ロゴ、画面、音）をまねたり、取り込んだりしないでください。ネット上の画像も使わないでください。特定の作品に見える顔の配置や特徴は避けてください。
+5. 文字は絵に入れないでください。
+6. 追加料金が発生する手段（別料金のAPIキー、有料サービス）は使わないでください。今の契約の範囲でできないことがあれば、無理をせず、できなかったことを報告してください。
+7. 最後に、作ったファイル・使った方法（SVGをコードで書いた／画像生成を使った等）・検査結果を `art/README.md` に書いてください。
+
+### 絵の方向性
+- **かわいらしく、幼い子向け。ただし安っぽくしない。** 絵本の挿絵のような品のある仕上がりにします。
+- 形に丸みと立体感を持たせます。やわらかい陰影、ほのかなグラデーション、光は左上から、接地面にやわらかい影を入れてください。平べったいクリップアートや絵文字のようにはしないでください。
+- 線は黒ではなく濃い茶色系（目安 #4A3A40）。太さに少し強弱をつけ、全部の線を同じ太さにしないでください。
+- 色は、少しくすんだやさしいパステルを基調に、差し色を少しだけ。蛍光色や彩度の高すぎる色は使わないでください。
+- 布の縫い目、木目、葉脈など、見つけるとうれしい細部を控えめに入れます。ただし背景がうるさくなり、さがしにくくなる量にはしないでください。
+- 3体の見分けは **色だけに頼らず形で** つけます。今の形を受け継いでください：
+  - **ころ**：あたまに「くるん」とした毛。げんきでくいしんぼう。アプリコット色
+  - **みみ**：たれた長い耳（内側はピンク）。ものしりでのんびり。ミントグリーン
+  - **もこ**：くもの形のもこもこした頭と、星の髪どめ。ふわふわではずかしがり。ラベンダー
+- 3体とも、頭が大きめの約2頭身です。目は大きく、ハイライトを入れてください。表情はおだやかな笑顔です。
+- 服は **ゲームが柄を流し込む部分** なので、`clothes-mask.png`（白黒の形）として分けてください。服の陰影は `clothes-shade.png`、ふち線は `clothes-line.png` に分けると、柄の上に立体感が出ます。
+- 背景の「柄の領域」（カーテン・ソファ・ラグ、生け垣・柵・花だん・芝生、かべ・カウンター・テーブルクロス・床）は、ゲームが柄で塗ります。質感は **柄タイル**（`art/patterns/`）で出してください。布の織り目や紙の質感などを入れたタイルにします。同じタイルが服にも使われます。
+- 前景の小物（`fore.png`）は、今の小物と同じ位置・同じくらいの大きさで描き直してください（ガイドの橙色）。顔（赤い円）には絶対に重ねないでください。
+- 怖い表情、暗い影、先のとがった危なそうな物は入れないでください。
+
+### おすすめの順番
+1. `art/characters/koro/` の5層（back, clothes-mask, clothes-shade, clothes-line, front, front-found）を作る → 検査に合格させる
+2. 同じ画風で みみ・もこ を作る
+3. `art/patterns/` の柄タイル12枚
+4. `art/scenes/room/` の back / over / minor / fore → 検査 → garden → shop
+5. `art/ui/` の title / handoff / bye
+
+途中で、`npm run build && npm run preview` を実行し、`http://127.0.0.1:4173/` で見た目を確認してください。
+
+（貼り付けここまで）
+
+## 作業後
+
+- Codex の作業を `git add art && git commit` して、同じブランチに push してください。
+- Claude 側では、画面写真・操作テスト・溶け込み具合を確認し、必要なら調整案を出します。
+- 同じファイルを同時に複数のAIで編集しないため、Codex は `art/` だけ、Claude はそれ以外、と分けています。
+
+codex
+部屋のドラッグ中断と、保存された座席情報の検証に問題候補が見つかりました。ジョブ96の「1ファイルだけ」という指定を優先し、STATUS.md は更新せず、検査結果もレビュー文書にまとめます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npx.cmd tsc --noEmit' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n 'myroom|upcomingHtml|courseRewardHtml|itemForSticker|movers|moverStart|startedAt|を みつけて' src/ui/app.ts src/ui/parent.ts src/ui/sceneView.ts src/storage/schema.ts; rg -n 'mv-|mr-|reduced-motion|touch-action' src/ui/styles.css; Get-Content -Encoding UTF8 tests/unit/movers.test.ts; Get-Content -Encoding UTF8 tests/e2e/movers.spec.ts; Get-Content -Encoding UTF8 src/core/access.ts; Get-Content -Encoding UTF8 vitest.config.ts" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm.cmd test' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 388ms:
+src/ui/sceneView.ts:28:  movers?: { back: string; front: string };
+src/ui/sceneView.ts:166:    (o.movers?.back ? `<g class="movers back">${o.movers.back}</g>` : '') +
+src/ui/sceneView.ts:169:    (o.movers?.front ? `<g class="movers front">${o.movers.front}</g>` : '') +
+src/ui/app.ts:47:import { type MoverDef, pickMovers } from '../core/movers';
+src/ui/app.ts:48:import { moversMarkup } from './moverView';
+src/ui/app.ts:49:import { MyRoomView } from './myroomView';
+src/ui/app.ts:50:import { ROOMS, itemForSticker, openRooms, ownedItems } from '../core/myroom';
+src/ui/app.ts:65:  | 'myroom'
+src/ui/app.ts:99:  private movers: MoverDef[] = [];
+src/ui/app.ts:100:  private myroom = new MyRoomView({
+src/ui/app.ts:104:    current: () => this.store.data.myroom.current,
+src/ui/app.ts:105:    load: (r) => this.store.data.myroom.layouts[r],
+src/ui/app.ts:108:        d.myroom.layouts[r] = list.map((p) => ({ ...p, ...(p.on ? { on: { ...p.on } } : {}) }));
+src/ui/app.ts:109:        d.myroom.current = cur;
+src/ui/app.ts:114:  private moverStart = 0;
+src/ui/app.ts:227:      case 'myroom':
+src/ui/app.ts:228:        return this.myroom.html(btn('home', ICONS.back, 'もどる', 'round'));
+src/ui/app.ts:253:        ${btn('toMyRoom', ICONS.room, 'じぶんの へや', 'mid myroom-btn')}
+src/ui/app.ts:304:      ${this.upcomingHtml()}
+src/ui/app.ts:309:  private upcomingHtml(compact = false): string {
+src/ui/app.ts:330:      const it = itemForSticker(id);
+src/ui/app.ts:408:        <div class="targets" role="status" aria-label="さがす こ">${targets}<span class="find-msg${s.placements.length >= 3 ? ' below' : ''}">${done ? 'みーつけた！' : s.placements.length >= 3 ? 'を みつけてね' : 'を<br>みつけてね'}</span></div>
+src/ui/app.ts:428:      movers: s.origin === 'course' && this.movers.length ? moversMarkup('g-', this.movers, (performance.now() - this.moverStart) / 1000) : undefined,
+src/ui/app.ts:457:          ${this.courseRewardHtml()}
+src/ui/app.ts:458:          ${last ? '<p class="clear-sub">ぜんぶの コースを クリアしたよ</p>' : this.upcomingHtml(true)}
+src/ui/app.ts:487:  private courseRewardHtml(): string {
+src/ui/app.ts:491:    const gift = st ? itemForSticker(st.id) : undefined;
+src/ui/app.ts:672:        this.myroom.open();
+src/ui/app.ts:673:        this.go('myroom');
+src/ui/app.ts:869:    this.movers = this.store.data.settings.movers ? pickMovers(scene.id, this.courseNo, seed) : [];
+src/ui/app.ts:870:    this.moverStart = performance.now();
+src/ui/app.ts:1047:    this.session = { ...this.session, startedAt: Date.now() };
+src/ui/app.ts:1099:    if (this.screen === 'myroom') {
+src/ui/app.ts:1101:      if (main) this.myroom.bind(main);
+src/ui/app.ts:1196:        record(this.store, { type: 'searchCompleted', durationMs: Date.now() - this.session.startedAt });
+src/storage/schema.ts:6:import { ROOMS, type RoomId, type RoomLayouts, validLayouts } from '../core/myroom';
+src/storage/schema.ts:16:  movers: boolean;
+src/storage/schema.ts:47:  myroom: { layouts: RoomLayouts; current: RoomId };
+src/storage/schema.ts:87:    settings: { sound: true, difficulty: 'easy', tutorialSeen: false, movers: true },
+src/storage/schema.ts:92:    myroom: { layouts: {}, current: 'living' },
+src/storage/schema.ts:155:    if (isBool(s.movers)) d.settings.movers = s.movers;
+src/storage/schema.ts:156:    else if (s.movers !== undefined) repaired = true;
+src/storage/schema.ts:200:  if (raw.myroom !== undefined) {
+src/storage/schema.ts:201:    const m = raw.myroom;
+src/storage/schema.ts:203:      d.myroom.layouts = validLayouts(m.layouts, CHARACTER_IDS);
+src/storage/schema.ts:204:      if (isObj(m.layouts) && Object.keys(m.layouts).length !== Object.keys(d.myroom.layouts).length) repaired = true;
+src/storage/schema.ts:205:      if (ROOMS.some((r) => r.id === m.current)) d.myroom.current = m.current as RoomId;
+src/ui/parent.ts:227:        <label class="switch"><input type="checkbox" data-set="movers" ${d.settings.movers ? 'checked' : ''}> うごくものを出す</label>
+src/ui/parent.ts:292:        } else if (k === 'movers') {
+src/ui/parent.ts:294:            d.settings.movers = inp.checked;
+29:body { overflow: hidden; touch-action: manipulation; }
+53:  cursor: pointer; touch-action: manipulation;
+127:.stage { flex: 1; min-height: 0; min-width: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; touch-action: none; }
+130:.tray-char { position: relative; width: 74px; height: 92px; border: 4px solid var(--line); border-radius: 18px; background: #fff; padding: 2px; cursor: grab; touch-action: none; }
+229:.hold-btn { position: relative; overflow: hidden; width: 100%; min-height: 56px; border-radius: 12px; border: 2px solid #555; background: #f6f6f6; font: inherit; font-weight: 700; cursor: pointer; touch-action: none; }
+239:@media (prefers-reduced-motion: reduce) {
+301:@media (prefers-reduced-motion: reduce) {
+313:@media (prefers-reduced-motion: reduce) { .btn.auto-next::after { animation: none; } }
+350:@media (prefers-reduced-motion: reduce) { .toast, .reward-sticker > svg, .new-friend > svg { animation: none; } }
+483:.mv-cross { animation-name: mv-cross; }
+484:.mv-patrol { animation-name: mv-patrol; }
+485:@keyframes mv-cross {
+489:@keyframes mv-patrol {
+495:.mv-inner { transform-box: view-box; animation: mv-step 0.5s ease-in-out infinite alternate; }
+496:.mv-inner.fly { animation: mv-fly 0.9s ease-in-out infinite alternate; }
+497:.mv-inner.drift { animation: mv-drift 3s ease-in-out infinite alternate; }
+498:@keyframes mv-step { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+499:@keyframes mv-fly { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+500:@keyframes mv-drift { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+501:@media (prefers-reduced-motion: reduce) {
+502:  .mv, .mv-inner { animation-play-state: paused; }
+509:.mr-rooms { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+510:.mr-room-tab { font: inherit; font-weight: 800; font-size: 17px; color: var(--ink); background: #fff; border: 3px solid var(--line); border-radius: 999px; padding: 6px 16px; min-height: 44px; cursor: pointer; }
+511:.mr-room-tab.on { background: var(--primary); }
+512:.mr-stage { touch-action: none; }
+513:.mr-svg { width: 100%; height: 100%; }
+514:.mr-obj { cursor: grab; }
+515:.mr-obj.dragging { cursor: grabbing; filter: drop-shadow(0 10px 8px rgba(74, 58, 64, 0.28)); }
+516:.mr-tray { width: 100%; background: #fff; border-top: 4px solid var(--line); border-radius: 22px 22px 0 0; padding: 6px 10px calc(8px + var(--safe-b)); display: flex; flex-direction: column; gap: 6px; transition: background 0.15s; }
+517:.mr-tray.drop-here { background: #FFF1C2; }
+518:.mr-tray.drop-here::before { content: 'ここで はなすと しまえるよ'; font-weight: 800; font-size: 14px; text-align: center; }
+519:.mr-tabs { display: flex; gap: 8px; justify-content: center; }
+520:.mr-tab { font: inherit; font-weight: 800; font-size: 16px; color: var(--ink); background: #F6EFE6; border: 3px solid var(--line); border-radius: 999px; padding: 4px 18px; min-height: 40px; cursor: pointer; }
+521:.mr-tab.on { background: var(--primary); }
+522:.mr-cells { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 6px; touch-action: pan-x; scrollbar-width: thin; }
+523:.mr-cell { flex: 0 0 auto; width: 76px; height: 76px; border: 3px solid var(--line); border-radius: 18px; background: #FFF6E8; padding: 4px; display: grid; place-items: center; cursor: grab; touch-action: none; position: relative; }
+524:.mr-cell svg { width: 100%; height: 100%; }
+525:.mr-cell span { font-size: 12px; font-weight: 700; }
+526:.mr-cell.placed { background: #EDE6DD; opacity: 0.55; }
+527:.mr-cell.placed::after { content: ''; position: absolute; right: -6px; top: -6px; width: 20px; height: 20px; border-radius: 50%; background: #9BD3A8; border: 3px solid var(--line); }
+529:  .mr-cell { width: 96px; height: 96px; }
+533:  .mr-cell { width: 58px; height: 58px; border-radius: 14px; }
+534:  .mr-tab { min-height: 34px; padding: 2px 14px; font-size: 14px; }
+535:  .mr-tray { padding-top: 4px; gap: 3px; }
+538:.mr-move, .mr-swing-seat, .mr-fish, .mr-hop, .mr-obj.rider { transform-box: view-box; transform-origin: 0 0; }
+539:.mr-m-walk .mr-move { animation: mr-walk 9s linear infinite; }
+540:.mr-m-bob .mr-move { animation: mr-bob 2.4s ease-in-out infinite alternate; }
+541:.mr-m-sway .mr-move { animation: mr-sway 3s ease-in-out infinite alternate; }
+542:.mr-m-roll .mr-move { animation: mr-roll 4s ease-in-out infinite alternate; }
+543:.mr-swing-seat { animation: mr-swing 2.6s ease-in-out infinite alternate; }
+544:.mr-fish { animation: mr-fish 3.5s ease-in-out infinite alternate; }
+545:.mr-hop.hop { animation: mr-hop 0.5s ease-out; }
+546:@keyframes mr-walk {
+552:@keyframes mr-bob { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+553:@keyframes mr-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+554:@keyframes mr-roll { from { transform: translateX(-18px); } to { transform: translateX(18px); } }
+555:@keyframes mr-swing { from { transform: translate(0px, -280px) rotate(-16deg) translate(0px, 280px); } to { transform: translate(0px, -280px) rotate(16deg) translate(0px, 280px); } }
+556:@keyframes mr-fish { from { transform: translateX(-14px); } to { transform: translateX(14px); } }
+557:@keyframes mr-hop { 0% { transform: translateY(0); } 40% { transform: translateY(-46px); } 100% { transform: translateY(0); } }
+558:@media (prefers-reduced-motion: reduce) {
+559:  .mr-move, .mr-swing-seat, .mr-fish, .mr-hop { animation: none !important; }
+563:.mr-rooms { flex-wrap: nowrap; gap: 6px; }
+564:.mr-room-tab { font-size: clamp(13px, 3.6vw, 17px); padding: 4px clamp(8px, 2.6vw, 16px); white-space: nowrap; }
+573:  .screen.myroom > .mr-stage { grid-column: 1; grid-row: 2; min-height: 0; }
+574:  .screen.myroom > .mr-tray { grid-column: 2; grid-row: 2; border-top: none; border-left: 4px solid var(--line); border-radius: 22px 0 0 0; min-height: 0; padding: 6px 8px calc(6px + var(--safe-b)); }
+575:  .screen.myroom .mr-cells { flex-wrap: wrap; overflow-x: hidden; overflow-y: auto; align-content: flex-start; touch-action: pan-y; justify-content: center; }
+import { describe, expect, it } from 'vitest';
+import { COURSE_MOVERS, FRONT_FROM_COURSE, MOVERS, type MoverKind, moverPos, pickMovers } from '../../src/core/movers';
+import { SCENES, SCENE_IDS } from '../../src/core/scenes';
+
+// 絵の大きさのめやす（ART：art/movers の横幅、高さ）
+const SIZE: Record<MoverKind, { w: number; h: number }> = {
+  bird: { w: 70, h: 60 },
+  seagull: { w: 90, h: 60 },
+  butterfly: { w: 60, h: 60 },
+  cloud: { w: 240, h: 120 },
+  cat: { w: 130, h: 120 },
+  puppy: { w: 120, h: 110 },
+  balloon: { w: 70, h: 140 },
+  sailboat: { w: 110, h: 120 },
+  crab: { w: 90, h: 70 },
+  ball: { w: 64, h: 64 },
+};
+
+describe('うごくもの', () => {
+  it('コース1は なし、あとのコースほど増える（同じシードなら同じ）', () => {
+    for (const id of SCENE_IDS) {
+      expect(pickMovers(id, 1, 5)).toEqual([]);
+      for (let c = 2; c <= 10; c++) {
+        const ms = pickMovers(id, c, c * 13);
+        expect(ms.length, `${id} course ${c}`).toBe(COURSE_MOVERS[c - 1]);
+        expect(new Set(ms.map((m) => m.id)).size).toBe(ms.length);
+        expect(pickMovers(id, c, c * 13)).toEqual(ms);
+        // 前を通るのは コース6から
+        if (c < FRONT_FROM_COURSE) expect(ms.every((m) => m.layer === 'back')).toBe(true);
+        else expect(ms.some((m) => m.layer === 'front')).toBe(true);
+      }
+    }
+  });
+
+  it('前を通るものは、どの隠れ場所の顔も 3秒より長く隠さない', () => {
+    for (const id of SCENE_IDS) {
+      for (const m of MOVERS[id].filter((x) => x.layer === 'front')) {
+        const { w, h } = SIZE[m.kind];
+        const period = m.move === 'patrol' ? m.sec * 2 : m.sec;
+        for (const sp of SCENES[id].spots) {
+          const face = { x: sp.x, y: sp.y - 142 * sp.s };
+          let run = 0;
+          let longest = 0;
+          for (let t = 0; t < period; t += 0.05) {
+            const p = moverPos(m, t);
+            const cover = Math.abs(face.x - p.x) < (w * m.scale) / 2 && face.y < p.y && face.y > p.y - h * m.scale;
+            run = cover ? run + 0.05 : 0;
+            longest = Math.max(longest, run);
+          }
+          expect(longest, `${m.id} × ${sp.id}`).toBeLessThan(3);
+        }
+      }
+    }
+  });
+
+  it('前を通るものは、ときどき どこかの友だちの前を ほんとうに横切る', () => {
+    for (const id of SCENE_IDS) {
+      let crossings = 0;
+      for (const m of MOVERS[id].filter((x) => x.layer === 'front')) {
+        const { w, h } = SIZE[m.kind];
+        for (const sp of SCENES[id].spots) {
+          const body = { x: sp.x, y: sp.y - 80 * sp.s };
+          for (let t = 0; t < m.sec * 2; t += 0.1) {
+            const p = moverPos(m, t);
+            if (Math.abs(body.x - p.x) < (w * m.scale) / 2 && body.y < p.y && body.y > p.y - h * m.scale) { crossings++; break; }
+          }
+        }
+      }
+      expect(crossings, id).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('通り道は 画面の中を通る（窓の中だけのものは窓を通る）', () => {
+    for (const id of SCENE_IDS) {
+      for (const m of MOVERS[id]) {
+        const mid = moverPos(m, m.sec / 2);
+        expect(mid.x).toBeGreaterThan(0);
+        expect(mid.x).toBeLessThan(1000);
+        expect(mid.y).toBeGreaterThan(0);
+        expect(mid.y).toBeLessThanOrEqual(1000);
+        if (m.clip) {
+          expect(mid.x).toBeGreaterThan(m.clip.x);
+          expect(mid.x).toBeLessThan(m.clip.x + m.clip.w);
+        }
+      }
+    }
+  });
+});
+// うごくもの（コース）：コース1は なし、後半は前を横切る、保護者が切れる、タップは さえぎらない
+import { expect, test } from '@playwright/test';
+import { act, faceCenter, fresh, state, tapAt } from './helpers';
+
+const KEY = 'moyou-kakurenbo-beta';
+
+async function seed(page: import('@playwright/test').Page, cleared: number, movers = true) {
+  await page.evaluate(
+    ([k, cleared, movers]) => {
+      localStorage.setItem(
+        k as string,
+        JSON.stringify({
+          schema: 1,
+          settings: { sound: false, difficulty: 'easy', tutorialSeen: true, movers },
+          resume: null,
+          playtest: { enabled: false, counters: {} },
+          course: { cleared, current: Math.min(10, (cleared as number) + 1), finds: 0 },
+          collection: { totalFinds: (cleared as number) * 10, sceneFinds: {} },
+        }),
+      );
+    },
+    [KEY, cleared, movers] as const,
+  );
+  await page.reload();
+}
+
+test('コース1は うごくもの なし、コース7は 3つ（前を通るものを含む）。上から押しても友だちが見つかる', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 6);
+  await act(page, 'toCourse');
+  await act(page, 'pickCourse', '[data-course="1"]');
+  await expect(page.locator('#stage .mv')).toHaveCount(0);
+  await act(page, 'home');
+  await act(page, 'toCourse');
+  await act(page, 'pickCourse', '[data-course="7"]');
+  await expect(page.locator('#stage .mv')).toHaveCount(3);
+  await expect(page.locator('#stage .movers.front .mv')).not.toHaveCount(0);
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: 'test-results/movers/course7.png' });
+  // 見つけても、うごくものは そのまま（数が変わらない）
+  const s = await state(page);
+  await tapAt(page, await faceCenter(page, 0));
+  await expect(page.locator('#stage .mv')).toHaveCount(3);
+  expect((await state(page)).session.found[0]).toBe(true);
+  expect(s.session.placements.length).toBeGreaterThan(0);
+});
+
+test('保護者が「うごくものを出す」を切ると、出ない', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 9, false);
+  await act(page, 'toCourse');
+  await act(page, 'pickCourse', '[data-course="10"]');
+  await expect(page.locator('[data-screen="play"]')).toBeVisible();
+  await expect(page.locator('#stage .mv')).toHaveCount(0);
+});
+// 遊べるかどうかを一か所で決める（Codex 総合レビュー指摘1〜4）。
+// 進み具合（クリア数・見つけた回数）と、パックの利用権限（canPlay）の両方を満たすものだけを出す。
+// 保存データの進み具合は購入の証明ではない。canPlay は本番では正規の購入確認だけを根拠にすること。
+import { type CharacterId, unlockedCharacters } from './characters';
+import type { Placement } from './placement';
+import type { SceneId } from './scene';
+import { STICKERS, type StickerDef } from './stickers';
+import type { ContentId } from '../entitlements/entitlements';
+
+export type CanPlay = (id: ContentId) => boolean;
+
+/** 進み具合で仲間になっていて、しかもパックで遊べる友だち */
+export function availableCharacters(cleared: number, sceneFinds: Partial<Record<SceneId, number>>, can: CanPlay): CharacterId[] {
+  return unlockedCharacters(cleared, sceneFinds).filter((c) => can(`char:${c}`));
+}
+
+export function canPlayCourse(no: number, can: CanPlay): boolean {
+  return can(`course:${no}`);
+}
+
+/** シールが属するパックの中身（それを遊べないなら、シールちょうに出さない） */
+export function stickerRequires(s: StickerDef): ContentId[] {
+  const need: ContentId[] = [`char:${s.char}`];
+  if (s.kind === 'course') need.push(`course:${s.need}`);
+  if (s.kind === 'scene' && s.scene) need.push(`scene:${s.scene}`);
+  return need;
+}
+
+export function visibleStickers(can: CanPlay): StickerDef[] {
+  return STICKERS.filter((s) => stickerRequires(s).every(can));
+}
+
+/** つづきから：背景と、置かれた全員がいま遊べるときだけ */
+export function canResume(r: { sceneId: SceneId; placements: Placement[] }, can: CanPlay): boolean {
+  return can(`scene:${r.sceneId}`) && r.placements.every((p) => can(`char:${p.char}`));
+}
+Get-Content : パス 'C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\vitest.config.ts' が存在しないため検出できません。
+発生場所 行:2 文字:387
++ ...  UTF8 src/core/access.ts; Get-Content -Encoding UTF8 vitest.config.ts
++                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\aki5h\...itest.config.ts:String) [Get-Content], ItemNotFoundEx 
+   ception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetContentCommand
+ 
+
+ exited 1 in 1140ms:
+
+> pattern-hide-family-beta@0.1.0 test
+> vitest run
+
+X [ERROR] Cannot read directory "../..": Access is denied.
+
+X [ERROR] Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+
+failed to load config from C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\vite.config.ts
+
+⎯⎯⎯⎯⎯⎯⎯ Startup Error ⎯⎯⎯⎯⎯⎯⎯⎯
+Error: Build failed with 2 errors:
+error: Cannot read directory "../..": Access is denied.
+error: Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+    at failureErrorWithLog (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1752:15)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1211:25
+    at runOnEndCallbacks (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1592:45)
+    at buildResponseToResult (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1209:7)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1236:16
+    at responseCallbacks.<computed> (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:886:9)
+    at handleIncomingPacket (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:941:12)
+    at Socket.readFromStdout (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:864:7)
+    at Socket.emit (node:events:509:28)
+    at addChunk (node:internal/streams/readable:563:12) {
+  errors: [Getter/Setter],
+  warnings: [Getter/Setter]
+}
+
+
+
+
+ succeeded in 3346ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$a = Get-Content -Encoding UTF8 src/ui/app.ts; $a[95..114]; $a[308..342]; $a[480..512]; $a[1080..1110]; $c = Get-Content -Encoding UTF8 src/ui/styles.css; $c[470..505]; $c[560..578]; Get-Content -Encoding UTF8 src/ui/dom.ts; Get-Content -Encoding UTF8 tests/unit/rewards.test.ts; Get-Content -Encoding UTF8 vite.config.ts; rg -n '"'private |pointer|seat|on\\.|keep|ref.split|Number.isFinite' src/ui/myroomView.ts src/core/myroom.ts; Get-Content -Encoding UTF8 src/art/registry.ts" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 203ms:
+  private courseNo = 1;
+  private courseRoundIdx = 0;
+  /** コースの うごくもの と、出題が始まった時刻（描き直しても位置が飛ばないように） */
+  private movers: MoverDef[] = [];
+  private myroom = new MyRoomView({
+    chars: () => this.allowedChars(),
+    items: () => ownedItems(this.progress(), this.can),
+    rooms: () => openRooms(this.store.data.course.cleared, this.can),
+    current: () => this.store.data.myroom.current,
+    load: (r) => this.store.data.myroom.layouts[r],
+    save: (r, list, cur) =>
+      this.store.update((d) => {
+        d.myroom.layouts[r] = list.map((p) => ({ ...p, ...(p.on ? { on: { ...p.on } } : {}) }));
+        d.myroom.current = cur;
+      }),
+    sound: (n) => play(n),
+    rerender: () => this.render(),
+  });
+  private moverStart = 0;
+  /** このラウンドでコースをクリアした（クリア画面を出す） */
+  private upcomingHtml(compact = false): string {
+    const d = this.store.data;
+    const list = upcomingRewards({ cleared: d.course.cleared, totalFinds: d.collection.totalFinds, sceneFinds: d.collection.sceneFinds }, this.can);
+    const rows = (compact ? list.slice(0, 1) : list).map((r) => this.upcomingRow(r)).join('');
+    if (!rows) return '';
+    return compact
+      ? `<div class="upcoming compact" role="status">${rows}</div>`
+      : `<section class="upcoming" aria-label="つぎの ごほうび"><h3>つぎの ごほうび</h3>${rows}</section>`;
+  }
+
+  private upcomingRow(r: UpcomingReward): string {
+    const d = this.store.data;
+    const when = (n: number) => (n <= 1 ? 'つぎの コースを クリアすると' : `あと <b>${n}</b>コース クリアすると`);
+    // 前の目標から、つぎの目標までの まる（クリアするたびに 1つずつ うまる）
+    const dots = (from: number, to: number, now: number) =>
+      `<span class="up-dots" aria-hidden="true">${Array.from({ length: to - from }, (_, k) => `<i class="${from + k < now ? 'on' : ''}"></i>`).join('')}</span>`;
+    if (r.kind === 'friend') {
+      const prev = Math.max(0, ...FRIEND_UNLOCKS.filter((f) => f.course < r.at).map((f) => f.course));
+      return `<div class="up-row friend"><span class="up-icon">${faceIcon(CHARACTERS[r.char])}</span><p>${when(r.remaining)}<br><strong>${CHARACTERS[r.char].name}</strong>が なかまに なるよ！${dots(prev, r.at, d.course.cleared)}</p></div>`;
+    }
+    const gift = (id: string) => {
+      const it = itemForSticker(id);
+      return it ? `<br><span class="up-gift">へやに「${it.name}」も とどくよ</span>` : '';
+    };
+    if (r.kind === 'room') {
+      return `<div class="up-row up-room"><span class="up-icon">${ICONS.room}</span><p>${when(r.remaining)}<br>じぶんの へや に「${r.room.name}」が ふえるよ</p></div>`;
+    }
+    if (r.kind === 'courseSticker') {
+      return `<div class="up-row up-sticker"><span class="up-icon">${stickerSvg(r.sticker)}</span><p>${when(r.remaining)}<br>シール「${r.sticker.name}」が もらえるよ${gift(r.sticker.id)}</p></div>`;
+    }
+    const prev = Math.max(0, ...visibleStickers(this.can).filter((s) => s.kind === 'finds' && s.need < r.at).map((s) => s.need));
+    const pct = Math.round(((r.done - prev) / (r.at - prev)) * 100);
+    return `<div class="up-row up-sticker"><span class="up-icon">${stickerSvg(r.sticker)}</span><p>あと <b>${r.remaining}</b>かい みつけると<br>シール「${r.sticker.name}」が もらえるよ${gift(r.sticker.id)}<span class="up-bar" aria-hidden="true"><i style="width:${pct}%"></i></span></p></div>`;
+  }
+
+    if (!pl.acc?.hat || !this.session) return base;
+    const hat = accessoryArt(SCENES[this.session.sceneId], { ...pl, acc: { hat: pl.acc.hat, tone: pl.acc.tone } }, `${prefix}${i}`, 1).front;
+    return base.replace('viewBox="-70 -215 140 120"', 'viewBox="-78 -250 156 155"').replace(/<\/svg>$/, `${hat}</svg>`);
+  }
+
+  /** コースクリアのごほうび：そのコースのシール、コース1・5では新しい友だち */
+  private courseRewardHtml(): string {
+    // 初めてクリアしたときだけ（もう一度クリアしても「あたらしい」とは言わない）
+    if (!this.courseFirstClear) return '';
+    const st = visibleStickers(this.can).find((x) => x.kind === 'course' && x.need === this.courseNo);
+    const gift = st ? itemForSticker(st.id) : undefined;
+    const room = ROOMS.find((r) => r.needCleared === this.courseNo && this.can(r.content));
+    const sticker = st
+      ? `<div class="reward-sticker">${stickerSvg(st)}<p>シールを もらったよ！${gift ? `<br><small>へやに「${gift.name}」が とどいたよ</small>` : ''}${room ? `<br><small>へやに「${room.name}」が ふえたよ</small>` : ''}</p></div>`
+      : '';
+    const nf = FRIEND_UNLOCKS.find((f) => f.course === this.courseNo && this.can(`char:${f.char}`));
+    const friend = nf
+      ? `<div class="new-friend">${faceIcon(CHARACTERS[nf.char])}<p>あたらしい ともだち<br><strong>${CHARACTERS[nf.char].name}</strong>が なかまに なったよ！</p></div>`
+      : '';
+    return `<div class="rewards">${sticker}${friend}</div>`;
+  }
+
+  private trialProgressHtml(): string {
+    const n = Math.min(HARDEST.finds, this.trial?.finds ?? 0);
+    return `<div class="course-progress trial" role="status" aria-label="おためし ${n}/${HARDEST.finds}"><span class="course-no">おためし</span>${Array.from({ length: HARDEST.finds }, (_, k) => `<i class="pip${k < n ? ' on' : ''}"></i>`).join('')}</div>`;
+  }
+
+  private trialClearHtml(): string {
+    const s = this.session as PlaySession;
+    if ((this.trial?.finds ?? 0) >= HARDEST.finds) {
+      return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="10にん みつけた">
+        <div class="clear-card">
+          <div class="medal" aria-hidden="true">${ICONS.star}<span>10</span></div>
+        d.resume = null;
+      });
+    }
+  }
+
+  // ---------- 画面ごとのイベント ----------
+
+  private bindScreen(): void {
+    const stage = this.root.querySelector<HTMLElement>('#stage');
+    if (stage && typeof ResizeObserver !== 'undefined') {
+      this.resizeObs = new ResizeObserver(() => {
+        const r = stage.getBoundingClientRect();
+        stage.classList.toggle('compact', Math.min(r.width, r.height) < 360);
+      });
+      this.resizeObs.observe(stage);
+    }
+    if (this.screen === 'play') this.bindPlay();
+    if (this.screen === 'hidePlace') this.bindPlace();
+    if (this.screen === 'myroom') {
+      const main = this.root.querySelector<HTMLElement>('main');
+      if (main) this.myroom.bind(main);
+    }
+  }
+
+  private renderToken = 0;
+
+  /**
+   * 画面に使う絵（背景・柄・小物・キャラクター）がすべて読み込まれ、展開されるまで、
+   * ステージ全体を隠して入力も止める。別の画面に移ったら、古い読み込みでは表示しない。
+   */
+  private gateStage(): void {
+  .upcoming .up-row.friend .up-icon { border-width: 2px; }
+  .upcoming .up-row p { font-size: 11.5px; line-height: 1.3; }
+  .upcoming .up-row p br { display: none; }
+  .up-dots { margin-top: 2px; gap: 3px; }
+  .up-dots i { width: 9px; height: 9px; border-width: 1.5px; }
+  .up-bar { height: 6px; margin-top: 3px; border-width: 1.5px; }
+  .course-tile { height: clamp(48px, 18vh, 80px); }
+}
+
+/* ---- うごくもの（コース）。位置は --x0..--y1、片道の向きは --f0/--f1（絵は右向き） ---- */
+.movers { pointer-events: none; }
+.mv { transform-box: view-box; animation-duration: var(--period); animation-delay: var(--delay); animation-iteration-count: infinite; animation-timing-function: linear; }
+.mv-cross { animation-name: mv-cross; }
+.mv-patrol { animation-name: mv-patrol; }
+@keyframes mv-cross {
+  from { transform: translate(var(--x0), var(--y0)) scaleX(var(--f0)); }
+  to { transform: translate(var(--x1), var(--y1)) scaleX(var(--f0)); }
+}
+@keyframes mv-patrol {
+  0% { transform: translate(var(--x0), var(--y0)) scaleX(var(--f0)); }
+  49.9% { transform: translate(var(--x1), var(--y1)) scaleX(var(--f0)); }
+  50% { transform: translate(var(--x1), var(--y1)) scaleX(var(--f1)); }
+  100% { transform: translate(var(--x0), var(--y0)) scaleX(var(--f1)); }
+}
+.mv-inner { transform-box: view-box; animation: mv-step 0.5s ease-in-out infinite alternate; }
+.mv-inner.fly { animation: mv-fly 0.9s ease-in-out infinite alternate; }
+.mv-inner.drift { animation: mv-drift 3s ease-in-out infinite alternate; }
+@keyframes mv-step { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+@keyframes mv-fly { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+@keyframes mv-drift { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) {
+  .mv, .mv-inner { animation-play-state: paused; }
+}
+
+/* ---- じぶんの へや ---- */
+.title .btn.myroom-btn { width: min(420px, 86vw); background: #F9DCE3; }
+
+/* 部屋が3つのときも 1行に */
+.mr-rooms { flex-wrap: nowrap; gap: 6px; }
+.mr-room-tab { font-size: clamp(13px, 3.6vw, 17px); padding: 4px clamp(8px, 2.6vw, 16px); white-space: nowrap; }
+
+.up-gift { font-size: 0.88em; color: #8a5a6a; }
+.up-row.up-room .up-icon { border-radius: 14px; background: #F9DCE3; border: 3px solid var(--line); padding: 6px; }
+.reward-sticker small { font-size: 13px; color: #8a5a6a; }
+/* iPhone 横向きの じぶんの へや：棚を右に縦長に置き、部屋を大きく */
+@media (orientation: landscape) and (max-height: 600px) {
+  .screen.myroom { display: grid; grid-template-columns: minmax(0, 1fr) clamp(150px, 26vw, 230px); grid-template-rows: auto minmax(0, 1fr); align-items: stretch; gap: 4px 8px; }
+  .screen.myroom > .topbar { grid-column: 1 / -1; }
+  .screen.myroom > .mr-stage { grid-column: 1; grid-row: 2; min-height: 0; }
+  .screen.myroom > .mr-tray { grid-column: 2; grid-row: 2; border-top: none; border-left: 4px solid var(--line); border-radius: 22px 0 0 0; min-height: 0; padding: 6px 8px calc(6px + var(--safe-b)); }
+  .screen.myroom .mr-cells { flex-wrap: wrap; overflow-x: hidden; overflow-y: auto; align-content: flex-start; touch-action: pan-y; justify-content: center; }
+}
+import type { Pt } from '../core/geometry';
+
+export function $(root: ParentNode, sel: string): HTMLElement {
+  const el = root.querySelector(sel);
+  if (!el) throw new Error(`missing ${sel}`);
+  return el as HTMLElement;
+}
+
+/** 画面座標→シーン座標（SVGの現在の変換を使うので、画面サイズ・回転に追従する） */
+export function toScene(svg: SVGSVGElement, clientX: number, clientY: number): Pt | null {
+  const m = svg.getScreenCTM();
+  if (!m) return null;
+  const p = new DOMPoint(clientX, clientY).matrixTransform(m.inverse());
+  return { x: p.x, y: p.y };
+}
+
+export function prefersReducedMotion(): boolean {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch {
+    return false;
+  }
+}
+
+export function btn(action: string, icon: string, label: string, cls = '', extra = ''): string {
+  return `<button type="button" class="btn ${cls}" data-action="${action}" aria-label="${label}" ${extra}>${icon}<span class="lbl">${label}</span></button>`;
+}
+import { describe, expect, it } from 'vitest';
+import { friendAtCourse, upcomingRewards } from '../../src/core/rewards';
+import { type ContentId, PACKS } from '../../src/entitlements/entitlements';
+
+const all = () => true;
+const baseOnly = (id: ContentId) => PACKS.find((p) => p.id === 'base')!.contents.includes(id);
+
+describe('つぎの ごほうび', () => {
+  it('はじめは「コース1で にゃこ」「コース1のシール」「10かいのシール」', () => {
+    const r = upcomingRewards({ cleared: 0, totalFinds: 0 }, all);
+    expect(r.map((x) => x.kind)).toEqual(['friend', 'courseSticker', 'findsSticker', 'room']);
+    expect(r[0]).toMatchObject({ char: 'nyako', at: 1, remaining: 1 });
+    expect(r[1]).toMatchObject({ at: 1, remaining: 1 });
+    expect(r[2]).toMatchObject({ at: 10, remaining: 10, done: 0 });
+    expect(r[3]).toMatchObject({ at: 3, remaining: 3 }); // しんしつ
+  });
+
+  it('クリアするたびに「あと なんコース」が減っていく', () => {
+    const rem = [1, 2, 3, 4].map((c) => upcomingRewards({ cleared: c, totalFinds: c * 10 }, all).find((x) => x.kind === 'friend')!.remaining);
+    expect(rem).toEqual([4, 3, 2, 1]); // ぽぽ（コース5）
+    expect(upcomingRewards({ cleared: 2, totalFinds: 23 }, all).find((x) => x.kind === 'findsSticker')).toMatchObject({ at: 30, remaining: 7, done: 23 });
+  });
+
+  it('友だちが全員そろうと、友だちの告知は出ない', () => {
+    const r = upcomingRewards({ cleared: 5, totalFinds: 50 }, all);
+    expect(r.some((x) => x.kind === 'friend')).toBe(false);
+    expect(r.find((x) => x.kind === 'courseSticker')).toMatchObject({ at: 6 });
+  });
+
+  it('へや：コース3で しんしつ、追加パックが無ければ おにわ は告知しない', () => {
+    expect(upcomingRewards({ cleared: 3, totalFinds: 30 }, all).find((x) => x.kind === 'room')).toMatchObject({ at: 6, remaining: 3 });
+    expect(upcomingRewards({ cleared: 3, totalFinds: 30 }, baseOnly).some((x) => x.kind === 'room')).toBe(false);
+  });
+
+  it('ぜんぶ もらうと 何も出ない', () => {
+    expect(upcomingRewards({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99 } }, all)).toEqual([]);
+  });
+
+  it('パックを持っていない人には、そのパックのコース・シールを告知しない', () => {
+    const r = upcomingRewards({ cleared: 5, totalFinds: 50 }, baseOnly);
+    // コース6〜10 は追加パック：コースのシールの告知は出ない
+    expect(r.some((x) => x.kind === 'courseSticker')).toBe(false);
+    expect(friendAtCourse(5, baseOnly)).toBe('popo');
+    expect(friendAtCourse(1, all)).toBe('nyako');
+    expect(friendAtCourse(2, all)).toBeNull();
+  });
+});
+import { defineConfig, type Plugin } from 'vite';
+import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = dirname(fileURLToPath(import.meta.url));
+
+// 本番ビルドの後に、ビルド成果物の一覧から Service Worker を作る。
+// 版（VERSION）は成果物の内容のハッシュなので、更新すると古いキャッシュは消える。
+function serviceWorkerPlugin(): Plugin {
+  let outDir = 'dist';
+  return {
+    name: 'local-service-worker',
+    // iOS アプリ用（--mode native）では作らない
+    apply: (_c, env) => env.command === 'build' && env.mode !== 'native',
+    configResolved(c) {
+      outDir = resolve(c.root, c.build.outDir);
+    },
+    closeBundle() {
+      const files: string[] = [];
+      const walk = (d: string) => {
+        for (const f of readdirSync(d)) {
+          const p = join(d, f);
+          if (statSync(p).isDirectory()) walk(p);
+          else files.push(p);
+        }
+      };
+      walk(outDir);
+      const list = files
+        .map((f) => relative(outDir, f).split('\\').join('/'))
+        .filter((f) => f !== 'sw.js')
+        .sort();
+      const h = createHash('sha256');
+      for (const f of list) h.update(f).update(readFileSync(join(outDir, f)));
+      const version = h.digest('hex').slice(0, 12);
+      const tpl = readFileSync(resolve(ROOT, 'src/sw-template.js'), 'utf8');
+      const out = tpl.replace('__VERSION__', version).replace('__ASSETS__', JSON.stringify(['./', ...list.map((f) => './' + f)]));
+      writeFileSync(join(outDir, 'sw.js'), out);
+    },
+  };
+}
+
+// 本番だけ、通信先を同一オリジンに制限する CSP を入れる
+function cspPlugin(): Plugin {
+  return {
+    name: 'csp-meta',
+    apply: 'build',
+    transformIndexHtml(html) {
+      const csp =
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'";
+      return html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${csp}" />`);
+    },
+  };
+}
+
+// iOS アプリ用（--mode native）：正式な名前にし、ホーム画面追加用の manifest は付けない
+function nativeHtmlPlugin(): Plugin {
+  return {
+    name: 'native-html',
+    apply: (_c, env) => env.command === 'build' && env.mode === 'native',
+    transformIndexHtml(html) {
+      return html
+        .replace(/<title>[^<]*<\/title>/, '<title>もようのかくれんぼ</title>')
+        .replace(/\s*<link rel="manifest"[^>]*>/, '')
+        .replace(/\s*<meta name="robots"[^>]*>/, '');
+    },
+  };
+}
+
+export default defineConfig({
+  base: './',
+  plugins: [cspPlugin(), serviceWorkerPlugin(), nativeHtmlPlugin()],
+  build: { target: 'es2020', sourcemap: false },
+  server: { host: '127.0.0.1', strictPort: false },
+  preview: { host: '127.0.0.1' },
+  test: {
+    include: ['tests/unit/**/*.test.ts'],
+    environment: 'node',
+  },
+} as never);
+src/core/myroom.ts:50:  seats?: Seat[];
+src/core/myroom.ts:57:  { id: 'sofa', name: 'ソファ', sticker: null, w: 280, seats: [{ x: -62, y: -62 }, { x: 62, y: -62 }] },
+src/core/myroom.ts:63:  { id: 'bed', name: 'ベッド', sticker: 'c3', w: 290, seats: [{ x: -40, y: -70 }, { x: 60, y: -70 }] },
+src/core/myroom.ts:69:  { id: 'swing', name: 'ブランコ', sticker: 'c9', w: 260, seats: [{ x: 0, y: -62 }], motion: 'swing' },
+src/core/myroom.ts:127:  on?: { idx: number; seat: number };
+src/core/myroom.ts:156:      if (typeof o.ref !== 'string' || typeof o.x !== 'number' || typeof o.y !== 'number' || !Number.isFinite(o.x) || !Number.isFinite(o.y)) return false;
+src/core/myroom.ts:157:      const [kind, id] = o.ref.split(':');
+src/core/myroom.ts:162:        if (typeof on !== 'object' || on === null || !Number.isInteger(on.idx) || !Number.isInteger(on.seat) || (on.idx as number) < 0 || (on.idx as number) >= arr.length || on.idx === i) return false;
+src/ui/myroomView.ts:63:  pointerId: number;
+src/ui/myroomView.ts:73:  private room: RoomId = 'living';
+src/ui/myroomView.ts:74:  private list: Placed[] = [];
+src/ui/myroomView.ts:75:  private tab: 'chars' | 'items' = 'chars';
+src/ui/myroomView.ts:76:  private drag: Drag | null = null;
+src/ui/myroomView.ts:77:  private el: HTMLElement | null = null;
+src/ui/myroomView.ts:79:  constructor(private deps: MyRoomDeps) {}
+src/ui/myroomView.ts:89:  private def(): RoomDef {
+src/ui/myroomView.ts:93:  private loadRoom(): void {
+src/ui/myroomView.ts:98:      const [k, id] = p.ref.split(':');
+src/ui/myroomView.ts:103:    const keep = base.map((p, i) => ({ p, i })).filter(({ p }) => usable(p));
+src/ui/myroomView.ts:104:    const map = new Map(keep.map(({ i }, j) => [i, j]));
+src/ui/myroomView.ts:105:    this.list = keep.map(({ p }) => {
+src/ui/myroomView.ts:108:        const ni = map.get(q.on.idx);
+src/ui/myroomView.ts:110:        else q.on = { idx: ni, seat: q.on.seat };
+src/ui/myroomView.ts:117:  private persist(): void {
+src/ui/myroomView.ts:138:  private placedScale(i: number): number {
+src/ui/myroomView.ts:140:    if (p.on) return this.placedScale(p.on.idx);
+src/ui/myroomView.ts:145:  private seatPos(p: Placed): { x: number; y: number } | null {
+src/ui/myroomView.ts:147:    const base = this.list[p.on.idx];
+src/ui/myroomView.ts:148:    const it = base && ITEM_BY_ID[base.ref.split(':')[1]];
+src/ui/myroomView.ts:149:    const seat = it?.seats?.[p.on.seat];
+src/ui/myroomView.ts:150:    if (!seat) return null;
+src/ui/myroomView.ts:153:    return { x: base.x + seat.x * s * f, y: base.y + seat.y * s };
+src/ui/myroomView.ts:156:  private objMarkup(i: number): string {
+src/ui/myroomView.ts:158:    const [kind, id] = p.ref.split(':');
+src/ui/myroomView.ts:159:    const pos = this.seatPos(p) ?? { x: p.x, y: p.y };
+src/ui/myroomView.ts:166:      return `<g class="mr-obj mr-char${p.on ? ' seated' : ''}" data-idx="${i}" transform="${tf}"><g class="mr-hop"><ellipse cx="0" cy="2" rx="60" ry="9" fill="#4A3A40" opacity="${p.on ? 0 : 0.12}"/>${charArtMarkup(c, { fillId: fill, outline: 1, found: true })}</g></g>`;
+src/ui/myroomView.ts:176:          const seat = it.seats![q.on!.seat];
+src/ui/myroomView.ts:177:          const c = CHARACTERS[q.ref.split(':')[1] as CharacterId];
+src/ui/myroomView.ts:178:          return `<g class="mr-obj mr-char seated rider" data-idx="${j}" transform="translate(${seat.x} ${seat.y})">${charArtMarkup(c, { fillId: `mr-fill-${c.id}`, outline: 1, found: true })}</g>`;
+src/ui/myroomView.ts:181:      return `<g class="mr-obj mr-item" data-idx="${i}" transform="${tf}">${itemArt(it)}<g class="mr-swing-seat">${itemArt(it, 'seat')}${riders}</g></g>`;
+src/ui/myroomView.ts:188:  private order(): number[] {
+src/ui/myroomView.ts:191:      const [k, id] = this.list[i].ref.split(':');
+src/ui/myroomView.ts:205:  private svg(): string {
+src/ui/myroomView.ts:219:  private placedRefs(): Set<string> {
+src/ui/myroomView.ts:223:  private trayHtml(): string {
+src/ui/myroomView.ts:241:              const icon = f ? `<svg viewBox="${-side / 2} ${-side + 8} ${side} ${side}" aria-hidden="true"><image href="${f}" x="-150" y="-300" width="300" height="300"/>${it.id === 'swing' && itemArtFile('swing-seat') ? `<image href="${itemArtFile('swing-seat')}" x="-150" y="-300" width="300" height="300"/>` : ''}</svg>` : `<span>${it.name}</span>`;
+src/ui/myroomView.ts:259:    stage?.addEventListener('pointerdown', (e) => this.onStageDown(e));
+src/ui/myroomView.ts:260:    main.addEventListener('pointermove', (e) => this.onMove(e));
+src/ui/myroomView.ts:261:    main.addEventListener('pointerup', (e) => this.onUp(e));
+src/ui/myroomView.ts:262:    main.addEventListener('pointercancel', () => this.cancelDrag());
+src/ui/myroomView.ts:264:    main.querySelector('.mr-cells')?.addEventListener('pointerdown', (e) => this.onTrayDown(e as PointerEvent));
+src/ui/myroomView.ts:267:  private svgEl(): SVGSVGElement | null {
+src/ui/myroomView.ts:271:  private redraw(): void {
+src/ui/myroomView.ts:277:      this.el?.querySelector('.mr-cells')?.addEventListener('pointerdown', (e) => this.onTrayDown(e as PointerEvent));
+src/ui/myroomView.ts:281:  private onClick(e: MouseEvent): void {
+src/ui/myroomView.ts:302:  private onTrayDown(e: PointerEvent): void {
+src/ui/myroomView.ts:306:    this.drag = { idx: -1, pointerId: e.pointerId, dx: 0, dy: 0, startX: e.clientX, startY: e.clientY, moved: false, fromTray: true };
+src/ui/myroomView.ts:310:  private onStageDown(e: PointerEvent): void {
+src/ui/myroomView.ts:320:    const pos = this.seatPos(p) ?? p;
+src/ui/myroomView.ts:321:    this.drag = { idx, pointerId: e.pointerId, dx: pos.x - pt.x, dy: pos.y - pt.y, startX: e.clientX, startY: e.clientY, moved: false };
+src/ui/myroomView.ts:322:    (e.target as Element).setPointerCapture?.(e.pointerId);
+src/ui/myroomView.ts:326:  private onMove(e: PointerEvent): void {
+src/ui/myroomView.ts:328:    if (!d || e.pointerId !== d.pointerId) return;
+src/ui/myroomView.ts:364:          const sp = this.seatPos(q);
+src/ui/myroomView.ts:376:  private overTray(x: number, y: number): boolean {
+src/ui/myroomView.ts:381:  private onUp(e: PointerEvent): void {
+src/ui/myroomView.ts:383:    if (!d || e.pointerId !== d.pointerId) return;
+src/ui/myroomView.ts:410:  private cancelDrag(): void {
+src/ui/myroomView.ts:418:  private trySeat(i: number): void {
+src/ui/myroomView.ts:420:    let best: { idx: number; seat: number; d: number } | null = null;
+src/ui/myroomView.ts:422:      const it = ITEM_BY_ID[q.ref.split(':')[1]];
+src/ui/myroomView.ts:423:      if (j === i || !q.ref.startsWith('item:') || !it?.seats) return;
+src/ui/myroomView.ts:425:      it.seats.forEach((seat, k) => {
+src/ui/myroomView.ts:426:        if (this.list.some((o) => o.on?.idx === j && o.on.seat === k)) return;
+src/ui/myroomView.ts:427:        const sx = q.x + seat.x * s * (q.flip ? -1 : 1);
+src/ui/myroomView.ts:428:        const sy = q.y + seat.y * s;
+src/ui/myroomView.ts:430:        if (dist < 95 * s && (!best || dist < best.d)) best = { idx: j, seat: k, d: dist };
+src/ui/myroomView.ts:434:      const b = best as { idx: number; seat: number };
+src/ui/myroomView.ts:435:      p.on = { idx: b.idx, seat: b.seat };
+src/ui/myroomView.ts:440:  private tapObject(i: number): void {
+src/ui/myroomView.ts:457:  private tapTray(ref: string): void {
+src/ui/myroomView.ts:476:  private removeAt(i: number): void {
+src/ui/myroomView.ts:480:        const sp = this.seatPos(q);
+src/ui/myroomView.ts:490:      if (q.on && q.on.idx > i) q.on = { idx: q.on.idx - 1, seat: q.on.seat };
+// 差し替え用の絵（art/ フォルダ）を読む窓口。
+// ファイルが無ければ、コードで描いた既定の絵を使う（ゲームは必ず動く）。
+// 置き場所・寸法の決まりは ART_SLOTS.md を参照。
+import type { CharacterId } from '../core/characters';
+import type { SceneId } from '../core/scene';
+
+const files = import.meta.glob('../../art/{characters,scenes,patterns,ui,accessories,stickers,movers,myroom}/**/*.{png,webp,svg}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>;
+
+const EXT = ['webp', 'png', 'svg'];
+
+function find(dir: string, name: string): string | undefined {
+  for (const e of EXT) {
+    const u = files[`../../art/${dir}/${name}.${e}`];
+    if (u) return u;
+  }
+  return undefined;
+}
+
+/** キャラクターの絵の枠（ローカル座標）。画像は 450×600px（2.5倍）を基準にする */
+export const CHAR_FRAME = { x: -90, y: -225, w: 180, h: 240 };
+
+export interface CharacterArt {
+  /** 服より後ろ（足・背中側の髪など） */
+  back?: string;
+  /** 服の形（白＝服）。ここにゲームの柄を流し込む */
+  clothesMask: string;
+  /** 服の陰影（乗算）。任意 */
+  clothesShade?: string;
+  /** 服のふち線。難易度で濃さを変える */
+  clothesLine?: string;
+  /** 服より前（顔・手・線） */
+  front: string;
+  /** 見つかった時の前面（手をふる）。無ければ front */
+  frontFound?: string;
+}
+
+export function characterArt(id: CharacterId): CharacterArt | null {
+  const d = `characters/${id}`;
+  const clothesMask = find(d, 'clothes-mask');
+  const front = find(d, 'front');
+  if (!clothesMask || !front) return null;
+  return {
+    back: find(d, 'back'),
+    clothesMask,
+    clothesShade: find(d, 'clothes-shade'),
+    clothesLine: find(d, 'clothes-line'),
+    front,
+    frontFound: find(d, 'front-found'),
+  };
+}
+
+export interface SceneArt {
+  /** 柄の領域より下（空・床・壁の質感など）1000×1000 */
+  back?: string;
+  /** 柄の領域の上・キャラクターの後ろ（家具の縁・陰影など）。透過 */
+  over?: string;
+  /** 小さい画面では省く飾り。透過 */
+  minor?: string;
+  /** 前景の小物すべて（キャラクターより前）。透過 */
+  fore?: string;
+}
+
+export function sceneArt(id: SceneId): SceneArt | null {
+  const d = `scenes/${id}`;
+  const a: SceneArt = { back: find(d, 'back'), over: find(d, 'over'), minor: find(d, 'minor'), fore: find(d, 'fore') };
+  return a.back || a.over || a.minor || a.fore ? a : null;
+}
+
+/** 柄のタイル（scene-costume）。正方形で、つなぎ目なく敷き詰められること */
+export function patternTile(scene: SceneId, costume: string): string | undefined {
+  return find('patterns', `${scene}-${costume}`);
+}
+
+/** 帽子・傘の絵の枠（ローカル座標）。画像は 600×720px（2倍）を基準にする。3体共通 */
+export const ACC_FRAME = { x: -150, y: -345, w: 300, h: 360 };
+
+export interface AccessoryArt {
+  /** 形（白＝ゲームが毛糸の色・背景の柄を流し込む部分） */
+  mask: string;
+  /** 陰影（乗算）。任意 */
+  shade?: string;
+  /** ふち線。背景の柄のときは服と同じ薄さになる。任意 */
+  line?: string;
+  /** いちばん前の細部（ぼんぼりの毛・傘の先 など）。任意 */
+  front?: string;
+  /** キャラクターより後ろ（傘の柄の棒 など）。任意 */
+  back?: string;
+}
+
+export function accessoryArtFiles(kind: 'hat' | 'umbrella'): AccessoryArt | null {
+  const d = `accessories/${kind}`;
+  const mask = find(d, 'mask');
+  if (!mask) return null;
+  return { mask, shade: find(d, 'shade'), line: find(d, 'line'), front: find(d, 'front'), back: find(d, 'back') };
+}
+
+export function uiArt(name: 'title' | 'handoff' | 'bye'): string | undefined {
+  return find('ui', name);
+}
+
+/** シールの絵（art/stickers/{id}.png、正方形） */
+export function stickerArtFile(id: string): string | undefined {
+  return find('stickers', id);
+}
+
+/** すべての絵のURL（起動時の先読み用） */
+export function allArtUrls(): string[] {
+  return Object.values(files);
+}
+
+export function artSummary(): string[] {
+  return Object.keys(files).map((k) => k.replace('../../art/', ''));
+}
+
+/** うごくもの（art/movers/{kind}.svg。枠 -150 -300 300 300、足もと中央が 0,0） */
+export function moverArtFile(kind: string): string | undefined {
+  return find('movers', kind) ?? find('myroom/items', kind);
+}
+
+/** じぶんの へや の もの（art/myroom/items/{id}.svg。無ければ うごくもの の同じ名前） */
+export function itemArtFile(id: string): string | undefined {
+  return find('myroom/items', id) ?? find('movers', id);
+}
+
+/** じぶんの へや の背景（art/myroom/rooms/{id}.svg、1000×1000） */
+export function roomArtFile(id: string): string | undefined {
+  return find('myroom/rooms', id);
+}
+
+codex
+型チェックは通りました。単体テストはサンドボックスのアクセス拒否で起動できなかったため、指示どおり回避策は使っていません。コード上では、ブランコから降ろす際の座標変換、ドラッグ中の部屋切り替え、棚のタッチスクロールにも修正が必要な点があります。実機未確認の項目は明記します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$n=0; Get-Content -Encoding UTF8 src/ui/myroomView.ts | ForEach-Object { $n++; if (($n -ge 281 -and $n -le 415) -or ($n -ge 188 -and $n -le 203)) { '"'{0}: {1}' -f "'$n, $_ } }; Get-Content -Encoding UTF8 tests/e2e/myroom.spec.ts -TotalCount 48; Get-Content -Encoding UTF8 art/myroom/items/swing.svg -TotalCount 8; Get-Content -Encoding UTF8 art/movers/cat.svg -TotalCount 8; git status --short' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 213ms:
+188:   private order(): number[] {
+189:     const idx = this.list.map((_, i) => i);
+190:     const isFlat = (i: number) => {
+191:       const [k, id] = this.list[i].ref.split(':');
+192:       return k === 'item' && !!ITEM_BY_ID[id]?.flat;
+193:     };
+194:     const roots = idx.filter((i) => !this.list[i].on).sort((a, b) => Number(isFlat(b)) - Number(isFlat(a)) || this.list[a].y - this.list[b].y);
+195:     const out: number[] = [];
+196:     for (const r of roots) {
+197:       out.push(r);
+198:       const base = this.list[r];
+199:       if (base.ref === 'item:swing') continue; // ブランコの子は板の中で描く
+200:       out.push(...idx.filter((i) => this.list[i].on?.idx === r));
+201:     }
+202:     return out;
+203:   }
+281:   private onClick(e: MouseEvent): void {
+282:     const t = e.target as HTMLElement;
+283:     const tab = t.closest<HTMLElement>('[data-mr-tab]');
+284:     if (tab) {
+285:       this.tab = tab.dataset.mrTab === 'items' ? 'items' : 'chars';
+286:       this.deps.sound('pop');
+287:       this.redraw();
+288:       return;
+289:     }
+290:     const rt = t.closest<HTMLElement>('[data-mr-room]');
+291:     if (rt && rt.dataset.mrRoom !== this.room) {
+292:       this.room = rt.dataset.mrRoom as RoomId;
+293:       this.loadRoom();
+294:       this.deps.save(this.room, this.list, this.room);
+295:       this.deps.sound('pop');
+296:       this.deps.rerender();
+297:       return;
+298:     }
+299:   }
+300: 
+301:   /** 棚から：押したまま部屋へ動かすと置ける。タップだけなら、空いている所に置く／もう置いてあれば しまう */
+302:   private onTrayDown(e: PointerEvent): void {
+303:     const cell = (e.target as HTMLElement).closest<HTMLElement>('[data-mr-ref]');
+304:     if (!cell || this.drag) return;
+305:     const ref = cell.dataset.mrRef as string;
+306:     this.drag = { idx: -1, pointerId: e.pointerId, dx: 0, dy: 0, startX: e.clientX, startY: e.clientY, moved: false, fromTray: true };
+307:     (this.drag as Drag & { ref: string }).ref = ref;
+308:   }
+309: 
+310:   private onStageDown(e: PointerEvent): void {
+311:     if (!e.isPrimary || this.drag) return;
+312:     const g = (e.target as Element).closest<SVGGElement>('.mr-obj');
+313:     const svg = this.svgEl();
+314:     if (!g || !svg) return;
+315:     const idx = Number(g.dataset.idx);
+316:     const p = this.list[idx];
+317:     if (!p) return;
+318:     const pt = toScene(svg, e.clientX, e.clientY);
+319:     if (!pt) return;
+320:     const pos = this.seatPos(p) ?? p;
+321:     this.drag = { idx, pointerId: e.pointerId, dx: pos.x - pt.x, dy: pos.y - pt.y, startX: e.clientX, startY: e.clientY, moved: false };
+322:     (e.target as Element).setPointerCapture?.(e.pointerId);
+323:     e.preventDefault();
+324:   }
+325: 
+326:   private onMove(e: PointerEvent): void {
+327:     const d = this.drag;
+328:     if (!d || e.pointerId !== d.pointerId) return;
+329:     if (!d.moved && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < 10) return;
+330:     const svg = this.svgEl();
+331:     if (!svg) return;
+332:     d.moved = true;
+333:     const pt = toScene(svg, e.clientX, e.clientY);
+334:     if (!pt) return;
+335:     if (d.fromTray && d.idx < 0) {
+336:       // 棚から部屋の上に来たら、そこに出す
+337:       const r = svg.getBoundingClientRect();
+338:       if (e.clientY > r.bottom - 4 || this.list.length >= MAX_PLACED) return;
+339:       const ref = (d as Drag & { ref: string }).ref;
+340:       const old = this.list.findIndex((p) => p.ref === ref);
+341:       if (old >= 0) this.removeAt(old);
+342:       this.list.push({ ref, x: pt.x, y: Math.max(this.def().floorTop, pt.y) });
+343:       d.idx = this.list.length - 1;
+344:       d.dx = 0;
+345:       d.dy = 0;
+346:       this.redraw();
+347:     }
+348:     const p = this.list[d.idx];
+349:     if (!p) return;
+350:     if (p.on) delete p.on;
+351:     p.x = pt.x + d.dx;
+352:     p.y = pt.y + d.dy;
+353:     // 動かしている物だけ描き直す（座っている子もいっしょに）
+354:     const g = svg.querySelector<SVGGElement>(`.mr-obj[data-idx="${d.idx}"]`);
+355:     if (g) {
+356:       const s = depthScale(this.def(), Math.max(this.def().floorTop, p.y));
+357:       const f = p.flip ? -1 : 1;
+358:       g.setAttribute('transform', `translate(${r1(p.x)} ${r1(p.y)}) scale(${r1s(s * f)} ${r1s(s)})`);
+359:       g.classList.add('dragging');
+360:       // ずっと前に出す
+361:       g.parentNode?.appendChild(g);
+362:       this.list.forEach((q, j) => {
+363:         if (q.on?.idx === d.idx && q.ref !== 'item:swing') {
+364:           const sp = this.seatPos(q);
+365:           const cg = svg.querySelector<SVGGElement>(`.mr-obj[data-idx="${j}"]:not(.rider)`);
+366:           if (sp && cg) {
+367:             cg.setAttribute('transform', `translate(${r1(sp.x)} ${r1(sp.y)}) scale(${r1s(s)} ${r1s(s)})`);
+368:             g.parentNode?.appendChild(cg);
+369:           }
+370:         }
+371:       });
+372:     }
+373:     this.el?.querySelector('.mr-tray')?.classList.toggle('drop-here', this.overTray(e.clientX, e.clientY));
+374:   }
+375: 
+376:   private overTray(x: number, y: number): boolean {
+377:     const t = this.el?.querySelector('.mr-tray')?.getBoundingClientRect();
+378:     return !!t && y >= t.top && x >= t.left && x <= t.right;
+379:   }
+380: 
+381:   private onUp(e: PointerEvent): void {
+382:     const d = this.drag;
+383:     if (!d || e.pointerId !== d.pointerId) return;
+384:     this.drag = null;
+385:     this.el?.querySelector('.mr-tray')?.classList.remove('drop-here');
+386:     if (d.fromTray && d.idx < 0) {
+387:       if (!d.moved) this.tapTray((d as Drag & { ref: string }).ref);
+388:       return;
+389:     }
+390:     const p = this.list[d.idx];
+391:     if (!p) return;
+392:     if (!d.moved) {
+393:       this.tapObject(d.idx);
+394:       return;
+395:     }
+396:     if (this.overTray(e.clientX, e.clientY)) {
+397:       this.removeAt(d.idx);
+398:       this.deps.sound('pop');
+399:     } else {
+400:       const c = clampToFloor(this.def(), p.x, p.y);
+401:       p.x = c.x;
+402:       p.y = c.y;
+403:       if (p.ref.startsWith('char:')) this.trySeat(d.idx);
+404:       this.deps.sound('pop');
+405:     }
+406:     this.persist();
+407:     this.redraw();
+408:   }
+409: 
+410:   private cancelDrag(): void {
+411:     if (!this.drag) return;
+412:     this.drag = null;
+413:     this.persist();
+414:     this.redraw();
+415:   }
+// じぶんの へや：開く・棚から置く・動かす・座らせる・しまう・保存・部屋の数（無料は2部屋まで）
+import { expect, test } from '@playwright/test';
+import { act, fresh } from './helpers';
+
+const KEY = 'moyou-kakurenbo-beta';
+const SHOTS = 'test-results/myroom';
+
+async function seed(page: import('@playwright/test').Page, cleared: number, myroom?: unknown) {
+  await page.evaluate(
+    ([k, cleared, myroom]) => {
+      localStorage.setItem(
+        k as string,
+        JSON.stringify({
+          schema: 1,
+          settings: { sound: false, difficulty: 'easy', tutorialSeen: true, movers: true },
+          resume: null,
+          playtest: { enabled: false, counters: {} },
+          course: { cleared, current: Math.min(10, (cleared as number) + 1), finds: 0 },
+          collection: { totalFinds: (cleared as number) * 10, sceneFinds: {} },
+          ...(myroom ? { myroom } : {}),
+        }),
+      );
+    },
+    [KEY, cleared, myroom ?? null] as const,
+  );
+  await page.reload();
+}
+
+const saved = (page: import('@playwright/test').Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).myroom, KEY);
+
+test('はじめて開くと リビングに ソファ・テーブル・ラグ と ころ。コース0なら部屋は1つ', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 0);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('[data-screen="myroom"]')).toBeVisible();
+  await expect(page.locator('#stage.loading')).toHaveCount(0);
+  await expect(page.locator('.mr-obj')).toHaveCount(4);
+  await expect(page.locator('.mr-room-tab')).toHaveCount(0);
+  const m = await saved(page);
+  expect(m.layouts.living.map((p: { ref: string }) => p.ref).sort()).toEqual(['char:koro', 'item:rug', 'item:sofa', 'item:table']);
+  await page.screenshot({ path: `${SHOTS}/start.png` });
+});
+
+test('棚の友だちをタップすると置け、もう一度タップで しまえる。もの は シールの分だけ', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 4);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('.mr-cell')).toHaveCount(4); // ころ・みみ・もこ・にゃこ
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="-150 -300 300 300">
+<defs><radialGradient id="rose" cx=".25" cy=".18" r=".95"><stop stop-color="#f8dcd7"/><stop offset="1" stop-color="#ce909e"/></radialGradient><radialGradient id="sage" cx=".25" cy=".18" r=".95"><stop stop-color="#e2edce"/><stop offset="1" stop-color="#97b79d"/></radialGradient><radialGradient id="cream" cx=".25" cy=".18" r=".95"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#ddd6c8"/></radialGradient><radialGradient id="gold" cx=".25" cy=".18" r=".95"><stop stop-color="#fff0c1"/><stop offset="1" stop-color="#d1ae69"/></radialGradient><radialGradient id="sky" cx=".25" cy=".18" r=".95"><stop stop-color="#dceaf1"/><stop offset="1" stop-color="#9bb9cd"/></radialGradient><radialGradient id="toast" cx=".25" cy=".18" r=".95"><stop stop-color="#f5deb0"/><stop offset="1" stop-color="#cb9563"/></radialGradient><radialGradient id="lavender" cx=".25" cy=".18" r=".95"><stop stop-color="#eee3f0"/><stop offset="1" stop-color="#b7a6c9"/></radialGradient><radialGradient id="ground"><stop stop-color="#6b5666" stop-opacity=".16"/><stop offset="1" stop-color="#6b5666" stop-opacity="0"/></radialGradient></defs>
+<g stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+<ellipse cx="0" cy="-3" rx="128" ry="3" fill="url(#ground)" stroke="none"/><path d="M-127-2 L-78-280 H-61 L-109-2Z M109-2 L61-280 H78 L127-2Z" fill="url(#toast)" /><rect x="-108" y="-291" width="216" height="22" rx="8" fill="url(#toast)" /><path d="M-96-284 H95 M-117-17 L-76-264 M116-17 L76-264" fill="none" stroke-width="1.3" stroke="#fff0cf" stroke-opacity=".7"/><ellipse cx="-71" cy="-280" rx="3" ry="3" fill="url(#cream)" /><ellipse cx="71" cy="-280" rx="3" ry="3" fill="url(#cream)" />
+</g>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="-150 -300 300 300">
+<defs><radialGradient id="rose" cx=".25" cy=".18" r=".95"><stop stop-color="#f8dcd7"/><stop offset="1" stop-color="#ce909e"/></radialGradient><radialGradient id="sage" cx=".25" cy=".18" r=".95"><stop stop-color="#e2edce"/><stop offset="1" stop-color="#97b79d"/></radialGradient><radialGradient id="cream" cx=".25" cy=".18" r=".95"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#ddd6c8"/></radialGradient><radialGradient id="gold" cx=".25" cy=".18" r=".95"><stop stop-color="#fff0c1"/><stop offset="1" stop-color="#d1ae69"/></radialGradient><radialGradient id="sky" cx=".25" cy=".18" r=".95"><stop stop-color="#dceaf1"/><stop offset="1" stop-color="#9bb9cd"/></radialGradient><radialGradient id="toast" cx=".25" cy=".18" r=".95"><stop stop-color="#f5deb0"/><stop offset="1" stop-color="#cb9563"/></radialGradient><radialGradient id="lavender" cx=".25" cy=".18" r=".95"><stop stop-color="#eee3f0"/><stop offset="1" stop-color="#b7a6c9"/></radialGradient><radialGradient id="ground"><stop stop-color="#6b5666" stop-opacity=".16"/><stop offset="1" stop-color="#6b5666" stop-opacity="0"/></radialGradient></defs>
+<g stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+<ellipse cx="0" cy="-3" rx="62" ry="3" fill="url(#ground)" stroke="none"/><path d="M-36-36 Q-67-35-62-63 Q-59-76-53-69 Q-50-64-54-58 Q-55-44-34-47" fill="url(#toast)" /><path d="M-21-33 L-27-11-16-7 Q-13-3-21-3 H-32 L-34-9-30-37 M16-36 L25-16 37-16 Q42-12 35-10 H19 L7-32" fill="url(#toast)" /><path d="M-43-37 Q-45-56-19-56 L17-51 L20-73 Q22-79 30-64 L43-64 Q54-80 55-70 L55-51 Q68-45 61-34 Q55-25 34-28 L30-4 Q27-1 19-2 Q16-3 22-10 L23-32 Q-4-22-27-31 L-32-4 Q-35 0-43-2 L-43-6-37-29Z" fill="url(#toast)" /><path d="M-20-54 L-18-43 M-5-53 L-3-44 M33-61 L35-54" fill="none" stroke-width="4" stroke-opacity=".42"/><ellipse cx="48" cy="-47" rx="2.4" ry="3" fill="#4A3A40" stroke="none"/><ellipse cx="47.3" cy="-48" rx="0.7" ry="0.9" fill="#fffdf0" stroke="none"/><ellipse cx="62" cy="-40" rx="2" ry="2" fill="url(#rose)" stroke="none"/><path d="M48-33 L60-32 M48-36 L62-37" fill="none" stroke-width="1.3"/>
+</g>
+</svg>
+ M codex-jobs/QUEUE.md
+?? codex-jobs/96-review-myroom.md
+?? video/hide-handoff-find.webm
+
+apply patch
+patch: completed
+C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\audit\codex\review-myroom.md
+diff --git a/pattern-hide-family-beta/audit/codex/review-myroom.md b/pattern-hide-family-beta/audit/codex/review-myroom.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..e0c17152326b686ee76984f1a44dc9916996c676
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/review-myroom.md
+@@ -0,0 +1,90 @@
++# ジョブ96：つぎの ごほうび・うごくもの・じぶんの へや 独立レビュー
++
++実施日：2026-10-15。方法：指定コード、関連する保存・権限・CSS・単体/E2Eテストの静的レビューと型チェック。以下の再現手順はコードから導いた確認手順であり、実機で再現済みという意味ではない。iPhone / WKWebView の操作・描画は未確認。
++
++## 重要度順の指摘
++
++### 1. P1：ドラッグ中の部屋切り替えで、別の部屋の同じ番号の物を操作できてしまう
++
++- **場所**：`src/ui/myroomView.ts:281`（onClick）、`:82`（open）、`:326`（onMove）、`:381`（onUp）。
++- **何が起きるか**：部屋切り替えは `room` と `list` を交換する一方、`drag.idx` / `pointerId` を残す。別の指による切り替え後に元の指のイベントが届くと、新しい部屋の同じ番号の物を動かす・しまう。DOM交換でイベントが届かなくなる場合も、drag が残り、その後の pointerdown が拒否される。ホームを経由した再入室でも open は drag を解除しない。
++- **再現**：リビングのラグ（idx=0）を指Aで押したまま、指Bでしんしつへ切り替える。Aを動かして離す。しんしつのラグが動く、または以降のドラッグが受け付けられない経路がある。端末でのイベント配送による違いは未確認。
++- **最小の直し方**：ドラッグ中のタブ・部屋切り替えを無効にするか、切り替え前に元の部屋のドラッグを明示的に中断・復元する。open/画面離脱でも解除し、操作対象の room を Drag に保持して不一致のイベントを破棄する。capture は再描画で消えない要素に保持する。
++
++### 2. P1：pointercancel が床外・画面外の途中座標を保存する
++
++- **場所**：`src/ui/myroomView.ts:262`、`:350`、`:410`。関連：`src/core/myroom.ts:156`。
++- **何が起きるか**：移動中は座席を解除し、床外も含めた座標を list に書く。cancelDrag は開始時に戻すことも床へ収めることもせず保存する。物が空中や画面外に残り、再入室後にも引き継がれる。pointercancel の pointerId を見ないため、別の指の中断でも進行中の操作を終了してしまう。
++- **再現**：家具や友だちを壁の上へドラッグした途中で、そのポインターに pointercancel を送る。保存された y が floorTop 未満になる。別の pointerId の cancel でも同じドラッグが終了する。
++- **最小の直し方**：開始時の配置を保持し、中断時は復元する（棚から新規追加した物も取り消す）。イベントの pointerId を照合する。確定保存する方針なら、最低限床への補正・座席整合性の処理を通常終了と共通化する。
++
++### 3. P1：validLayouts が不正な座席・循環・重複を受け入れる
++
++- **場所**：`src/core/myroom.ts:146`（validLayouts）、特に `:157` と `:162`。利用側：`src/ui/myroomView.ts:176`、`:194`。
++- **何が起きるか**：on の検証は整数・参照番号の範囲・自己参照禁止だけ。座る側が char か、対象が座れる item か、seat が実在するか、同じ席の重複、相互参照を検証しない。ブランコの存在しない席では `seat.x` の参照で描画が例外終了する。相互参照の二体は root がなく描画されない。ref の重複・範囲外の有限座標も通り、「1枚に1つ」や床内配置を保証しない。
++- **再現**：コース9クリア相当で living に `[{ref:'item:swing',x:500,y:800},{ref:'char:koro',x:500,y:800,on:{idx:0,seat:99}}]` を保存して入室する。検証を通り、ブランコの描画で例外になる。また、二体の char に互いを指す on を付けると両方消える。
++- **最小の直し方**：ref を完全一致で検証し、重複を拒否。on は char → on を持たない座席付き item に限定し、seat の範囲と占有重複を確認する。座標は床内へ補正する。不正な部屋は既存方針どおり初期化し、描画側にも無効な席を参照しない防御を入れる。
++
++### 4. P1：ブランコから友だちをドラッグすると、親の変換が二重にかかる
++
++- **場所**：`src/ui/myroomView.ts:178`（rider の入れ子）、`:320`、`:350`、`:358`、`:361`。
++- **何が起きるか**：rider はブランコの transform と揺れる座板の内側にいる。ドラッグでは on だけを消し、部屋全体の座標で transform を設定するが、DOMは座板の子のまま。同じ親への appendChild では外へ出ないため、家具の移動・倍率・揺れが再び加わり、指から大きく離れる。離した後の redraw で戻るので操作中の位置と確定位置も一致しない。
++- **再現**：ブランコに友だちを座らせ、その子を10px以上ドラッグする。ブランコを左右反転した場合も確認する。
++- **最小の直し方**：降り始めた時点で表示上の足元座標を部屋座標へ変換し、rider を `.mr-objs` 直下へ移す。capture 対象を消さずに行い、その後は通常の友だちと同じ移動処理にする。開始座標には実際の座板の揺れも反映する。
++
++### 5. P1：棚のセルから指でスクロールできず、奥のごほうびへ届きにくい
++
++- **場所**：`src/ui/styles.css:522`、`:523`、`:575`。`src/ui/myroomView.ts:302`、`:329`。
++- **何が起きるか**：棚本体は pan-x（横向きでは pan-y）だが、76px等のセルには touch-action:none がある。セル上で始めたスワイプはネイティブスクロールにならず、JSにも棚をスクロールする処理がない。セル間の狭い隙間から操作する必要が生じる。マウスのクリック中心の既存テストでは確認できない。
++- **再現**：シールを多数獲得した iPhone の縦向きで「もの」を開き、セルの中央から左右へスワイプする。横向きではセル中央から上下へ操作する。CSS上の問題であり、実機での操作感は未確認。
++- **最小の直し方**：棚方向のパンをセルにも許可し、部屋へ出す方向の移動と区別する。長押し後だけドラッグ開始、または前後ページボタンなど、子どもがセル上からでも全品に到達できる操作を用意する。
++
++### 6. P2：横向きの棚ドラッグが「部屋に入った」と誤判定される
++
++- **場所**：`src/ui/myroomView.ts:335`（特に `:338`）、`src/ui/styles.css:571`。
++- **何が起きるか**：棚から追加する条件が SVG の下端との y 比較だけ。横向きでは棚が右側にあるので、棚の中を動かしただけでも条件を満たし、既存の同じ物を removeAt → 再追加する。棚内で離すと今度は removeAt されるため、スクロールしようとした動きで部屋の家具がしまわれ、座っていた子も降りる。
++- **再現**：横向きでソファを置き、子を座らせる。棚のソファのセル上を10px以上動かして棚内で離す。SVG下端より上の位置で試す。
++- **最小の直し方**：追加はポインターが実際の部屋描画領域に入った場合だけにする。矩形の左右上下に加え、余白を含む SVG の場合は toScene の座標でも範囲を検証する。既存物の除去は有効なドロップが確定するまで行わない。
++
++### 7. P2：「視差効果を減らす」で前景が顔の前に止まり続ける
++
++- **場所**：`src/ui/styles.css:501`、`src/ui/moverView.ts:64`付近の負の animation-delay、`src/ui/app.ts:428`。
++- **何が起きるか**：reduce は非表示や安全な位置への退避ではなく paused。顔の上を通る時点で設定が有効になると、その位置で止まる。また、再描画すると経過時間由来の新しい負のdelayで別の位置に停止する。「長く隠さない」「描き直しても位置が飛ばない」をreduce時には満たさない。
++- **再現**：コース6以降で前景が顔を横切るタイミングに reduce を有効化する。そのまま待ち、さらに別の友だちを見つけて再描画させる。実機確認は未実施。
++- **最小の直し方**：reduce 時は少なくとも前景の movers を非表示にする。背景も固定表示にする場合は開始時刻に依存しない安全な位置を選ぶ。
++
++## その他の確認・保留事項
++
++- **パック境界**：`src/core/rewards.ts:32` の upcomingRewards、`src/ui/app.ts:487` のクリア報酬、`src/core/myroom.ts:89` の ownedItems / openRooms は権限で絞る。無料の人におにわ・コース6以降の家具・うみべの家具を出す経路は、確認した通常経路では見つからない。ベータの canPlay が常に true であることと、無料相当の権限関数での確認は区別する必要がある。既存の部屋E2Eは進捗を変えるだけで、無料権限への差し替え試験ではない。
++- **パックが外れた後**：`src/ui/myroomView.ts:103` は残った要素の番号を組み直すため、単純な filter による on.idx のずれは防いでいる。ただし `:109` は座席だけを解除し、最後に見えていた位置ではなく古い p.x/y に戻す。さらにフィルター済み list を次の persist で保存するため、再有効化しても除外した家具の配置は戻らない。非表示中も配置を保持したい仕様なら、保存用配置と表示用配置を分ける。現状の仕様では復元保証が明記されていないため、改善事項として保留。
++- **通常のしまう操作**：`src/ui/myroomView.ts:476` は乗っている子を降ろしてから splice し、以降の on.idx を減らしている。通常の単一ポインター操作でここだけを原因とする番号ずれは見つからない。棚の連打も findIndex による追加/削除の交互動作で、通常データでは同じ ref を増殖させない。ただし置いた物のセルを押すと即座にしまわれる意味は、薄色と小さな丸だけでは幼児には分かりづらい（推測）。置く/しまうの短い案内や絵による区別があるとよい。
++- **棚からの capture**：`src/ui/myroomView.ts:302` は明示的な capture がなく、`:346` の redraw は押していたセル自体を交換する。タッチの暗黙captureや画面外での pointerup を取り逃がす可能性がある（端末依存、推測）。`lostpointercapture` の終了処理もない。上記1・2と合わせ、安定した親要素で capture と終了を管理し、棚からドラッグしたまま画面外へ出る手順を実機で確認する。
++- **顔を隠す時間**：`tests/unit/movers.test.ts:46` 付近の検査は、moverPos の理想軌道・概算寸法・顔の一点を各 mover 単独で調べる。CSSの上下動、実画像の範囲、複数の連続遮蔽、周期末から周期頭への連続区間を保証するテストではない。通常時に3秒以上隠すことを確認したわけではなく、保証範囲の不足として記録する。前景全部の合成と実際の顔範囲でも確認するとよい。
++- **タップと位置維持**：`.movers { pointer-events:none }` はタップを遮らない設計。外側の移動には経過時間による負のdelayがあり、通常時の大きな巻き戻りを抑えている。一方 `.mv-inner` の上下動は再描画で0から始まり、最大14 SVG単位程度の位相差が出うる。優先度は低いが内側にも経過時間を反映できる。
++- **WKWebView**：px・transform-box:view-box・CSS変数を使うkeyframesが意図どおりSVG座標で動くかは、このWindows上の静的レビューと型チェックでは判定できない。互換性がある/ないとも断定しない。対象iOSで往復端、左右反転、画面回転、見つけた直後の再描画、reduce切り替えを確認すること。ネット接続禁止のため互換性資料の外部調査も行っていない。
++- **幼児向けの大きさ**：棚セルは通常76px、小さい画面では58pxなので、セルそのものは比較的押しやすい設計。部屋の小さい物はSVGに縮小され、明示的な最小ヒット領域がないため、重なった小物の選択は難しい可能性がある（推測）。実機でボール等を複数の家具の手前/奥に置いて確認したい。文字列・題材に怖い/危険な表現は見当たらないが、全画像を画面表示しての視覚検査は未実施。
++- **性能（推測）**：通常ドラッグは対象と同乗者の transform を更新する方式で、毎フレーム全体を描き直さない点はよい。確定・タブ切り替え時は stage と棚を丸ごと交換し、最大40要素ではSVG構築、画像・マスク、アニメーション再開始の負荷が出うる。movers 5つはCSSアニメーション中心で毎フレームのJS生成はない。現行データの重複なし最大は家具21種＋友だち6体の27要素で、40要素は通常操作より保存境界の試験条件。低性能iPhoneでのフレーム時間・メモリは未計測。まず計測し、必要なら差分更新を行う。
++
++## 良い点
++
++権限と進捗を両方確認してごほうび・棚・部屋を出している。シールと家具の対応、無料2部屋、破損した部屋だけの初期化に単体テストがある。通常の家具除去では座席を解放し番号も補正する。保護者のmovers切り替えが保存され、コース生成時に適用される。時間制限や罰のない部屋遊び、友だちと物のタブ分けも用途に合っている。
++
++## 検査結果・作業範囲
++
++- `npx.cmd tsc --noEmit`：成功（exit 0）。
++- `npm.cmd test`：起動失敗（exit 1）。esbuild が `Cannot read directory "../..": Access is denied.`、続いて vite.config.ts を解決できないエラーを出した。テスト本体は未実行で、合格扱いにはしていない。
++- AGENTS.md の指示に従い、設定・node_modules・環境変数・実行方式の差し替えによる回避はしていない。テスト再実行はClaude Code側の外部環境へ引き継ぐ。
++- E2E・ビルド・実機試験は未実施。既存E2Eは test-results 配下へのスクリーンショット等を含み、今回の1ファイル限定の書き込み許可外でもある。絵は制作していないため validate:art は実行していない。
++- 新規作成は本ファイルのみ。コード・絵・テスト・設定、既存の作業変更には手を加えていない。ネット接続・公開・commit・pushなし。ジョブ96の「1ファイルだけ」を優先し、一般指示の STATUS.md 更新は行っていない。
++
++## すぐ直すべきもの
++
++1. ドラッグ中の部屋切り替え・再入室と、pointercancel の状態管理（指摘1・2）。
++2. 保存された座席参照の検証と、ブランコから降ろす際の座標/DOMの整合（指摘3・4）。
++3. 棚セル上からのスクロールと、横向きの部屋進入判定（指摘5・6）。
++4. reduce 時に前景が顔を覆ったまま停止する処理（指摘7）。
++5. 修正後、単体テストを実行可能な環境で通し、iPhoneでマルチタッチ・中断・ブランコ・縦横の棚操作を確認する。
++
++## あとでよいもの
++
++パック再有効化時の配置復元方針、しまう操作の案内、小物のヒット領域、内側アニメーションの位相維持、合成遮蔽のテスト強化、実機計測に基づく描画最適化。WKWebViewの互換性と性能は未確認事項として残り、実機試験を省略できるという意味ではない。
+
+diff --git a/pattern-hide-family-beta/audit/codex/review-myroom.md b/pattern-hide-family-beta/audit/codex/review-myroom.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..e0c17152326b686ee76984f1a44dc9916996c676
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/review-myroom.md
+@@ -0,0 +1,90 @@
++# ジョブ96：つぎの ごほうび・うごくもの・じぶんの へや 独立レビュー
++
++実施日：2026-10-15。方法：指定コード、関連する保存・権限・CSS・単体/E2Eテストの静的レビューと型チェック。以下の再現手順はコードから導いた確認手順であり、実機で再現済みという意味ではない。iPhone / WKWebView の操作・描画は未確認。
++
++## 重要度順の指摘
++
++### 1. P1：ドラッグ中の部屋切り替えで、別の部屋の同じ番号の物を操作できてしまう
++
++- **場所**：`src/ui/myroomView.ts:281`（onClick）、`:82`（open）、`:326`（onMove）、`:381`（onUp）。
++- **何が起きるか**：部屋切り替えは `room` と `list` を交換する一方、`drag.idx` / `pointerId` を残す。別の指による切り替え後に元の指のイベントが届くと、新しい部屋の同じ番号の物を動かす・しまう。DOM交換でイベントが届かなくなる場合も、drag が残り、その後の pointerdown が拒否される。ホームを経由した再入室でも open は drag を解除しない。
++- **再現**：リビングのラグ（idx=0）を指Aで押したまま、指Bでしんしつへ切り替える。Aを動かして離す。しんしつのラグが動く、または以降のドラッグが受け付けられない経路がある。端末でのイベント配送による違いは未確認。
++- **最小の直し方**：ドラッグ中のタブ・部屋切り替えを無効にするか、切り替え前に元の部屋のドラッグを明示的に中断・復元する。open/画面離脱でも解除し、操作対象の room を Drag に保持して不一致のイベントを破棄する。capture は再描画で消えない要素に保持する。
++
++### 2. P1：pointercancel が床外・画面外の途中座標を保存する
++
++- **場所**：`src/ui/myroomView.ts:262`、`:350`、`:410`。関連：`src/core/myroom.ts:156`。
++- **何が起きるか**：移動中は座席を解除し、床外も含めた座標を list に書く。cancelDrag は開始時に戻すことも床へ収めることもせず保存する。物が空中や画面外に残り、再入室後にも引き継がれる。pointercancel の pointerId を見ないため、別の指の中断でも進行中の操作を終了してしまう。
++- **再現**：家具や友だちを壁の上へドラッグした途中で、そのポインターに pointercancel を送る。保存された y が floorTop 未満になる。別の pointerId の cancel でも同じドラッグが終了する。
++- **最小の直し方**：開始時の配置を保持し、中断時は復元する（棚から新規追加した物も取り消す）。イベントの pointerId を照合する。確定保存する方針なら、最低限床への補正・座席整合性の処理を通常終了と共通化する。
++
++### 3. P1：validLayouts が不正な座席・循環・重複を受け入れる
++
++- **場所**：`src/core/myroom.ts:146`（validLayouts）、特に `:157` と `:162`。利用側：`src/ui/myroomView.ts:176`、`:194`。
++- **何が起きるか**：on の検証は整数・参照番号の範囲・自己参照禁止だけ。座る側が char か、対象が座れる item か、seat が実在するか、同じ席の重複、相互参照を検証しない。ブランコの存在しない席では `seat.x` の参照で描画が例外終了する。相互参照の二体は root がなく描画されない。ref の重複・範囲外の有限座標も通り、「1枚に1つ」や床内配置を保証しない。
++- **再現**：コース9クリア相当で living に `[{ref:'item:swing',x:500,y:800},{ref:'char:koro',x:500,y:800,on:{idx:0,seat:99}}]` を保存して入室する。検証を通り、ブランコの描画で例外になる。また、二体の char に互いを指す on を付けると両方消える。
++- **最小の直し方**：ref を完全一致で検証し、重複を拒否。on は char → on を持たない座席付き item に限定し、seat の範囲と占有重複を確認する。座標は床内へ補正する。不正な部屋は既存方針どおり初期化し、描画側にも無効な席を参照しない防御を入れる。
++
++### 4. P1：ブランコから友だちをドラッグすると、親の変換が二重にかかる
++
++- **場所**：`src/ui/myroomView.ts:178`（rider の入れ子）、`:320`、`:350`、`:358`、`:361`。
++- **何が起きるか**：rider はブランコの transform と揺れる座板の内側にいる。ドラッグでは on だけを消し、部屋全体の座標で transform を設定するが、DOMは座板の子のまま。同じ親への appendChild では外へ出ないため、家具の移動・倍率・揺れが再び加わり、指から大きく離れる。離した後の redraw で戻るので操作中の位置と確定位置も一致しない。
++- **再現**：ブランコに友だちを座らせ、その子を10px以上ドラッグする。ブランコを左右反転した場合も確認する。
++- **最小の直し方**：降り始めた時点で表示上の足元座標を部屋座標へ変換し、rider を `.mr-objs` 直下へ移す。capture 対象を消さずに行い、その後は通常の友だちと同じ移動処理にする。開始座標には実際の座板の揺れも反映する。
++
++### 5. P1：棚のセルから指でスクロールできず、奥のごほうびへ届きにくい
++
++- **場所**：`src/ui/styles.css:522`、`:523`、`:575`。`src/ui/myroomView.ts:302`、`:329`。
++- **何が起きるか**：棚本体は pan-x（横向きでは pan-y）だが、76px等のセルには touch-action:none がある。セル上で始めたスワイプはネイティブスクロールにならず、JSにも棚をスクロールする処理がない。セル間の狭い隙間から操作する必要が生じる。マウスのクリック中心の既存テストでは確認できない。
++- **再現**：シールを多数獲得した iPhone の縦向きで「もの」を開き、セルの中央から左右へスワイプする。横向きではセル中央から上下へ操作する。CSS上の問題であり、実機での操作感は未確認。
++- **最小の直し方**：棚方向のパンをセルにも許可し、部屋へ出す方向の移動と区別する。長押し後だけドラッグ開始、または前後ページボタンなど、子どもがセル上からでも全品に到達できる操作を用意する。
++
++### 6. P2：横向きの棚ドラッグが「部屋に入った」と誤判定される
++
++- **場所**：`src/ui/myroomView.ts:335`（特に `:338`）、`src/ui/styles.css:571`。
++- **何が起きるか**：棚から追加する条件が SVG の下端との y 比較だけ。横向きでは棚が右側にあるので、棚の中を動かしただけでも条件を満たし、既存の同じ物を removeAt → 再追加する。棚内で離すと今度は removeAt されるため、スクロールしようとした動きで部屋の家具がしまわれ、座っていた子も降りる。
++- **再現**：横向きでソファを置き、子を座らせる。棚のソファのセル上を10px以上動かして棚内で離す。SVG下端より上の位置で試す。
++- **最小の直し方**：追加はポインターが実際の部屋描画領域に入った場合だけにする。矩形の左右上下に加え、余白を含む SVG の場合は toScene の座標でも範囲を検証する。既存物の除去は有効なドロップが確定するまで行わない。
++
++### 7. P2：「視差効果を減らす」で前景が顔の前に止まり続ける
++
++- **場所**：`src/ui/styles.css:501`、`src/ui/moverView.ts:64`付近の負の animation-delay、`src/ui/app.ts:428`。
++- **何が起きるか**：reduce は非表示や安全な位置への退避ではなく paused。顔の上を通る時点で設定が有効になると、その位置で止まる。また、再描画すると経過時間由来の新しい負のdelayで別の位置に停止する。「長く隠さない」「描き直しても位置が飛ばない」をreduce時には満たさない。
++- **再現**：コース6以降で前景が顔を横切るタイミングに reduce を有効化する。そのまま待ち、さらに別の友だちを見つけて再描画させる。実機確認は未実施。
++- **最小の直し方**：reduce 時は少なくとも前景の movers を非表示にする。背景も固定表示にする場合は開始時刻に依存しない安全な位置を選ぶ。
++
++## その他の確認・保留事項
++
++- **パック境界**：`src/core/rewards.ts:32` の upcomingRewards、`src/ui/app.ts:487` のクリア報酬、`src/core/myroom.ts:89` の ownedItems / openRooms は権限で絞る。無料の人におにわ・コース6以降の家具・うみべの家具を出す経路は、確認した通常経路では見つからない。ベータの canPlay が常に true であることと、無料相当の権限関数での確認は区別する必要がある。既存の部屋E2Eは進捗を変えるだけで、無料権限への差し替え試験ではない。
++- **パックが外れた後**：`src/ui/myroomView.ts:103` は残った要素の番号を組み直すため、単純な filter による on.idx のずれは防いでいる。ただし `:109` は座席だけを解除し、最後に見えていた位置ではなく古い p.x/y に戻す。さらにフィルター済み list を次の persist で保存するため、再有効化しても除外した家具の配置は戻らない。非表示中も配置を保持したい仕様なら、保存用配置と表示用配置を分ける。現状の仕様では復元保証が明記されていないため、改善事項として保留。
++- **通常のしまう操作**：`src/ui/myroomView.ts:476` は乗っている子を降ろしてから splice し、以降の on.idx を減らしている。通常の単一ポインター操作でここだけを原因とする番号ずれは見つからない。棚の連打も findIndex による追加/削除の交互動作で、通常データでは同じ ref を増殖させない。ただし置いた物のセルを押すと即座にしまわれる意味は、薄色と小さな丸だけでは幼児には分かりづらい（推測）。置く/しまうの短い案内や絵による区別があるとよい。
++- **棚からの capture**：`src/ui/myroomView.ts:302` は明示的な capture がなく、`:346` の redraw は押していたセル自体を交換する。タッチの暗黙captureや画面外での pointerup を取り逃がす可能性がある（端末依存、推測）。`lostpointercapture` の終了処理もない。上記1・2と合わせ、安定した親要素で capture と終了を管理し、棚からドラッグしたまま画面外へ出る手順を実機で確認する。
++- **顔を隠す時間**：`tests/unit/movers.test.ts:46` 付近の検査は、moverPos の理想軌道・概算寸法・顔の一点を各 mover 単独で調べる。CSSの上下動、実画像の範囲、複数の連続遮蔽、周期末から周期頭への連続区間を保証するテストではない。通常時に3秒以上隠すことを確認したわけではなく、保証範囲の不足として記録する。前景全部の合成と実際の顔範囲でも確認するとよい。
++- **タップと位置維持**：`.movers { pointer-events:none }` はタップを遮らない設計。外側の移動には経過時間による負のdelayがあり、通常時の大きな巻き戻りを抑えている。一方 `.mv-inner` の上下動は再描画で0から始まり、最大14 SVG単位程度の位相差が出うる。優先度は低いが内側にも経過時間を反映できる。
++- **WKWebView**：px・transform-box:view-box・CSS変数を使うkeyframesが意図どおりSVG座標で動くかは、このWindows上の静的レビューと型チェックでは判定できない。互換性がある/ないとも断定しない。対象iOSで往復端、左右反転、画面回転、見つけた直後の再描画、reduce切り替えを確認すること。ネット接続禁止のため互換性資料の外部調査も行っていない。
++- **幼児向けの大きさ**：棚セルは通常76px、小さい画面では58pxなので、セルそのものは比較的押しやすい設計。部屋の小さい物はSVGに縮小され、明示的な最小ヒット領域がないため、重なった小物の選択は難しい可能性がある（推測）。実機でボール等を複数の家具の手前/奥に置いて確認したい。文字列・題材に怖い/危険な表現は見当たらないが、全画像を画面表示しての視覚検査は未実施。
++- **性能（推測）**：通常ドラッグは対象と同乗者の transform を更新する方式で、毎フレーム全体を描き直さない点はよい。確定・タブ切り替え時は stage と棚を丸ごと交換し、最大40要素ではSVG構築、画像・マスク、アニメーション再開始の負荷が出うる。movers 5つはCSSアニメーション中心で毎フレームのJS生成はない。現行データの重複なし最大は家具21種＋友だち6体の27要素で、40要素は通常操作より保存境界の試験条件。低性能iPhoneでのフレーム時間・メモリは未計測。まず計測し、必要なら差分更新を行う。
++
++## 良い点
++
++権限と進捗を両方確認してごほうび・棚・部屋を出している。シールと家具の対応、無料2部屋、破損した部屋だけの初期化に単体テストがある。通常の家具除去では座席を解放し番号も補正する。保護者のmovers切り替えが保存され、コース生成時に適用される。時間制限や罰のない部屋遊び、友だちと物のタブ分けも用途に合っている。
++
++## 検査結果・作業範囲
++
++- `npx.cmd tsc --noEmit`：成功（exit 0）。
++- `npm.cmd test`：起動失敗（exit 1）。esbuild が `Cannot read directory "../..": Access is denied.`、続いて vite.config.ts を解決できないエラーを出した。テスト本体は未実行で、合格扱いにはしていない。
++- AGENTS.md の指示に従い、設定・node_modules・環境変数・実行方式の差し替えによる回避はしていない。テスト再実行はClaude Code側の外部環境へ引き継ぐ。
++- E2E・ビルド・実機試験は未実施。既存E2Eは test-results 配下へのスクリーンショット等を含み、今回の1ファイル限定の書き込み許可外でもある。絵は制作していないため validate:art は実行していない。
++- 新規作成は本ファイルのみ。コード・絵・テスト・設定、既存の作業変更には手を加えていない。ネット接続・公開・commit・pushなし。ジョブ96の「1ファイルだけ」を優先し、一般指示の STATUS.md 更新は行っていない。
++
++## すぐ直すべきもの
++
++1. ドラッグ中の部屋切り替え・再入室と、pointercancel の状態管理（指摘1・2）。
++2. 保存された座席参照の検証と、ブランコから降ろす際の座標/DOMの整合（指摘3・4）。
++3. 棚セル上からのスクロールと、横向きの部屋進入判定（指摘5・6）。
++4. reduce 時に前景が顔を覆ったまま停止する処理（指摘7）。
++5. 修正後、単体テストを実行可能な環境で通し、iPhoneでマルチタッチ・中断・ブランコ・縦横の棚操作を確認する。
++
++## あとでよいもの
++
++パック再有効化時の配置復元方針、しまう操作の案内、小物のヒット領域、内側アニメーションの位相維持、合成遮蔽のテスト強化、実機計測に基づく描画最適化。WKWebViewの互換性と性能は未確認事項として残り、実機試験を省略できるという意味ではない。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short; Get-Content -Encoding UTF8 audit/codex/review-myroom.md -TotalCount 7' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 163ms:
+ M codex-jobs/QUEUE.md
+?? audit/codex/review-myroom.md
+?? codex-jobs/96-review-myroom.md
+?? video/hide-handoff-find.webm
+# ジョブ96：つぎの ごほうび・うごくもの・じぶんの へや 独立レビュー
+
+実施日：2026-10-15。方法：指定コード、関連する保存・権限・CSS・単体/E2Eテストの静的レビューと型チェック。以下の再現手順はコードから導いた確認手順であり、実機で再現済みという意味ではない。iPhone / WKWebView の操作・描画は未確認。
+
+## 重要度順の指摘
+
+### 1. P1：ドラッグ中の部屋切り替えで、別の部屋の同じ番号の物を操作できてしまう
+
+diff --git a/pattern-hide-family-beta/audit/codex/review-myroom.md b/pattern-hide-family-beta/audit/codex/review-myroom.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..e0c17152326b686ee76984f1a44dc9916996c676
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/review-myroom.md
+@@ -0,0 +1,90 @@
++# ジョブ96：つぎの ごほうび・うごくもの・じぶんの へや 独立レビュー
++
++実施日：2026-10-15。方法：指定コード、関連する保存・権限・CSS・単体/E2Eテストの静的レビューと型チェック。以下の再現手順はコードから導いた確認手順であり、実機で再現済みという意味ではない。iPhone / WKWebView の操作・描画は未確認。
++
++## 重要度順の指摘
++
++### 1. P1：ドラッグ中の部屋切り替えで、別の部屋の同じ番号の物を操作できてしまう
++
++- **場所**：`src/ui/myroomView.ts:281`（onClick）、`:82`（open）、`:326`（onMove）、`:381`（onUp）。
++- **何が起きるか**：部屋切り替えは `room` と `list` を交換する一方、`drag.idx` / `pointerId` を残す。別の指による切り替え後に元の指のイベントが届くと、新しい部屋の同じ番号の物を動かす・しまう。DOM交換でイベントが届かなくなる場合も、drag が残り、その後の pointerdown が拒否される。ホームを経由した再入室でも open は drag を解除しない。
++- **再現**：リビングのラグ（idx=0）を指Aで押したまま、指Bでしんしつへ切り替える。Aを動かして離す。しんしつのラグが動く、または以降のドラッグが受け付けられない経路がある。端末でのイベント配送による違いは未確認。
++- **最小の直し方**：ドラッグ中のタブ・部屋切り替えを無効にするか、切り替え前に元の部屋のドラッグを明示的に中断・復元する。open/画面離脱でも解除し、操作対象の room を Drag に保持して不一致のイベントを破棄する。capture は再描画で消えない要素に保持する。
++
++### 2. P1：pointercancel が床外・画面外の途中座標を保存する
++
++- **場所**：`src/ui/myroomView.ts:262`、`:350`、`:410`。関連：`src/core/myroom.ts:156`。
++- **何が起きるか**：移動中は座席を解除し、床外も含めた座標を list に書く。cancelDrag は開始時に戻すことも床へ収めることもせず保存する。物が空中や画面外に残り、再入室後にも引き継がれる。pointercancel の pointerId を見ないため、別の指の中断でも進行中の操作を終了してしまう。
++- **再現**：家具や友だちを壁の上へドラッグした途中で、そのポインターに pointercancel を送る。保存された y が floorTop 未満になる。別の pointerId の cancel でも同じドラッグが終了する。
++- **最小の直し方**：開始時の配置を保持し、中断時は復元する（棚から新規追加した物も取り消す）。イベントの pointerId を照合する。確定保存する方針なら、最低限床への補正・座席整合性の処理を通常終了と共通化する。
++
++### 3. P1：validLayouts が不正な座席・循環・重複を受け入れる
++
++- **場所**：`src/core/myroom.ts:146`（validLayouts）、特に `:157` と `:162`。利用側：`src/ui/myroomView.ts:176`、`:194`。
++- **何が起きるか**：on の検証は整数・参照番号の範囲・自己参照禁止だけ。座る側が char か、対象が座れる item か、seat が実在するか、同じ席の重複、相互参照を検証しない。ブランコの存在しない席では `seat.x` の参照で描画が例外終了する。相互参照の二体は root がなく描画されない。ref の重複・範囲外の有限座標も通り、「1枚に1つ」や床内配置を保証しない。
++- **再現**：コース9クリア相当で living に `[{ref:'item:swing',x:500,y:800},{ref:'char:koro',x:500,y:800,on:{idx:0,seat:99}}]` を保存して入室する。検証を通り、ブランコの描画で例外になる。また、二体の char に互いを指す on を付けると両方消える。
++- **最小の直し方**：ref を完全一致で検証し、重複を拒否。on は char → on を持たない座席付き item に限定し、seat の範囲と占有重複を確認する。座標は床内へ補正する。不正な部屋は既存方針どおり初期化し、描画側にも無効な席を参照しない防御を入れる。
++
++### 4. P1：ブランコから友だちをドラッグすると、親の変換が二重にかかる
++
++- **場所**：`src/ui/myroomView.ts:178`（rider の入れ子）、`:320`、`:350`、`:358`、`:361`。
++- **何が起きるか**：rider はブランコの transform と揺れる座板の内側にいる。ドラッグでは on だけを消し、部屋全体の座標で transform を設定するが、DOMは座板の子のまま。同じ親への appendChild では外へ出ないため、家具の移動・倍率・揺れが再び加わり、指から大きく離れる。離した後の redraw で戻るので操作中の位置と確定位置も一致しない。
++- **再現**：ブランコに友だちを座らせ、その子を10px以上ドラッグする。ブランコを左右反転した場合も確認する。
++- **最小の直し方**：降り始めた時点で表示上の足元座標を部屋座標へ変換し、rider を `.mr-objs` 直下へ移す。capture 対象を消さずに行い、その後は通常の友だちと同じ移動処理にする。開始座標には実際の座板の揺れも反映する。
++
++### 5. P1：棚のセルから指でスクロールできず、奥のごほうびへ届きにくい
++
++- **場所**：`src/ui/styles.css:522`、`:523`、`:575`。`src/ui/myroomView.ts:302`、`:329`。
++- **何が起きるか**：棚本体は pan-x（横向きでは pan-y）だが、76px等のセルには touch-action:none がある。セル上で始めたスワイプはネイティブスクロールにならず、JSにも棚をスクロールする処理がない。セル間の狭い隙間から操作する必要が生じる。マウスのクリック中心の既存テストでは確認できない。
++- **再現**：シールを多数獲得した iPhone の縦向きで「もの」を開き、セルの中央から左右へスワイプする。横向きではセル中央から上下へ操作する。CSS上の問題であり、実機での操作感は未確認。
++- **最小の直し方**：棚方向のパンをセルにも許可し、部屋へ出す方向の移動と区別する。長押し後だけドラッグ開始、または前後ページボタンなど、子どもがセル上からでも全品に到達できる操作を用意する。
++
++### 6. P2：横向きの棚ドラッグが「部屋に入った」と誤判定される
++
++- **場所**：`src/ui/myroomView.ts:335`（特に `:338`）、`src/ui/styles.css:571`。
++- **何が起きるか**：棚から追加する条件が SVG の下端との y 比較だけ。横向きでは棚が右側にあるので、棚の中を動かしただけでも条件を満たし、既存の同じ物を removeAt → 再追加する。棚内で離すと今度は removeAt されるため、スクロールしようとした動きで部屋の家具がしまわれ、座っていた子も降りる。
++- **再現**：横向きでソファを置き、子を座らせる。棚のソファのセル上を10px以上動かして棚内で離す。SVG下端より上の位置で試す。
++- **最小の直し方**：追加はポインターが実際の部屋描画領域に入った場合だけにする。矩形の左右上下に加え、余白を含む SVG の場合は toScene の座標でも範囲を検証する。既存物の除去は有効なドロップが確定するまで行わない。
++
++### 7. P2：「視差効果を減らす」で前景が顔の前に止まり続ける
++
++- **場所**：`src/ui/styles.css:501`、`src/ui/moverView.ts:64`付近の負の animation-delay、`src/ui/app.ts:428`。
++- **何が起きるか**：reduce は非表示や安全な位置への退避ではなく paused。顔の上を通る時点で設定が有効になると、その位置で止まる。また、再描画すると経過時間由来の新しい負のdelayで別の位置に停止する。「長く隠さない」「描き直しても位置が飛ばない」をreduce時には満たさない。
++- **再現**：コース6以降で前景が顔を横切るタイミングに reduce を有効化する。そのまま待ち、さらに別の友だちを見つけて再描画させる。実機確認は未実施。
++- **最小の直し方**：reduce 時は少なくとも前景の movers を非表示にする。背景も固定表示にする場合は開始時刻に依存しない安全な位置を選ぶ。
++
++## その他の確認・保留事項
++
++- **パック境界**：`src/core/rewards.ts:32` の upcomingRewards、`src/ui/app.ts:487` のクリア報酬、`src/core/myroom.ts:89` の ownedItems / openRooms は権限で絞る。無料の人におにわ・コース6以降の家具・うみべの家具を出す経路は、確認した通常経路では見つからない。ベータの canPlay が常に true であることと、無料相当の権限関数での確認は区別する必要がある。既存の部屋E2Eは進捗を変えるだけで、無料権限への差し替え試験ではない。
++- **パックが外れた後**：`src/ui/myroomView.ts:103` は残った要素の番号を組み直すため、単純な filter による on.idx のずれは防いでいる。ただし `:109` は座席だけを解除し、最後に見えていた位置ではなく古い p.x/y に戻す。さらにフィルター済み list を次の persist で保存するため、再有効化しても除外した家具の配置は戻らない。非表示中も配置を保持したい仕様なら、保存用配置と表示用配置を分ける。現状の仕様では復元保証が明記されていないため、改善事項として保留。
++- **通常のしまう操作**：`src/ui/myroomView.ts:476` は乗っている子を降ろしてから splice し、以降の on.idx を減らしている。通常の単一ポインター操作でここだけを原因とする番号ずれは見つからない。棚の連打も findIndex による追加/削除の交互動作で、通常データでは同じ ref を増殖させない。ただし置いた物のセルを押すと即座にしまわれる意味は、薄色と小さな丸だけでは幼児には分かりづらい（推測）。置く/しまうの短い案内や絵による区別があるとよい。
++- **棚からの capture**：`src/ui/myroomView.ts:302` は明示的な capture がなく、`:346` の redraw は押していたセル自体を交換する。タッチの暗黙captureや画面外での pointerup を取り逃がす可能性がある（端末依存、推測）。`lostpointercapture` の終了処理もない。上記1・2と合わせ、安定した親要素で capture と終了を管理し、棚からドラッグしたまま画面外へ出る手順を実機で確認する。
++- **顔を隠す時間**：`tests/unit/movers.test.ts:46` 付近の検査は、moverPos の理想軌道・概算寸法・顔の一点を各 mover 単独で調べる。CSSの上下動、実画像の範囲、複数の連続遮蔽、周期末から周期頭への連続区間を保証するテストではない。通常時に3秒以上隠すことを確認したわけではなく、保証範囲の不足として記録する。前景全部の合成と実際の顔範囲でも確認するとよい。
++- **タップと位置維持**：`.movers { pointer-events:none }` はタップを遮らない設計。外側の移動には経過時間による負のdelayがあり、通常時の大きな巻き戻りを抑えている。一方 `.mv-inner` の上下動は再描画で0から始まり、最大14 SVG単位程度の位相差が出うる。優先度は低いが内側にも経過時間を反映できる。
++- **WKWebView**：px・transform-box:view-box・CSS変数を使うkeyframesが意図どおりSVG座標で動くかは、このWindows上の静的レビューと型チェックでは判定できない。互換性がある/ないとも断定しない。対象iOSで往復端、左右反転、画面回転、見つけた直後の再描画、reduce切り替えを確認すること。ネット接続禁止のため互換性資料の外部調査も行っていない。
++- **幼児向けの大きさ**：棚セルは通常76px、小さい画面では58pxなので、セルそのものは比較的押しやすい設計。部屋の小さい物はSVGに縮小され、明示的な最小ヒット領域がないため、重なった小物の選択は難しい可能性がある（推測）。実機でボール等を複数の家具の手前/奥に置いて確認したい。文字列・題材に怖い/危険な表現は見当たらないが、全画像を画面表示しての視覚検査は未実施。
++- **性能（推測）**：通常ドラッグは対象と同乗者の transform を更新する方式で、毎フレーム全体を描き直さない点はよい。確定・タブ切り替え時は stage と棚を丸ごと交換し、最大40要素ではSVG構築、画像・マスク、アニメーション再開始の負荷が出うる。movers 5つはCSSアニメーション中心で毎フレームのJS生成はない。現行データの重複なし最大は家具21種＋友だち6体の27要素で、40要素は通常操作より保存境界の試験条件。低性能iPhoneでのフレーム時間・メモリは未計測。まず計測し、必要なら差分更新を行う。
++
++## 良い点
++
++権限と進捗を両方確認してごほうび・棚・部屋を出している。シールと家具の対応、無料2部屋、破損した部屋だけの初期化に単体テストがある。通常の家具除去では座席を解放し番号も補正する。保護者のmovers切り替えが保存され、コース生成時に適用される。時間制限や罰のない部屋遊び、友だちと物のタブ分けも用途に合っている。
++
++## 検査結果・作業範囲
++
++- `npx.cmd tsc --noEmit`：成功（exit 0）。
++- `npm.cmd test`：起動失敗（exit 1）。esbuild が `Cannot read directory "../..": Access is denied.`、続いて vite.config.ts を解決できないエラーを出した。テスト本体は未実行で、合格扱いにはしていない。
++- AGENTS.md の指示に従い、設定・node_modules・環境変数・実行方式の差し替えによる回避はしていない。テスト再実行はClaude Code側の外部環境へ引き継ぐ。
++- E2E・ビルド・実機試験は未実施。既存E2Eは test-results 配下へのスクリーンショット等を含み、今回の1ファイル限定の書き込み許可外でもある。絵は制作していないため validate:art は実行していない。
++- 新規作成は本ファイルのみ。コード・絵・テスト・設定、既存の作業変更には手を加えていない。ネット接続・公開・commit・pushなし。ジョブ96の「1ファイルだけ」を優先し、一般指示の STATUS.md 更新は行っていない。
++
++## すぐ直すべきもの
++
++1. ドラッグ中の部屋切り替え・再入室と、pointercancel の状態管理（指摘1・2）。
++2. 保存された座席参照の検証と、ブランコから降ろす際の座標/DOMの整合（指摘3・4）。
++3. 棚セル上からのスクロールと、横向きの部屋進入判定（指摘5・6）。
++4. reduce 時に前景が顔を覆ったまま停止する処理（指摘7）。
++5. 修正後、単体テストを実行可能な環境で通し、iPhoneでマルチタッチ・中断・ブランコ・縦横の棚操作を確認する。
++
++## あとでよいもの
++
++パック再有効化時の配置復元方針、しまう操作の案内、小物のヒット領域、内側アニメーションの位相維持、合成遮蔽のテスト強化、実機計測に基づく描画最適化。WKWebViewの互換性と性能は未確認事項として残り、実機試験を省略できるという意味ではない。
+
+codex
+レビューを完了し、[review-myroom.md](audit/codex/review-myroom.md) に記録しました。
+
+- ドラッグ中断・座席検証・棚操作など、7件の指摘と再現手順・最小修正案を記載。
+- 型チェックは成功。
+- 単体テストはサンドボックスのアクセス拒否で起動できず、実機確認も未実施。
+
+書き込みは指定のレビュー1ファイルのみです。
+diff --git a/pattern-hide-family-beta/audit/codex/review-myroom.md b/pattern-hide-family-beta/audit/codex/review-myroom.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..e0c17152326b686ee76984f1a44dc9916996c676
+--- /dev/null
++++ b/pattern-hide-family-beta/audit/codex/review-myroom.md
+@@ -0,0 +1,90 @@
++# ジョブ96：つぎの ごほうび・うごくもの・じぶんの へや 独立レビュー
++
++実施日：2026-10-15。方法：指定コード、関連する保存・権限・CSS・単体/E2Eテストの静的レビューと型チェック。以下の再現手順はコードから導いた確認手順であり、実機で再現済みという意味ではない。iPhone / WKWebView の操作・描画は未確認。
++
++## 重要度順の指摘
++
++### 1. P1：ドラッグ中の部屋切り替えで、別の部屋の同じ番号の物を操作できてしまう
++
++- **場所**：`src/ui/myroomView.ts:281`（onClick）、`:82`（open）、`:326`（onMove）、`:381`（onUp）。
++- **何が起きるか**：部屋切り替えは `room` と `list` を交換する一方、`drag.idx` / `pointerId` を残す。別の指による切り替え後に元の指のイベントが届くと、新しい部屋の同じ番号の物を動かす・しまう。DOM交換でイベントが届かなくなる場合も、drag が残り、その後の pointerdown が拒否される。ホームを経由した再入室でも open は drag を解除しない。
++- **再現**：リビングのラグ（idx=0）を指Aで押したまま、指Bでしんしつへ切り替える。Aを動かして離す。しんしつのラグが動く、または以降のドラッグが受け付けられない経路がある。端末でのイベント配送による違いは未確認。
++- **最小の直し方**：ドラッグ中のタブ・部屋切り替えを無効にするか、切り替え前に元の部屋のドラッグを明示的に中断・復元する。open/画面離脱でも解除し、操作対象の room を Drag に保持して不一致のイベントを破棄する。capture は再描画で消えない要素に保持する。
++
++### 2. P1：pointercancel が床外・画面外の途中座標を保存する
++
++- **場所**：`src/ui/myroomView.ts:262`、`:350`、`:410`。関連：`src/core/myroom.ts:156`。
++- **何が起きるか**：移動中は座席を解除し、床外も含めた座標を list に書く。cancelDrag は開始時に戻すことも床へ収めることもせず保存する。物が空中や画面外に残り、再入室後にも引き継がれる。pointercancel の pointerId を見ないため、別の指の中断でも進行中の操作を終了してしまう。
++- **再現**：家具や友だちを壁の上へドラッグした途中で、そのポインターに pointercancel を送る。保存された y が floorTop 未満になる。別の pointerId の cancel でも同じドラッグが終了する。
++- **最小の直し方**：開始時の配置を保持し、中断時は復元する（棚から新規追加した物も取り消す）。イベントの pointerId を照合する。確定保存する方針なら、最低限床への補正・座席整合性の処理を通常終了と共通化する。
++
++### 3. P1：validLayouts が不正な座席・循環・重複を受け入れる
++
++- **場所**：`src/core/myroom.ts:146`（validLayouts）、特に `:157` と `:162`。利用側：`src/ui/myroomView.ts:176`、`:194`。
++- **何が起きるか**：on の検証は整数・参照番号の範囲・自己参照禁止だけ。座る側が char か、対象が座れる item か、seat が実在するか、同じ席の重複、相互参照を検証しない。ブランコの存在しない席では `seat.x` の参照で描画が例外終了する。相互参照の二体は root がなく描画されない。ref の重複・範囲外の有限座標も通り、「1枚に1つ」や床内配置を保証しない。
++- **再現**：コース9クリア相当で living に `[{ref:'item:swing',x:500,y:800},{ref:'char:koro',x:500,y:800,on:{idx:0,seat:99}}]` を保存して入室する。検証を通り、ブランコの描画で例外になる。また、二体の char に互いを指す on を付けると両方消える。
++- **最小の直し方**：ref を完全一致で検証し、重複を拒否。on は char → on を持たない座席付き item に限定し、seat の範囲と占有重複を確認する。座標は床内へ補正する。不正な部屋は既存方針どおり初期化し、描画側にも無効な席を参照しない防御を入れる。
++
++### 4. P1：ブランコから友だちをドラッグすると、親の変換が二重にかかる
++
++- **場所**：`src/ui/myroomView.ts:178`（rider の入れ子）、`:320`、`:350`、`:358`、`:361`。
++- **何が起きるか**：rider はブランコの transform と揺れる座板の内側にいる。ドラッグでは on だけを消し、部屋全体の座標で transform を設定するが、DOMは座板の子のまま。同じ親への appendChild では外へ出ないため、家具の移動・倍率・揺れが再び加わり、指から大きく離れる。離した後の redraw で戻るので操作中の位置と確定位置も一致しない。
++- **再現**：ブランコに友だちを座らせ、その子を10px以上ドラッグする。ブランコを左右反転した場合も確認する。
++- **最小の直し方**：降り始めた時点で表示上の足元座標を部屋座標へ変換し、rider を `.mr-objs` 直下へ移す。capture 対象を消さずに行い、その後は通常の友だちと同じ移動処理にする。開始座標には実際の座板の揺れも反映する。
++
++### 5. P1：棚のセルから指でスクロールできず、奥のごほうびへ届きにくい
++
++- **場所**：`src/ui/styles.css:522`、`:523`、`:575`。`src/ui/myroomView.ts:302`、`:329`。
++- **何が起きるか**：棚本体は pan-x（横向きでは pan-y）だが、76px等のセルには touch-action:none がある。セル上で始めたスワイプはネイティブスクロールにならず、JSにも棚をスクロールする処理がない。セル間の狭い隙間から操作する必要が生じる。マウスのクリック中心の既存テストでは確認できない。
++- **再現**：シールを多数獲得した iPhone の縦向きで「もの」を開き、セルの中央から左右へスワイプする。横向きではセル中央から上下へ操作する。CSS上の問題であり、実機での操作感は未確認。
++- **最小の直し方**：棚方向のパンをセルにも許可し、部屋へ出す方向の移動と区別する。長押し後だけドラッグ開始、または前後ページボタンなど、子どもがセル上からでも全品に到達できる操作を用意する。
++
++### 6. P2：横向きの棚ドラッグが「部屋に入った」と誤判定される
++
++- **場所**：`src/ui/myroomView.ts:335`（特に `:338`）、`src/ui/styles.css:571`。
++- **何が起きるか**：棚から追加する条件が SVG の下端との y 比較だけ。横向きでは棚が右側にあるので、棚の中を動かしただけでも条件を満たし、既存の同じ物を removeAt → 再追加する。棚内で離すと今度は removeAt されるため、スクロールしようとした動きで部屋の家具がしまわれ、座っていた子も降りる。
++- **再現**：横向きでソファを置き、子を座らせる。棚のソファのセル上を10px以上動かして棚内で離す。SVG下端より上の位置で試す。
++- **最小の直し方**：追加はポインターが実際の部屋描画領域に入った場合だけにする。矩形の左右上下に加え、余白を含む SVG の場合は toScene の座標でも範囲を検証する。既存物の除去は有効なドロップが確定するまで行わない。
++
++### 7. P2：「視差効果を減らす」で前景が顔の前に止まり続ける
++
++- **場所**：`src/ui/styles.css:501`、`src/ui/moverView.ts:64`付近の負の animation-delay、`src/ui/app.ts:428`。
++- **何が起きるか**：reduce は非表示や安全な位置への退避ではなく paused。顔の上を通る時点で設定が有効になると、その位置で止まる。また、再描画すると経過時間由来の新しい負のdelayで別の位置に停止する。「長く隠さない」「描き直しても位置が飛ばない」をreduce時には満たさない。
++- **再現**：コース6以降で前景が顔を横切るタイミングに reduce を有効化する。そのまま待ち、さらに別の友だちを見つけて再描画させる。実機確認は未実施。
++- **最小の直し方**：reduce 時は少なくとも前景の movers を非表示にする。背景も固定表示にする場合は開始時刻に依存しない安全な位置を選ぶ。
++
++## その他の確認・保留事項
++
++- **パック境界**：`src/core/rewards.ts:32` の upcomingRewards、`src/ui/app.ts:487` のクリア報酬、`src/core/myroom.ts:89` の ownedItems / openRooms は権限で絞る。無料の人におにわ・コース6以降の家具・うみべの家具を出す経路は、確認した通常経路では見つからない。ベータの canPlay が常に true であることと、無料相当の権限関数での確認は区別する必要がある。既存の部屋E2Eは進捗を変えるだけで、無料権限への差し替え試験ではない。
++- **パックが外れた後**：`src/ui/myroomView.ts:103` は残った要素の番号を組み直すため、単純な filter による on.idx のずれは防いでいる。ただし `:109` は座席だけを解除し、最後に見えていた位置ではなく古い p.x/y に戻す。さらにフィルター済み list を次の persist で保存するため、再有効化しても除外した家具の配置は戻らない。非表示中も配置を保持したい仕様なら、保存用配置と表示用配置を分ける。現状の仕様では復元保証が明記されていないため、改善事項として保留。
++- **通常のしまう操作**：`src/ui/myroomView.ts:476` は乗っている子を降ろしてから splice し、以降の on.idx を減らしている。通常の単一ポインター操作でここだけを原因とする番号ずれは見つからない。棚の連打も findIndex による追加/削除の交互動作で、通常データでは同じ ref を増殖させない。ただし置いた物のセルを押すと即座にしまわれる意味は、薄色と小さな丸だけでは幼児には分かりづらい（推測）。置く/しまうの短い案内や絵による区別があるとよい。
++- **棚からの capture**：`src/ui/myroomView.ts:302` は明示的な capture がなく、`:346` の redraw は押していたセル自体を交換する。タッチの暗黙captureや画面外での pointerup を取り逃がす可能性がある（端末依存、推測）。`lostpointercapture` の終了処理もない。上記1・2と合わせ、安定した親要素で capture と終了を管理し、棚からドラッグしたまま画面外へ出る手順を実機で確認する。
++- **顔を隠す時間**：`tests/unit/movers.test.ts:46` 付近の検査は、moverPos の理想軌道・概算寸法・顔の一点を各 mover 単独で調べる。CSSの上下動、実画像の範囲、複数の連続遮蔽、周期末から周期頭への連続区間を保証するテストではない。通常時に3秒以上隠すことを確認したわけではなく、保証範囲の不足として記録する。前景全部の合成と実際の顔範囲でも確認するとよい。
++- **タップと位置維持**：`.movers { pointer-events:none }` はタップを遮らない設計。外側の移動には経過時間による負のdelayがあり、通常時の大きな巻き戻りを抑えている。一方 `.mv-inner` の上下動は再描画で0から始まり、最大14 SVG単位程度の位相差が出うる。優先度は低いが内側にも経過時間を反映できる。
++- **WKWebView**：px・transform-box:view-box・CSS変数を使うkeyframesが意図どおりSVG座標で動くかは、このWindows上の静的レビューと型チェックでは判定できない。互換性がある/ないとも断定しない。対象iOSで往復端、左右反転、画面回転、見つけた直後の再描画、reduce切り替えを確認すること。ネット接続禁止のため互換性資料の外部調査も行っていない。
++- **幼児向けの大きさ**：棚セルは通常76px、小さい画面では58pxなので、セルそのものは比較的押しやすい設計。部屋の小さい物はSVGに縮小され、明示的な最小ヒット領域がないため、重なった小物の選択は難しい可能性がある（推測）。実機でボール等を複数の家具の手前/奥に置いて確認したい。文字列・題材に怖い/危険な表現は見当たらないが、全画像を画面表示しての視覚検査は未実施。
++- **性能（推測）**：通常ドラッグは対象と同乗者の transform を更新する方式で、毎フレーム全体を描き直さない点はよい。確定・タブ切り替え時は stage と棚を丸ごと交換し、最大40要素ではSVG構築、画像・マスク、アニメーション再開始の負荷が出うる。movers 5つはCSSアニメーション中心で毎フレームのJS生成はない。現行データの重複なし最大は家具21種＋友だち6体の27要素で、40要素は通常操作より保存境界の試験条件。低性能iPhoneでのフレーム時間・メモリは未計測。まず計測し、必要なら差分更新を行う。
++
++## 良い点
++
++権限と進捗を両方確認してごほうび・棚・部屋を出している。シールと家具の対応、無料2部屋、破損した部屋だけの初期化に単体テストがある。通常の家具除去では座席を解放し番号も補正する。保護者のmovers切り替えが保存され、コース生成時に適用される。時間制限や罰のない部屋遊び、友だちと物のタブ分けも用途に合っている。
++
++## 検査結果・作業範囲
++
++- `npx.cmd tsc --noEmit`：成功（exit 0）。
++- `npm.cmd test`：起動失敗（exit 1）。esbuild が `Cannot read directory "../..": Access is denied.`、続いて vite.config.ts を解決できないエラーを出した。テスト本体は未実行で、合格扱いにはしていない。
++- AGENTS.md の指示に従い、設定・node_modules・環境変数・実行方式の差し替えによる回避はしていない。テスト再実行はClaude Code側の外部環境へ引き継ぐ。
++- E2E・ビルド・実機試験は未実施。既存E2Eは test-results 配下へのスクリーンショット等を含み、今回の1ファイル限定の書き込み許可外でもある。絵は制作していないため validate:art は実行していない。
++- 新規作成は本ファイルのみ。コード・絵・テスト・設定、既存の作業変更には手を加えていない。ネット接続・公開・commit・pushなし。ジョブ96の「1ファイルだけ」を優先し、一般指示の STATUS.md 更新は行っていない。
++
++## すぐ直すべきもの
++
++1. ドラッグ中の部屋切り替え・再入室と、pointercancel の状態管理（指摘1・2）。
++2. 保存された座席参照の検証と、ブランコから降ろす際の座標/DOMの整合（指摘3・4）。
++3. 棚セル上からのスクロールと、横向きの部屋進入判定（指摘5・6）。
++4. reduce 時に前景が顔を覆ったまま停止する処理（指摘7）。
++5. 修正後、単体テストを実行可能な環境で通し、iPhoneでマルチタッチ・中断・ブランコ・縦横の棚操作を確認する。
++
++## あとでよいもの
++
++パック再有効化時の配置復元方針、しまう操作の案内、小物のヒット領域、内側アニメーションの位相維持、合成遮蔽のテスト強化、実機計測に基づく描画最適化。WKWebViewの互換性と性能は未確認事項として残り、実機試験を省略できるという意味ではない。
+
+tokens used
+65,184
+レビューを完了し、[review-myroom.md](audit/codex/review-myroom.md) に記録しました。
+
+- ドラッグ中断・座席検証・棚操作など、7件の指摘と再現手順・最小修正案を記載。
+- 型チェックは成功。
+- 単体テストはサンドボックスのアクセス拒否で起動できず、実機確認も未実施。
+
+書き込みは指定のレビュー1ファイルのみです。
