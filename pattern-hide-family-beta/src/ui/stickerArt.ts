@@ -43,6 +43,14 @@ function motif(m: Motif): string {
       return `<ellipse cy="-4" rx="11" ry="13" fill="#F29AAE" ${L}/><path d="M0 9 Q-4 14 2 18" fill="none" stroke="#4A3A40" stroke-width="1.8"/>`;
     case 'present':
       return `<rect x="-14" y="-8" width="28" height="22" rx="3" fill="#F7C6CF" ${L}/><path d="M0 -8 V14 M-14 2 H14" stroke="#E07B7B" stroke-width="3"/><path d="M0 -8 Q-10 -18 -6 -9 M0 -8 Q10 -18 6 -9" fill="none" ${L}/>`;
+    case 'mushroom':
+      return `<rect x="-6" y="0" width="12" height="14" rx="5" fill="#F5EBD6" ${L}/><path d="M-16 2 Q-16 -15 0 -15 Q16 -15 16 2 Z" fill="#D98A6C" ${L}/><circle cx="-6" cy="-6" r="2.5" fill="#FFFDF6"/><circle cx="5" cy="-8" r="2" fill="#FFFDF6"/>`;
+    case 'acorn':
+      return `<ellipse cx="0" cy="4" rx="11" ry="12" fill="#C88B52" ${L}/><path d="M-13 -2 Q-13 -12 0 -12 Q13 -12 13 -2 Z" fill="#8C5A32" ${L}/><path d="M0 -12 V-16" ${L}/>`;
+    case 'lantern':
+      return `<path d="M-5 -12 Q0 -18 5 -12" fill="none" ${L}/><rect x="-10" y="-8" width="20" height="22" rx="4" fill="#FFE082" ${L}/><rect x="-12" y="-10" width="24" height="4" rx="2" fill="#7A5A46" ${L}/><rect x="-12" y="12" width="24" height="4" rx="2" fill="#7A5A46" ${L}/>`;
+    case 'squirrel':
+      return `<path d="M4 10 Q18 10 16 -6 Q14 -16 6 -8" fill="#D89458" ${L}/><ellipse cx="-3" cy="4" rx="9" ry="10" fill="#D89458" ${L}/><circle cx="-5" cy="-7" r="7" fill="#D89458" ${L}/><circle cx="-7" cy="-8" r="1.6" fill="#4A3A40"/>`;
   }
 }
 

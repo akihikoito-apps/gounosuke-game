@@ -30,6 +30,12 @@ function fallback(kind: MoverKind): string {
       return `<ellipse cx="0" cy="-4" rx="40" ry="5" fill="#4A3A40" opacity="0.1"/><path d="M-26 -14 L-40 -2 M-14 -12 L-24 0 M26 -14 L40 -2 M14 -12 L24 0" ${L}/><ellipse cx="0" cy="-26" rx="32" ry="20" fill="#F08C78" ${L}/><path d="M-30 -36 Q-50 -60 -36 -66 Q-28 -56 -40 -50 M30 -36 Q50 -60 36 -66 Q28 -56 40 -50" fill="#F08C78" ${L}/><circle cx="-10" cy="-30" r="3.5" fill="#4A3A40"/><circle cx="10" cy="-30" r="3.5" fill="#4A3A40"/>`;
     case 'ball':
       return `<ellipse cx="0" cy="-2" rx="26" ry="5" fill="#4A3A40" opacity="0.1"/><circle cx="0" cy="-32" r="30" fill="#FFF6E8" ${L}/><path d="M-10 -60 Q-22 -32 -10 -4 M10 -60 Q22 -32 10 -4" fill="none" stroke="#E07B7B" stroke-width="7"/>`;
+    case 'squirrel':
+      return `<ellipse cx="0" cy="-2" rx="44" ry="5" fill="#4A3A40" opacity="0.1"/><path d="M-24 -28 Q-64 -34 -56 -72 Q-48 -98 -22 -76 Q-14 -56 -24 -28 Z" fill="#C97E48" ${L}/><ellipse cx="2" cy="-32" rx="28" ry="20" fill="#D89458" ${L}/><circle cx="28" cy="-54" r="18" fill="#D89458" ${L}/><path d="M22 -68 L26 -80 L32 -68" fill="#D89458" ${L}/><circle cx="33" cy="-56" r="3" fill="#4A3A40"/>`;
+    case 'owl':
+      return `<path d="M-42 -42 Q-20 -68 0 -44 Q20 -68 42 -42" fill="#B58E6B" ${L}/><ellipse cx="0" cy="-38" rx="18" ry="16" fill="#C8A27E" ${L}/><circle cx="-6" cy="-40" r="5" fill="#FFFDF6" ${L}/><circle cx="6" cy="-40" r="5" fill="#FFFDF6" ${L}/><circle cx="-6" cy="-40" r="2" fill="#4A3A40"/><circle cx="6" cy="-40" r="2" fill="#4A3A40"/>`;
+    case 'falling-leaf':
+      return `<path d="M-22 -24 Q-4 -48 22 -28 Q6 -6 -22 -24 Z" fill="#D88A52" ${L}/><path d="M-26 -22 L18 -27" ${L}/>`;
   }
 }
 
@@ -38,7 +44,7 @@ function art(kind: MoverKind): string {
   return f ? `<image href="${f}" x="-150" y="-300" width="300" height="300"/>` : fallback(kind);
 }
 
-const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon'];
+const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon', 'owl', 'falling-leaf'];
 
 /** うごくもの1つ。elapsed：出題が始まってからの秒数 */
 function one(P: string, m: MoverDef, elapsed: number): string {
@@ -73,6 +79,9 @@ const BOX: Record<MoverKind, [number, number, number, number]> = {
   sailboat: [-53, -103, 106, 101],
   seagull: [-44, -62, 88, 60],
   ball: [-30, -62, 60, 62],
+  squirrel: [-55, -75, 110, 75],
+  owl: [-44, -66, 88, 64],
+  'falling-leaf': [-28, -48, 56, 48],
 };
 
 /** 選ぶボタン用の絵（その絵の大きさに合わせて切り取る） */

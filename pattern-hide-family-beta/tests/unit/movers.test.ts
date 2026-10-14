@@ -14,6 +14,9 @@ const SIZE: Record<MoverKind, { w: number; h: number }> = {
   sailboat: { w: 110, h: 120 },
   crab: { w: 90, h: 70 },
   ball: { w: 64, h: 64 },
+  squirrel: { w: 110, h: 75 },
+  owl: { w: 90, h: 65 },
+  'falling-leaf': { w: 56, h: 48 },
 };
 
 describe('うごくもの', () => {

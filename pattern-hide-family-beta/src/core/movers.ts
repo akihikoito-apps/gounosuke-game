@@ -4,7 +4,7 @@
 import { type Rng, mulberry32, shuffle } from './rng';
 import type { SceneId } from './scene';
 
-export type MoverKind = 'bird' | 'butterfly' | 'cloud' | 'cat' | 'puppy' | 'balloon' | 'seagull' | 'sailboat' | 'crab' | 'ball';
+export type MoverKind = 'bird' | 'butterfly' | 'cloud' | 'cat' | 'puppy' | 'balloon' | 'seagull' | 'sailboat' | 'crab' | 'ball' | 'squirrel' | 'owl' | 'falling-leaf';
 /** cross：端から端へ通りぬけて、また最初から / patrol：行って もどる（向きを変える） */
 export type MoverMove = 'cross' | 'patrol';
 
@@ -54,6 +54,13 @@ export const MOVERS: Record<SceneId, MoverDef[]> = {
     { id: 'beach-crab', kind: 'crab', move: 'patrol', from: { x: -90, y: 850 }, to: { x: 1090, y: 850 }, sec: 14, scale: 1.19, layer: 'front' },
     { id: 'beach-seagull2', kind: 'seagull', move: 'cross', from: { x: 1100, y: 600 }, to: { x: -100, y: 520 }, sec: 10, scale: 1.05, layer: 'front' },
   ],
+  forest: [
+    { id: 'forest-cloud', kind: 'cloud', move: 'cross', from: { x: -150, y: 80 }, to: { x: 1150, y: 80 }, sec: 42, scale: 1.15, layer: 'back' },
+    { id: 'forest-owl', kind: 'owl', move: 'cross', from: { x: 1100, y: 180 }, to: { x: -100, y: 140 }, sec: 13, scale: 1.05, layer: 'back' },
+    { id: 'forest-squirrel', kind: 'squirrel', move: 'patrol', from: { x: -90, y: 860 }, to: { x: 1090, y: 860 }, sec: 14, scale: 1.15, layer: 'front' },
+    { id: 'forest-leaf', kind: 'falling-leaf', move: 'cross', from: { x: 240, y: -40 }, to: { x: 760, y: 1060 }, sec: 11, scale: 1.0, layer: 'front' },
+    { id: 'forest-butterfly', kind: 'butterfly', move: 'patrol', from: { x: 1090, y: 540 }, to: { x: -90, y: 580 }, sec: 13, scale: 1.05, layer: 'front' },
+  ],
 };
 
 /** かくして わたす で、隠す人が選べる うごくもの の数 */
@@ -70,6 +77,9 @@ export const MOVER_NAMES: Record<MoverKind, string> = {
   sailboat: 'ヨット',
   crab: 'かに',
   ball: 'ボール',
+  squirrel: 'りす',
+  owl: 'ふくろう',
+  'falling-leaf': 'はっぱ',
 };
 
 /** コースごとの うごくものの数（コース1は なし） */

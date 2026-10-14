@@ -8,24 +8,27 @@ const all = () => true;
 const baseOnly = (id: ContentId) => PACKS.find((p) => p.id === 'base')!.contents.includes(id);
 
 describe('じぶんの へや', () => {
-  it('無料（きほん）では 部屋は2つまで。おにわ は追加パック', () => {
+  it('無料（きほん）では 部屋は2つまで。おにわ・ひみつきち は追加パック', () => {
     expect(openRooms(10, baseOnly).map((r) => r.id)).toEqual(['living', 'bedroom']);
-    expect(openRooms(0, all).map((r) => r.id)).toEqual(['living']);
-    expect(openRooms(3, all).map((r) => r.id)).toEqual(['living', 'bedroom']);
-    expect(openRooms(6, all).map((r) => r.id)).toEqual(['living', 'bedroom', 'yard']);
+    expect(openRooms(0, all).map((r) => r.id)).toEqual(['living', 'treehouse']);
+    expect(openRooms(3, all).map((r) => r.id)).toEqual(['living', 'bedroom', 'treehouse']);
+    expect(openRooms(6, all).map((r) => r.id)).toEqual(['living', 'bedroom', 'yard', 'treehouse']);
     // どの部屋も、ちょうど1つのパックに入っている
     for (const r of ROOMS) expect(PACKS.filter((p) => p.contents.includes(r.content)).length, r.id).toBe(1);
   });
 
-  it('シール1枚に もの1つ。はじめから3つ。シールの数だけ増える', () => {
+  it('シール1枚に もの1つ。無料は はじめから3つ、もりパックで キャンプテントが増える', () => {
     for (const s of STICKERS) expect(itemForSticker(s.id), s.id).toBeTruthy();
     expect(new Set(ITEMS.map((i) => i.id)).size).toBe(ITEMS.length);
-    expect(ownedItems({ cleared: 0, totalFinds: 0 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug']);
-    expect(ownedItems({ cleared: 3, totalFinds: 12 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'ball', 'cushion', 'bed', 'plant']);
-    // パックが無ければ、そのパックのシールの もの は出ない（コース10のこいぬ・うみべ）
-    const base = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99 } }, baseOnly).map((i) => i.id);
+    expect(ownedItems({ cleared: 0, totalFinds: 0 }, baseOnly).map((i) => i.id)).toEqual(['sofa', 'table', 'rug']);
+    expect(ownedItems({ cleared: 0, totalFinds: 0 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'camp-tent']);
+    expect(ownedItems({ cleared: 3, totalFinds: 12 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'ball', 'cushion', 'bed', 'plant', 'camp-tent']);
+    // パックが無ければ、そのパックのシールの もの は出ない（コース10のこいぬ・うみべ・きのこの もり）
+    const base = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99, forest: 99 } }, baseOnly).map((i) => i.id);
     expect(base).not.toContain('puppy');
     expect(base).not.toContain('shell');
+    expect(base).not.toContain('camp-tent');
+    expect(base).not.toContain('stump-chair');
     expect(base).toContain('balloon');
   });
 

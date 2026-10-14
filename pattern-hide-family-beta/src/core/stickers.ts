@@ -2,8 +2,9 @@
 // コースをクリアすると1枚ずつ（10枚）、見つけた合計回数でも5枚。ガチャやランダムはなし（何をするともらえるか、いつも分かる）。
 import type { CharacterId } from './characters';
 import type { SceneId } from './scene';
+import { SCENES } from './scenes';
 
-export type Motif = 'shell' | 'floatring' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present';
+export type Motif = 'shell' | 'floatring' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel';
 
 export interface StickerDef {
   id: string;
@@ -40,6 +41,12 @@ export const STICKERS: StickerDef[] = [
   { id: 'b1', name: 'ちょきが きたよ', kind: 'scene', scene: 'beach', need: 1, char: 'choki', motif: 'shell', color: '#F6DCD3' },
   { id: 'b10', name: 'うみべで 10かい', kind: 'scene', scene: 'beach', need: 10, char: 'koro', motif: 'floatring', color: '#D7ECF3' },
   { id: 'b30', name: 'うみべで 30かい', kind: 'scene', scene: 'beach', need: 30, char: 'choki', motif: 'star', color: '#F3E6C2' },
+  // 背景パック2「きのこの もり」
+  { id: 'f-s1', name: 'ぴのが きたよ', kind: 'scene', scene: 'forest', need: 1, char: 'pino', motif: 'mushroom', color: '#E8D9B8' },
+  { id: 'f-s5', name: 'きのこの もりで 5かい', kind: 'scene', scene: 'forest', need: 5, char: 'koro', motif: 'acorn', color: '#E5D3B8' },
+  { id: 'f-s15', name: 'きのこの もりで 15かい', kind: 'scene', scene: 'forest', need: 15, char: 'pino', motif: 'lantern', color: '#F3DFB6' },
+  { id: 'f-s30', name: 'きのこの もりで 30かい', kind: 'scene', scene: 'forest', need: 30, char: 'mimi', motif: 'mushroom', color: '#DAE8CE' },
+  { id: 'f-s50', name: 'きのこの もりで 50かい', kind: 'scene', scene: 'forest', need: 50, char: 'pino', motif: 'squirrel', color: '#EBD6BE' },
 ];
 
 export interface Progress {
@@ -68,6 +75,9 @@ export function newStickers(before: Progress, after: Progress): StickerDef[] {
 /** まだのシールの「どうすればもらえるか」 */
 export function stickerHint(s: StickerDef): string {
   if (s.kind === 'course') return `コース${s.need} クリアで`;
-  if (s.kind === 'scene') return s.need === 1 ? 'うみべで みつけたら' : `うみべで ${s.need}かい`;
+  if (s.kind === 'scene') {
+    const sceneName = SCENES[s.scene ?? 'beach'].name;
+    return s.need === 1 ? `${sceneName}で みつけたら` : `${sceneName}で ${s.need}かい`;
+  }
   return `${s.need}かい みつけたら`;
 }

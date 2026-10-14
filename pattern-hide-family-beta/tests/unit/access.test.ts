@@ -10,6 +10,7 @@ const owns = (...packs: PackId[]): CanPlay => (id: ContentId) => {
 };
 const baseOnly = owns();
 const withBeach = owns('beach');
+const withForest = owns('forest');
 const withMore = owns('more-courses');
 
 describe('access by pack', () => {
@@ -21,26 +22,34 @@ describe('access by pack', () => {
     expect(availableCharacters(5, {}, baseOnly)).toEqual(['koro', 'mimi', 'moko', 'nyako', 'popo']);
   });
 
-  it('choki needs the beach pack even if old save data says the beach was played', () => {
+  it('choki and pino need their scene pack even if old save data says the scene was played', () => {
     expect(availableCharacters(10, { beach: 30 }, baseOnly)).not.toContain('choki');
     expect(availableCharacters(10, { beach: 30 }, withMore)).not.toContain('choki');
     expect(availableCharacters(0, {}, withBeach)).not.toContain('choki'); // パックがあっても、うみべで見つけるまでは
     expect(availableCharacters(0, { beach: 1 }, withBeach)).toContain('choki');
+    expect(availableCharacters(10, { forest: 50 }, baseOnly)).not.toContain('pino');
+    expect(availableCharacters(0, {}, withForest)).not.toContain('pino');
+    expect(availableCharacters(0, { forest: 1 }, withForest)).toContain('pino');
   });
 
   it('resume is refused for a scene or a friend you cannot play', () => {
     const pl = (char: any, spot: string) => ({ char, spot, costume: 'plain', variant: 'exact' as const });
     expect(canResume({ sceneId: 'beach', placements: [pl('koro', 'beach-hut-1')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('choki', 'room-plant')] }, baseOnly)).toBe(false);
+    expect(canResume({ sceneId: 'forest', placements: [pl('koro', 'forest-tent-1')] }, baseOnly)).toBe(false);
+    expect(canResume({ sceneId: 'room', placements: [pl('pino', 'room-plant')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('koro', 'room-plant')] }, baseOnly)).toBe(true);
     expect(canResume({ sceneId: 'beach', placements: [pl('choki', 'beach-hut-1')] }, withBeach)).toBe(true);
+    expect(canResume({ sceneId: 'forest', placements: [pl('pino', 'forest-tent-1')] }, withForest)).toBe(true);
   });
 
   it('the sticker book only shows stickers of packs you have', () => {
     const ids = (c: CanPlay) => visibleStickers(c).map((s) => s.id);
     expect(ids(baseOnly)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150']);
     expect(ids(withBeach)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'b1', 'b10', 'b30']);
+    expect(ids(withForest)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'f-s1', 'f-s5', 'f-s15', 'f-s30', 'f-s50']);
     expect(ids(owns('beach', 'more-courses'))).toHaveLength(18);
+    expect(ids(owns('beach', 'forest', 'more-courses'))).toHaveLength(23);
   });
 
   it('every pack is reachable and every paid pack has something to play', () => {

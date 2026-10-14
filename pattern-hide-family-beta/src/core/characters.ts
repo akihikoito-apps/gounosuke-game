@@ -2,7 +2,7 @@
 // ローカル座標：足もと中央が原点、上が -y。高さ約200。
 import { type Pt, type Shape, quadPoints, shapeToSvg } from './geometry';
 
-export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'choki';
+export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'choki' | 'pino';
 import type { SceneId } from './scene';
 
 export interface CharacterDef {
@@ -127,9 +127,23 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     ],
     facePoints: FACE,
   },
+  // 背景パック2「きのこの もり」の友だち。きのこの もりで初めて誰かを見つけると仲間になる
+  pino: {
+    id: 'pino',
+    name: 'ぴの',
+    personality: 'おだやかで もりしり。あたまの ふたば が めじるし。',
+    skin: '#E4C4A8',
+    silhouette: [
+      BODY,
+      HEAD,
+      rotEllipse(-22, -198, 18, 11, -28, -22, -198),
+      rotEllipse(22, -198, 18, 11, 28, 22, -198),
+    ],
+    facePoints: FACE,
+  },
 };
 
-export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'choki'];
+export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'choki', 'pino'];
 /** 最初からいる3体 */
 export const BASE_CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
 /** 新しい友だちが仲間になるコース（このコースをクリアしたら）。最初のクリアで1体目が来る */
@@ -139,7 +153,10 @@ export const FRIEND_UNLOCKS: { course: number; char: CharacterId }[] = [
 ];
 
 /** 背景パックの友だち：その背景で初めて誰かを見つけると仲間になる */
-export const SCENE_FRIENDS: { scene: SceneId; char: CharacterId }[] = [{ scene: 'beach', char: 'choki' }];
+export const SCENE_FRIENDS: { scene: SceneId; char: CharacterId }[] = [
+  { scene: 'beach', char: 'choki' },
+  { scene: 'forest', char: 'pino' },
+];
 
 /** いま遊べるキャラクター（コースの進み具合と、背景パックで見つけた回数で増える） */
 export function unlockedCharacters(cleared: number, sceneFinds: Partial<Record<SceneId, number>> = {}): CharacterId[] {
@@ -216,6 +233,24 @@ function headMarkup(c: CharacterDef): string {
         eyes() +
         cheeks() +
         `<path d="M-8 -126 Q0 -118 8 -126" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
+      );
+    }
+    case 'pino': {
+      // 頭のてっぺんから左右に開いたふたば
+      const leaf = (sx: number) =>
+        `<g transform="rotate(${-28 * sx} ${-22 * sx} -198)">` +
+        `<ellipse cx="${-22 * sx}" cy="-198" rx="18" ry="11" fill="#88C47C" ${st}/>` +
+        `<path d="M${-10 * sx} -198 H${-30 * sx}" stroke="#5A9652" stroke-width="2.5" stroke-linecap="round"/>` +
+        `</g>`;
+      return (
+        `<path d="M0 -184 V-194" stroke="${LINE}" stroke-width="3.5" stroke-linecap="round"/>` +
+        leaf(1) +
+        leaf(-1) +
+        `<ellipse cx="0" cy="-142" rx="48" ry="45" fill="${c.skin}" ${st}/>` +
+        eyes() +
+        cheeks() +
+        `<ellipse cx="0" cy="-133" rx="4" ry="3" fill="#9E7356"/>` +
+        `<path d="M-8 -125 Q0 -118 8 -125" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
       );
     }
     case 'popo': {

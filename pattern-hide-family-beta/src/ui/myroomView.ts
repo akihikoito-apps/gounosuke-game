@@ -29,6 +29,7 @@ const OUTFIT: Record<string, PatternSpec> = {
   nyako: { kind: 'stripes', bg: '#DCEAF6', fg: '#A9C9E6', size: 28 },
   popo: { kind: 'dots', bg: '#F8E0E0', fg: '#FFFFFF', size: 30 },
   choki: { kind: 'check', bg: '#FDE6DA', fg: '#F4B9A0', size: 32 },
+  pino: { kind: 'leaf', bg: '#E5F2DC', fg: '#9AC88E', size: 32 },
 };
 
 const L = 'stroke="#4A3A40" stroke-width="5" stroke-linejoin="round"';
@@ -561,6 +562,6 @@ export class MyRoomView {
 }
 
 /** 横幅より背が高い物（棚の絵の切り取り） */
-const TALL: Record<string, number> = { swing: 300, plant: 170, flowerpot: 140, balloon: 170, starmobile: 190, moonlamp: 140, puppy: 140, fishtank: 170 };
+const TALL: Record<string, number> = { swing: 300, plant: 170, flowerpot: 140, balloon: 170, starmobile: 190, moonlamp: 140, puppy: 140, fishtank: 170, 'acorn-lamp': 160 };
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const r1s = (n: number) => Math.round(n * 1000) / 1000;

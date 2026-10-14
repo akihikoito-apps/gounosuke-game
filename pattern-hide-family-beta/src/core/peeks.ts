@@ -73,6 +73,10 @@ const TABLE: Shape[] = [
 const HUT: Shape[] = [R(22, 240, 318, 426)];
 const WINDBREAK: Shape[] = [R(590, 436, 400, 230, 6)];
 
+// きのこの もり：テント（壁と屋根の下まで）、ジャンボきのこの傘
+const TENT_FRONT: Shape[] = [R(22, 240, 348, 426, 8)];
+const MUSH_FRONT: Shape[] = [R(574, 406, 402, 256, 40)];
+
 const peek = (id: string, x: number, y: number, s: number, region: string, front: Shape[], kind: 'peek' | 'window' = 'peek', clip?: Shape[]): PeekDef => ({
   id,
   x,
@@ -108,6 +112,11 @@ export const PEEKS: Record<SceneId, PeekDef[]> = {
     peek('beach-peek-hut', 342, 652, 1, 'sand', HUT),
     peek('beach-peek-wind-1', 700, 550, 0.9, 'windbreak', WINDBREAK),
     peek('beach-peek-wind-2', 880, 550, 0.9, 'windbreak', WINDBREAK),
+  ],
+  forest: [
+    peek('forest-peek-tent', 372, 652, 1, 'ground', TENT_FRONT),
+    peek('forest-peek-mush-1', 680, 520, 0.9, 'mushroom', MUSH_FRONT),
+    peek('forest-peek-mush-2', 860, 520, 0.9, 'mushroom', MUSH_FRONT),
   ],
 };
 

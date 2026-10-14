@@ -7,7 +7,7 @@ import type { CharacterId } from './characters';
 import { STICKERS, hasSticker } from './stickers';
 import type { SceneId } from './scene';
 
-export type RoomId = 'living' | 'bedroom' | 'yard';
+export type RoomId = 'living' | 'bedroom' | 'yard' | 'treehouse';
 export type Motion = 'walk' | 'swing' | 'bob' | 'sway' | 'roll' | 'swim';
 
 export interface RoomDef {
@@ -29,6 +29,7 @@ export const ROOMS: RoomDef[] = [
   { id: 'living', name: 'リビング', needCleared: 0, content: 'room:living', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'bedroom', name: 'しんしつ', needCleared: 3, content: 'room:bedroom', floorTop: 580, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'yard', name: 'おにわ', needCleared: 6, content: 'room:yard', floorTop: 540, scaleBack: 0.95, scaleFront: 1.45 },
+  { id: 'treehouse', name: 'ひみつきち', needCleared: 0, content: 'room:treehouse', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
 ];
 
 export interface Seat {
@@ -42,6 +43,8 @@ export interface ItemDef {
   name: string;
   /** どのシールでもらえるか。null ははじめから持っている */
   sticker: string | null;
+  /** パックを買った瞬間から使える物（sticker が null のとき）の所属パック中身 */
+  content?: ContentId;
   /** 置いたときの横幅のめやす（ローカル座標。友だちの横幅は 約150） */
   w: number;
   /** 床に敷くもの（いつも いちばん奥に描く） */
@@ -78,6 +81,13 @@ export const ITEMS: ItemDef[] = [
   { id: 'shell', name: 'かいがら', sticker: 'b1', w: 70 },
   { id: 'floatring', name: 'うきわ', sticker: 'b10', w: 120 },
   { id: 'beachball', name: 'ビーチボール', sticker: 'b30', w: 80, motion: 'roll' },
+  // きのこの もりパック
+  { id: 'camp-tent', name: 'キャンプテント', sticker: null, content: 'scene:forest', w: 280, seats: [{ x: 0, y: -50 }] },
+  { id: 'stump-chair', name: 'きりかぶの いす', sticker: 'f-s1', w: 120, seats: [{ x: 0, y: -55 }] },
+  { id: 'acorn-lamp', name: 'どんぐりランプ', sticker: 'f-s5', w: 90, motion: 'bob' },
+  { id: 'mushroom-table', name: 'きのこの つくえ', sticker: 'f-s15', w: 170 },
+  { id: 'campfire-pot', name: 'たきびの なべ', sticker: 'f-s30', w: 140, motion: 'sway' },
+  { id: 'squirrel', name: 'りす', sticker: 'f-s50', w: 110, motion: 'walk' },
 ];
 
 export const ITEM_BY_ID: Record<string, ItemDef> = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
@@ -91,7 +101,7 @@ export interface ProgressLike {
 /** いま使える もの（シールを持っていて、そのシールのパックも遊べる） */
 export function ownedItems(p: ProgressLike, can: CanPlay): ItemDef[] {
   return ITEMS.filter((it) => {
-    if (!it.sticker) return true;
+    if (!it.sticker) return !it.content || can(it.content);
     const s = STICKERS.find((x) => x.id === it.sticker);
     if (!s || !can(`char:${s.char}`)) return false;
     if (s.kind === 'course' && !can(`course:${s.need}`)) return false;
@@ -135,6 +145,7 @@ export const MAX_PLACED = 40;
 export function starterLayout(room: RoomId): Placed[] {
   if (room === 'living') return [{ ref: 'item:rug', x: 520, y: 900 }, { ref: 'item:sofa', x: 470, y: 690 }, { ref: 'item:table', x: 520, y: 900 }, { ref: 'char:koro', x: 830, y: 960 }];
   if (room === 'bedroom') return [{ ref: 'item:rug', x: 500, y: 900 }];
+  if (room === 'treehouse') return [{ ref: 'item:camp-tent', x: 260, y: 720 }, { ref: 'char:koro', x: 640, y: 880 }];
   return [];
 }
 
