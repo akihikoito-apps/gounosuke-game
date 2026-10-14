@@ -392,3 +392,87 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 .parent-dialog .policy summary { cursor: pointer; font-weight: 700; padding: 6px 0; min-height: 44px; display: flex; align-items: center; }
 .parent-dialog .policy h4 { font-size: 15px; margin: 14px 0 4px; }
 .parent-dialog .policy p, .parent-dialog .policy li { font-size: 14px; }
+
+/* 遊ぶ画面：顔の横に「を みつけてね」 */
+.targets { flex-wrap: wrap; align-items: center; }
+.find-msg { font-weight: 800; font-size: 16px; line-height: 1.2; white-space: nowrap; text-align: left; }
+@media (max-width: 420px) {
+  .target { width: 54px; height: 54px; border-width: 3px; }
+  .find-msg { font-size: 14px; }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .find-msg { text-align: center; font-size: 13px; }
+}
+
+/* コースを えらぶ：その コースで なかまに なる友だち */
+.tile-friend { position: absolute; left: -10px; bottom: -10px; width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 3px solid var(--line); display: grid; place-items: center; overflow: hidden; }
+.tile-friend svg { width: 120%; height: auto; margin-top: 4px; }
+.course-tile.locked .tile-friend { filter: saturate(0.7); }
+
+/* つぎの ごほうび */
+.upcoming { width: 100%; max-width: 640px; background: #fff; border: 3px solid var(--line); border-radius: 20px; padding: 8px 14px 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: calc(8px + var(--safe-b)); }
+.upcoming h3 { margin: 0; font-size: 15px; opacity: 0.75; }
+.up-row { display: flex; align-items: center; gap: 12px; }
+.up-row p { margin: 0; font-size: 15px; font-weight: 700; line-height: 1.35; min-width: 0; }
+.up-row b { font-size: 1.3em; color: #c2553f; }
+.up-row strong { font-size: 1.1em; }
+.up-icon { flex: 0 0 auto; width: 56px; height: 56px; display: grid; place-items: center; }
+.up-icon svg { width: 100%; height: 100%; }
+.up-row.friend .up-icon { border-radius: 50%; background: #fff6e8; border: 3px solid var(--line); overflow: hidden; }
+.up-row.friend .up-icon svg { width: 120%; height: auto; margin-top: 6px; }
+.up-dots { display: flex; gap: 5px; margin-top: 5px; }
+.up-dots i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); background: #fff; }
+.up-dots i.on { background: #ffd45c; }
+.up-bar { display: block; height: 10px; border-radius: 6px; border: 2px solid var(--line); background: #fff; margin-top: 5px; overflow: hidden; max-width: 220px; }
+.up-bar i { display: block; height: 100%; background: #ffd45c; }
+.upcoming.compact { border: none; padding: 0; margin: 0; background: transparent; align-items: center; }
+.upcoming.compact .up-row { background: #fff6e8; border-radius: 16px; padding: 6px 12px; }
+.upcoming.compact .up-icon { width: 46px; height: 46px; }
+.upcoming.compact p { font-size: 14px; }
+@media (orientation: landscape) and (max-height: 600px) {
+  .upcoming { flex-direction: row; flex-wrap: wrap; padding: 6px 10px; gap: 6px 16px; }
+  .upcoming h3 { display: none; }
+  .up-icon { width: 44px; height: 44px; }
+  .up-row p { font-size: 13px; }
+}
+@media (min-width: 700px) and (min-height: 700px) {
+  .upcoming { max-width: min(900px, 92vw); padding: 12px 20px 14px; }
+  .upcoming h3 { font-size: 18px; }
+  .up-icon { width: 72px; height: 72px; }
+  .up-row p { font-size: 19px; }
+  .tile-friend { width: 54px; height: 54px; }
+}
+/* 3人のときは、顔の下に1行で */
+.find-msg.below { flex-basis: 100%; text-align: center; }
+/* コースを えらぶ：つぎの ごほうびの場所を あけるため、スマホでも5列 */
+.course-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; align-content: center; }
+.course-tile { min-height: 0; border-radius: 18px; border-width: 3px; }
+.course-tile .num { font-size: clamp(22px, 6vw, 42px); }
+.course-tile .mark { width: clamp(14px, 4vw, 24px); height: clamp(14px, 4vw, 24px); }
+.course-tile .badge { width: clamp(24px, 7vw, 40px); height: clamp(24px, 7vw, 40px); top: -9px; right: -9px; }
+.tile-friend { width: clamp(28px, 8vw, 40px); height: clamp(28px, 8vw, 40px); left: -8px; bottom: -8px; }
+/* iPhone 横向き：高さが足りないので、タイルは正方形にせず低くする */
+@media (orientation: landscape) and (max-height: 600px) {
+  .course-grid { max-width: 620px; gap: 8px; flex: 0 1 auto; }
+  .course-tile { aspect-ratio: auto; height: clamp(52px, 19vh, 84px); flex-direction: row; gap: 6px; }
+  .course-tile .num { font-size: clamp(20px, 6vh, 30px); }
+}
+/* iPad：つぎの ごほうびも大きく */
+@media (min-width: 700px) and (min-height: 700px) {
+  .upcoming .up-icon { width: 72px; height: 72px; }
+  .upcoming .up-row p { font-size: 19px; }
+  .upcoming h3 { font-size: 18px; }
+}
+/* iPhone 横向き：つぎの ごほうびは 横1列にして、高さを使わない */
+@media (orientation: landscape) and (max-height: 600px) {
+  .upcoming { flex-wrap: nowrap; padding: 5px 10px; gap: 12px; margin-bottom: calc(4px + var(--safe-b)); max-width: min(900px, 100%); }
+  .upcoming .up-row { flex: 1 1 0; min-width: 0; gap: 6px; }
+  .upcoming .up-icon { width: 36px; height: 36px; }
+  .upcoming .up-row.friend .up-icon { border-width: 2px; }
+  .upcoming .up-row p { font-size: 11.5px; line-height: 1.3; }
+  .upcoming .up-row p br { display: none; }
+  .up-dots { margin-top: 2px; gap: 3px; }
+  .up-dots i { width: 9px; height: 9px; border-width: 1.5px; }
+  .up-bar { height: 6px; margin-top: 3px; border-width: 1.5px; }
+  .course-tile { height: clamp(48px, 18vh, 80px); }
+}

@@ -43,6 +43,7 @@ import { $, btn, prefersReducedMotion, toScene } from './dom';
 import { renderScene, sceneThumb } from './sceneView';
 import { ParentArea } from './parent';
 import { NATIVE } from './platform';
+import { type UpcomingReward, friendAtCourse, upcomingRewards } from '../core/rewards';
 
 
 type Screen =
@@ -268,12 +269,44 @@ export class App {
         ? `<span class="tile-pips" aria-hidden="true">${'<i class="on"></i>'.repeat(p.finds)}${'<i></i>'.repeat(FINDS_PER_COURSE - p.finds)}</span>`
         : '';
       const badge = cleared ? `<span class="badge">${ICONS.star}</span>` : open ? '' : `<span class="badge">${ICONS.lock}</span>`;
-      return `<button type="button" class="course-tile${cleared ? ' cleared' : ''}${open ? '' : ' locked'}${c.no === next && !cleared ? ' next' : ''}" data-action="pickCourse" data-course="${c.no}" aria-label="${label}" ${open ? '' : 'disabled'}${c.no === next ? ' data-autofocus' : ''}><span class="num">${c.no}</span>${badge}${courseMark(c.no)}${pips}</button>`;
+      const fc = cleared ? null : friendAtCourse(c.no, this.can);
+      const friendMark = fc ? `<span class="tile-friend" aria-hidden="true">${faceIcon(CHARACTERS[fc])}</span>` : '';
+      return `<button type="button" class="course-tile${cleared ? ' cleared' : ''}${open ? '' : ' locked'}${c.no === next && !cleared ? ' next' : ''}" data-action="pickCourse" data-course="${c.no}" aria-label="${label}" ${open ? '' : 'disabled'}${c.no === next ? ' data-autofocus' : ''}><span class="num">${c.no}</span>${badge}${friendMark}${courseMark(c.no)}${pips}</button>`;
     }).join('');
     return `<main class="screen setup course-select" data-screen="courseSelect">
       <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>コースを えらぶ</h2><span></span></header>
       <div class="course-grid">${tiles}</div>
+      ${this.upcomingHtml()}
     </main>`;
+  }
+
+  /** つぎの ごほうび（あと なんコースで だれが なかまに／どのシール）。コースを えらぶ画面の下に出す */
+  private upcomingHtml(compact = false): string {
+    const d = this.store.data;
+    const list = upcomingRewards({ cleared: d.course.cleared, totalFinds: d.collection.totalFinds, sceneFinds: d.collection.sceneFinds }, this.can);
+    const rows = (compact ? list.slice(0, 1) : list).map((r) => this.upcomingRow(r)).join('');
+    if (!rows) return '';
+    return compact
+      ? `<div class="upcoming compact" role="status">${rows}</div>`
+      : `<section class="upcoming" aria-label="つぎの ごほうび"><h3>つぎの ごほうび</h3>${rows}</section>`;
+  }
+
+  private upcomingRow(r: UpcomingReward): string {
+    const d = this.store.data;
+    const when = (n: number) => (n <= 1 ? 'つぎの コースを クリアすると' : `あと <b>${n}</b>コース クリアすると`);
+    // 前の目標から、つぎの目標までの まる（クリアするたびに 1つずつ うまる）
+    const dots = (from: number, to: number, now: number) =>
+      `<span class="up-dots" aria-hidden="true">${Array.from({ length: to - from }, (_, k) => `<i class="${from + k < now ? 'on' : ''}"></i>`).join('')}</span>`;
+    if (r.kind === 'friend') {
+      const prev = Math.max(0, ...FRIEND_UNLOCKS.filter((f) => f.course < r.at).map((f) => f.course));
+      return `<div class="up-row friend"><span class="up-icon">${faceIcon(CHARACTERS[r.char])}</span><p>${when(r.remaining)}<br><strong>${CHARACTERS[r.char].name}</strong>が なかまに なるよ！${dots(prev, r.at, d.course.cleared)}</p></div>`;
+    }
+    if (r.kind === 'courseSticker') {
+      return `<div class="up-row up-sticker"><span class="up-icon">${stickerSvg(r.sticker)}</span><p>${when(r.remaining)}<br>シール「${r.sticker.name}」が もらえるよ</p></div>`;
+    }
+    const prev = Math.max(0, ...visibleStickers(this.can).filter((s) => s.kind === 'finds' && s.need < r.at).map((s) => s.need));
+    const pct = Math.round(((r.done - prev) / (r.at - prev)) * 100);
+    return `<div class="up-row up-sticker"><span class="up-icon">${stickerSvg(r.sticker)}</span><p>あと <b>${r.remaining}</b>かい みつけると<br>シール「${r.sticker.name}」が もらえるよ<span class="up-bar" aria-hidden="true"><i style="width:${pct}%"></i></span></p></div>`;
   }
 
   /** コース中の進み具合（10この まる） */
@@ -340,7 +373,7 @@ export class App {
     return `<main class="screen play" data-screen="play" data-origin="${s.origin}">
       <div class="bar">
         ${btn('home', ICONS.home, 'おしまい', 'round')}
-        <div class="targets" role="status" aria-label="さがす こ">${targets}</div>
+        <div class="targets" role="status" aria-label="さがす こ">${targets}<span class="find-msg${s.placements.length >= 3 ? ' below' : ''}">${done ? 'みーつけた！' : s.placements.length >= 3 ? 'を みつけてね' : 'を<br>みつけてね'}</span></div>
         ${btn('hint', ICONS.hint, 'ヒント', 'round hint-btn', done ? 'disabled' : '')}
       </div>
       ${s.origin === 'course' ? this.courseProgressHtml() : s.origin === 'trial' ? this.trialProgressHtml() : ''}
@@ -389,7 +422,7 @@ export class App {
           <div class="medal" aria-hidden="true">${ICONS.star}<span>${this.courseNo}</span></div>
           <p class="clear-title">コース${this.courseNo} クリア！</p>
           ${this.courseRewardHtml()}
-          ${last ? '<p class="clear-sub">ぜんぶの コースを クリアしたよ</p>' : ''}
+          ${last ? '<p class="clear-sub">ぜんぶの コースを クリアしたよ</p>' : this.upcomingHtml(true)}
           <div class="clear-actions two">
             ${last ? btn('toCourse', ICONS.course, 'コースを えらぶ', 'equal', 'data-autofocus') : btn('nextCourse', ICONS.next, 'つぎの コース', 'equal primary', 'data-autofocus')}
             ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
@@ -1143,6 +1176,8 @@ export class App {
     });
     const hb = this.root.querySelector<HTMLButtonElement>('[data-action="hint"]');
     if (hb) hb.disabled = isComplete(s);
+    const fm = this.root.querySelector<HTMLElement>('.find-msg');
+    if (fm && isComplete(s)) fm.textContent = 'みーつけた！';
     const cp = this.root.querySelector<HTMLElement>('.course-progress');
     if (cp && s.origin === 'course') cp.outerHTML = this.courseProgressHtml();
     if (cp && s.origin === 'trial') cp.outerHTML = this.trialProgressHtml();
