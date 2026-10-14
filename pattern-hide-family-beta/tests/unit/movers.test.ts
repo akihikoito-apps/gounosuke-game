@@ -17,6 +17,10 @@ const SIZE: Record<MoverKind, { w: number; h: number }> = {
   squirrel: { w: 110, h: 75 },
   owl: { w: 90, h: 65 },
   'falling-leaf': { w: 56, h: 48 },
+  'tropical-fish': { w: 96, h: 56 },
+  jellyfish: { w: 72, h: 80 },
+  penguin: { w: 84, h: 86 },
+  bubble: { w: 56, h: 60 },
 };
 
 describe('うごくもの', () => {

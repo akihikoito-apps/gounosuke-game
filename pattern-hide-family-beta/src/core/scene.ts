@@ -2,7 +2,7 @@ import type { Shape } from './geometry';
 import type { PatternKind, PatternSpec } from './patterns';
 import type { Prop } from './props';
 
-export type SceneId = 'room' | 'garden' | 'shop' | 'beach' | 'forest';
+export type SceneId = 'room' | 'garden' | 'shop' | 'beach' | 'forest' | 'aquarium';
 
 export interface CostumeDef {
   id: string;

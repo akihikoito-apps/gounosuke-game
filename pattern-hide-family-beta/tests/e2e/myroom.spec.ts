@@ -28,14 +28,14 @@ async function seed(page: import('@playwright/test').Page, cleared: number, myro
 
 const saved = (page: import('@playwright/test').Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).myroom, KEY);
 
-test('はじめて開くと リビングに ソファ・テーブル・ラグ と ころ。コース0では リビングと ひみつきち', async ({ page }) => {
+test('はじめて開くと リビングに ソファ・テーブル・ラグ と ころ。コース0では リビングと ひみつきち・すいぞくかんの へや', async ({ page }) => {
   await fresh(page);
   await seed(page, 0);
   await act(page, 'toMyRoom');
   await expect(page.locator('[data-screen="myroom"]')).toBeVisible();
   await expect(page.locator('#stage.loading')).toHaveCount(0);
   await expect(page.locator('.mr-obj')).toHaveCount(4);
-  await expect(page.locator('.mr-room-tab')).toHaveCount(2);
+  await expect(page.locator('.mr-room-tab')).toHaveCount(3);
   const m = await saved(page);
   expect(m.layouts.living.map((p: { ref: string }) => p.ref).sort()).toEqual(['char:koro', 'item:rug', 'item:sofa', 'item:table']);
   await page.screenshot({ path: `${SHOTS}/start.png` });
@@ -51,8 +51,8 @@ test('棚の友だちをタップすると置け、もう一度タップで し�
   await page.locator('[data-mr-ref="char:mimi"]').click();
   await expect(page.locator('.mr-obj.mr-char')).toHaveCount(1);
   await page.locator('[data-mr-tab="items"]').click();
-  // はじめから3つ＋キャンプテント1つ＋コース1〜4のシール4つ＋10・30かい の2つ
-  await expect(page.locator('.mr-cell')).toHaveCount(10);
+  // はじめから3つ＋キャンプテント1つ＋かいがらのソファ1つ＋コース1〜4のシール4つ＋10・30かい の2つ
+  await expect(page.locator('.mr-cell')).toHaveCount(11);
   await expect(page.locator('[data-mr-ref="item:bed"]')).toHaveCount(1);
   await expect(page.locator('[data-mr-ref="item:swing"]')).toHaveCount(0);
 });
@@ -106,7 +106,7 @@ test('コース3で しんしつ、無料の範囲は2部屋まで。コース6�
   await fresh(page);
   await seed(page, 3);
   await act(page, 'toMyRoom');
-  await expect(page.locator('.mr-room-tab')).toHaveCount(3);
+  await expect(page.locator('.mr-room-tab')).toHaveCount(4);
   await page.locator('[data-mr-room="bedroom"]').click();
   await expect(page.locator('.mr-room-tab.on')).toHaveText('しんしつ');
   await page.locator('[data-mr-tab="items"]').click();
@@ -117,7 +117,7 @@ test('コース3で しんしつ、無料の範囲は2部屋まで。コース6�
   await page.screenshot({ path: `${SHOTS}/bedroom.png` });
   await seed(page, 9);
   await act(page, 'toMyRoom');
-  await expect(page.locator('.mr-room-tab')).toHaveCount(4);
+  await expect(page.locator('.mr-room-tab')).toHaveCount(5);
   await page.locator('[data-mr-room="yard"]').click();
   await page.locator('[data-mr-tab="items"]').click();
   await page.locator('[data-mr-ref="item:swing"]').click();

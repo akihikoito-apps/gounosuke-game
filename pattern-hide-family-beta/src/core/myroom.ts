@@ -7,7 +7,7 @@ import type { CharacterId } from './characters';
 import { STICKERS, hasSticker } from './stickers';
 import type { SceneId } from './scene';
 
-export type RoomId = 'living' | 'bedroom' | 'yard' | 'treehouse';
+export type RoomId = 'living' | 'bedroom' | 'yard' | 'treehouse' | 'aquarium-room';
 export type Motion = 'walk' | 'swing' | 'bob' | 'sway' | 'roll' | 'swim';
 
 export interface RoomDef {
@@ -30,6 +30,7 @@ export const ROOMS: RoomDef[] = [
   { id: 'bedroom', name: 'しんしつ', needCleared: 3, content: 'room:bedroom', floorTop: 580, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'yard', name: 'おにわ', needCleared: 6, content: 'room:yard', floorTop: 540, scaleBack: 0.95, scaleFront: 1.45 },
   { id: 'treehouse', name: 'ひみつきち', needCleared: 0, content: 'room:treehouse', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
+  { id: 'aquarium-room', name: 'すいぞくかんの へや', needCleared: 0, content: 'room:aquarium-room', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
 ];
 
 export interface Seat {
@@ -88,6 +89,13 @@ export const ITEMS: ItemDef[] = [
   { id: 'mushroom-table', name: 'きのこの つくえ', sticker: 'f-s15', w: 170 },
   { id: 'campfire-pot', name: 'たきびの なべ', sticker: 'f-s30', w: 140, motion: 'sway' },
   { id: 'squirrel', name: 'りす', sticker: 'f-s50', w: 110, motion: 'walk' },
+  // すいぞくかんパック
+  { id: 'shell-sofa', name: 'かいがらの ソファ', sticker: null, content: 'scene:aquarium', w: 280, seats: [{ x: -58, y: -60 }, { x: 58, y: -60 }] },
+  { id: 'coral-rug', name: 'さんごの ラグ', sticker: 'a-s1', w: 290, flat: true },
+  { id: 'jelly-lamp', name: 'くらげの ランプ', sticker: 'a-s5', w: 96, motion: 'bob' },
+  { id: 'dolphin-ride', name: 'イルカの のりもの', sticker: 'a-s15', w: 180, seats: [{ x: 0, y: -64 }], motion: 'sway' },
+  { id: 'treasure-box', name: 'たからばこ', sticker: 'a-s30', w: 130 },
+  { id: 'penguin', name: 'ペンギン', sticker: 'a-s50', w: 100, motion: 'walk' },
 ];
 
 export const ITEM_BY_ID: Record<string, ItemDef> = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
@@ -146,6 +154,7 @@ export function starterLayout(room: RoomId): Placed[] {
   if (room === 'living') return [{ ref: 'item:rug', x: 520, y: 900 }, { ref: 'item:sofa', x: 470, y: 690 }, { ref: 'item:table', x: 520, y: 900 }, { ref: 'char:koro', x: 830, y: 960 }];
   if (room === 'bedroom') return [{ ref: 'item:rug', x: 500, y: 900 }];
   if (room === 'treehouse') return [{ ref: 'item:camp-tent', x: 260, y: 720 }, { ref: 'char:koro', x: 640, y: 880 }];
+  if (room === 'aquarium-room') return [{ ref: 'item:shell-sofa', x: 280, y: 720 }, { ref: 'char:koro', x: 640, y: 880 }];
   return [];
 }
 

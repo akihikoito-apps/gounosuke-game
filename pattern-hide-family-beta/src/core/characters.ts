@@ -2,7 +2,7 @@
 // ローカル座標：足もと中央が原点、上が -y。高さ約200。
 import { type Pt, type Shape, quadPoints, shapeToSvg } from './geometry';
 
-export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'choki' | 'pino';
+export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'choki' | 'pino' | 'puka';
 import type { SceneId } from './scene';
 
 export interface CharacterDef {
@@ -141,9 +141,23 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     ],
     facePoints: FACE,
   },
+  // 背景パック3「すいぞくかん」の友だち。すいぞくかんで初めて誰かを見つけると仲間になる
+  puka: {
+    id: 'puka',
+    name: 'ぷか',
+    personality: 'のんびりやで およぐのが だいすき。ほっぺの よこの ひらひらヒレ が めじるし。',
+    skin: '#E8C6DC',
+    silhouette: [
+      BODY,
+      HEAD,
+      rotEllipse(-52, -152, 18, 12, -15, -46, -152),
+      rotEllipse(52, -152, 18, 12, 15, 46, -152),
+    ],
+    facePoints: FACE,
+  },
 };
 
-export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'choki', 'pino'];
+export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'choki', 'pino', 'puka'];
 /** 最初からいる3体 */
 export const BASE_CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
 /** 新しい友だちが仲間になるコース（このコースをクリアしたら）。最初のクリアで1体目が来る */
@@ -156,6 +170,7 @@ export const FRIEND_UNLOCKS: { course: number; char: CharacterId }[] = [
 export const SCENE_FRIENDS: { scene: SceneId; char: CharacterId }[] = [
   { scene: 'beach', char: 'choki' },
   { scene: 'forest', char: 'pino' },
+  { scene: 'aquarium', char: 'puka' },
 ];
 
 /** いま遊べるキャラクター（コースの進み具合と、背景パックで見つけた回数で増える） */
@@ -251,6 +266,22 @@ function headMarkup(c: CharacterDef): string {
         cheeks() +
         `<ellipse cx="0" cy="-133" rx="4" ry="3" fill="#9E7356"/>` +
         `<path d="M-8 -125 Q0 -118 8 -125" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
+      );
+    }
+    case 'puka': {
+      // ほっぺの横にひらひらと広がった耳ヒレ
+      const fin = (sx: number) =>
+        `<g transform="rotate(${15 * sx} ${46 * sx} -152)">` +
+        `<ellipse cx="${52 * sx}" cy="-152" rx="18" ry="12" fill="${c.skin}" ${st}/>` +
+        `<ellipse cx="${53 * sx}" cy="-152" rx="10" ry="6" fill="#F7DCE8"/>` +
+        `</g>`;
+      return (
+        fin(-1) +
+        fin(1) +
+        `<ellipse cx="0" cy="-142" rx="48" ry="45" fill="${c.skin}" ${st}/>` +
+        eyes() +
+        cheeks() +
+        `<path d="M-7 -125 Q0 -118 7 -125" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
       );
     }
     case 'popo': {

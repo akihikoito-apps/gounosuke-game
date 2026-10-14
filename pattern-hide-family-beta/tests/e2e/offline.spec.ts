@@ -50,7 +50,7 @@ test.describe('offline', () => {
     await page.goto('http://127.0.0.1:4173/');
     await expect(page.locator('[data-screen="title"]')).toBeVisible();
     await act(page, 'toSearch');
-    await expect(page.locator('.scene-card')).toHaveCount(5); // へや・にわ・みせ・うみべ・きのこの もり
+    await expect(page.locator('.scene-card')).toHaveCount(6); // へや・にわ・みせ・うみべ・きのこの もり・すいぞくかん
     await ctx.close();
   });
 });

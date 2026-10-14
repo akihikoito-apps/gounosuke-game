@@ -11,6 +11,7 @@ const owns = (...packs: PackId[]): CanPlay => (id: ContentId) => {
 const baseOnly = owns();
 const withBeach = owns('beach');
 const withForest = owns('forest');
+const withAquarium = owns('aquarium');
 const withMore = owns('more-courses');
 
 describe('access by pack', () => {
@@ -22,7 +23,7 @@ describe('access by pack', () => {
     expect(availableCharacters(5, {}, baseOnly)).toEqual(['koro', 'mimi', 'moko', 'nyako', 'popo']);
   });
 
-  it('choki and pino need their scene pack even if old save data says the scene was played', () => {
+  it('choki, pino, and puka need their scene pack even if old save data says the scene was played', () => {
     expect(availableCharacters(10, { beach: 30 }, baseOnly)).not.toContain('choki');
     expect(availableCharacters(10, { beach: 30 }, withMore)).not.toContain('choki');
     expect(availableCharacters(0, {}, withBeach)).not.toContain('choki'); // パックがあっても、うみべで見つけるまでは
@@ -30,6 +31,9 @@ describe('access by pack', () => {
     expect(availableCharacters(10, { forest: 50 }, baseOnly)).not.toContain('pino');
     expect(availableCharacters(0, {}, withForest)).not.toContain('pino');
     expect(availableCharacters(0, { forest: 1 }, withForest)).toContain('pino');
+    expect(availableCharacters(10, { aquarium: 50 }, baseOnly)).not.toContain('puka');
+    expect(availableCharacters(0, {}, withAquarium)).not.toContain('puka');
+    expect(availableCharacters(0, { aquarium: 1 }, withAquarium)).toContain('puka');
   });
 
   it('resume is refused for a scene or a friend you cannot play', () => {
@@ -38,9 +42,12 @@ describe('access by pack', () => {
     expect(canResume({ sceneId: 'room', placements: [pl('choki', 'room-plant')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'forest', placements: [pl('koro', 'forest-tent-1')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('pino', 'room-plant')] }, baseOnly)).toBe(false);
+    expect(canResume({ sceneId: 'aquarium', placements: [pl('koro', 'aquarium-tank-1')] }, baseOnly)).toBe(false);
+    expect(canResume({ sceneId: 'room', placements: [pl('puka', 'room-plant')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('koro', 'room-plant')] }, baseOnly)).toBe(true);
     expect(canResume({ sceneId: 'beach', placements: [pl('choki', 'beach-hut-1')] }, withBeach)).toBe(true);
     expect(canResume({ sceneId: 'forest', placements: [pl('pino', 'forest-tent-1')] }, withForest)).toBe(true);
+    expect(canResume({ sceneId: 'aquarium', placements: [pl('puka', 'aquarium-tank-1')] }, withAquarium)).toBe(true);
   });
 
   it('the sticker book only shows stickers of packs you have', () => {
@@ -48,8 +55,10 @@ describe('access by pack', () => {
     expect(ids(baseOnly)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150']);
     expect(ids(withBeach)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'b1', 'b10', 'b30']);
     expect(ids(withForest)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'f-s1', 'f-s5', 'f-s15', 'f-s30', 'f-s50']);
+    expect(ids(withAquarium)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'a-s1', 'a-s5', 'a-s15', 'a-s30', 'a-s50']);
     expect(ids(owns('beach', 'more-courses'))).toHaveLength(18);
     expect(ids(owns('beach', 'forest', 'more-courses'))).toHaveLength(23);
+    expect(ids(owns('beach', 'forest', 'aquarium', 'more-courses'))).toHaveLength(28);
   });
 
   it('every pack is reachable and every paid pack has something to play', () => {
