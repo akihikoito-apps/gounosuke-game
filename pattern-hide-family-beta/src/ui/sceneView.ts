@@ -24,6 +24,8 @@ export interface SceneRenderOpts {
   hint?: HintInfo | null;
   compact?: boolean;
   title?: string;
+  /** うごくもの（コース）。back は友だちの後ろ、front は前 */
+  movers?: { back: string; front: string };
 }
 
 export function scenePatternId(prefix: string, scene: SceneDef, costume: string): string {
@@ -161,8 +163,10 @@ export function renderScene(scene: SceneDef, o: SceneRenderOpts): string {
     `<svg class="scene-svg${o.compact ? ' compact' : ''}" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${o.title ?? scene.name}">` +
     `<defs>${scenePatternDefs(P, scene)}</defs>` +
     `<g class="bg" id="${P}bg">${backgroundMarkup(P, scene)}</g>` +
+    (o.movers?.back ? `<g class="movers back">${o.movers.back}</g>` : '') +
     `<g class="chars">${chars}</g>` +
     `<g class="props">${props}</g>` +
+    (o.movers?.front ? `<g class="movers front">${o.movers.front}</g>` : '') +
     `<g class="fx">${fx}</g>` +
     `<g class="edit-layer">${cand}${sel}</g>` +
     `<g class="hint-layer">${hintMarkup(scene, placements, o.hint)}</g>` +

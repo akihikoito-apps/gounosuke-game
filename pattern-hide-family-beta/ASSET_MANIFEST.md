@@ -43,6 +43,7 @@
 | `art/stickers/`（シール15枚 SVG） | Codex がSVGをコードで記述（c5 はぽぽ用に描き直し） | 2026-10-08 | validate:art 合格 |
 | `art/scenes/beach/`・`art/patterns/beach-*`・`art/characters/choki/`・`art/stickers/b*`（背景パック1 うみべ） | Codex がSVGをコードで記述。画像生成・ネット画像は不使用 | 2026-10-08 | validate:art 合格（9か所×6体）、総合レビュー済み |
 | `art/app/`（アプリのアイコン 1024・起動画面 2732 の SVG）→ `native/make-icons.mjs` で RGB の PNG に変換 | Codex がSVGをコードで記述。画像生成・ネット画像は不使用。文字なし | 2026-10-08 | validate:art 合格、PNG はアルファなし（App Store の条件）を確認 |
+| `art/movers/`（コースの うごくもの 9枚）・`art/myroom/`（じぶんの へや の もの 23枚・部屋 3枚） | Codex がSVGをコードで記述。画像生成・ネット画像は不使用。文字なし | 2026-10-15 | validate:art 合格（枠・名前・安全性）、画面で大きさを確認 |
 `art-guides/` は形状データから自動生成した下書きガイドで、ゲームには含まれません。
 
 ## 外部の画像生成について

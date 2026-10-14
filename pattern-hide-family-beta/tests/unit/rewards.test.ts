@@ -8,10 +8,11 @@ const baseOnly = (id: ContentId) => PACKS.find((p) => p.id === 'base')!.contents
 describe('つぎの ごほうび', () => {
   it('はじめは「コース1で にゃこ」「コース1のシール」「10かいのシール」', () => {
     const r = upcomingRewards({ cleared: 0, totalFinds: 0 }, all);
-    expect(r.map((x) => x.kind)).toEqual(['friend', 'courseSticker', 'findsSticker']);
+    expect(r.map((x) => x.kind)).toEqual(['friend', 'courseSticker', 'findsSticker', 'room']);
     expect(r[0]).toMatchObject({ char: 'nyako', at: 1, remaining: 1 });
     expect(r[1]).toMatchObject({ at: 1, remaining: 1 });
     expect(r[2]).toMatchObject({ at: 10, remaining: 10, done: 0 });
+    expect(r[3]).toMatchObject({ at: 3, remaining: 3 }); // しんしつ
   });
 
   it('クリアするたびに「あと なんコース」が減っていく', () => {
@@ -24,6 +25,11 @@ describe('つぎの ごほうび', () => {
     const r = upcomingRewards({ cleared: 5, totalFinds: 50 }, all);
     expect(r.some((x) => x.kind === 'friend')).toBe(false);
     expect(r.find((x) => x.kind === 'courseSticker')).toMatchObject({ at: 6 });
+  });
+
+  it('へや：コース3で しんしつ、追加パックが無ければ おにわ は告知しない', () => {
+    expect(upcomingRewards({ cleared: 3, totalFinds: 30 }, all).find((x) => x.kind === 'room')).toMatchObject({ at: 6, remaining: 3 });
+    expect(upcomingRewards({ cleared: 3, totalFinds: 30 }, baseOnly).some((x) => x.kind === 'room')).toBe(false);
   });
 
   it('ぜんぶ もらうと 何も出ない', () => {

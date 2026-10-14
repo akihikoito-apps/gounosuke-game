@@ -265,6 +265,24 @@ for (const f of list(join(ART, 'ui'))) {
   const px = await pixels(f, 64, 64);
   (px.nw <= 2000 && px.nh <= 2000 ? ok : ng)(f, `寸法 ${px.nw}×${px.nh}`);
 }
+
+// ---- うごくもの（コース）・じぶんの へや。SVG だけ。枠をそろえる（足もと中央が 0,0）
+const viewBoxOf = (f) => (readFileSync(f, 'utf8').match(/viewBox\s*=\s*["']([^"']+)["']/) ?? [])[1]?.trim().split(/[\s,]+/).map(Number).join(' ');
+for (const [dir, want, re] of [
+  ['movers', '-150 -300 300 300', /^[a-z0-9-]+\.svg$/],
+  ['myroom/items', '-150 -300 300 300', /^[a-z0-9-]+\.svg$/],
+  ['myroom/rooms', '0 0 1000 1000', /^(living|bedroom|yard)\.svg$/],
+]) {
+  for (const f of list(join(ART, dir))) {
+    if (!re.test(basename(f))) {
+      ng(f, `ファイル名か形式が決まりと違う（${dir}：小文字の英数字.svg）`);
+      continue;
+    }
+    const vb = viewBoxOf(f);
+    (vb === want ? ok : ng)(f, vb === want ? `枠 ${want}` : `viewBox が ${vb ?? 'なし'}（決まり：${want}）`);
+    if (/<animate|<set\b|@keyframes|animation\s*:/i.test(readFileSync(f, 'utf8'))) ng(f, 'SVG の中で動かさない（動きはゲームがつける）');
+  }
+}
 await browser.close();
 
 const fails = results.filter((r) => !r.ok);

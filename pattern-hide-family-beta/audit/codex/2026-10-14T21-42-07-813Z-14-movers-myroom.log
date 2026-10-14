@@ -1,0 +1,1854 @@
+job: codex-jobs/14-movers-myroom.md
+exit: 0
+minutes: 6.2
+changed (47): art-guides/ART_CHECK.md, art/README.md, src/entitlements/entitlements.ts, src/storage/schema.ts, src/ui/app.ts, src/ui/parent.ts, src/ui/sceneView.ts, src/ui/styles.css, art/movers/balloon.svg, art/movers/bird.svg, art/movers/butterfly.svg, art/movers/cat.svg, art/movers/cloud.svg, art/movers/crab.svg, art/movers/puppy.svg, art/movers/sailboat.svg, art/movers/seagull.svg, art/myroom/items/ball.svg, art/myroom/items/balloon.svg, art/myroom/items/beachball.svg, art/myroom/items/bed.svg, art/myroom/items/breadbasket.svg, art/myroom/items/cake.svg, art/myroom/items/cushion.svg, art/myroom/items/fishtank-fish.svg, art/myroom/items/fishtank.svg, art/myroom/items/floatring.svg, art/myroom/items/flowerpot.svg, art/myroom/items/heartcushion.svg, art/myroom/items/moonlamp.svg, art/myroom/items/plant.svg, art/myroom/items/present.svg, art/myroom/items/puppy.svg, art/myroom/items/rug.svg, art/myroom/items/shell.svg, art/myroom/items/sofa.svg, art/myroom/items/starmobile.svg, art/myroom/items/swing-seat.svg, art/myroom/items/swing.svg, art/myroom/items/table.svg, art/myroom/rooms/bedroom.svg, art/myroom/rooms/living.svg, art/myroom/rooms/yard.svg, src/core/movers.ts, src/ui/moverView.ts, tests/e2e/movers.spec.ts, tests/unit/movers.test.ts
+outside allowed paths (10): src/entitlements/entitlements.ts, src/storage/schema.ts, src/ui/app.ts, src/ui/parent.ts, src/ui/sceneView.ts, src/ui/styles.css, src/core/movers.ts, src/ui/moverView.ts, tests/e2e/movers.spec.ts, tests/unit/movers.test.ts
+
+----- codex output -----
+OpenAI Codex v0.154.0
+--------
+workdir: C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+reasoning summaries: none
+session id: 01a13c5d-93b8-7be2-9aff-5c19058e6914
+--------
+user
+Read the file codex-jobs/14-movers-myroom.md and AGENTS.md in this folder, then carry out the job exactly as described. Only write inside the allowed paths listed there.
+codex
+指定されたジョブと AGENTS.md を読み、作業範囲と検査手順を確認してから進めます。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 AGENTS.md
+Get-Content -Encoding UTF8 codex-jobs/14-movers-myroom.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 222ms:
+# Codex 向けの決まり（このフォルダ）
+
+このフォルダは幼児向けゲーム「もようのかくれんぼ（仮）」のWebベータです。Claude Code が司令塔で、Codex は **絵の制作** と **独立レビュー** を担当します。
+
+## 書き込んでよい場所
+- 絵の制作ジョブ：`art/` の中だけ
+- レビュージョブ：`audit/codex/` の中だけ（レポートを書く）
+- それ以外（`src/`, `tests/`, `scripts/`, 設定、文書）は **変更しない**。直したほうがよい点は、レポートや `art/README.md` に提案として書く
+
+## 必ず守ること
+- ジョブファイル（`codex-jobs/*.md`）の指示と、`ART_SLOTS.md`・`CODEX_ART_BRIEF.md` の決まりに従う
+- 絵を作ったら `npm run validate:art` を実行し、合格するまで直す。結果は `art-guides/ART_CHECK.md` に出る
+- 既存の作品（キャラクター・ロゴ・画面・音）をまねない／取り込まない。ネット上の画像を使わない。文字を絵に入れない
+- 子どもの個人情報・外部通信・広告・課金に関わるものを追加しない
+- 追加料金が発生する手段（別料金の API キー、有料サービス）を使わない。利用上限に達したら、そこで止めて報告する
+- git の commit / push はしない（Claude Code が確認してから行う）
+- 最後に、やったこと・使った方法（SVGをコードで書いた／画像生成を使った 等）・検査結果・できなかったことを、ジョブファイルの指定場所に書く
+
+## サンドボックスでの注意（2026-10-07 追記）
+- `art-guides/ART_CHECK.md` は `npm run validate:art` が自動で書き換える。これは許可済みなので、書き込み先を変える工夫は不要
+- 検査・ビルドの道具（node_modules、scripts、環境変数 NODE_OPTIONS など）を差し替えたり、上書きしたりする回り道はしない。サンドボックスで動かないコマンドがあれば、無理をせず、その旨を作業記録に書いて終える（検査は Claude Code が外でも実行する）
+- 作業用の一時ファイル（ビルドの出力など）を `art/` に残さない
+- Windows の PowerShell では `npm` / `npx` が実行ポリシーで止まる。代わりに `npm.cmd run validate:art`、`npm.cmd run build` を使う（設定は変えない）
+- PowerShell でファイルを読むときは `Get-Content -Encoding UTF8` を使う（指定しないと日本語が文字化けする）
+
+## 本部（_hq）との約束
+- 作業の区切りで必ず STATUS.md（リポジトリ直下）を更新すること。「状態・今やっていること・次の一手・ブロッカー・最終更新」の各行を書き換える。
+# ジョブ14：うごくもの と じぶんの へや の絵
+
+## 書き込んでよい場所
+`art/movers/`、`art/myroom/`、`art/README.md` だけ
+
+## 読むもの
+AGENTS.md / CODEX_ART_BRIEF.md の「絵の方向性」/ `art/characters/`（画風・線の太さ・色）/ `art/scenes/`（背景の雰囲気）/ `art/stickers/`（シールの絵：ここで出した もの と形をそろえる）/ `src/core/myroom.ts`（もの の一覧・座る位置・大きさ）
+
+## 背景
+ご本人（持ち主）の要望が2つ。
+1. **コースがだんだん難しくなるように、背景に「うごくもの」を出す**（鳥・雲・子犬など。コース2で1つ、後半は4〜5つ）。ときどき友だちの前を一瞬だけ通る。動きはゲームがつける（左右に移動・ゆらゆら等）ので、絵は1枚の止まった絵でよい。
+2. **新しい遊び「じぶんの へや」**：仲間にした友だちと、シールでもらった家具・おもちゃを、部屋の好きな場所に置いて遊ぶ（おままごと）。ソファやベッドやブランコには友だちを座らせられる。
+
+幼い子と親が「かわいい、品がいい」と感じる、今の絵と同じ画風で。**文字は入れない**。既存の有名キャラクターに似せない。
+
+## 共通の決まり
+- すべて SVG。スクリプト・外部参照・文字・`<animate>`・CSS アニメーションは使わない
+- 線の色 #4A3A40、太さは友だちの絵とそろえる。くすみパステル
+- **もの・うごくもの の枠は全部同じ**：`viewBox="-150 -300 300 300"`。**足もと中央（床に接する点）が (0, 0)**。友だちの絵と同じ大きさの単位（友だちは 高さ 約240・横幅 約150）
+- 背景は透明。影は足もとに薄い楕円を1つ描いてよい
+
+## 1. うごくもの `art/movers/{id}.svg`（9枚）
+| id | 中身 | 大きさのめやす（横幅） |
+|---|---|---|
+| bird | 小鳥（羽を広げて飛んでいる、横向き・右を向く） | 70 |
+| butterfly | ちょうちょ（正面〜ななめ） | 60 |
+| cloud | ふわふわの雲（白〜クリーム、線は薄く） | 240 |
+| cat | 歩いている ねこ（横向き・右を向く。友だちの にゃこ とは別の、ふつうの動物のねこ。色は茶トラ） | 130 |
+| puppy | 歩いている 子犬（横向き・右を向く、しっぽが上がる） | 120 |
+| balloon | ふうせん（ひも付き。足もと＝ひもの下の端） | 70 |
+| seagull | かもめ（羽を広げて飛ぶ、右を向く） | 90 |
+| sailboat | 小さなヨット（遠くに見える大きさ） | 110 |
+| crab | かに（横歩き、正面向き） | 90 |
+
+飛ぶもの（bird・butterfly・cloud・seagull・balloon・sailboat）は、ゲームが空中に置くので、足もとの影は描かない。
+
+## 2. じぶんの へや の もの `art/myroom/items/{id}.svg`
+`src/core/myroom.ts` の ITEMS と同じ id・同じ横幅のめやす（w）。**シールの絵に出てくる物（ボール・クッション・ケーキ など）と、形や色をそろえる**。
+| id | 中身 | 注意 |
+|---|---|---|
+| sofa | ソファ（正面から少し上から見た向き、ふたりがけ） | **座面の高さは y = −62、座る場所の中心は x = −62 と x = 62**。ここに友だちの足もとが来る。座面から上に友だちが重なるので、背もたれは座面より後ろに |
+| table | ローテーブル | |
+| rug | まるいラグ（床に敷く。横長の楕円で、ほぼ平ら。高さ 40 以内） | |
+| ball | ボール（シールの ころと ボール と同じ柄） | |
+| cushion | クッション | |
+| bed | ベッド（掛け布団つき、正面から少し上から） | 座る（ねころぶ）位置：x = −40・60、**高さ y = −70** |
+| flowerpot | はなの はちうえ | |
+| present | プレゼントの箱（リボン） | |
+| cake | ケーキ（シールの みみと ケーキ と同じ） | |
+| moonlamp | おつきさまの形のランプ | |
+| fishtank | すいそう（水と砂と水草。**魚は描かない**） | 魚は別ファイル |
+| fishtank-fish | すいそうの魚2ひきだけ（すいそうと同じ枠・同じ位置に重ねる。ほかは透明） | ゲームが左右にゆらす |
+| swing | ブランコの **わく（柱と上の横木）だけ** | 横木の中心は (0, −280) |
+| swing-seat | ブランコの **ロープと座る板だけ**（わくと同じ枠・同じ位置に重ねる） | ロープの上の端は (0, −280)、**板の上面は y = −62**、ゲームが (0, −280) を中心にゆらす |
+| puppy | `art/movers/puppy.svg` と同じ子犬（同じ絵でよい。ファイルを作らなければ movers のものを使う） | |
+| plant | うえき（大きめの葉） | |
+| breadbasket | パンの かご（シールの ころと パン とそろえる） | |
+| heartcushion | ハートの クッション | |
+| balloon | ふうせん（movers と同じでよい） | |
+| starmobile | ほしの メリー（台の上で星がつり下がる） | |
+| shell | かいがら | |
+| floatring | うきわ（横に寝かせた向き） | |
+| beachball | ビーチボール | |
+
+## 3. へや の背景 `art/myroom/rooms/{id}.svg`（3枚、`viewBox="0 0 1000 1000"`）
+**家具は描かない**（子どもが自分で置くため、からっぽの部屋）。壁・床・窓など。
+| id | 中身 | 床 |
+|---|---|---|
+| living | リビング：やさしい色の壁紙（無地か うすい柄）、大きな窓（外に空）、木の床 | **y = 560 から下が床**（ここに物を置く） |
+| bedroom | しんしつ：夜っぽすぎない、うすい青やラベンダーの壁、小さな窓に月、じゅうたんの床 | **y = 580 から下が床** |
+| yard | おにわ：空・遠くの木・柵、手前は芝生 | **y = 540 から下が芝生** |
+床の手前ほど明るく、奥（床の上端）は少し暗く。床の上端より上（壁・空）に物は置かれないので、上のほうに飾り（額・時計・雲）を描いてよい。
+
+## 合格条件
+- `npm.cmd run validate:art` がすべて合格（新しいフォルダは 枠・ファイル名・安全性を検査する）
+- 画面で並べたときに大きさがそろって見えること（ソファに友だちが座れる大きさ）
+
+## 最後に書くこと
+`art/README.md` の「作業記録」に：作ったファイル、使った方法、迷った点
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 CODEX_ART_BRIEF.md
+Get-Content -Encoding UTF8 ART_SLOTS.md
+Get-Content -Encoding UTF8 src/core/myroom.ts
+Get-Content -Encoding UTF8 art/README.md
+rg --files art/characters art/scenes art/stickers art/myroom art/movers
+rg --files -g AGENTS.md' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 328ms:
+# Codex への絵の制作依頼（CODEX_ART_BRIEF）
+
+> ご自宅PCで Codex に渡すための依頼文です。下の「Codex への指示」をそのまま貼り付けてください。
+
+## 事前準備（ご自宅PC）
+
+```bash
+git fetch origin
+git checkout claude/pattern-hide-family-beta
+git pull
+cd pattern-hide-family-beta
+npm ci
+npm run art:guides      # art-guides/ に下書きガイドができる
+```
+
+## Codex への指示（ここから貼り付け）
+
+あなたは、幼児向けかくれんぼゲーム「もようのかくれんぼ（仮）」の絵を作る担当です。
+作業フォルダは `pattern-hide-family-beta/` です。最初に `ART_SLOTS.md` と、この `CODEX_ART_BRIEF.md` を読んでください。
+
+### 守ること
+1. 書き込んでよいのは `pattern-hide-family-beta/art/` の中だけです。`src/` やテスト、設定ファイルは変更しないでください（別のAIが担当しています）。
+2. ファイル名・寸法・層の分け方は `ART_SLOTS.md` のとおりにしてください。描く位置は `art-guides/` のガイド画像に合わせてください。ガイドはゲームの当たり判定と同じ形から作られています。
+3. 描き終えたら `npm run validate:art` を実行し、**すべて合格するまで直してください**。結果は `art-guides/ART_CHECK.md` に出ます。そのあと `npm run build` が通ることを確認してください。
+4. 既存の作品（キャラクター、ロゴ、画面、音）をまねたり、取り込んだりしないでください。ネット上の画像も使わないでください。特定の作品に見える顔の配置や特徴は避けてください。
+5. 文字は絵に入れないでください。
+6. 追加料金が発生する手段（別料金のAPIキー、有料サービス）は使わないでください。今の契約の範囲でできないことがあれば、無理をせず、できなかったことを報告してください。
+7. 最後に、作ったファイル・使った方法（SVGをコードで書いた／画像生成を使った等）・検査結果を `art/README.md` に書いてください。
+
+### 絵の方向性
+- **かわいらしく、幼い子向け。ただし安っぽくしない。** 絵本の挿絵のような品のある仕上がりにします。
+- 形に丸みと立体感を持たせます。やわらかい陰影、ほのかなグラデーション、光は左上から、接地面にやわらかい影を入れてください。平べったいクリップアートや絵文字のようにはしないでください。
+- 線は黒ではなく濃い茶色系（目安 #4A3A40）。太さに少し強弱をつけ、全部の線を同じ太さにしないでください。
+- 色は、少しくすんだやさしいパステルを基調に、差し色を少しだけ。蛍光色や彩度の高すぎる色は使わないでください。
+- 布の縫い目、木目、葉脈など、見つけるとうれしい細部を控えめに入れます。ただし背景がうるさくなり、さがしにくくなる量にはしないでください。
+- 3体の見分けは **色だけに頼らず形で** つけます。今の形を受け継いでください：
+  - **ころ**：あたまに「くるん」とした毛。げんきでくいしんぼう。アプリコット色
+  - **みみ**：たれた長い耳（内側はピンク）。ものしりでのんびり。ミントグリーン
+  - **もこ**：くもの形のもこもこした頭と、星の髪どめ。ふわふわではずかしがり。ラベンダー
+- 3体とも、頭が大きめの約2頭身です。目は大きく、ハイライトを入れてください。表情はおだやかな笑顔です。
+- 服は **ゲームが柄を流し込む部分** なので、`clothes-mask.png`（白黒の形）として分けてください。服の陰影は `clothes-shade.png`、ふち線は `clothes-line.png` に分けると、柄の上に立体感が出ます。
+- 背景の「柄の領域」（カーテン・ソファ・ラグ、生け垣・柵・花だん・芝生、かべ・カウンター・テーブルクロス・床）は、ゲームが柄で塗ります。質感は **柄タイル**（`art/patterns/`）で出してください。布の織り目や紙の質感などを入れたタイルにします。同じタイルが服にも使われます。
+- 前景の小物（`fore.png`）は、今の小物と同じ位置・同じくらいの大きさで描き直してください（ガイドの橙色）。顔（赤い円）には絶対に重ねないでください。
+- 怖い表情、暗い影、先のとがった危なそうな物は入れないでください。
+
+### おすすめの順番
+1. `art/characters/koro/` の5層（back, clothes-mask, clothes-shade, clothes-line, front, front-found）を作る → 検査に合格させる
+2. 同じ画風で みみ・もこ を作る
+3. `art/patterns/` の柄タイル12枚
+4. `art/scenes/room/` の back / over / minor / fore → 検査 → garden → shop
+5. `art/ui/` の title / handoff / bye
+
+途中で、`npm run build && npm run preview` を実行し、`http://127.0.0.1:4173/` で見た目を確認してください。
+
+（貼り付けここまで）
+
+## 作業後
+
+- Codex の作業を `git add art && git commit` して、同じブランチに push してください。
+- Claude 側では、画面写真・操作テスト・溶け込み具合を確認し、必要なら調整案を出します。
+- 同じファイルを同時に複数のAIで編集しないため、Codex は `art/` だけ、Claude はそれ以外、と分けています。
+# 絵の差し替え口（ART_SLOTS）
+
+`art/` フォルダに決まった名前でファイルを置くと、ゲームが自動でその絵を使います。
+**置かなかった部分は、今のコードの絵のまま** 動きます（一部だけ差し替えてもよい）。
+
+- 形式：PNG（透過）／WebP／SVG。1ファイル 800KB まで、合計 8MB まで
+- SVG はスクリプト・外部参照・文字（フォント）を含めない
+- 置いたら `npm run validate:art` で検査 → `npm run build` → 画面を確認
+- 下書きガイド：`npm run art:guides` で `art-guides/` に出る（形状データから自動生成。描く位置の基準）
+
+## キャラクター `art/characters/{koro|mimi|moko}/`
+
+枠：**450×600px**（またはその整数倍。縦横比 3:4）。ゲーム内の座標 x −90〜90、y −225〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 37.5px**。ガイド `art-guides/character-*.png` に重ねて描く。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `clothes-mask.png` | ○ | 服の形だけを **白**、ほかは黒か透明。ここにゲームが背景と同じ柄を流し込む。ガイドの青い範囲（からだの判定）からはみ出さないこと |
+| `front.png` | ○ | 服より前に描くもの：顔・頭・耳・髪・手・服の上に出る線。目と口はガイドの赤い点の位置 |
+| `back.png` | | 服より後ろ：足、背中側の耳や髪など |
+| `clothes-shade.png` | | 服の陰影（乗算で重なる）。グレー〜茶系の濃淡、透過 |
+| `clothes-line.png` | | 服のふち線だけ。難易度に応じてゲームが濃さを変える（最低25%） |
+| `front-found.png` | | 見つかった時の前面（手をふるポーズ）。無ければ front を使う |
+
+`clothes-mask` と `front` がそろっていない時は、そのキャラクターはコードの絵のままです。
+
+## シーン `art/scenes/{room|garden|shop}/`
+
+枠：**1000×1000px**（2000×2000 推奨）。ガイド `art-guides/scene-*.png` の色面が「柄の領域」で、**ここはゲームが柄を塗る**（服と同じ柄にして隠れられるようにするため）。
+
+| ファイル | 中身 | 決まり |
+|---|---|---|
+| `back.png` | 柄の領域より下：空・壁の上部・床など | 不透明でよい |
+| `over.png` | 柄の領域の上・キャラクターの後ろ：家具の縁・カーテンのひだの陰・窓・棚など | 透過。キャラクターの服の後ろは薄く（平均の濃さ35%以下）、顔の後ろには描かない |
+| `minor.png` | 小さい画面では省く飾り（壁の絵・雲など） | over と同じ決まり |
+| `fore.png` | 前景の小物すべて（キャラクターの前に重なる） | 透過。ガイドの橙色の形に合わせる。**赤い円（顔）には重ねない**。服は少し（2割以上8割未満が見える程度）隠す |
+
+## 柄のタイル `art/patterns/{シーン}-{服}.png`
+
+例：`room-stripes.png`、`garden-leaf.png`。正方形 64px 以上、不透明、**上下左右がつなぎ目なく続く**こと。
+同じタイルが背景の領域と服の両方に使われます（だから隠れられる）。タイル1枚がゲーム内で表す大きさは、各シーンの柄の `size`（38〜52）です。
+
+| シーン | 服（ファイル名の後半） |
+|---|---|
+| room | plain（壁）, stripes（カーテン）, dots（ソファ）, check（ラグ） |
+| garden | plain（芝生）, stripes（柵）, dots（花だん）, leaf（生け垣） |
+| shop | plain（床）, stripes（カウンター）, dots（壁）, check（テーブルクロス） |
+
+## 画面の絵 `art/ui/`
+
+`title.png`（タイトルの絵）、`handoff.png`（受け渡し画面の絵。**隠れ場所や背景を描かない**）、`bye.png`（おしまい画面）。2000px 以内。
+
+## 帽子・傘 `art/accessories/{hat|umbrella}/`（コースモード用。3体共通）
+
+枠：**600×720px**（またはその整数倍。縦横比 5:6）。ゲーム内の座標 x −150〜150、y −345〜15 にあたり、**足もと中央（x 0, y 0）は画像の横中央・下から 30px**。ガイド `art-guides/accessory-hat.png` / `accessory-umbrella.png` に重ねて描く（薄く3体が入っている）。
+
+| ファイル | 必須 | 中身 |
+|---|---|---|
+| `mask.png` | ○ | 形だけを **白**、ほかは黒か透明。ゲームがここに **毛糸の色（色つきの帽子）** か **うしろの背景と同じ柄（背景の柄の帽子・傘）** を流し込む。ガイドの青い範囲からはみ出さない |
+| `shade.png` | | 陰影（乗算）。編み目・布のしわ・ぼんぼりのふくらみなどの質感もここで |
+| `line.png` | | ふち線。背景の柄のときは服と同じ薄さに、色つきのときははっきり表示される |
+| `front.png` | | いちばん前の細部（傘の先の飾り など）。形の範囲内 |
+| `back.png` | | キャラクターより後ろ（**傘の柄の棒**＝ガイドの緑。帽子では使わない） |
+
+- **顔（ガイドの赤い丸）には、どの層も重ねない**
+- 帽子はキャラクターの頭の前に、傘はキャラクターの後ろに描かれる
+- `mask` が無いときは、ゲームがコードで描いた帽子・傘を使う
+
+## シール `art/stickers/{id}.png`（シールちょう）
+
+正方形（480×480px 推奨、透過PNGかSVG）。ファイル名は `src/core/stickers.ts` の id：`c1`〜`c10`（コースクリア）、`f10` `f30` `f60` `f100` `f150`（見つけた回数）。
+- 白いふちのある丸いシール（直径は枠の約9割）。ふちの外は透明
+- そのシールのキャラクターとモチーフ（stickers.ts の char / motif / color）を、キャラクターと同じ画風で
+- 文字は入れない（名前はゲームが下に表示する）
+- 置かなかったシールは、コードで描いたシールを使う
+// じぶんの へや：仲間にした友だちと、シールでもらった「もの」を、好きな場所に置いて遊ぶ（おままごと）。
+// 勝ち負け・時間制限・正解はない。コースで遊ぶほど、置ける もの と へや が増える。
+// 座標は 1000×1000 の部屋の中。もの と 友だち は「足もと中央」を基準に置く（ゲームの他の画面と同じ単位）。
+import type { ContentId } from '../entitlements/entitlements';
+import type { CanPlay } from './access';
+import type { CharacterId } from './characters';
+import { STICKERS, hasSticker } from './stickers';
+import type { SceneId } from './scene';
+
+export type RoomId = 'living' | 'bedroom' | 'yard';
+export type Motion = 'walk' | 'swing' | 'bob' | 'sway' | 'roll' | 'swim';
+
+export interface RoomDef {
+  id: RoomId;
+  name: string;
+  /** この部屋が開くクリア数（0：はじめから） */
+  needCleared: number;
+  /** どのパックの中身か */
+  content: ContentId;
+  /** 置ける床の範囲（足もとの y）。これより上には置けない */
+  floorTop: number;
+  /** 奥（floorTop）と手前（1000）での大きさ */
+  scaleBack: number;
+  scaleFront: number;
+}
+
+/** 無課金で遊べるのは 2部屋まで（リビング・しんしつ）。ほかは追加パックで増える（ご本人の方針 2026-10-15） */
+export const ROOMS: RoomDef[] = [
+  { id: 'living', name: 'リビング', needCleared: 0, content: 'room:living', floorTop: 560, scaleBack: 0.62, scaleFront: 0.95 },
+  { id: 'bedroom', name: 'しんしつ', needCleared: 3, content: 'room:bedroom', floorTop: 580, scaleBack: 0.62, scaleFront: 0.95 },
+  { id: 'yard', name: 'おにわ', needCleared: 6, content: 'room:yard', floorTop: 540, scaleBack: 0.58, scaleFront: 0.92 },
+];
+
+export interface Seat {
+  /** もの の足もとから見た、座る位置（足もとが来る所） */
+  x: number;
+  y: number;
+}
+
+export interface ItemDef {
+  id: string;
+  name: string;
+  /** どのシールでもらえるか。null ははじめから持っている */
+  sticker: string | null;
+  /** 置いたときの横幅のめやす（ローカル座標。友だちの横幅は 約150） */
+  w: number;
+  /** 床に敷くもの（いつも いちばん奥に描く） */
+  flat?: boolean;
+  /** 座れる場所（ソファ・ベッド・ブランコ） */
+  seats?: Seat[];
+  motion?: Motion;
+}
+
+// 絵の枠は全部同じ：viewBox "-150 -300 300 300"、足もと中央が (0, 0)。友だちと同じ大きさの単位で描く。
+export const ITEMS: ItemDef[] = [
+  // はじめから
+  { id: 'sofa', name: 'ソファ', sticker: null, w: 280, seats: [{ x: -62, y: -62 }, { x: 62, y: -62 }] },
+  { id: 'table', name: 'テーブル', sticker: null, w: 190 },
+  { id: 'rug', name: 'ラグ', sticker: null, w: 300, flat: true },
+  // コースのシール
+  { id: 'ball', name: 'ボール', sticker: 'c1', w: 64, motion: 'roll' },
+  { id: 'cushion', name: 'クッション', sticker: 'c2', w: 90 },
+  { id: 'bed', name: 'ベッド', sticker: 'c3', w: 290, seats: [{ x: -40, y: -70 }, { x: 60, y: -70 }] },
+  { id: 'flowerpot', name: 'はなの はちうえ', sticker: 'c4', w: 80, motion: 'sway' },
+  { id: 'present', name: 'プレゼント', sticker: 'c5', w: 90 },
+  { id: 'cake', name: 'ケーキ', sticker: 'c6', w: 90 },
+  { id: 'moonlamp', name: 'おつきさまの ランプ', sticker: 'c7', w: 90, motion: 'bob' },
+  { id: 'fishtank', name: 'すいそう', sticker: 'c8', w: 150, motion: 'swim' },
+  { id: 'swing', name: 'ブランコ', sticker: 'c9', w: 260, seats: [{ x: 0, y: -62 }], motion: 'swing' },
+  { id: 'puppy', name: 'こいぬ', sticker: 'c10', w: 120, motion: 'walk' },
+  // 見つけた回数のシール
+  { id: 'plant', name: 'うえき', sticker: 'f10', w: 100, motion: 'sway' },
+  { id: 'breadbasket', name: 'パンの かご', sticker: 'f30', w: 100 },
+  { id: 'heartcushion', name: 'ハートの クッション', sticker: 'f60', w: 90 },
+  { id: 'balloon', name: 'ふうせん', sticker: 'f100', w: 80, motion: 'bob' },
+  { id: 'starmobile', name: 'ほしの メリー', sticker: 'f150', w: 110, motion: 'sway' },
+  // うみべパック
+  { id: 'shell', name: 'かいがら', sticker: 'b1', w: 70 },
+  { id: 'floatring', name: 'うきわ', sticker: 'b10', w: 120 },
+  { id: 'beachball', name: 'ビーチボール', sticker: 'b30', w: 80, motion: 'roll' },
+];
+
+export const ITEM_BY_ID: Record<string, ItemDef> = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
+
+export interface ProgressLike {
+  cleared: number;
+  totalFinds: number;
+  sceneFinds?: Partial<Record<SceneId, number>>;
+}
+
+/** いま使える もの（シールを持っていて、そのシールのパックも遊べる） */
+export function ownedItems(p: ProgressLike, can: CanPlay): ItemDef[] {
+  return ITEMS.filter((it) => {
+    if (!it.sticker) return true;
+    const s = STICKERS.find((x) => x.id === it.sticker);
+    if (!s || !can(`char:${s.char}`)) return false;
+    if (s.kind === 'course' && !can(`course:${s.need}`)) return false;
+    if (s.kind === 'scene' && s.scene && !can(`scene:${s.scene}`)) return false;
+    return hasSticker(s, p.cleared, p.totalFinds, p.sceneFinds);
+  });
+}
+
+/** シールでもらえる もの（シールちょう・ごほうびの告知で使う） */
+export function itemForSticker(stickerId: string): ItemDef | undefined {
+  return ITEMS.find((i) => i.sticker === stickerId);
+}
+
+export function openRooms(cleared: number, can: CanPlay): RoomDef[] {
+  return ROOMS.filter((r) => can(r.content) && cleared >= r.needCleared);
+}
+
+/** 奥ほど小さく（遠近） */
+export function depthScale(room: RoomDef, y: number): number {
+  const t = Math.min(1, Math.max(0, (y - room.floorTop) / (1000 - room.floorTop)));
+  return room.scaleBack + (room.scaleFront - room.scaleBack) * t;
+}
+
+// ---- 置いたもの（保存する形）
+
+export interface Placed {
+  /** 'item:sofa' / 'char:koro' */
+  ref: string;
+  x: number;
+  y: number;
+  flip?: boolean;
+  /** 座っている もの（その Placed の番号）と座席の番号 */
+  on?: { idx: number; seat: number };
+}
+
+export type RoomLayouts = Partial<Record<RoomId, Placed[]>>;
+
+export const MAX_PLACED = 40;
+
+/** はじめて開いたときの部屋（からっぽだと何をすればいいか分からないので、少し置いておく） */
+export function starterLayout(room: RoomId): Placed[] {
+  if (room === 'living') return [{ ref: 'item:rug', x: 500, y: 860 }, { ref: 'item:sofa', x: 500, y: 700 }, { ref: 'item:table', x: 500, y: 880 }, { ref: 'char:koro', x: 330, y: 900 }];
+  if (room === 'bedroom') return [{ ref: 'item:rug', x: 520, y: 880 }];
+  return [];
+}
+
+/** 置き場所を床の中に収める */
+export function clampToFloor(room: RoomDef, x: number, y: number): { x: number; y: number } {
+  return { x: Math.min(960, Math.max(40, x)), y: Math.min(985, Math.max(room.floorTop, y)) };
+}
+
+/** 保存データの検査：壊れていたら、その部屋だけ消す */
+export function validLayouts(v: unknown, charIds: readonly CharacterId[]): RoomLayouts {
+  const out: RoomLayouts = {};
+  if (typeof v !== 'object' || v === null) return out;
+  for (const r of ROOMS) {
+    const arr = (v as Record<string, unknown>)[r.id];
+    if (!Array.isArray(arr) || arr.length > MAX_PLACED) continue;
+    const ok = arr.every((p, i) => {
+      if (typeof p !== 'object' || p === null) return false;
+      const o = p as Record<string, unknown>;
+      if (typeof o.ref !== 'string' || typeof o.x !== 'number' || typeof o.y !== 'number' || !Number.isFinite(o.x) || !Number.isFinite(o.y)) return false;
+      const [kind, id] = o.ref.split(':');
+      if (kind === 'item' ? !ITEM_BY_ID[id] : kind === 'char' ? !charIds.includes(id as CharacterId) : true) return false;
+      if (o.flip !== undefined && typeof o.flip !== 'boolean') return false;
+      if (o.on !== undefined) {
+        const on = o.on as Record<string, unknown>;
+        if (typeof on !== 'object' || on === null || !Number.isInteger(on.idx) || !Number.isInteger(on.seat) || (on.idx as number) < 0 || (on.idx as number) >= arr.length || on.idx === i) return false;
+      }
+      return true;
+    });
+    if (ok) out[r.id] = arr as Placed[];
+  }
+  return out;
+}
+# art/
+
+差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+
+## 作業記録
+### 2026-10-08：ジョブ13（アプリアイコン・起動画面）
+
+- 作成ファイル：`app/icon.svg`（1024×1024px）、`app/splash.svg`（2732×2732px）、本README。
+- 方法：SVGをコードで記述。既存の自作キャラクターの輪郭・顔・グラデーションをファイル内に展開し、タイトルPNGの構図とroom-dotsの色を参照。画像生成・ネット画像・外部サービス・別料金APIは使用していない。文字・外部参照・スクリプトなし。
+- アイコン：ころが水玉の布からのぞく構図。服と布に同じ座標・周期の水玉を使い、服の輪郭を薄くして柄をつなげた。四隅まで不透明な正方形、角丸なし。濃茶色の強弱のある輪郭、左上の光、控えめな縫い目を使用。
+- 起動画面：地色 #FFF6E8。中央にみみ・ころ・もこが布からのぞく絵と柔らかな接地影を配置。既存タイトルの並びと顔の特徴を継承。
+- 迷った点：小さいアイコンの読みやすさを優先して1体に絞り、大きな水玉を採用。起動画面にも共通の柄を使った。SVG指定と既存素材との統一を優先してコードで制作。
+- 自動検査：`npm.cmd run validate:art` は終了コード0、98ファイル・合計4162KBで「すべて合格」。形状組み立てに失敗して保存済み形状を使用した警告あり。art/appは形式・安全性検査の対象。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- 追加確認：ローカルChromiumで寸法と全画素のアルファ値255を2枚とも確認。splashの中央1200×1200（x/y 766以上1966未満）の外側はすべて #FFF6E8。アイコン480px・60px、起動画面480pxで目視し、顔と水玉、3体の並びを確認。一時プレビュー画像は削除済み。
+- ビルド：`npm.cmd run build` はtsc通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ ../.. を読めず（Access is denied）、vite.config.tsを解決できなかった。道具・設定・環境変数を変更する回避策は行っていない。
+- できなかったこと：ビルド成功、preview・iPhone実機での表示確認。Claude Code側で最新形状による検査、ビルドと実機の切り取り確認が必要。
+- 状態：制作済み・素材検査合格。今やっていること：成果物の引き渡し。次の一手：Claude Codeによるビルド・実機確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-08（JST）。STATUS.mdは存在せず、ジョブの書き込み先限定を優先して本欄に状態を記録。
+- 手動の書き込みは app/ と本READMEのみ。他の作業者のファイルは保持。commit / pushは行っていない。
+
+### 2026-10-08：ジョブ12（ちょき・うみべのシール3枚）
+
+- 作成ファイル：`characters/choki/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`（450×600px）、`stickers/b1.svg`、`b10.svg`、`b30.svg`（480×480px）。本READMEも更新。
+- 方法：SVGをコードで記述。ガイドPNG・SVG、既存キャラクターとシール、stickers.tsを参照。共通の服3層・足・接地影・顔の配置・手のポーズを継承し、ちょきの頭とはさみ、貝がら、浮き輪、星を作成。画像生成・ネット画像・外部サービス・別料金APIは使用していない。文字・外部参照・スクリプトなし。
+- 画風：くすんだコーラル #E9A797、濃茶色 #4A3A40 の輪郭、左上の光、淡い頬と目のハイライト。目は (±16, -142)、口は (0, -125) 付近。頭の両わきの上げたはさみは橙の楕円内に収まる小さな丸い形。通常は両手を下げ、発見時は片手を上げてふる。
+- シール：b1はちょき＋貝がら、b10はころ＋青とクリームの浮き輪、b30はちょき＋淡い金色の星と小さな輝き。指定地色 #F6DCD3 / #D7ECF3 / #F3E6C2、白い丸ふちの直径432px（枠の90%）、ふちの外は透明。既存シールと同じ服・光・接地影・顔の作り。
+- 迷った点：既存素材に合わせSVG形式を採用。カニらしさは頭の両わきのはさみで表現し、共通の顔と服の判定を維持。はさみの先は鋭角を避けて丸くした。b30の特別感は小さな輝き2つに抑えた。
+- 自動検査：`npm.cmd run validate:art` は終了コード1、96ファイル・合計4143KB、不合格4件。ちょきのマスクは判定内100%・被覆率100%、back・clothes-shade・clothes-line・frontのはみ出し0.0%、front-foundは5.9%（許容12%以下）、両frontの顔位置合格。新規9枚にエラーなし。ただしシールのモチーフや白ふちの専用判定は現行検査にはない。不合格は既存beach柄4枚のみで、scripts/validate-art.mjsの柄名許可式がroom|garden|shopに限定されているため。検査道具・既存の柄は変更していない。形状の組み立て失敗により保存済み形状を使用した警告あり。art-guides/ART_CHECK.mdは許可済みの自動更新。
+- 目視確認：ローカルChromiumでころ・ちょき通常・ちょき発見を層合成して比較。シール3枚を200pxと70pxで確認し、顔・はさみ・モチーフ・白ふちが読めることを確認。ゲーム実画面の確認ではない。一時確認画像は削除済み。
+- ビルド：`npm.cmd run build` はtsc通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ ../.. を読めず（Access is denied）、vite.config.tsを解決できなかった。AGENTS.mdに従い、検査・ビルド道具や環境変数の差し替えなどの回避策は行っていない。
+- できなかったこと：公式検査の全項目合格、ビルド成功、previewとゲーム実画面での確認。Claude Code側でbeach柄名の検査対応、最新形状による再検査、ビルドと実画面確認が必要。
+- 状態：制作済み・検査対応待ち。今やっていること：成果物と未達事項の引き渡し。次の一手：Claude Codeによる上記の検査対応。ブロッカー：既存beach柄の検査未対応とビルドのアクセス制限。最終更新：2026-10-08（JST）。STATUS.mdは存在せず、ジョブの書き込み先限定を優先して本欄に状態を記録。
+- 手動の書き込みはジョブ指定先のみ。他の作業者のファイルは保持。commit / pushは行っていない。
+
+### 2026-10-08：ジョブ11（うみべの4層・柄タイル4枚）
+
+- 作成ファイル：`scenes/beach/back.svg`、`over.svg`、`minor.svg`、`fore.svg`（2000×2000px、viewBox 0 0 1000 1000）、`patterns/beach-plain.svg`、`beach-stripes.svg`、`beach-dots.svg`、`beach-check.svg`（256×256px）。本READMEも更新。
+- 方法：SVGをコードで記述。ガイドPNG・SVG、beach.ts、props-beach.ts、既存room・garden・shopの絵と柄を参照。画像生成・ネット画像・外部サービス・別料金APIは使用していない。文字・外部参照・スクリプトなし。ローカルChromiumのCanvasで合成・画素確認。
+- 画風：濃茶色 #4A3A40 の輪郭（基本2.6、影側3.4前後）、左上からの淡い光、くすんだパステル、控えめな屋根の板目・縫い目・貝の筋・砂粒。既存背景と線・陰影をそろえ、屋根の縁、クーラーの留め具、スコップ、貝の筋などに細部を追加。
+- 層の内容：backは空・淡い太陽・水平線・ゆるい波の海。柄の4領域はゲーム側に任せ、砂の質感はplainタイルに集約。overは屋根・ひさし・板の縁・風よけの柱とロープ・波打ちぎわの泡・シートの縁と薄い影。minorは雲・ヨット・かもめ。foreはバケツとスコップ2組、浮き輪2個、クーラーボックス、砂のお城2個、ビーチボール、貝がらの山の9か所。小物の接地影は表示時に砂の柄で消えないようfore、建物と布の接地影はoverに配置した。
+- 柄：beach.tsのcostumesと同じ地色・柄色を使用。砂はごく薄い砂粒、しまは板壁の淡い筋、水玉とギンガムは控えめな織り目。背景と服の両方に使うため細部を低コントラストにした。
+- 迷った点：ART_SLOTSで許可されたSVG形式を採用。小物の位置・本体寸法はガイドに合わせ、バケツの持ち手は顔との余白のため少し低めにした。スコップはバケツ上部の近くへ収め、砂のお城の旗はガイドの橙の形に含まれず顔に近づくため描かなかった。over・minor・foreにはガイドの顔楕円より3単位広い透過保護領域を設定した。
+- 自動検査：`npm.cmd run validate:art` は終了コード1、87ファイル・合計4115KB、不合格4件。背景4層は合格（over・minor・foreは各9か所で問題なし）。4件すべて柄ファイル名エラー。`scripts/validate-art.mjs:240` の許可式が `room|garden|shop` のみで、ジョブ指定の `beach-*` が未対応。柄の画素検査に進む前に拒否される。検査ツールは変更していない。形状データの組み立てに失敗し、保存済みデータを使用した旨の警告もあり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- 追加確認：完成SVGを2000×2000pxで描画し、over・minor・foreすべてで赤い顔楕円9個の内側の非透明画素が0であることを確認。柄4枚は256×256px、不透明（最小alpha 255）、上下・左右の端のRGBA各成分の最大差0。柄と背景4層の1000px合成画像を目視確認。これは公式検査の合格やゲーム実画面確認を代替するものではない。
+- ビルド：`npm.cmd run build` はtsc通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。AGENTS.mdの指示に従い、道具・設定・環境変数の差し替えや回避策は行わず終了。previewは未実行。
+- できなかったこと：公式検査の全項目合格、ビルド成功、ゲーム実画面・縮小表示での確認。Claude Code側で検査スクリプトのbeach柄対応、最新形状での再検査、ビルドと実画面確認が必要。
+- 状態：素材制作済み・検査対応待ち。今やっていること：成果物と未達事項の引き渡し。次の一手：Claude Codeによる上記の検査対応。ブロッカー：柄名検査のbeach未対応、サンドボックスのビルド制限。最終更新：2026-10-08（JST）。ジョブの書き込み先限定を優先し、STATUS.mdは変更せず本欄に記録した。
+- 手動の書き込みはジョブ指定の3範囲のみ。一時確認画像は削除済み。既存の他作業者のファイルは保持。commit / push は行っていない。
+
+### 2026-10-08：ジョブ10（新しい友だち「ぽぽ」とコース5のシール）
+
+- 作成ファイル：`characters/popo/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`（450×600px、viewBox `-90 -225 180 240`）と `stickers/c5.svg`（480×480px）。本READMEも更新。
+- 方法：SVGをコードで記述。ぽぽのガイドPNG・SVG、既存キャラクターとシール、`src/core/stickers.ts` のc5を参照した。服の3層・足・接地影と手のポーズは自プロジェクトの既存素材を継承し、丸い耳、明るい口まわり、小さい鼻、プレゼントを作成。画像生成・ネット画像・外部サービス・別料金APIは使用していない。文字・外部参照・スクリプトなし。
+- 画風：くすんだローズ #E6C3BE、内側が淡いピンクの丸い耳、濃茶色 #4A3A40 の輪郭（基本2.6、影側3.4）、左上の光、目のハイライト、淡い頬。目はガイドの (±16, -142)、口は (0, -125) 付近。通常は両手を下げ、発見時は片手を上げてふる。プレゼントは落ち着いた緑と淡い金色で、両手でしっかり抱える構図。
+- シール：指定地色 #F2DCD8、白い丸ふちの直径432px（枠の90%）、外側は透明。既存シールと同じ背景の淡い光、接地影、服の作りに合わせ、ぽぽの顔をそのまま組み込んだ。
+- 迷った点：丸い耳は輪郭線込みでガイド内に収めるため半径13.6にした。既存作品は参照せず、本ゲーム共通の顔の配置に合わせた。ちからもちの印象は険しい表情や体形変更ではなく、シールのプレゼントを両手で抱える姿で表現。服の判定と柄への溶け込みを優先し、服の形は既存キャラクターと共通にした。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む79ファイル・合計4070KBで「すべて合格」。ぽぽのマスクは判定内100%、被覆率100%。back・clothes-shade・clothes-line・frontのはみ出し0.0%、front-foundは6.3%（許容12%以下）、両frontで顔位置検査合格。形状データの組み立てに失敗し、保存済みデータを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- 目視確認：ローカルChromiumで6層を合成し、ころ・にゃこ・ぽぽ通常・ぽぽ発見を並べ、耳・顔・手・輪郭の画風を確認。c5は240pxと70pxで表示し、丸ふち・顔・プレゼントを確認した。確認画像はメモリ内のみで、一時ファイルは残していない。ゲーム実画面の確認とは別。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。
+- できなかったこと：ビルド成功・preview・ゲーム実画面の確認は未達。AGENTS.mdの指示に従い、道具・設定・環境変数の変更や回避策は行っていない。Claude Code側で最新形状データによる再検査・ビルド・実画面確認が必要。
+- 書き込み範囲：手動の書き込みはジョブ10指定の `art/characters/popo/`、`art/stickers/c5.svg`、本READMEのみ。STATUS.md更新の一般指示より、ジョブ10とユーザーの限定指定を優先し、存在しないルートSTATUS.mdは作成していない。既存の他作業者のファイルは保持。commit / push は行っていない。
+
+### 2026-10-08：ジョブ09（シールちょうの15枚）
+
+- 作成ファイル：`stickers/c1.svg`〜`stickers/c10.svg`、`stickers/f10.svg`、`stickers/f30.svg`、`stickers/f60.svg`、`stickers/f100.svg`、`stickers/f150.svg`。すべて480×480px、白い丸ふちの直径432px（枠の90%）、外側は透明。本READMEも更新。
+- 方法：SVGをコードで記述。自プロジェクトの既存4体の `front.svg` から顔・頭・耳・髪どめ・グラデーションを引き継ぎ、上半身・手・15種のモチーフを構成。画像生成・ネット画像・外部サービス・別料金のAPIは使用していない。絵に文字・外部参照・スクリプトなし。
+- 対応：`src/core/stickers.ts` のid・char・motif・colorを使用。c1＝ころ／ボール、c2＝みみ／クッション、c3＝もこ／くも、c4＝ころ／はな、c5＝にゃこ／プレゼント、c6＝みみ／ケーキ、c7＝もこ／おつきさま、c8＝にゃこ／さかな、c9＝ころ／にじ、c10＝もこ／おうかん。f10＝みみ／はっぱ、f30＝ころ／パン、f60＝もこ／ハート、f100＝にゃこ／ふうせん、f150＝みみ／ほし。
+- 画風：既存キャラクターの濃茶色の輪郭と線幅の強弱、左上からの光、柔らかなグラデーションと接地影を継承。クッションの縫い目、葉脈、パンの切れ目などは控えめに追加。回数記念の5枚は白ふちを残し、細い金色の内ふちと小さい光2個で特別感を付けた。
+- 迷った点：c10の名前は「みんなの おうかん」だが、ジョブのchar指定を優先し、もこ1体がおうかんを抱える構図にした。モチーフは顔と一緒に読める下半分へ配置。地色は指定の色値そのままの円に淡い光を重ねた。ふうせんはひもを持つポーズにした。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む73ファイル・合計4057KBで「すべて合格」。形状データの組み立てに失敗し、保存済みデータを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- 追加確認：ローカルChromiumで15枚を216pxと70pxで一覧表示し、顔・耳・モチーフ・丸ふちを目視確認。頬などに親グループの輪郭線が継承される問題を修正してから上記検査を実施。Canvasで全15枚の480×480px、指定地色の存在、中心から217pxより外の画素が完全透明であることを確認。一覧画像はメモリ内だけで作成し、一時ファイルは残していない。ゲーム実画面の確認とは別。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。
+- できなかったこと：ビルド成功、preview、ゲーム実画面での表示確認は未達。AGENTS.mdの指示に従い、道具・設定・環境変数の変更や回避策は行っていない。Claude Code側で最新形状データによる再検査・ビルド・実画面確認が必要。
+- 書き込み範囲：手動の書き込みはジョブ09指定の `art/stickers/` と本READMEのみ。STATUS.md更新の一般指示より、ジョブ09とユーザーの限定指定を優先し、ルートSTATUS.mdは変更・作成していない。既存の他作業者のファイルは保持。commit / push は行っていない。
+
+### 2026-10-08：ジョブ08（新しい友だち「にゃこ」）
+
+- 作成ファイル：`characters/nyako/` に `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層。すべて450×600px、viewBoxは `-90 -225 180 240`、背景は透明。本READMEも更新。
+- 方法：SVGをコードで記述。ガイドPNG・SVGと既存のころ・みみ・もこのSVGを参照。服の3層、足と接地影は既存3体と共通の形を使用し、頭・三角耳・耳の内側・鼻・ωの口・ひげを記述。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。絵に文字・外部参照・スクリプトなし。
+- 画風：くすんだ水色 #BCCDE4、左上からの光、濃茶色 #4A3A40 の輪郭（基本2.6、影側3.4）、目のハイライト、淡い頬を既存3体に合わせた。目はガイドの (±16, -142)、口は (0, -125) 付近。内側がピンクの立ち耳と左右2本ずつのひげで形からも区別できる。発見時は片手を上げてふる。
+- 迷った点：三角耳の先は立った印象を保ちつつ少し丸め、輪郭線を含めて橙色の三角形の内側に収めた。既存作品を参照せず、このゲームの顔の配置と画風を引き継いだ。服の柄への溶け込みを優先し、新しい服の装飾や尾は追加しなかった。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む58ファイル・合計3967KBで「すべて合格」。にゃこの白いマスクは判定内100%、被覆率100%。back・clothes-shade・clothes-line・frontのはみ出し0.0%、front-foundは6.0%（許容12%以下）、両frontで顔位置の検査合格。形状データの組み立てに失敗し、保存済みデータを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- 目視確認：ローカルChromiumのCanvasで6層を合成し、既存3体とにゃこの通常・発見ポーズを225×300pxで並べて、画風・耳・ひげ・顔・手を確認。合成データはメモリ内のみで、一時ファイルは残していない。ゲーム実画面の確認とは別。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。
+- できなかったこと：ビルド成功、preview、ゲーム実画面の表示確認は未達。AGENTS.mdの指示に従い、道具・設定・環境変数の変更や回避策は行っていない。Claude Code側で最新形状データによる再検査・ビルド・実画面確認が必要。
+- 書き込み範囲：手動の書き込みはジョブ08指定の `art/characters/nyako/` と本READMEのみ。AGENTS.mdのSTATUS.md更新の一般指示より、ジョブ08とユーザーの限定指定を優先し、存在しないルートSTATUS.mdは作成していない。他作業者のファイルは保持。commit / push は行っていない。
+
+### 2026-10-08：ジョブ07（ニット帽と傘）
+
+- 作成ファイル：`accessories/hat/` に `mask.svg`、`shade.svg`、`line.svg`、`accessories/umbrella/` に `mask.svg`、`shade.svg`、`line.svg`、`back.svg`、計7枚。すべて600×720px、viewBoxは `-150 -345 300 360`、背景は透明。本READMEも更新。
+- 方法：SVGをコードで記述。ガイド2枚、現行のaccessoryArt.ts・accessories.ts、既存キャラクターSVGを参照。マスクは現行の10分割二次曲線と同じ点列、ぼんぼりはガイドと同じ半径13の円。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。絵に文字・外部参照・スクリプトなし。
+- 帽子：白いマスク、左上を明るくした薄い茶系の陰影、控えめなV字の編み目、折り返しのゴム編み、ぼんぼりの毛糸の流れ。輪郭は濃茶色 #4A3A40、影側を少し太くし、外形内にクリップ。頭頂とぼんぼりの交差線は隠した。
+- 傘：ガイドと同じ4つの波、布のふくらみの陰影、3本の骨と控えめな縫い目。backは緑のガイドに沿う木色の棒で、上端は布の内側、下端は手の位置。棒以外は布の外形内にクリップ。
+- 迷った点：色つきと背景柄でshadeが共通なので、陰影・編み目は既存の服と同等以下の薄さにした。任意のfrontは背景柄への溶け込みと形の範囲を優先して省略。帽子にbackは不要。
+- 追加確認：ローカルChromiumで3体に帽子と傘を重ね、無地と背景に連続する水玉柄、輪郭不透明度1と0.25の6通りを合成して目視確認。ゲーム実画面の確認とは別。全7層を600×720pxで読み取り、3つの顔の点を中心とする半径7（画像上14px）の保護円内で非透明画素が0であることを確認。確認後の調整は棒の上端短縮とぼんぼりに重なる線の除去のみ。一時確認画像は削除済み。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む52ファイル・合計3954KBで「すべて合格」。全7層ではみ出し0.0%、顔への重なりなし。白いマスクの被覆率は帽子97%、傘98%。形状データを組み立てられず、検査ツールが保存済みデータを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。
+- できなかったこと：ビルド成功、preview、ゲーム実画面での表示確認は未達。AGENTS.mdに従い、道具・設定・環境変数の変更や回避策は行っていない。Claude Code側で最新形状データによる再検査、ビルド、実画面確認が必要。
+- 書き込み範囲：手動の書き込みはジョブ07指定の `art/accessories/` と本READMEのみ。AGENTS.mdにはSTATUS.md更新の一般指示があるが、ジョブ07の限定指定とユーザーの書き込み制限を優先し、存在しないルートSTATUS.mdは新規作成していない。制作スクリプト・一時ファイルは残していない。既存の他作業者のファイルは保持。commit / push は行っていない。
+
+### 2026-10-08：ジョブ06（画面の絵）
+
+- 作成ファイル：`ui/title.png`（1200×700px、375,025 bytes）、`ui/handoff.png`（800×600px、196,262 bytes）、`ui/bye.png`（1000×600px、354,890 bytes）。すべて透過PNG、800KB以下。本READMEも更新。
+- 方法：既存の自作キャラクターSVGの顔・各層を読み取り、SVGコードで構図と小物を組み立て、既存のローカルChromiumとCanvasでPNGを書き出した。中間データはメモリ内のみ。画像生成・ネット画像・外部サービス・別料金のAPIは使用していない。既存キャラクターファイルは変更していない。
+- title：3体が縫い目のある淡い布のふちからのぞき、両手をかける絵。ころの巻き毛、みみのたれ耳、もこの雲形と星を維持した。文字なし。
+- handoff：ころからみみへ端末を渡す絵。丸い端末と受け渡す手、向きを示す矢印を描いた。画面は無地で、隠れ場所・背景シーン・文字は描いていない。
+- bye：既存のfront-foundの手をふるポーズを使って3体を並べ、控えめな動きの線を加えた。服は淡い無地で、既存の陰影・輪郭・縫い目を重ねた。
+- 画風・迷った点：既存3体の濃茶色の線、左上からの光、目のハイライト、くすんだパステルをそのまま基準にした。タイトルではのぞく動作を優先し、左右2体の口元は布で隠した。受け渡しでは隠れ場所の情報を出さず、無地の端末と矢印で動作を示した。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む45ファイル・合計3941KBで「すべて合格」。形状データの組み立てに失敗したため、検査ツールが保存済みの形状データを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。完成PNG3枚を開いて、構図・顔・手・端末・画像端の欠けがないことを目視確認した。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと：ビルド成功、previewおよびゲーム実画面での表示・縮小表示の確認は未達。PNG単体の目視確認は実画面確認とは別。AGENTS.mdのサンドボックス指示に従い、検査・ビルド道具、設定、環境変数の差し替えや回避策は行わず終了。Claude Code側で最新形状データによる再検査、ビルド、実画面確認が必要。
+- 手動の書き込みは `art/ui/` と本READMEのみ。一時ファイルは残していない。既存の他作業者のファイルは保持。commit / push は行っていない。
+
+### 2026-10-08：ジョブ05（にわ・おやつのみせの4層）
+
+- 作成ファイル：`scenes/garden/back.png`、`over.png`、`minor.png`、`fore.png` と、`scenes/shop/back.png`、`over.png`、`minor.png`、`fore.png` の計8枚。すべて2000×2000px。本READMEも更新。
+- 方法：SVGをコードで記述し、既存のローカルChromiumとCanvasでPNGを書き出した。PNG内の画像データを可逆圧縮し直し、展開後のデータが一致することも確認。画像生成・ネット画像・外部サービス・別料金のAPIは使用していない。
+- 画風：へやの既存PNG、ガイドPNG、シーン・小物の形状定義を参照。濃茶色 `#4A3A40` の輪郭、左上からの淡いグラデーション、やわらかい接地影、控えめな木目・縫い目を使用。文字は入れていない。
+- にわ：backは空と太陽。overは生け垣・柵・花だんの縁、柵の横木、飛び石。minorは雲・小鳥の線・少量の草。foreはバケツ2個、石の山、植木鉢、木箱、じょうろ、花の茂み2か所、切り株の9か所。芝生・生け垣・柵・花だんの柄面はゲームに任せた。
+- みせ：backは柄領域の間から見える淡いクリーム色の下地。overはひさし、カウンターとテーブルの天板・縁、薄い布の折り目。minorは棚と小びん3個、文字のないケーキの壁飾り。foreはびん2個、ケーキ台、パンかご2個、いす2脚、袋2個の9か所。水玉の壁・床・カウンター・テーブルクロスの柄面はゲームに任せた。
+- 容量（bytes、back / over / minor / fore順）：garden は 559,108 / 77,110 / 27,312 / 399,443、shop は 18,829 / 178,572 / 102,327 / 313,171。すべて800KB以下。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む42ファイル・合計3037KBで「すべて合格」。両シーンともover・minor・foreの各9か所×3体で問題なし。形状データの組み立てに失敗し、検査ツールが保存済みの形状データを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- 追加確認：完成PNGを2000×2000pxで読み取り、両シーンのover・minor・foreすべてで、ガイドの赤い顔楕円9個の内側の非透明画素が0であることを確認。既存柄タイルとガイド領域を合成して目視確認。一時スクリプトと確認用画像は削除済み。
+- 迷った点・調整：顔に近い小物はガイドに近い位置・大きさを保ちながら余白を確保した。バケツの持ち手を低めにし、じょうろの本体を6px低く、カウンター前の袋の高さを84→72pxにした。右下のいすの座面は9px下げた。飛び石は顔領域から離した。いすはガイドの長方形の遮蔽に合わせ、座面下を丸い木板で覆う形にした。顔の周囲には透過の保護領域を設けた。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと：ビルド成功およびゲーム実画面・縮小表示の確認は未達。合成確認はゲーム実画面の確認とは別。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数の差し替えや回避策は行わず終了。Claude Code側で最新形状データによる再検査、ビルド、実画面確認が必要。ビルド停止のためpreviewは実行していない。
+- 手動の書き込みは `art/scenes/garden/`、`art/scenes/shop/`、本READMEのみ。制作途中のファイルは残していない。既存の他作業者のファイルは保持。commit / push は行っていない。
+
+### 2026-10-08：ジョブ04（へやの4層）
+
+- 作成ファイル：`scenes/room/back.png`、`over.png`、`minor.png`、`fore.png`。すべて2000×2000px。本READMEも更新。
+- 方法：SVGをコードで記述し、既存のローカルChromiumとCanvasでPNGに書き出した。PNGの画像データを可逆圧縮し直し、展開後のデータが一致することを確認。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
+- 画風：既存のキャラクター・柄タイルとガイド・現行画面を参照。濃茶色 `#4A3A40` の輪郭、影側を少し太くした線、左上からの淡い光、くすんだパステル、控えめな木目と縫い目を使用。文字は入れていない。
+- 層の内容：backは木の床と接地影（壁側は透明）。overは窓、カーテンレール、薄いひだ・ソファの縁と陰、脚、戸だな、家具の間に見える巾木。minorは壁の絵と数字のない時計。foreは橙色ガイドに合わせ、おもちゃ箱、植木鉢2個、クッション2個、畳んだブランケット、積み木、ボール、かごの9か所。壁・カーテン・ソファ・ラグの柄は描かず、ゲーム側の領域描画に任せた。
+- 容量：back 616,843 bytes、over 302,763 bytes、minor 65,156 bytes、fore 355,243 bytes。全ファイル800KB以下。透過を維持。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存素材を含む34ファイル・合計1400KBで「すべて合格」。over・minor・foreとも全9か所×3体で問題なし。形状データの組み立てに失敗したため、検査ツールが保存済みの形状データを使用した旨の警告あり。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- 追加確認：完成PNGのover・minor・foreを2000×2000で読み取り、ガイドの赤い楕円9個の内側すべてでアルファ値が0であることを確認。既存の柄タイルとガイドの領域を合成して目視確認し、ソファの前を巾木が横切らないよう修正した。確認用の一時画像は削除済み。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと・迷った点：ビルド成功およびゲーム実画面での表示・縮小時の見やすさは未確認。合成確認はゲーム実画面の確認とは別。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数を変更する回避策は行わず終了。Claude Code側で最新形状データによる再検査、ビルド、実画面確認が必要。サーバーを使うpreview確認はビルド停止のため行っていない。
+- 手動の書き込みは `art/scenes/room/` と本READMEのみ。制作スクリプト・SVG中間ファイル・確認画像は残していない。既存の他作業者の変更は保持。commit / push は行っていない。
+
+### 2026-10-07：feedback（ギンガムチェックの修正）
+
+- 変更ファイル：`patterns/room-check.svg`、`patterns/shop-check.svg`、本READMEのみ。他の柄10枚は変更していない。
+- 方法：`art-guides/current-room-easy.png` のラグ、`current-shop-normal.png` のテーブルクロスと既存の柄定義を確認し、SVGコードを直接編集。画像生成・ネット画像・外部サービス・別料金のAPIは使用していない。
+- 修正内容：グループ全体の `opacity=".5"` を各帯に適用される `fill-opacity=".5"` に変更。縦横それぞれ64px幅の帯を32px・160pxの位置に2本配置し、帯と間隔を64pxに統一した。地色／半透明の帯／二重に重なる交差部分の3段階に戻した。roomの黄色系、shopのピンク系の色値と既存の控えめな織り目は保持。対象2枚の不足していたviewBoxの高さも補い、`0 0 256 256` とした。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、30ファイル・合計92KBで「すべて合格」。修正した2枚は不透明、上下左右のつなぎ目の差はいずれも0.0（基準28未満）。`art-guides/ART_CHECK.md` は許可済みの自動更新。形状データの組み立てに失敗し、検査スクリプトが保存済みの形状データを使用した旨の警告あり。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定の読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと：ビルド成功と変更後のゲーム実画面での目視確認は未確認。AGENTS.mdのサンドボックス指示に従い、検査・ビルド道具、設定、環境変数を変更する回避策は試さず終了。Claude Code側で最新形状データによる検査、ビルド、実画面確認が必要。
+- 一時ファイルは残していない。既存の作業記録・他の作業者による変更は保持。commit / push は行っていない。
+
+### 2026-10-07：ジョブ03（柄タイル12枚）
+
+- 作成ファイル：`patterns/room-plain.svg`、`room-stripes.svg`、`room-dots.svg`、`room-check.svg`、`patterns/garden-plain.svg`、`garden-stripes.svg`、`garden-dots.svg`、`garden-leaf.svg`、`patterns/shop-plain.svg`、`shop-stripes.svg`、`shop-dots.svg`、`shop-check.svg`（すべて `patterns/` 内）。本READMEも更新。
+- 方法：SVGをコードで記述。すべて256×256pxの正方形、不透明な地色。画像生成、ネット画像、外部サービス、別料金のAPIは使用していない。
+- 色と大きさ：各シーンの `costumes` の地色・柄色をそのまま使用。ゲーム内の1周期は既存のsize（38〜52）のまま使える構成。水玉の位置・半径、葉の位置・傾き・大きさも既存柄を基準にした。しま・チェックは幅を保ったまま帯を中央に移し、両端の色をそろえた。
+- 質感：既存3体のSVGの柔らかい光と濃茶色 `#4A3A40` を参考に、布には白系10%・茶系3.5%の細い織り目、無地には小さく薄い紙の繊維、葉には控えめな葉脈を追加。水玉・葉には左上が明るい薄いグラデーション、しまには横方向の淡い陰影を重ねた。無地が別の柄に見えないよう、大きな装飾は加えていない。背景と服に同じタイルを使う前提で細部の濃さを抑えた。
+- つなぎ目：布の織り目は256を割り切る8px周期。水玉・葉・紙の繊維は四辺をまたがず、しま・チェックは辺まで同じ色で続く。タイル全体を一方向に明暗変化させるグラデーションは使用していない。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、既存キャラクターを含む30ファイル・合計92KBで「すべて合格」。柄12枚すべて不透明、つなぎ目の差は0.0〜0.1（基準28未満）。`art-guides/ART_CHECK.md` は許可済みの自動更新。形状データの組み立てに失敗したため、検査スクリプトが保存済みの形状データを使用した旨の警告あり。道具は変更していない。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` 通過後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと・迷った点：ビルド成功およびゲーム実画面での見た目・縮小時の柄の読みやすさ・服との溶け込みの目視確認は未確認。SVGはART_SLOTSで許可された形式のため採用。AGENTS.mdのサンドボックス指示に従い、ビルド停止後は道具・設定・環境変数の差し替えや回避策を試さず記録して終了。Claude Code側で最新形状データでの再検査、ビルド、実画面確認が必要。
+- 手動の書き込みは `art/patterns/` と本READMEのみ。制作スクリプト・一時ファイルは残していない。commit / push は行っていない。
+
+### 2026-10-07：ジョブ02（みみ・もこ）
+
+- 作成ファイル：`characters/mimi/` と `characters/moko/` に、それぞれ `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg` の6層、計12枚。寸法はすべて450×600px、viewBoxは `-90 -225 180 240`、背景は透過。本READMEも更新。
+- 方法：SVGをコードで記述。ころの既存SVGを画風の基準とし、服の白いマスク・陰影・輪郭、接地影と足を共通化。顔と手のグラデーションを各キャラクターの色に調整し、頭の形を新しく記述した。画像生成、ネット画像、別料金のAPIは使用していない。
+- みみ：ミントグリーンの丸い頭、左右にたれた長い耳、淡いピンクの耳の内側、ゆったりした眉と小さな笑顔。もこ：ラベンダーの雲形の頭、角を丸めた淡い金色の星の髪どめ、控えめな笑顔。色に加えて、たれ耳／雲形と星／ころの巻き毛で区別できる構成にした。
+- 画風・位置：ころと同じ濃茶色 `#4A3A40`、外周の基本線幅2.6と影側3.4、左上からの光、目のハイライト、淡い頬、控えめな縫い目を使用。目の中心はガイドの `(±16, -142)`、口は `(0, -125)` 付近。服の白いマスクはガイドと同じ形。発見時は片手を上げてふるポーズ。
+- 検査結果：`npm.cmd run validate:art` は終了コード0、18ファイル（既存ころ6枚を含む）、合計40KBで「すべて合格」。結果は `art-guides/ART_CHECK.md` に自動出力。形状データの組み立てに失敗したため、検査スクリプトに元から備わっている処理で保存済みの形状データを使用した旨の警告あり。検査道具は変更していない。
+- ビルド結果：`npm.cmd run build` は `tsc --noEmit` を通過した後、Viteの設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` にアクセスできず（`Access is denied`）、`vite.config.ts` を解決できなかった。
+- できなかったこと・迷った点：ビルド成功とゲーム実画面での表示・縮小表示の目視確認は未確認。もこの口はガイド既定の開いた口ではなく、制作方針の「おだやかな笑顔」に合わせた。AGENTS.mdのサンドボックス指示に従い、道具・設定・環境変数の差し替えや回避策は試さず終了。Claude Code側で最新の形状データによる再検査、ビルド、3体を並べた表示と発見ポーズの目視確認が必要。
+- 手動の書き込みはジョブで許可された2体のフォルダと本READMEのみ。検査レポートは許可済みの自動更新。commit / push は行っていない。
+
+### 2026-10-07：ジョブ01（既存成果物の記録を補記）
+
+- 対象ファイル：`characters/koro/` の `back.svg`、`clothes-mask.svg`、`clothes-shade.svg`、`clothes-line.svg`、`front.svg`、`front-found.svg`。
+- 方法：既存成果物はコードで記述されたSVG（450×600px、viewBox `-90 -225 180 240`）。アプリコット色の肌、くるんとした毛、目のハイライト、左上からの光と柔らかな陰影を、パスとグラデーションで構成。服のマスク・陰影・輪郭を別の層に分けている。
+- 検査結果：前回の実行結果を確定できる作業記録がないため、ジョブ01当時の検査・ビルドの合否は未確認。今回の再検査の試行結果は下記。
+- できなかったこと・迷った点：この記録は残っているSVGを読んで補記したもの。前回の制作過程や判断理由は確認できないため、推測で補っていない。
+
+### 2026-10-07：feedback（ころの輪郭と手の修正）
+
+- 変更ファイル：`characters/koro/front.svg`、`front-found.svg`、`back.svg`、`clothes-line.svg`、本README。
+- 方法：既存SVGのコードを直接編集。画像生成・ネット画像・追加料金のAPIは使用していない。
+- 頭・手・足・服の外周は濃い茶色 `#4A3A40`、基本の線幅を2.6に変更。���じ外周の下側・影側に幅3.4の線を重ね、左上を細くした。線幅は既存SVGのviewBox座標単位。服の襟の線も2.6にそろえた。肌・足・服の陰影、顔、髪、縫い目、ハイライト、服マスクは保持。
+- 通常ポーズの両手と発見ポーズの下げた手には、小さい親指のふくらみを1つ追加。発見ポーズの上げた手は、複数の指の突起を丸いひとまとまりにし、親指のふくらみを1つ残した。手をふる位置は維持。
+- 迷った点：縮小時の読みやすさと幼い丸みを両立するため、指を描き分けず、外周のふくらみで親指を表現。線幅の強弱は元の形を維持した外周の重ね描きで付けた。
+- 検査結果：`npm run validate:art` と `npm run build` を実行したが、いずれもPowerShellの実行ポリシーにより `C:\Program Files\nodejs\npm.ps1` がブロックされた（`PSSecurityException` / `UnauthorizedAccess`）。両コマンドとも処理開始前に終了コード1で停止。今回の検査レポートは生成されておらず、既存の `art-guides/ART_CHECK.md` は今回の合格を示すものではない。
+- できなかったこと：自動検査の全項目合格、ビルド成功、ブラウザーでの縮小表示確認は未確認。`AGENTS.md` のサンドボックス指示に従い、検査道具・設定・環境変数の変更や回避策は行わず終了。Claude Code側で両コマンドと実画面の確認が必要。
+- 他キャラクターやアプリのコードは変更していない。commit / push は行っていない。
+rg: art/myroom: 指定されたファイルが見つかりません。 (os error 2)
+rg: art/movers: 指定されたファイルが見つかりません。 (os error 2)
+art/characters\popo\front.svg
+art/characters\popo\front-found.svg
+art/characters\popo\clothes-shade.svg
+art/characters\popo\clothes-mask.svg
+art/characters\popo\clothes-line.svg
+art/characters\popo\back.svg
+art/scenes\shop\over.png
+art/scenes\shop\minor.png
+art/scenes\shop\fore.png
+art/scenes\shop\back.png
+art/stickers\f60.svg
+art/stickers\f30.svg
+art/stickers\f150.svg
+art/stickers\f100.svg
+art/stickers\f10.svg
+art/stickers\c9.svg
+art/stickers\c8.svg
+art/stickers\c7.svg
+art/stickers\c6.svg
+art/stickers\c5.svg
+art/stickers\c4.svg
+art/stickers\c3.svg
+art/stickers\c2.svg
+art/stickers\c10.svg
+art/stickers\c1.svg
+art/stickers\b30.svg
+art/stickers\b10.svg
+art/stickers\b1.svg
+art/characters\nyako\front.svg
+art/characters\nyako\front-found.svg
+art/characters\nyako\clothes-shade.svg
+art/characters\nyako\clothes-mask.svg
+art/characters\nyako\clothes-line.svg
+art/characters\nyako\back.svg
+art/scenes\beach\over.svg
+art/scenes\beach\minor.svg
+art/scenes\beach\fore.svg
+art/scenes\beach\back.svg
+art/scenes\room\over.png
+art/scenes\room\minor.png
+art/scenes\room\fore.png
+art/scenes\room\back.png
+art/characters\moko\front.svg
+art/characters\moko\front-found.svg
+art/characters\moko\clothes-shade.svg
+art/characters\moko\clothes-mask.svg
+art/characters\moko\clothes-line.svg
+art/characters\moko\back.svg
+art/scenes\garden\over.png
+art/scenes\garden\minor.png
+art/scenes\garden\fore.png
+art/scenes\garden\back.png
+art/characters\koro\front.svg
+art/characters\koro\front-found.svg
+art/characters\koro\clothes-shade.svg
+art/characters\koro\clothes-mask.svg
+art/characters\koro\clothes-line.svg
+art/characters\koro\back.svg
+art/characters\mimi\front.svg
+art/characters\mimi\front-found.svg
+art/characters\mimi\clothes-shade.svg
+art/characters\mimi\clothes-mask.svg
+art/characters\mimi\clothes-line.svg
+art/characters\mimi\back.svg
+art/characters\choki\front.svg
+art/characters\choki\front-found.svg
+art/characters\choki\clothes-shade.svg
+art/characters\choki\clothes-mask.svg
+art/characters\choki\clothes-line.svg
+art/characters\choki\back.svg
+AGENTS.md
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 art/stickers/c1.svg
+Get-Content -Encoding UTF8 art/stickers/c6.svg
+Get-Content -Encoding UTF8 art/stickers/f30.svg
+Get-Content -Encoding UTF8 art/characters/koro/front.svg
+Get-Content -Encoding UTF8 package.json
+Get-Content -Encoding UTF8 scripts/validate-art.mjs | Select-Object -Last 180
+ git status --short' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 310ms:
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#ffe5be"/><stop offset=".48" stop-color="#f3c48f"/><stop offset=".82" stop-color="#eab07e"/><stop offset="1" stop-color="#d49770"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#fff1d7" stop-opacity=".62"/><stop offset="1" stop-color="#fff1d7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+<linearGradient id="curl" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#b7875f"/><stop offset="1" stop-color="#81573f"/></linearGradient>
+<radialGradient id="rose" cx=".25" cy=".18" r=".95"><stop stop-color="#f8dcd7"/><stop offset="1" stop-color="#ce909e"/></radialGradient><radialGradient id="sage" cx=".25" cy=".18" r=".95"><stop stop-color="#e2edce"/><stop offset="1" stop-color="#97b79d"/></radialGradient><radialGradient id="cream" cx=".25" cy=".18" r=".95"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#ddd6c8"/></radialGradient><radialGradient id="gold" cx=".25" cy=".18" r=".95"><stop stop-color="#fff0c1"/><stop offset="1" stop-color="#d1ae69"/></radialGradient><radialGradient id="sky" cx=".25" cy=".18" r=".95"><stop stop-color="#dceaf1"/><stop offset="1" stop-color="#9bb9cd"/></radialGradient><radialGradient id="toast" cx=".25" cy=".18" r=".95"><stop stop-color="#f5deb0"/><stop offset="1" stop-color="#cb9563"/></radialGradient><radialGradient id="shirt" cx=".25" cy=".18" r=".95"><stop stop-color="#fff5df"/><stop offset="1" stop-color="#daceb5"/></radialGradient><radialGradient id="ground"><stop stop-color="#6b5666" stop-opacity=".18"/><stop offset="1" stop-color="#6b5666" stop-opacity="0"/></radialGradient><radialGradient id="paperLight" cx=".25" cy=".15" r=".9"><stop stop-color="#fffdf5" stop-opacity=".32"/><stop offset="1" stop-color="#fffdf5" stop-opacity="0"/></radialGradient></defs>
+<circle cx="240" cy="240" r="216" fill="#ffffff"/>
+<circle cx="240" cy="240" r="201" fill="#F6D7B8"/>
+<circle cx="240" cy="240" r="201" fill="url(#paperLight)"/>
+
+<ellipse cx="240" cy="401" rx="132" ry="24" fill="url(#ground)" />
+<g stroke="#4a3a40" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round">
+<path d="M191 285 Q240 266 289 285 Q316 324 310 386 Q240 419 170 386 Q165 325 191 285Z" fill="url(#shirt)" />
+<path d="M211 292 Q239 320 269 292" fill="none" stroke="#a89984" stroke-width="2.4"/>
+<g stroke="none" transform="rotate(-7 240 222) translate(240 480) scale(1.85)"><path d="M-47-145 C-46-168-29-185-5-187 C17-190 39-175 46-153 C53-130 40-109 19-102 C4-96-14-99-28-109 C-41-118-49-130-47-145Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M46-153 C53-130 40-109 19-102 C4-96-14-99-28-109" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-43-149 C-41-168-27-180-10-182" fill="none" stroke="#fff1d8" stroke-opacity=".64" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M41-128 Q34-108 12-103" fill="none" stroke="#aa7357" stroke-opacity=".5" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M-4-187 C-12-199 1-209 12-202 C22-195 14-185 7-191 C3-195 9-199 12-195" fill="none" stroke="#745140" stroke-width="6.4" stroke-linecap="round"/>
+<path d="M-4.5-189 C-10-199 1-206 11-200 C18-195 13-190 8-193" fill="none" stroke="url(#curl)" stroke-width="3.8" stroke-linecap="round"/>
+<path d="M-5-196 Q-1-204 7-201" fill="none" stroke="#e7ba85" stroke-width="1.1" stroke-linecap="round"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153" fill="none" stroke="#9a7155" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(7)"><circle r="63" fill="url(#rose)"/><path d="M-52-36 Q-7-8-12 61 A63 63 0 0 1-52-36" fill="url(#cream)" /><path d="M-3-63 Q24-9 62 8 A63 63 0 0 0-3-63" fill="url(#sage)" /><path d="M-52-36 Q-7-8-12 61 M-3-63 Q24-9 62 8" fill="none" stroke-width="2.4"/></g>
+<g transform="translate(240 347) rotate(7)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#e5f2db"/><stop offset=".48" stop-color="#bfdcc5"/><stop offset=".82" stop-color="#a8cfb5"/><stop offset="1" stop-color="#88b39e"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#f1f6df" stop-opacity=".62"/><stop offset="1" stop-color="#f1f6df" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+
+<linearGradient id="ear" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#cce4ca"/><stop offset=".55" stop-color="#a7cdb2"/><stop offset="1" stop-color="#85ac96"/></linearGradient>
+<radialGradient id="pink" cx=".3" cy=".25" r=".8"><stop stop-color="#f5d8d6"/><stop offset="1" stop-color="#dcaeaf"/></radialGradient>
+<linearGradient id="star" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#f9e6ac"/><stop offset=".55" stop-color="#edcc7d"/><stop offset="1" stop-color="#cba360"/></linearGradient><radialGradient id="rose" cx=".25" cy=".18" r=".95"><stop stop-color="#f8dcd7"/><stop offset="1" stop-color="#ce909e"/></radialGradient><radialGradient id="sage" cx=".25" cy=".18" r=".95"><stop stop-color="#e2edce"/><stop offset="1" stop-color="#97b79d"/></radialGradient><radialGradient id="cream" cx=".25" cy=".18" r=".95"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#ddd6c8"/></radialGradient><radialGradient id="gold" cx=".25" cy=".18" r=".95"><stop stop-color="#fff0c1"/><stop offset="1" stop-color="#d1ae69"/></radialGradient><radialGradient id="sky" cx=".25" cy=".18" r=".95"><stop stop-color="#dceaf1"/><stop offset="1" stop-color="#9bb9cd"/></radialGradient><radialGradient id="toast" cx=".25" cy=".18" r=".95"><stop stop-color="#f5deb0"/><stop offset="1" stop-color="#cb9563"/></radialGradient><radialGradient id="shirt" cx=".25" cy=".18" r=".95"><stop stop-color="#fff5df"/><stop offset="1" stop-color="#daceb5"/></radialGradient><radialGradient id="ground"><stop stop-color="#6b5666" stop-opacity=".18"/><stop offset="1" stop-color="#6b5666" stop-opacity="0"/></radialGradient><radialGradient id="paperLight" cx=".25" cy=".15" r=".9"><stop stop-color="#fffdf5" stop-opacity=".32"/><stop offset="1" stop-color="#fffdf5" stop-opacity="0"/></radialGradient></defs>
+<circle cx="240" cy="240" r="216" fill="#ffffff"/>
+<circle cx="240" cy="240" r="201" fill="#F6E2C4"/>
+<circle cx="240" cy="240" r="201" fill="url(#paperLight)"/>
+
+<ellipse cx="240" cy="401" rx="132" ry="24" fill="url(#ground)" />
+<g stroke="#4a3a40" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round">
+<path d="M191 285 Q240 266 289 285 Q316 324 310 386 Q240 419 170 386 Q165 325 191 285Z" fill="url(#shirt)" />
+<path d="M211 292 Q239 320 269 292" fill="none" stroke="#a89984" stroke-width="2.4"/>
+<g stroke="none" transform="rotate(-4 240 222) translate(240 480) scale(1.85)"><g transform="rotate(18 -46 -158)">
+<ellipse cx="-50" cy="-126" rx="15" ry="35" fill="url(#ear)" stroke="#4A3A40" stroke-width="2.6"/>
+<path d="M-35-126 C-35-106-42-91-50-91 C-57-91-63-101-65-114" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round"/>
+<ellipse cx="-50" cy="-121" rx="7" ry="23" fill="url(#pink)"/>
+<path d="M-59-141 Q-62-131-61-120" fill="none" stroke="#e4f3dd" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>
+</g>
+<g transform="rotate(-18 46 -158)">
+<ellipse cx="50" cy="-126" rx="15" ry="35" fill="url(#ear)" stroke="#4A3A40" stroke-width="2.6"/>
+<path d="M65-126 C65-106 58-91 50-91 C43-91 37-101 35-114" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round"/>
+<ellipse cx="50" cy="-121" rx="7" ry="23" fill="url(#pink)"/>
+<path d="M42-143 Q39-132 40-124" fill="none" stroke="#e4f3dd" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>
+</g>
+<path d="M-46-142 C-46-167-27-186 0-186 C26-186 46-167 46-142 C46-117 26-98 0-98 C-26-98-46-117-46-142Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6"/>
+<path d="M46-142 C46-117 26-98 0-98 C-14-98-27-104-35-112" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round"/>
+<path d="M-41-151 C-38-167-24-179-10-181" fill="none" stroke="#eef8e5" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>
+<path d="M39-125 Q28-105 10-103" fill="none" stroke="#739b85" stroke-width="1.15" stroke-linecap="round" opacity=".5"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-155 Q-17-156-12-155 M12-155 Q17-156 22-155" fill="none" stroke="#718a78" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#b5ceb0" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#b5ceb0" opacity=".75"/>
+<path d="M-8-126 Q-4-120 0-125 Q4-120 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#88a58c" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#859d83" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(4)"><ellipse cx="0" cy="56" rx="90" ry="12" fill="#e8e9e2"/><rect x="-64" y="-29" width="128" height="82" rx="10" fill="url(#cream)"/><path d="M-64 14 H64 V30 H-64Z" fill="#d9a1a4" stroke="none"/><path d="M-64-26 Q0-43 64-26 L64-7 Q52 11 41-6 Q26 9 12-6 Q0 12-13-6 Q-30 9-42-6 Q-54 9-64-7Z" fill="#fff8e8" /><path d="M-18-38 Q-17-75 3-74 Q25-68 18-41 Q0-29-18-38Z" fill="url(#rose)" /><path d="M-10-71 L0-78 L10-69" fill="none" stroke="#788e70" stroke-width="5"/><path d="M-7-57 L-5-53 M7-51 L9-47" fill="none" stroke="#fff4d9" stroke-width="3"/></g>
+<g transform="translate(240 347) rotate(4)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#ffe5be"/><stop offset=".48" stop-color="#f3c48f"/><stop offset=".82" stop-color="#eab07e"/><stop offset="1" stop-color="#d49770"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#fff1d7" stop-opacity=".62"/><stop offset="1" stop-color="#fff1d7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+<linearGradient id="curl" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#b7875f"/><stop offset="1" stop-color="#81573f"/></linearGradient>
+<radialGradient id="rose" cx=".25" cy=".18" r=".95"><stop stop-color="#f8dcd7"/><stop offset="1" stop-color="#ce909e"/></radialGradient><radialGradient id="sage" cx=".25" cy=".18" r=".95"><stop stop-color="#e2edce"/><stop offset="1" stop-color="#97b79d"/></radialGradient><radialGradient id="cream" cx=".25" cy=".18" r=".95"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#ddd6c8"/></radialGradient><radialGradient id="gold" cx=".25" cy=".18" r=".95"><stop stop-color="#fff0c1"/><stop offset="1" stop-color="#d1ae69"/></radialGradient><radialGradient id="sky" cx=".25" cy=".18" r=".95"><stop stop-color="#dceaf1"/><stop offset="1" stop-color="#9bb9cd"/></radialGradient><radialGradient id="toast" cx=".25" cy=".18" r=".95"><stop stop-color="#f5deb0"/><stop offset="1" stop-color="#cb9563"/></radialGradient><radialGradient id="shirt" cx=".25" cy=".18" r=".95"><stop stop-color="#fff5df"/><stop offset="1" stop-color="#daceb5"/></radialGradient><radialGradient id="ground"><stop stop-color="#6b5666" stop-opacity=".18"/><stop offset="1" stop-color="#6b5666" stop-opacity="0"/></radialGradient><radialGradient id="paperLight" cx=".25" cy=".15" r=".9"><stop stop-color="#fffdf5" stop-opacity=".32"/><stop offset="1" stop-color="#fffdf5" stop-opacity="0"/></radialGradient></defs>
+<circle cx="240" cy="240" r="216" fill="#ffffff"/>
+<circle cx="240" cy="240" r="201" fill="#F1DDC2"/>
+<circle cx="240" cy="240" r="201" fill="url(#paperLight)"/>
+<circle cx="240" cy="240" r="207" fill="none" stroke="#c9aa70" stroke-width="3"/>
+<ellipse cx="240" cy="401" rx="132" ry="24" fill="url(#ground)" />
+<g stroke="#4a3a40" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round">
+<path d="M191 285 Q240 266 289 285 Q316 324 310 386 Q240 419 170 386 Q165 325 191 285Z" fill="url(#shirt)" />
+<path d="M211 292 Q239 320 269 292" fill="none" stroke="#a89984" stroke-width="2.4"/>
+<g stroke="none" transform="rotate(-5 240 222) translate(240 480) scale(1.85)"><path d="M-47-145 C-46-168-29-185-5-187 C17-190 39-175 46-153 C53-130 40-109 19-102 C4-96-14-99-28-109 C-41-118-49-130-47-145Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M46-153 C53-130 40-109 19-102 C4-96-14-99-28-109" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-43-149 C-41-168-27-180-10-182" fill="none" stroke="#fff1d8" stroke-opacity=".64" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M41-128 Q34-108 12-103" fill="none" stroke="#aa7357" stroke-opacity=".5" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M-4-187 C-12-199 1-209 12-202 C22-195 14-185 7-191 C3-195 9-199 12-195" fill="none" stroke="#745140" stroke-width="6.4" stroke-linecap="round"/>
+<path d="M-4.5-189 C-10-199 1-206 11-200 C18-195 13-190 8-193" fill="none" stroke="url(#curl)" stroke-width="3.8" stroke-linecap="round"/>
+<path d="M-5-196 Q-1-204 7-201" fill="none" stroke="#e7ba85" stroke-width="1.1" stroke-linecap="round"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153" fill="none" stroke="#9a7155" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(5)"><path d="M-74 39 C-89 17-84-30-64-42 Q-47-57-28-48 Q-1-70 23-49 Q46-59 65-38 C86-13 90 22 72 40 Q0 61-74 39Z" fill="url(#toast)" /><path d="M-45-25 Q-53-7-47 11 M-8-34 Q-17-12-11 12 M30-27 Q22-8 29 11" fill="none" stroke="#ffedc5" stroke-width="9"/><path d="M-66 31 Q0 46 65 31" fill="none" stroke="#bc8558" stroke-width="3"/></g>
+<g transform="translate(240 347) rotate(5)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+<g fill="#c1a268"><path d="M111 133 Q114 144 124 147 Q113 149 111 161 Q108 149 98 147 Q109 144 111 133Z"/><path d="M361 187 Q364 195 372 198 Q363 200 361 209 Q359 200 351 198 Q359 195 361 187Z"/></g>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="600" viewBox="-90 -225 180 240">
+<defs>
+<radialGradient id="skin" cx=".28" cy=".22" r=".82"><stop stop-color="#ffe5be"/><stop offset=".48" stop-color="#f3c48f"/><stop offset=".82" stop-color="#eab07e"/><stop offset="1" stop-color="#d49770"/></radialGradient>
+<radialGradient id="cheek"><stop stop-color="#d77e76" stop-opacity=".47"/><stop offset=".6" stop-color="#e49481" stop-opacity=".25"/><stop offset="1" stop-color="#e49481" stop-opacity="0"/></radialGradient>
+<radialGradient id="muzzle"><stop stop-color="#fff1d7" stop-opacity=".62"/><stop offset="1" stop-color="#fff1d7" stop-opacity="0"/></radialGradient>
+<linearGradient id="eye" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#49373b"/><stop offset="1" stop-color="#715046"/></linearGradient>
+<linearGradient id="curl" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#b7875f"/><stop offset="1" stop-color="#81573f"/></linearGradient>
+</defs><path d="M-47-145 C-46-168-29-185-5-187 C17-190 39-175 46-153 C53-130 40-109 19-102 C4-96-14-99-28-109 C-41-118-49-130-47-145Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M46-153 C53-130 40-109 19-102 C4-96-14-99-28-109" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-43-149 C-41-168-27-180-10-182" fill="none" stroke="#fff1d8" stroke-opacity=".64" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M41-128 Q34-108 12-103" fill="none" stroke="#aa7357" stroke-opacity=".5" stroke-width="1.15" stroke-linecap="round"/>
+<path d="M-4-187 C-12-199 1-209 12-202 C22-195 14-185 7-191 C3-195 9-199 12-195" fill="none" stroke="#745140" stroke-width="6.4" stroke-linecap="round"/>
+<path d="M-4.5-189 C-10-199 1-206 11-200 C18-195 13-190 8-193" fill="none" stroke="url(#curl)" stroke-width="3.8" stroke-linecap="round"/>
+<path d="M-5-196 Q-1-204 7-201" fill="none" stroke="#e7ba85" stroke-width="1.1" stroke-linecap="round"/>
+<ellipse cx="-30" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="31" cy="-126" rx="12" ry="8" fill="url(#cheek)"/>
+<ellipse cx="0" cy="-124" rx="18" ry="13" fill="url(#muzzle)"/>
+<path d="M-22-154 Q-17-157-12-155 M12-155 Q17-157 21-153" fill="none" stroke="#9a7155" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<ellipse cx="-16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="16" cy="-142" rx="6.1" ry="7.7" fill="url(#eye)"/>
+<ellipse cx="-17.8" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<ellipse cx="14.2" cy="-145.1" rx="2.05" ry="2.45" fill="#fff9e9"/>
+<circle cx="-13.8" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g><path d="M-43-54 C-49-60-59-56-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44 C-36-42-34-46-37-49 Q-40-53-43-54Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M-55-50 Q-57-45-54-42" fill="none" stroke="#ffe7c5" stroke-width="1.15" stroke-linecap="round" opacity=".8"/><path d="M43-54 C49-60 58-55 60-48 C62-40 55-34 48-36 C43-37 40-40 41-44 C36-42 34-46 37-49 Q40-53 43-54Z" fill="url(#skin)" stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M46-53 Q51-56 55-51" fill="none" stroke="#ffe7c5" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+<path d="M-60-48 C-63-40-55-34-48-36 C-43-37-40-40-41-44" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M60-48 C62-40 55-34 48-36 C43-37 40-40 41-44" fill="none" stroke="#4A3A40" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+{
+  "name": "pattern-hide-family-beta",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "もようのかくれんぼ（仮）家族内テスト用ベータ。公開・課金なし。",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "verify:layouts": "vitest run tests/unit/placement.test.ts",
+    "validate:art": "node scripts/validate-art.mjs",
+    "art:guides": "node scripts/export-art-guides.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "5.0.3"
+  }
+}
+      (cover >= 0.7 ? ok : ng)(f, `からだの判定を服が覆う割合 ${(cover * 100).toFixed(0)}%（70%以上）`);
+    } else {
+      const op = grid.filter((p) => px.a[at(px, toPx(p).x, toPx(p).y)] > 128);
+      const out = op.filter((p) => dist(c.silhouette, p) > 10).length;
+      const lim = n === 'front-found' ? 0.12 : 0.04;
+      const r = op.length ? out / op.length : 0;
+      (r <= lim ? ok : ng)(f, `輪郭の判定からはみ出す割合 ${(r * 100).toFixed(1)}%（${lim * 100}%以下）`);
+      if (n === 'front' || n === 'front-found') {
+        const faceOk = c.facePoints.every((p) => near(px, 'a', toPx(p).x, toPx(p).y, 2) > 128);
+        (faceOk ? ok : ng)(f, faceOk ? '顔の位置に絵がある' : '顔の位置（目・口）に絵が無い');
+      }
+    }
+  }
+}
+
+// ---- シーン
+for (const sid of G.SCENE_IDS) {
+  const d = join(ART, 'scenes', sid);
+  if (!existsSync(d)) continue;
+  const sc = G.SCENES[sid];
+  const pick = (n) => ['webp', 'png', 'svg'].map((e) => join(d, `${n}.${e}`)).find(existsSync);
+  for (const n of ['back', 'over', 'minor', 'fore']) {
+    const f = pick(n);
+    if (!f) continue;
+    const px = await pixels(f, 1000, 1000);
+    if (px.nw !== px.nh || px.nw < 1000) ng(f, `寸法 ${px.nw}×${px.nh}（正方形・1000以上）`);
+    if (n === 'back') {
+      ok(f, '寸法確認のみ');
+      continue;
+    }
+    let bad = 0;
+    for (const sp of sc.spots) {
+      for (const cid of G.CHARACTER_IDS) {
+        const t = G.spotTransform(sp);
+        const face = G.CHARACTERS[cid].facePoints.map((p) => G.transformPt(t, p));
+        const faceA = Math.max(...face.map((p) => near(px, 'a', p.x, p.y, 4)));
+        const body = G.samplePoints(G.transformShape(t, G.BODY), 6);
+        if (n === 'fore') {
+          const sil = G.silhouetteWorld(cid, sp).flatMap((s) => G.samplePoints(s, 6));
+          const vis = sil.filter((p) => px.a[at(px, p.x, p.y)] <= 128).length / sil.length;
+          const bvis = body.filter((p) => px.a[at(px, p.x, p.y)] <= 128).length / body.length;
+          const probs = [];
+          if (faceA > 76) probs.push('顔に重なる');
+          if (vis < G.LIMITS.minVisible) probs.push(`見える割合 ${vis.toFixed(2)} < ${G.LIMITS.minVisible}`);
+          if (bvis < G.LIMITS.minBodyVisible) probs.push(`服が見える割合 ${bvis.toFixed(2)} < ${G.LIMITS.minBodyVisible}`);
+          if (bvis > G.LIMITS.maxBodyVisible) probs.push(`服がまったく隠れていない ${bvis.toFixed(2)}`);
+          if (probs.length) {
+            bad++;
+            ng(f, `${sp.id}/${cid}: ${probs.join('、')}`);
+          }
+        } else {
+          const mean = body.reduce((s, p) => s + px.a[at(px, p.x, p.y)], 0) / body.length / 255;
+          const probs = [];
+          if (faceA > 76) probs.push('顔の後ろに濃い絵がある（顔の輪郭が読みにくくなる）');
+          if (mean > 0.35) probs.push(`服の後ろの濃さ ${mean.toFixed(2)} > 0.35（柄が溶け込まなくなる）`);
+          if (probs.length) {
+            bad++;
+            ng(f, `${sp.id}/${cid}: ${probs.join('、')}`);
+          }
+        }
+      }
+    }
+    if (!bad) ok(f, `全 ${sc.spots.length} か所 × ${G.CHARACTER_IDS.length}体で問題なし`);
+  }
+}
+
+// ---- 帽子・傘（全員共通。枠 600×720px ＝ ローカル座標 x -150〜150, y -345〜15）
+const AF = G.ACC_FRAME;
+const AC_SCALE = 1; // 1単位 = 1px で検査
+const shaftRect = { kind: 'rect', x: G.UMBRELLA_SHAFT.x - 6, y: G.UMBRELLA_SHAFT.y1 - 6, w: 12, h: G.UMBRELLA_SHAFT.y0 - G.UMBRELLA_SHAFT.y1 + 12 };
+for (const kind of ['hat', 'umbrella']) {
+  const d = join(ART, 'accessories', kind);
+  if (!existsSync(d)) continue;
+  const pick = (n) => ['webp', 'png', 'svg'].map((e) => join(d, `${n}.${e}`)).find(existsSync);
+  const shapes = kind === 'hat' ? G.hatShapes() : G.umbrellaShapes();
+  const allowed = kind === 'hat' ? shapes : [...shapes, shaftRect];
+  if (!pick('mask')) {
+    ng(d, 'mask が必要（無いと使われません）');
+    continue;
+  }
+  const W = AF.w * AC_SCALE;
+  const H = AF.h * AC_SCALE;
+  const toPx = (p) => ({ x: (p.x - AF.x) * AC_SCALE, y: (p.y - AF.y) * AC_SCALE });
+  const grid = [];
+  for (let y = AF.y + 1; y < AF.y + AF.h; y += 2) for (let x = AF.x + 1; x < AF.x + AF.w; x += 2) grid.push({ x, y });
+  const dist = (sh, p) => Math.min(...sh.map((s) => G.distanceTo(s, p)));
+  // 顔（全員共通の目と口）とその周り
+  const face = G.CHARACTERS.koro.facePoints;
+  for (const n of ['mask', 'shade', 'line', 'front', 'back']) {
+    const f = pick(n);
+    if (!f) continue;
+    const px = await pixels(f, W, H);
+    const ar = px.nw / px.nh;
+    if (Math.abs(ar - AF.w / AF.h) > 0.01 || px.nw < 600) ng(f, `寸法 ${px.nw}×${px.nh}（600×720 か、その整数倍）`);
+    const on = n === 'mask' ? (p) => px.l[at(px, toPx(p).x, toPx(p).y)] > 128 : (p) => px.a[at(px, toPx(p).x, toPx(p).y)] > 128;
+    const pts = grid.filter(on);
+    const out = pts.filter((p) => dist(allowed, p) > (n === 'mask' ? 6 : 10)).length;
+    const r = pts.length ? out / pts.length : 0;
+    const lim = n === 'mask' ? 0.05 : 0.04;
+    (r <= lim ? ok : ng)(f, `形の判定からはみ出す割合 ${(r * 100).toFixed(1)}%（${lim * 100}%以下）`);
+    if (n === 'mask') {
+      const inner = shapes.flatMap((s) => G.samplePoints(s, 3));
+      const cover = inner.filter(on).length / inner.length;
+      (cover >= 0.7 ? ok : ng)(f, `形の判定を白が覆う割合 ${(cover * 100).toFixed(0)}%（70%以上）`);
+    }
+    const faceHit = face.some((p) => near(px, n === 'mask' ? 'l' : 'a', toPx(p).x, toPx(p).y, 6) > 60);
+    (faceHit ? ng : ok)(f, faceHit ? '顔（目・口）の位置に絵がある' : '顔に重ならない');
+  }
+}
+
+// ---- 柄タイル
+const pdir = join(ART, 'patterns');
+for (const f of list(pdir)) {
+  // 背景の一覧はゲームの定義から（背景パックが増えても検査できる）
+  const m = basename(f).match(new RegExp(`^(${G.SCENE_IDS.join('|')})-(plain|stripes|dots|check|leaf)\\.(png|webp|svg)$`));
+  if (!m) {
+    ng(f, `ファイル名は {${G.SCENE_IDS.join('|')}}-{costume}.png の形（例 room-stripes.png）`);
+    continue;
+  }
+  if (!G.SCENES[m[1]].costumes.some((c) => c.id === m[2])) ng(f, `${m[1]} に ${m[2]} の服はありません`);
+  const px = await pixels(f, 128, 128);
+  if (px.nw !== px.nh || px.nw < 64) ng(f, `寸法 ${px.nw}×${px.nh}（正方形・64以上）`);
+  let diff = 0;
+  for (let i = 0; i < 128; i++) {
+    diff += Math.abs(px.l[at(px, 0, i)] - px.l[at(px, 127, i)]) + Math.abs(px.l[at(px, i, 0)] - px.l[at(px, i, 127)]);
+  }
+  diff /= 256;
+  const opaque = px.a.every((v) => v > 250);
+  (diff < 28 ? ok : ng)(f, `つなぎ目の差 ${diff.toFixed(1)}（28未満）`);
+  (opaque ? ok : ng)(f, opaque ? '不透明' : '透明な部分がある（柄タイルは不透明にしてください）');
+}
+
+// ---- UI
+for (const f of list(join(ART, 'ui'))) {
+  if (!/^(title|handoff|bye)\.(png|webp|svg)$/.test(basename(f))) {
+    ng(f, 'ファイル名は title / handoff / bye のいずれか');
+    continue;
+  }
+  const px = await pixels(f, 64, 64);
+  (px.nw <= 2000 && px.nh <= 2000 ? ok : ng)(f, `寸法 ${px.nw}×${px.nh}`);
+}
+
+// ---- うごくもの（コース）・じぶんの へや。SVG だけ。枠をそろえる（足もと中央が 0,0）
+const viewBoxOf = (f) => (readFileSync(f, 'utf8').match(/viewBox\s*=\s*["']([^"']+)["']/) ?? [])[1]?.trim().split(/[\s,]+/).map(Number).join(' ');
+for (const [dir, want, re] of [
+  ['movers', '-150 -300 300 300', /^[a-z0-9-]+\.svg$/],
+  ['myroom/items', '-150 -300 300 300', /^[a-z0-9-]+\.svg$/],
+  ['myroom/rooms', '0 0 1000 1000', /^(living|bedroom|yard)\.svg$/],
+]) {
+  for (const f of list(join(ART, dir))) {
+    if (!re.test(basename(f))) {
+      ng(f, `ファイル名か形式が決まりと違う（${dir}：小文字の英数字.svg）`);
+      continue;
+    }
+    const vb = viewBoxOf(f);
+    (vb === want ? ok : ng)(f, vb === want ? `枠 ${want}` : `viewBox が ${vb ?? 'なし'}（決まり：${want}）`);
+    if (/<animate|<set\b|@keyframes|animation\s*:/i.test(readFileSync(f, 'utf8'))) ng(f, 'SVG の中で動かさない（動きはゲームがつける）');
+  }
+}
+await browser.close();
+
+const fails = results.filter((r) => !r.ok);
+const lines = [
+  `# 絵の自動検査結果`,
+  ``,
+  `対象：\`${ART}/\`（${files.length}ファイル、合計 ${(total / 1024).toFixed(0)}KB） 実行：${new Date().toISOString()}`,
+  ``,
+  files.length === 0 ? '差し替えの絵はまだありません（ゲームはコードで描いた既定の絵を使います）。' : fails.length ? `**不合格 ${fails.length} 件**` : '**すべて合格**',
+  ``,
+  `| 結果 | ファイル | 内容 |`,
+  `|---|---|---|`,
+  ...results.map((r) => `| ${r.ok ? 'OK' : 'NG'} | ${r.file} | ${r.msg} |`),
+  ``,
+  `見た目の良し悪し・幼児にとっての難しさ・既存作品との似ている度合いは、この検査では分かりません。`,
+];
+mkdirSync('art-guides', { recursive: true });
+writeFileSync(dirArg > 0 ? join(ART, 'ART_CHECK.md') : 'art-guides/ART_CHECK.md', lines.join('\n') + '\n');
+console.log(lines.slice(0, 5).join('\n'));
+for (const r of fails.slice(0, 40)) console.log('NG', r.file, r.msg);
+process.exit(fails.length ? 1 : 0);
+ M codex-jobs/QUEUE.md
+ M scripts/validate-art.mjs
+ M src/art/registry.ts
+?? codex-jobs/14-movers-myroom.md
+?? src/core/myroom.ts
+?? video/hide-handoff-find.webm
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem art/stickers/*.svg | ForEach-Object { $_.Name; (Get-Content -Encoding UTF8 $_.FullName | Select-Object -Last 6) }
+Get-Content -Encoding UTF8 scripts/validate-art.mjs | Select-Object -First 90
+Get-Content -Encoding UTF8 art/scenes/beach/back.svg
+Get-Content -Encoding UTF8 art/README.md | Select-Object -First 20' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 345ms:
+b1.svg
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8179" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b87f75" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 350)"><path d="M-18 48 Q-50 28-67-4 C-76-24-58-35-45-25 C-47-47-22-56-10-38 C0-61 27-50 29-32 C49-46 68-28 58-9 C80-9 77 13 59 27 L18 48 Q0 59-18 48Z" fill="url(#cream)"/><path d="M-18 44 Q-39 10-45-25 M-7 43 Q-18 1-10-38 M7 43 Q19 2 29-32 M18 44 Q42 19 58-9" fill="none" stroke="#bda693" stroke-width="2.7"/><path d="M-20 46 Q0 34 20 46 L17 55 Q0 62-17 55Z" fill="url(#rose)"/><path d="M-62-10 Q-65-21-58-24" fill="none" stroke="#fffdf6" stroke-width="3"/></g>
+<g transform="translate(240 350)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)"/><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)"/></g>
+</g>
+</svg>
+b10.svg
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 355)"><path d="M-79 0 A79 52 0 1 0 79 0 A79 52 0 1 0-79 0Z M-42 0 A42 24 0 1 1 42 0 A42 24 0 1 1-42 0Z" fill="url(#sky)" fill-rule="evenodd"/><path d="M-63-31 Q-45-47-23-49 L-13-23 Q-26-21-33-14Z M63 31 Q45 47 23 49 L13 23 Q26 21 33 14Z" fill="url(#cream)" stroke-width="2.4"/><path d="M-65-13 Q-61-29-45-33" fill="none" stroke="#f8fcff" stroke-width="3"/></g>
+<g transform="translate(240 335)"><ellipse cx="-80" cy="0" rx="17" ry="23" fill="url(#skin)"/><ellipse cx="80" cy="0" rx="17" ry="23" fill="url(#skin)"/></g>
+</g>
+</svg>
+b30.svg
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8179" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b87f75" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 347) rotate(-7)"><path d="M-7-54 Q0-69 7-54 L22-24 55-19 Q72-17 59-4 L34 20 39 53 Q42 69 27 61 L0 46-29 61 Q-44 68-40 51 L-34 20-59-4 Q-72-17-54-20 L-22-24Z" fill="url(#gold)"/><path d="M-5-44 L-15-18-44-13 M-27 25 L-29 45" fill="none" stroke="#fff7d8" stroke-width="3.4"/><path d="M-6-2 Q0-7 6-2 M-10 15 Q0 20 10 15" fill="none" stroke="#b49462" stroke-width="2.4" opacity=".65"/></g>
+<g transform="translate(240 350)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)"/><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)"/></g>
+</g><g fill="url(#gold)" stroke="#b59b70" stroke-width="2" stroke-linejoin="round"><path d="M111 235 Q115 251 125 255 Q115 259 111 274 Q107 259 97 255 Q107 251 111 235Z"/><path d="M373 211 Q376 223 385 227 Q376 231 373 243 Q370 231 361 227 Q370 223 373 211Z"/></g><g fill="#fff7dd"><circle cx="118" cy="293" r="4"/><circle cx="357" cy="277" r="4"/></g>
+</svg>
+c1.svg
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(7)"><circle r="63" fill="url(#rose)"/><path d="M-52-36 Q-7-8-12 61 A63 63 0 0 1-52-36" fill="url(#cream)" /><path d="M-3-63 Q24-9 62 8 A63 63 0 0 0-3-63" fill="url(#sage)" /><path d="M-52-36 Q-7-8-12 61 M-3-63 Q24-9 62 8" fill="none" stroke-width="2.4"/></g>
+<g transform="translate(240 347) rotate(7)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+c10.svg
+<g fill="#a18ba6" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(0)"><path d="M-68 40 L-79-35 Q-80-43-72-37 L-34-8 L-6-59 Q0-69 6-58 L34-8 L72-37 Q80-43 79-34 L68 40 Q0 61-68 40Z" fill="url(#gold)" /><path d="M-65 23 Q0 41 65 23" fill="none" stroke="#a88458" stroke-width="3"/><ellipse cx="0" cy="6" rx="10" ry="13" fill="url(#rose)" /><ellipse cx="-42" cy="9" rx="5" ry="6" fill="#a9c2b1" /><ellipse cx="42" cy="9" rx="5" ry="6" fill="#a9c2b1" /></g>
+<g transform="translate(240 347) rotate(0)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+c2.svg
+<g fill="#859d83" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(-5)"><path d="M-76-52 Q-5-66 72-49 Q61 0 76 51 Q0 66-75 48 Q-63 0-76-52Z" fill="url(#rose)" /><path d="M-62-39 Q0-50 59-38 Q50 0 62 39 Q0 49-60 37 Q-50 0-62-39Z" fill="none" stroke="#a7747b" stroke-width="2" stroke-dasharray="3 6"/><ellipse cx="0" cy="0" rx="6" ry="5" fill="#e7b9bb" /><path d="M-8-8 L-18-16 M8 8 L18 16" fill="none" stroke-width="2.4"/></g>
+<g transform="translate(240 347) rotate(-5)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+c3.svg
+<g fill="#a18ba6" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(4)"><path d="M-69 39 C-109 33-96-18-63-17 C-69-56-14-73 5-39 C28-67 71-45 67-16 C106-14 103 36 74 41 Q5 55-69 39Z" fill="url(#cream)" /><path d="M-74 18 Q-84-3-65-7 M-49-25 Q-43-44-23-43" fill="none" stroke="#fffdf4" stroke-width="5"/></g>
+<g transform="translate(240 347) rotate(4)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+c4.svg
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(6)"><path d="M0 58 Q-8 23 0-4" fill="none" stroke="#748b6c" stroke-width="8"/><path d="M-3 39 Q-46 44-43 12 Q-12 9-3 39 M0 25 Q42 31 43 2 Q13 0 0 25" fill="url(#sage)" /><g transform="translate(0 -24)"><g transform="rotate(0)"><ellipse cx="0" cy="-26" rx="22" ry="30" fill="url(#rose)" /></g><g transform="rotate(72)"><ellipse cx="0" cy="-26" rx="22" ry="30" fill="url(#rose)" /></g><g transform="rotate(144)"><ellipse cx="0" cy="-26" rx="22" ry="30" fill="url(#rose)" /></g><g transform="rotate(216)"><ellipse cx="0" cy="-26" rx="22" ry="30" fill="url(#rose)" /></g><g transform="rotate(288)"><ellipse cx="0" cy="-26" rx="22" ry="30" fill="url(#rose)" /></g><circle r="23" fill="url(#gold)"/><ellipse cx="-7" cy="-7" rx="6" ry="4" fill="#fff1cc" stroke="none"/></g></g>
+<g transform="translate(240 347) rotate(6)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+c5.svg
+<ellipse cx="-69" cy="7" rx="17" ry="23" fill="url(#skin)"/>
+<ellipse cx="69" cy="7" rx="17" ry="23" fill="url(#skin)"/>
+<path d="M-75-3 Q-80 4-76 11 M63-3 Q58 4 62 11" fill="none" stroke="#fff0e5" stroke-width="2" opacity=".8"/>
+</g>
+</g>
+</svg>
+c6.svg
+<g fill="#859d83" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(4)"><ellipse cx="0" cy="56" rx="90" ry="12" fill="#e8e9e2"/><rect x="-64" y="-29" width="128" height="82" rx="10" fill="url(#cream)"/><path d="M-64 14 H64 V30 H-64Z" fill="#d9a1a4" stroke="none"/><path d="M-64-26 Q0-43 64-26 L64-7 Q52 11 41-6 Q26 9 12-6 Q0 12-13-6 Q-30 9-42-6 Q-54 9-64-7Z" fill="#fff8e8" /><path d="M-18-38 Q-17-75 3-74 Q25-68 18-41 Q0-29-18-38Z" fill="url(#rose)" /><path d="M-10-71 L0-78 L10-69" fill="none" stroke="#788e70" stroke-width="5"/><path d="M-7-57 L-5-53 M7-51 L9-47" fill="none" stroke="#fff4d9" stroke-width="3"/></g>
+<g transform="translate(240 347) rotate(4)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+c7.svg
+<g fill="#a18ba6" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(-7)"><path d="M26-64 C-48-72-87-4-48 43 C-19 78 36 65 61 31 C17 48-24 15-19-20 Q-13-52 26-64Z" fill="url(#gold)" /><path d="M-45-33 Q-62-3-45 23" fill="none" stroke="#fff2cf" stroke-width="4"/><ellipse cx="-34" cy="29" rx="8" ry="7" fill="#d4b773" stroke="none" opacity=".45"/></g>
+<g transform="translate(240 347) rotate(-7)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+c8.svg
+<g fill="#889ab5" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(6)"><path d="M-62 0 Q-86-32-97-32 Q-90 0-97 33 Q-81 31-62 8 C-26 61 44 57 82 0 C44-54-27-54-62 0Z" fill="url(#sky)" /><path d="M-12-36 Q-3-61 23-40 M-13 38 Q0 59 24 40" fill="url(#sage)" /><path d="M42-26 Q23 0 42 27 M-36-15 Q-23-4-36 7 M-13-18 Q0-6-13 7 M9-15 Q20-5 9 6" fill="none" stroke-width="2.4"/><ellipse cx="55" cy="-5" rx="5" ry="6" fill="#4a3a40" /><ellipse cx="54" cy="-7" rx="1.5" ry="2" fill="#fff9ed" stroke="none"/></g>
+<g transform="translate(240 347) rotate(6)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+c9.svg
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(0)"><path d="M-82 38 A82 82 0 0 1 82 38" fill="none" stroke="#cf9094" stroke-width="15"/><path d="M-68 38 A68 68 0 0 1 68 38" fill="none" stroke="#e2b385" stroke-width="15"/><path d="M-54 38 A54 54 0 0 1 54 38" fill="none" stroke="#e8d29a" stroke-width="15"/><path d="M-40 38 A40 40 0 0 1 40 38" fill="none" stroke="#a9c7ad" stroke-width="15"/><path d="M-26 38 A26 26 0 0 1 26 38" fill="none" stroke="#a6bacf" stroke-width="15"/><path d="M-106 46 C-124 25-101 8-89 19 C-78-7-48 3-49 24 C-25 18-23 48-43 51Z M46 51 C26 46 28 22 48 24 C47 2 79-6 89 19 C110 10 123 37 105 47Z" fill="url(#cream)" stroke-width="3"/></g>
+<g transform="translate(240 347) rotate(0)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+
+</svg>
+f10.svg
+<g fill="#859d83" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(-5)"><path d="M-65 50 C-94-26-29-59 74-57 C79 12 35 66-65 50Z" fill="url(#sage)" /><path d="M-76 61 Q-8 7 60-42 M-42 35 L-49-10 M-13 12 L-20-31 M17-11 L20-40 M-43 35 L2 40 M-13 12 L38 18" fill="none" stroke="#6e8d76" stroke-width="3"/><path d="M-54-8 Q-31-36 6-42" fill="none" stroke="#e5f1d1" stroke-width="4"/></g>
+<g transform="translate(240 347) rotate(-5)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+<g fill="#c1a268"><path d="M111 133 Q114 144 124 147 Q113 149 111 161 Q108 149 98 147 Q109 144 111 133Z"/><path d="M361 187 Q364 195 372 198 Q363 200 361 209 Q359 200 351 198 Q359 195 361 187Z"/></g>
+</svg>
+f100.svg
+<g fill="#889ab5" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(282 319) scale(.95)"><path d="M2 37 Q-34 56-10 77 Q10 94-6 110" fill="none" stroke="#8d8291" stroke-width="2.4"/><ellipse cx="0" cy="-19" rx="51" ry="65" fill="url(#rose)" /><path d="M0 44 L-8 53 Q0 58 8 53Z" fill="url(#rose)" /><path d="M-34-34 Q-32-57-13-63" fill="none" stroke="#ffeadf" stroke-width="5"/></g>
+<ellipse cx="267" cy="378" rx="20" ry="14" fill="url(#skin)" /><ellipse cx="188" cy="338" rx="18" ry="23" fill="url(#skin)" />
+</g>
+<g fill="#c1a268"><path d="M111 133 Q114 144 124 147 Q113 149 111 161 Q108 149 98 147 Q109 144 111 133Z"/><path d="M361 187 Q364 195 372 198 Q363 200 361 209 Q359 200 351 198 Q359 195 361 187Z"/></g>
+</svg>
+f150.svg
+<g fill="#859d83" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(4)"><path d="M-5-64 Q0-74 5-64 L23-24 L65-19 Q76-18 68-10 L36 20 L43 61 Q45 71 35 66 L0 46 L-36 66 Q-46 71-43 60 L-36 20 L-68-10 Q-77-18-65-19 L-23-24Z" fill="url(#gold)" /><path d="M0-49 L-16-14 L-47-10" fill="none" stroke="#fff1ce" stroke-width="4"/></g>
+<g transform="translate(240 347) rotate(4)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+<g fill="#c1a268"><path d="M111 133 Q114 144 124 147 Q113 149 111 161 Q108 149 98 147 Q109 144 111 133Z"/><path d="M361 187 Q364 195 372 198 Q363 200 361 209 Q359 200 351 198 Q359 195 361 187Z"/></g>
+</svg>
+f30.svg
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(5)"><path d="M-74 39 C-89 17-84-30-64-42 Q-47-57-28-48 Q-1-70 23-49 Q46-59 65-38 C86-13 90 22 72 40 Q0 61-74 39Z" fill="url(#toast)" /><path d="M-45-25 Q-53-7-47 11 M-8-34 Q-17-12-11 12 M30-27 Q22-8 29 11" fill="none" stroke="#ffedc5" stroke-width="9"/><path d="M-66 31 Q0 46 65 31" fill="none" stroke="#bc8558" stroke-width="3"/></g>
+<g transform="translate(240 347) rotate(5)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+<g fill="#c1a268"><path d="M111 133 Q114 144 124 147 Q113 149 111 161 Q108 149 98 147 Q109 144 111 133Z"/><path d="M361 187 Q364 195 372 198 Q363 200 361 209 Q359 200 351 198 Q359 195 361 187Z"/></g>
+</svg>
+f60.svg
+<g fill="#a18ba6" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(-5)"><path d="M0 61 C-14 49-79 11-75-29 C-73-70-20-77 0-42 C24-78 75-64 76-28 C77 9 21 49 0 61Z" fill="url(#rose)" /><path d="M-57-29 Q-58-46-42-50" fill="none" stroke="#ffe9df" stroke-width="5"/></g>
+<g transform="translate(240 347) rotate(-5)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+<g fill="#c1a268"><path d="M111 133 Q114 144 124 147 Q113 149 111 161 Q108 149 98 147 Q109 144 111 133Z"/><path d="M361 187 Q364 195 372 198 Q363 200 361 209 Q359 200 351 198 Q359 195 361 187Z"/></g>
+</svg>
+// art/ の絵を自動検査する（npm run validate:art）。
+// 形式・寸法・安全性に加え、ゲームと同じ形状データで「顔が隠れない」「全面を隠さない」
+// 「服の形がからだの判定とずれない」「柄タイルがつなぎ目なく並ぶ」を確かめる。
+// 見た目の良し悪し・幼児にとっての難しさは検査しない（人が見る）。
+import { chromium } from '@playwright/test';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, extname, basename } from 'node:path';
+import { loadGeometry } from './lib/load-geometry.mjs';
+
+const dirArg = process.argv.indexOf('--dir');
+const ART = dirArg > 0 ? process.argv[dirArg + 1] : 'art';
+const G = await loadGeometry();
+const F = G.CHAR_FRAME;
+const MAX_FILE = 800 * 1024;
+const MAX_TOTAL = 8 * 1024 * 1024;
+const results = []; // {file, ok, msg}
+const ok = (file, msg) => results.push({ file, ok: true, msg });
+const ng = (file, msg) => results.push({ file, ok: false, msg });
+
+function list(d) {
+  if (!existsSync(d)) return [];
+  return readdirSync(d).flatMap((f) => {
+    const p = join(d, f);
+    return statSync(p).isDirectory() ? list(p) : [p];
+  });
+}
+const files = list(ART).filter((f) => !basename(f).startsWith('.') && !['README.md', 'ART_CHECK.md'].includes(basename(f)));
+const MIME = { '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
+
+// ---- 形式・安全性
+let total = 0;
+for (const f of files) {
+  const ext = extname(f).toLowerCase();
+  const size = statSync(f).size;
+  total += size;
+  if (!MIME[ext]) {
+    ng(f, `使えない形式 ${ext}（png / webp / svg のみ）`);
+    continue;
+  }
+  if (size > MAX_FILE) ng(f, `大きすぎ ${(size / 1024).toFixed(0)}KB > ${MAX_FILE / 1024}KB`);
+  if (ext === '.svg') {
+    const t = readFileSync(f, 'utf8');
+    if (/<script|on[a-z]+\s*=|<foreignObject|javascript:/i.test(t)) ng(f, 'SVG にスクリプト／イベント属性／foreignObject がある');
+    if (/(href|src)\s*=\s*["'](?!#|data:image\/)/i.test(t) || /url\(\s*['"]?(?!#)/i.test(t)) ng(f, 'SVG が外部ファイル・URLを参照している（同じファイル内の #id と data:image のみ可）');
+    if (/<text|font-family/i.test(t)) ng(f, 'SVG に文字・フォント指定がある（端末で見た目が変わるため、線に変換してください）');
+  }
+}
+if (total > MAX_TOTAL) ng(ART, `合計が大きすぎ ${(total / 1048576).toFixed(1)}MB > 8MB`);
+
+// ---- 画素の読み取り（Chromium の canvas）
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.setContent('<html><body></body></html>');
+async function pixels(file, w, h) {
+  const data = `data:${MIME[extname(file).toLowerCase()]};base64,${readFileSync(file).toString('base64')}`;
+  return page.evaluate(
+    async ({ data, w, h }) => {
+      const img = new Image();
+      img.src = data;
+      await img.decode();
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const x = c.getContext('2d');
+      x.drawImage(img, 0, 0, w, h);
+      const d = x.getImageData(0, 0, w, h).data;
+      const a = new Uint8Array(w * h);
+      const l = new Uint8Array(w * h);
+      for (let i = 0; i < w * h; i++) {
+        a[i] = d[i * 4 + 3];
+        l[i] = Math.round((d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114) * (d[i * 4 + 3] / 255));
+      }
+      const b64 = (u) => {
+        let s = '';
+        for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+        return btoa(s);
+      };
+      return { nw: img.naturalWidth, nh: img.naturalHeight, a: b64(a), l: b64(l), w, h };
+    },
+    { data, w, h },
+  ).then((r) => ({ ...r, a: Buffer.from(r.a, 'base64'), l: Buffer.from(r.l, 'base64') }));
+}
+const at = (px, x, y) => {
+  const xi = Math.min(px.w - 1, Math.max(0, Math.round(x)));
+  const yi = Math.min(px.h - 1, Math.max(0, Math.round(y)));
+  return xi + yi * px.w;
+};
+const near = (px, arr, x, y, r) => {
+  let m = 0;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) m = Math.max(m, px[arr][at(px, x + dx, y + dy)]);
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000" viewBox="0 0 1000 1000">
+<defs><linearGradient id="sky" x2=".8" y2="1"><stop stop-color="#D2E9F0"/><stop offset="1" stop-color="#F2F3E8"/></linearGradient><linearGradient id="sea" x2=".8" y2="1"><stop stop-color="#92C6D5"/><stop offset="1" stop-color="#BEDDDC"/></linearGradient><linearGradient id="wood" x2=".8" y2="1"><stop stop-color="#EDCBA0"/><stop offset="1" stop-color="#BD9369"/></linearGradient><linearGradient id="roof" x2=".8" y2="1"><stop stop-color="#F1B59E"/><stop offset="1" stop-color="#CF8C7B"/></linearGradient><linearGradient id="cream" x2=".8" y2="1"><stop stop-color="#FFFAE9"/><stop offset="1" stop-color="#E7DCC3"/></linearGradient><linearGradient id="gold" x2=".8" y2="1"><stop stop-color="#F9E3AA"/><stop offset="1" stop-color="#DDB878"/></linearGradient><linearGradient id="blue" x2=".8" y2="1"><stop stop-color="#C4DEEA"/><stop offset="1" stop-color="#8FB4CA"/></linearGradient><linearGradient id="pink" x2=".8" y2="1"><stop stop-color="#F2C6C2"/><stop offset="1" stop-color="#D999A0"/></linearGradient><linearGradient id="sand" x2=".8" y2="1"><stop stop-color="#F5E2B7"/><stop offset="1" stop-color="#D9B987"/></linearGradient><linearGradient id="shell" x2=".8" y2="1"><stop stop-color="#FFF1E6"/><stop offset="1" stop-color="#E7BFB3"/></linearGradient><radialGradient id="shadow"><stop stop-color="#7A5B48" stop-opacity=".22"/><stop offset="1" stop-color="#7A5B48" stop-opacity="0"/></radialGradient><radialGradient id="sun"><stop stop-color="#FFF0BF"/><stop offset="1" stop-color="#F7DFAB"/></radialGradient><mask id="face-clear" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000"><rect x="0" y="0" width="1000" height="1000" rx="0" fill="white" stroke="none" stroke-width="2.6"/><ellipse cx="110" cy="510" rx="63" ry="59" fill="black" stroke="none" stroke-width="2.6" /><ellipse cx="260" cy="510" rx="63" ry="59" fill="black" stroke="none" stroke-width="2.6" /><ellipse cx="690" cy="510" rx="63" ry="59" fill="black" stroke="none" stroke-width="2.6" /><ellipse cx="880" cy="510" rx="63" ry="59" fill="black" stroke="none" stroke-width="2.6" /><ellipse cx="490" cy="742" rx="63" ry="59" fill="black" stroke="none" stroke-width="2.6" /><ellipse cx="660" cy="806" rx="63" ry="59" fill="black" stroke="none" stroke-width="2.6" /><ellipse cx="830" cy="742" rx="63" ry="59" fill="black" stroke="none" stroke-width="2.6" /><ellipse cx="150" cy="758" rx="63" ry="59" fill="black" stroke="none" stroke-width="2.6" /><ellipse cx="320" cy="825.1" rx="60" ry="56.2" fill="black" stroke="none" stroke-width="2.6" /></mask><mask id="open-background" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000"><rect x="0" y="0" width="1000" height="1000" rx="0" fill="white" stroke="none" stroke-width="2.6"/><rect x="0" y="470" width="1000" height="530" rx="0" fill="black" stroke="none" stroke-width="2.6"/><rect x="30" y="250" width="300" height="404" rx="0" fill="black" stroke="none" stroke-width="2.6"/><rect x="600" y="440" width="380" height="214" rx="6" fill="black" stroke="none" stroke-width="2.6"/></mask></defs>
+<g mask="url(#open-background)"><rect x="0" y="0" width="1000" height="470" rx="0" fill="url(#sky)" stroke="none" stroke-width="2.6"/><ellipse cx="880" cy="96" rx="47" ry="47" fill="url(#sun)" stroke="none" stroke-width="2.6" /><rect x="0" y="330" width="1000" height="140" rx="0" fill="url(#sea)" stroke="none" stroke-width="2.6"/><path d="M0 332 H1000" fill="none" stroke="#EAF5F2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /><path d="M0 372 q50 -6 100 0 q50 -6 100 0 q50 -6 100 0 q50 -6 100 0 q50 -6 100 0 q50 -6 100 0 q50 -6 100 0 q50 -6 100 0 q50 -6 100 0 q50 -6 100 0" fill="none" stroke="#EFF8F4" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" /><path d="M0 419 q62.5 -9 125 0 q62.5 -9 125 0 q62.5 -9 125 0 q62.5 -9 125 0 q62.5 -9 125 0 q62.5 -9 125 0 q62.5 -9 125 0 q62.5 -9 125 0" fill="none" stroke="#E8F5EF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /><path d="M0 451 q80 -5 160 0 q80 -5 160 0 q80 -5 160 0 q80 -5 160 0 q80 -5 160 0 q80 -5 160 0 q80 -5 160 0" fill="none" stroke="#E0F0E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></g>
+</svg>
+# art/
+
+差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+
+## 作業記録
+### 2026-10-08：ジョブ13（アプリアイコン・起動画面）
+
+- 作成ファイル：`app/icon.svg`（1024×1024px）、`app/splash.svg`（2732×2732px）、本README。
+- 方法：SVGをコードで記述。既存の自作キャラクターの輪郭・顔・グラデーションをファイル内に展開し、タイトルPNGの構図とroom-dotsの色を参照。画像生成・ネット画像・外部サービス・別料金APIは使用していない。文字・外部参照・スクリプトなし。
+- アイコン：ころが水玉の布からのぞく構図。服と布に同じ座標・周期の水玉を使い、服の輪郭を薄くして柄をつなげた。四隅まで不透明な正方形、角丸なし。濃茶色の強弱のある輪郭、左上の光、控えめな縫い目を使用。
+- 起動画面：地色 #FFF6E8。中央にみみ・ころ・もこが布からのぞく絵と柔らかな接地影を配置。既存タイトルの並びと顔の特徴を継承。
+- 迷った点：小さいアイコンの読みやすさを優先して1体に絞り、大きな水玉を採用。起動画面にも共通の柄を使った。SVG指定と既存素材との統一を優先してコードで制作。
+- 自動検査：`npm.cmd run validate:art` は終了コード0、98ファイル・合計4162KBで「すべて合格」。形状組み立てに失敗して保存済み形状を使用した警告あり。art/appは形式・安全性検査の対象。`art-guides/ART_CHECK.md` は許可済みの自動更新。
+- 追加確認：ローカルChromiumで寸法と全画素のアルファ値255を2枚とも確認。splashの中央1200×1200（x/y 766以上1966未満）の外側はすべて #FFF6E8。アイコン480px・60px、起動画面480pxで目視し、顔と水玉、3体の並びを確認。一時プレビュー画像は削除済み。
+- ビルド：`npm.cmd run build` はtsc通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ ../.. を読めず（Access is denied）、vite.config.tsを解決できなかった。道具・設定・環境変数を変更する回避策は行っていない。
+- できなかったこと：ビルド成功、preview・iPhone実機での表示確認。Claude Code側で最新形状による検査、ビルドと実機の切り取り確認が必要。
+- 状態：制作済み・素材検査合格。今やっていること：成果物の引き渡し。次の一手：Claude Codeによるビルド・実機確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-08（JST）。STATUS.mdは存在せず、ジョブの書き込み先限定を優先して本欄に状態を記録。
+- 手動の書き込みは app/ と本READMEのみ。他の作業者のファイルは保持。commit / pushは行っていない。
+
+
+codex
+既存の絵は、濃茶の輪郭と淡いグラデーションで統一されています。ボール・クッション・ケーキなどはシールの形と色を引き継ぎ、全35枚をSVGで制作します。座面やブランコの支点も指定座標に合わせます。
+
+書き込み先はジョブの限定を優先し、STATUS.md相当の進捗は `art/README.md` に記録します。検査レポートの自動更新は、AGENTS.mdで許可されています。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 art/stickers/f30.svg | Select-Object -Last 9
+Get-Content -Encoding UTF8 art/stickers/c5.svg | Select-Object -Last 19
+Get-Content -Encoding UTF8 art/stickers/f150.svg | Select-Object -Last 8' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 223ms:
+<circle cx="18.2" cy="-138.2" r=".85" fill="#e8bd91" opacity=".75"/>
+<path d="M-7.5-126 Q-.5-117.5 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#bd8565" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#b98160" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(5)"><path d="M-74 39 C-89 17-84-30-64-42 Q-47-57-28-48 Q-1-70 23-49 Q46-59 65-38 C86-13 90 22 72 40 Q0 61-74 39Z" fill="url(#toast)" /><path d="M-45-25 Q-53-7-47 11 M-8-34 Q-17-12-11 12 M30-27 Q22-8 29 11" fill="none" stroke="#ffedc5" stroke-width="9"/><path d="M-66 31 Q0 46 65 31" fill="none" stroke="#bc8558" stroke-width="3"/></g>
+<g transform="translate(240 347) rotate(5)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+<g fill="#c1a268"><path d="M111 133 Q114 144 124 147 Q113 149 111 161 Q108 149 98 147 Q109 144 111 133Z"/><path d="M361 187 Q364 195 372 198 Q363 200 361 209 Q359 200 351 198 Q359 195 361 187Z"/></g>
+</svg>
+<ellipse cx="-1.1" cy="-133" rx="1.4" ry=".7" fill="#c7a09a" opacity=".8"/>
+<path d="M-7-124 Q0-117 7-124" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#b78d8c" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+</g>
+<g transform="translate(240 352)">
+<rect x="-68" y="-27" width="136" height="78" rx="9" fill="url(#sage)"/>
+<path d="M-58 40 H57" fill="none" stroke="#789780" stroke-width="2" opacity=".6"/>
+<rect x="-74" y="-39" width="148" height="24" rx="7" fill="url(#sage)"/>
+<path d="M-12-39 H12 V51 H-12Z" fill="url(#gold)" stroke-width="3"/>
+<path d="M0-41 C-15-70-49-74-45-54 C-42-42-17-42 0-41Z M0-41 C15-70 49-74 45-54 C42-42 17-42 0-41Z" fill="url(#gold)" stroke-width="3.6"/>
+<path d="M-33-57 Q-22-56-12-48 M13-49 Q23-59 34-58" fill="none" stroke="#fff3cc" stroke-width="2.2"/>
+<ellipse cx="0" cy="-42" rx="10" ry="8" fill="url(#gold)" stroke-width="3"/>
+<path d="M-65-29 H-22" fill="none" stroke="#f1f5df" stroke-width="2" opacity=".8"/>
+<ellipse cx="-69" cy="7" rx="17" ry="23" fill="url(#skin)"/>
+<ellipse cx="69" cy="7" rx="17" ry="23" fill="url(#skin)"/>
+<path d="M-75-3 Q-80 4-76 11 M63-3 Q58 4 62 11" fill="none" stroke="#fff0e5" stroke-width="2" opacity=".8"/>
+</g>
+</g>
+</svg>
+<path d="M-8-126 Q-4-120 0-125 Q4-120 8-126" fill="none" stroke="#604339" stroke-width="1.9" stroke-linecap="round"/>
+<path d="M-2-116.5 Q1-115.5 4-117" fill="none" stroke="#88a58c" stroke-width=".7" stroke-linecap="round" opacity=".5"/>
+<g fill="#859d83" opacity=".36"><circle cx="-33" cy="-125" r=".65"/><circle cx="-29" cy="-123.5" r=".7"/><circle cx="29" cy="-123.5" r=".7"/><circle cx="33" cy="-125" r=".65"/></g></g>
+<g transform="translate(240 349) rotate(4)"><path d="M-5-64 Q0-74 5-64 L23-24 L65-19 Q76-18 68-10 L36 20 L43 61 Q45 71 35 66 L0 46 L-36 66 Q-46 71-43 60 L-36 20 L-68-10 Q-77-18-65-19 L-23-24Z" fill="url(#gold)" /><path d="M0-49 L-16-14 L-47-10" fill="none" stroke="#fff1ce" stroke-width="4"/></g>
+<g transform="translate(240 347) rotate(4)"><ellipse cx="-76" cy="6" rx="17" ry="24" fill="url(#skin)" /><ellipse cx="76" cy="6" rx="17" ry="24" fill="url(#skin)" /></g>
+</g>
+<g fill="#c1a268"><path d="M111 133 Q114 144 124 147 Q113 149 111 161 Q108 149 98 147 Q109 144 111 133Z"/><path d="M361 187 Q364 195 372 198 Q363 200 361 209 Q359 200 351 198 Q359 195 361 187Z"/></g>
+</svg>
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs = require('node:fs');
+for (const d of ['art/movers','art/myroom/items','art/myroom/rooms']) fs.mkdirSync(d,{recursive:true});
+const colors={rose:['#f8dcd7','#ce909e'],sage:['#e2edce','#97b79d'],cream:['#fffdf0','#ddd6c8'],gold:['#fff0c1','#d1ae69'],sky:['#dceaf1','#9bb9cd'],toast:['#f5deb0','#cb9563'],lavender:['#eee3f0','#b7a6c9']};
+const defs=Object.entries(colors).map(([id,c])=>"'`<radialGradient id="${id}" cx=".25" cy=".18" r=".95"><stop stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></radialGradient>`).join('"'')+'<radialGradient id=\"ground\"><stop stop-color=\"#6b5666\" stop-opacity=\".16\"/><stop offset=\"1\" stop-color=\"#6b5666\" stop-opacity=\"0\"/></radialGradient>';
+const p=(d,f='none',extra='')=>"'`<path d="${d}" fill="${f}" ${extra}/>`;
+const e=(x,y,rx,ry,f,extra='"'')=>"'`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${f}" ${extra}/>`;
+const r=(x,y,w,h,rad,f,extra='"'')=>"'`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rad}" fill="${f}" ${extra}/>`;
+const c=id=>`url(#${id})`;
+const g=(t,s)=>`<g transform="${t}">${s}</g>`;
+const sh=w=>e(0,-3,w/2,3,c('"'ground'),'stroke=\"none\"');
+const eye=(x,y)=>e(x,y,2.4,3,'#4A3A40','stroke=\"none\"')+e(x-.7,y-1,.7,.9,'#fffdf0','stroke=\"none\"');
+const line=d=>p(d,'none','stroke-width=\"1.3\"');
+function save(dir,id,s){fs.writeFileSync("'`art/${dir}/${id}.svg`,`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="-150 -300 300 300">'"\\n<defs>"'${defs}</defs>'"\\n<g stroke=\"#4A3A40\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\\n"'${s}'"\\n</g>\\n</svg>\\n"'`);}
+save('"'movers','bird',p('M-9-23 Q-25-23-32-10 Q-17-12-5-5 Q12 2 21-15 Q26-30 15-34 Q4-38-1-28 Q-7-55-29-58 Q-28-37-9-23Z',c('sage'))+p('M22-25 L34-20 21-17Z',c('gold'))+line('M-18-45 Q-12-32-4-28 M-9-12 Q1-4 12-12')+eye(15,-26));
+save('movers','butterfly',p('M-2-25 C-40-67-37-16-8-17 C-39-20-23 15-2-5 M2-25 C40-67 37-16 8-17 C39-20 23 15 2-5',c('rose'))+e(-18,-29,6,9,c('cream'),'stroke=\"none\"')+e(18,-29,6,9,c('cream'),'stroke=\"none\"')+p('M-2-29 Q-10-42-13-36 M2-29 Q10-42 13-36','none','stroke-width=\"1.4\"')+e(0,-17,3.5,15,c('toast')));
+save('movers','cloud',p('M-91-5 C-132-5-125-51-91-51 C-89-84-43-95-23-65 C-2-108 55-93 59-57 C100-76 138-23 107-7 Q10 4-91-5Z',c('cream'),'stroke-opacity=\".22\" stroke-width=\"1.6\"')+p('M-101-36 Q-104-48-90-47 M-77-60 Q-62-81-42-70 M-9-73 Q11-90 32-73','none','stroke=\"#ffffff\" stroke-opacity=\".65\" stroke-width=\"2\"'));
+const puppy=sh(110)+p('M-36-45 Q-59-43-57-68 Q-48-73-48-59 Q-44-52-31-57',c('toast'))+p('M-24-35 L-30-10-19-6 Q-14-4-20-3 H-34 Q-39-4-37-12 L-34-39 M17-34 L24-17 35-18 Q40-16 35-12 L20-10 7-29',c('toast'))+p('M-41-40 Q-39-58-16-56 L15-52 Q29-65 41-57 Q49-53 47-42 L55-36 Q63-23 46-20 L32-21 29-5 Q28-1 17-2 L14-5 17-28 Q-5-20-23-28 L-25-5 Q-27-1-37-2 Q-41-4-36-9 L-35-29 Q-43-32-41-40Z',c('cream'))+p('M20-54 Q5-62 7-40 Q10-25 19-31 Q25-40 20-54Z',c('toast'))+e(-16,-43,12,9,c('toast'),'stroke=\"none\"')+eye(39,-42)+e(55,-33,4,3,'#4A3A40','stroke=\"none\"')+line('M44-25 Q48-23 51-27');
+save('movers','puppy',puppy);save('myroom/items','puppy',puppy);
+save('movers','cat',sh(124)+p('M-36-36 Q-67-35-62-63 Q-59-76-53-69 Q-50-64-54-58 Q-55-44-34-47',c('toast'))+p('M-21-33 L-27-11-16-7 Q-13-3-21-3 H-32 L-34-9-30-37 M16-36 L25-16 37-16 Q42-12 35-10 H19 L7-32',c('toast'))+p('M-43-37 Q-45-56-19-56 L17-51 L20-73 Q22-79 30-64 L43-64 Q54-80 55-70 L55-51 Q68-45 61-34 Q55-25 34-28 L30-4 Q27-1 19-2 Q16-3 22-10 L23-32 Q-4-22-27-31 L-32-4 Q-35 0-43-2 L-43-6-37-29Z',c('toast'))+p('M-20-54 L-18-43 M-5-53 L-3-44 M33-61 L35-54','none','stroke-width=\"4\" stroke-opacity=\".42\"')+eye(48,-47)+e(62,-40,2,2,c('rose'),'stroke=\"none\"')+line('M48-33 L60-32 M48-36 L62-37'));
+const balloon=w=>{const s=(w-3)/102;return g("'`translate(0 ${-1-110*s}) scale(${s})`,p('"'M2 37 Q-34 56-10 77 Q10 94 0 110','none','stroke-width=\"2\"')+e(0,-19,51,65,c('rose'))+p('M0 44 L-8 53 Q0 58 8 53Z',c('rose'))+p('M-34-34 Q-32-57-13-63','none','stroke=\"#ffeadf\" stroke-width=\"4\"'));};
+save('movers','balloon',balloon(70));save('myroom/items','balloon',balloon(80));
+save('movers','seagull',p('M-11-22 Q-35-29-44-53 Q-19-48-2-29 Q8-57 34-62 Q24-35 13-24 Q25-32 32-23 L43-20 31-15 Q20-4 5-9 L-17-2-13-12-30-11Z',c('cream'))+p('M31-23 L44-20 31-16Z',c('gold'))+line('M-34-44 L-16-29 M25-51 L12-31')+eye(26,-23));
+save('movers','sailboat',p('M-53-21 H53 Q44-2 27-2 H-31 Q-45-4-53-21Z',c('sky'))+p('M-3-24 V-103','none','stroke-width=\"3\"')+p('M-8-97 Q-35-69-44-32 H-8Z',c('cream'))+p('M4-86 L4-32 H44Z',c('rose'))+line('M-40-15 H38'));
+save('movers','crab',sh(86)+p('M-20-21 L-36-27-42-21 M-21-14 L-37-15-42-8 M-18-8 L-29-8-34-2 M20-21 L36-27 42-21 M21-14 L37-15 42-8 M18-8 L29-8 34-2','none')+p('M-21-24 L-31-36 M21-24 L31-36','none','stroke-width=\"4\"')+p('M-31-36 C-45-32-47-47-39-51 L-36-42-30-51 Q-21-43-31-36Z M31-36 C45-32 47-47 39-51 L36-42 30-51 Q21-43 31-36Z',c('rose'))+e(0,-17,25,14,c('rose'))+p('M-10-29 V-36 M10-29 V-36')+eye(-10,-37)+eye(10,-37)+line('M-5-16 Q0-11 5-16'));
+console.log('Created 9 movers and 2 matching room items.');
+'@ | node" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 237ms:
+Created 9 movers and 2 matching room items.
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs=require('node:fs');
+const defs=fs.readFileSync('art/movers/puppy.svg','utf8').match(/<defs>([\\s\\S]*?)<\\/defs>/)[1];
+const p=(d,f='none',a='')=>"'`<path d="${d}" fill="${f}" ${a}/>`;const e=(x,y,rx,ry,f,a='"'')=>"'`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${f}" ${a}/>`;const r=(x,y,w,h,rad,f,a='"'')=>"'`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rad}" fill="${f}" ${a}/>`;const c=id=>`url(#${id})`;const g=(t,s)=>`<g transform="${t}">${s}</g>`;const sh=w=>e(0,-3,w/2,3,c('"'ground'),'stroke=\"none\"');const line=(d,a='')=>p(d,'none',"'`stroke-width="1.3" ${a}`);
+function save(id,s){fs.writeFileSync(`art/myroom/items/${id}.svg`,`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="-150 -300 300 300">'"\\n<defs>"'${defs}</defs>'"\\n<g stroke=\"#4A3A40\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\\n"'${s}'"\\n</g>\\n</svg>\\n"'`);}
+function motif(id){const t=fs.readFileSync(`art/stickers/${id}.svg`,'"'utf8');const start=t.indexOf('<g transform=\"translate(240 349)');if(start<0)throw Error(id);let end=start,depth=0;const rx=/<\\/?g\\b["'^>]*>/g;rx.lastIndex=start;let m;while(m=rx.exec(t)){depth+=m[0].startsWith('"'</')?-1:1;if(depth===0){end=rx.lastIndex;break;}}return t.slice(start,end).replace(/"'^<g[''^>]*>/,'"'<g>');}
+const fitted=(id,s,y)=>g("'`translate(0 ${y}) scale(${s})`,motif(id));
+save('"'ball',sh(64)+fitted('c1',.49,-32));
+save('cushion',sh(88)+fitted('c2',.57,-34));
+save('cake',sh(88)+fitted('c6',.485,-34));
+save('heartcushion',sh(80)+fitted('f60',.57,-37));
+const shell=fs.readFileSync('art/stickers/b1.svg','utf8').match(/<g transform=\"translate\\(240 350\\)\">([\\s\\S]*?)<\\/g>/)[1];save('shell',sh(64)+g('translate(0 -29) scale(.47)',shell));
+const ring=fs.readFileSync('art/stickers/b10.svg','utf8').match(/<g transform=\"translate\\(240 355\\)\">([\\s\\S]*?)<\\/g>/)[1];save('floatring',sh(116)+g('translate(0 -29) scale(.74 .52)',ring));
+const gift=fs.readFileSync('art/stickers/c5.svg','utf8').split('<g transform=\"translate(240 352)\">')[1].split('<ellipse cx=\"-69\"')[0];save('present',sh(88)+g('translate(0 -31) scale(.59)',gift));
+save('sofa',sh(276)+r(-119,-29,17,27,4,c('toast'))+r(102,-29,17,27,4,c('toast'))+r(-129,-163,258,123,29,c('sage'))+p('M-110-141 Q-63-153-6-141 V-87 H-111Z',c('sage'))+p('M6-141 Q63-153 110-141 L111-87 H6Z',c('sage'))+line('M-101-133 Q-58-142-17-133 M17-133 Q58-142 101-133','stroke-dasharray=\"2 5\" stroke-opacity=\".4\"')+r(-125,-62,250,42,13,c('sage'))+p('M-108-86 Q-62-94 0-86 Q62-94 108-86 L120-62 H-120Z',c('cream'))+line('M0-85 V-63')+r(-139,-103,28,83,13,c('sage'))+r(111,-103,28,83,13,c('sage'))+p('M-111-27 H110','none','stroke-width=\"3.4\"')+line('M-131-88 V-43 M119-88 V-43','stroke=\"#fffdf0\" stroke-opacity=\".7\"'));
+save('table',sh(184)+p('M-78-57 L-83-7 Q-83-1-73-2 L-63-50 M64-50 L74-2 Q84 0 83-7 L78-57',c('toast'))+p('M-92-65 Q0-100 92-65 V-52 Q0-19-92-52Z',c('toast'))+e(0,-66,93,25,c('toast'))+line('M-64-69 Q-34-77-3-73 M20-59 Q43-55 64-63','stroke-opacity=\".25\"')+p('M-70-79 Q-20-94 43-84','none','stroke=\"#fff4da\" stroke-width=\"1.5\"'));
+save('rug',e(0,-20,148,18,c('rose'))+e(0,-20,139,13,'none','stroke-width=\"1.3\" stroke-dasharray=\"3 5\" stroke-opacity=\".4\"')+e(0,-21,125,9,'#f7dfd3','stroke=\"none\" fill-opacity=\".35\"'));
+save('bed',sh(286)+r(-130,-31,17,29,4,c('toast'))+r(113,-31,17,29,4,c('toast'))+r(-143,-157,286,127,20,c('toast'))+r(-131,-145,262,83,15,c('cream'))+line('M-120-131 H120','stroke-opacity=\".25\"')+p('M-125-99 H125 L139-70 V-29 Q0-16-139-29 V-70Z',c('cream'))+p('M-115-108 Q-76-118-34-106 L-29-81 Q-79-72-118-81Z',c('rose'))+p('M25-106 Q67-118 110-108 L117-81 Q71-72 29-81Z',c('rose'))+p('M-135-83 Q0-95 135-83 L139-70 V-34 Q0-21-139-34 V-70Z',c('lavender'))+p('M-135-83 Q0-95 135-83 L139-70 H-139Z',c('cream'))+line('M-127-44 Q0-34 127-44','stroke-dasharray=\"3 6\" stroke-opacity=\".5\"')+p('M-141-25 Q0-12 141-25','none','stroke-width=\"3.4\"'));
+save('flowerpot',sh(76)+p('M0-28 Q-6-67 0-90','none','stroke-width=\"3\"')+g('translate(0 -103) scale(.58)',motif('c4').replace('M0 58 Q-8 23 0-4','M0 58 Q-8 23 0-4'))+p('M-29-42 H29 L23-6 Q0 4-23-6Z',c('toast'))+r(-34,-49,68,12,5,c('toast'))+line('M-21-30 L-18-12','stroke=\"#fff0d3\"'));
+save('plant',sh(96)+p('M0-43 Q-5-90 10-151 M0-75 Q-30-88-35-112','none','stroke-width=\"3\"')+g('translate(10 -138) rotate(-25) scale(.38)',motif('f10'))+g('translate(-22 -103) rotate(50) scale(-.32 .32)',motif('f10'))+g('translate(22 -82) rotate(-12) scale(.32)',motif('f10'))+p('M-37-49 H37 L28-7 Q0 4-28-7Z',c('cream'))+r(-41,-55,82,12,5,c('cream'))+line('M-25-34 L-22-14','stroke=\"#ffffff\"'));
+save('breadbasket',sh(98)+e(0,-42,48,16,c('toast'))+fitted('f30',.52,-55)+p('M-48-40 Q0-23 48-40 L39-9 Q0 5-39-9Z',c('toast'))+p('M-41-36 Q0-23 41-36','none','stroke=\"#fff0d2\" stroke-width=\"3\"')+line('M-40-27 Q0-12 40-27 M-36-17 Q0-3 36-17 M-27-31 L-23-9 M-10-28 L-8-6 M10-28 L8-6 M27-31 L23-9','stroke-opacity=\".4\"'));
+save('moonlamp',sh(80)+e(0,-8,38,6,c('toast'))+r(-5,-37,10,28,4,c('toast'))+fitted('c7',.66,-75));
+save('fishtank',sh(146)+r(-73,-117,146,110,10,'#ecf5ef','fill-opacity=\".65\"')+p('M-68-96 Q-30-100 0-96 Q35-92 68-96 V-18 Q0-8-68-18Z',c('sky'),'stroke=\"none\" fill-opacity=\".65\"')+p('M-68-24 Q-36-34-8-23 Q22-16 68-26 V-13 H-68Z',c('gold'),'stroke=\"none\"')+p('M-49-25 Q-67-50-53-71 Q-37-51-49-25 M-44-25 Q-40-67-27-70 Q-23-44-44-25 M47-24 Q31-47 45-66 Q57-44 47-24',c('sage'),'stroke-width=\"1.3\"')+r(-74,-121,148,10,4,c('cream'))+r(-74,-13,148,11,4,c('cream'))+line('M-62-106 V-76 M-56-106 V-92','stroke=\"#ffffff\" stroke-width=\"2\"')+e(22,-95,3,3,'none','stroke=\"#fffdf0\" stroke-width=\"1\"'));
+save('fishtank-fish',g('translate(-17 -77) scale(.23)',motif('c8'))+g('translate(25 -48) scale(-.19 .19)',motif('c8')));
+save('swing',sh(256)+p('M-127-2 L-78-280 H-61 L-109-2Z M109-2 L61-280 H78 L127-2Z',c('toast'))+r(-108,-291,216,22,8,c('toast'))+line('M-96-284 H95 M-117-17 L-76-264 M116-17 L76-264','stroke=\"#fff0cf\" stroke-opacity=\".7\"')+e(-71,-280,3,3,c('cream'))+e(71,-280,3,3,c('cream')));
+save('swing-seat',p('M0-280 L-57-62 M0-280 L57-62','none','stroke-width=\"3.4\"')+p('M0-280 L-57-62 M0-280 L57-62','none','stroke=\"#d5bd91\" stroke-width=\"1.6\"')+r(-66,-62,132,13,5,c('toast'))+line('M-55-57 H55','stroke=\"#fff1d0\"'));
+save('starmobile',sh(90)+e(0,-8,43,6,c('toast'))+p('M-5-12 V-162 Q-4-181 15-181 Q35-181 35-165','none','stroke-width=\"7\"')+p('M-5-12 V-162 Q-4-181 15-181 Q35-181 35-165','none','stroke=\"#dec29b\" stroke-width=\"4\"')+p('M-43-151 Q0-167 48-151','none','stroke-width=\"3\"')+line('M-35-153 V-125 M6-159 V-113 M44-152 V-129')+g('translate(-35 -112) scale(.20)',motif('f150'))+g('translate(6 -96) scale(.25)',motif('f150'))+g('translate(44 -119) scale(.15)',motif('f150')));
+save('beachball',sh(78)+g('translate(0 -40)',e(0,0,38.5,38.5,c('cream'))+p('M-8-37 Q-47-10-21 32 A38.5 38.5 0 0 1-8-37Z',c('sky'),'stroke-width=\"1.3\"')+p('M-8-37 Q13-12 19 33 A38.5 38.5 0 0 0 36-13 Q15-31-8-37Z',c('rose'),'stroke-width=\"1.3\"')+e(-8,-35,7,2.5,c('gold'),'stroke-width=\"1\"')+p('M-29-18 Q-33-10-31-4','none','stroke=\"#fffdf0\" stroke-width=\"2\"')));
+console.log('Created remaining 21 room item layers.');
+'@ | node" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 268ms:
+Created remaining 21 room item layers.
+
+codex
+うごくもの9枚と、家具・小物の23枚を作成しました。水槽の魚とブランコの座板は、ゲーム側で動かせるよう別ファイルに分けています。続いて空の部屋3枚を描き、一覧表示とキャラクターを重ねた表示で大きさを確認します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs=require('node:fs');
+const p=(d,f='none',a='')=>"'`<path d="${d}" fill="${f}" ${a}/>`;const e=(x,y,rx,ry,f,a='"'')=>"'`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${f}" ${a}/>`;const r=(x,y,w,h,rad,f,a='"'')=>"'`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rad}" fill="${f}" ${a}/>`;const c=id=>`url(#${id})`;
+const grad=(id,a,b)=>`<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+const defs=grad('"'wall','#fff8e9','#e8decc')+grad('wood','#cda87e','#f5ddba')+grad('sky','#cce4eb','#eef4e7')+grad('night','#cbd8e8','#e7e3ef')+grad('lavender','#eee8f4','#d4ccdf')+grad('carpet','#b0b8c4','#e4e9e6')+grad('grass','#a7bc94','#e0e9bc')+grad('leaf','#dce8c4','#9bb898')+grad('frame','#edd6b5','#c49f77');
+const cloud=(x,y,s)=>"'`<g transform="translate(${x} ${y}) scale(${s})">`+p('"'M-72 18 Q-87-3-65-12 Q-57-44-31-27 Q-6-58 15-25 Q48-38 53-11 Q82-10 79 18Z','#fffdf1','stroke=\"none\" fill-opacity=\".85\"')+'</g>';
+function save(id,s){fs.writeFileSync("'`art/myroom/rooms/${id}.svg`,`<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000" viewBox="0 0 1000 1000">'"\\n<defs>"'${defs}</defs>'"\\n<g stroke=\"#4A3A40\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\">"'${s}</g>'"\\n</svg>\\n"'`);}
+let living=r(0,0,1000,560,0,c('"'wall'),'stroke=\"none\"')+r(0,560,1000,440,0,c('wood'),'stroke=\"none\"');
+living+=r(0,545,1000,15,0,c('frame'),'stroke-opacity=\".3\"');
+for(const y of [617,697,811,965])living+=p("'`M0 ${y} H1000`,'"'none','stroke-opacity=\".15\" stroke-width=\"1.4\"');
+for(const x of [-300,30,350,670,990,1320])living+=p("'`M${500+(x-500)*.42} 560 L${x} 1000`,'"'none','stroke-opacity=\".12\" stroke-width=\"1.4\"');
+living+=r(233,111,534,341,22,c('frame'),'stroke-opacity=\".55\"')+r(251,129,498,301,12,c('sky'),'stroke=\"#fff5df\" stroke-width=\"3\"')+e(649,211,38,38,'#fff0bc','stroke=\"none\"')+cloud(343,229,.65)+cloud(576,339,.8)+p('M500 132 V430 M254 288 H746','none','stroke=\"#c4a17c\" stroke-width=\"7\"')+p('M496 132 V428 M254 284 H746','none','stroke=\"#fff4d9\" stroke-width=\"2\"')+r(219,441,562,17,7,c('frame'),'stroke-opacity=\".45\"');
+living+=e(867,195,45,45,c('frame'),'stroke-opacity=\".45\"')+e(867,195,36,36,'#fff9ec','stroke=\"none\"')+p('M867 174 V195 L884 203','none','stroke-width=\"3\" stroke-opacity=\".6\"')+e(867,195,3,3,'#9e8270','stroke=\"none\"');
+save('living',living);
+let bedroom=r(0,0,1000,580,0,c('lavender'),'stroke=\"none\"')+r(0,580,1000,420,0,c('carpet'),'stroke=\"none\"')+r(0,565,1000,15,0,'#e9e1dd','stroke-opacity=\".25\"');
+bedroom+=r(580,125,247,265,24,c('frame'),'stroke-opacity=\".5\"')+r(596,141,215,231,14,c('night'),'stroke=\"#fff5e9\" stroke-width=\"3\"')+p('M734 178 C679 181 670 250 719 260 Q742 266 760 248 C713 253 702 205 734 178Z','#fff0c2','stroke=\"none\"')+e(628,183,3,3,'#fffae9','stroke=\"none\"')+e(778,294,3,3,'#fffae9','stroke=\"none\"')+p('M703 144 V370 M598 307 H809','none','stroke=\"#c8ac98\" stroke-width=\"5\"')+r(568,380,271,15,6,c('frame'),'stroke-opacity=\".4\"');
+bedroom+=p('M174 186 Q278 216 382 186','none','stroke-opacity=\".28\" stroke-width=\"2\"');
+for(const [x,y,col] of [[202,194,'#e1bdc3'],[278,204,'#dbc792'],[354,194,'#b6cbbd']])bedroom+=p("'`M${x-13} ${y} H${x+13} L${x+7} ${y+29} Q${x} ${y+36} ${x-7} ${y+29}Z`,col,'"'stroke=\"none\"');
+for(let y=625;y<1000;y+=55)for(let x=28;x<1000;x+=95)bedroom+=p("'`M${x+(y%2)*24} ${y} l5 1 m8 -1 l4 1`,'"'none','stroke=\"#ffffff\" stroke-opacity=\".19\" stroke-width=\"1\"');
+save('bedroom',bedroom);
+let yard=r(0,0,1000,540,0,c('sky'),'stroke=\"none\"')+e(824,128,47,47,'#fff0be','stroke=\"none\"')+cloud(232,139,1.15)+cloud(634,231,.85)+p('M0 415 Q170 314 348 414 Q599 314 1000 411 V540 H0Z','#bdcfae','stroke=\"none\"');
+for(const [x,y,s] of [[77,382,1.1],[919,366,1],[179,423,.65]])yard+="'`<g transform="translate(${x} ${y}) scale(${s})">`+p('"'M-9-25 H9 L14 123 H-14Z',c('frame'),'stroke-opacity=\".3\"')+p('M-67 13 C-107-9-81-64-49-66 C-58-110 12-128 31-84 C75-94 107-41 72-13 C99 28 45 55 14 35 Q-35 58-67 13Z',c('leaf'),'stroke-opacity=\".22\"')+p('M-44-50 Q-37-78-13-78','none','stroke=\"#f4f6dc\" stroke-opacity=\".5\"')+'</g>';
+yard+=r(0,451,1000,13,0,'#eadac0','stroke-opacity=\".25\"')+r(0,504,1000,12,0,'#eadac0','stroke-opacity=\".25\"');
+for(let x=20;x<1000;x+=62)yard+=p("'`M${x} 538 V442 Q${x+10} 424 ${x+20} 442 V538Z`,c('"'frame'),'stroke-opacity=\".24\"');
+yard+=r(0,540,1000,460,0,c('grass'),'stroke=\"none\"');
+for(const [x,y] of [[68,610],[903,643],[191,803],[793,893],[451,976],[610,607]])yard+=p("'`M${x-8} ${y} l-4 -8 M${x} ${y} v-12 M${x+8} ${y} l4 -8`,'"'none','stroke=\"#8aa77d\" stroke-opacity=\".3\" stroke-width=\"1.6\"');
+save('yard',yard);
+console.log('Created 3 empty rooms with floor boundaries 560 / 580 / 540.');
+'@ | node" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 240ms:
+Created 3 empty rooms with floor boundaries 560 / 580 / 540.
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs=require('node:fs');const {chromium}=require('@playwright/test');
+(async()=>{const browser=await chromium.launch();const page=await browser.newPage();
+const files=['art/movers','art/myroom/items'].flatMap(d=>fs.readdirSync(d).filter(f=>f.endsWith('.svg')).map(f=>({name:d.split('/').pop()+'/'+f,data:'data:image/svg+xml;base64,'+fs.readFileSync(d+'/'+f).toString('base64')})));
+const result=await page.evaluate(async(files)=>{const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=Math.ceil(files.length/6)*245;const ctx=canvas.getContext('2d');ctx.fillStyle='#faf5eb';ctx.fillRect(0,0,canvas.width,canvas.height);const bounds=[];for(let i=0;i<files.length;i++){const im=new Image();im.src=files[i].data;await im.decode();const x=(i%6)*200,y=Math.floor(i/6)*245;ctx.fillStyle='#fffdf7';ctx.fillRect(x+4,y+4,192,235);ctx.drawImage(im,x+10,y+24,180,180);ctx.fillStyle='#4a3a40';ctx.font='12px sans-serif';ctx.fillText(files[i].name,x+10,y+225);const c=document.createElement('canvas');c.width=c.height=300;const a=c.getContext('2d');a.drawImage(im,0,0,300,300);const pix=a.getImageData(0,0,300,300).data;let minX=300,maxX=0,minY=300,maxY=0;for(let y=0;y<300;y++)for(let x=0;x<300;x++)if(pix[(y*300+x)*4+3]>40){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}bounds.push({name:files[i].name,width:maxX-minX+1,top:minY-300,bottom:maxY-300,edge:minX===0||maxX===299||minY===0});}return{png:canvas.toDataURL().split(',')[1],bounds};},files);
+fs.writeFileSync('art/myroom/.preview-items.png',Buffer.from(result.png,'base64'));console.log(JSON.stringify(result.bounds));
+const roomFiles=['living','bedroom','yard'].map(id=>({name:id,data:'data:image/svg+xml;base64,'+fs.readFileSync("'`art/myroom/rooms/${id}.svg`).toString('"'base64')}));
+const png=await page.evaluate(async(files)=>{const c=document.createElement('canvas');c.width=1500;c.height=500;const x=c.getContext('2d');for(let i=0;i<files.length;i++){const im=new Image();im.src=files[i].data;await im.decode();x.drawImage(im,i*500,0,500,500);}return c.toDataURL().split(',')[1];},roomFiles);fs.writeFileSync('art/myroom/.preview-rooms.png',Buffer.from(png,'base64'));
+await browser.close();})().catch(e=>{console.error(e);process.exit(1)});
+'@ | node" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 5177ms:
+page.evaluate: EncodingError: The source image cannot be decoded.
+    at [stdin]:4:25
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem art/movers,art/myroom -Recurse -Filter *.svg | ForEach-Object { try { $null = [xml](Get-Content -Encoding UTF8 -Raw $_.FullName) } catch { $_.FullName; $_.Exception.Message } }
+Get-Content -Encoding UTF8 art/movers/bird.svg' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 297ms:
+値 "<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="-150 -300 300 300">
+<defs><radialGradient id="rose" cx=".25" cy=".18" r=".95"><stop stop-color="#f8dcd7"/><stop offset="1" stop-color="#ce909e"/></radialGradient><radialGradient id="sage" cx=".25" cy=".18" r=".95"><stop stop-color="#e2edce"/><stop offset="1" stop-color="#97b79d"/></radialGradient><radialGradient id="cream" cx=".25" cy=".18" r=".95"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#ddd6c8"/></radialGradient><radialGradient id="gold" cx=".25" cy=".18" r=".95"><stop stop-color="#fff0c1"/><stop offset="1" stop-color="#d1ae69"/></radialGradient><radialGradient id="sky" cx=".25" cy=".18" r=".95"><stop stop-color="#dceaf1"/><stop offset="1" stop-color="#9bb9cd"/></radialGradient><radialGradient id="toast" cx=".25" cy=".18" r=".95"><stop stop-color="#f5deb0"/><stop offset="1" stop-color="#cb9563"/></radialGradient><radialGradient id="lavender" cx=".25" cy=".18" r=".95"><stop stop-color="#eee3f0"/><stop offset="1" stop-color="#b7a6c9"/></radialGradient><radialGradient id="ground"><stop stop-color="#6b5666" stop-opacity=".16"/><stop offset="1" stop-color="#6b5666" stop-opacity="0"/></radialGradient></defs>
+<g stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+<ellipse cx="0" cy="-3" rx="73" ry="3" fill="url(#ground)" stroke="none"/><rect x="-73" y="-117" width="146" height="110" rx="10" fill="#ecf5ef" fill-opacity=".65"/><path d="M-68-96 Q-30-100 0-96 Q35-92 68-96 V-18 Q0-8-68-18Z" fill="url(#sky)" stroke="none" fill-opacity=".65"/><path d="M-68-24 Q-36-34-8-23 Q22-16 68-26 V-13 H-68Z" fill="url(#gold)" stroke="none"/><path d="M-49-25 Q-67-50-53-71 Q-37-51-49-25 M-44-25 Q-40-67-27-70 Q-23-44-44-25 M47-24 Q31-47 45-66 Q57-44 47-24" fill="url(#sage)" stroke-width="1.3"/><rect x="-74" y="-121" width="148" height="10" rx="4" fill="url(#cream)" /><rect x="-74" y="-13" width="148" height="11" rx="4" fill="url(#cream)" /><path d="M-62-106 V-76 M-56-106 V-92" fill="none" stroke-width="1.3" stroke="#ffffff" stroke-width="2"/><ellipse cx="22" cy="-95" rx="3" ry="3" fill="none" stroke="#fffdf0" stroke-width="1"/>
+</g>
+</svg>
+" を型 "System.Xml.XmlDocument" に変換できません。エラー: "'stroke-width' は重複する属性名です。 行 4、位置 755。"
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="-150 -300 300 300">
+<defs><radialGradient id="rose" cx=".25" cy=".18" r=".95"><stop stop-color="#f8dcd7"/><stop offset="1" stop-color="#ce909e"/></radialGradient><radialGradient id="sage" cx=".25" cy=".18" r=".95"><stop stop-color="#e2edce"/><stop offset="1" stop-color="#97b79d"/></radialGradient><radialGradient id="cream" cx=".25" cy=".18" r=".95"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#ddd6c8"/></radialGradient><radialGradient id="gold" cx=".25" cy=".18" r=".95"><stop stop-color="#fff0c1"/><stop offset="1" stop-color="#d1ae69"/></radialGradient><radialGradient id="sky" cx=".25" cy=".18" r=".95"><stop stop-color="#dceaf1"/><stop offset="1" stop-color="#9bb9cd"/></radialGradient><radialGradient id="toast" cx=".25" cy=".18" r=".95"><stop stop-color="#f5deb0"/><stop offset="1" stop-color="#cb9563"/></radialGradient><radialGradient id="lavender" cx=".25" cy=".18" r=".95"><stop stop-color="#eee3f0"/><stop offset="1" stop-color="#b7a6c9"/></radialGradient><radialGradient id="ground"><stop stop-color="#6b5666" stop-opacity=".16"/><stop offset="1" stop-color="#6b5666" stop-opacity="0"/></radialGradient></defs>
+<g stroke="#4A3A40" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+<path d="M-9-23 Q-25-23-32-10 Q-17-12-5-5 Q12 2 21-15 Q26-30 15-34 Q4-38-1-28 Q-7-55-29-58 Q-28-37-9-23Z" fill="url(#sage)" /><path d="M22-25 L34-20 21-17Z" fill="url(#gold)" /><path d="M-18-45 Q-12-32-4-28 M-9-12 Q1-4 12-12" fill="none" stroke-width="1.3"/><ellipse cx="15" cy="-26" rx="2.4" ry="3" fill="#4A3A40" stroke="none"/><ellipse cx="14.3" cy="-27" rx="0.7" ry="0.9" fill="#fffdf0" stroke="none"/>
+</g>
+</svg>
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs=require('node:fs');const f='art/myroom/items/fishtank.svg';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace('stroke-width=\"1.3\" stroke=\"#ffffff\" stroke-width=\"2\"','stroke=\"#ffffff\" stroke-width=\"2\"'));
+'@ | node" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 256ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs=require('node:fs');const {chromium}=require('@playwright/test');
+(async()=>{const browser=await chromium.launch();const page=await browser.newPage();
+for(const rooms of [false,true]){const files=(rooms?['art/myroom/rooms']:['art/movers','art/myroom/items']).flatMap(d=>fs.readdirSync(d).filter(f=>f.endsWith('.svg')).map(f=>({name:d.split('/').pop()+'/'+f,data:'data:image/svg+xml;base64,'+fs.readFileSync(d+'/'+f).toString('base64')})));
+const result=await page.evaluate(async({files,rooms})=>{const c=document.createElement('canvas');const cols=rooms?3:6,w=rooms?500:200,h=rooms?500:245;c.width=cols*w;c.height=Math.ceil(files.length/cols)*h;const ctx=c.getContext('2d');ctx.fillStyle='#faf5eb';ctx.fillRect(0,0,c.width,c.height);const bounds=[];for(let i=0;i<files.length;i++){const im=new Image();im.src=files[i].data;await im.decode();const x=i%cols*w,y=Math.floor(i/cols)*h;ctx.drawImage(im,x+(rooms?0:10),y+(rooms?0:24),rooms?w:180,rooms?h:180);if("'!rooms){ctx.fillStyle='"'#4a3a40';ctx.font='12px sans-serif';ctx.fillText(files[i].name,x+10,y+225);const a=document.createElement('canvas');a.width=a.height=300;const z=a.getContext('2d');z.drawImage(im,0,0,300,300);const pix=z.getImageData(0,0,300,300).data;let minX=300,maxX=0,minY=300,maxY=0;for(let y=0;y<300;y++)for(let x=0;x<300;x++)if(pix[(y*300+x)*4+3]>40){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}bounds.push({name:files[i].name,width:maxX-minX+1,top:minY-300,bottom:maxY-300,edge:minX===0||maxX===299||minY===0});}}return{png:c.toDataURL().split(',')[1],bounds};},{files,rooms});fs.writeFileSync('art/myroom/.preview-'+(rooms?'rooms':'items')+'.png',Buffer.from(result.png,'base64'));if("'!rooms)console.log(JSON.stringify(result.bounds));}
+await browser.close();})().catch(e=>{console.error(e);process.exit(1)});
+'"'@ | node" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 3194ms:
+[{"name":"movers/balloon.svg","width":70,"top":-130,"bottom":-1,"edge":false},{"name":"movers/bird.svg","width":69,"top":-60,"bottom":-2,"edge":false},{"name":"movers/butterfly.svg","width":64,"top":-43,"bottom":-1,"edge":false},{"name":"movers/cat.svg","width":129,"top":-76,"bottom":-1,"edge":false},{"name":"movers/cloud.svg","width":239,"top":-92,"bottom":-1,"edge":false},{"name":"movers/crab.svg","width":90,"top":-53,"bottom":-1,"edge":false},{"name":"movers/puppy.svg","width":118,"top":-71,"bottom":-1,"edge":false},{"name":"movers/sailboat.svg","width":109,"top":-105,"bottom":-1,"edge":false},{"name":"movers/seagull.svg","width":91,"top":-64,"bottom":-1,"edge":false},{"name":"items/ball.svg","width":64,"top":-64,"bottom":-1,"edge":false},{"name":"items/balloon.svg","width":80,"top":-149,"bottom":-1,"edge":false},{"name":"items/beachball.svg","width":80,"top":-80,"bottom":-1,"edge":false},{"name":"items/bed.svg","width":290,"top":-159,"bottom":-1,"edge":false},{"name":"items/breadbasket.svg","width":100,"top":-87,"bottom":-1,"edge":false},{"name":"items/cake.svg","width":88,"top":-73,"bottom":-1,"edge":false},{"name":"items/cushion.svg","width":88,"top":-68,"bottom":-1,"edge":false},{"name":"items/fishtank-fish.svg","width":84,"top":-89,"bottom":-39,"edge":false},{"name":"items/fishtank.svg","width":152,"top":-123,"bottom":-1,"edge":false},{"name":"items/floatring.svg","width":120,"top":-57,"bottom":-2,"edge":false},{"name":"items/flowerpot.svg","width":72,"top":-151,"bottom":-1,"edge":false},{"name":"items/heartcushion.svg","width":88,"top":-75,"bottom":-2,"edge":false},{"name":"items/moonlamp.svg","width":84,"top":-119,"bottom":-1,"edge":false},{"name":"items/plant.svg","width":87,"top":-170,"bottom":-1,"edge":false},{"name":"items/present.svg","width":90,"top":-72,"bottom":-1,"edge":false},{"name":"items/puppy.svg","width":118,"top":-71,"bottom":-1,"edge":false},{"name":"items/rug.svg","width":298,"top":-40,"bottom":-1,"edge":false},{"name":"items/shell.svg","width":69,"top":-54,"bottom":-2,"edge":false},{"name":"items/sofa.svg","width":282,"top":-165,"bottom":-1,"edge":false},{"name":"items/starmobile.svg","width":105,"top":-185,"bottom":-1,"edge":false},{"name":"items/swing-seat.svg","width":136,"top":-282,"bottom":-48,"edge":false},{"name":"items/swing.svg","width":258,"top":-293,"bottom":-1,"edge":false},{"name":"items/table.svg","width":190,"top":-93,"bottom":-1,"edge":false}]
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs=require('node:fs');
+for(const id of ['ball','cushion','cake','heartcushion','flowerpot','plant','breadbasket','moonlamp','fishtank-fish','starmobile']){const f="'`art/myroom/items/${id}.svg`;let t=fs.readFileSync(f,'"'utf8').replace(/<g>/g,'<g stroke-width=\"4.8\">');const scales={flowerpot:'1.1 1',plant:'1.13 1',moonlamp:'1.07 1'};if(scales[id])t=t.replace('stroke-linejoin=\"round\">','stroke-linejoin=\"round\">\\n<g transform=\"scale('+scales[id]+')\">').replace('</g>\\n</svg>','</g>\\n</g>\\n</svg>');fs.writeFileSync(f,t);}
+const {chromium}=require('@playwright/test');
+(async()=>{const browser=await chromium.launch();const page=await browser.newPage();const files={};for(const id of ['sofa','bed','swing','swing-seat','fishtank','fishtank-fish'])files[id]=fs.readFileSync("'`art/myroom/items/${id}.svg`,'"'utf8');for(const id of ['koro','mimi'])for(const layer of ['back','clothes-mask','clothes-shade','clothes-line','front'])files[id+'/'+layer]=fs.readFileSync("'`art/characters/${id}/${layer}.svg`,'"'utf8');
+const png=await page.evaluate(async(files)=>{const c=document.createElement('canvas');c.width=1200;c.height=450;const x=c.getContext('2d');x.fillStyle='#f9f2e5';x.fillRect(0,0,1200,450);async function draw(key,px,py,char=false){const im=new Image();im.src='data:image/svg+xml;base64,'+btoa(files[key]);await im.decode();if(char)x.drawImage(im,px-90,py-225,180,240);else x.drawImage(im,px-150,py-300,300,300);}for(const [item,px,py,seats] of [['sofa',170,365,[[-62,-62],[62,-62]]],['bed',500,365,[[-40,-70],[60,-70]]],['swing',830,365,[[0,-62]]]]){await draw(item,px,py);if(item==='swing')await draw('swing-seat',px,py);for(let i=0;i<seats.length;i++)for(const layer of ['back','clothes-mask','clothes-shade','clothes-line','front'])await draw((i?'mimi':'koro')+'/'+layer,px+seats[i][0],py+seats[i][1],true);}await draw('fishtank',1090,365);await draw('fishtank-fish',1090,365);return c.toDataURL().split(',')[1];},files);fs.writeFileSync('art/myroom/.preview-seats.png',Buffer.from(png,'base64'));await browser.close();})();
+'@ | node" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 1413ms:
+codex
+一覧と重ね合わせを確認し、ソファ・ベッド・ブランコに指定位置で友だちが収まることを確認しました。部屋の床境界も指定どおりです。確認中に見つけた水槽SVGの属性重複を修正し、全35枚がブラウザーで読み込めています。これから正式な素材検査とビルドを実行します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Remove-Item -LiteralPath art/myroom/.preview-items.png,art/myroom/.preview-rooms.png,art/myroom/.preview-seats.png' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 143ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm.cmd run validate:art' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 5970ms:
+
+> pattern-hide-family-beta@0.1.0 validate:art
+> node scripts/validate-art.mjs
+
+形状データを組み立てられなかったため、前回の結果を使います（Build failed with 2 errors:）
+# 絵の自動検査結果
+
+対象：`art/`（133ファイル、合計 4244KB） 実行：2026-10-14T21:47:00.872Z
+
+**すべて合格**
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm.cmd run build' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ exited 1 in 3038ms:
+
+> pattern-hide-family-beta@0.1.0 build
+> tsc --noEmit && vite build
+
+X [ERROR] Cannot read directory "../..": Access is denied.
+
+X [ERROR] Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+
+failed to load config from C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\vite.config.ts
+error during build:
+Error: Build failed with 2 errors:
+error: Cannot read directory "../..": Access is denied.
+error: Could not resolve "C:\\Users\\aki5h\\moyou-kakurenbo\\pattern-hide-family-beta\\vite.config.ts"
+    at failureErrorWithLog (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1752:15)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1211:25
+    at runOnEndCallbacks (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1592:45)
+    at buildResponseToResult (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1209:7)
+    at C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:1236:16
+    at responseCallbacks.<computed> (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:886:9)
+    at handleIncomingPacket (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:941:12)
+    at Socket.readFromStdout (C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\node_modules\esbuild\lib\main.js:864:7)
+    at Socket.emit (node:events:509:28)
+    at addChunk (node:internal/streams/readable:563:12)
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short
+Get-Content -Encoding UTF8 art-guides/ART_CHECK.md | Select-Object -Last 38' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 271ms:
+ M art-guides/ART_CHECK.md
+ M codex-jobs/QUEUE.md
+ M scripts/validate-art.mjs
+ M src/art/registry.ts
+ M src/entitlements/entitlements.ts
+ M src/storage/schema.ts
+ M src/ui/app.ts
+ M src/ui/parent.ts
+ M src/ui/sceneView.ts
+ M src/ui/styles.css
+?? art/movers/
+?? art/myroom/
+?? codex-jobs/14-movers-myroom.md
+?? src/core/movers.ts
+?? src/core/myroom.ts
+?? src/ui/moverView.ts
+?? tests/e2e/movers.spec.ts
+?? tests/unit/movers.test.ts
+?? video/hide-handoff-find.webm
+| OK | art\ui\title.png | 寸法 1200×700 |
+| OK | art\movers\balloon.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\bird.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\butterfly.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\cat.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\cloud.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\crab.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\puppy.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\sailboat.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\seagull.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\ball.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\balloon.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\beachball.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\bed.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\breadbasket.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\cake.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\cushion.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\fishtank-fish.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\fishtank.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\floatring.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\flowerpot.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\heartcushion.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\moonlamp.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\plant.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\present.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\puppy.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\rug.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\shell.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\sofa.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\starmobile.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\swing-seat.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\swing.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\table.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\rooms\bedroom.svg | 枠 0 0 1000 1000 |
+| OK | art\myroom\rooms\living.svg | 枠 0 0 1000 1000 |
+| OK | art\myroom\rooms\yard.svg | 枠 0 0 1000 1000 |
+
+見た目の良し悪し・幼児にとっての難しさ・既存作品との似ている度合いは、この検査では分かりません。
+
+codex
+素材検査は、既存素材を含む133ファイルすべて合格しました。ビルドは型検査を通過しましたが、Vite設定の読み込み時に親ディレクトリへのアクセスが拒否されて停止しました。AGENTS.mdに従って回避策は試さず、結果と実画面確認が未完了であることを作業記録に残します。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs=require('node:fs');const file='art/README.md';const text=fs.readFileSync(file,'utf8');const note="'`
+### 2026-10-15：ジョブ14（うごくもの・じぶんのへや）
+
+- 作成ファイル：計35枚。すべてSVGをコードで記述。
+  - '"\\"'`movers/'"\\"'`：bird.svg、butterfly.svg、cloud.svg、cat.svg、puppy.svg、balloon.svg、seagull.svg、sailboat.svg、crab.svg（9枚）。
+  - '"\\"'`myroom/items/'"\\"'`：sofa.svg、table.svg、rug.svg、ball.svg、cushion.svg、bed.svg、flowerpot.svg、present.svg、cake.svg、moonlamp.svg、fishtank.svg、fishtank-fish.svg、swing.svg、swing-seat.svg、puppy.svg、plant.svg、breadbasket.svg、heartcushion.svg、balloon.svg、starmobile.svg、shell.svg、floatring.svg、beachball.svg（23枚）。
+  - '"\\"'`myroom/rooms/'"\\"'`：living.svg、bedroom.svg、yard.svg（3枚）。本READMEも更新。
+- 方法・画風：既存の自作キャラクター、部屋の背景、シールを参照。濃茶 #4A3A40、基本線幅2.6・細部1.3・一部の下側3.4、左上に光のあるくすみパステルのグラデーションを使用。ボール、クッション、ケーキ、プレゼント、パン、ハート、貝殻、うきわ等は既存シールのモチーフをファイル内へ展開して形と色を継承。文字、外部参照、スクリプト、アニメーションなし。画像生成、ネット画像、外部サービス、別料金APIは不使用。
+- 座標：もの・うごくものは600×600px、viewBox '"\\"'`-150 -300 300 300'"\\"'`。足もと中央を原点とし、ソファは (−62,−62)・(62,−62)、ベッドは (−40,−70)・(60,−70)、ブランコ座板上面は y=−62。ブランコの横木中心・ロープ上端は (0,−280)。背景は2000×2000px、viewBox '"\\"'`0 0 1000 1000'"\\"'`。床上端はliving 560、bedroom 580、yard 540で、手前ほど明るい。部屋に家具は描いていない。
+- レイヤー：水槽本体には魚を描かず、2ひきを同じ枠の別SVGに配置。ブランコのわくとロープ・座板も別SVG。飛ぶもの6種には接地影を入れていない。子犬はmoversとitemsで同一。風船は同じデザインでmoversの幅70、ITEMSの幅80をそれぞれ優先した。
+- 迷った点：シールのごほうびと家具の種類は必ずしも一致しないため、形の共通するものを継承した（c3は雲、c9は虹、c10は冠、b30は星）。ベッド・ブランコ・子犬・ビーチボールはジョブの指定内容で新しく描いた。ブランコのロープは指定の1点支点から左右へ分かれる形。ラグは枠内に輪郭を収め、高さ40以内とした。
+- 追加確認：ローカルChromiumで35枚すべての画像デコードを確認し、一覧と背景3部屋を目視。もの・うごくものの不透明画素の外接範囲を測定し、左右・上端の切れがないことを確認。幅は例としてbird 69、cat 129、puppy 118、cloud 239、sofa 282、bed 290、table 190、rug 298。plant・flowerpot・moonlampの幅を調整し、既存シール由来の輪郭線も縮尺に合わせた。ころ・みみを指定座標で合成してソファ・ベッド・ブランコの収まりを目視、水槽と魚の重ね合わせも確認。合成時の服は白いマスク表示で、実ゲーム画面ではない。制作中に発見した水槽の重複属性は修正済み。
+- 自動検査：'"\\"'`npm.cmd run validate:art'"\\"'` は終了コード0、既存素材を含む133ファイル・合計4244KBで「すべて合格」。新規35枚の枠検査もすべてOK。形状データの組み立てに失敗し、保存済み形状を使用した警告あり。'"\\"'`art-guides/ART_CHECK.md'"\\"'` はAGENTS.mdで許可された自動更新。
+- ビルド：'"\\"'`npm.cmd run build'"\\"'` は '"\\"'`tsc --noEmit'"\\"'` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ '"\\"'`../..'"\\"'` を読めず（Access is denied）、vite.config.tsを解決できなかった。検査・ビルドの道具、設定、環境変数を変更する回避策は行っていない。
+- できなかったこと：ビルド成功、ゲーム実画面での表示・動き・座る操作の確認。Claude Code側で最新形状による素材検査、ビルド、実画面の確認が必要。ビルド停止のためpreviewは起動していない。
+- 状態：制作済み・素材検査合格。今やっていること：成果物の引き渡し。次の一手：Claude Codeによるビルド・実画面確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-15（JST）。STATUS.mdの更新指示とジョブの書き込み先限定が競合するため、今回の明示的な書き込み先限定を優先し、本欄に状態を記録。
+- 手動の書き込みは '"\\"'`art/movers/'"\\"'`、'"\\"'`art/myroom/'"\\"'`、本READMEのみ。確認用の一時PNGは削除済み。制作スクリプトは標準入力で実行し保存していない。他の作業者の変更は保持。commit / pushは行っていない。
+
+`;
+if(!text.includes('"'### 2026-10-15：ジョブ14'))fs.writeFileSync(file,text.replace('## 作業記録\\n','## 作業記録\\n'+note).replace('## 作業記録\\r\\n','## 作業記録\\r\\n'+note));
+console.log('Recorded job 14 in art/README.md.');
+'@ | node
+Get-ChildItem art/myroom -Recurse -Force -File | Where-Object { "'$_.Extension -ne '"'.svg' } | Select-Object FullName
+git diff --stat -- art/README.md art-guides/ART_CHECK.md" in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 283ms:
+Recorded job 14 in art/README.md.
+warning: in the working copy of 'pattern-hide-family-beta/art-guides/ART_CHECK.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'pattern-hide-family-beta/art/README.md', LF will be replaced by CRLF the next time Git touches it
+ pattern-hide-family-beta/art-guides/ART_CHECK.md | 37 +++++++++++++++++++++++-
+ 1 file changed, 36 insertions(+), 1 deletion(-)
+
+apply patch
+patch: completed
+C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta\art\README.md
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 49c519c77505e711067acf3c345dd9d7c9e033fa..06da19f2115baf25bf560dfb468f80466013ca11
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -4,6 +4,23 @@
+ 現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-15：ジョブ14（うごくもの・じぶんのへや）
++
++- 作成ファイル：計35枚。すべてSVGをコードで記述。
++  - `movers/`：bird.svg、butterfly.svg、cloud.svg、cat.svg、puppy.svg、balloon.svg、seagull.svg、sailboat.svg、crab.svg（9枚）。
++  - `myroom/items/`：sofa.svg、table.svg、rug.svg、ball.svg、cushion.svg、bed.svg、flowerpot.svg、present.svg、cake.svg、moonlamp.svg、fishtank.svg、fishtank-fish.svg、swing.svg、swing-seat.svg、puppy.svg、plant.svg、breadbasket.svg、heartcushion.svg、balloon.svg、starmobile.svg、shell.svg、floatring.svg、beachball.svg（23枚）。
++  - `myroom/rooms/`：living.svg、bedroom.svg、yard.svg（3枚）。本READMEも更新。
++- 方法・画風：既存の自作キャラクター、背景、シールを参照。濃茶 #4A3A40、基本線幅2.6・細部1.3・一部の下側3.4、左上からの光、くすみパステルのグラデーションを使用。ボール・クッション・ケーキ・プレゼント・パン・ハート・貝殻・うきわ等は既存シールのモチーフをファイル内へ展開し形と色を継承。文字、外部参照、スクリプト、アニメーションなし。画像生成、ネット画像、外部サービス、別料金APIは不使用。
++- 座標：もの・うごくものは600×600px、viewBox `-150 -300 300 300`。足もと中央を原点とし、ソファは (−62,−62)・(62,−62)、ベッドは (−40,−70)・(60,−70)、ブランコ座板上面は y=−62。横木中心・ロープ上端は (0,−280)。背景は2000×2000px、viewBox `0 0 1000 1000`。床上端はliving 560、bedroom 580、yard 540で、手前ほど明るい。部屋に家具は描いていない。
++- レイヤー：水槽本体には魚を描かず、2ひきを同じ枠の別SVGに配置。ブランコのわくとロープ・座板も別SVG。飛ぶもの6種には接地影なし。子犬はmoversとitemsで同一。風船は同じデザインでmoversの幅70、ITEMSの幅80をそれぞれ優先した。
++- 迷った点：シールのモチーフと家具の種類は必ずしも一致しない（c3は雲、c9は虹、c10は冠、b30は星）。形の共通するものは継承し、ベッド・ブランコ・子犬・ビーチボールはジョブの指定内容で新しく描いた。ロープは指定の1点支点から左右へ分かれる形。ラグは枠内に輪郭を収め、高さ40以内とした。
++- 追加確認：ローカルChromiumで35枚すべての画像デコードを確認し、一覧と背景3部屋を目視。もの・うごくものの不透明画素範囲を測定し、左右・上端の切れがないことを確認。幅は例としてbird 69、cat 129、puppy 118、cloud 239、sofa 282、bed 290、table 190、rug 298。plant・flowerpot・moonlampの幅を調整し、シール由来の輪郭線も縮尺に合わせた。ころ・みみを指定座標で合成してソファ・ベッド・ブランコの収まりを目視、水槽と魚の重ね合わせも確認。合成時の服は白いマスク表示で、実ゲーム画面ではない。制作中に発見した水槽の重複属性は修正済み。
++- 自動検査：`npm.cmd run validate:art` は終了コード0、既存素材を含む133ファイル・合計4244KBで「すべて合格」。新規35枚の枠検査もすべてOK。形状データの組み立てに失敗し、保存済み形状を使用した警告あり。`art-guides/ART_CHECK.md` はAGENTS.mdで許可された自動更新。
++- ビルド：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。道具・設定・環境変数を変更する回避策は行っていない。
++- できなかったこと：ビルド成功、ゲーム実画面での表示・動き・座る操作の確認。Claude Code側で最新形状による素材検査、ビルド、実画面の確認が必要。ビルド停止のためpreviewは起動していない。
++- 状態：制作済み・素材検査合格。今やっていること：成果物の引き渡し。次の一手：Claude Codeによるビルド・実画面確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-15（JST）。STATUS.mdの更新指示とジョブの書き込み先限定が競合するため、今回の明示的な書き込み先限定を優先し、本欄に状態を記録。
++- 手動の書き込みは `art/movers/`、`art/myroom/`、本READMEのみ。確認用の一時PNGは削除済み。制作スクリプトは標準入力で実行し保存していない。他の作業者の変更は保持。commit / pushは行っていない。
++
+ ### 2026-10-08：ジョブ13（アプリアイコン・起動画面）
+ 
+ - 作成ファイル：`app/icon.svg`（1024×1024px）、`app/splash.svg`（2732×2732px）、本README。
+
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 49c519c77505e711067acf3c345dd9d7c9e033fa..06da19f2115baf25bf560dfb468f80466013ca11
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -4,6 +4,23 @@
+ 現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-15：ジョブ14（うごくもの・じぶんのへや）
++
++- 作成ファイル：計35枚。すべてSVGをコードで記述。
++  - `movers/`：bird.svg、butterfly.svg、cloud.svg、cat.svg、puppy.svg、balloon.svg、seagull.svg、sailboat.svg、crab.svg（9枚）。
++  - `myroom/items/`：sofa.svg、table.svg、rug.svg、ball.svg、cushion.svg、bed.svg、flowerpot.svg、present.svg、cake.svg、moonlamp.svg、fishtank.svg、fishtank-fish.svg、swing.svg、swing-seat.svg、puppy.svg、plant.svg、breadbasket.svg、heartcushion.svg、balloon.svg、starmobile.svg、shell.svg、floatring.svg、beachball.svg（23枚）。
++  - `myroom/rooms/`：living.svg、bedroom.svg、yard.svg（3枚）。本READMEも更新。
++- 方法・画風：既存の自作キャラクター、背景、シールを参照。濃茶 #4A3A40、基本線幅2.6・細部1.3・一部の下側3.4、左上からの光、くすみパステルのグラデーションを使用。ボール・クッション・ケーキ・プレゼント・パン・ハート・貝殻・うきわ等は既存シールのモチーフをファイル内へ展開し形と色を継承。文字、外部参照、スクリプト、アニメーションなし。画像生成、ネット画像、外部サービス、別料金APIは不使用。
++- 座標：もの・うごくものは600×600px、viewBox `-150 -300 300 300`。足もと中央を原点とし、ソファは (−62,−62)・(62,−62)、ベッドは (−40,−70)・(60,−70)、ブランコ座板上面は y=−62。横木中心・ロープ上端は (0,−280)。背景は2000×2000px、viewBox `0 0 1000 1000`。床上端はliving 560、bedroom 580、yard 540で、手前ほど明るい。部屋に家具は描いていない。
++- レイヤー：水槽本体には魚を描かず、2ひきを同じ枠の別SVGに配置。ブランコのわくとロープ・座板も別SVG。飛ぶもの6種には接地影なし。子犬はmoversとitemsで同一。風船は同じデザインでmoversの幅70、ITEMSの幅80をそれぞれ優先した。
++- 迷った点：シールのモチーフと家具の種類は必ずしも一致しない（c3は雲、c9は虹、c10は冠、b30は星）。形の共通するものは継承し、ベッド・ブランコ・子犬・ビーチボールはジョブの指定内容で新しく描いた。ロープは指定の1点支点から左右へ分かれる形。ラグは枠内に輪郭を収め、高さ40以内とした。
++- 追加確認：ローカルChromiumで35枚すべての画像デコードを確認し、一覧と背景3部屋を目視。もの・うごくものの不透明画素範囲を測定し、左右・上端の切れがないことを確認。幅は例としてbird 69、cat 129、puppy 118、cloud 239、sofa 282、bed 290、table 190、rug 298。plant・flowerpot・moonlampの幅を調整し、シール由来の輪郭線も縮尺に合わせた。ころ・みみを指定座標で合成してソファ・ベッド・ブランコの収まりを目視、水槽と魚の重ね合わせも確認。合成時の服は白いマスク表示で、実ゲーム画面ではない。制作中に発見した水槽の重複属性は修正済み。
++- 自動検査：`npm.cmd run validate:art` は終了コード0、既存素材を含む133ファイル・合計4244KBで「すべて合格」。新規35枚の枠検査もすべてOK。形状データの組み立てに失敗し、保存済み形状を使用した警告あり。`art-guides/ART_CHECK.md` はAGENTS.mdで許可された自動更新。
++- ビルド：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。道具・設定・環境変数を変更する回避策は行っていない。
++- できなかったこと：ビルド成功、ゲーム実画面での表示・動き・座る操作の確認。Claude Code側で最新形状による素材検査、ビルド、実画面の確認が必要。ビルド停止のためpreviewは起動していない。
++- 状態：制作済み・素材検査合格。今やっていること：成果物の引き渡し。次の一手：Claude Codeによるビルド・実画面確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-15（JST）。STATUS.mdの更新指示とジョブの書き込み先限定が競合するため、今回の明示的な書き込み先限定を優先し、本欄に状態を記録。
++- 手動の書き込みは `art/movers/`、`art/myroom/`、本READMEのみ。確認用の一時PNGは削除済み。制作スクリプトは標準入力で実行し保存していない。他の作業者の変更は保持。commit / pushは行っていない。
++
+ ### 2026-10-08：ジョブ13（アプリアイコン・起動画面）
+ 
+ - 作成ファイル：`app/icon.svg`（1024×1024px）、`app/splash.svg`（2732×2732px）、本README。
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Encoding UTF8 art/README.md | Select-Object -First 12
+git diff --numstat -- art/README.md
+(Get-ChildItem art/movers,art/myroom -Recurse -File -Filter *.svg).Count' in C:\Users\aki5h\moyou-kakurenbo\pattern-hide-family-beta
+ succeeded in 241ms:
+# art/
+
+差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
+現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+
+## 作業記録
+### 2026-10-15：ジョブ14（うごくもの・じぶんのへや）
+
+- 作成ファイル：計35枚。すべてSVGをコードで記述。
+  - `movers/`：bird.svg、butterfly.svg、cloud.svg、cat.svg、puppy.svg、balloon.svg、seagull.svg、sailboat.svg、crab.svg（9枚）。
+  - `myroom/items/`：sofa.svg、table.svg、rug.svg、ball.svg、cushion.svg、bed.svg、flowerpot.svg、present.svg、cake.svg、moonlamp.svg、fishtank.svg、fishtank-fish.svg、swing.svg、swing-seat.svg、puppy.svg、plant.svg、breadbasket.svg、heartcushion.svg、balloon.svg、starmobile.svg、shell.svg、floatring.svg、beachball.svg（23枚）。
+  - `myroom/rooms/`：living.svg、bedroom.svg、yard.svg（3枚）。本READMEも更新。
+warning: in the working copy of 'pattern-hide-family-beta/art/README.md', LF will be replaced by CRLF the next time Git touches it
+17	0	pattern-hide-family-beta/art/README.md
+35
+
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 49c519c77505e711067acf3c345dd9d7c9e033fa..06da19f2115baf25bf560dfb468f80466013ca11
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -4,6 +4,23 @@
+ 現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-15：ジョブ14（うごくもの・じぶんのへや）
++
++- 作成ファイル：計35枚。すべてSVGをコードで記述。
++  - `movers/`：bird.svg、butterfly.svg、cloud.svg、cat.svg、puppy.svg、balloon.svg、seagull.svg、sailboat.svg、crab.svg（9枚）。
++  - `myroom/items/`：sofa.svg、table.svg、rug.svg、ball.svg、cushion.svg、bed.svg、flowerpot.svg、present.svg、cake.svg、moonlamp.svg、fishtank.svg、fishtank-fish.svg、swing.svg、swing-seat.svg、puppy.svg、plant.svg、breadbasket.svg、heartcushion.svg、balloon.svg、starmobile.svg、shell.svg、floatring.svg、beachball.svg（23枚）。
++  - `myroom/rooms/`：living.svg、bedroom.svg、yard.svg（3枚）。本READMEも更新。
++- 方法・画風：既存の自作キャラクター、背景、シールを参照。濃茶 #4A3A40、基本線幅2.6・細部1.3・一部の下側3.4、左上からの光、くすみパステルのグラデーションを使用。ボール・クッション・ケーキ・プレゼント・パン・ハート・貝殻・うきわ等は既存シールのモチーフをファイル内へ展開し形と色を継承。文字、外部参照、スクリプト、アニメーションなし。画像生成、ネット画像、外部サービス、別料金APIは不使用。
++- 座標：もの・うごくものは600×600px、viewBox `-150 -300 300 300`。足もと中央を原点とし、ソファは (−62,−62)・(62,−62)、ベッドは (−40,−70)・(60,−70)、ブランコ座板上面は y=−62。横木中心・ロープ上端は (0,−280)。背景は2000×2000px、viewBox `0 0 1000 1000`。床上端はliving 560、bedroom 580、yard 540で、手前ほど明るい。部屋に家具は描いていない。
++- レイヤー：水槽本体には魚を描かず、2ひきを同じ枠の別SVGに配置。ブランコのわくとロープ・座板も別SVG。飛ぶもの6種には接地影なし。子犬はmoversとitemsで同一。風船は同じデザインでmoversの幅70、ITEMSの幅80をそれぞれ優先した。
++- 迷った点：シールのモチーフと家具の種類は必ずしも一致しない（c3は雲、c9は虹、c10は冠、b30は星）。形の共通するものは継承し、ベッド・ブランコ・子犬・ビーチボールはジョブの指定内容で新しく描いた。ロープは指定の1点支点から左右へ分かれる形。ラグは枠内に輪郭を収め、高さ40以内とした。
++- 追加確認：ローカルChromiumで35枚すべての画像デコードを確認し、一覧と背景3部屋を目視。もの・うごくものの不透明画素範囲を測定し、左右・上端の切れがないことを確認。幅は例としてbird 69、cat 129、puppy 118、cloud 239、sofa 282、bed 290、table 190、rug 298。plant・flowerpot・moonlampの幅を調整し、シール由来の輪郭線も縮尺に合わせた。ころ・みみを指定座標で合成してソファ・ベッド・ブランコの収まりを目視、水槽と魚の重ね合わせも確認。合成時の服は白いマスク表示で、実ゲーム画面ではない。制作中に発見した水槽の重複属性は修正済み。
++- 自動検査：`npm.cmd run validate:art` は終了コード0、既存素材を含む133ファイル・合計4244KBで「すべて合格」。新規35枚の枠検査もすべてOK。形状データの組み立てに失敗し、保存済み形状を使用した警告あり。`art-guides/ART_CHECK.md` はAGENTS.mdで許可された自動更新。
++- ビルド：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。道具・設定・環境変数を変更する回避策は行っていない。
++- できなかったこと：ビルド成功、ゲーム実画面での表示・動き・座る操作の確認。Claude Code側で最新形状による素材検査、ビルド、実画面の確認が必要。ビルド停止のためpreviewは起動していない。
++- 状態：制作済み・素材検査合格。今やっていること：成果物の引き渡し。次の一手：Claude Codeによるビルド・実画面確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-15（JST）。STATUS.mdの更新指示とジョブの書き込み先限定が競合するため、今回の明示的な書き込み先限定を優先し、本欄に状態を記録。
++- 手動の書き込みは `art/movers/`、`art/myroom/`、本READMEのみ。確認用の一時PNGは削除済み。制作スクリプトは標準入力で実行し保存していない。他の作業者の変更は保持。commit / pushは行っていない。
++
+ ### 2026-10-08：ジョブ13（アプリアイコン・起動画面）
+ 
+ - 作成ファイル：`app/icon.svg`（1024×1024px）、`app/splash.svg`（2732×2732px）、本README。
+
+codex
+SVG35枚を制作し、座面・重ね合わせも確認しました。
+
+- 素材検査：133ファイルすべて合格（保存済み形状データ使用）。
+- ビルド：型検査通過後、アクセス制限で停止。実ゲーム画面は未確認。
+- 作業記録：[art/README.md](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/art/README.md:7)
+
+許可された範囲のみ書き込み、commit・pushはしていません。
+diff --git a/pattern-hide-family-beta/art/README.md b/pattern-hide-family-beta/art/README.md
+index 49c519c77505e711067acf3c345dd9d7c9e033fa..06da19f2115baf25bf560dfb468f80466013ca11
+--- a/pattern-hide-family-beta/art/README.md
++++ b/pattern-hide-family-beta/art/README.md
+@@ -4,6 +4,23 @@
+ 現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
+ 
+ ## 作業記録
++### 2026-10-15：ジョブ14（うごくもの・じぶんのへや）
++
++- 作成ファイル：計35枚。すべてSVGをコードで記述。
++  - `movers/`：bird.svg、butterfly.svg、cloud.svg、cat.svg、puppy.svg、balloon.svg、seagull.svg、sailboat.svg、crab.svg（9枚）。
++  - `myroom/items/`：sofa.svg、table.svg、rug.svg、ball.svg、cushion.svg、bed.svg、flowerpot.svg、present.svg、cake.svg、moonlamp.svg、fishtank.svg、fishtank-fish.svg、swing.svg、swing-seat.svg、puppy.svg、plant.svg、breadbasket.svg、heartcushion.svg、balloon.svg、starmobile.svg、shell.svg、floatring.svg、beachball.svg（23枚）。
++  - `myroom/rooms/`：living.svg、bedroom.svg、yard.svg（3枚）。本READMEも更新。
++- 方法・画風：既存の自作キャラクター、背景、シールを参照。濃茶 #4A3A40、基本線幅2.6・細部1.3・一部の下側3.4、左上からの光、くすみパステルのグラデーションを使用。ボール・クッション・ケーキ・プレゼント・パン・ハート・貝殻・うきわ等は既存シールのモチーフをファイル内へ展開し形と色を継承。文字、外部参照、スクリプト、アニメーションなし。画像生成、ネット画像、外部サービス、別料金APIは不使用。
++- 座標：もの・うごくものは600×600px、viewBox `-150 -300 300 300`。足もと中央を原点とし、ソファは (−62,−62)・(62,−62)、ベッドは (−40,−70)・(60,−70)、ブランコ座板上面は y=−62。横木中心・ロープ上端は (0,−280)。背景は2000×2000px、viewBox `0 0 1000 1000`。床上端はliving 560、bedroom 580、yard 540で、手前ほど明るい。部屋に家具は描いていない。
++- レイヤー：水槽本体には魚を描かず、2ひきを同じ枠の別SVGに配置。ブランコのわくとロープ・座板も別SVG。飛ぶもの6種には接地影なし。子犬はmoversとitemsで同一。風船は同じデザインでmoversの幅70、ITEMSの幅80をそれぞれ優先した。
++- 迷った点：シールのモチーフと家具の種類は必ずしも一致しない（c3は雲、c9は虹、c10は冠、b30は星）。形の共通するものは継承し、ベッド・ブランコ・子犬・ビーチボールはジョブの指定内容で新しく描いた。ロープは指定の1点支点から左右へ分かれる形。ラグは枠内に輪郭を収め、高さ40以内とした。
++- 追加確認：ローカルChromiumで35枚すべての画像デコードを確認し、一覧と背景3部屋を目視。もの・うごくものの不透明画素範囲を測定し、左右・上端の切れがないことを確認。幅は例としてbird 69、cat 129、puppy 118、cloud 239、sofa 282、bed 290、table 190、rug 298。plant・flowerpot・moonlampの幅を調整し、シール由来の輪郭線も縮尺に合わせた。ころ・みみを指定座標で合成してソファ・ベッド・ブランコの収まりを目視、水槽と魚の重ね合わせも確認。合成時の服は白いマスク表示で、実ゲーム画面ではない。制作中に発見した水槽の重複属性は修正済み。
++- 自動検査：`npm.cmd run validate:art` は終了コード0、既存素材を含む133ファイル・合計4244KBで「すべて合格」。新規35枚の枠検査もすべてOK。形状データの組み立てに失敗し、保存済み形状を使用した警告あり。`art-guides/ART_CHECK.md` はAGENTS.mdで許可された自動更新。
++- ビルド：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。道具・設定・環境変数を変更する回避策は行っていない。
++- できなかったこと：ビルド成功、ゲーム実画面での表示・動き・座る操作の確認。Claude Code側で最新形状による素材検査、ビルド、実画面の確認が必要。ビルド停止のためpreviewは起動していない。
++- 状態：制作済み・素材検査合格。今やっていること：成果物の引き渡し。次の一手：Claude Codeによるビルド・実画面確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-15（JST）。STATUS.mdの更新指示とジョブの書き込み先限定が競合するため、今回の明示的な書き込み先限定を優先し、本欄に状態を記録。
++- 手動の書き込みは `art/movers/`、`art/myroom/`、本READMEのみ。確認用の一時PNGは削除済み。制作スクリプトは標準入力で実行し保存していない。他の作業者の変更は保持。commit / pushは行っていない。
++
+ ### 2026-10-08：ジョブ13（アプリアイコン・起動画面）
+ 
+ - 作成ファイル：`app/icon.svg`（1024×1024px）、`app/splash.svg`（2732×2732px）、本README。
+
+tokens used
+90,767
+SVG35枚を制作し、座面・重ね合わせも確認しました。
+
+- 素材検査：133ファイルすべて合格（保存済み形状データ使用）。
+- ビルド：型検査通過後、アクセス制限で停止。実ゲーム画面は未確認。
+- 作業記録：[art/README.md](C:/Users/aki5h/moyou-kakurenbo/pattern-hide-family-beta/art/README.md:7)
+
+許可された範囲のみ書き込み、commit・pushはしていません。

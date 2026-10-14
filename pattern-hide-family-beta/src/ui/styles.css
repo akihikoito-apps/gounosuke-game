@@ -476,3 +476,101 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
   .up-bar { height: 6px; margin-top: 3px; border-width: 1.5px; }
   .course-tile { height: clamp(48px, 18vh, 80px); }
 }
+
+/* ---- うごくもの（コース）。位置は --x0..--y1、片道の向きは --f0/--f1（絵は右向き） ---- */
+.movers { pointer-events: none; }
+.mv { transform-box: view-box; animation-duration: var(--period); animation-delay: var(--delay); animation-iteration-count: infinite; animation-timing-function: linear; }
+.mv-cross { animation-name: mv-cross; }
+.mv-patrol { animation-name: mv-patrol; }
+@keyframes mv-cross {
+  from { transform: translate(var(--x0), var(--y0)) scaleX(var(--f0)); }
+  to { transform: translate(var(--x1), var(--y1)) scaleX(var(--f0)); }
+}
+@keyframes mv-patrol {
+  0% { transform: translate(var(--x0), var(--y0)) scaleX(var(--f0)); }
+  49.9% { transform: translate(var(--x1), var(--y1)) scaleX(var(--f0)); }
+  50% { transform: translate(var(--x1), var(--y1)) scaleX(var(--f1)); }
+  100% { transform: translate(var(--x0), var(--y0)) scaleX(var(--f1)); }
+}
+.mv-inner { transform-box: view-box; animation: mv-step 0.5s ease-in-out infinite alternate; }
+.mv-inner.fly { animation: mv-fly 0.9s ease-in-out infinite alternate; }
+.mv-inner.drift { animation: mv-drift 3s ease-in-out infinite alternate; }
+@keyframes mv-step { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+@keyframes mv-fly { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+@keyframes mv-drift { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) {
+  .mv, .mv-inner { animation-play-state: paused; }
+}
+
+/* ---- じぶんの へや ---- */
+.title .btn.myroom-btn { width: min(420px, 86vw); background: #F9DCE3; }
+.myroom { gap: 6px; padding-bottom: 0; }
+.myroom .topbar h2 { margin: 0; }
+.mr-rooms { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.mr-room-tab { font: inherit; font-weight: 800; font-size: 17px; color: var(--ink); background: #fff; border: 3px solid var(--line); border-radius: 999px; padding: 6px 16px; min-height: 44px; cursor: pointer; }
+.mr-room-tab.on { background: var(--primary); }
+.mr-stage { touch-action: none; }
+.mr-svg { width: 100%; height: 100%; }
+.mr-obj { cursor: grab; }
+.mr-obj.dragging { cursor: grabbing; filter: drop-shadow(0 10px 8px rgba(74, 58, 64, 0.28)); }
+.mr-tray { width: 100%; background: #fff; border-top: 4px solid var(--line); border-radius: 22px 22px 0 0; padding: 6px 10px calc(8px + var(--safe-b)); display: flex; flex-direction: column; gap: 6px; transition: background 0.15s; }
+.mr-tray.drop-here { background: #FFF1C2; }
+.mr-tray.drop-here::before { content: 'ここで はなすと しまえるよ'; font-weight: 800; font-size: 14px; text-align: center; }
+.mr-tabs { display: flex; gap: 8px; justify-content: center; }
+.mr-tab { font: inherit; font-weight: 800; font-size: 16px; color: var(--ink); background: #F6EFE6; border: 3px solid var(--line); border-radius: 999px; padding: 4px 18px; min-height: 40px; cursor: pointer; }
+.mr-tab.on { background: var(--primary); }
+.mr-cells { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 6px; touch-action: pan-x; scrollbar-width: thin; }
+.mr-cell { flex: 0 0 auto; width: 76px; height: 76px; border: 3px solid var(--line); border-radius: 18px; background: #FFF6E8; padding: 4px; display: grid; place-items: center; cursor: grab; touch-action: none; position: relative; }
+.mr-cell svg { width: 100%; height: 100%; }
+.mr-cell span { font-size: 12px; font-weight: 700; }
+.mr-cell.placed { background: #EDE6DD; opacity: 0.55; }
+.mr-cell.placed::after { content: ''; position: absolute; right: -6px; top: -6px; width: 20px; height: 20px; border-radius: 50%; background: #9BD3A8; border: 3px solid var(--line); }
+@media (min-width: 700px) and (min-height: 700px) {
+  .mr-cell { width: 96px; height: 96px; }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .myroom { flex-direction: column; }
+  .mr-cell { width: 58px; height: 58px; border-radius: 14px; }
+  .mr-tab { min-height: 34px; padding: 2px 14px; font-size: 14px; }
+  .mr-tray { padding-top: 4px; gap: 3px; }
+}
+/* 動き（足もと 0,0 を中心に） */
+.mr-move, .mr-swing-seat, .mr-fish, .mr-hop, .mr-obj.rider { transform-box: view-box; transform-origin: 0 0; }
+.mr-m-walk .mr-move { animation: mr-walk 9s linear infinite; }
+.mr-m-bob .mr-move { animation: mr-bob 2.4s ease-in-out infinite alternate; }
+.mr-m-sway .mr-move { animation: mr-sway 3s ease-in-out infinite alternate; }
+.mr-m-roll .mr-move { animation: mr-roll 4s ease-in-out infinite alternate; }
+.mr-swing-seat { animation: mr-swing 2.6s ease-in-out infinite alternate; }
+.mr-fish { animation: mr-fish 3.5s ease-in-out infinite alternate; }
+.mr-hop.hop { animation: mr-hop 0.5s ease-out; }
+@keyframes mr-walk {
+  0% { transform: translateX(-70px) scaleX(1); }
+  49.9% { transform: translateX(70px) scaleX(1); }
+  50% { transform: translateX(70px) scaleX(-1); }
+  100% { transform: translateX(-70px) scaleX(-1); }
+}
+@keyframes mr-bob { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+@keyframes mr-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+@keyframes mr-roll { from { transform: translateX(-18px); } to { transform: translateX(18px); } }
+@keyframes mr-swing { from { transform: translate(0px, -280px) rotate(-16deg) translate(0px, 280px); } to { transform: translate(0px, -280px) rotate(16deg) translate(0px, 280px); } }
+@keyframes mr-fish { from { transform: translateX(-14px); } to { transform: translateX(14px); } }
+@keyframes mr-hop { 0% { transform: translateY(0); } 40% { transform: translateY(-46px); } 100% { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .mr-move, .mr-swing-seat, .mr-fish, .mr-hop { animation: none !important; }
+}
+
+/* 部屋が3つのときも 1行に */
+.mr-rooms { flex-wrap: nowrap; gap: 6px; }
+.mr-room-tab { font-size: clamp(13px, 3.6vw, 17px); padding: 4px clamp(8px, 2.6vw, 16px); white-space: nowrap; }
+
+.up-gift { font-size: 0.88em; color: #8a5a6a; }
+.up-row.up-room .up-icon { border-radius: 14px; background: #F9DCE3; border: 3px solid var(--line); padding: 6px; }
+.reward-sticker small { font-size: 13px; color: #8a5a6a; }
+/* iPhone 横向きの じぶんの へや：棚を右に縦長に置き、部屋を大きく */
+@media (orientation: landscape) and (max-height: 600px) {
+  .screen.myroom { display: grid; grid-template-columns: minmax(0, 1fr) clamp(150px, 26vw, 230px); grid-template-rows: auto minmax(0, 1fr); align-items: stretch; gap: 4px 8px; }
+  .screen.myroom > .topbar { grid-column: 1 / -1; }
+  .screen.myroom > .mr-stage { grid-column: 1; grid-row: 2; min-height: 0; }
+  .screen.myroom > .mr-tray { grid-column: 2; grid-row: 2; border-top: none; border-left: 4px solid var(--line); border-radius: 22px 0 0 0; min-height: 0; padding: 6px 8px calc(6px + var(--safe-b)); }
+  .screen.myroom .mr-cells { flex-wrap: wrap; overflow-x: hidden; overflow-y: auto; align-content: flex-start; touch-action: pan-y; justify-content: center; }
+}

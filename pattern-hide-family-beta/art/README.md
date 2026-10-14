@@ -4,6 +4,23 @@
 現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
 
 ## 作業記録
+### 2026-10-15：ジョブ14（うごくもの・じぶんのへや）
+
+- 作成ファイル：計35枚。すべてSVGをコードで記述。
+  - `movers/`：bird.svg、butterfly.svg、cloud.svg、cat.svg、puppy.svg、balloon.svg、seagull.svg、sailboat.svg、crab.svg（9枚）。
+  - `myroom/items/`：sofa.svg、table.svg、rug.svg、ball.svg、cushion.svg、bed.svg、flowerpot.svg、present.svg、cake.svg、moonlamp.svg、fishtank.svg、fishtank-fish.svg、swing.svg、swing-seat.svg、puppy.svg、plant.svg、breadbasket.svg、heartcushion.svg、balloon.svg、starmobile.svg、shell.svg、floatring.svg、beachball.svg（23枚）。
+  - `myroom/rooms/`：living.svg、bedroom.svg、yard.svg（3枚）。本READMEも更新。
+- 方法・画風：既存の自作キャラクター、背景、シールを参照。濃茶 #4A3A40、基本線幅2.6・細部1.3・一部の下側3.4、左上からの光、くすみパステルのグラデーションを使用。ボール・クッション・ケーキ・プレゼント・パン・ハート・貝殻・うきわ等は既存シールのモチーフをファイル内へ展開し形と色を継承。文字、外部参照、スクリプト、アニメーションなし。画像生成、ネット画像、外部サービス、別料金APIは不使用。
+- 座標：もの・うごくものは600×600px、viewBox `-150 -300 300 300`。足もと中央を原点とし、ソファは (−62,−62)・(62,−62)、ベッドは (−40,−70)・(60,−70)、ブランコ座板上面は y=−62。横木中心・ロープ上端は (0,−280)。背景は2000×2000px、viewBox `0 0 1000 1000`。床上端はliving 560、bedroom 580、yard 540で、手前ほど明るい。部屋に家具は描いていない。
+- レイヤー：水槽本体には魚を描かず、2ひきを同じ枠の別SVGに配置。ブランコのわくとロープ・座板も別SVG。飛ぶもの6種には接地影なし。子犬はmoversとitemsで同一。風船は同じデザインでmoversの幅70、ITEMSの幅80をそれぞれ優先した。
+- 迷った点：シールのモチーフと家具の種類は必ずしも一致しない（c3は雲、c9は虹、c10は冠、b30は星）。形の共通するものは継承し、ベッド・ブランコ・子犬・ビーチボールはジョブの指定内容で新しく描いた。ロープは指定の1点支点から左右へ分かれる形。ラグは枠内に輪郭を収め、高さ40以内とした。
+- 追加確認：ローカルChromiumで35枚すべての画像デコードを確認し、一覧と背景3部屋を目視。もの・うごくものの不透明画素範囲を測定し、左右・上端の切れがないことを確認。幅は例としてbird 69、cat 129、puppy 118、cloud 239、sofa 282、bed 290、table 190、rug 298。plant・flowerpot・moonlampの幅を調整し、シール由来の輪郭線も縮尺に合わせた。ころ・みみを指定座標で合成してソファ・ベッド・ブランコの収まりを目視、水槽と魚の重ね合わせも確認。合成時の服は白いマスク表示で、実ゲーム画面ではない。制作中に発見した水槽の重複属性は修正済み。
+- 自動検査：`npm.cmd run validate:art` は終了コード0、既存素材を含む133ファイル・合計4244KBで「すべて合格」。新規35枚の枠検査もすべてOK。形状データの組み立てに失敗し、保存済み形状を使用した警告あり。`art-guides/ART_CHECK.md` はAGENTS.mdで許可された自動更新。
+- ビルド：`npm.cmd run build` は `tsc --noEmit` 通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ `../..` を読めず（Access is denied）、vite.config.tsを解決できなかった。道具・設定・環境変数を変更する回避策は行っていない。
+- できなかったこと：ビルド成功、ゲーム実画面での表示・動き・座る操作の確認。Claude Code側で最新形状による素材検査、ビルド、実画面の確認が必要。ビルド停止のためpreviewは起動していない。
+- 状態：制作済み・素材検査合格。今やっていること：成果物の引き渡し。次の一手：Claude Codeによるビルド・実画面確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-15（JST）。STATUS.mdの更新指示とジョブの書き込み先限定が競合するため、今回の明示的な書き込み先限定を優先し、本欄に状態を記録。
+- 手動の書き込みは `art/movers/`、`art/myroom/`、本READMEのみ。確認用の一時PNGは削除済み。制作スクリプトは標準入力で実行し保存していない。他の作業者の変更は保持。commit / pushは行っていない。
+
 ### 2026-10-08：ジョブ13（アプリアイコン・起動画面）
 
 - 作成ファイル：`app/icon.svg`（1024×1024px）、`app/splash.svg`（2732×2732px）、本README。

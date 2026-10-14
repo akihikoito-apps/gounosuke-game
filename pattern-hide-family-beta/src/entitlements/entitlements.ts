@@ -5,7 +5,7 @@
 import type { CharacterId } from '../core/characters';
 import type { SceneId } from '../core/scene';
 
-export type ContentId = `scene:${SceneId}` | `course:${number}` | `char:${CharacterId}` | 'trial:hardest' | `costume-pack:${string}`;
+export type ContentId = `scene:${SceneId}` | `course:${number}` | `char:${CharacterId}` | 'trial:hardest' | `costume-pack:${string}` | `room:${string}`;
 
 export type PackId = 'base' | 'more-courses' | 'beach';
 
@@ -31,13 +31,13 @@ export const PACKS: PackDef[] = [
     name: 'きほん',
     free: true,
     // コース1・5で仲間になる にゃこ・ぽぽ は、無料の範囲のごほうび
-    contents: ['scene:room', 'scene:garden', 'scene:shop', ...courses(1, 5), 'char:koro', 'char:mimi', 'char:moko', 'char:nyako', 'char:popo'],
+    contents: ['scene:room', 'scene:garden', 'scene:shop', ...courses(1, 5), 'char:koro', 'char:mimi', 'char:moko', 'char:nyako', 'char:popo', 'room:living', 'room:bedroom'],
   },
   {
     id: 'more-courses',
     name: 'つづきの コース',
     free: false,
-    contents: [...courses(6, 10), 'trial:hardest'],
+    contents: [...courses(6, 10), 'trial:hardest', 'room:yard'],
   },
   {
     id: 'beach',

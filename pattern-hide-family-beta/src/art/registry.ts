@@ -4,7 +4,7 @@
 import type { CharacterId } from '../core/characters';
 import type { SceneId } from '../core/scene';
 
-const files = import.meta.glob('../../art/{characters,scenes,patterns,ui,accessories,stickers}/**/*.{png,webp,svg}', {
+const files = import.meta.glob('../../art/{characters,scenes,patterns,ui,accessories,stickers,movers,myroom}/**/*.{png,webp,svg}', {
   eager: true,
   query: '?url',
   import: 'default',
@@ -114,4 +114,19 @@ export function allArtUrls(): string[] {
 
 export function artSummary(): string[] {
   return Object.keys(files).map((k) => k.replace('../../art/', ''));
+}
+
+/** うごくもの（art/movers/{kind}.svg。枠 -150 -300 300 300、足もと中央が 0,0） */
+export function moverArtFile(kind: string): string | undefined {
+  return find('movers', kind) ?? find('myroom/items', kind);
+}
+
+/** じぶんの へや の もの（art/myroom/items/{id}.svg。無ければ うごくもの の同じ名前） */
+export function itemArtFile(id: string): string | undefined {
+  return find('myroom/items', id) ?? find('movers', id);
+}
+
+/** じぶんの へや の背景（art/myroom/rooms/{id}.svg、1000×1000） */
+export function roomArtFile(id: string): string | undefined {
+  return find('myroom/rooms', id);
 }

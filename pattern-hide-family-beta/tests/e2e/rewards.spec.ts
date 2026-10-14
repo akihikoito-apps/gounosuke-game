@@ -30,7 +30,7 @@ test('コースを えらぶ：はじめは「つぎの コースで にゃこ�
   await seed(page, { cleared: 0, current: 1, finds: 0 }, 0);
   await act(page, 'toCourse');
   const up = page.locator('.upcoming .up-row');
-  await expect(up).toHaveCount(3);
+  await expect(up).toHaveCount(4);
   await expect(up.nth(0)).toContainText('つぎの コースを クリアすると');
   await expect(up.nth(0)).toContainText('にゃこ');
   await expect(up.nth(2)).toContainText('あと 10かい みつけると');

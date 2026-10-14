@@ -3,6 +3,7 @@ import { CHARACTER_IDS, type CharacterId } from '../core/characters';
 import type { Difficulty, Placement } from '../core/placement';
 import type { SceneId } from '../core/scene';
 import { SCENES, SCENE_IDS } from '../core/scenes';
+import { ROOMS, type RoomId, type RoomLayouts, validLayouts } from '../core/myroom';
 
 export const STORAGE_KEY = 'moyou-kakurenbo-beta';
 export const SCHEMA_VERSION = 1;
@@ -11,6 +12,8 @@ export interface Settings {
   sound: boolean;
   difficulty: Difficulty;
   tutorialSeen: boolean;
+  /** コースの うごくもの（保護者が切れる。初期値 ON） */
+  movers: boolean;
 }
 
 export interface ResumeState {
@@ -40,6 +43,8 @@ export interface SaveData {
   course: CourseProgress;
   /** シールちょう用：見つけた合計回数（コース・さがす・かくして わたす。おためしは数えない） */
   collection: { totalFinds: number; sceneFinds: Partial<Record<SceneId, number>> };
+  /** じぶんの へや：部屋ごとの置き方と、いま開いている部屋 */
+  myroom: { layouts: RoomLayouts; current: RoomId };
 }
 
 /** コースの進み具合。cleared：クリアした最後のコース（0〜10）。current の finds：そのコースで見つけた回数 */
@@ -79,11 +84,12 @@ export function emptyCounters(): PlaytestCounters {
 export function defaults(): SaveData {
   return {
     schema: SCHEMA_VERSION,
-    settings: { sound: true, difficulty: 'easy', tutorialSeen: false },
+    settings: { sound: true, difficulty: 'easy', tutorialSeen: false, movers: true },
     resume: null,
     playtest: { enabled: false, counters: emptyCounters() },
     course: emptyCourse(),
     collection: { totalFinds: 0, sceneFinds: {} },
+    myroom: { layouts: {}, current: 'living' },
   };
 }
 
@@ -145,6 +151,9 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
     else repaired = true;
     if (isBool(s.tutorialSeen)) d.settings.tutorialSeen = s.tutorialSeen;
     else repaired = true;
+    // 以前の保存データには無い（そのときは ON のまま）
+    if (isBool(s.movers)) d.settings.movers = s.movers;
+    else if (s.movers !== undefined) repaired = true;
   } else repaired = true;
   if (raw.resume !== null && raw.resume !== undefined) {
     const r = validateResume(raw.resume);
@@ -187,5 +196,14 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
   const course = validateCourse(raw.course);
   d.course = course.course;
   if (course.repaired) repaired = true;
+  // じぶんの へや：壊れた部屋だけ消す（ほかの部屋と進み具合は残す）
+  if (raw.myroom !== undefined) {
+    const m = raw.myroom;
+    if (isObj(m)) {
+      d.myroom.layouts = validLayouts(m.layouts, CHARACTER_IDS);
+      if (isObj(m.layouts) && Object.keys(m.layouts).length !== Object.keys(d.myroom.layouts).length) repaired = true;
+      if (ROOMS.some((r) => r.id === m.current)) d.myroom.current = m.current as RoomId;
+    } else repaired = true;
+  }
   return { data: d, repaired };
 }

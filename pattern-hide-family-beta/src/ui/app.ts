@@ -44,6 +44,10 @@ import { renderScene, sceneThumb } from './sceneView';
 import { ParentArea } from './parent';
 import { NATIVE } from './platform';
 import { type UpcomingReward, friendAtCourse, upcomingRewards } from '../core/rewards';
+import { type MoverDef, pickMovers } from '../core/movers';
+import { moversMarkup } from './moverView';
+import { MyRoomView } from './myroomView';
+import { ROOMS, itemForSticker, openRooms, ownedItems } from '../core/myroom';
 
 
 type Screen =
@@ -58,6 +62,7 @@ type Screen =
   | 'hidePlace'
   | 'courseSelect'
   | 'stickers'
+  | 'myroom'
   | 'bye';
 
 const OUTLINE: Record<Difficulty, number> = { easy: 0.62, normal: 0.34 };
@@ -90,6 +95,23 @@ export class App {
   /** コース：遊んでいるコース番号と、その中で何回目の出題か（背景を順に回す） */
   private courseNo = 1;
   private courseRoundIdx = 0;
+  /** コースの うごくもの と、出題が始まった時刻（描き直しても位置が飛ばないように） */
+  private movers: MoverDef[] = [];
+  private myroom = new MyRoomView({
+    chars: () => this.allowedChars(),
+    items: () => ownedItems(this.progress(), this.can),
+    rooms: () => openRooms(this.store.data.course.cleared, this.can),
+    current: () => this.store.data.myroom.current,
+    load: (r) => this.store.data.myroom.layouts[r],
+    save: (r, list, cur) =>
+      this.store.update((d) => {
+        d.myroom.layouts[r] = list.map((p) => ({ ...p, ...(p.on ? { on: { ...p.on } } : {}) }));
+        d.myroom.current = cur;
+      }),
+    sound: (n) => play(n),
+    rerender: () => this.render(),
+  });
+  private moverStart = 0;
   /** このラウンドでコースをクリアした（クリア画面を出す） */
   private courseJustCleared = false;
   private afterTutorial: 'search' | 'course' = 'search';
@@ -202,6 +224,8 @@ export class App {
         return this.courseSelectHtml();
       case 'stickers':
         return this.stickersHtml();
+      case 'myroom':
+        return this.myroom.html(btn('home', ICONS.back, 'もどる', 'round'));
       case 'bye':
         return this.byeHtml();
     }
@@ -226,6 +250,7 @@ export class App {
           ${btn('toSearch', ICONS.search, 'さがす', 'mid')}
           ${btn('toHide', ICONS.hide, 'かくして わたす', 'mid secondary')}
         </div>
+        ${btn('toMyRoom', ICONS.room, 'じぶんの へや', 'mid myroom-btn')}
         ${resume ? btn('resume', ICONS.play, 'つづきから', 'mid') : ''}
       </div>
       <div class="title-foot">
@@ -301,12 +326,19 @@ export class App {
       const prev = Math.max(0, ...FRIEND_UNLOCKS.filter((f) => f.course < r.at).map((f) => f.course));
       return `<div class="up-row friend"><span class="up-icon">${faceIcon(CHARACTERS[r.char])}</span><p>${when(r.remaining)}<br><strong>${CHARACTERS[r.char].name}</strong>が なかまに なるよ！${dots(prev, r.at, d.course.cleared)}</p></div>`;
     }
+    const gift = (id: string) => {
+      const it = itemForSticker(id);
+      return it ? `<br><span class="up-gift">へやに「${it.name}」も とどくよ</span>` : '';
+    };
+    if (r.kind === 'room') {
+      return `<div class="up-row up-room"><span class="up-icon">${ICONS.room}</span><p>${when(r.remaining)}<br>じぶんの へや に「${r.room.name}」が ふえるよ</p></div>`;
+    }
     if (r.kind === 'courseSticker') {
-      return `<div class="up-row up-sticker"><span class="up-icon">${stickerSvg(r.sticker)}</span><p>${when(r.remaining)}<br>シール「${r.sticker.name}」が もらえるよ</p></div>`;
+      return `<div class="up-row up-sticker"><span class="up-icon">${stickerSvg(r.sticker)}</span><p>${when(r.remaining)}<br>シール「${r.sticker.name}」が もらえるよ${gift(r.sticker.id)}</p></div>`;
     }
     const prev = Math.max(0, ...visibleStickers(this.can).filter((s) => s.kind === 'finds' && s.need < r.at).map((s) => s.need));
     const pct = Math.round(((r.done - prev) / (r.at - prev)) * 100);
-    return `<div class="up-row up-sticker"><span class="up-icon">${stickerSvg(r.sticker)}</span><p>あと <b>${r.remaining}</b>かい みつけると<br>シール「${r.sticker.name}」が もらえるよ<span class="up-bar" aria-hidden="true"><i style="width:${pct}%"></i></span></p></div>`;
+    return `<div class="up-row up-sticker"><span class="up-icon">${stickerSvg(r.sticker)}</span><p>あと <b>${r.remaining}</b>かい みつけると<br>シール「${r.sticker.name}」が もらえるよ${gift(r.sticker.id)}<span class="up-bar" aria-hidden="true"><i style="width:${pct}%"></i></span></p></div>`;
   }
 
   /** コース中の進み具合（10この まる） */
@@ -393,6 +425,7 @@ export class App {
       shade: s.origin === 'trial' ? HARDEST.shade : 1,
       hint: currentHint(scene, s),
       title: `${scene.name}。かくれている こを さがして タッチ`,
+      movers: s.origin === 'course' && this.movers.length ? moversMarkup('g-', this.movers, (performance.now() - this.moverStart) / 1000) : undefined,
     });
   }
 
@@ -455,7 +488,11 @@ export class App {
     // 初めてクリアしたときだけ（もう一度クリアしても「あたらしい」とは言わない）
     if (!this.courseFirstClear) return '';
     const st = visibleStickers(this.can).find((x) => x.kind === 'course' && x.need === this.courseNo);
-    const sticker = st ? `<div class="reward-sticker">${stickerSvg(st)}<p>シールを もらったよ！</p></div>` : '';
+    const gift = st ? itemForSticker(st.id) : undefined;
+    const room = ROOMS.find((r) => r.needCleared === this.courseNo && this.can(r.content));
+    const sticker = st
+      ? `<div class="reward-sticker">${stickerSvg(st)}<p>シールを もらったよ！${gift ? `<br><small>へやに「${gift.name}」が とどいたよ</small>` : ''}${room ? `<br><small>へやに「${room.name}」が ふえたよ</small>` : ''}</p></div>`
+      : '';
     const nf = FRIEND_UNLOCKS.find((f) => f.course === this.courseNo && this.can(`char:${f.char}`));
     const friend = nf
       ? `<div class="new-friend">${faceIcon(CHARACTERS[nf.char])}<p>あたらしい ともだち<br><strong>${CHARACTERS[nf.char].name}</strong>が なかまに なったよ！</p></div>`
@@ -630,6 +667,10 @@ export class App {
         break;
       case 'toStickers':
         this.go('stickers');
+        break;
+      case 'toMyRoom':
+        this.myroom.open();
+        this.go('myroom');
         break;
       case 'toCourse':
         this.session = null;
@@ -825,10 +866,17 @@ export class App {
     const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
     const placements = courseRound(scene, this.courseNo, remaining, seed, this.allowedChars());
+    this.movers = this.store.data.settings.movers ? pickMovers(scene.id, this.courseNo, seed) : [];
+    this.moverStart = performance.now();
     const c = courseDef(this.courseNo);
     this.session = newSession(scene.id, c.variant === 'exact' ? 'normal' : 'easy', placements, 'course', Date.now());
     record(this.store, { type: 'searchStarted' });
     this.go('play');
+  }
+
+  private progress() {
+    const d = this.store.data;
+    return { cleared: d.course.cleared, totalFinds: d.collection.totalFinds, sceneFinds: d.collection.sceneFinds };
   }
 
   /** いま遊べるキャラクター（コース1でにゃこ、コース5でぽぽが仲間に） */
@@ -1048,6 +1096,10 @@ export class App {
     }
     if (this.screen === 'play') this.bindPlay();
     if (this.screen === 'hidePlace') this.bindPlace();
+    if (this.screen === 'myroom') {
+      const main = this.root.querySelector<HTMLElement>('main');
+      if (main) this.myroom.bind(main);
+    }
   }
 
   private renderToken = 0;

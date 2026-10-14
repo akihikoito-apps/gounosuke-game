@@ -222,6 +222,11 @@ export class ParentArea {
         <label class="switch"><input type="checkbox" data-set="sound" ${d.settings.sound ? 'checked' : ''}> 音を出す</label>
       </section>
       <section>
+        <h3>うごくもの（コース）</h3>
+        <p>コース2から、背景に鳥・雲・子犬などが動きます。コース6からは、ときどき友だちの前を横切ります（タップは さえぎりません）。動きが気になるときは切ってください。端末の「視差効果を減らす」がオンのときは止まります。</p>
+        <label class="switch"><input type="checkbox" data-set="movers" ${d.settings.movers ? 'checked' : ''}> うごくものを出す</label>
+      </section>
+      <section>
         <h3>むずかしさ（「さがす」の初期値）</h3>
         <div class="row" role="radiogroup" aria-label="むずかしさ">
           <label class="radio"><input type="radio" name="diff" value="easy" data-set="difficulty" ${d.settings.difficulty === 'easy' ? 'checked' : ''}> やさしい（1体）</label>
@@ -284,6 +289,10 @@ export class ParentArea {
             d.settings.sound = inp.checked;
           });
           setSoundEnabled(inp.checked);
+        } else if (k === 'movers') {
+          this.store.update((d) => {
+            d.settings.movers = inp.checked;
+          });
         } else if (k === 'difficulty' && inp.checked) {
           this.store.update((d) => {
             d.settings.difficulty = inp.value === 'normal' ? 'normal' : 'easy';
