@@ -1,4 +1,4 @@
-# ジョブ案：追加パック「きのこの もり（forest）」の絵一式
+# ジョブ15：追加パック「きのこの もり（forest）」の絵一式
 
 ## 書き込んでよい場所
 `art/scenes/forest/`、`art/patterns/forest-*`、`art/characters/pino/`、`art/movers/`、`art/myroom/`、`art/stickers/`、`art/README.md` だけ
