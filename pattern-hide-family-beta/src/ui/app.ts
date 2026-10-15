@@ -31,7 +31,7 @@ import {
   toPlacements,
   undo,
 } from '../core/hideEditor';
-import { type ContentId, betaEntitlements } from '../entitlements/entitlements';
+import { type ContentId, PACKS, packEntitlements } from '../entitlements/entitlements';
 import { COURSES, FINDS_PER_COURSE, HARDEST, courseDef, courseRound, courseScene, hardestRound } from '../core/courses';
 import { accessoryArt } from './accessoryArt';
 import { COURSE_COUNT } from '../storage/schema';
@@ -121,7 +121,16 @@ export class App {
   /** このクリアが初めてか（ごほうびの表示に使う） */
   private courseFirstClear = false;
   /** パックの利用権限（ベータは全開放。本番では正規の購入確認に差し替える） */
-  private can = (id: ContentId) => betaEntitlements.canPlay(id);
+  /**
+   * 遊べる範囲：無料（きほん）＋持っているパック。購入の仕組み（StoreKit）はまだなので、持っているパックは
+   * 保護者の画面の「テスト用：追加パックを ためす」だけ（自動テストのビルドでは、指定がなければ ため す状態）。
+   */
+  private entitlements = packEntitlements(() => {
+    const t = this.store.data.settings.trialAllPacks;
+    const trial = t ?? import.meta.env.MODE === 'e2e';
+    return trial ? PACKS.filter((p) => !p.free).map((p) => p.id) : [];
+  });
+  private can = (id: ContentId) => this.entitlements.canPlay(id);
   /** 最難関のおためし（保存しない。メモリ内だけ） */
   private trial: { finds: number; round: number; used: Partial<Record<SceneId, string[]>> } | null = null;
   /** 「みーつけた」のあと、少し待って自動で次へ */

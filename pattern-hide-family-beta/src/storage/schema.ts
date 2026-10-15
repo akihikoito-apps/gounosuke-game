@@ -14,6 +14,8 @@ export interface Settings {
   tutorialSeen: boolean;
   /** コースの うごくもの（保護者が切れる。初期値 ON） */
   movers: boolean;
+  /** テスト用：追加パックを ためす（購入の仕組みができるまでの確認用。購入の証明ではない） */
+  trialAllPacks?: boolean;
 }
 
 export interface ResumeState {
@@ -154,6 +156,7 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
     // 以前の保存データには無い（そのときは ON のまま）
     if (isBool(s.movers)) d.settings.movers = s.movers;
     else if (s.movers !== undefined) repaired = true;
+    if (isBool(s.trialAllPacks)) d.settings.trialAllPacks = s.trialAllPacks;
   } else repaired = true;
   if (raw.resume !== null && raw.resume !== undefined) {
     const r = validateResume(raw.resume);

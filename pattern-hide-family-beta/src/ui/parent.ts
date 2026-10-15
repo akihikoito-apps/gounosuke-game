@@ -222,6 +222,11 @@ export class ParentArea {
         <label class="switch"><input type="checkbox" data-set="sound" ${d.settings.sound ? 'checked' : ''}> 音を出す</label>
       </section>
       <section>
+        <h3>テスト用：追加パックを ためす</h3>
+        <p>発売前の確認用です。ONにすると、追加パック（つづきの コース・うみべ・きのこの もり・すいぞくかん・おばけやしき）を 買わずに ためせます。<strong>購入の しくみが できたら、この切りかえは なくします。</strong></p>
+        <label class="switch"><input type="checkbox" data-set="trialAllPacks" ${d.settings.trialAllPacks ? 'checked' : ''}> 追加パックを ためす</label>
+      </section>
+      <section>
         <h3>うごくもの（コース）</h3>
         <p>コース2から、背景に鳥・雲・子犬などが動きます。コース6からは、ときどき友だちの前を横切ります（タップは さえぎりません）。動きが気になるときは切ってください。端末の「視差効果を減らす」がオンのときは止まります。</p>
         <label class="switch"><input type="checkbox" data-set="movers" ${d.settings.movers ? 'checked' : ''}> うごくものを出す</label>
@@ -289,6 +294,10 @@ export class ParentArea {
             d.settings.sound = inp.checked;
           });
           setSoundEnabled(inp.checked);
+        } else if (k === 'trialAllPacks') {
+          this.store.update((d) => {
+            d.settings.trialAllPacks = inp.checked;
+          });
         } else if (k === 'movers') {
           this.store.update((d) => {
             d.settings.movers = inp.checked;

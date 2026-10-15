@@ -75,6 +75,20 @@ export interface EntitlementSource {
   canPlay(id: ContentId): boolean;
 }
 
+/**
+ * 持っているパックだけ遊べる（ご本人の方針 2026-10-15：課金したもの・進捗で開いたものだけ）。
+ * owned は将来 StoreKit の購入確認の結果だけを根拠にする。無料（きほん）はいつも遊べる。どのパックにも入っていない中身は遊べない。
+ */
+export function packEntitlements(owned: () => readonly PackId[]): { kind: 'packs'; canPlay(id: ContentId): boolean } {
+  return {
+    kind: 'packs',
+    canPlay(id: ContentId) {
+      const p = packOf(id);
+      return !!p && (p.free || owned().includes(p.id));
+    },
+  };
+}
+
 export const betaEntitlements: EntitlementSource = {
   kind: 'beta-all-unlocked',
   canPlay: () => true,
