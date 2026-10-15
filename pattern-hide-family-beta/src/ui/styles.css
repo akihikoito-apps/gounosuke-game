@@ -632,3 +632,13 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 .news ul { margin: 0; padding-left: 1.2em; font-size: 14px; font-weight: 700; line-height: 1.5; }
 .news .news-ok { position: static; align-self: end; }
 @media (prefers-reduced-motion: reduce) { .news { animation: none; } }
+
+/* ほかの部屋に いる子：つれてこられるので、うすくしすぎない */
+.mr-cell.elsewhere > svg, .mr-cell.elsewhere > span:not(.mr-where) { opacity: 0.6; }
+
+/* 保護者の画面：追加パック */
+.shop-list { list-style: none; margin: 8px 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.shop-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 2px solid #e8dccb; border-radius: 12px; padding: 8px 10px; }
+.shop-item small { color: #6b5a60; }
+.shop-item .have { font-size: 13px; font-weight: 700; color: #4f8a5b; white-space: nowrap; }
+.shop-item .pbtn { white-space: nowrap; }

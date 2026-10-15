@@ -27,9 +27,9 @@ describe('つぎの ごほうび', () => {
     expect(r.find((x) => x.kind === 'courseSticker')).toMatchObject({ at: 6 });
   });
 
-  it('へや：コース5で ひみつきち、コース10で しんしつ。つづきのコースが無ければ しんしつ は告知しない', () => {
-    expect(upcomingRewards({ cleared: 6, totalFinds: 60 }, all).find((x) => x.kind === 'room')).toMatchObject({ at: 10, remaining: 4 });
-    expect(upcomingRewards({ cleared: 6, totalFinds: 60 }, baseOnly).some((x) => x.kind === 'room')).toBe(false);
+  it('へや：コース5で ひみつきち、コース6で しんしつ。つづきのコースが無ければ しんしつ は告知しない', () => {
+    expect(upcomingRewards({ cleared: 5, totalFinds: 50 }, all).find((x) => x.kind === 'room')).toMatchObject({ at: 6, remaining: 1 });
+    expect(upcomingRewards({ cleared: 5, totalFinds: 50 }, baseOnly).some((x) => x.kind === 'room')).toBe(false);
   });
 
   it('ぜんぶ もらうと 何も出ない', () => {
