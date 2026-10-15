@@ -21,9 +21,8 @@ const SIZE: Record<MoverKind, { w: number; h: number }> = {
   jellyfish: { w: 72, h: 80 },
   penguin: { w: 84, h: 86 },
   bubble: { w: 56, h: 60 },
-  ghost: { w: 80, h: 84 },
-  bat: { w: 88, h: 56 },
-  candle: { w: 56, h: 76 },
+  firefly: { w: 72, h: 60 },
+  frog: { w: 84, h: 56 },
 };
 
 describe('うごくもの', () => {

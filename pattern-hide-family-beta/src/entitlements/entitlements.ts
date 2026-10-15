@@ -7,7 +7,7 @@ import type { SceneId } from '../core/scene';
 
 export type ContentId = `scene:${SceneId}` | `course:${number}` | `char:${CharacterId}` | 'trial:hardest' | `costume-pack:${string}` | `room:${string}`;
 
-export type PackId = 'base' | 'more-courses' | 'beach' | 'forest' | 'aquarium' | 'haunted';
+export type PackId = 'base' | 'more-courses' | 'beach' | 'forest' | 'aquarium' | 'night';
 
 export interface PackDef {
   id: PackId;
@@ -58,10 +58,10 @@ export const PACKS: PackDef[] = [
     contents: ['scene:aquarium', 'char:puka', 'room:aquarium-room'],
   },
   {
-    id: 'haunted',
-    name: 'おばけやしき パック',
+    id: 'night',
+    name: 'ほたるの かわべ パック',
     free: false,
-    contents: ['scene:haunted', 'char:fuwa', 'room:attic'],
+    contents: ['scene:night', 'char:hika', 'room:veranda'],
   },
 ];
 

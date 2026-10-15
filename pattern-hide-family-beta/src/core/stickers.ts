@@ -4,7 +4,7 @@ import type { CharacterId } from './characters';
 import type { SceneId } from './scene';
 import { SCENES } from './scenes';
 
-export type Motif = 'shell' | 'floatring' | 'shavedice' | 'crab' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel' | 'jellyfish' | 'dolphin' | 'treasure' | 'penguin' | 'pumpkin' | 'ghost' | 'bat' | 'musicbox';
+export type Motif = 'shell' | 'floatring' | 'shavedice' | 'crab' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel' | 'jellyfish' | 'dolphin' | 'treasure' | 'penguin' | 'firefly' | 'frog' | 'dragonfly';
 
 export interface StickerDef {
   id: string;
@@ -55,12 +55,12 @@ export const STICKERS: StickerDef[] = [
   { id: 'a-s15', name: 'すいぞくかんで 15かい', kind: 'scene', scene: 'aquarium', need: 15, char: 'puka', motif: 'dolphin', color: '#CFE8F6' },
   { id: 'a-s30', name: 'すいぞくかんで 30かい', kind: 'scene', scene: 'aquarium', need: 30, char: 'koro', motif: 'treasure', color: '#F6E4B8' },
   { id: 'a-s50', name: 'すいぞくかんで 50かい', kind: 'scene', scene: 'aquarium', need: 50, char: 'puka', motif: 'penguin', color: '#D4ECE8' },
-  // 背景パック4「おばけやしき」
-  { id: 'h-s1', name: 'ふわが きたよ', kind: 'scene', scene: 'haunted', need: 1, char: 'fuwa', motif: 'ghost', color: '#E6DCF5' },
-  { id: 'h-s5', name: 'おばけやしきで 5かい', kind: 'scene', scene: 'haunted', need: 5, char: 'koro', motif: 'pumpkin', color: '#F5DFC6' },
-  { id: 'h-s15', name: 'おばけやしきで 15かい', kind: 'scene', scene: 'haunted', need: 15, char: 'fuwa', motif: 'musicbox', color: '#DCE4F6' },
-  { id: 'h-s30', name: 'おばけやしきで 30かい', kind: 'scene', scene: 'haunted', need: 30, char: 'moko', motif: 'bat', color: '#E2D6F0' },
-  { id: 'h-s50', name: 'おばけやしきで 50かい', kind: 'scene', scene: 'haunted', need: 50, char: 'fuwa', motif: 'moon', color: '#F6EAB8' },
+  // 背景パック4「ほたるの かわべ」
+  { id: 'n-s1', name: 'ひかが きたよ', kind: 'scene', scene: 'night', need: 1, char: 'hika', motif: 'firefly', color: '#DCE8D8' },
+  { id: 'n-s5', name: 'かわべで 5かい', kind: 'scene', scene: 'night', need: 5, char: 'koro', motif: 'lantern', color: '#F5E6C8' },
+  { id: 'n-s15', name: 'かわべで 15かい', kind: 'scene', scene: 'night', need: 15, char: 'hika', motif: 'frog', color: '#D4EBD8' },
+  { id: 'n-s30', name: 'かわべで 30かい', kind: 'scene', scene: 'night', need: 30, char: 'moko', motif: 'dragonfly', color: '#D8E4F4' },
+  { id: 'n-s50', name: 'かわべで 50かい', kind: 'scene', scene: 'night', need: 50, char: 'hika', motif: 'moon', color: '#F6EAB8' },
 ];
 
 export interface Progress {

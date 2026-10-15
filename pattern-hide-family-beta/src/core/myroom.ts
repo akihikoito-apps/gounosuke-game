@@ -7,7 +7,7 @@ import type { CharacterId } from './characters';
 import { STICKERS, hasSticker } from './stickers';
 import type { SceneId } from './scene';
 
-export type RoomId = 'living' | 'bedroom' | 'yard' | 'treehouse' | 'aquarium-room' | 'attic' | 'beach-deck';
+export type RoomId = 'living' | 'bedroom' | 'yard' | 'treehouse' | 'aquarium-room' | 'veranda' | 'beach-deck';
 export type Motion = 'walk' | 'swing' | 'bob' | 'sway' | 'roll' | 'swim';
 
 export interface RoomDef {
@@ -38,7 +38,7 @@ export const ROOMS: RoomDef[] = [
   { id: 'beach-deck', name: 'うみべの デッキ', needCleared: 0, needScene: 'beach', content: 'room:beach-deck', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'yard', name: 'もりの ひろば', needCleared: 0, needScene: 'forest', content: 'room:yard', floorTop: 540, scaleBack: 0.95, scaleFront: 1.45 },
   { id: 'aquarium-room', name: 'すいぞくかんの へや', needCleared: 0, needScene: 'aquarium', content: 'room:aquarium-room', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
-  { id: 'attic', name: 'ほしの やねうらべや', needCleared: 0, needScene: 'haunted', content: 'room:attic', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
+  { id: 'veranda', name: 'ほたるの えんがわ', needCleared: 0, needScene: 'night', content: 'room:veranda', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
 ];
 
 export type Genre = 'furniture' | 'toy' | 'animal' | 'deco' | 'food';
@@ -120,13 +120,13 @@ export const ITEMS: ItemDef[] = [
   { id: 'dolphin-ride', name: 'イルカの のりもの', sticker: 'a-s15', genre: 'toy', w: 180, seats: [{ x: 0, y: -64 }], motion: 'sway' },
   { id: 'treasure-box', name: 'たからばこ', sticker: 'a-s30', genre: 'toy', w: 130 },
   { id: 'penguin', name: 'ペンギン', sticker: 'a-s50', genre: 'animal', w: 100, motion: 'walk' },
-  // おばけやしき パック
-  { id: 'gothic-sofa', name: 'おやしきの ソファ', sticker: null, genre: 'furniture', content: 'scene:haunted', w: 280, seats: [{ x: -58, y: -60 }, { x: 58, y: -60 }] },
-  { id: 'star-rug', name: 'ほしぞらの ラグ', sticker: 'h-s1', genre: 'deco', w: 290, flat: true },
-  { id: 'pumpkin-lantern', name: 'かぼちゃ ランタン', sticker: 'h-s5', genre: 'deco', w: 96, motion: 'sway' },
-  { id: 'music-box', name: 'ほしの オルゴール', sticker: 'h-s15', genre: 'toy', w: 130, motion: 'sway' },
-  { id: 'ghost-chair', name: 'おばけの ゆりいす', sticker: 'h-s30', genre: 'furniture', w: 160, seats: [{ x: 0, y: -62 }], motion: 'sway' },
-  { id: 'ghost-plush', name: 'ふわふわ おばけ', sticker: 'h-s50', genre: 'toy', w: 100, motion: 'bob' },
+  // ほたるの かわべ パック
+  { id: 'engawa-bench', name: 'えんがわの ベンチ', sticker: null, genre: 'furniture', content: 'scene:night', w: 280, seats: [{ x: -58, y: -60 }, { x: 58, y: -60 }] },
+  { id: 'star-rug', name: 'ほしぞらの ラグ', sticker: 'n-s1', genre: 'deco', w: 290, flat: true },
+  { id: 'paper-lantern', name: 'ちょうちん', sticker: 'n-s5', genre: 'deco', w: 96, motion: 'sway' },
+  { id: 'music-box', name: 'ほしの オルゴール', sticker: 'n-s15', genre: 'toy', w: 130, motion: 'sway' },
+  { id: 'bamboo-chair', name: 'たけの ゆりいす', sticker: 'n-s30', genre: 'furniture', w: 160, seats: [{ x: 0, y: -62 }], motion: 'sway' },
+  { id: 'frog-plush', name: 'かえるの ぬいぐるみ', sticker: 'n-s50', genre: 'toy', w: 100, motion: 'bob' },
 ];
 
 export const ITEM_BY_ID: Record<string, ItemDef> = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
@@ -218,7 +218,7 @@ export function starterLayout(room: RoomId): Placed[] {
   if (room === 'beach-deck') return [{ ref: 'item:beach-chair', x: 280, y: 720 }];
   if (room === 'yard') return [{ ref: 'item:camp-tent', x: 260, y: 720 }];
   if (room === 'aquarium-room') return [{ ref: 'item:shell-sofa', x: 280, y: 720 }];
-  if (room === 'attic') return [{ ref: 'item:gothic-sofa', x: 280, y: 720 }];
+  if (room === 'veranda') return [{ ref: 'item:engawa-bench', x: 280, y: 720 }];
   // ひみつきち は からっぽから（何を置くかを自分で決める）
   return [];
 }

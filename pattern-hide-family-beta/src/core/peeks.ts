@@ -101,8 +101,8 @@ const JELLY_FRONT: Shape[] = [
   },
 ];
 
-// おばけやしき：ドレープカーテン（アーチ飾り枠まで）、アンティークソファ（曲線背もたれ）
-const CURTAIN_FRONT: Shape[] = [
+// ほたるの かわべ：くさはらのアーチ（竹の縁まで）、かわの岸辺（ゆるい波）
+const GRASS_FRONT: Shape[] = [
   {
     kind: 'poly',
     pts: [
@@ -113,13 +113,15 @@ const CURTAIN_FRONT: Shape[] = [
     ],
   },
 ];
-const SOFA_FRONT: Shape[] = [
+const RIVER_FRONT: Shape[] = [
   {
     kind: 'poly',
     pts: [
       { x: 568, y: 596 },
       { x: 568, y: 368 },
-      ...quadPoints({ x: 568, y: 368 }, { x: 775, y: 300 }, { x: 982, y: 368 }, 16),
+      ...quadPoints({ x: 568, y: 368 }, { x: 612, y: 342 }, { x: 680, y: 342 }, 8),
+      ...quadPoints({ x: 680, y: 342 }, { x: 770, y: 290 }, { x: 860, y: 342 }, 10),
+      ...quadPoints({ x: 860, y: 342 }, { x: 938, y: 342 }, { x: 982, y: 368 }, 8),
       { x: 982, y: 596 },
     ],
   },
@@ -171,10 +173,10 @@ export const PEEKS: Record<SceneId, PeekDef[]> = {
     peek('aquarium-peek-jelly-1', 680, 520, 0.9, 'jelly', JELLY_FRONT),
     peek('aquarium-peek-jelly-2', 860, 520, 0.9, 'jelly', JELLY_FRONT),
   ],
-  haunted: [
-    peek('haunted-peek-curtain', 396, 584, 1, 'hall', CURTAIN_FRONT),
-    peek('haunted-peek-sofa-1', 680, 452, 0.9, 'sofa', SOFA_FRONT),
-    peek('haunted-peek-sofa-2', 860, 452, 0.9, 'sofa', SOFA_FRONT),
+  night: [
+    peek('night-peek-grass', 396, 584, 1, 'path', GRASS_FRONT),
+    peek('night-peek-river-1', 680, 452, 0.9, 'river', RIVER_FRONT),
+    peek('night-peek-river-2', 860, 452, 0.9, 'river', RIVER_FRONT),
   ],
 };
 

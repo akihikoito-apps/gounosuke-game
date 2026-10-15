@@ -44,12 +44,10 @@ function fallback(kind: MoverKind): string {
       return `<ellipse cx="0" cy="-2" rx="36" ry="5" fill="#4A3A40" opacity="0.1"/><ellipse cx="0" cy="-42" rx="28" ry="38" fill="#5E7A96" ${L}/><ellipse cx="4" cy="-36" rx="18" ry="26" fill="#FFFDF8"/><circle cx="8" cy="-60" r="3.5" fill="#4A3A40"/><path d="M18 -58 L32 -54 L18 -50 Z" fill="#F6C85F" ${L}/>`;
     case 'bubble':
       return `<circle cx="-8" cy="-24" r="14" fill="#D6ECF4" fill-opacity="0.7" ${L}/><circle cx="12" cy="-46" r="10" fill="#D6ECF4" fill-opacity="0.7" ${L}/><circle cx="-4" cy="-28" r="4" fill="#FFFFFF"/>`;
-    case 'ghost':
-      return `<path d="M-32 -10 V-46 A32 32 0 0 1 32 -46 V-10 Q22 -22 11 -10 Q0 -22 -11 -10 Q-22 -22 -32 -10 Z" fill="#F8F6FF" ${L}/><circle cx="-10" cy="-48" r="3.5" fill="#4A3A40"/><circle cx="10" cy="-48" r="3.5" fill="#4A3A40"/><ellipse cx="-18" cy="-40" rx="5" ry="3" fill="#F29AAE" opacity="0.6"/><ellipse cx="18" cy="-40" rx="5" ry="3" fill="#F29AAE" opacity="0.6"/><path d="M-6 -40 Q0 -34 6 -40" fill="none" ${L}/>`;
-    case 'bat':
-      return `<path d="M-40 -40 Q-24 -60 -12 -42 Q-24 -26 -40 -40 Z M40 -40 Q24 -60 12 -42 Q24 -26 40 -40 Z" fill="#9E86B8" ${L}/><ellipse cx="0" cy="-38" rx="16" ry="14" fill="#B69CD8" ${L}/><circle cx="-6" cy="-48" r="5" fill="#B69CD8" ${L}/><circle cx="6" cy="-48" r="5" fill="#B69CD8" ${L}/><circle cx="-5" cy="-38" r="2.5" fill="#4A3A40"/><circle cx="5" cy="-38" r="2.5" fill="#4A3A40"/>`;
-    case 'candle':
-      return `<ellipse cx="0" cy="-58" rx="14" ry="18" fill="#FFF3B0" opacity="0.6"/><path d="M0 -68 Q-9 -54 0 -46 Q9 -54 0 -68 Z" fill="#FFE082" ${L}/><rect x="-10" y="-44" width="20" height="30" rx="5" fill="#FFFDF4" ${L}/><ellipse cx="0" cy="-12" rx="18" ry="6" fill="#D8B46C" ${L}/>`;
+    case 'firefly':
+      return `<circle cx="-18" cy="-42" r="14" fill="#FFF3B0" opacity="0.5"/><circle cx="16" cy="-54" r="12" fill="#FFF3B0" opacity="0.5"/><ellipse cx="-18" cy="-44" rx="9" ry="7" fill="#82B596" ${L}/><circle cx="-12" cy="-40" r="6" fill="#FFE866" ${L}/><ellipse cx="16" cy="-56" rx="8" ry="6" fill="#82B596" ${L}/><circle cx="22" cy="-52" r="5" fill="#FFE866" ${L}/>`;
+    case 'frog':
+      return `<ellipse cx="0" cy="-2" rx="38" ry="5" fill="#4A3A40" opacity="0.1"/><path d="M-26 -14 Q-40 -26 -30 -4 L-16 -4 M26 -14 Q40 -26 30 -4 L16 -4" fill="#7AB87E" ${L}/><ellipse cx="0" cy="-24" rx="28" ry="20" fill="#88C88E" ${L}/><ellipse cx="0" cy="-18" rx="18" ry="12" fill="#EAF5D8"/><circle cx="-12" cy="-42" r="9" fill="#88C88E" ${L}/><circle cx="12" cy="-42" r="9" fill="#88C88E" ${L}/><circle cx="-12" cy="-42" r="3.5" fill="#4A3A40"/><circle cx="12" cy="-42" r="3.5" fill="#4A3A40"/><path d="M-8 -22 Q0 -16 8 -22" fill="none" ${L}/>`;
   }
 }
 
@@ -58,7 +56,7 @@ function art(kind: MoverKind): string {
   return f ? `<image href="${f}" x="-150" y="-300" width="300" height="300"/>` : fallback(kind);
 }
 
-const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon', 'owl', 'falling-leaf', 'tropical-fish', 'jellyfish', 'bubble', 'ghost', 'bat', 'candle'];
+const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon', 'owl', 'falling-leaf', 'tropical-fish', 'jellyfish', 'bubble', 'firefly'];
 
 /** うごくもの1つ。elapsed：出題が始まってからの秒数 */
 function one(P: string, m: MoverDef, elapsed: number): string {
@@ -100,9 +98,8 @@ const BOX: Record<MoverKind, [number, number, number, number]> = {
   jellyfish: [-36, -82, 72, 80],
   penguin: [-42, -86, 84, 86],
   bubble: [-28, -64, 56, 60],
-  ghost: [-40, -84, 80, 84],
-  bat: [-44, -64, 88, 56],
-  candle: [-28, -78, 56, 76],
+  firefly: [-36, -72, 72, 60],
+  frog: [-42, -56, 84, 56],
 };
 
 /** 選ぶボタン用の絵（その絵の大きさに合わせて切り取る） */

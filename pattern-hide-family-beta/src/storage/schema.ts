@@ -209,6 +209,7 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
       d.myroom.layouts = validLayouts(m.layouts, CHARACTER_IDS);
       if (isObj(m.layouts) && Object.keys(m.layouts).length !== Object.keys(d.myroom.layouts).length) repaired = true;
       if (ROOMS.some((r) => r.id === m.current)) d.myroom.current = m.current as RoomId;
+      else if (m.current !== undefined) repaired = true;
     } else repaired = true;
   }
   return { data: d, repaired };

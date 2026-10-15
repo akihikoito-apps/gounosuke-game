@@ -5,7 +5,7 @@ import { shop } from './shop';
 import { beach } from './beach';
 import { forest } from './forest';
 import { aquarium } from './aquarium';
-import { haunted } from './haunted';
+import { night } from './night';
 
-export const SCENES: Record<SceneId, SceneDef> = { room, garden, shop, beach, forest, aquarium, haunted };
-export const SCENE_IDS: SceneId[] = ['room', 'garden', 'shop', 'beach', 'forest', 'aquarium', 'haunted'];
+export const SCENES: Record<SceneId, SceneDef> = { room, garden, shop, beach, forest, aquarium, night };
+export const SCENE_IDS: SceneId[] = ['room', 'garden', 'shop', 'beach', 'forest', 'aquarium', 'night'];
