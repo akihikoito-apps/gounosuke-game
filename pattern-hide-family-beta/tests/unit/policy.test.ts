@@ -32,8 +32,8 @@ describe('policy', () => {
     for (const f of src) {
       let text = readFileSync(f, 'utf8');
       if (f.endsWith('sw-template.js')) text = text.replace(/fetch\(req\)/g, ''); // SW は同一オリジンのみ
-      // 保護者向け説明文（課金なしの案内）は許可
-      if (f.endsWith('parent.ts')) text = text.replace(/課金|購入|広告/g, '');
+      // 値段・購入の言葉は、保護者ゲートの内側（parent.ts）と 購入の仕組み（purchase/）だけ。子どもの画面には出さない
+      if (f.endsWith('parent.ts') || /[\\/]purchase[\\/]/.test(f)) text = text.replace(/課金|購入|広告|価格|[¥￥]|[0-9０-９]\s*円/g, '');
       expect(re.test(text), `${f} matches ${re}`).toBe(false);
     }
   });

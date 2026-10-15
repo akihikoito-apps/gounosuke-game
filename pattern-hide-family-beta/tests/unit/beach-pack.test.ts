@@ -3,10 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { beach } from '../../src/core/scenes/beach';
 import { SCENE_IDS } from '../../src/core/scenes';
 import { CHARACTER_IDS } from '../../src/core/characters';
-import { analyzeSpot, autoLayout, costumeForRegion, spotsConflict, validateLayout } from '../../src/core/placement';
-import { accessoryFits } from '../../src/core/accessories';
 import { PEEKS, analyzePeek } from '../../src/core/peeks';
-import { courseRound, hardestRound } from '../../src/core/courses';
+import { hardestRound } from '../../src/core/courses';
 import { availableCharacters, canResume, visibleStickers, type CanPlay } from '../../src/core/access';
 import { ITEM_BY_ID, openRooms, ownedItems, starterLayout, validLayouts } from '../../src/core/myroom';
 import { STICKERS, earnedStickers, stickerHint } from '../../src/core/stickers';
@@ -20,51 +18,7 @@ const baseOnly = owns();
 const withBeach = owns('beach');
 
 describe('beach pack: spots, peeks, and courses', () => {
-  it('all 9 spots × all 9 friends pass analyzeSpot, validateLayout, and accessoryFits (hat & umbrella)', () => {
-    expect(beach.spots).toHaveLength(9);
-    expect(beach.spots.filter((s) => s.easy)).toHaveLength(5);
-    for (const sp of beach.spots) {
-      const costume = costumeForRegion(beach, sp.region);
-      for (const ch of CHARACTER_IDS) {
-        const rep = analyzeSpot(beach, sp, ch);
-        expect(rep.problems, `${sp.id} × ${ch}`).toEqual([]);
-        expect(rep.ok, `${sp.id} × ${ch}`).toBe(true);
-        const v = validateLayout(beach, [{ char: ch, spot: sp.id, costume, variant: 'exact' }]);
-        expect(v.problems, `validateLayout ${sp.id} × ${ch}`).toEqual([]);
-        expect(v.ok).toBe(true);
-        expect(accessoryFits(beach, sp, ch, 'hat', 'camo').problems, `hat camo ${sp.id} × ${ch}`).toEqual([]);
-        expect(accessoryFits(beach, sp, ch, 'umbrella', 'camo').problems, `umbrella camo ${sp.id} × ${ch}`).toEqual([]);
-      }
-    }
-  });
-
-  it('no two spots in beach conflict, and autoLayout / courseRound succeed across seeds', () => {
-    for (let i = 0; i < beach.spots.length; i++) {
-      for (let j = i + 1; j < beach.spots.length; j++) {
-        expect(spotsConflict(beach.spots[i], beach.spots[j]), `${beach.spots[i].id} vs ${beach.spots[j].id}`).toBe(false);
-      }
-    }
-    for (const diff of ['easy', 'normal'] as const) {
-      for (let seed = 1; seed <= 30; seed++) {
-        const pls = autoLayout(beach, diff, seed);
-        if (diff === 'easy') {
-          expect(pls).toHaveLength(1);
-        } else {
-          expect(pls.length).toBeGreaterThanOrEqual(2);
-          expect(pls.length).toBeLessThanOrEqual(3);
-        }
-        expect(validateLayout(beach, pls).problems).toEqual([]);
-      }
-    }
-    for (let c = 1; c <= 10; c++) {
-      for (let seed = 1; seed <= 15; seed++) {
-        const pls = courseRound(beach, c, 3, seed, CHARACTER_IDS);
-        expect(pls.length).toBeGreaterThan(0);
-        expect(validateLayout(beach, pls).problems).toEqual([]);
-      }
-    }
-  });
-
+  // うみべの背景（隠れ場所・柄の形）は前からある背景で、placement / hardest / courses のテストで検査済み
   it('all 3 beach peek spots pass analyzePeek for all 9 friends, and hardestRound works', () => {
     expect(PEEKS.beach).toHaveLength(3);
     for (const pk of PEEKS.beach) {
