@@ -56,11 +56,32 @@
 
 ---
 
-## 3. 自信のない所（Claude がテストで確かめるべき所）
+## 3. テスト失敗3件の修正（2026-10-15 追記）
 
-1. **`tests/unit/haunted.test.ts`・`tests/unit/courses.test.ts`・`tests/unit/hardest.test.ts` での `fuwa` を含む全9キャラクター×全7ステージの幾何検査**
-   - `haunted` の座標系・多角形形状は合格済みの `aquarium` と同型のジオメトリで設計しており、`fuwa` の `headFeatures` も既存の全スポットおよび `PEEKS` の上縁で `featureFrac >= 0.15` を満たすよう計算していますが、実テストで全件パスするか確認してください。
-2. **`tests/unit/movers.test.ts` での `haunted` のうごくもの5体の検査**
-   - 前を通る3体（`haunted-ghost1`, `haunted-bat2`, `haunted-candle`）の顔遮蔽時間（3秒未満、実際は最大約0.6秒）および「どこかの友だちの前を横切る」判定が通るか確認してください。
-3. **E2Eテスト（`tests/e2e/offline.spec.ts`, `tests/e2e/course.spec.ts`, `tests/e2e/myroom.spec.ts`）**
-   - 背景数7・シール全33枚・部屋タブ最大6・コース4時点の棚アイテム数12の更新箇所がすべて通るか確認してください。
+1. **`tests/unit/courses.test.ts`（course 8 の傘の出現率）の修正 — `src/core/scenes/haunted.ts`, `src/core/peeks.ts`**
+   - **原因**: `accessoryFits(haunted, spot, char, 'umbrella', 'camo')` において、当初の `haunted` では9か所中2か所（`haunted-curtain-2`, `haunted-carpet-1`）しか傘が使えませんでした：
+     - `haunted-curtain-1`（`x = 112`）は傘の左端 `x - 128 = -16 < 6` で `out of bounds`。
+     - `haunted-sofa-1` / `haunted-sofa-2`（`y = 652`）は傘の基準点 `UMBRELLA_ANCHOR`（`y = 376`）が `hall` 領域（`y >= 460`）より上にあり、`regionAt` が `null` で `camo match 0.00`。
+     - 手前の列（`haunted-carpet-2`, `haunted-carpet-3`, `haunted-hall-1`, `haunted-hall-2`）は傘の上端（`y = spot.y - 322`）が奥の列の小物（`y = 590..662`）や領域境界（`y = 654`）に重なり `under another prop` / `camo match` 不足。
+   - **修正**:
+     - 屋内の洋館ホールに合わせて `hall` 領域を `y = 240..1000`（`{ kind: 'rect', x: 0, y: 240, w: 1000, h: 760 }`）に広げました。
+     - 奥の列（`curtain-1/2`, `sofa-1/2`）および `CURTAIN_POLY`・`SOFA_POLY`・`CURTAIN_FRONT`・`SOFA_FRONT`・`PEEKS.haunted` を `y = 584` 基準（`dy = -68`）に上げ、さらに `curtain-1` を `x = 136`（`136 - 128 = 8 >= 6`）、`curtain-2` を `x = 300`、`CURTAIN_POLY` の横幅を `x = 14..388` に広げました。
+     - 手前の列（`carpet-1/2/3`, `hall-1/2`）を `y = 922..928`（`CARPET_POLY` 上端 `y = 784`）に配置しました。これにより、手前の列の傘（`y = 600..696`）が奥の列の小物（下端 `y = 594`）や奥のキャラクターの足もと（`y = 588.5`）と一切重ならず、かつ `hall` 領域内に100%収まります。
+     - 結果として、**`haunted` の全9スポットすべて（easy 5か所・通常4か所の9/9）で `hat`（color / camo）と `umbrella`（camo）の両方が `accessoryFits` に合格**するようになり、`tests/unit/haunted.test.ts` にもその検査を追加しました。
+
+2. **`tests/unit/haunted.test.ts`（`openRooms` の `sceneFinds` 対応と `starterLayout('attic')`）の修正**
+   - `tests/unit/forest.test.ts` と同じ形に合わせ、`openRooms(10, baseOnly, { haunted: 9 })`・`openRooms(0, withHaunted)` では `attic` が開かず、`openRooms(0, withHaunted, { haunted: 1 })` で開く検査に更新しました。
+   - あわせて `starterLayout('attic')` の期待値も、新しい仕様（同じ友だちは1つの部屋にだけ置けるため `[{ ref: 'item:gothic-sofa', x: 280, y: 720 }]`）に合わせました。
+
+3. **`tests/unit/myroom.test.ts`（`gothic-sofa` と `attic` の追加）の修正**
+   - `openRooms` のパック部屋テストに `haunted: 1` → `'attic'` を追加し、`ownedItems` の全パック所有時の期待値に `'gothic-sofa'` を追加、無料（`baseOnly`）で出ない物の検査に `'gothic-sofa'`・`'star-rug'` を追加しました。
+
+---
+
+## 4. 自信のない所（Claude がテストで確かめるべき所）
+
+1. **`tests/unit/courses.test.ts` の全10コースの帽子・傘の出現率と配置検証**
+   - `haunted` の全9スポットで帽子・傘ともに `accessoryFits` が通るようになり、奥の列と手前の列の傘・キャラクター外枠も重ならない座標にしてありますが、全シードで `course 8` を含む全コースが合格するか確認してください。
+2. **`tests/unit/haunted.test.ts`・`tests/unit/hardest.test.ts`・`tests/unit/movers.test.ts`**
+   - 座標調整後の `haunted` で `analyzeSpot`・`analyzePeek`・`hardestRound`・`movers` の交差判定（手前の列 `body.y = 842..848` が `haunted-ghost` の `y = 763.4..860` と交差）がすべて通るか確認してください。
+

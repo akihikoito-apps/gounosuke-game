@@ -106,10 +106,10 @@ const CURTAIN_FRONT: Shape[] = [
   {
     kind: 'poly',
     pts: [
-      { x: 18, y: 666 },
-      { x: 18, y: 310 },
-      ...quadPoints({ x: 18, y: 310 }, { x: 195, y: 192 }, { x: 370, y: 310 }, 16),
-      { x: 370, y: 666 },
+      { x: 8, y: 598 },
+      { x: 8, y: 242 },
+      ...quadPoints({ x: 8, y: 242 }, { x: 201, y: 124 }, { x: 394, y: 242 }, 16),
+      { x: 394, y: 598 },
     ],
   },
 ];
@@ -117,10 +117,10 @@ const SOFA_FRONT: Shape[] = [
   {
     kind: 'poly',
     pts: [
-      { x: 568, y: 664 },
-      { x: 568, y: 436 },
-      ...quadPoints({ x: 568, y: 436 }, { x: 775, y: 368 }, { x: 982, y: 436 }, 16),
-      { x: 982, y: 664 },
+      { x: 568, y: 596 },
+      { x: 568, y: 368 },
+      ...quadPoints({ x: 568, y: 368 }, { x: 775, y: 300 }, { x: 982, y: 368 }, 16),
+      { x: 982, y: 596 },
     ],
   },
 ];
@@ -172,9 +172,9 @@ export const PEEKS: Record<SceneId, PeekDef[]> = {
     peek('aquarium-peek-jelly-2', 860, 520, 0.9, 'jelly', JELLY_FRONT),
   ],
   haunted: [
-    peek('haunted-peek-curtain', 372, 652, 1, 'hall', CURTAIN_FRONT),
-    peek('haunted-peek-sofa-1', 680, 520, 0.9, 'sofa', SOFA_FRONT),
-    peek('haunted-peek-sofa-2', 860, 520, 0.9, 'sofa', SOFA_FRONT),
+    peek('haunted-peek-curtain', 396, 584, 1, 'hall', CURTAIN_FRONT),
+    peek('haunted-peek-sofa-1', 680, 452, 0.9, 'sofa', SOFA_FRONT),
+    peek('haunted-peek-sofa-2', 860, 452, 0.9, 'sofa', SOFA_FRONT),
   ],
 };
 

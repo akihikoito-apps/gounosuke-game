@@ -4,6 +4,7 @@ import { haunted } from '../../src/core/scenes/haunted';
 import { SCENE_IDS } from '../../src/core/scenes';
 import { CHARACTER_IDS } from '../../src/core/characters';
 import { analyzeSpot, autoLayout, costumeForRegion, spotsConflict, validateLayout } from '../../src/core/placement';
+import { accessoryFits } from '../../src/core/accessories';
 import { PEEKS, analyzePeek } from '../../src/core/peeks';
 import { courseRound, hardestRound } from '../../src/core/courses';
 import { availableCharacters, canResume, visibleStickers, type CanPlay } from '../../src/core/access';
@@ -19,7 +20,7 @@ const baseOnly = owns();
 const withHaunted = owns('haunted');
 
 describe('haunted pack: spots, peeks, and courses', () => {
-  it('all 9 spots × all 9 friends pass analyzeSpot and validateLayout', () => {
+  it('all 9 spots × all 9 friends pass analyzeSpot, validateLayout, and accessoryFits (hat & umbrella)', () => {
     expect(haunted.spots).toHaveLength(9);
     expect(haunted.spots.filter((s) => s.easy)).toHaveLength(5);
     for (const sp of haunted.spots) {
@@ -31,6 +32,8 @@ describe('haunted pack: spots, peeks, and courses', () => {
         const v = validateLayout(haunted, [{ char: ch, spot: sp.id, costume, variant: 'exact' }]);
         expect(v.problems, `validateLayout ${sp.id} × ${ch}`).toEqual([]);
         expect(v.ok).toBe(true);
+        expect(accessoryFits(haunted, sp, ch, 'hat', 'camo').problems, `hat camo ${sp.id} × ${ch}`).toEqual([]);
+        expect(accessoryFits(haunted, sp, ch, 'umbrella', 'camo').problems, `umbrella camo ${sp.id} × ${ch}`).toEqual([]);
       }
     }
   });
@@ -91,8 +94,10 @@ describe('haunted pack: entitlement boundaries', () => {
     expect(availableCharacters(0, {}, withHaunted)).not.toContain('fuwa');
     expect(availableCharacters(0, { haunted: 1 }, withHaunted)).toContain('fuwa');
 
-    expect(openRooms(10, baseOnly).map((r) => r.id)).not.toContain('attic');
-    expect(openRooms(0, withHaunted).map((r) => r.id)).toContain('attic');
+    expect(openRooms(10, baseOnly, { haunted: 9 }).map((r) => r.id)).not.toContain('attic');
+    // パックを持っていても、おばけやしきで初めて見つけるまでは開かない
+    expect(openRooms(0, withHaunted).map((r) => r.id)).not.toContain('attic');
+    expect(openRooms(0, withHaunted, { haunted: 1 }).map((r) => r.id)).toContain('attic');
 
     const baseItems = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { haunted: 99 } }, baseOnly).map((i) => i.id);
     for (const id of ['gothic-sofa', 'star-rug', 'pumpkin-lantern', 'music-box', 'ghost-chair', 'ghost-plush']) {
@@ -109,10 +114,7 @@ describe('haunted pack: entitlement boundaries', () => {
     }
 
     const attic = starterLayout('attic');
-    expect(attic).toEqual([
-      { ref: 'item:gothic-sofa', x: 280, y: 720 },
-      { ref: 'char:koro', x: 640, y: 880 },
-    ]);
+    expect(attic).toEqual([{ ref: 'item:gothic-sofa', x: 280, y: 720 }]);
     expect(validLayouts({ attic }, CHARACTER_IDS)).toEqual({ attic });
 
     const pl = (char: (typeof CHARACTER_IDS)[number], spot: string) => ({ char, spot, costume: 'plain', variant: 'exact' as const });
