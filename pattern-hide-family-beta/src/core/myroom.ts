@@ -28,13 +28,13 @@ export interface RoomDef {
 
 /**
  * 部屋は ゆっくり増える（ご本人の方針 2026-10-15）：
- * はじめは リビングだけ → コース5 クリアで ひみつきち（無料はここまでの2部屋）→ コース10 クリアで しんしつ（つづきのコース）。
+ * はじめは リビングだけ → コース5 クリアで ひみつきち（無料はここまでの2部屋）→ コース6 クリアで しんしつ（つづきのコースを買って最初のクリアで。Gemini 最終点検の提案を採用）。
  * ほかは追加パックの部屋で、その背景で初めて友だちを見つけたときに開く。
  */
 export const ROOMS: RoomDef[] = [
   { id: 'living', name: 'リビング', needCleared: 0, content: 'room:living', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'treehouse', name: 'ひみつきち', needCleared: 5, content: 'room:treehouse', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
-  { id: 'bedroom', name: 'しんしつ', needCleared: 10, content: 'room:bedroom', floorTop: 580, scaleBack: 1.0, scaleFront: 1.5 },
+  { id: 'bedroom', name: 'しんしつ', needCleared: 6, content: 'room:bedroom', floorTop: 580, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'yard', name: 'もりの ひろば', needCleared: 0, needScene: 'forest', content: 'room:yard', floorTop: 540, scaleBack: 0.95, scaleFront: 1.45 },
   { id: 'aquarium-room', name: 'すいぞくかんの へや', needCleared: 0, needScene: 'aquarium', content: 'room:aquarium-room', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'attic', name: 'ほしの やねうらべや', needCleared: 0, needScene: 'haunted', content: 'room:attic', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },

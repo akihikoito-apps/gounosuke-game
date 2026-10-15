@@ -105,7 +105,7 @@ test('棚へ ドラッグして もどすと しまえる', async ({ page }) => 
   await expect(page.locator('.mr-obj')).toHaveCount(3);
 });
 
-test('部屋は ゆっくり増える：コース5で ひみつきち、コース10で しんしつ、パックの部屋は その背景で初めて見つけたら', async ({ page }) => {
+test('部屋は ゆっくり増える：コース5で ひみつきち、コース6で しんしつ、パックの部屋は その背景で初めて見つけたら', async ({ page }) => {
   await fresh(page);
   await seed(page, 4);
   await act(page, 'toMyRoom');
@@ -113,7 +113,7 @@ test('部屋は ゆっくり増える：コース5で ひみつきち、コー�
   await seed(page, 5);
   await act(page, 'toMyRoom');
   await expect(page.locator('.mr-room-tab')).toHaveText(['リビング', 'ひみつきち']);
-  await seed(page, 10);
+  await seed(page, 6);
   await act(page, 'toMyRoom');
   await expect(page.locator('.mr-room-tab')).toHaveText(['リビング', 'ひみつきち', 'しんしつ']);
   await seed(page, 10, undefined, { forest: 1, aquarium: 1 });
@@ -126,33 +126,29 @@ test('部屋は ゆっくり増える：コース5で ひみつきち、コー�
   await page.screenshot({ path: `${SHOTS}/yard.png` });
 });
 
-test('同じ友だち・物は 1つの部屋にだけ。ほかの部屋では「〇〇に いるよ」と出て、しまうと つれてこられる', async ({ page }) => {
+test('同じ友だち・物は 1つの部屋にだけ。ほかの部屋に いる子を タップすると おひっこし して ここに来る', async ({ page }) => {
   await fresh(page);
   await seed(page, 5);
   await act(page, 'toMyRoom');
   await expect(page.locator('#stage.loading')).toHaveCount(0);
   await page.locator('[data-mr-room="treehouse"]').click();
   await expect(page.locator('.mr-room-tab.on')).toHaveText('ひみつきち');
-  // リビングに いる ころ・ソファ は、ここでは置けない
+  // リビングに いる ころ は、うすく＋リビングの絵
   const koro = page.locator('[data-mr-ref="char:koro"]');
   await expect(koro).toHaveClass(/elsewhere/);
-  await koro.click();
-  await expect(page.locator('.mr-hint')).toContainText('リビング');
-  await expect(page.locator('.mr-obj')).toHaveCount(0);
   await page.locator('[data-mr-tab="furniture"]').click();
   await expect(page.locator('[data-mr-ref="item:sofa"]')).toHaveClass(/elsewhere/);
   await page.screenshot({ path: `${SHOTS}/elsewhere.png` });
-  // リビングで しまうと、ひみつきち に置ける
-  await page.locator('[data-mr-room="living"]').click();
+  // タップすると おひっこし（リビングからは いなくなる）
   await page.locator('[data-mr-tab="chars"]').click();
   await page.locator('[data-mr-ref="char:koro"]').click();
-  await page.locator('[data-mr-room="treehouse"]').click();
-  await expect(page.locator('[data-mr-ref="char:koro"]')).not.toHaveClass(/elsewhere/);
-  await page.locator('[data-mr-ref="char:koro"]').click();
+  await expect(page.locator('.mr-hint')).toContainText('リビング');
   await expect(page.locator('.mr-obj.mr-char')).toHaveCount(1);
   const m = await saved(page);
   expect(m.layouts.living.some((p: { ref: string }) => p.ref === 'char:koro')).toBe(false);
   expect(m.layouts.treehouse.some((p: { ref: string }) => p.ref === 'char:koro')).toBe(true);
+  // ソファから降ろされた ほかの物は そのまま（ソファは リビングに残る）
+  expect(m.layouts.living.some((p: { ref: string }) => p.ref === 'item:sofa')).toBe(true);
 });
 
 test('前の保存データで 同じ子が2つの部屋にいても、先の部屋にだけ出る', async ({ page }) => {

@@ -9,12 +9,13 @@ const baseOnly = (id: ContentId) => PACKS.find((p) => p.id === 'base')!.contents
 
 describe('じぶんの へや', () => {
   it('無料（きほん）では 部屋は2つまで（リビング・ひみつきち）。しんしつ は つづきのコース、ほかは追加パック', () => {
-    // ゆっくり増える：はじめは リビング、コース5で ひみつきち、コース10で しんしつ（つづきのコース）
+    // ゆっくり増える：はじめは リビング、コース5で ひみつきち、コース6で しんしつ（つづきのコース）
     expect(openRooms(10, baseOnly).map((r) => r.id)).toEqual(['living', 'treehouse']);
     expect(openRooms(0, all).map((r) => r.id)).toEqual(['living']);
     expect(openRooms(4, all).map((r) => r.id)).toEqual(['living']);
     expect(openRooms(5, all).map((r) => r.id)).toEqual(['living', 'treehouse']);
-    expect(openRooms(10, all).map((r) => r.id)).toEqual(['living', 'treehouse', 'bedroom']);
+    expect(openRooms(5, all).map((r) => r.id)).not.toContain('bedroom');
+    expect(openRooms(6, all).map((r) => r.id)).toEqual(['living', 'treehouse', 'bedroom']);
     // パックの部屋は、その背景で初めて見つけたら
     expect(openRooms(0, all, { forest: 1, aquarium: 1, haunted: 1 }).map((r) => r.id)).toEqual(['living', 'yard', 'aquarium-room', 'attic']);
     // どの部屋も、ちょうど1つのパックに入っている

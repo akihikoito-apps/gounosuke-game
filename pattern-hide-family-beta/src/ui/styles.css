@@ -632,3 +632,6 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 .news ul { margin: 0; padding-left: 1.2em; font-size: 14px; font-weight: 700; line-height: 1.5; }
 .news .news-ok { position: static; align-self: end; }
 @media (prefers-reduced-motion: reduce) { .news { animation: none; } }
+
+/* ほかの部屋に いる子：つれてこられるので、うすくしすぎない */
+.mr-cell.elsewhere > svg, .mr-cell.elsewhere > span:not(.mr-where) { opacity: 0.6; }

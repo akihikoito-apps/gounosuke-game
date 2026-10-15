@@ -91,6 +91,8 @@ export class MyRoomView {
   private tab: 'chars' | Genre = 'chars';
   /** 「〇〇に いるよ」の知らせ */
   private hintTimer = 0;
+  /** いま出している知らせ（描き直しても消えないように） */
+  private hintText = '';
   /** パックが使えなくて いまは見せない物（置き場所は保存に残す。パックが もどったら また出る） */
   private hidden: Placed[] = [];
   private drag: Drag | null = null;
@@ -166,15 +168,38 @@ export class MyRoomView {
     return !!o && o !== this.room;
   }
 
-  /** この物を ここに置くとき、閉じた部屋に残っていたら そこから取りのぞく（1つの部屋だけ、を守る） */
+  /**
+   * この物を ここに置くとき、ほかの部屋に いたら そこから つれてくる（おひっこし。1つの部屋だけ、を守る）。
+   * 幼い子には「そこで しまってから」より わかりやすい（Gemini 最終点検の提案、持ち主が採用）。
+   */
   private releaseFromClosedRooms(ref: string): void {
     const all = this.deps.allLayouts();
-    const open = this.openIds();
+    let from: RoomId | null = null;
     for (const r of ROOMS) {
-      if (r.id === this.room || open.includes(r.id)) continue;
+      if (r.id === this.room) continue;
       const l = all[r.id];
-      if (l?.some((p) => p.ref === ref)) this.deps.save(r.id, removeRef(l, ref), this.room);
+      if (l?.some((p) => p.ref === ref)) {
+        this.deps.save(r.id, removeRef(l, ref), this.room);
+        if (this.openIds().includes(r.id)) from = r.id;
+      }
     }
+    if (from) this.showMoved(from);
+  }
+
+  /** 「〇〇から おひっこし したよ」 */
+  private showMoved(from: RoomId): void {
+    const name = ROOMS.find((r) => r.id === from)?.name ?? '';
+    this.hintText = `「${name}」から おひっこし したよ`;
+    const hint = this.el?.querySelector<HTMLElement>('.mr-hint');
+    if (hint) {
+      hint.textContent = this.hintText;
+      hint.classList.add('show');
+    }
+    window.clearTimeout(this.hintTimer);
+    this.hintTimer = window.setTimeout(() => {
+      this.hintText = '';
+      this.el?.querySelector('.mr-hint')?.classList.remove('show');
+    }, 2600);
   }
 
   // ---------- 描画 ----------
@@ -296,7 +321,7 @@ export class MyRoomView {
 
   private cell(ref: string, icon: string, name: string, here: boolean, away: RoomId | undefined): string {
     const room = away ? ROOMS.find((r) => r.id === away)?.name : '';
-    const label = here ? `${name}（この へやに いる）` : away ? `${name}（${room}に いる）` : name;
+    const label = here ? `${name}（この へやに いる）` : away ? `${name}（${room}に いる。タップで つれてくる）` : name;
     return `<button type="button" class="mr-cell${ref.startsWith('item:') ? ' item' : ''}${here ? ' placed' : ''}${away ? ' elsewhere' : ''}" data-mr-ref="${ref}"${away ? ` data-mr-away="${away}"` : ''} aria-label="${label}">${icon}${away ? this.roomBadge(away) : ''}</button>`;
   }
 
@@ -326,7 +351,7 @@ export class MyRoomView {
     return `<div class="mr-tray" aria-label="おくもの">
       <div class="mr-tabs" role="tablist">${tabs}</div>
       <div class="mr-cells">${cells}</div>
-      <p class="mr-hint" role="status" aria-live="polite"></p>
+      <p class="mr-hint${this.hintText ? ' show' : ''}" role="status" aria-live="polite">${this.hintText}</p>
     </div>`;
   }
 
@@ -407,10 +432,6 @@ export class MyRoomView {
   private onTrayDown(e: PointerEvent): void {
     const cell = (e.target as HTMLElement).closest<HTMLElement>('[data-mr-ref]');
     if (!cell || this.drag || !e.isPrimary) return;
-    if (cell.dataset.mrAway) {
-      this.showAway(cell.dataset.mrAway as RoomId);
-      return;
-    }
     this.begin(e, { idx: -1, dx: 0, dy: 0, ref: cell.dataset.mrRef as string });
   }
 
@@ -540,23 +561,6 @@ export class MyRoomView {
     this.deps.sound('pop');
     this.persist();
     this.redraw();
-  }
-
-  /** ほかの部屋にあるよ、と知らせる（その部屋のタブも ひかる） */
-  private showAway(room: RoomId): void {
-    const name = ROOMS.find((r) => r.id === room)?.name ?? '';
-    const hint = this.el?.querySelector<HTMLElement>('.mr-hint');
-    if (hint) {
-      hint.textContent = `「${name}」に いるよ。つれてくるときは、そこで しまってね`;
-      hint.classList.add('show');
-    }
-    const t = this.el?.querySelector<HTMLElement>(`[data-mr-room="${room}"]`);
-    t?.classList.remove('call');
-    void t?.offsetWidth;
-    t?.classList.add('call');
-    this.deps.sound('pop');
-    window.clearTimeout(this.hintTimer);
-    this.hintTimer = window.setTimeout(() => this.el?.querySelector('.mr-hint')?.classList.remove('show'), 2600);
   }
 
   /** 中断：指を置く前の並びに もどす（保存は前のまま） */
