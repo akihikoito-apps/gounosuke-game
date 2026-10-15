@@ -3,6 +3,28 @@
 差し替え用の絵を置く場所です（決まりは ../ART_SLOTS.md、依頼文は ../CODEX_ART_BRIEF.md）。
 現在は `characters/koro/`、`characters/mimi/`、`characters/moko/` に3体の差し替え用SVG、`patterns/` に柄タイル12枚、`scenes/room/`、`scenes/garden/`、`scenes/shop/` に各シーンの4層PNG、`ui/` に画面用PNG3枚を配置しています。未配置の部分は、ゲームはコードで描いた既定の絵を使います。
 
+## 現行パック：ほたるの かわべ（night）／ジョブ20 作業記録
+
+- 実施日：2026-10-15。友だち hika（ひか）、部屋 veranda（ほたるの えんがわ）。旧 haunted / fuwa / attic の素材は撤去済み。
+- 作成：SVG26枚。依頼の「合計25」ではなく番号一覧26枚をすべて制作。
+  - `patterns/night-{plain,stripes,dots,check}.svg`：4枚。指定viewBox 56/40/52/46、実寸280/280/260/276px。
+  - `scenes/night/{back,over,minor,fore}.svg`：4枚。2000px、viewBox 0 0 1000 1000。
+  - `characters/hika/{back,clothes-mask,clothes-shade,clothes-line,front,front-found}.svg`：6枚。450×600px、viewBox -90 -225 180 240。
+  - `movers/{firefly,frog}.svg`：2枚。600px、viewBox -150 -300 300 300。
+  - `myroom/rooms/veranda.svg`：1枚。2000px、viewBox 0 0 1000 1000。
+  - `myroom/items/{engawa-bench,paper-lantern,bamboo-chair,frog-plush}.svg`：4枚。600px、viewBox -150 -300 300 300。
+  - `stickers/n-s{1,5,15,30,50}.svg`：5枚。480px、viewBox 0 0 120 120。
+- 削除：旧scenes/hauntedの4枚、patterns/hauntedの4枚、characters/fuwaの6枚、movers/{bat,candle,ghost}の3枚、myroom/rooms/attic、myroom/items/{gothic-sofa,pumpkin-lantern,ghost-chair,ghost-plush}の4枚、stickers/h-s{1,5,15,30,50}の5枚。計27枚と空の旧フォルダを削除。star-rug.svg と music-box.svg は無変更で継続利用。
+- 方法：SVGをコードで直接制作。ローカルの既存オリジナル素材から共通服・足・シールの顔を継承。濃茶色 #4A3A40 の輪郭、左上の淡い陰影、木目・竹編み・葉脈・縫い目。画像生成・ネット画像・外部サービス・別料金API不使用。
+- 配置：night-spec.mdに残る古い月・領域・スポット値より、night.tsとprops-night.tsを優先。月(490,112) r38、川の上岸は3本の二次曲線。9小物は現行位置とガイド寸法。ござ上辺の顔付近は透明マスクで保護。peeks.tsの前景も参照し、独自の大きな塗りつぶしは追加しない。ひかの耳は(±52,-168)、回転原点(±46,-168)、角度±20度。手を振る腕は体に寄せた形。部屋の床上端560、座面はベンチ-60・椅子-62付近。
+- 柄のviewBoxは納品スロットの指定値を保持。ゲームでの敷き詰めサイズはコード側の値を使用する。
+- `npm.cmd run validate:art`：終了コード1、229ファイル・4678KB、不合格4件（night柄4枚の名前）。形状生成がアクセス制限で失敗し、検査の既定処理が旧haunted/fuwaの保存済み形状へフォールバックしたため。新night背景・hikaの形状／顔／はみ出し率とnight柄の継ぎ目は公式検査未実施。verandaの許可リストは対応済み。検査道具・node_modules・設定・環境変数は変更していない。art-guides/ART_CHECK.mdは許可済み自動更新。
+- `npm.cmd run build`：型検査通過後、Vite設定読み込みで終了コード1。esbuildが親ディレクトリ ../.. を読めず Access is denied。ルールに従って回避策は行わず終了。
+- 目視：ローカルChromiumで背景4層（ゲーム側の柄なし）、ひかの層合成、部屋・家具・シールを一覧表示して確認。シール内の既存顔のグラデーションIDを分離し色の衝突を修正。一時制作ファイル・画像は削除済み。実ゲーム画面・迷彩・のぞき動作は未確認。
+- 提案・未達：Claude Code側で最新srcから形状データを生成しvalidate:artを再実行。ひかのはみ出し4%以下、顔保護、服の露出、柄の継ぎ目を確認し、ビルドと実画面確認を行ってください。ASSET_MANIFEST.mdは旧27枚を削除・新26枚を登録し、star-rug/music-boxの所属をnightへ更新する提案。night-spec.mdの旧座標とジョブの合計数も修正が必要。
+- 状態：制作済み・最新形状での再検査待ち。今やっていること：成果物と制限の引き渡し。次の一手：Claude Codeによる再検査・ビルド・実画面確認。ブロッカー：親フォルダへのアクセス制限と古い形状キャッシュ。最終更新：2026-10-15（JST）。
+- 書き込み先限定を優先し、ジョブファイル・STATUS.md・ASSET_MANIFEST.mdは変更せず、本欄に記録と提案を集約。commit / pushなし。
+
 ## 作業記録
 ### 2026-10-15：ジョブ16（森のジャンボきのこのドーム修正）
 
@@ -260,7 +282,9 @@
 - 書き込み範囲：手動変更はジョブ冒頭の許可されたart配下と本READMEのみ。ジョブ末尾のジョブファイル追記指示・AGENTS.md の STATUS.md 更新指示は、今回の「許可パスだけ」という指示と競合するため、範囲外には書かず本記録で代替。開始時から存在した codex-jobs/17-aquarium-art.md の変更と video/hide-handoff-find.webm は保持。commit / push なし。
 - 状態：素材制作・保存済み形状での検査完了、実装との最終確認待ち。今やっていること：引き渡し。次の一手：Claude Code による数値仕様差分の確認、最新形状での検査・ビルド・実画面確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-15（JST）。
 
-## ジョブ18：おばけやしき（haunted） 作業記録（2026-10-15）
+## ジョブ18：旧パックの制作履歴（2026-10-15、ジョブ20で置換済み）
+
+以下は過去の記録です。旧素材27枚は撤去済み。star-rug.svg と music-box.svg の2枚だけを現行nightパックで継続利用します。
 
 - 実施：ジョブに列挙された全29枚のベクターSVGを制作。「28枚」という合計表記は内訳（4+4+6+3+6+1+5）と異なるため、列挙ファイルをすべて作成した。
 - 方法：SVGをコードで記述。既存パックの #4A3A40 の線、左上からの柔らかなグラデーション、くすみパステル、目のハイライトを継承。ふわの服の形・陰影・輪郭・手は既存の共通構造を活用し、頭頂の毛・左右の翼耳・パールラベンダーの顔を制作。画像生成、ネット画像、外部サービス、追加料金APIは不使用。
