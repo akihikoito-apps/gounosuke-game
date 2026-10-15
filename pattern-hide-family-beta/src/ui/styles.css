@@ -82,7 +82,23 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 @keyframes peek { 0%, 70%, 100% { transform: translateY(0); } 80% { transform: translateY(-8px); } }
 .beta-tag { font-size: 14px; margin-top: 6px; opacity: 0.8; }
 .title-actions { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.parent-btn { position: absolute; right: calc(12px + var(--safe-r)); bottom: calc(12px + var(--safe-b)); }
+/* タイトルの下の3つ（シールちょう・あそびかた・おとなの かたへ）：1列に並べて、どの幅でも重ならない */
+.title-foot { position: absolute; left: calc(12px + var(--safe-l)); right: calc(12px + var(--safe-r)); bottom: calc(12px + var(--safe-b)); display: flex; justify-content: space-between; gap: 8px; pointer-events: none; }
+.title-foot .btn { pointer-events: auto; min-width: 0; white-space: nowrap; }
+@media (max-width: 620px) {
+  .title-foot .btn { flex: 1 1 0; font-size: 13px; padding: 4px 6px; gap: 4px; }
+  .title-foot .btn .icon { width: 24px; height: 24px; }
+  /* 数字（12/40）は2行目に小さく */
+  .title-foot .sticker-btn .lbl { display: flex; flex-direction: column; line-height: 1.15; }
+  .title-foot .sticker-btn .cnt { font-size: 11px; }
+}
+/* 横向きの スマホ：下の3つの ぶん、上を あける */
+@media (orientation: landscape) and (max-height: 500px) { .screen.title { padding-bottom: calc(80px + var(--safe-b)); } }
+/* とても せまい画面：ことばの すきまで 2行に おる */
+@media (max-width: 380px) {
+  .title-foot .btn { white-space: normal; word-break: keep-all; line-height: 1.15; text-align: center; padding: 4px; }
+  .title-foot .btn .icon { display: none; }
+}
 
 /* ---- 選択画面 ---- */
 .topbar { width: 100%; display: grid; grid-template-columns: var(--tap) 1fr var(--tap); align-items: center; gap: 8px; }
@@ -318,7 +334,6 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 .stage.loading { pointer-events: none; }
 
 /* ---- シールちょう ---- */
-.sticker-btn { position: absolute; left: calc(12px + var(--safe-l)); bottom: calc(12px + var(--safe-b)); }
 .stickers { gap: 6px; }
 .stickers h2 .count { font-size: 0.7em; opacity: 0.75; }
 .sticker-note { font-size: 15px; opacity: 0.8; }
@@ -362,13 +377,12 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 }
 
 /* とても小さい画面（320×568 など）：タイトルの下のボタンを重ねずに並べる */
-@media (max-height: 640px) and (orientation: portrait) {
+@media (max-height: 700px) and (orientation: portrait) {
   .title { justify-content: flex-start; gap: 12px; padding-top: 14px; }
   .title .ui-art-title { max-height: 18dvh; width: auto; }
   .title .logo h1 { font-size: clamp(28px, 8vw, 40px); }
   .title .btn.big { min-height: 76px; }
-  .title-foot { display: flex; gap: 8px; width: min(420px, 94vw); }
-  .title-foot .btn { position: static; flex: 1 1 0; min-width: 0; font-size: 13px; padding: 4px 6px; white-space: nowrap; }
+  .title-foot { position: static; width: min(420px, 94vw); }
 }
 .scene-card .lbl { white-space: nowrap; font-size: clamp(15px, 2.2vw + 6px, 20px); }
 
@@ -623,9 +637,6 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 }
 @media (prefers-reduced-motion: reduce) { .mr-room-tab.call { animation: none; outline: 3px solid #FFD45C; } }
 
-/* タイトル：あそびかた（下の真ん中） */
-.howto-btn { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12px + var(--safe-b)); }
-@media (max-height: 640px) and (orientation: portrait) { .title-foot .howto-btn { transform: none; } }
 /* あたらしく なったよ（更新したあと1回だけ） */
 .news { position: absolute; top: calc(10px + var(--safe-t)); left: 50%; transform: translateX(-50%); z-index: 20; width: min(420px, 92vw); background: #fff; border: 4px solid var(--line); border-radius: 20px; padding: 10px 14px; box-shadow: 0 6px 0 rgba(74, 58, 64, 0.2); display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; animation: pop 0.5s ease-out; }
 .news-title { margin: 0; font-weight: 800; font-size: 17px; grid-column: 1 / -1; }

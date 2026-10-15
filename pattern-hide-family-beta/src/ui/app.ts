@@ -287,7 +287,7 @@ export class App {
         ${resume ? btn('resume', ICONS.play, 'つづきから', 'mid') : ''}
       </div>
       <div class="title-foot">
-        ${btn('toStickers', ICONS.sticker, `シールちょう ${this.stickerCount()}/${visibleStickers(this.can).length}`, 'small sticker-btn')}
+        ${btn('toStickers', ICONS.sticker, `シールちょう ${this.stickerCount()}/${visibleStickers(this.can).length}`, 'small sticker-btn').replace(/ (\d+\/\d+)<\/span>/, ' <small class="cnt">$1</small></span>')}
         ${btn('howto', ICONS.question, 'あそびかた', 'small howto-btn')}
         ${btn('parent', ICONS.parent, 'おとなの かたへ', 'small parent-btn')}
       </div>
