@@ -4,7 +4,7 @@
 import { type Rng, mulberry32, shuffle } from './rng';
 import type { SceneId } from './scene';
 
-export type MoverKind = 'bird' | 'butterfly' | 'cloud' | 'cat' | 'puppy' | 'balloon' | 'seagull' | 'sailboat' | 'crab' | 'ball' | 'squirrel' | 'owl' | 'falling-leaf';
+export type MoverKind = 'bird' | 'butterfly' | 'cloud' | 'cat' | 'puppy' | 'balloon' | 'seagull' | 'sailboat' | 'crab' | 'ball' | 'squirrel' | 'owl' | 'falling-leaf' | 'tropical-fish' | 'jellyfish' | 'penguin' | 'bubble';
 /** cross：端から端へ通りぬけて、また最初から / patrol：行って もどる（向きを変える） */
 export type MoverMove = 'cross' | 'patrol';
 
@@ -61,6 +61,13 @@ export const MOVERS: Record<SceneId, MoverDef[]> = {
     { id: 'forest-leaf', kind: 'falling-leaf', move: 'cross', from: { x: 240, y: -40 }, to: { x: 760, y: 1060 }, sec: 11, scale: 1.0, layer: 'front' },
     { id: 'forest-butterfly', kind: 'butterfly', move: 'patrol', from: { x: 1090, y: 540 }, to: { x: -90, y: 580 }, sec: 13, scale: 1.05, layer: 'front' },
   ],
+  aquarium: [
+    { id: 'aquarium-fish', kind: 'tropical-fish', move: 'cross', from: { x: -120, y: 180 }, to: { x: 1120, y: 150 }, sec: 15, scale: 1.1, layer: 'back' },
+    { id: 'aquarium-jelly', kind: 'jellyfish', move: 'patrol', from: { x: 180, y: 240 }, to: { x: 820, y: 200 }, sec: 22, scale: 1.05, layer: 'back' },
+    { id: 'aquarium-penguin', kind: 'penguin', move: 'patrol', from: { x: -90, y: 860 }, to: { x: 1090, y: 860 }, sec: 14, scale: 1.15, layer: 'front' },
+    { id: 'aquarium-bubble', kind: 'bubble', move: 'cross', from: { x: 240, y: 1060 }, to: { x: 760, y: -40 }, sec: 12, scale: 1.0, layer: 'front' },
+    { id: 'aquarium-fish2', kind: 'tropical-fish', move: 'patrol', from: { x: 1090, y: 580 }, to: { x: -90, y: 600 }, sec: 13, scale: 1.0, layer: 'front' },
+  ],
 };
 
 /** かくして わたす で、隠す人が選べる うごくもの の数 */
@@ -80,6 +87,10 @@ export const MOVER_NAMES: Record<MoverKind, string> = {
   squirrel: 'りす',
   owl: 'ふくろう',
   'falling-leaf': 'はっぱ',
+  'tropical-fish': 'さかな',
+  jellyfish: 'くらげ',
+  penguin: 'ペンギン',
+  bubble: 'あわ',
 };
 
 /** コースごとの うごくものの数（コース1は なし） */

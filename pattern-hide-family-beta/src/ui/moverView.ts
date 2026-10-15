@@ -36,6 +36,14 @@ function fallback(kind: MoverKind): string {
       return `<path d="M-42 -42 Q-20 -68 0 -44 Q20 -68 42 -42" fill="#B58E6B" ${L}/><ellipse cx="0" cy="-38" rx="18" ry="16" fill="#C8A27E" ${L}/><circle cx="-6" cy="-40" r="5" fill="#FFFDF6" ${L}/><circle cx="6" cy="-40" r="5" fill="#FFFDF6" ${L}/><circle cx="-6" cy="-40" r="2" fill="#4A3A40"/><circle cx="6" cy="-40" r="2" fill="#4A3A40"/>`;
     case 'falling-leaf':
       return `<path d="M-22 -24 Q-4 -48 22 -28 Q6 -6 -22 -24 Z" fill="#D88A52" ${L}/><path d="M-26 -22 L18 -27" ${L}/>`;
+    case 'tropical-fish':
+      return `<path d="M-22 -36 L-44 -54 V-18 Z" fill="#F6C85F" ${L}/><ellipse cx="4" cy="-36" rx="30" ry="20" fill="#78C6D6" ${L}/><path d="M-6 -54 V-18 M8 -55 V-17" stroke="#F6C85F" stroke-width="6"/><circle cx="18" cy="-40" r="3.5" fill="#4A3A40"/>`;
+    case 'jellyfish':
+      return `<path d="M-24 -36 Q-26 -14 -16 -4 M0 -36 Q-2 -12 4 -2 M24 -36 Q22 -14 28 -4" fill="none" ${L}/><path d="M-32 -36 Q-32 -76 0 -76 Q32 -76 32 -36 Z" fill="#C8CEF4" ${L}/><circle cx="-10" cy="-50" r="3" fill="#4A3A40"/><circle cx="10" cy="-50" r="3" fill="#4A3A40"/>`;
+    case 'penguin':
+      return `<ellipse cx="0" cy="-2" rx="36" ry="5" fill="#4A3A40" opacity="0.1"/><ellipse cx="0" cy="-42" rx="28" ry="38" fill="#5E7A96" ${L}/><ellipse cx="4" cy="-36" rx="18" ry="26" fill="#FFFDF8"/><circle cx="8" cy="-60" r="3.5" fill="#4A3A40"/><path d="M18 -58 L32 -54 L18 -50 Z" fill="#F6C85F" ${L}/>`;
+    case 'bubble':
+      return `<circle cx="-8" cy="-24" r="14" fill="#D6ECF4" fill-opacity="0.7" ${L}/><circle cx="12" cy="-46" r="10" fill="#D6ECF4" fill-opacity="0.7" ${L}/><circle cx="-4" cy="-28" r="4" fill="#FFFFFF"/>`;
   }
 }
 
@@ -44,7 +52,7 @@ function art(kind: MoverKind): string {
   return f ? `<image href="${f}" x="-150" y="-300" width="300" height="300"/>` : fallback(kind);
 }
 
-const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon', 'owl', 'falling-leaf'];
+const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon', 'owl', 'falling-leaf', 'tropical-fish', 'jellyfish', 'bubble'];
 
 /** うごくもの1つ。elapsed：出題が始まってからの秒数 */
 function one(P: string, m: MoverDef, elapsed: number): string {
@@ -82,6 +90,10 @@ const BOX: Record<MoverKind, [number, number, number, number]> = {
   squirrel: [-55, -75, 110, 75],
   owl: [-44, -66, 88, 64],
   'falling-leaf': [-28, -48, 56, 48],
+  'tropical-fish': [-48, -64, 96, 56],
+  jellyfish: [-36, -82, 72, 80],
+  penguin: [-42, -86, 84, 86],
+  bubble: [-28, -64, 56, 60],
 };
 
 /** 選ぶボタン用の絵（その絵の大きさに合わせて切り取る） */

@@ -217,10 +217,10 @@ test('clearing course 5 gives its sticker and brings popo; the sticker book show
   await act(page, 'bye');
   await act(page, 'home');
   await act(page, 'toStickers');
-  // コース1〜5 ＋ 10回・30回。コースの背景は順番に回るので、うみべ・もり で初めて見つけていれば その1枚も
-  const sceneFirst = ['beach', 'forest'].filter((sc) => (saved.collection.sceneFinds[sc] ?? 0) >= 1).length;
+  // コース1〜5 ＋ 10回・30回。コースの背景は順番に回るので、うみべ・もり・すいぞくかん で初めて見つけていれば その1枚も
+  const sceneFirst = ['beach', 'forest', 'aquarium'].filter((sc) => (saved.collection.sceneFinds[sc] ?? 0) >= 1).length;
   await expect(page.locator('.sticker.got')).toHaveCount(7 + sceneFirst);
-  await expect(page.locator('.sticker.locked')).toHaveCount(16 - sceneFirst); // 全23枚
+  await expect(page.locator('.sticker.locked')).toHaveCount(21 - sceneFirst); // 全28枚
   // 仲間になったあとは、かくす画面に ぽぽ がいる
   await act(page, 'home');
   await act(page, 'toHide');

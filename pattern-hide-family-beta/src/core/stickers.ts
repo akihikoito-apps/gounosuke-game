@@ -4,7 +4,7 @@ import type { CharacterId } from './characters';
 import type { SceneId } from './scene';
 import { SCENES } from './scenes';
 
-export type Motif = 'shell' | 'floatring' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel';
+export type Motif = 'shell' | 'floatring' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel' | 'jellyfish' | 'dolphin' | 'treasure' | 'penguin';
 
 export interface StickerDef {
   id: string;
@@ -47,6 +47,12 @@ export const STICKERS: StickerDef[] = [
   { id: 'f-s15', name: 'きのこの もりで 15かい', kind: 'scene', scene: 'forest', need: 15, char: 'pino', motif: 'lantern', color: '#F3DFB6' },
   { id: 'f-s30', name: 'きのこの もりで 30かい', kind: 'scene', scene: 'forest', need: 30, char: 'mimi', motif: 'mushroom', color: '#DAE8CE' },
   { id: 'f-s50', name: 'きのこの もりで 50かい', kind: 'scene', scene: 'forest', need: 50, char: 'pino', motif: 'squirrel', color: '#EBD6BE' },
+  // 背景パック3「すいぞくかん」
+  { id: 'a-s1', name: 'ぷかが きたよ', kind: 'scene', scene: 'aquarium', need: 1, char: 'puka', motif: 'shell', color: '#F5DCE8' },
+  { id: 'a-s5', name: 'すいぞくかんで 5かい', kind: 'scene', scene: 'aquarium', need: 5, char: 'moko', motif: 'jellyfish', color: '#DCD8F4' },
+  { id: 'a-s15', name: 'すいぞくかんで 15かい', kind: 'scene', scene: 'aquarium', need: 15, char: 'puka', motif: 'dolphin', color: '#CFE8F6' },
+  { id: 'a-s30', name: 'すいぞくかんで 30かい', kind: 'scene', scene: 'aquarium', need: 30, char: 'koro', motif: 'treasure', color: '#F6E4B8' },
+  { id: 'a-s50', name: 'すいぞくかんで 50かい', kind: 'scene', scene: 'aquarium', need: 50, char: 'puka', motif: 'penguin', color: '#D4ECE8' },
 ];
 
 export interface Progress {

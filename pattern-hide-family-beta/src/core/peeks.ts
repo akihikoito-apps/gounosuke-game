@@ -3,7 +3,7 @@
 // 窓は clip（ガラスの内側）でキャラクターを切り抜き、front（枠・桟）を前に描き直す。
 // 守る最低線（Codex 第3回）：片目がまるごと見える／頭の 20% 以上・全身の 5% 以上が見える／色以外の目印が1つ見える。
 import { BODY, CHARACTERS, type CharacterId } from './characters';
-import { type Pt, type Shape, SCENE_SIZE, contains, samplePoints, transformPt, transformShape } from './geometry';
+import { type Pt, type Shape, SCENE_SIZE, contains, quadPoints, samplePoints, transformPt, transformShape } from './geometry';
 import type { SceneDef, SceneId, SpotDef } from './scene';
 
 export interface PeekDef extends SpotDef {
@@ -77,6 +77,30 @@ const WINDBREAK: Shape[] = [R(590, 436, 400, 230, 6)];
 const TENT_FRONT: Shape[] = [R(22, 240, 348, 426, 8)];
 const MUSH_FRONT: Shape[] = [R(574, 406, 402, 256, 40)];
 
+// すいぞくかん：パノラマ大水槽（アーチ枠と台座まで）、クラゲドーム水槽
+const TANK_FRONT: Shape[] = [
+  {
+    kind: 'poly',
+    pts: [
+      { x: 18, y: 666 },
+      { x: 18, y: 310 },
+      ...quadPoints({ x: 18, y: 310 }, { x: 195, y: 192 }, { x: 370, y: 310 }, 16),
+      { x: 370, y: 666 },
+    ],
+  },
+];
+const JELLY_FRONT: Shape[] = [
+  {
+    kind: 'poly',
+    pts: [
+      { x: 568, y: 664 },
+      { x: 568, y: 436 },
+      ...quadPoints({ x: 568, y: 436 }, { x: 775, y: 368 }, { x: 982, y: 436 }, 16),
+      { x: 982, y: 664 },
+    ],
+  },
+];
+
 const peek = (id: string, x: number, y: number, s: number, region: string, front: Shape[], kind: 'peek' | 'window' = 'peek', clip?: Shape[]): PeekDef => ({
   id,
   x,
@@ -117,6 +141,11 @@ export const PEEKS: Record<SceneId, PeekDef[]> = {
     peek('forest-peek-tent', 372, 652, 1, 'ground', TENT_FRONT),
     peek('forest-peek-mush-1', 680, 520, 0.9, 'mushroom', MUSH_FRONT),
     peek('forest-peek-mush-2', 860, 520, 0.9, 'mushroom', MUSH_FRONT),
+  ],
+  aquarium: [
+    peek('aquarium-peek-tank', 372, 652, 1, 'floor', TANK_FRONT),
+    peek('aquarium-peek-jelly-1', 680, 520, 0.9, 'jelly', JELLY_FRONT),
+    peek('aquarium-peek-jelly-2', 860, 520, 0.9, 'jelly', JELLY_FRONT),
   ],
 };
 

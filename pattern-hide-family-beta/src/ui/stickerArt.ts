@@ -51,6 +51,14 @@ function motif(m: Motif): string {
       return `<path d="M-5 -12 Q0 -18 5 -12" fill="none" ${L}/><rect x="-10" y="-8" width="20" height="22" rx="4" fill="#FFE082" ${L}/><rect x="-12" y="-10" width="24" height="4" rx="2" fill="#7A5A46" ${L}/><rect x="-12" y="12" width="24" height="4" rx="2" fill="#7A5A46" ${L}/>`;
     case 'squirrel':
       return `<path d="M4 10 Q18 10 16 -6 Q14 -16 6 -8" fill="#D89458" ${L}/><ellipse cx="-3" cy="4" rx="9" ry="10" fill="#D89458" ${L}/><circle cx="-5" cy="-7" r="7" fill="#D89458" ${L}/><circle cx="-7" cy="-8" r="1.6" fill="#4A3A40"/>`;
+    case 'jellyfish':
+      return `<path d="M-15 0 Q-15 -15 0 -15 Q15 -15 15 0 Z" fill="#C8CEF4" ${L}/><path d="M-8 0 Q-10 8 -6 14 M0 0 Q-2 8 2 14 M8 0 Q6 8 10 14" fill="none" ${L}/>`;
+    case 'dolphin':
+      return `<path d="M-15 6 Q-6 -14 14 -4 Q6 8 -15 6 Z" fill="#88C4E0" ${L}/><path d="M-2 -6 L2 -14 L6 -5 Z" fill="#88C4E0" ${L}/><circle cx="7" cy="-3" r="1.6" fill="#4A3A40"/>`;
+    case 'treasure':
+      return `<rect x="-14" y="-4" width="28" height="16" rx="3" fill="#C98A54" ${L}/><path d="M-14 -4 Q0 -14 14 -4 Z" fill="#E5B869" ${L}/><circle cx="0" cy="-2" r="3" fill="#FFE082" ${L}/>`;
+    case 'penguin':
+      return `<ellipse cx="0" cy="1" rx="11" ry="14" fill="#5E7A96" ${L}/><ellipse cx="0" cy="4" rx="7" ry="10" fill="#FFFDF8"/><circle cx="-4" cy="-6" r="1.6" fill="#4A3A40"/><circle cx="4" cy="-6" r="1.6" fill="#4A3A40"/><path d="M-3 -3 L3 -3 L0 1 Z" fill="#F6C85F"/>`;
   }
 }
 
