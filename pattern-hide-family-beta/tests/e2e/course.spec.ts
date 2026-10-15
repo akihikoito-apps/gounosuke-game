@@ -206,7 +206,8 @@ test('clearing course 5 gives its sticker and brings popo; the sticker book show
   const eyes = await eyePoints(page, 0);
   await tapAt(page, { x: (eyes[0].x + eyes[1].x) / 2, y: eyes[0].y });
   // 30かい みつけた のシールの知らせ
-  await expect(page.locator('.toast')).toContainText('シール ゲット');
+  // 知らせは1つずつ順番に出る（森・すいぞくかんで初めてなら、仲間・部屋の知らせが先）
+  await expect(page.locator('.toast', { hasText: 'シール ゲット' })).toBeVisible({ timeout: 15000 });
   await expect(page.locator('.course-clear')).toBeVisible({ timeout: 4000 });
   await expect(page.locator('.course-clear .reward-sticker')).toBeVisible();
   await expect(page.locator('.course-clear .new-friend')).toContainText('ぽぽ');

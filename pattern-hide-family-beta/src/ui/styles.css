@@ -596,3 +596,29 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 @media (orientation: landscape) and (max-height: 600px) {
   .mv-chip { width: 40px; height: 40px; border-radius: 10px; }
 }
+/* 部屋が増えても、タブは横に送って選べる */
+.mr-rooms { overflow-x: auto; justify-content: flex-start; scrollbar-width: none; max-width: calc(100vw - 150px); padding: 2px; }
+.mr-rooms::-webkit-scrollbar { display: none; }
+.mr-room-tab { flex: 0 0 auto; }
+
+/* じぶんの へや：棚のタブは 絵＋みじかい ことば（字が読めなくても えらべる） */
+.mr-tabs { overflow-x: auto; justify-content: flex-start; scrollbar-width: none; padding: 2px 2px 4px; }
+.mr-tabs::-webkit-scrollbar { display: none; }
+.mr-tab { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 0; padding: 4px 10px 2px; min-height: 0; border-radius: 16px; font-size: 12px; line-height: 1.2; }
+.mr-tab-icon { width: 38px; height: 38px; display: grid; place-items: center; }
+.mr-tab-icon svg { width: 100%; height: 100%; }
+.mr-tab-name { font-size: 12px; font-weight: 800; white-space: nowrap; }
+/* ほかの部屋に いる友だち・物：うすく、右下に その部屋の小さな絵 */
+.mr-cell.elsewhere { background: #EDE6DD; }
+.mr-cell.elsewhere > svg, .mr-cell.elsewhere > span:not(.mr-where) { opacity: 0.4; }
+.mr-where { position: absolute; right: -6px; bottom: -6px; width: 34px; height: 26px; border-radius: 8px; border: 2px solid var(--line); background: #fff; overflow: hidden; }
+.mr-where svg { width: 100%; height: 100%; display: block; }
+.mr-hint { margin: 0; min-height: 0; max-height: 0; overflow: hidden; text-align: center; font-weight: 800; font-size: 14px; color: #8a5a6a; transition: max-height 0.2s; }
+.mr-hint.show { max-height: 3em; }
+.mr-room-tab.call { animation: mr-call 0.9s ease-in-out 2; }
+@keyframes mr-call { 50% { transform: scale(1.12); background: #FFE7A0; } }
+@media (orientation: landscape) and (max-height: 600px) {
+  .mr-tab-icon { width: 28px; height: 28px; }
+  .mr-tab { padding: 2px 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .mr-room-tab.call { animation: none; outline: 3px solid #FFD45C; } }

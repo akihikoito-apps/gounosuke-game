@@ -12,7 +12,7 @@ describe('つぎの ごほうび', () => {
     expect(r[0]).toMatchObject({ char: 'nyako', at: 1, remaining: 1 });
     expect(r[1]).toMatchObject({ at: 1, remaining: 1 });
     expect(r[2]).toMatchObject({ at: 10, remaining: 10, done: 0 });
-    expect(r[3]).toMatchObject({ at: 3, remaining: 3 }); // しんしつ
+    expect(r[3]).toMatchObject({ at: 5, remaining: 5 }); // ひみつきち
   });
 
   it('クリアするたびに「あと なんコース」が減っていく', () => {
@@ -27,9 +27,9 @@ describe('つぎの ごほうび', () => {
     expect(r.find((x) => x.kind === 'courseSticker')).toMatchObject({ at: 6 });
   });
 
-  it('へや：コース3で しんしつ、追加パックが無ければ おにわ は告知しない', () => {
-    expect(upcomingRewards({ cleared: 3, totalFinds: 30 }, all).find((x) => x.kind === 'room')).toMatchObject({ at: 6, remaining: 3 });
-    expect(upcomingRewards({ cleared: 3, totalFinds: 30 }, baseOnly).some((x) => x.kind === 'room')).toBe(false);
+  it('へや：コース5で ひみつきち、コース10で しんしつ。つづきのコースが無ければ しんしつ は告知しない', () => {
+    expect(upcomingRewards({ cleared: 6, totalFinds: 60 }, all).find((x) => x.kind === 'room')).toMatchObject({ at: 10, remaining: 4 });
+    expect(upcomingRewards({ cleared: 6, totalFinds: 60 }, baseOnly).some((x) => x.kind === 'room')).toBe(false);
   });
 
   it('ぜんぶ もらうと 何も出ない', () => {

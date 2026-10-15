@@ -1,4 +1,4 @@
-# ジョブ（下書き）：追加パック「すいぞくかん（aquarium）」の絵一式
+# ジョブ17：追加パック「すいぞくかん（aquarium）」の絵一式
 
 ## 書き込んでよい場所
 `art/scenes/aquarium/`、`art/patterns/aquarium-*`、`art/characters/puka/`、`art/movers/`、`art/myroom/`、`art/stickers/`、`art/README.md` だけ。`src/`・`tests/`・`scripts/` は変更しない。
@@ -140,3 +140,7 @@
 
 ## 最後に書くこと
 作業が終わったら、このファイルの一番下に「作業記録」として、作ったファイル・使った方法・検査結果を追記してください。
+
+## 絵のトーンについて（持ち主の希望）
+持ち主は「パックごとに絵のトーンをそろえたい」と考えている。**先に描いた `art/scenes/forest/`・`art/characters/pino/`・`art/myroom/` の きのこの もり パック、および最初からの へや・にわ・おみせ・うみべ と並べて違和感がないこと**（線の色と太さ・くすみパステル・陰影の付け方・光の向き・顔の描き方）を最優先にする。
+また、柄の領域はゲーム側で アーチ形などの形になっている（`src/core/scenes/aquarium.ts` の regions）。`back`/`over` は、その形に合わせて描き、四角い板の跡が残らないようにする（森で四角い跡が残った反省）。

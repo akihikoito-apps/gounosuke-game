@@ -82,7 +82,7 @@ describe('forest pack: entitlement boundaries', () => {
   it('free users do not get forest scene, pino, treehouse, or forest items/stickers', () => {
     expect(baseOnly('scene:forest')).toBe(false);
     expect(baseOnly('char:pino')).toBe(false);
-    expect(baseOnly('room:treehouse')).toBe(false);
+    expect(baseOnly('room:yard')).toBe(false); // もりの ひろば
 
     expect(SCENE_IDS.filter((id) => baseOnly(`scene:${id}`))).not.toContain('forest');
     expect(SCENE_IDS.filter((id) => withForest(`scene:${id}`))).toContain('forest');
@@ -91,8 +91,10 @@ describe('forest pack: entitlement boundaries', () => {
     expect(availableCharacters(0, {}, withForest)).not.toContain('pino');
     expect(availableCharacters(0, { forest: 1 }, withForest)).toContain('pino');
 
-    expect(openRooms(10, baseOnly).map((r) => r.id)).not.toContain('treehouse');
-    expect(openRooms(0, withForest).map((r) => r.id)).toContain('treehouse');
+    expect(openRooms(10, baseOnly, { forest: 9 }).map((r) => r.id)).not.toContain('yard');
+    // パックを持っていても、森で初めて見つけるまでは開かない
+    expect(openRooms(0, withForest).map((r) => r.id)).not.toContain('yard');
+    expect(openRooms(0, withForest, { forest: 1 }).map((r) => r.id)).toContain('yard');
 
     const baseItems = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { forest: 99 } }, baseOnly).map((i) => i.id);
     for (const id of ['camp-tent', 'stump-chair', 'acorn-lamp', 'mushroom-table', 'campfire-pot', 'squirrel']) {
@@ -108,12 +110,9 @@ describe('forest pack: entitlement boundaries', () => {
       expect(forestAllItems).toContain(id);
     }
 
-    const treehouse = starterLayout('treehouse');
-    expect(treehouse).toEqual([
-      { ref: 'item:camp-tent', x: 260, y: 720 },
-      { ref: 'char:koro', x: 640, y: 880 },
-    ]);
-    expect(validLayouts({ treehouse }, CHARACTER_IDS)).toEqual({ treehouse });
+    const yard = starterLayout('yard');
+    expect(yard).toEqual([{ ref: 'item:camp-tent', x: 260, y: 720 }]);
+    expect(validLayouts({ yard }, CHARACTER_IDS)).toEqual({ yard });
 
     const pl = (char: (typeof CHARACTER_IDS)[number], spot: string) => ({ char, spot, costume: 'plain', variant: 'exact' as const });
     expect(canResume({ sceneId: 'forest', placements: [pl('koro', 'forest-tent-1')] }, baseOnly)).toBe(false);

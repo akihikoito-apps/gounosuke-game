@@ -91,8 +91,9 @@ describe('aquarium pack: entitlement boundaries', () => {
     expect(availableCharacters(0, {}, withAquarium)).not.toContain('puka');
     expect(availableCharacters(0, { aquarium: 1 }, withAquarium)).toContain('puka');
 
-    expect(openRooms(10, baseOnly).map((r) => r.id)).not.toContain('aquarium-room');
-    expect(openRooms(0, withAquarium).map((r) => r.id)).toContain('aquarium-room');
+    expect(openRooms(10, baseOnly, { aquarium: 9 }).map((r) => r.id)).not.toContain('aquarium-room');
+    expect(openRooms(0, withAquarium).map((r) => r.id)).not.toContain('aquarium-room');
+    expect(openRooms(0, withAquarium, { aquarium: 1 }).map((r) => r.id)).toContain('aquarium-room');
 
     const baseItems = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { aquarium: 99 } }, baseOnly).map((i) => i.id);
     for (const id of ['shell-sofa', 'coral-rug', 'jelly-lamp', 'dolphin-ride', 'treasure-box', 'penguin']) {
@@ -109,10 +110,7 @@ describe('aquarium pack: entitlement boundaries', () => {
     }
 
     const aquariumRoom = starterLayout('aquarium-room');
-    expect(aquariumRoom).toEqual([
-      { ref: 'item:shell-sofa', x: 280, y: 720 },
-      { ref: 'char:koro', x: 640, y: 880 },
-    ]);
+    expect(aquariumRoom).toEqual([{ ref: 'item:shell-sofa', x: 280, y: 720 }]);
     expect(validLayouts({ 'aquarium-room': aquariumRoom }, CHARACTER_IDS)).toEqual({ 'aquarium-room': aquariumRoom });
 
     const pl = (char: (typeof CHARACTER_IDS)[number], spot: string) => ({ char, spot, costume: 'plain', variant: 'exact' as const });

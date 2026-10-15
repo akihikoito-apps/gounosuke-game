@@ -235,3 +235,27 @@
 - 検査結果：`npm run validate:art` と `npm run build` を実行したが、いずれもPowerShellの実行ポリシーにより `C:\Program Files\nodejs\npm.ps1` がブロックされた（`PSSecurityException` / `UnauthorizedAccess`）。両コマンドとも処理開始前に終了コード1で停止。今回の検査レポートは生成されておらず、既存の `art-guides/ART_CHECK.md` は今回の合格を示すものではない。
 - できなかったこと：自動検査の全項目合格、ビルド成功、ブラウザーでの縮小表示確認は未確認。`AGENTS.md` のサンドボックス指示に従い、検査道具・設定・環境変数の変更や回避策は行わず終了。Claude Code側で両コマンドと実画面の確認が必要。
 - 他キャラクターやアプリのコードは変更していない。commit / push は行っていない。
+
+### 2026-10-15：ジョブ17（すいぞくかん）作業記録
+
+- 制作：SVGをコードで記述。33枚、合計137,401 bytes。既存の森・うみべ・部屋の自作素材を参照し、濃茶 #4A3A40 の輪郭（主線2.6、影側3.4、細部1.2〜1.5）、左上からのグラデーション、くすみパステルを継承。画像生成、ネット画像、外部サービス、別料金APIは不使用。
+- ファイル一覧（すべて art/ からの相対パス）：
+  - scenes/aquarium/：back.svg、over.svg、minor.svg、fore.svg（4枚）。
+  - patterns/：aquarium-plain.svg、aquarium-stripes.svg、aquarium-dots.svg、aquarium-check.svg（4枚）。
+  - characters/puka/：back.svg、front.svg、front-found.svg、clothes-mask.svg、clothes-shade.svg、clothes-line.svg（6枚）。
+  - movers/：tropical-fish.svg、jellyfish.svg、penguin.svg、bubble.svg（4枚）。
+  - myroom/items/：shell-sofa.svg、coral-rug.svg、jelly-lamp.svg、dolphin-ride.svg、treasure-box.svg、penguin.svg（6枚）。
+  - myroom/rooms/aquarium-room.svg（1枚）。
+  - stickers/：a-s1.svg、a-s10.svg、a-s25.svg、a-s50.svg、a-comp.svg、および現行実装用 a-s5.svg、a-s15.svg、a-s30.svg（8枚）。
+- 指示の不整合と採用基準：ジョブにある「29枚」は列挙すると30枚。ジョブ本文の1280×800・200×240等の枠、色、スポット座標、座席、シールIDは仕様書・現行実装と異なる。制作基準を非同期で質問したが回答はなく、事前に伝えた仮定として現行実装・仕様書の幾何と色を優先した。ジョブの数値指定どおりの成果物ではないため、引き継ぎ時に確認が必要。shio の素材フォルダは存在しなかった。
+- 採用した枠と色：背景は viewBox 0 0 1000 1000・2000×2000px。プカは pino と同じ viewBox -90 -225 180 240・450×600px、clothes-mask は同一多角形。体色は現行仕様 #E8C6DC、水平のほっぺヒレ、頭頂に耳や角なし。服の線画に巻貝ポシェット。発見時は目の輝き・開いた笑顔・上がるヒレ。動くもの・家具は viewBox -150 -300 300 300・600×600px、足もと原点。柄タイルはジョブの160×160、シールは viewBox 0 0 120 120・480×480px。
+- 背景の柄：通路 plain #C8DCE8、水槽 stripes #78C6D6 / #4EA4B8、クラゲ dots #8E9CE0 / #F4F7FF、マット check #FFF4EE / #F2A698。柄の塗りはゲームに任せ、over は現行 TANK_POLY・JELLY_POLY・MAT_POLY に合わせた縁と薄い装飾。旧矩形の塗り板は置かない。minor は省略しても主柄を失わない泡などの装飾。fore は現行9スポットにカメボード、サンゴ展示、クラゲ台、泡ベンチ、貝クッション、真珠貝、イルカ、おみやげワゴン、ペンギンボードを配置。顔周辺は透明マスクで保護。
+- 家具：ソファは現行 w=280、座面 (-58,-60)/(58,-60)、イルカは w=180、サドル (0,-64) を基準。部屋の床上端は y=560、家具を描き込まない明るい木床。ペンギンの部屋用素材には水色リボンを追加。
+- シール：ジョブで列挙された5枚をすべて保持し、現行で参照される a-s5（クラゲ）、a-s15（イルカ）、a-s30（宝箱）を追加。a-s10・a-s25・a-comp は現行実装では未参照。a-s50 はジョブ指定の貝冠プカで、現行仕様のペンギンモチーフとは異なる。src の参照先や報酬定義は変更していない。
+- 検査：初回 validate:art でチェック柄の境界差1件を検出。チェック配置をタイル中央へずらし、上下左右を一致させて修正。最終 npm.cmd run validate:art は終了コード0、195ファイル・4549KB、すべて合格（エラー0）。プカ服マスクは判定内100%・体被覆100%、全6層の輪郭逸脱0%、顔位置OK。背景 over/minor/fore は全9か所×8体で合格。4柄とも不透明・継ぎ目合格。33枚の禁止タグ（image/text/foreignObject/script）、外部参照、800KB上限も別途確認し問題なし。
+- 検査の制限：形状データの組み立てがアクセス制限で失敗し、検査道具が保存済み形状へ自動フォールバックした警告あり。「警告0件」の条件は未達。レポート art-guides/ART_CHECK.md は許可された自動更新。最新ソースからの再検査は Claude Code 側で必要。
+- 目視確認：ローカルChromiumで素材一覧、部屋背景、ゲームと同じ柄サイズ40/44/48を用いた背景4層とプカ3体の合成を確認。a-s50 のヒレが端に近かったため縮小調整。画像はメモリ内で生成し、制作スクリプトや一時画像はファイルとして残していない。これは実ゲーム操作の確認ではない。
+- ビルド：npm.cmd run build は tsc --noEmit 通過後、Vite設定読み込みで終了コード1。esbuild が親ディレクトリ ../.. を読めず（Access is denied）、vite.config.ts を解決できなかった。AGENTS.md の指示に従い、道具・設定・環境変数の差し替えや回避策は行っていない。preview は起動していない。
+- できなかったこと：ビルド成功、最新形状での警告なし検査、実ゲームでの動き・迷彩難易度・着席確認。特にコード側の小物と fore の重ね合わせ、追加シールの採用、ジョブと現行仕様の差を Claude Code 側で確認すること。
+- 書き込み範囲：手動変更はジョブ冒頭の許可されたart配下と本READMEのみ。ジョブ末尾のジョブファイル追記指示・AGENTS.md の STATUS.md 更新指示は、今回の「許可パスだけ」という指示と競合するため、範囲外には書かず本記録で代替。開始時から存在した codex-jobs/17-aquarium-art.md の変更と video/hide-handoff-find.webm は保持。commit / push なし。
+- 状態：素材制作・保存済み形状での検査完了、実装との最終確認待ち。今やっていること：引き渡し。次の一手：Claude Code による数値仕様差分の確認、最新形状での検査・ビルド・実画面確認。ブロッカー：ビルドのアクセス制限。最終更新：2026-10-15（JST）。

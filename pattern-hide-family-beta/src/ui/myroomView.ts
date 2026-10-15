@@ -5,7 +5,11 @@
 import { itemArtFile, roomArtFile } from '../art/registry';
 import { CHARACTERS, type CharacterId } from '../core/characters';
 import {
+  GENRES,
+  type Genre,
   ITEM_BY_ID,
+  ownerRooms,
+  type RoomLayouts,
   MAX_PLACED,
   type ItemDef,
   type Placed,
@@ -52,6 +56,8 @@ export interface MyRoomDeps {
   chars: () => CharacterId[];
   items: () => ItemDef[];
   rooms: () => RoomDef[];
+  /** すべての部屋の置き方（同じ友だち・物は1つの部屋にだけ置く） */
+  allLayouts: () => RoomLayouts;
   current: () => RoomId;
   load: (room: RoomId) => Placed[] | undefined;
   save: (room: RoomId, list: Placed[], current: RoomId) => void;
@@ -80,7 +86,9 @@ type Drag = {
 export class MyRoomView {
   private room: RoomId = 'living';
   private list: Placed[] = [];
-  private tab: 'chars' | 'items' = 'chars';
+  private tab: 'chars' | Genre = 'chars';
+  /** 「〇〇に いるよ」の知らせ */
+  private hintTimer = 0;
   private drag: Drag | null = null;
   private el: HTMLElement | null = null;
 
@@ -99,12 +107,25 @@ export class MyRoomView {
     return ROOMS.find((r) => r.id === this.room) ?? ROOMS[0];
   }
 
+  /** ref → それが置いてある ほかの部屋 */
+  private elsewhere(): Map<string, RoomId> {
+    const m = ownerRooms(this.deps.allLayouts());
+    for (const [ref, room] of [...m]) if (room === this.room) m.delete(ref);
+    // いま開いている部屋に置いた物は、保存前でも「ここ」
+    for (const p of this.list) m.delete(p.ref);
+    return m;
+  }
+
   private loadRoom(): void {
     const saved = this.deps.load(this.room);
     const chars = new Set(this.deps.chars());
     const items = new Set(this.deps.items().map((i) => i.id));
+    const owners = ownerRooms(this.deps.allLayouts());
     const usable = (p: Placed) => {
       const [k, id] = p.ref.split(':');
+      // 同じ友だち・物が ほかの部屋にもあるとき（以前の保存データ）は、先に並ぶ部屋の方だけ
+      const owner = owners.get(p.ref);
+      if (owner && owner !== this.room) return false;
       return k === 'char' ? chars.has(id as CharacterId) : items.has(id);
     };
     const base = saved ?? starterLayout(this.room);
@@ -229,34 +250,54 @@ export class MyRoomView {
     return new Set(this.list.map((p) => p.ref));
   }
 
+  private itemIcon(it: ItemDef): string {
+    const f = itemArtFile(it.id);
+    // 小さい物も大きく見えるよう、物の大きさに合わせて切り取る
+    const side = TALL[it.id] ?? Math.max(it.w * 1.15, 100);
+    if (!f) return `<span>${it.name}</span>`;
+    const seat = it.id === 'swing' ? itemArtFile('swing-seat') : undefined;
+    return `<svg viewBox="${-side / 2} ${-side + 8} ${side} ${side}" aria-hidden="true"><image href="${f}" x="-150" y="-300" width="300" height="300"/>${seat ? `<image href="${seat}" x="-150" y="-300" width="300" height="300"/>` : ''}</svg>`;
+  }
+
+  /** ほかの部屋にあることを、小さな部屋の絵で見せる（字が読めなくても分かるように） */
+  private roomBadge(room: RoomId): string {
+    const f = roomArtFile(room);
+    return `<span class="mr-where" aria-hidden="true">${f ? `<svg viewBox="0 120 1000 760"><image href="${f}" width="1000" height="1000"/></svg>` : ''}</span>`;
+  }
+
+  private cell(ref: string, icon: string, name: string, here: boolean, away: RoomId | undefined): string {
+    const room = away ? ROOMS.find((r) => r.id === away)?.name : '';
+    const label = here ? `${name}（この へやに いる）` : away ? `${name}（${room}に いる）` : name;
+    return `<button type="button" class="mr-cell${ref.startsWith('item:') ? ' item' : ''}${here ? ' placed' : ''}${away ? ' elsewhere' : ''}" data-mr-ref="${ref}"${away ? ` data-mr-away="${away}"` : ''} aria-label="${label}">${icon}${away ? this.roomBadge(away) : ''}</button>`;
+  }
+
   private trayHtml(): string {
     const placed = this.placedRefs();
+    const away = this.elsewhere();
+    const owned = this.deps.items();
+    const genres = GENRES.filter((g) => owned.some((i) => i.genre === g.id));
+    if (this.tab !== 'chars' && !genres.some((g) => g.id === this.tab)) this.tab = 'chars';
     const cells =
       this.tab === 'chars'
         ? this.deps
             .chars()
-            .map((c) => {
-              const on = placed.has(`char:${c}`);
-              return `<button type="button" class="mr-cell${on ? ' placed' : ''}" data-mr-ref="char:${c}" aria-label="${CHARACTERS[c].name}${on ? '（へやに いる）' : ''}">${faceIcon(CHARACTERS[c])}</button>`;
-            })
+            .map((c) => this.cell(`char:${c}`, faceIcon(CHARACTERS[c]), CHARACTERS[c].name, placed.has(`char:${c}`), away.get(`char:${c}`)))
             .join('')
-        : this.deps
-            .items()
-            .map((it) => {
-              const on = placed.has(`item:${it.id}`);
-              const f = itemArtFile(it.id);
-              // 小さい物も大きく見えるよう、物の大きさに合わせて切り取る
-              const side = TALL[it.id] ?? Math.max(it.w * 1.15, 100);
-              const icon = f ? `<svg viewBox="${-side / 2} ${-side + 8} ${side} ${side}" aria-hidden="true"><image href="${f}" x="-150" y="-300" width="300" height="300"/>${it.id === 'swing' && itemArtFile('swing-seat') ? `<image href="${itemArtFile('swing-seat')}" x="-150" y="-300" width="300" height="300"/>` : ''}</svg>` : `<span>${it.name}</span>`;
-              return `<button type="button" class="mr-cell item${on ? ' placed' : ''}" data-mr-ref="item:${it.id}" aria-label="${it.name}${on ? '（へやに ある）' : ''}">${icon}</button>`;
-            })
+        : owned
+            .filter((it) => it.genre === this.tab)
+            .map((it) => this.cell(`item:${it.id}`, this.itemIcon(it), it.name, placed.has(`item:${it.id}`), away.get(`item:${it.id}`)))
             .join('');
+    const first = this.deps.chars()[0];
+    const tab = (id: string, icon: string, name: string) =>
+      `<button type="button" class="mr-tab${this.tab === id ? ' on' : ''}" data-mr-tab="${id}" role="tab" aria-selected="${this.tab === id}" aria-label="${name}"><span class="mr-tab-icon">${icon}</span><span class="mr-tab-name">${name}</span></button>`;
+    const tabs = [
+      tab('chars', first ? faceIcon(CHARACTERS[first]) : '', 'ともだち'),
+      ...genres.map((g) => tab(g.id, ITEM_BY_ID[g.rep] ? this.itemIcon(ITEM_BY_ID[g.rep]) : '', g.name)),
+    ].join('');
     return `<div class="mr-tray" aria-label="おくもの">
-      <div class="mr-tabs" role="tablist">
-        <button type="button" class="mr-tab${this.tab === 'chars' ? ' on' : ''}" data-mr-tab="chars" role="tab" aria-selected="${this.tab === 'chars'}">ともだち</button>
-        <button type="button" class="mr-tab${this.tab === 'items' ? ' on' : ''}" data-mr-tab="items" role="tab" aria-selected="${this.tab === 'items'}">もの</button>
-      </div>
+      <div class="mr-tabs" role="tablist">${tabs}</div>
       <div class="mr-cells">${cells}</div>
+      <p class="mr-hint" role="status" aria-live="polite"></p>
     </div>`;
   }
 
@@ -267,6 +308,8 @@ export class MyRoomView {
   bind(main: HTMLElement): void {
     this.el = main;
     this.drag = null;
+    // 部屋が多いとき、選んでいる部屋のタブが見えるように
+    main.querySelector<HTMLElement>(".mr-room-tab.on")?.scrollIntoView({ inline: "center", block: "nearest" });
     main.querySelector<HTMLElement>('#stage')?.addEventListener('pointerdown', (e) => this.onStageDown(e));
     main.addEventListener('pointermove', (e) => this.onMove(e));
     main.addEventListener('pointerup', (e) => this.onUp(e));
@@ -303,7 +346,8 @@ export class MyRoomView {
     const t = e.target as HTMLElement;
     const tab = t.closest<HTMLElement>('[data-mr-tab]');
     if (tab) {
-      this.tab = tab.dataset.mrTab === 'items' ? 'items' : 'chars';
+      const t = tab.dataset.mrTab as string;
+      this.tab = t === 'chars' || GENRES.some((g) => g.id === t) ? (t as 'chars' | Genre) : 'chars';
       this.deps.sound('pop');
       this.redraw();
       return;
@@ -331,6 +375,10 @@ export class MyRoomView {
   private onTrayDown(e: PointerEvent): void {
     const cell = (e.target as HTMLElement).closest<HTMLElement>('[data-mr-ref]');
     if (!cell || this.drag || !e.isPrimary) return;
+    if (cell.dataset.mrAway) {
+      this.showAway(cell.dataset.mrAway as RoomId);
+      return;
+    }
     this.begin(e, { idx: -1, dx: 0, dy: 0, ref: cell.dataset.mrRef as string });
   }
 
@@ -459,6 +507,23 @@ export class MyRoomView {
     this.deps.sound('pop');
     this.persist();
     this.redraw();
+  }
+
+  /** ほかの部屋にあるよ、と知らせる（その部屋のタブも ひかる） */
+  private showAway(room: RoomId): void {
+    const name = ROOMS.find((r) => r.id === room)?.name ?? '';
+    const hint = this.el?.querySelector<HTMLElement>('.mr-hint');
+    if (hint) {
+      hint.textContent = `「${name}」に いるよ。つれてくるときは、そこで しまってね`;
+      hint.classList.add('show');
+    }
+    const t = this.el?.querySelector<HTMLElement>(`[data-mr-room="${room}"]`);
+    t?.classList.remove('call');
+    void t?.offsetWidth;
+    t?.classList.add('call');
+    this.deps.sound('pop');
+    window.clearTimeout(this.hintTimer);
+    this.hintTimer = window.setTimeout(() => this.el?.querySelector('.mr-hint')?.classList.remove('show'), 2600);
   }
 
   /** 中断：指を置く前の並びに もどす（保存は前のまま） */

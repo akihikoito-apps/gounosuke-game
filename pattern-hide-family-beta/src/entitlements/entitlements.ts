@@ -31,13 +31,13 @@ export const PACKS: PackDef[] = [
     name: 'きほん',
     free: true,
     // コース1・5で仲間になる にゃこ・ぽぽ は、無料の範囲のごほうび
-    contents: ['scene:room', 'scene:garden', 'scene:shop', ...courses(1, 5), 'char:koro', 'char:mimi', 'char:moko', 'char:nyako', 'char:popo', 'room:living', 'room:bedroom'],
+    contents: ['scene:room', 'scene:garden', 'scene:shop', ...courses(1, 5), 'char:koro', 'char:mimi', 'char:moko', 'char:nyako', 'char:popo', 'room:living', 'room:treehouse'],
   },
   {
     id: 'more-courses',
     name: 'つづきの コース',
     free: false,
-    contents: [...courses(6, 10), 'trial:hardest', 'room:yard'],
+    contents: [...courses(6, 10), 'trial:hardest', 'room:bedroom'],
   },
   {
     id: 'beach',
@@ -49,7 +49,7 @@ export const PACKS: PackDef[] = [
     id: 'forest',
     name: 'きのこの もり パック',
     free: false,
-    contents: ['scene:forest', 'char:pino', 'room:treehouse'],
+    contents: ['scene:forest', 'char:pino', 'room:yard'],
   },
   {
     id: 'aquarium',

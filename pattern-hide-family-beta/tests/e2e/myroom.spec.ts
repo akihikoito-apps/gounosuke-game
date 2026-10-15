@@ -5,9 +5,9 @@ import { act, fresh } from './helpers';
 const KEY = 'moyou-kakurenbo-beta';
 const SHOTS = 'test-results/myroom';
 
-async function seed(page: import('@playwright/test').Page, cleared: number, myroom?: unknown) {
+async function seed(page: import('@playwright/test').Page, cleared: number, myroom?: unknown, sceneFinds: Record<string, number> = {}) {
   await page.evaluate(
-    ([k, cleared, myroom]) => {
+    ([k, cleared, myroom, sceneFinds]) => {
       localStorage.setItem(
         k as string,
         JSON.stringify({
@@ -16,26 +16,26 @@ async function seed(page: import('@playwright/test').Page, cleared: number, myro
           resume: null,
           playtest: { enabled: false, counters: {} },
           course: { cleared, current: Math.min(10, (cleared as number) + 1), finds: 0 },
-          collection: { totalFinds: (cleared as number) * 10, sceneFinds: {} },
+          collection: { totalFinds: (cleared as number) * 10, sceneFinds },
           ...(myroom ? { myroom } : {}),
         }),
       );
     },
-    [KEY, cleared, myroom ?? null] as const,
+    [KEY, cleared, myroom ?? null, sceneFinds] as const,
   );
   await page.reload();
 }
 
 const saved = (page: import('@playwright/test').Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).myroom, KEY);
 
-test('はじめて開くと リビングに ソファ・テーブル・ラグ と ころ。コース0では リビングと ひみつきち・すいぞくかんの へや', async ({ page }) => {
+test('はじめて開くと リビングに ソファ・テーブル・ラグ と ころ。はじめは リビングだけ', async ({ page }) => {
   await fresh(page);
   await seed(page, 0);
   await act(page, 'toMyRoom');
   await expect(page.locator('[data-screen="myroom"]')).toBeVisible();
   await expect(page.locator('#stage.loading')).toHaveCount(0);
   await expect(page.locator('.mr-obj')).toHaveCount(4);
-  await expect(page.locator('.mr-room-tab')).toHaveCount(3);
+  await expect(page.locator('.mr-room-tab')).toHaveCount(0);
   const m = await saved(page);
   expect(m.layouts.living.map((p: { ref: string }) => p.ref).sort()).toEqual(['char:koro', 'item:rug', 'item:sofa', 'item:table']);
   await page.screenshot({ path: `${SHOTS}/start.png` });
@@ -50,11 +50,14 @@ test('棚の友だちをタップすると置け、もう一度タップで し�
   await expect(page.locator('.mr-obj.mr-char')).toHaveCount(2);
   await page.locator('[data-mr-ref="char:mimi"]').click();
   await expect(page.locator('.mr-obj.mr-char')).toHaveCount(1);
-  await page.locator('[data-mr-tab="items"]').click();
-  // はじめから3つ＋キャンプテント1つ＋かいがらのソファ1つ＋コース1〜4のシール4つ＋10・30かい の2つ
-  await expect(page.locator('.mr-cell')).toHaveCount(11);
+  // もの は ジャンルの タブに分かれる（持っているジャンルだけ）
+  await page.locator('[data-mr-tab="furniture"]').click();
   await expect(page.locator('[data-mr-ref="item:bed"]')).toHaveCount(1);
+  await expect(page.locator('[data-mr-ref="item:ball"]')).toHaveCount(0);
+  await page.locator('[data-mr-tab="toy"]').click();
+  await expect(page.locator('[data-mr-ref="item:ball"]')).toHaveCount(1);
   await expect(page.locator('[data-mr-ref="item:swing"]')).toHaveCount(0);
+  await expect(page.locator('[data-mr-tab="animal"]')).toHaveCount(0); // いきもの は まだ持っていない（こいぬ は コース10）
 });
 
 test('友だちを ソファへ ドラッグすると座り、ソファを動かすと いっしょに動く。保存される', async ({ page }) => {
@@ -102,28 +105,62 @@ test('棚へ ドラッグして もどすと しまえる', async ({ page }) => 
   await expect(page.locator('.mr-obj')).toHaveCount(3);
 });
 
-test('コース3で しんしつ、無料の範囲は2部屋まで。コース6以降で おにわ（追加パック）', async ({ page }) => {
+test('部屋は ゆっくり増える：コース5で ひみつきち、コース10で しんしつ、パックの部屋は その背景で初めて見つけたら', async ({ page }) => {
   await fresh(page);
-  await seed(page, 3);
+  await seed(page, 4);
   await act(page, 'toMyRoom');
-  await expect(page.locator('.mr-room-tab')).toHaveCount(4);
-  await page.locator('[data-mr-room="bedroom"]').click();
-  await expect(page.locator('.mr-room-tab.on')).toHaveText('しんしつ');
-  await page.locator('[data-mr-tab="items"]').click();
-  await page.locator('[data-mr-ref="item:bed"]').click();
-  await page.locator('[data-mr-tab="chars"]').click();
-  await page.locator('[data-mr-ref="char:moko"]').click();
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: `${SHOTS}/bedroom.png` });
-  await seed(page, 9);
+  await expect(page.locator('.mr-room-tab')).toHaveCount(0);
+  await seed(page, 5);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('.mr-room-tab')).toHaveText(['リビング', 'ひみつきち']);
+  await seed(page, 10);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('.mr-room-tab')).toHaveText(['リビング', 'ひみつきち', 'しんしつ']);
+  await seed(page, 10, undefined, { forest: 1, aquarium: 1 });
   await act(page, 'toMyRoom');
   await expect(page.locator('.mr-room-tab')).toHaveCount(5);
   await page.locator('[data-mr-room="yard"]').click();
-  await page.locator('[data-mr-tab="items"]').click();
+  await page.locator('[data-mr-tab="toy"]').click();
   await page.locator('[data-mr-ref="item:swing"]').click();
-  await page.locator('[data-mr-ref="item:plant"]').click();
   await page.waitForTimeout(800);
   await page.screenshot({ path: `${SHOTS}/yard.png` });
+});
+
+test('同じ友だち・物は 1つの部屋にだけ。ほかの部屋では「〇〇に いるよ」と出て、しまうと つれてこられる', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 5);
+  await act(page, 'toMyRoom');
+  await expect(page.locator('#stage.loading')).toHaveCount(0);
+  await page.locator('[data-mr-room="treehouse"]').click();
+  await expect(page.locator('.mr-room-tab.on')).toHaveText('ひみつきち');
+  // リビングに いる ころ・ソファ は、ここでは置けない
+  const koro = page.locator('[data-mr-ref="char:koro"]');
+  await expect(koro).toHaveClass(/elsewhere/);
+  await koro.click();
+  await expect(page.locator('.mr-hint')).toContainText('リビング');
+  await expect(page.locator('.mr-obj')).toHaveCount(0);
+  await page.locator('[data-mr-tab="furniture"]').click();
+  await expect(page.locator('[data-mr-ref="item:sofa"]')).toHaveClass(/elsewhere/);
+  await page.screenshot({ path: `${SHOTS}/elsewhere.png` });
+  // リビングで しまうと、ひみつきち に置ける
+  await page.locator('[data-mr-room="living"]').click();
+  await page.locator('[data-mr-tab="chars"]').click();
+  await page.locator('[data-mr-ref="char:koro"]').click();
+  await page.locator('[data-mr-room="treehouse"]').click();
+  await expect(page.locator('[data-mr-ref="char:koro"]')).not.toHaveClass(/elsewhere/);
+  await page.locator('[data-mr-ref="char:koro"]').click();
+  await expect(page.locator('.mr-obj.mr-char')).toHaveCount(1);
+  const m = await saved(page);
+  expect(m.layouts.living.some((p: { ref: string }) => p.ref === 'char:koro')).toBe(false);
+  expect(m.layouts.treehouse.some((p: { ref: string }) => p.ref === 'char:koro')).toBe(true);
+});
+
+test('前の保存データで 同じ子が2つの部屋にいても、先の部屋にだけ出る', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 5, { layouts: { living: [{ ref: 'char:mimi', x: 500, y: 900 }], treehouse: [{ ref: 'char:mimi', x: 500, y: 900 }] }, current: 'treehouse' });
+  await act(page, 'toMyRoom');
+  await expect(page.locator('.mr-obj')).toHaveCount(0);
+  await expect(page.locator('[data-mr-ref="char:mimi"]')).toHaveClass(/elsewhere/);
 });
 
 test('壊れた保存データでも開ける（その部屋だけ初めからに）', async ({ page }) => {
@@ -137,7 +174,7 @@ test('壊れた保存データでも開ける（その部屋だけ初めから�
 // ---- Codex レビュー96 の指摘の再現 ----
 test('ブランコの子を引っぱると、指の所へ降りる（二重にずれない）', async ({ page }) => {
   await fresh(page);
-  await seed(page, 9, { layouts: { yard: [{ ref: 'item:swing', x: 500, y: 760 }, { ref: 'char:koro', x: 500, y: 760, on: { idx: 0, seat: 0 } }] }, current: 'yard' });
+  await seed(page, 9, { layouts: { yard: [{ ref: 'item:swing', x: 500, y: 760 }, { ref: 'char:koro', x: 500, y: 760, on: { idx: 0, seat: 0 } }] }, current: 'yard' }, { forest: 1 });
   await act(page, 'toMyRoom');
   await expect(page.locator('#stage.loading')).toHaveCount(0);
   const rb = (await page.locator('.mr-obj.rider').boundingBox())!;
@@ -178,7 +215,7 @@ test('横向き：棚の中で指を動かしても、部屋の物は しまわ�
   await fresh(page);
   await seed(page, 0);
   await act(page, 'toMyRoom');
-  await page.locator('[data-mr-tab="items"]').click();
+  await page.locator('[data-mr-tab="furniture"]').click();
   const cell = (await page.locator('[data-mr-ref="item:sofa"]').boundingBox())!;
   await page.mouse.move(cell.x + cell.width / 2, cell.y + cell.height / 2);
   await page.mouse.down();
