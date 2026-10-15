@@ -3,6 +3,7 @@ import type { Store } from '../storage/storage';
 import { resetCounters, setEnabled } from '../storage/playtest';
 import { setSoundEnabled } from '../audio/sound';
 import { NATIVE } from './platform';
+import { type PurchaseStore, PRODUCTS } from '../purchase/store';
 import { PRIVACY_POLICY_HTML } from './privacy';
 
 const KANJI = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -39,8 +40,12 @@ export class ParentArea {
   private cooldownUntil = 0;
 
   private onTrial: () => void;
+  private purchases: PurchaseStore | null;
+  /** 買い物の結果の知らせ */
+  private shopNote = '';
 
-  constructor(store: Store, onChange: () => void, onCleared: () => void = () => undefined, onTrial: () => void = () => undefined) {
+  constructor(store: Store, onChange: () => void, onCleared: () => void = () => undefined, onTrial: () => void = () => undefined, purchases: PurchaseStore | null = null) {
+    this.purchases = purchases;
     this.store = store;
     this.onChange = onChange;
     this.onCleared = onCleared;
@@ -185,8 +190,37 @@ export class ParentArea {
   // ---- 設定パネル ----
 
   private openPanel(): void {
+    this.shopNote = '';
     this.mount(this.panelHtml());
     this.bindPanel();
+    // 価格と購入済みを Apple に聞いてから、もう一度描く
+    if (this.purchases?.available()) void Promise.all([this.purchases.loadPrices(), this.purchases.refresh()]).then(() => this.el && this.rerenderPanel('[data-close]'));
+  }
+
+  /** 追加パック（買い切り）。保護者ゲートの内側だけに出す */
+  private shopHtml(): string {
+    const pu = this.purchases;
+    if (!pu?.available()) {
+      return `<section class="shop"><h3>追加パック（買い切り）</h3><p>追加パックは iPhone・iPad の アプリ版で 購入できます。</p></section>`;
+    }
+    const owned = pu.owned();
+    const rows = PRODUCTS.map((p) => {
+      const have = p.packs.every((k) => owned.includes(k));
+      const price = pu.price(p.id);
+      const btn = have
+        ? '<span class="have">もっています</span>'
+        : price
+          ? `<button type="button" class="pbtn primary" data-act="buy" data-product="${p.id}">${price} で かう</button>`
+          : '<span class="have">いまは 買えません</span>';
+      return `<li class="shop-item"><div><strong>${p.name}</strong><br><small>${p.summary}</small></div>${btn}</li>`;
+    }).join('');
+    return `<section class="shop">
+        <h3>追加パック（買い切り）</h3>
+        <p>一度買うと、ずっと遊べます。同じ Apple ID の 端末では「購入を 復元」で 使えます。友だちは、その背景で はじめて見つけたときに 仲間に なります。</p>
+        <ul class="shop-list">${rows}</ul>
+        ${this.shopNote ? `<p class="note" role="status">${this.shopNote}</p>` : ''}
+        <button type="button" class="pbtn" data-act="restore">購入を 復元</button>
+      </section>`;
   }
 
   private panelHtml(): string {
@@ -221,11 +255,16 @@ export class ParentArea {
         <h3>音</h3>
         <label class="switch"><input type="checkbox" data-set="sound" ${d.settings.sound ? 'checked' : ''}> 音を出す</label>
       </section>
-      <section>
+      ${this.shopHtml()}
+      ${
+        NATIVE
+          ? ''
+          : `<section>
         <h3>テスト用：追加パックを ためす</h3>
-        <p>発売前の確認用です。ONにすると、追加パック（つづきの コース・うみべ・きのこの もり・すいぞくかん・おばけやしき）を 買わずに ためせます。<strong>購入の しくみが できたら、この切りかえは なくします。</strong></p>
+        <p>ウェブの試遊版だけの切りかえです（アプリ版には ありません）。ONにすると、追加パックを 買わずに ためせます。</p>
         <label class="switch"><input type="checkbox" data-set="trialAllPacks" ${d.settings.trialAllPacks ? 'checked' : ''}> 追加パックを ためす</label>
-      </section>
+      </section>`
+      }
       <section>
         <h3>うごくもの（コース）</h3>
         <p>コース2から、背景に鳥・雲・子犬などが動きます。コース6からは、ときどき友だちの前を横切ります（タップは さえぎりません）。動きが気になるときは切ってください。端末の「視差効果を減らす」がオンのときは止まります。</p>
@@ -346,6 +385,24 @@ export class ParentArea {
             break;
           case 'trial':
             this.onTrial();
+            break;
+          case 'buy': {
+            const id = b.dataset.product as string;
+            b.setAttribute('disabled', '');
+            void this.purchases?.buy(id).then((r) => {
+              this.shopNote = { ok: 'ありがとうございます。追加パックが 使えるように なりました。', cancelled: '', pending: '保護者の 承認待ちです（ファミリー共有の「承認と購入のリクエスト」）。承認されると 使えるように なります。', error: '購入できませんでした。時間をおいて、もう一度 お試しください。', unavailable: 'いまは 購入できません。' }[r];
+              this.onChange();
+              if (this.el) this.rerenderPanel('[data-act="restore"]');
+            });
+            break;
+          }
+          case 'restore':
+            b.setAttribute('disabled', '');
+            void this.purchases?.restore().then((ok) => {
+              this.shopNote = ok ? '購入を 復元しました。' : '復元できませんでした。通信できる場所で もう一度 お試しください。';
+              this.onChange();
+              if (this.el) this.rerenderPanel('[data-act="restore"]');
+            });
             break;
           case 'resetCounts':
             resetCounters(this.store);

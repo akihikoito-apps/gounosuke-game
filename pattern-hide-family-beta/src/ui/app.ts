@@ -44,6 +44,7 @@ import { renderScene, sceneThumb } from './sceneView';
 import { ParentArea } from './parent';
 import { NATIVE } from './platform';
 import { CONTENT_VERSION, newsSince } from '../core/whatsnew';
+import { PurchaseStore } from '../purchase/store';
 import { type UpcomingReward, friendAtCourse, upcomingRewards } from '../core/rewards';
 import { HIDE_MOVERS_MAX, MOVERS, MOVER_NAMES, type MoverDef, pickMovers } from '../core/movers';
 import { moverIcon, moversMarkup } from './moverView';
@@ -126,10 +127,15 @@ export class App {
    * 遊べる範囲：無料（きほん）＋持っているパック。購入の仕組み（StoreKit）はまだなので、持っているパックは
    * 保護者の画面の「テスト用：追加パックを ためす」だけ（自動テストのビルドでは、指定がなければ ため す状態）。
    */
+  /** Apple の購入（iPhone アプリ版だけ）。変わったら、遊んでいる途中でなければ描き直す */
+  private purchases = new PurchaseStore(() => {
+    if (this.screen !== 'play' && !this.parent?.isOpen()) this.render();
+  });
   private entitlements = packEntitlements(() => {
-    const t = this.store.data.settings.trialAllPacks;
+    // テスト用の切りかえは ウェブの試遊版だけ（アプリ版では Apple の購入だけが根拠）
+    const t = NATIVE ? false : this.store.data.settings.trialAllPacks;
     const trial = t ?? import.meta.env.MODE === 'e2e';
-    return trial ? PACKS.filter((p) => !p.free).map((p) => p.id) : [];
+    return trial ? PACKS.filter((p) => !p.free).map((p) => p.id) : this.purchases.owned();
   });
   private can = (id: ContentId) => this.entitlements.canPlay(id);
   /** 最難関のおためし（保存しない。メモリ内だけ） */
@@ -152,6 +158,7 @@ export class App {
         document.querySelectorAll('.toast').forEach((t) => t.remove());
       },
       () => this.startTrial(),
+      this.purchases
     );
     root.addEventListener('click', (e) => this.onClick(e));
     // 最初の操作のあとだけ音を出せるようにする
@@ -172,6 +179,8 @@ export class App {
   start(): void {
     // 絵を先に読み込んでおく（出題の画面で、背景より先にキャラクターだけが見えないように）
     for (const u of allArtUrls()) void decodeImage(u);
+    // 買ったパックを Apple に聞く（アプリ版だけ。通信なしでも端末の記録で答える）
+    void this.purchases.refresh();
     // はじめて入れた人には「あたらしく なったよ」を出さない（いまの版を見たことにする）
     if (this.store.status === 'empty' && this.store.data.settings.newsSeen === undefined) {
       this.store.update((d) => {
