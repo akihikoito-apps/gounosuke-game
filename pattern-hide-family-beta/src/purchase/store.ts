@@ -17,7 +17,7 @@ export interface ProductDef {
 const P = 'com.akihikoito.moyoukakurenbo.';
 export const PRODUCTS: ProductDef[] = [
   { id: `${P}morecourses`, packs: ['more-courses'], name: 'つづきの コース', summary: 'コース6〜10・最難関モード・へや「しんしつ」・コースのシール5枚と家具' },
-  { id: `${P}beach`, packs: ['beach'], name: 'うみべ パック', summary: '背景「うみべ」・友だち「ちょき」・へや・家具・シール' },
+  { id: `${P}beach`, packs: ['beach'], name: 'うみべ パック', summary: '背景「うみべ」・友だち「ちょき」・へや「うみべの デッキ」・家具6つ・シール5枚' },
   { id: `${P}forest`, packs: ['forest'], name: 'きのこの もり パック', summary: '背景「きのこの もり」・友だち「ぴの」・へや「もりの ひろば」・家具6つ・シール5枚' },
   { id: `${P}aquarium`, packs: ['aquarium'], name: 'すいぞくかん パック', summary: '背景「すいぞくかん」・友だち「プカ」・へや・家具6つ・シール5枚' },
   { id: `${P}haunted`, packs: ['haunted'], name: 'おばけやしき パック', summary: '背景「おばけやしき」・友だち「ふわ」・へや「ほしの やねうらべや」・家具6つ・シール5枚' },
