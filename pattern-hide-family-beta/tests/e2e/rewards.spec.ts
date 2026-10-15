@@ -1,6 +1,6 @@
 // つぎの ごほうびの告知と「を みつけてね」（ご本人の実機テストの要望 2026-10-15）
 import { expect, test } from '@playwright/test';
-import { act, faceCenter, fresh, state, tapAt } from './helpers';
+import { act, faceCenter, fresh, startSearch, state, tapAt } from './helpers';
 
 const KEY = 'moyou-kakurenbo-beta';
 const SHOTS = 'test-results/rewards';
@@ -69,25 +69,15 @@ test('遊ぶ画面：顔の横に「を みつけてね」、ぜんぶ見つけ�
 });
 
 test('遊ぶ画面：3人のときも、顔と文字が 画面に おさまる', async ({ page }) => {
+  // 自動で次へ進まない「じゆうに さがす（ふつう）」で、3人の回が出るまで やりなおす
   await fresh(page);
-  await seed(page, { cleared: 9, current: 10, finds: 0 }, 95);
-  await act(page, 'toCourse');
-  await act(page, 'pickCourse', '[data-course="10"]');
+  await seed(page, { cleared: 4, current: 5, finds: 0 }, 40);
   for (let k = 0; k < 30; k++) {
-    const n = (await state(page)).session.placements.length;
-    if (n === 3) break;
-    for (let i = 0; i < n; i++) await tapAt(page, await faceCenter(page, i));
-    // 自動で次へ進むこともあるので、ボタンが残っていれば押す
-    await page.waitForTimeout(450);
-    // コースを クリアしたら、もう一度 コース10 を はじめる
-    if (await page.locator('.course-clear').count()) {
-      await act(page, 'toCourse');
-      await act(page, 'pickCourse', '[data-course="10"]');
-      continue;
-    }
-    await page.locator('[data-action="nextRound"]').click({ timeout: 3500 }).catch(() => {});
-    await page.waitForTimeout(300);
+    await page.goto('/');
+    await startSearch(page, 'shop', 'normal');
+    if ((await state(page)).session.placements.length === 3) break;
   }
+  expect((await state(page)).session.placements.length).toBe(3);
   const bar = await page.locator('.bar').boundingBox();
   const msg = await page.locator('.find-msg').boundingBox();
   expect(msg!.x + msg!.width).toBeLessThanOrEqual(bar!.x + bar!.width);
