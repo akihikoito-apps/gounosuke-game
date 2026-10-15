@@ -25,7 +25,7 @@ const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 440, height: 956 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true });
 await ctx.addInitScript(() => {
   const P = 'com.akihikoito.moyoukakurenbo.';
-  const price = { morecourses: '¥480', beach: '¥400', forest: '¥400', aquarium: '¥400', haunted: '¥400', allpacks: '¥1,480' };
+  const price = { morecourses: '¥480', beach: '¥400', forest: '¥400', aquarium: '¥400', night: '¥400', allpacks: '¥1,480' };
   window.Capacitor = {
     Plugins: {
       NativePurchases: {
