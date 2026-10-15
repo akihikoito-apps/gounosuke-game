@@ -12,7 +12,7 @@ const baseOnly = owns();
 const withBeach = owns('beach');
 const withForest = owns('forest');
 const withAquarium = owns('aquarium');
-const withHaunted = owns('haunted');
+const withNight = owns('night');
 const withMore = owns('more-courses');
 
 describe('access by pack', () => {
@@ -24,7 +24,7 @@ describe('access by pack', () => {
     expect(availableCharacters(5, {}, baseOnly)).toEqual(['koro', 'mimi', 'moko', 'nyako', 'popo']);
   });
 
-  it('choki, pino, puka, and fuwa need their scene pack even if old save data says the scene was played', () => {
+  it('choki, pino, puka, and hika need their scene pack even if old save data says the scene was played', () => {
     expect(availableCharacters(10, { beach: 30 }, baseOnly)).not.toContain('choki');
     expect(availableCharacters(10, { beach: 30 }, withMore)).not.toContain('choki');
     expect(availableCharacters(0, {}, withBeach)).not.toContain('choki'); // パックがあっても、うみべで見つけるまでは
@@ -35,9 +35,9 @@ describe('access by pack', () => {
     expect(availableCharacters(10, { aquarium: 50 }, baseOnly)).not.toContain('puka');
     expect(availableCharacters(0, {}, withAquarium)).not.toContain('puka');
     expect(availableCharacters(0, { aquarium: 1 }, withAquarium)).toContain('puka');
-    expect(availableCharacters(10, { haunted: 50 }, baseOnly)).not.toContain('fuwa');
-    expect(availableCharacters(0, {}, withHaunted)).not.toContain('fuwa');
-    expect(availableCharacters(0, { haunted: 1 }, withHaunted)).toContain('fuwa');
+    expect(availableCharacters(10, { night: 50 }, baseOnly)).not.toContain('hika');
+    expect(availableCharacters(0, {}, withNight)).not.toContain('hika');
+    expect(availableCharacters(0, { night: 1 }, withNight)).toContain('hika');
   });
 
   it('resume is refused for a scene or a friend you cannot play', () => {
@@ -48,13 +48,13 @@ describe('access by pack', () => {
     expect(canResume({ sceneId: 'room', placements: [pl('pino', 'room-plant')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'aquarium', placements: [pl('koro', 'aquarium-tank-1')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('puka', 'room-plant')] }, baseOnly)).toBe(false);
-    expect(canResume({ sceneId: 'haunted', placements: [pl('koro', 'haunted-curtain-1')] }, baseOnly)).toBe(false);
-    expect(canResume({ sceneId: 'room', placements: [pl('fuwa', 'room-plant')] }, baseOnly)).toBe(false);
+    expect(canResume({ sceneId: 'night', placements: [pl('koro', 'night-grass-1')] }, baseOnly)).toBe(false);
+    expect(canResume({ sceneId: 'room', placements: [pl('hika', 'room-plant')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('koro', 'room-plant')] }, baseOnly)).toBe(true);
     expect(canResume({ sceneId: 'beach', placements: [pl('choki', 'beach-hut-1')] }, withBeach)).toBe(true);
     expect(canResume({ sceneId: 'forest', placements: [pl('pino', 'forest-tent-1')] }, withForest)).toBe(true);
     expect(canResume({ sceneId: 'aquarium', placements: [pl('puka', 'aquarium-tank-1')] }, withAquarium)).toBe(true);
-    expect(canResume({ sceneId: 'haunted', placements: [pl('fuwa', 'haunted-curtain-1')] }, withHaunted)).toBe(true);
+    expect(canResume({ sceneId: 'night', placements: [pl('hika', 'night-grass-1')] }, withNight)).toBe(true);
   });
 
   it('the sticker book only shows stickers of packs you have', () => {
@@ -63,11 +63,11 @@ describe('access by pack', () => {
     expect(ids(withBeach)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'b1', 'b5', 'b10', 'b30', 'b50']);
     expect(ids(withForest)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'f-s1', 'f-s5', 'f-s15', 'f-s30', 'f-s50']);
     expect(ids(withAquarium)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'a-s1', 'a-s5', 'a-s15', 'a-s30', 'a-s50']);
-    expect(ids(withHaunted)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'h-s1', 'h-s5', 'h-s15', 'h-s30', 'h-s50']);
+    expect(ids(withNight)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'n-s1', 'n-s5', 'n-s15', 'n-s30', 'n-s50']);
     expect(ids(owns('beach', 'more-courses'))).toHaveLength(20);
     expect(ids(owns('beach', 'forest', 'more-courses'))).toHaveLength(25);
     expect(ids(owns('beach', 'forest', 'aquarium', 'more-courses'))).toHaveLength(30);
-    expect(ids(owns('beach', 'forest', 'aquarium', 'haunted', 'more-courses'))).toHaveLength(35);
+    expect(ids(owns('beach', 'forest', 'aquarium', 'night', 'more-courses'))).toHaveLength(35);
   });
 
   it('every pack is reachable and every paid pack has something to play', () => {

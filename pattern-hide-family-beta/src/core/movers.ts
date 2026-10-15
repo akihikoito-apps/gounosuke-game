@@ -4,7 +4,7 @@
 import { type Rng, mulberry32, shuffle } from './rng';
 import type { SceneId } from './scene';
 
-export type MoverKind = 'bird' | 'butterfly' | 'cloud' | 'cat' | 'puppy' | 'balloon' | 'seagull' | 'sailboat' | 'crab' | 'ball' | 'squirrel' | 'owl' | 'falling-leaf' | 'tropical-fish' | 'jellyfish' | 'penguin' | 'bubble' | 'ghost' | 'bat' | 'candle';
+export type MoverKind = 'bird' | 'butterfly' | 'cloud' | 'cat' | 'puppy' | 'balloon' | 'seagull' | 'sailboat' | 'crab' | 'ball' | 'squirrel' | 'owl' | 'falling-leaf' | 'tropical-fish' | 'jellyfish' | 'penguin' | 'bubble' | 'firefly' | 'frog';
 /** cross：端から端へ通りぬけて、また最初から / patrol：行って もどる（向きを変える） */
 export type MoverMove = 'cross' | 'patrol';
 
@@ -68,12 +68,12 @@ export const MOVERS: Record<SceneId, MoverDef[]> = {
     { id: 'aquarium-bubble', kind: 'bubble', move: 'cross', from: { x: 240, y: 1060 }, to: { x: 760, y: -40 }, sec: 12, scale: 1.0, layer: 'front' },
     { id: 'aquarium-fish2', kind: 'tropical-fish', move: 'patrol', from: { x: 1090, y: 580 }, to: { x: -90, y: 600 }, sec: 13, scale: 1.0, layer: 'front' },
   ],
-  haunted: [
-    { id: 'haunted-bat', kind: 'bat', move: 'cross', from: { x: -120, y: 170 }, to: { x: 1120, y: 140 }, sec: 14, scale: 1.1, layer: 'back' },
-    { id: 'haunted-candle', kind: 'candle', move: 'patrol', from: { x: 180, y: 240 }, to: { x: 820, y: 200 }, sec: 20, scale: 1.05, layer: 'back' },
-    { id: 'haunted-ghost', kind: 'ghost', move: 'patrol', from: { x: -90, y: 860 }, to: { x: 1090, y: 860 }, sec: 14, scale: 1.15, layer: 'front' },
-    { id: 'haunted-candle2', kind: 'candle', move: 'cross', from: { x: 240, y: 1060 }, to: { x: 760, y: -40 }, sec: 12, scale: 1.0, layer: 'front' },
-    { id: 'haunted-ghost2', kind: 'ghost', move: 'patrol', from: { x: 1090, y: 580 }, to: { x: -90, y: 600 }, sec: 13, scale: 1.0, layer: 'front' },
+  night: [
+    { id: 'night-firefly1', kind: 'firefly', move: 'cross', from: { x: -120, y: 170 }, to: { x: 1120, y: 140 }, sec: 14, scale: 1.1, layer: 'back' },
+    { id: 'night-firefly2', kind: 'firefly', move: 'patrol', from: { x: 180, y: 240 }, to: { x: 820, y: 200 }, sec: 20, scale: 1.05, layer: 'back' },
+    { id: 'night-frog', kind: 'frog', move: 'patrol', from: { x: -90, y: 860 }, to: { x: 1090, y: 860 }, sec: 14, scale: 1.15, layer: 'front' },
+    { id: 'night-firefly3', kind: 'firefly', move: 'cross', from: { x: 240, y: 1060 }, to: { x: 760, y: -40 }, sec: 12, scale: 1.0, layer: 'front' },
+    { id: 'night-firefly4', kind: 'firefly', move: 'patrol', from: { x: 1090, y: 580 }, to: { x: -90, y: 600 }, sec: 13, scale: 1.0, layer: 'front' },
   ],
 };
 
@@ -98,9 +98,8 @@ export const MOVER_NAMES: Record<MoverKind, string> = {
   jellyfish: 'くらげ',
   penguin: 'ペンギン',
   bubble: 'あわ',
-  ghost: 'おばけ',
-  bat: 'こうもり',
-  candle: 'ろうそく',
+  firefly: 'ほたる',
+  frog: 'かえる',
 };
 
 /** コースごとの うごくものの数（コース1は なし） */

@@ -127,7 +127,7 @@ describe('hardest trial with all six friends', { timeout: 120_000 }, () => {
         }
       }
       // 新しい6体も、最難関に出てくる
-      for (const c of ['nyako', 'popo', 'choki', 'pino', 'puka', 'fuwa']) expect(seen.has(c), c).toBe(true);
+      for (const c of ['nyako', 'popo', 'choki', 'pino', 'puka', 'hika']) expect(seen.has(c), c).toBe(true);
     });
   }
 });
