@@ -102,7 +102,8 @@ export class App {
   private myroom = new MyRoomView({
     chars: () => this.allowedChars(),
     items: () => ownedItems(this.progress(), this.can),
-    rooms: () => openRooms(this.store.data.course.cleared, this.can),
+    rooms: () => openRooms(this.store.data.course.cleared, this.can, this.store.data.collection.sceneFinds),
+    allLayouts: () => this.store.data.myroom.layouts,
     current: () => this.store.data.myroom.current,
     load: (r) => this.store.data.myroom.layouts[r],
     save: (r, list, cur) =>
@@ -931,6 +932,10 @@ export class App {
       if ((before.sceneFinds[f.scene] ?? 0) === 0 && (after.sceneFinds[f.scene] ?? 0) >= 1 && this.can(`char:${f.char}`)) {
         this.toast(`<div class="toast-sticker">${faceIcon(CHARACTERS[f.char])}</div><p>あたらしい ともだち<br>${CHARACTERS[f.char].name}が なかまに なったよ！</p>`);
       }
+    }
+    // パックの部屋：その背景で初めて見つけたら、じぶんの へや に部屋が ふえる
+    for (const r of ROOMS.filter((x) => x.needScene && this.can(x.content))) {
+      if ((before.sceneFinds[r.needScene!] ?? 0) === 0 && (after.sceneFinds[r.needScene!] ?? 0) >= 1) this.toast(`<div class="toast-sticker">${ICONS.room}</div><p>じぶんの へや に<br>「${r.name}」が ふえたよ！</p>`);
     }
     for (const st of newStickers(before, after).filter((x) => visibleStickers(this.can).includes(x))) this.toast(`<div class="toast-sticker">${stickerSvg(st)}</div><p>シール ゲット！<br>${st.name}</p>`);
   }
