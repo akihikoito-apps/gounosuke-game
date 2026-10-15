@@ -310,7 +310,10 @@ export class MyRoomView {
     this.el = main;
     this.drag = null;
     // 部屋が多いとき、選んでいる部屋のタブが見えるように
-    main.querySelector<HTMLElement>(".mr-room-tab.on")?.scrollIntoView({ inline: "center", block: "nearest" });
+    // （scrollIntoView は画面全体まで動かすことがあるので、タブの列だけを横に送る）
+    const row = main.querySelector<HTMLElement>(".mr-rooms");
+    const on = main.querySelector<HTMLElement>(".mr-room-tab.on");
+    if (row && on) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - (row.clientWidth - on.offsetWidth) / 2);
     main.querySelector<HTMLElement>('#stage')?.addEventListener('pointerdown', (e) => this.onStageDown(e));
     main.addEventListener('pointermove', (e) => this.onMove(e));
     main.addEventListener('pointerup', (e) => this.onUp(e));

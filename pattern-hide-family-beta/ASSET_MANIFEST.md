@@ -45,6 +45,7 @@
 | `art/app/`（アプリのアイコン 1024・起動画面 2732 の SVG）→ `native/make-icons.mjs` で RGB の PNG に変換 | Codex がSVGをコードで記述。画像生成・ネット画像は不使用。文字なし | 2026-10-08 | validate:art 合格、PNG はアルファなし（App Store の条件）を確認 |
 | `art/movers/`（コースの うごくもの 9枚）・`art/myroom/`（じぶんの へや の もの 23枚・部屋 3枚） | Codex がSVGをコードで記述。画像生成・ネット画像は不使用。文字なし | 2026-10-15 | validate:art 合格（枠・名前・安全性）、画面で大きさを確認 |
 | 追加パック「きのこの もり」：`art/scenes/forest/`・`art/patterns/forest-*`・`art/characters/pino/`・`art/movers/{owl,squirrel,falling-leaf}`・`art/myroom/`（ひみつきち・家具6）・`art/stickers/f-s*` | Codex がSVGをコードで記述（依頼文は Gemini が下書き）。画像生成・ネット画像は不使用。文字なし | 2026-10-15 | validate:art 合格、画面で確認、全テスト合格 |
+| 追加パック「すいぞくかん」「おばけやしき」：`art/scenes/{aquarium,haunted}/`・`art/patterns/{aquarium,haunted}-*`・`art/characters/{puka,fuwa}/`・`art/movers/`・`art/myroom/`・`art/stickers/{a,h}-*` | Codex がSVGをコードで記述（依頼文は Gemini が下書き）。画像生成・ネット画像は不使用。文字なし | 2026-10-15 | validate:art 合格、画面で確認、全テスト合格 |
 `art-guides/` は形状データから自動生成した下書きガイドで、ゲームには含まれません。
 
 ## 外部の画像生成について
