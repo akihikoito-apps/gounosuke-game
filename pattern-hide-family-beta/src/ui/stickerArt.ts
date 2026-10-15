@@ -13,6 +13,10 @@ function motif(m: Motif): string {
       return `<path d="M-15 10 Q-16 -14 0 -15 Q16 -14 15 10 Z" fill="#FBE3DC" ${L}/><path d="M-8 9 L-4 -10 M0 10 V-13 M8 9 L4 -10" stroke="#C9A39A" stroke-width="2"/>`;
     case 'floatring':
       return `<circle r="15" fill="#F07D7D" ${L}/><circle r="7" fill="#D7ECF3" ${L}/><path d="M0 -15 V-7 M0 7 V15 M-15 0 H-7 M7 0 H15" stroke="#FFFFFF" stroke-width="4"/>`;
+    case 'shavedice':
+      return `<path d="M-13 2 Q0 -18 13 2 Z" fill="#FFFDF8" ${L}/><path d="M-10 -2 Q0 -15 10 -2 Z" fill="#F29AAE" ${L}/><path d="M-14 2 H14 L9 14 H-9 Z" fill="#9FC0E2" ${L}/>`;
+    case 'crab':
+      return `<path d="M-12 6 Q-14 -12 2 -13 Q15 -10 12 6 Z" fill="#E5B869" ${L}/><ellipse cx="-4" cy="8" rx="9" ry="6" fill="#E88B72" ${L}/><circle cx="-8" cy="6" r="1.6" fill="#4A3A40"/><circle cx="-2" cy="6" r="1.6" fill="#4A3A40"/>`;
     case 'ball':
       return `<circle r="15" fill="#FFF7EA" ${L}/><path d="M-15 0 Q0 -8 15 0" fill="none" stroke="#E07B7B" stroke-width="4"/><path d="M0 -15 Q-7 0 0 15" fill="none" stroke="#7EA6DA" stroke-width="4"/>`;
     case 'cushion':

@@ -662,6 +662,6 @@ export class MyRoomView {
 }
 
 /** 横幅より背が高い物（棚の絵の切り取り） */
-const TALL: Record<string, number> = { swing: 300, plant: 170, flowerpot: 140, balloon: 170, starmobile: 190, moonlamp: 140, puppy: 140, fishtank: 170, 'acorn-lamp': 160, 'jelly-lamp': 160, 'pumpkin-lantern': 160 };
+const TALL: Record<string, number> = { swing: 300, plant: 170, flowerpot: 140, balloon: 170, starmobile: 190, moonlamp: 140, puppy: 140, fishtank: 170, 'shaved-ice': 160, 'acorn-lamp': 160, 'jelly-lamp': 160, 'pumpkin-lantern': 160 };
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const r1s = (n: number) => Math.round(n * 1000) / 1000;

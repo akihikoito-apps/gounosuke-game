@@ -7,16 +7,19 @@ import { SCENES, SCENE_IDS } from '../../src/core/scenes';
 import { validate } from '../../src/storage/schema';
 
 describe('sticker book and the new friend', () => {
-  it('33 stickers: one per course, five by total finds, three for beach, five for forest, five for aquarium, five for haunted; no randomness', () => {
-    expect(STICKERS).toHaveLength(33);
-    expect(new Set(STICKERS.map((s) => s.id)).size).toBe(33);
+  it('35 stickers: one per course, five by total finds, five for beach, five for forest, five for aquarium, five for haunted; no randomness', () => {
+    expect(STICKERS).toHaveLength(35);
+    expect(new Set(STICKERS.map((s) => s.id)).size).toBe(35);
     expect(earnedStickers(0, 0)).toHaveLength(0);
     expect(earnedStickers(10, 150)).toHaveLength(15);
-    expect(earnedStickers(10, 150, { beach: 30 })).toHaveLength(18);
-    expect(earnedStickers(10, 150, { beach: 30, forest: 50 })).toHaveLength(23);
-    expect(earnedStickers(10, 150, { beach: 30, forest: 50, aquarium: 50 })).toHaveLength(28);
-    expect(earnedStickers(10, 150, { beach: 30, forest: 50, aquarium: 50, haunted: 50 })).toHaveLength(33);
+    expect(earnedStickers(10, 150, { beach: 50 })).toHaveLength(20);
+    expect(earnedStickers(10, 150, { beach: 50, forest: 50 })).toHaveLength(25);
+    expect(earnedStickers(10, 150, { beach: 50, forest: 50, aquarium: 50 })).toHaveLength(30);
+    expect(earnedStickers(10, 150, { beach: 50, forest: 50, aquarium: 50, haunted: 50 })).toHaveLength(35);
     expect(earnedStickers(0, 0, { beach: 1 }).map((s) => s.id)).toEqual(['b1']);
+    expect(earnedStickers(0, 0, { beach: 10 }).map((s) => s.id)).toEqual(['b1', 'b5', 'b10']);
+    expect(earnedStickers(0, 0, { beach: 30 }).map((s) => s.id)).toEqual(['b1', 'b5', 'b10', 'b30']);
+    expect(earnedStickers(0, 0, { beach: 50 }).map((s) => s.id)).toEqual(['b1', 'b5', 'b10', 'b30', 'b50']);
     expect(earnedStickers(0, 0, { forest: 1 }).map((s) => s.id)).toEqual(['f-s1']);
     expect(earnedStickers(0, 0, { aquarium: 1 }).map((s) => s.id)).toEqual(['a-s1']);
     expect(earnedStickers(0, 0, { haunted: 1 }).map((s) => s.id)).toEqual(['h-s1']);
@@ -24,7 +27,9 @@ describe('sticker book and the new friend', () => {
     expect(newStickers({ cleared: 4, totalFinds: 29 }, { cleared: 5, totalFinds: 30 }).map((s) => s.id)).toEqual(['c5', 'f30']);
     expect(STICKERS.find((s) => s.id === 'c5')?.char).toBe('popo');
     expect(stickerHint(STICKERS.find((s) => s.id === 'b1')!)).toBe('うみべで みつけたら');
+    expect(stickerHint(STICKERS.find((s) => s.id === 'b5')!)).toBe('うみべで 5かい');
     expect(stickerHint(STICKERS.find((s) => s.id === 'b10')!)).toBe('うみべで 10かい');
+    expect(stickerHint(STICKERS.find((s) => s.id === 'b50')!)).toBe('うみべで 50かい');
     expect(stickerHint(STICKERS.find((s) => s.id === 'f-s1')!)).toBe('きのこの もりで みつけたら');
     expect(stickerHint(STICKERS.find((s) => s.id === 'f-s5')!)).toBe('きのこの もりで 5かい');
     expect(stickerHint(STICKERS.find((s) => s.id === 'a-s1')!)).toBe('すいぞくかんで みつけたら');

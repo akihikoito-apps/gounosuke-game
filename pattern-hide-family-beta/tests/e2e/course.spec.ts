@@ -221,7 +221,7 @@ test('clearing course 5 gives its sticker and brings popo; the sticker book show
   // コース1〜5 ＋ 10回・30回。コースの背景は順番に回るので、うみべ・もり・すいぞくかん・おばけやしき で初めて見つけていれば その1枚も
   const sceneFirst = ['beach', 'forest', 'aquarium', 'haunted'].filter((sc) => (saved.collection.sceneFinds[sc] ?? 0) >= 1).length;
   await expect(page.locator('.sticker.got')).toHaveCount(7 + sceneFirst);
-  await expect(page.locator('.sticker.locked')).toHaveCount(26 - sceneFirst); // 全33枚
+  await expect(page.locator('.sticker.locked')).toHaveCount(28 - sceneFirst); // 全35枚
   // 仲間になったあとは、かくす画面に ぽぽ がいる
   await act(page, 'home');
   await act(page, 'toHide');
@@ -247,9 +247,10 @@ test('beach pack: first find at the beach brings choki and the b1 sticker; notic
   expect(s.session.placements.some((p: any) => p.char === 'choki')).toBe(true);
   const eyes = await eyePoints(page, 0);
   await tapAt(page, { x: (eyes[0].x + eyes[1].x) / 2, y: eyes[0].y });
-  // 知らせは1つずつ：まず ちょき、次にシール
+  // 知らせは1つずつ：まず ちょき、次に うみべの デッキ、次にシール
   await expect(page.locator('.toast')).toHaveCount(1);
   await expect(page.locator('.toast')).toContainText('ちょき');
+  await expect(page.locator('.toast')).toContainText('うみべの デッキ', { timeout: 5000 });
   await expect(page.locator('.toast')).toContainText('シール', { timeout: 5000 });
   await expect(page.locator('.toast')).toHaveCount(1);
   const saved = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);

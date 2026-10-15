@@ -60,14 +60,14 @@ describe('access by pack', () => {
   it('the sticker book only shows stickers of packs you have', () => {
     const ids = (c: CanPlay) => visibleStickers(c).map((s) => s.id);
     expect(ids(baseOnly)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150']);
-    expect(ids(withBeach)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'b1', 'b10', 'b30']);
+    expect(ids(withBeach)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'b1', 'b5', 'b10', 'b30', 'b50']);
     expect(ids(withForest)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'f-s1', 'f-s5', 'f-s15', 'f-s30', 'f-s50']);
     expect(ids(withAquarium)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'a-s1', 'a-s5', 'a-s15', 'a-s30', 'a-s50']);
     expect(ids(withHaunted)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'f10', 'f30', 'f60', 'f100', 'f150', 'h-s1', 'h-s5', 'h-s15', 'h-s30', 'h-s50']);
-    expect(ids(owns('beach', 'more-courses'))).toHaveLength(18);
-    expect(ids(owns('beach', 'forest', 'more-courses'))).toHaveLength(23);
-    expect(ids(owns('beach', 'forest', 'aquarium', 'more-courses'))).toHaveLength(28);
-    expect(ids(owns('beach', 'forest', 'aquarium', 'haunted', 'more-courses'))).toHaveLength(33);
+    expect(ids(owns('beach', 'more-courses'))).toHaveLength(20);
+    expect(ids(owns('beach', 'forest', 'more-courses'))).toHaveLength(25);
+    expect(ids(owns('beach', 'forest', 'aquarium', 'more-courses'))).toHaveLength(30);
+    expect(ids(owns('beach', 'forest', 'aquarium', 'haunted', 'more-courses'))).toHaveLength(35);
   });
 
   it('every pack is reachable and every paid pack has something to play', () => {

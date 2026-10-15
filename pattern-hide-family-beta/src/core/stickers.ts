@@ -4,7 +4,7 @@ import type { CharacterId } from './characters';
 import type { SceneId } from './scene';
 import { SCENES } from './scenes';
 
-export type Motif = 'shell' | 'floatring' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel' | 'jellyfish' | 'dolphin' | 'treasure' | 'penguin' | 'pumpkin' | 'ghost' | 'bat' | 'musicbox';
+export type Motif = 'shell' | 'floatring' | 'shavedice' | 'crab' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel' | 'jellyfish' | 'dolphin' | 'treasure' | 'penguin' | 'pumpkin' | 'ghost' | 'bat' | 'musicbox';
 
 export interface StickerDef {
   id: string;
@@ -39,8 +39,10 @@ export const STICKERS: StickerDef[] = [
   { id: 'f150', name: '150かい みつけた', kind: 'finds', need: 150, char: 'mimi', motif: 'star', color: '#F4E6B4' },
   // 背景パック1「うみべ」
   { id: 'b1', name: 'ちょきが きたよ', kind: 'scene', scene: 'beach', need: 1, char: 'choki', motif: 'shell', color: '#F6DCD3' },
+  { id: 'b5', name: 'うみべで 5かい', kind: 'scene', scene: 'beach', need: 5, char: 'mimi', motif: 'shavedice', color: '#E2F0CB' },
   { id: 'b10', name: 'うみべで 10かい', kind: 'scene', scene: 'beach', need: 10, char: 'koro', motif: 'floatring', color: '#D7ECF3' },
   { id: 'b30', name: 'うみべで 30かい', kind: 'scene', scene: 'beach', need: 30, char: 'choki', motif: 'star', color: '#F3E6C2' },
+  { id: 'b50', name: 'うみべで 50かい', kind: 'scene', scene: 'beach', need: 50, char: 'choki', motif: 'crab', color: '#F5DFC6' },
   // 背景パック2「きのこの もり」
   { id: 'f-s1', name: 'ぴのが きたよ', kind: 'scene', scene: 'forest', need: 1, char: 'pino', motif: 'mushroom', color: '#E8D9B8' },
   { id: 'f-s5', name: 'きのこの もりで 5かい', kind: 'scene', scene: 'forest', need: 5, char: 'koro', motif: 'acorn', color: '#E5D3B8' },

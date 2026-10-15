@@ -43,7 +43,7 @@ export const PACKS: PackDef[] = [
     id: 'beach',
     name: 'うみべ パック',
     free: false,
-    contents: ['scene:beach', 'char:choki'],
+    contents: ['scene:beach', 'char:choki', 'room:beach-deck'],
   },
   {
     id: 'forest',

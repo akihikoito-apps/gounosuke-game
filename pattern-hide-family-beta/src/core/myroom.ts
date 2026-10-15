@@ -7,7 +7,7 @@ import type { CharacterId } from './characters';
 import { STICKERS, hasSticker } from './stickers';
 import type { SceneId } from './scene';
 
-export type RoomId = 'living' | 'bedroom' | 'yard' | 'treehouse' | 'aquarium-room' | 'attic';
+export type RoomId = 'living' | 'bedroom' | 'yard' | 'treehouse' | 'aquarium-room' | 'attic' | 'beach-deck';
 export type Motion = 'walk' | 'swing' | 'bob' | 'sway' | 'roll' | 'swim';
 
 export interface RoomDef {
@@ -35,6 +35,7 @@ export const ROOMS: RoomDef[] = [
   { id: 'living', name: 'リビング', needCleared: 0, content: 'room:living', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'treehouse', name: 'ひみつきち', needCleared: 5, content: 'room:treehouse', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'bedroom', name: 'しんしつ', needCleared: 10, content: 'room:bedroom', floorTop: 580, scaleBack: 1.0, scaleFront: 1.5 },
+  { id: 'beach-deck', name: 'うみべの デッキ', needCleared: 0, needScene: 'beach', content: 'room:beach-deck', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'yard', name: 'もりの ひろば', needCleared: 0, needScene: 'forest', content: 'room:yard', floorTop: 540, scaleBack: 0.95, scaleFront: 1.45 },
   { id: 'aquarium-room', name: 'すいぞくかんの へや', needCleared: 0, needScene: 'aquarium', content: 'room:aquarium-room', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'attic', name: 'ほしの やねうらべや', needCleared: 0, needScene: 'haunted', content: 'room:attic', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
@@ -99,9 +100,12 @@ export const ITEMS: ItemDef[] = [
   { id: 'balloon', name: 'ふうせん', sticker: 'f100', genre: 'toy', w: 80, motion: 'bob' },
   { id: 'starmobile', name: 'ほしの メリー', sticker: 'f150', genre: 'deco', w: 110, motion: 'sway' },
   // うみべパック
+  { id: 'beach-chair', name: 'パラソル ベンチ', sticker: null, genre: 'furniture', content: 'scene:beach', w: 260, seats: [{ x: -52, y: -58 }, { x: 52, y: -58 }] },
   { id: 'shell', name: 'かいがら', sticker: 'b1', genre: 'deco', w: 70 },
+  { id: 'shaved-ice', name: 'かきごおりき', sticker: 'b5', genre: 'food', w: 110, motion: 'sway' },
   { id: 'floatring', name: 'うきわ', sticker: 'b10', genre: 'toy', w: 120 },
   { id: 'beachball', name: 'ビーチボール', sticker: 'b30', genre: 'toy', w: 80, motion: 'roll' },
+  { id: 'hermit-crab', name: 'やどかり', sticker: 'b50', genre: 'animal', w: 96, motion: 'walk' },
   // きのこの もりパック
   { id: 'camp-tent', name: 'キャンプテント', sticker: null, genre: 'furniture', content: 'scene:forest', w: 280, seats: [{ x: 0, y: -50 }] },
   { id: 'stump-chair', name: 'きりかぶの いす', sticker: 'f-s1', genre: 'furniture', w: 120, seats: [{ x: 0, y: -55 }] },
@@ -211,6 +215,7 @@ export function starterLayout(room: RoomId): Placed[] {
   if (room === 'living') return [{ ref: 'item:rug', x: 520, y: 900 }, { ref: 'item:sofa', x: 470, y: 690 }, { ref: 'item:table', x: 520, y: 900 }, { ref: 'char:koro', x: 410, y: 600, on: { idx: 1, seat: 0 } }];
   // しんしつ：ベッド（コース3で とどいている）
   if (room === 'bedroom') return [{ ref: 'item:bed', x: 500, y: 760 }];
+  if (room === 'beach-deck') return [{ ref: 'item:beach-chair', x: 280, y: 720 }];
   if (room === 'yard') return [{ ref: 'item:camp-tent', x: 260, y: 720 }];
   if (room === 'aquarium-room') return [{ ref: 'item:shell-sofa', x: 280, y: 720 }];
   if (room === 'attic') return [{ ref: 'item:gothic-sofa', x: 280, y: 720 }];
