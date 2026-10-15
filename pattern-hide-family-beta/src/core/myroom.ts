@@ -7,7 +7,7 @@ import type { CharacterId } from './characters';
 import { STICKERS, hasSticker } from './stickers';
 import type { SceneId } from './scene';
 
-export type RoomId = 'living' | 'bedroom' | 'yard' | 'treehouse' | 'aquarium-room';
+export type RoomId = 'living' | 'bedroom' | 'yard' | 'treehouse' | 'aquarium-room' | 'attic';
 export type Motion = 'walk' | 'swing' | 'bob' | 'sway' | 'roll' | 'swim';
 
 export interface RoomDef {
@@ -31,6 +31,7 @@ export const ROOMS: RoomDef[] = [
   { id: 'yard', name: 'おにわ', needCleared: 6, content: 'room:yard', floorTop: 540, scaleBack: 0.95, scaleFront: 1.45 },
   { id: 'treehouse', name: 'ひみつきち', needCleared: 0, content: 'room:treehouse', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'aquarium-room', name: 'すいぞくかんの へや', needCleared: 0, content: 'room:aquarium-room', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
+  { id: 'attic', name: 'ほしの やねうらべや', needCleared: 0, content: 'room:attic', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
 ];
 
 export interface Seat {
@@ -96,6 +97,13 @@ export const ITEMS: ItemDef[] = [
   { id: 'dolphin-ride', name: 'イルカの のりもの', sticker: 'a-s15', w: 180, seats: [{ x: 0, y: -64 }], motion: 'sway' },
   { id: 'treasure-box', name: 'たからばこ', sticker: 'a-s30', w: 130 },
   { id: 'penguin', name: 'ペンギン', sticker: 'a-s50', w: 100, motion: 'walk' },
+  // おばけやしきパック
+  { id: 'gothic-sofa', name: 'おやしきの ソファ', sticker: null, content: 'scene:haunted', w: 280, seats: [{ x: -58, y: -60 }, { x: 58, y: -60 }] },
+  { id: 'star-rug', name: 'ほしぞらの ラグ', sticker: 'h-s1', w: 290, flat: true },
+  { id: 'pumpkin-lantern', name: 'かぼちゃ ランタン', sticker: 'h-s5', w: 96, motion: 'sway' },
+  { id: 'music-box', name: 'ほしの オルゴール', sticker: 'h-s15', w: 130, motion: 'sway' },
+  { id: 'ghost-chair', name: 'おばけの ゆりいす', sticker: 'h-s30', w: 160, seats: [{ x: 0, y: -62 }], motion: 'sway' },
+  { id: 'ghost-plush', name: 'ふわふわ おばけ', sticker: 'h-s50', w: 100, motion: 'bob' },
 ];
 
 export const ITEM_BY_ID: Record<string, ItemDef> = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
@@ -155,6 +163,7 @@ export function starterLayout(room: RoomId): Placed[] {
   if (room === 'bedroom') return [{ ref: 'item:rug', x: 500, y: 900 }];
   if (room === 'treehouse') return [{ ref: 'item:camp-tent', x: 260, y: 720 }, { ref: 'char:koro', x: 640, y: 880 }];
   if (room === 'aquarium-room') return [{ ref: 'item:shell-sofa', x: 280, y: 720 }, { ref: 'char:koro', x: 640, y: 880 }];
+  if (room === 'attic') return [{ ref: 'item:gothic-sofa', x: 280, y: 720 }, { ref: 'char:koro', x: 640, y: 880 }];
   return [];
 }
 

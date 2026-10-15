@@ -2,7 +2,7 @@
 // ローカル座標：足もと中央が原点、上が -y。高さ約200。
 import { type Pt, type Shape, quadPoints, shapeToSvg } from './geometry';
 
-export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'choki' | 'pino' | 'puka';
+export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'choki' | 'pino' | 'puka' | 'fuwa';
 import type { SceneId } from './scene';
 
 export interface CharacterDef {
@@ -155,9 +155,24 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     ],
     facePoints: FACE,
   },
+  // 背景パック4「おばけやしき」の友だち。おばけやしきで初めて誰かを見つけると仲間になる
+  fuwa: {
+    id: 'fuwa',
+    name: 'ふわ',
+    personality: 'よるの おやしきに すむ やさしい こ。あたまの ふわふわげと こうもりみみ が めじるし。',
+    skin: '#EFE6FA',
+    silhouette: [
+      BODY,
+      HEAD,
+      { kind: 'ellipse', cx: 0, cy: -195, rx: 12, ry: 14 },
+      rotEllipse(-52, -168, 19, 12, 20, -46, -168),
+      rotEllipse(52, -168, 19, 12, -20, 46, -168),
+    ],
+    facePoints: FACE,
+  },
 };
 
-export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'choki', 'pino', 'puka'];
+export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'choki', 'pino', 'puka', 'fuwa'];
 /** 最初からいる3体 */
 export const BASE_CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
 /** 新しい友だちが仲間になるコース（このコースをクリアしたら）。最初のクリアで1体目が来る */
@@ -171,6 +186,7 @@ export const SCENE_FRIENDS: { scene: SceneId; char: CharacterId }[] = [
   { scene: 'beach', char: 'choki' },
   { scene: 'forest', char: 'pino' },
   { scene: 'aquarium', char: 'puka' },
+  { scene: 'haunted', char: 'fuwa' },
 ];
 
 /** いま遊べるキャラクター（コースの進み具合と、背景パックで見つけた回数で増える） */
@@ -279,6 +295,24 @@ function headMarkup(c: CharacterDef): string {
         fin(-1) +
         fin(1) +
         `<ellipse cx="0" cy="-142" rx="48" ry="45" fill="${c.skin}" ${st}/>` +
+        eyes() +
+        cheeks() +
+        `<path d="M-7 -125 Q0 -118 7 -125" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
+      );
+    }
+    case 'fuwa': {
+      // 頭のてっぺんのふわふわしっぽ毛と、左右斜め上のまるいこうもりみみ
+      const wing = (sx: number) =>
+        `<g transform="rotate(${-20 * sx} ${46 * sx} -168)">` +
+        `<ellipse cx="${52 * sx}" cy="-168" rx="19" ry="12" fill="#9E86B8" ${st}/>` +
+        `<ellipse cx="${52 * sx}" cy="-168" rx="11" ry="6" fill="#E6DAF5"/>` +
+        `</g>`;
+      const tuft = `<ellipse cx="0" cy="-195" rx="12" ry="14" fill="${c.skin}" ${st}/>`;
+      return (
+        wing(-1) +
+        wing(1) +
+        `<ellipse cx="0" cy="-142" rx="48" ry="45" fill="${c.skin}" ${st}/>` +
+        tuft +
         eyes() +
         cheeks() +
         `<path d="M-7 -125 Q0 -118 7 -125" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`

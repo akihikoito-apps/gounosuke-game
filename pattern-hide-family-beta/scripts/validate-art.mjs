@@ -271,7 +271,7 @@ const viewBoxOf = (f) => (readFileSync(f, 'utf8').match(/viewBox\s*=\s*["']([^"'
 for (const [dir, want, re] of [
   ['movers', '-150 -300 300 300', /^[a-z0-9-]+\.svg$/],
   ['myroom/items', '-150 -300 300 300', /^[a-z0-9-]+\.svg$/],
-  ['myroom/rooms', '0 0 1000 1000', /^(living|bedroom|yard|treehouse|aquarium-room)\.svg$/],
+  ['myroom/rooms', '0 0 1000 1000', /^(living|bedroom|yard|treehouse|aquarium-room|attic)\.svg$/],
 ]) {
   for (const f of list(join(ART, dir))) {
     if (!re.test(basename(f))) {

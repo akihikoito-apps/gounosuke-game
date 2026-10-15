@@ -8,29 +8,31 @@ const all = () => true;
 const baseOnly = (id: ContentId) => PACKS.find((p) => p.id === 'base')!.contents.includes(id);
 
 describe('じぶんの へや', () => {
-  it('無料（きほん）では 部屋は2つまで。おにわ・ひみつきち・すいぞくかんの へや は追加パック', () => {
+  it('無料（きほん）では 部屋は2つまで。おにわ・ひみつきち・すいぞくかんの へや・ほしの やねうらべや は追加パック', () => {
     expect(openRooms(10, baseOnly).map((r) => r.id)).toEqual(['living', 'bedroom']);
-    expect(openRooms(0, all).map((r) => r.id)).toEqual(['living', 'treehouse', 'aquarium-room']);
-    expect(openRooms(3, all).map((r) => r.id)).toEqual(['living', 'bedroom', 'treehouse', 'aquarium-room']);
-    expect(openRooms(6, all).map((r) => r.id)).toEqual(['living', 'bedroom', 'yard', 'treehouse', 'aquarium-room']);
+    expect(openRooms(0, all).map((r) => r.id)).toEqual(['living', 'treehouse', 'aquarium-room', 'attic']);
+    expect(openRooms(3, all).map((r) => r.id)).toEqual(['living', 'bedroom', 'treehouse', 'aquarium-room', 'attic']);
+    expect(openRooms(6, all).map((r) => r.id)).toEqual(['living', 'bedroom', 'yard', 'treehouse', 'aquarium-room', 'attic']);
     // どの部屋も、ちょうど1つのパックに入っている
     for (const r of ROOMS) expect(PACKS.filter((p) => p.contents.includes(r.content)).length, r.id).toBe(1);
   });
 
-  it('シール1枚に もの1つ。無料は はじめから3つ、もり・すいぞくかんパックで キャンプテント・かいがらのソファが増える', () => {
+  it('シール1枚に もの1つ。無料は はじめから3つ、もり・すいぞくかん・おばけやしきパックで 初期家具が増える', () => {
     for (const s of STICKERS) expect(itemForSticker(s.id), s.id).toBeTruthy();
     expect(new Set(ITEMS.map((i) => i.id)).size).toBe(ITEMS.length);
     expect(ownedItems({ cleared: 0, totalFinds: 0 }, baseOnly).map((i) => i.id)).toEqual(['sofa', 'table', 'rug']);
-    expect(ownedItems({ cleared: 0, totalFinds: 0 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'camp-tent', 'shell-sofa']);
-    expect(ownedItems({ cleared: 3, totalFinds: 12 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'ball', 'cushion', 'bed', 'plant', 'camp-tent', 'shell-sofa']);
-    // パックが無ければ、そのパックのシールの もの は出ない（コース10のこいぬ・うみべ・きのこの もり・すいぞくかん）
-    const base = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99, forest: 99, aquarium: 99 } }, baseOnly).map((i) => i.id);
+    expect(ownedItems({ cleared: 0, totalFinds: 0 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'camp-tent', 'shell-sofa', 'gothic-sofa']);
+    expect(ownedItems({ cleared: 3, totalFinds: 12 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'ball', 'cushion', 'bed', 'plant', 'camp-tent', 'shell-sofa', 'gothic-sofa']);
+    // パックが無ければ、そのパックのシールの もの は出ない（コース10のこいぬ・うみべ・きのこの もり・すいぞくかん・おばけやしき）
+    const base = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99, forest: 99, aquarium: 99, haunted: 99 } }, baseOnly).map((i) => i.id);
     expect(base).not.toContain('puppy');
     expect(base).not.toContain('shell');
     expect(base).not.toContain('camp-tent');
     expect(base).not.toContain('stump-chair');
     expect(base).not.toContain('shell-sofa');
     expect(base).not.toContain('coral-rug');
+    expect(base).not.toContain('gothic-sofa');
+    expect(base).not.toContain('star-rug');
     expect(base).toContain('balloon');
   });
 

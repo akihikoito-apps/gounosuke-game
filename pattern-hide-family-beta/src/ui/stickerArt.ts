@@ -59,6 +59,14 @@ function motif(m: Motif): string {
       return `<rect x="-14" y="-4" width="28" height="16" rx="3" fill="#C98A54" ${L}/><path d="M-14 -4 Q0 -14 14 -4 Z" fill="#E5B869" ${L}/><circle cx="0" cy="-2" r="3" fill="#FFE082" ${L}/>`;
     case 'penguin':
       return `<ellipse cx="0" cy="1" rx="11" ry="14" fill="#5E7A96" ${L}/><ellipse cx="0" cy="4" rx="7" ry="10" fill="#FFFDF8"/><circle cx="-4" cy="-6" r="1.6" fill="#4A3A40"/><circle cx="4" cy="-6" r="1.6" fill="#4A3A40"/><path d="M-3 -3 L3 -3 L0 1 Z" fill="#F6C85F"/>`;
+    case 'pumpkin':
+      return `<path d="M0 -11 V-15" ${L}/><ellipse cx="0" cy="2" rx="15" ry="12" fill="#F29A52" ${L}/><circle cx="-5" cy="-1" r="2" fill="#FFF0A8"/><circle cx="5" cy="-1" r="2" fill="#FFF0A8"/><path d="M-6 5 Q0 10 6 5" fill="none" ${L}/>`;
+    case 'ghost':
+      return `<path d="M-12 12 V-2 A12 12 0 0 1 12 -2 V12 Q8 8 4 12 Q0 8 -4 12 Q-8 8 -12 12 Z" fill="#F8F6FF" ${L}/><circle cx="-4" cy="-3" r="1.8" fill="#4A3A40"/><circle cx="4" cy="-3" r="1.8" fill="#4A3A40"/>`;
+    case 'bat':
+      return `<ellipse cx="-11" cy="0" rx="7" ry="5" fill="#9E86B8" ${L}/><ellipse cx="11" cy="0" rx="7" ry="5" fill="#9E86B8" ${L}/><circle cx="0" cy="0" r="8" fill="#9E86B8" ${L}/><circle cx="-3" cy="-1" r="1.5" fill="#4A3A40"/><circle cx="3" cy="-1" r="1.5" fill="#4A3A40"/>`;
+    case 'musicbox':
+      return `<rect x="-13" y="0" width="26" height="12" rx="3" fill="#A87C68" ${L}/><circle cx="0" cy="-6" r="7" fill="#FFF3B0" ${L}/>`;
   }
 }
 
