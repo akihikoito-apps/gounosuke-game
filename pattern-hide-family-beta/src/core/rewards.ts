@@ -13,6 +13,8 @@ export type UpcomingReward =
   | { kind: 'courseSticker'; sticker: StickerDef; at: number; remaining: number }
   /** 見つけた合計が at 回になると、シール。done：いまの回数 */
   | { kind: 'findsSticker'; sticker: StickerDef; at: number; remaining: number; done: number }
+  /** パックの背景で 見つけた回数が at 回になると、シール（と へやの物） */
+  | { kind: 'sceneSticker'; sticker: StickerDef; scene: SceneId; at: number; remaining: number; done: number }
   /** コース at をクリアすると、じぶんの へや に部屋が ふえる */
   | { kind: 'room'; room: RoomDef; at: number; remaining: number };
 
@@ -32,6 +34,12 @@ export function upcomingRewards(p: RewardProgress, can: CanPlay): UpcomingReward
   if (cs) out.push({ kind: 'courseSticker', sticker: cs, at: cs.need, remaining: cs.need - p.cleared });
   const fs = stickers.filter((s) => s.kind === 'finds').sort((a, b) => a.need - b.need)[0];
   if (fs) out.push({ kind: 'findsSticker', sticker: fs, at: fs.need, remaining: fs.need - p.totalFinds, done: p.totalFinds });
+  // パック：遊びはじめた背景の、いちばん近い シール
+  const ss = stickers
+    .filter((s) => s.kind === 'scene' && s.scene && can(`scene:${s.scene}`) && (p.sceneFinds?.[s.scene] ?? 0) >= 1)
+    .map((s) => ({ s, remaining: s.need - (p.sceneFinds?.[s.scene as SceneId] ?? 0) }))
+    .sort((a, b) => a.remaining - b.remaining)[0];
+  if (ss) out.push({ kind: 'sceneSticker', sticker: ss.s, scene: ss.s.scene as SceneId, at: ss.s.need, remaining: ss.remaining, done: p.sceneFinds?.[ss.s.scene as SceneId] ?? 0 });
   const room = ROOMS.filter((r) => r.needCleared > p.cleared && can(r.content) && canPlayCourse(r.needCleared, can)).sort((a, b) => a.needCleared - b.needCleared)[0];
   if (room) out.push({ kind: 'room', room, at: room.needCleared, remaining: room.needCleared - p.cleared });
   return out;

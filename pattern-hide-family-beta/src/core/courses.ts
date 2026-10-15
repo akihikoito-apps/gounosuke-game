@@ -41,6 +41,12 @@ export const COURSES: CourseDef[] = [
   { no: 10, spots: 'all', variant: 'exact', outline: 0.32, maxChars: 3, hat: { rate: 0.9, style: 'camo' }, umbrella: { rate: 0.8, style: 'camo' } },
 ];
 
+/** must（その背景で初めて会う友だち）を かならず入れる */
+export function withMust(chars: CharacterId[], must?: CharacterId): CharacterId[] {
+  if (!must || chars.includes(must)) return chars;
+  return [must, ...chars.slice(0, Math.max(0, chars.length - 1))];
+}
+
 export function courseDef(no: number): CourseDef {
   return COURSES[Math.min(COURSES.length, Math.max(1, Math.floor(no))) - 1];
 }
@@ -59,11 +65,11 @@ function worldShapes(spot: SpotDef, acc: Accessories) {
  * コースの1回分の配置。remaining（このコースで残りの「みつける」回数）を超えない人数にする。
  * シードが同じなら同じ結果。
  */
-export function courseRound(scene: SceneDef, no: number, remaining: number, seed: number, allowed: readonly CharacterId[] = BASE_CHARACTER_IDS): Placement[] {
+export function courseRound(scene: SceneDef, no: number, remaining: number, seed: number, allowed: readonly CharacterId[] = BASE_CHARACTER_IDS, must?: CharacterId): Placement[] {
   const c = courseDef(no);
   const rng: Rng = mulberry32(seed);
   const want = Math.max(1, Math.min(remaining, 1 + Math.floor(rng() * c.maxChars)));
-  const chars = shuffle(rng, allowed).slice(0, want);
+  const chars = withMust(shuffle(rng, allowed).slice(0, want), must);
   const pool = shuffle(
     rng,
     scene.spots.filter((s) => c.spots === 'all' || s.easy),

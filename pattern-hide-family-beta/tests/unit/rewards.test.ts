@@ -45,3 +45,27 @@ describe('つぎの ごほうび', () => {
     expect(friendAtCourse(2, all)).toBeNull();
   });
 });
+
+import { withMust } from '../../src/core/courses';
+import { autoLayout } from '../../src/core/placement';
+import { SCENES } from '../../src/core/scenes';
+
+describe('発売前の仕上げ（Gemini 最終点検）', () => {
+  it('パックの背景で遊びはじめたら、その背景の いちばん近いシールを告知する', () => {
+    const r = upcomingRewards({ cleared: 2, totalFinds: 22, sceneFinds: { forest: 3 } }, all).find((x) => x.kind === 'sceneSticker');
+    expect(r).toMatchObject({ scene: 'forest', at: 5, remaining: 2, done: 3 });
+    // まだ遊んでいない背景・持っていないパックは告知しない
+    expect(upcomingRewards({ cleared: 2, totalFinds: 22 }, all).some((x) => x.kind === 'sceneSticker')).toBe(false);
+    expect(upcomingRewards({ cleared: 2, totalFinds: 22, sceneFinds: { forest: 3 } }, baseOnly).some((x) => x.kind === 'sceneSticker')).toBe(false);
+  });
+
+  it('初めての背景では、その背景の友だちが かならず かくれている（人数は変えない）', () => {
+    expect(withMust(['koro', 'mimi'], 'pino')).toEqual(['pino', 'koro']);
+    expect(withMust(['koro'], 'pino')).toEqual(['pino']);
+    expect(withMust(['pino', 'koro'], 'pino')).toEqual(['pino', 'koro']);
+    for (let seed = 1; seed <= 30; seed++) {
+      const pls = autoLayout(SCENES.forest, 'normal', seed, ['koro', 'mimi', 'moko'], 'pino');
+      expect(pls.some((p) => p.char === 'pino')).toBe(true);
+    }
+  });
+});

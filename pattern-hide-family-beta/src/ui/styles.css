@@ -622,3 +622,13 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
   .mr-tab { padding: 2px 6px; }
 }
 @media (prefers-reduced-motion: reduce) { .mr-room-tab.call { animation: none; outline: 3px solid #FFD45C; } }
+
+/* タイトル：あそびかた（下の真ん中） */
+.howto-btn { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12px + var(--safe-b)); }
+@media (max-height: 640px) and (orientation: portrait) { .title-foot .howto-btn { transform: none; } }
+/* あたらしく なったよ（更新したあと1回だけ） */
+.news { position: absolute; top: calc(10px + var(--safe-t)); left: 50%; transform: translateX(-50%); z-index: 20; width: min(420px, 92vw); background: #fff; border: 4px solid var(--line); border-radius: 20px; padding: 10px 14px; box-shadow: 0 6px 0 rgba(74, 58, 64, 0.2); display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; animation: pop 0.5s ease-out; }
+.news-title { margin: 0; font-weight: 800; font-size: 17px; grid-column: 1 / -1; }
+.news ul { margin: 0; padding-left: 1.2em; font-size: 14px; font-weight: 700; line-height: 1.5; }
+.news .news-ok { position: static; align-self: end; }
+@media (prefers-reduced-motion: reduce) { .news { animation: none; } }

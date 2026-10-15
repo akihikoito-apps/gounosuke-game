@@ -43,6 +43,7 @@ import { $, btn, prefersReducedMotion, toScene } from './dom';
 import { renderScene, sceneThumb } from './sceneView';
 import { ParentArea } from './parent';
 import { NATIVE } from './platform';
+import { CONTENT_VERSION, newsSince } from '../core/whatsnew';
 import { type UpcomingReward, friendAtCourse, upcomingRewards } from '../core/rewards';
 import { HIDE_MOVERS_MAX, MOVERS, MOVER_NAMES, type MoverDef, pickMovers } from '../core/movers';
 import { moverIcon, moversMarkup } from './moverView';
@@ -117,7 +118,7 @@ export class App {
   private moverStart = 0;
   /** このラウンドでコースをクリアした（クリア画面を出す） */
   private courseJustCleared = false;
-  private afterTutorial: 'search' | 'course' = 'search';
+  private afterTutorial: 'search' | 'course' | 'title' = 'search';
   /** このクリアが初めてか（ごほうびの表示に使う） */
   private courseFirstClear = false;
   /** パックの利用権限（ベータは全開放。本番では正規の購入確認に差し替える） */
@@ -171,6 +172,12 @@ export class App {
   start(): void {
     // 絵を先に読み込んでおく（出題の画面で、背景より先にキャラクターだけが見えないように）
     for (const u of allArtUrls()) void decodeImage(u);
+    // はじめて入れた人には「あたらしく なったよ」を出さない（いまの版を見たことにする）
+    if (this.store.status === 'empty' && this.store.data.settings.newsSeen === undefined) {
+      this.store.update((d) => {
+        d.settings.newsSeen = CONTENT_VERSION;
+      });
+    }
     this.render();
   }
 
@@ -250,7 +257,12 @@ export class App {
     // 遊べない（パックが無い）背景・友だちの途中は「つづきから」に出さない
     const resume = r0 && canResume(r0, this.can) ? r0 : null;
     const peek = CHARACTER_IDS.map((c) => `<div class="peek peek-${c}">${faceIcon(CHARACTERS[c])}</div>`).join('');
+    const news = newsSince(this.store.data.settings.newsSeen);
+    const newsHtml = news.length
+      ? `<div class="news" role="status"><p class="news-title">あたらしく なったよ！</p><ul>${news.flatMap((n) => n.lines).slice(0, 4).map((l) => `<li>${l}</li>`).join('')}</ul>${btn('newsOk', ICONS.done, 'わかった', 'small news-ok')}</div>`
+      : '';
     return `<main class="screen title" data-screen="title">
+      ${newsHtml}
       <div class="logo" aria-label="もようの かくれんぼ">
         ${artImg('title') ?? `<div class="peeks">${peek}</div>`}
         <h1>もようの<br>かくれんぼ</h1>
@@ -267,6 +279,7 @@ export class App {
       </div>
       <div class="title-foot">
         ${btn('toStickers', ICONS.sticker, `シールちょう ${this.stickerCount()}/${visibleStickers(this.can).length}`, 'small sticker-btn')}
+        ${btn('howto', ICONS.question, 'あそびかた', 'small howto-btn')}
         ${btn('parent', ICONS.parent, 'おとなの かたへ', 'small parent-btn')}
       </div>
     </main>`;
@@ -342,6 +355,10 @@ export class App {
       const it = itemForSticker(id);
       return it ? `<br><span class="up-gift">へやに「${it.name}」も とどくよ</span>` : '';
     };
+    if (r.kind === 'sceneSticker') {
+      const pct = Math.round((r.done / r.at) * 100);
+      return `<div class="up-row up-sticker"><span class="up-icon">${stickerSvg(r.sticker)}</span><p>「${SCENES[r.scene].name}」で あと <b>${r.remaining}</b>かい みつけると<br>シール「${r.sticker.name}」が もらえるよ${gift(r.sticker.id)}<span class="up-bar" aria-hidden="true"><i style="width:${pct}%"></i></span></p></div>`;
+    }
     if (r.kind === 'room') {
       return `<div class="up-row up-room"><span class="up-icon">${ICONS.room}</span><p>${when(r.remaining)}<br>じぶんの へや に「${r.room.name}」が ふえるよ</p></div>`;
     }
@@ -462,14 +479,16 @@ export class App {
     const faces = s.placements.map((pl, i) => `<div class="clear-face">${this.targetIcon(pl, i, 'cf')}</div>`).join('');
     if (this.courseJustCleared) {
       const last = this.courseNo >= COURSE_COUNT;
+      // 次のコースが追加パックで、まだ持っていない：きほんの コースは ここで おしまい
+      const baseEnd = !last && !canPlayCourse(this.courseNo + 1, this.can);
       return `<div class="overlay clear course-clear" role="dialog" aria-modal="true" aria-label="コース${this.courseNo} クリア">
         <div class="clear-card">
           <div class="medal" aria-hidden="true">${ICONS.star}<span>${this.courseNo}</span></div>
           <p class="clear-title">コース${this.courseNo} クリア！</p>
           ${this.courseRewardHtml()}
-          ${last ? '<p class="clear-sub">ぜんぶの コースを クリアしたよ</p>' : this.upcomingHtml(true)}
+          ${last ? '<p class="clear-sub">ぜんぶの コースを クリアしたよ</p>' : baseEnd ? '<p class="clear-sub">きほんの コースを ぜんぶ クリアしたよ！<br>じぶんの へやで あそんでみてね</p>' : this.upcomingHtml(true)}
           <div class="clear-actions two">
-            ${last ? btn('toCourse', ICONS.course, 'コースを えらぶ', 'equal', 'data-autofocus') : btn('nextCourse', ICONS.next, 'つぎの コース', 'equal primary', 'data-autofocus')}
+            ${last ? btn('toCourse', ICONS.course, 'コースを えらぶ', 'equal', 'data-autofocus') : baseEnd ? btn('toMyRoom', ICONS.room, 'じぶんの へや', 'equal primary', 'data-autofocus') : btn('nextCourse', ICONS.next, 'つぎの コース', 'equal primary', 'data-autofocus')}
             ${btn('bye', ICONS.bye, 'おしまい', 'equal')}
           </div>
         </div>
@@ -758,8 +777,18 @@ export class App {
         this.afterTutorial = 'search';
         this.go('tutorial');
         break;
+      case 'howto':
+        this.afterTutorial = 'title';
+        this.go('tutorial');
+        break;
+      case 'newsOk':
+        this.store.update((d) => {
+          d.settings.newsSeen = CONTENT_VERSION;
+        });
+        this.render();
+        break;
       case 'backFromTutorial':
-        this.go(this.afterTutorial === 'course' ? 'courseSelect' : 'searchSetup');
+        this.go(this.afterTutorial === 'course' ? 'courseSelect' : this.afterTutorial === 'title' ? 'title' : 'searchSetup');
         break;
       case 'startSearch':
         this.searchScene = el.dataset.scene as SceneId;
@@ -772,7 +801,11 @@ export class App {
           x.settings.tutorialSeen = true;
         });
         if (this.afterTutorial === 'course') this.startCourseRound();
-        else this.startSearch();
+        else {
+          // タイトルの「あそびかた」から：無料の へや で 1回 やってみる
+          if (this.afterTutorial === 'title') this.searchScene = 'room';
+          this.startSearch();
+        }
         break;
       case 'hint':
         this.onHint();
@@ -874,7 +907,7 @@ export class App {
     const difficulty = this.store.data.settings.difficulty;
     const scene = SCENES[this.searchScene];
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
-    const placements = autoLayout(scene, difficulty, seed, this.allowedChars());
+    const placements = autoLayout(scene, difficulty, seed, this.allowedChars(), this.firstMeet(scene.id));
     this.session = newSession(scene.id, difficulty, placements, 'search', Date.now());
     record(this.store, { type: 'searchStarted' });
     this.saveResume();
@@ -908,7 +941,7 @@ export class App {
     const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids)];
     const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
-    const placements = courseRound(scene, this.courseNo, remaining, seed, this.allowedChars());
+    const placements = courseRound(scene, this.courseNo, remaining, seed, this.allowedChars(), this.firstMeet(scene.id));
     this.movers = this.store.data.settings.movers ? pickMovers(scene.id, this.courseNo, seed) : [];
     this.moverStart = performance.now();
     const c = courseDef(this.courseNo);
@@ -920,6 +953,13 @@ export class App {
   private progress() {
     const d = this.store.data;
     return { cleared: d.course.cleared, totalFinds: d.collection.totalFinds, sceneFinds: d.collection.sceneFinds };
+  }
+
+  /** その背景で まだ誰も見つけていなければ、その背景の友だち（パック）。初めての出会いに かならず かくれている */
+  private firstMeet(scene: SceneId): CharacterId | undefined {
+    if ((this.store.data.collection.sceneFinds[scene] ?? 0) > 0) return undefined;
+    const f = SCENE_FRIENDS.find((x) => x.scene === scene && this.can(`char:${x.char}`));
+    return f?.char;
   }
 
   /** いま遊べるキャラクター（コース1でにゃこ、コース5でぽぽが仲間に） */
@@ -1032,6 +1072,11 @@ export class App {
     if (!btnEl) return; // コースクリア・おためし終了の画面では待つ
     this.autoTimer = window.setTimeout(() => {
       if (this.session !== s || this.screen !== 'play' || this.parent.isOpen()) return;
+      // 「なかまに なったよ」などの知らせが出ている間は待つ（重ならないように）
+      if (this.toastBusy) {
+        this.scheduleAutoNext();
+        return;
+      }
       if (s.origin === 'course') this.startCourseRound();
       else this.startTrialRound();
     }, AUTO_NEXT_MS);

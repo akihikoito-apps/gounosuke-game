@@ -16,6 +16,8 @@ export interface Settings {
   movers: boolean;
   /** テスト用：追加パックを ためす（購入の仕組みができるまでの確認用。購入の証明ではない） */
   trialAllPacks?: boolean;
+  /** 「あたらしく なったよ」を最後に見た版（無ければ はじめて入れた人） */
+  newsSeen?: number;
 }
 
 export interface ResumeState {
@@ -157,6 +159,7 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
     if (isBool(s.movers)) d.settings.movers = s.movers;
     else if (s.movers !== undefined) repaired = true;
     if (isBool(s.trialAllPacks)) d.settings.trialAllPacks = s.trialAllPacks;
+    if (typeof s.newsSeen === 'number' && Number.isInteger(s.newsSeen) && s.newsSeen >= 0 && s.newsSeen < 10000) d.settings.newsSeen = s.newsSeen;
   } else repaired = true;
   if (raw.resume !== null && raw.resume !== undefined) {
     const r = validateResume(raw.resume);

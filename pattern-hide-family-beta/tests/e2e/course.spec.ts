@@ -243,7 +243,8 @@ test('beach pack: first find at the beach brings choki and the b1 sticker; notic
   await act(page, 'startSearch', '[data-scene="beach"]');
   const s = await state(page);
   expect(s.session.sceneId).toBe('beach');
-  expect(s.session.placements.some((p: any) => p.char === 'choki')).toBe(false);
+  // 初めての うみべ では、ちょき が かならず かくれている（初めての出会い）
+  expect(s.session.placements.some((p: any) => p.char === 'choki')).toBe(true);
   const eyes = await eyePoints(page, 0);
   await tapAt(page, { x: (eyes[0].x + eyes[1].x) / 2, y: eyes[0].y });
   // 知らせは1つずつ：まず ちょき、次にシール

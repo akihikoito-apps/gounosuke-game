@@ -9,6 +9,7 @@ import {
   type Genre,
   ITEM_BY_ID,
   ownerRooms,
+  removeRef,
   type RoomLayouts,
   MAX_PLACED,
   type ItemDef,
@@ -90,6 +91,8 @@ export class MyRoomView {
   private tab: 'chars' | Genre = 'chars';
   /** 「〇〇に いるよ」の知らせ */
   private hintTimer = 0;
+  /** パックが使えなくて いまは見せない物（置き場所は保存に残す。パックが もどったら また出る） */
+  private hidden: Placed[] = [];
   private drag: Drag | null = null;
   private el: HTMLElement | null = null;
 
@@ -110,7 +113,7 @@ export class MyRoomView {
 
   /** ref → それが置いてある ほかの部屋 */
   private elsewhere(): Map<string, RoomId> {
-    const m = ownerRooms(this.deps.allLayouts());
+    const m = ownerRooms(this.deps.allLayouts(), this.openIds());
     for (const [ref, room] of [...m]) if (room === this.room) m.delete(ref);
     // いま開いている部屋に置いた物は、保存前でも「ここ」
     for (const p of this.list) m.delete(p.ref);
@@ -121,17 +124,20 @@ export class MyRoomView {
     const saved = this.deps.load(this.room);
     const chars = new Set(this.deps.chars());
     const items = new Set(this.deps.items().map((i) => i.id));
-    const owners = ownerRooms(this.deps.allLayouts());
-    const usable = (p: Placed) => {
-      const [k, id] = p.ref.split(':');
+    const owners = ownerRooms(this.deps.allLayouts(), this.openIds());
+    const dup = (p: Placed) => {
       // 同じ友だち・物が ほかの部屋にもあるとき（以前の保存データ）は、先に並ぶ部屋の方だけ
       const owner = owners.get(p.ref);
-      if (owner && owner !== this.room) return false;
+      return !!owner && owner !== this.room;
+    };
+    const owned = (p: Placed) => {
+      const [k, id] = p.ref.split(':');
       return k === 'char' ? chars.has(id as CharacterId) : items.has(id);
     };
-    const base = saved ?? starterLayout(this.room);
-    // 使えなくなったもの（パック外など）は出さない。座っている先が消えたら床に下ろす
-    const keep = base.map((p, i) => ({ p, i })).filter(({ p }) => usable(p));
+    const base = (saved ?? starterLayout(this.room)).filter((p) => !(saved ? false : this.otherRoomHas(p.ref)));
+    // パックが使えない物は見せないが、置き場所は残す（hidden）。座っている先が消えたら床に下ろす
+    this.hidden = base.filter((p) => !dup(p) && !owned(p)).map((p) => ({ ref: p.ref, x: p.x, y: p.y, ...(p.flip ? { flip: true } : {}) }));
+    const keep = base.map((p, i) => ({ p, i })).filter(({ p }) => !dup(p) && owned(p));
     const map = new Map(keep.map(({ i }, j) => [i, j]));
     this.list = keep.map(({ p }) => {
       const q: Placed = { ...p };
@@ -146,7 +152,29 @@ export class MyRoomView {
   }
 
   private persist(): void {
-    this.deps.save(this.room, this.list, this.room);
+    // 見せていない物（パック外）も 置き場所を残す。番号の付いた座席は いま見せている物の中だけ
+    this.deps.save(this.room, [...this.list, ...this.hidden.filter((h) => !this.list.some((p) => p.ref === h.ref))], this.room);
+  }
+
+  private openIds(): RoomId[] {
+    return this.deps.rooms().map((r) => r.id);
+  }
+
+  /** ほかの（開いている）部屋に もう置いてある */
+  private otherRoomHas(ref: string): boolean {
+    const o = ownerRooms(this.deps.allLayouts(), this.openIds()).get(ref);
+    return !!o && o !== this.room;
+  }
+
+  /** この物を ここに置くとき、閉じた部屋に残っていたら そこから取りのぞく（1つの部屋だけ、を守る） */
+  private releaseFromClosedRooms(ref: string): void {
+    const all = this.deps.allLayouts();
+    const open = this.openIds();
+    for (const r of ROOMS) {
+      if (r.id === this.room || open.includes(r.id)) continue;
+      const l = all[r.id];
+      if (l?.some((p) => p.ref === ref)) this.deps.save(r.id, removeRef(l, ref), this.room);
+    }
   }
 
   // ---------- 描画 ----------
@@ -442,6 +470,7 @@ export class MyRoomView {
         d.idx = old;
       } else {
         if (this.list.length >= MAX_PLACED) return;
+        this.releaseFromClosedRooms(d.ref);
         this.list.push({ ref: d.ref, x: at.x, y: Math.max(this.def().floorTop, at.y) });
         d.idx = this.list.length - 1;
       }
@@ -601,6 +630,7 @@ export class MyRoomView {
       this.removeAt(old);
     } else {
       if (this.list.length >= MAX_PLACED) return;
+      this.releaseFromClosedRooms(ref);
       const room = this.def();
       // 空いていそうな所（手前の真ん中から 少しずつ ずらす）
       const n = this.list.length;

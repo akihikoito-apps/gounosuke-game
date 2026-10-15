@@ -154,11 +154,33 @@ export function openRooms(cleared: number, can: CanPlay, sceneFinds: Partial<Rec
   return ROOMS.filter((r) => can(r.content) && cleared >= r.needCleared && (!r.needScene || (sceneFinds[r.needScene] ?? 0) >= 1));
 }
 
-/** 置いてある部屋（同じ友だち・物は1つの部屋にだけ置ける。先に並ぶ部屋が優先） */
-export function ownerRooms(layouts: RoomLayouts): Map<string, RoomId> {
+/**
+ * 置いてある部屋（同じ友だち・物は1つの部屋にだけ置ける。先に並ぶ部屋が優先）。
+ * open を渡すと、開いている部屋だけを見る（閉じた部屋＝パックが使えない部屋に取り残された物は、ほかで使える）。
+ */
+export function ownerRooms(layouts: RoomLayouts, open?: readonly RoomId[]): Map<string, RoomId> {
   const m = new Map<string, RoomId>();
-  for (const r of ROOMS) for (const p of layouts[r.id] ?? []) if (!m.has(p.ref)) m.set(p.ref, r.id);
+  for (const r of ROOMS) {
+    if (open && !open.includes(r.id)) continue;
+    for (const p of layouts[r.id] ?? []) if (!m.has(p.ref)) m.set(p.ref, r.id);
+  }
   return m;
+}
+
+/** 置き方から ref を取りのぞく（座っていた子は床に下ろし、座席の番号を つめる） */
+export function removeRef(list: readonly Placed[], ref: string): Placed[] {
+  const i = list.findIndex((p) => p.ref === ref);
+  if (i < 0) return list.map((p) => ({ ...p }));
+  return list
+    .filter((_, j) => j !== i)
+    .map((p) => {
+      const q: Placed = { ...p };
+      if (q.on) {
+        if (q.on.idx === i) delete q.on;
+        else if (q.on.idx > i) q.on = { idx: q.on.idx - 1, seat: q.on.seat };
+      }
+      return q;
+    });
 }
 
 /** 奥ほど小さく（遠近） */
@@ -185,8 +207,10 @@ export const MAX_PLACED = 40;
 
 /** はじめて開いたときの部屋（からっぽだと何をすればいいか分からないので、少し置いておく） */
 export function starterLayout(room: RoomId): Placed[] {
-  if (room === 'living') return [{ ref: 'item:rug', x: 520, y: 900 }, { ref: 'item:sofa', x: 470, y: 690 }, { ref: 'item:table', x: 520, y: 900 }, { ref: 'char:koro', x: 830, y: 960 }];
-  if (room === 'bedroom') return [{ ref: 'item:rug', x: 500, y: 900 }];
+  // ころ は さいしょから ソファに すわっている（すわれることが 見て分かるように）
+  if (room === 'living') return [{ ref: 'item:rug', x: 520, y: 900 }, { ref: 'item:sofa', x: 470, y: 690 }, { ref: 'item:table', x: 520, y: 900 }, { ref: 'char:koro', x: 410, y: 600, on: { idx: 1, seat: 0 } }];
+  // しんしつ：ベッド（コース3で とどいている）
+  if (room === 'bedroom') return [{ ref: 'item:bed', x: 500, y: 760 }];
   if (room === 'yard') return [{ ref: 'item:camp-tent', x: 260, y: 720 }];
   if (room === 'aquarium-room') return [{ ref: 'item:shell-sofa', x: 280, y: 720 }];
   if (room === 'attic') return [{ ref: 'item:gothic-sofa', x: 280, y: 720 }];

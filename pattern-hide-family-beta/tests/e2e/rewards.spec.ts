@@ -73,11 +73,20 @@ test('遊ぶ画面：3人のときも、顔と文字が 画面に おさまる',
   await seed(page, { cleared: 9, current: 10, finds: 0 }, 95);
   await act(page, 'toCourse');
   await act(page, 'pickCourse', '[data-course="10"]');
-  for (let k = 0; k < 12; k++) {
+  for (let k = 0; k < 30; k++) {
     const n = (await state(page)).session.placements.length;
     if (n === 3) break;
     for (let i = 0; i < n; i++) await tapAt(page, await faceCenter(page, i));
-    await act(page, 'nextRound');
+    // 自動で次へ進むこともあるので、ボタンが残っていれば押す
+    await page.waitForTimeout(450);
+    // コースを クリアしたら、もう一度 コース10 を はじめる
+    if (await page.locator('.course-clear').count()) {
+      await act(page, 'toCourse');
+      await act(page, 'pickCourse', '[data-course="10"]');
+      continue;
+    }
+    await page.locator('[data-action="nextRound"]').click({ timeout: 3500 }).catch(() => {});
+    await page.waitForTimeout(300);
   }
   const bar = await page.locator('.bar').boundingBox();
   const msg = await page.locator('.find-msg').boundingBox();

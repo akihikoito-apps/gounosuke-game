@@ -178,10 +178,12 @@ export function validateLayout(scene: SceneDef, placements: Placement[]): Layout
 
 /** 「さがす」モードの自動配置。シードが同じなら同じ結果。 */
 /** chars：出てよいキャラクター（にゃこは仲間になってから） */
-export function autoLayout(scene: SceneDef, difficulty: Difficulty, seed: number, chars0: readonly CharacterId[] = BASE_CHARACTER_IDS): Placement[] {
+export function autoLayout(scene: SceneDef, difficulty: Difficulty, seed: number, chars0: readonly CharacterId[] = BASE_CHARACTER_IDS, must?: CharacterId): Placement[] {
   const rng: Rng = mulberry32(seed);
   const count = difficulty === 'easy' ? 1 : rng() < 0.5 ? 2 : 3;
-  const chars = shuffle(rng, chars0).slice(0, count);
+  let chars = shuffle(rng, chars0).slice(0, count);
+  // その背景で初めて会う友だちを かならず入れる
+  if (must && !chars.includes(must)) chars = [must, ...chars.slice(0, count - 1)];
   const pool = shuffle(
     rng,
     scene.spots.filter((s) => difficulty === 'normal' || s.easy),
