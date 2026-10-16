@@ -28,6 +28,9 @@ const FOE_COLORS = run('FOE_COLORS');
 const FOE_MOTION = run('FOE_MOTION');
 const FOE_STATS  = run('FOE_STATS');
 const FOE_EXTRAS = run('FOE_EXTRAS');
+const FOE_BASE   = run('FOE_BASE');
+const FOE_BODY_SIZE = run('FOE_BODY_SIZE');
+const drawFoeFrame  = run('drawFoeFrame');
 const ORIG       = run('ORIG');
 const BACKGROUNDS = run('BACKGROUNDS');
 const BG_NAME = run('BG_NAME');
@@ -158,6 +161,76 @@ test('えの とうろく（registerFoeDrawer）が はたらく', () => {
   registerFoeDrawer('origfoe_test1', look, { walk: 'float', atk: 'shoot' });
   assert.strictEqual(typeof DRAWERS['origfoe_test1'], 'function');
   assert.doesNotThrow(() => DRAWERS['origfoe_test1'](fakeCtx, { t: 1, moving: true, atk: -1 }));
+});
+
+console.log('たいけい（きほんの かたち）');
+
+test('たいけいが 5しゅるい いじょう ある', () => {
+  assert.ok(Array.isArray(FOE_BASE) && FOE_BASE.length >= 5,
+    'たいけいが ' + (FOE_BASE || []).length + 'しゅるい しか ない');
+  assert.strictEqual(new Set(FOE_BASE.map(b => b.id)).size, FOE_BASE.length, 'id が かぶって いる');
+  FOE_BASE.forEach(b => assert.ok(b.name, b.id + ' に なまえが ない'));
+  assert.ok(FOE_BASE.some(b => b.id === 'blob'), 'いままでの「ふつう」が ない');
+  ['human', 'beast', 'fish', 'dino'].forEach(id =>
+    assert.ok(FOE_BASE.some(b => b.id === id), 'たいけい「' + id + '」が ない'));
+});
+
+test('からだの おおきさを かえられる', () => {
+  assert.ok(FOE_BODY_SIZE.min < 1 && FOE_BODY_SIZE.max > 1,
+    'おおきくも ちいさくも できない');
+  assert.ok(FOE_BODY_SIZE.step > 0 && FOE_BODY_SIZE.def >= FOE_BODY_SIZE.min
+    && FOE_BODY_SIZE.def <= FOE_BODY_SIZE.max, 'はじめの あたいが はんいの そと');
+});
+
+test('★たいけいの ほねが ぜんぶ かけて、あたまの ばしょを かえす', () => {
+  const COL = { main: '#e05252', dark: '#8e2222', light: '#ffb4a8' };
+  const ids = FOE_BASE.map(b => b.id).filter(id => id !== 'blob').concat(['しらない かたち']);
+  ids.forEach(id => {
+    [true, false].forEach(mv => {
+      [{ lean: 0, crouch: 0 }, { lean: 0.8, crouch: 0.5 }, { lean: -0.6, crouch: 0 }].forEach(p => {
+        const r = drawFoeFrame(fakeCtx, id, 1.3, mv, p, COL, '#20201e');
+        assert.ok(r && typeof r.hx === 'number' && typeof r.hy === 'number' && typeof r.hr === 'number',
+          id + ' が あたまの ばしょを かえして いない');
+        assert.ok(r.hy < 0, id + ' の あたまが じめんの したに ある（hy=' + r.hy + '）');
+        assert.ok(r.hr > 10 && r.hr < 40, id + ' の あたまの おおきさが へん（hr=' + r.hr + '）');
+        assert.ok(Math.abs(r.hx) < 70, id + ' の あたまが よこに はなれすぎ（hx=' + r.hx + '）');
+      });
+    });
+  });
+});
+
+test('たいけい × パーツ × おおきさ を ぜんぶ えに して みて エラーが でない', () => {
+  const keys = ['body', 'eye', 'mouth', 'horn', 'arm', 'leg', 'pattern'];
+  const base = {};
+  keys.forEach(k => { base[k] = FOE_PARTS[k][0].id; });
+  base.color = FOE_COLORS[0].id;
+  const states = [
+    { t: 0.5, moving: true,  atk: -1 },
+    { t: 1.2, moving: false, atk: 0.6 },
+    { t: 2.0, moving: false, atk: -1, fired: true },
+  ];
+  let n = 0;
+  FOE_BASE.forEach(b => {
+    FOE_PARTS.body.forEach(bodyPart => {
+      [FOE_BODY_SIZE.min, 1, FOE_BODY_SIZE.max].forEach(sz => {
+        FOE_MOTION.atk.forEach(ak => {
+          const look = Object.assign({}, base, { base: b.id, bodySize: sz, body: bodyPart.id });
+          states.forEach(st => { n++; drawFoeParts(fakeCtx, st, look, { walk: 'step', atk: ak.id }); });
+        });
+      });
+    });
+  });
+  assert.ok(n > 1000, 'ためした かずが すくなすぎる（' + n + '）');
+});
+
+test('たいけいを えらぶ ところが つくる がめんに ある', () => {
+  const i = main.indexOf("if (foeTab === 'look')");
+  assert.ok(i >= 0, 'みための タブが みつからない');
+  const body = main.slice(i, i + 3000);
+  assert.ok(/FOE_EDIT\.look\.base = b\.id/.test(body), 'たいけいを えらべない');
+  assert.ok(/FOE_EDIT\.look\.bodySize = parseFloat/.test(body), 'おおきさを かえられない');
+  assert.ok(/k === 'arm' \|\| k === 'leg'/.test(body),
+    'たいけいの ときに て・あしを かくして いない');
 });
 
 console.log('ステータスと とくこうか');

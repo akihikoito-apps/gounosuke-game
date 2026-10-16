@@ -15194,6 +15194,11 @@ function drawFoeParts(ctx, st, look, motion) {
     ? (FOE_COLORS.find(c => c.id === L.color) || FOE_COLORS[0])
     : { main: '#e05252', dark: '#8e2222', light: '#ffb4a8' };
   const INK = '#20201e';
+  /* ★たいけい（きほんの かたち）。'blob' は いままで どおり */
+  const baseId = L.base || 'blob';
+  const isBlob = (baseId === 'blob');
+  /* ★からだ（たいけいの ときは あたま）の おおきさ */
+  const bodySize = (typeof L.bodySize === 'number') ? L.bodySize : 1;
 
   /* --- うごき（からだ ぜんたいの ゆれ）--- */
   let bob = 0, tilt = 0, spin = 0, lean = 0;
@@ -15240,8 +15245,10 @@ function drawFoeParts(ctx, st, look, motion) {
   ctx.strokeStyle = INK;
   ctx.lineWidth = 2.4;
 
-  /* ===== あし（からだより さきに かく）===== */
-  const legId = L.leg || 'two';
+  /* ===== あし（からだより さきに かく）=====
+       ★たいけいを えらんで いる ときは、その たいけいの あしに なる ので
+         ここは かきません。                                          */
+  const legId = isBlob ? (L.leg || 'two') : 'none';
   const legTop = -34;
   ctx.save();
   ctx.fillStyle = COL.dark;
@@ -15326,12 +15333,35 @@ function drawFoeParts(ctx, st, look, motion) {
   /* none（ふわふわ）は なにも かかない */
   ctx.restore();
 
-  /* ===== からだ ===== */
+  /* ===== たいけいの ほね（人がた・よつあし・さかな・きょうりゅう・むし）=====
+       ここで どう・て・あし・しっぽを かいて、あたまを おく ばしょを
+       かえして もらいます。                                          */
+  let head = null;
+  if (!isBlob && typeof drawFoeFrame === 'function') {
+    ctx.save();
+    ctx.translate(0, -bob);
+    try {
+      head = drawFoeFrame(ctx, baseId, t, moving,
+        { lean: Math.max(-1, Math.min(1, bodyPush / 16)), crouch: Math.max(0, 1 - squash) },
+        COL, INK);
+    } catch (e) { head = null; }
+    ctx.restore();
+  }
+
+  /* ===== からだ（たいけいの ときは あたま）===== */
   ctx.save();
-  const bodyY = -62 - bob + bodyPush * 0 + (legId === 'none' ? -10 : 0);
-  ctx.translate(0 + bodyPush, bodyY);
-  ctx.rotate(tilt + spin + atkSpin);
-  ctx.scale(1 / squash, squash);
+  if (head) {
+    /* あたまは たいけいが おしえて くれた ばしょに、その おおきさで */
+    const hs = (head.hr || 24) * bodySize / 34;
+    ctx.translate(head.hx + bodyPush * 0.5, head.hy - bob);
+    ctx.rotate(tilt * 0.6 + spin + atkSpin);
+    ctx.scale(hs / squash, hs * squash);
+  } else {
+    const bodyY = -62 - bob + bodyPush * 0 + (legId === 'none' ? -10 : 0);
+    ctx.translate(0 + bodyPush, bodyY);
+    ctx.rotate(tilt + spin + atkSpin);
+    ctx.scale(bodySize / squash, bodySize * squash);
+  }
   ctx.fillStyle = COL.main;
 
   const bodyId = L.body || 'round';
@@ -15546,8 +15576,9 @@ function drawFoeParts(ctx, st, look, motion) {
     }
   }
 
-  /* ===== て ===== */
-  const arm = L.arm || 'none';
+  /* ===== て =====
+       ★たいけいを えらんで いる ときは、その たいけいの てに なります */
+  const arm = isBlob ? (L.arm || 'none') : 'none';
   if (arm !== 'none') {
     const ay = -2;
     for (const d of [-1, 1]) {
@@ -15702,7 +15733,8 @@ function drawFoeParts(ctx, st, look, motion) {
     const k = Math.max(0, Math.min(1, fxK));
     ctx.save();
     ctx.lineCap = 'round';
-    const cy = -62 - bob;
+    /* あたまの たかさに あわせる（たいけいの ときは そこが かおの いち）*/
+    const cy = head ? (head.hy - bob) : (-62 - bob);
     if (fx === 'punch_ready' || fx === 'bite_ready' || fx === 'charge_ready') {
       /* ためて いる ことを しめす しろい もや（うしろ がわ）*/
       ctx.strokeStyle = 'rgba(255,255,255,' + (0.25 + 0.4 * k) + ')';
@@ -15802,4 +15834,169 @@ function drawFoeParts(ctx, st, look, motion) {
 function registerFoeDrawer(key, look, motion) {
   DRAWERS[key] = function (ctx, st) { drawFoeParts(ctx, st, look, motion); };
   return key;
+}
+
+/* からだの かたち。あたまは、かえした ばしょに よびだしがわで かく。 */
+function drawFoeFrame(ctx, base, t, moving, pose, COL, INK) {
+  ctx.save();
+  try {
+    const lean = Math.max(-1, Math.min(1, (pose && pose.lean) || 0));
+    const crouch = Math.max(0, Math.min(1, (pose && pose.crouch) || 0));
+    const wave = Math.sin(t * (moving ? 8 : 2));
+    const step = moving ? 10 : 0.6;
+    const dx = lean * 8;
+    const dy = crouch * 14 + (moving ? Math.cos(t * 16) * 1.5 : wave * 0.8);
+    let hx = 0, hy = -94, hr = 25;
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 2.4;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    // あしは じめんに のこし、こしを さげて しゃがむ。
+    if (base !== 'fish') {
+      const bug = base === 'bug';
+      const beast = base === 'beast';
+      const dino = base === 'dino';
+      const count = bug ? 6 : beast ? 4 : 2;
+      for (let i = 0; i < count; i++) {
+        const far = i < count / 2;
+        const phase = t * 8 + (bug ? (i % 3) * 2.1 + (far ? 0 : Math.PI) : i * Math.PI);
+        const swing = moving ? Math.sin(phase) * step : 0;
+        const lift = moving ? Math.max(0, Math.cos(phase)) * 6 : 0;
+        const rootX = bug ? -23 + (i % 3) * 19 : beast ? (i % 2 ? 22 : -25) : (i ? 10 : -10);
+        const rootY = bug ? -36 : beast ? -39 : dino ? -39 : -43;
+        const footX = rootX + swing + (bug ? (far ? -13 : 13) : far ? -4 : 4);
+        const footY = -(bug ? 2.5 : dino ? 8 : 5.5) - lift;
+        const kneeX = rootX + (bug ? (far ? -18 : 18) : dino ? 10 : -3) + swing * 0.5;
+        const kneeY = bug ? -22 : -20 + crouch * 5;
+        ctx.beginPath();
+        ctx.moveTo(rootX + dx, rootY + dy);
+        ctx.lineTo(kneeX, kneeY);
+        ctx.lineTo(footX, footY);
+        if (!bug) ctx.lineTo(footX + 5, footY);
+        // ふちを さきに、なかの いろを あとに かさねる。
+        ctx.strokeStyle = INK;
+        ctx.lineWidth = bug ? 5 : dino ? 16 : 11;
+        ctx.stroke();
+        ctx.strokeStyle = far ? COL.dark : COL.main;
+        ctx.lineWidth -= 4.8;
+        if (bug) ctx.lineWidth = 2.4;
+        ctx.stroke();
+      }
+    }
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 2.4;
+    ctx.translate(dx, dy);
+
+    if (base === 'beast') {
+      // しっぽと よこながの どう。
+      ctx.fillStyle = COL.dark;
+      ctx.beginPath();
+      ctx.moveTo(-27, -48);
+      ctx.quadraticCurveTo(-49, -45, -51, -67 + wave * 4);
+      ctx.quadraticCurveTo(-40, -55, -25, -57);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.main;
+      ctx.beginPath(); ctx.ellipse(-3, -49, 34, 23, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.light;
+      ctx.beginPath(); ctx.ellipse(1, -42, 23, 12, 0, 0, Math.PI * 2); ctx.fill();
+      hx = 30; hy = -74; hr = 23;
+    } else if (base === 'fish') {
+      // おびれを ゆらして、みずの なかを すいすい。
+      const tail = Math.sin(t * (moving ? 9 : 3)) * (moving ? 7 : 3);
+      ctx.fillStyle = COL.dark;
+      ctx.beginPath();
+      ctx.moveTo(-25, -56);
+      ctx.lineTo(-53, -78 + tail);
+      ctx.quadraticCurveTo(-45, -55 + tail, -53, -31 + tail);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.light;
+      ctx.beginPath();
+      ctx.moveTo(-22, -68); ctx.lineTo(-9, -91); ctx.lineTo(12, -70);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-10, -42); ctx.lineTo(6, -23); ctx.lineTo(18, -45);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.main;
+      ctx.beginPath();
+      ctx.moveTo(-32, -56);
+      ctx.bezierCurveTo(-12, -88, 18, -80, 36, -56);
+      ctx.bezierCurveTo(18, -32, -12, -24, -32, -56);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.light;
+      ctx.beginPath();
+      ctx.moveTo(-3, -55); ctx.quadraticCurveTo(7, -43, 16, -48);
+      ctx.lineTo(8, -61); ctx.closePath(); ctx.fill(); ctx.stroke();
+      hx = 31; hy = -56; hr = 22;
+    } else if (base === 'dino') {
+      // ながい しっぽと おおきな おなか、ちいさな うで。
+      ctx.fillStyle = COL.dark;
+      ctx.beginPath();
+      ctx.moveTo(-12, -59);
+      ctx.quadraticCurveTo(-34, -40, -55, -41 + wave * 5);
+      ctx.quadraticCurveTo(-41, -15, -5, -31);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.main;
+      ctx.beginPath(); ctx.ellipse(0, -56, 25, 30, 0.2 + lean * 0.12, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      roundRect(ctx, 8 + lean * 4, -86, 19, 31, 8); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.light;
+      ctx.beginPath(); ctx.ellipse(9, -51, 12, 19, 0.2, 0, Math.PI * 2); ctx.fill();
+      for (let i = 0; i < 2; i++) {
+        const arm = wave * (moving ? 3 : 0.5) * (i ? 1 : -1);
+        ctx.fillStyle = i ? COL.main : COL.dark;
+        ctx.beginPath();
+        ctx.moveTo(13, -67 + i * 9);
+        ctx.lineTo(29, -60 + i * 9 + arm);
+        ctx.lineTo(36, -64 + i * 9 + arm);
+        ctx.lineTo(35, -57 + i * 9 + arm);
+        ctx.lineTo(25, -54 + i * 9 + arm);
+        ctx.lineTo(12, -59 + i * 9);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      hx = 23 + lean * 4; hy = -92; hr = 24;
+    } else if (base === 'bug') {
+      // おしりと むね。みぎの あたまで、みっつの ふしに なる。
+      ctx.fillStyle = COL.main;
+      ctx.beginPath(); ctx.ellipse(-24, -48, 26, 22, -0.12, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.light;
+      ctx.beginPath(); ctx.ellipse(-29, -54, 14, 10, -0.12, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-21, -68); ctx.quadraticCurveTo(-10, -48, -20, -28); ctx.stroke();
+      ctx.fillStyle = COL.dark;
+      ctx.beginPath(); ctx.ellipse(6, -48, 16, 18, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      hx = 32; hy = -53; hr = 21;
+    } else {
+      // しらない なまえも ひとがた。うでは あしと はんたいに ふる。
+      for (let i = 0; i < 2; i++) {
+        const side = i ? 1 : -1;
+        const arm = wave * step * side;
+        ctx.fillStyle = i ? COL.main : COL.dark;
+        ctx.beginPath();
+        ctx.moveTo(side * 14 + lean * 5, -77);
+        ctx.lineTo(side * 23 + arm, -55);
+        ctx.lineTo(side * 21 + arm, -38);
+        ctx.lineTo(side * 15 + arm, -40);
+        ctx.lineTo(side * 15 + arm, -55);
+        ctx.lineTo(side * 8 + lean * 5, -72);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = COL.main;
+      ctx.beginPath();
+      ctx.moveTo(-13 + lean * 5, -80);
+      ctx.quadraticCurveTo(lean * 5, -86, 13 + lean * 5, -80);
+      ctx.lineTo(17, -43);
+      ctx.quadraticCurveTo(0, -34, -17, -43);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.light;
+      ctx.beginPath(); ctx.ellipse(lean * 3, -61, 9, 16, lean * 0.12, 0, Math.PI * 2); ctx.fill();
+      hx = lean * 5;
+    }
+    // ずらした ぶんを もどして、あたまの ばしょを しらせる。
+    return { hx: hx + dx, hy: hy + dy, hr };
+  } finally {
+    ctx.restore();
+  }
 }

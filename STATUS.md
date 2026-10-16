@@ -1,9 +1,9 @@
 # STATUS — ごうのすけゲーム
 
 状態: 🟢 順調
-今やっていること: v6.62 iPadで戦闘中に下のパネルが上にずれる不具合を修正（原因はテキスト入力時の iOS のページスクロール）（10/17）
-次の一手: iPad実機でずれが再発しないか確認してもらう。あわせてオリジナルの間のバー上限・つよさのめやすの体感を聞く
-ブロッカー: なし（node 実行可。tests/ 6本=84件すべて実行して ok）
+今やっていること: v6.63 敵の体型5種（人型/四足/魚/恐竜/虫）＋からだの大きさバー＋ステージの出かたの繰り返し（10/17）
+次の一手: 体型と繰り返しを触ってもらう。トークン節約のため、重い実装は今後も Codex に委譲して Claude 側は仕様書・検証に回す
+ブロッカー: なし（node 実行可。tests/ 6本=94件すべて実行して ok）。Antigravity は GUI のみで CLI が無く、Claude Code からは駆動できない（Codex は headless で可）
 最終更新: 2026-10-16（Claude）
 
 <!-- 上の5行は本部（_hq）が読む。行の頭の言葉は変えないこと。詳しいメモはこの下に自由に書いてよい。 -->
@@ -18,7 +18,7 @@
 - `node tests/gear.test.js` 17件 ok（装備品の定義・ステータス反映・UNITS 非破壊・vs/pierce/guard の戦闘内挙動・開放条件）
 - `node tests/gimmicks.test.js` 10件 ok
 - `node tests/minigame2.test.js` 19件 ok（RUNGAME/TATAKI/MEMORY の整合・3種目とも余韻がある・③が毎回順番を作り直している・新画面とボタンの存在・1人用/2人用の振り分け）
-- `node tests/original.test.js` 17件 ok（素材カタログの整合・43背景すべてに日本語名・形15種以上・パーツ全組み合わせの描画・とくこうかが engine の項目に落ちる・5画面の存在・削除は3種とも確認を通す・オリジナルは報酬0で図鑑も汚さない・三番勝負が3種目を回す）
+- `node tests/original.test.js` 27件 ok（素材カタログの整合・43背景すべてに日本語名・形15種以上・パーツ全組み合わせの描画・とくこうかが engine の項目に落ちる・5画面の存在・削除は3種とも確認を通す・オリジナルは報酬0で図鑑も汚さない・三番勝負が3種目を回す）
 - `node tests/selectors.test.js` 10件 ok（$/$$ の使い分け・id の存在・版番号・iOS スクロール対策5件）
 - `node tests/sound.test.js` 11件 ok
 - 画面操作の通しテスト（jsdom、scratchpad の uitest.js）: タイトル→庭→開発室→開発→装備→編成表示→外す まで全 ok
@@ -26,6 +26,7 @@
 - 全コース描画・ロジックの通しテスト（scratchpad の rt.js）: 130コース・描画 12,574回 エラーなし
 
 ## 本部の作業記録
+- 2026-10-17 Claude: v6.63 (1) 敵の「きほんの かたち」= 体型を追加。FOE_BASE（blob/human/beast/fish/dino/bug）と FOE_BODY_SIZE（0.6〜1.8）を data.js に、drawFoeFrame(ctx, base, t, moving, pose, COL, INK) -> {hx,hy,hr} を draw.js に追加。drawFoeParts は base!=='blob' のとき drawFoeFrame で骨格を描き、返ってきた (hx,hy,hr) に「からだ」の形を頭として縮めて描く。その場合 arm/leg パーツは描かずUIでも隠す。(2) ステージの出かたに repeat/times。engine 側は wave.fired を数えて times で done。(3) ★drawFoeFrame の165行は Codex に委譲（仕様書は scratchpad/brief-frame.md）。既存行の変更0・append のみを条件にし、こちらで全組み合わせ描画・save/restore 均衡・返り値の妥当性を検証してから採用した。Antigravity は CLI が無いため駆動不可。
 - 2026-10-17 Claude: v6.62 iPad で戦闘中に下部 HUD が上にずれ、下に黒い帯が出る不具合を修正。原因は #hud-bottom の高さではなく、**ドキュメント自体のスクロール**。v6.57 以降に追加したテキスト入力（名前入力・各メーカー）にフォーカスすると iOS がページごとスクロールし、キーボードを閉じても戻らないことがある。対策：(1) resetScroll() を show() と window の scroll / focusout / visualViewport に仕込んで常に 0 へ戻す、(2) typingNow() 中は relayout() を打ち切り（キーボードで狭くなった高さで --ui / --hud-h を確定させない）、(3) startBattle で applyUiScale + applyUnitLayout を必ず実行、(4) 入力の font-size を max(16px, …) にして iOS の自動ズームを防止。検証は scratchpad/scrolltest.js（scrollY と innerHeight を差し替えて iPad の挙動を再現。仲間10体＝2段でも --hud-h は 241px＝画面の29%に収まることも確認）。
 - 2026-10-16 Claude: v6.61 本人の指摘4点を修正。(1) × が即削除だったので askOrigDelete() による確認モーダル（#orig-del、#app 直下に1つ置いて全画面から使う）を追加。使用中のものは従来どおり確認前に拒否。(2) ステージ作成の既存背景がローマ字キー表示だったので BG_NAME（43件）と bgNameOf() を追加。(3) からだの形を 7→20（極端な形も: wide/thin/tri/hex/spiky/jelly/mush/tower/heart/crescent/snake/cross/cloudb）、て 6→9、あし 5→7。(4) 攻撃モーションを明確化：ふりかぶりの引きを大きくし、drawFoeParts の最後に fx レイヤ（punch/charge の衝撃光、bite の大あご、spin の回転弧、shoot の弾の成長と発射、stomp の地面の輪）を追加。
 - 2026-10-16 Claude: v6.60 オリジナルの間。data.js に BG_PARTS/FOE_PARTS/FOE_COLORS/FOE_MOTION/FOE_STATS/FOE_EXTRAS/ORIG を追加、draw.js に drawFoeParts()+registerFoeDrawer() を追加（パーツ44種×色12×動き6×6をすべて描画テスト済み）。engine 側は3点だけ触った：Game.foeDef() で ENEMIES と Game.extraEnemies を見るように、currentBg() が stage.bgData を優先、start() で orig 以外は extraEnemies を破棄。保存は s.orig = {bgs,foes,stages,seq}。オリジナルステージは reward 0・ENEMIES に登録しない・recordSeen で弾くので、育成バランスと図鑑に影響しない。あわせて三番勝負（screen-match の成績表に戻ってくる方式）。

@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.62';
+  const GAME_VERSION = '6.63';
 
 
   /* =================================================
@@ -6077,6 +6077,9 @@
   const FOEM = () => (typeof FOE_MOTION !== 'undefined') ? FOE_MOTION : { walk: [], atk: [] };
   const FOES = () => (typeof FOE_STATS !== 'undefined') ? FOE_STATS : [];
   const FOEX = () => (typeof FOE_EXTRAS !== 'undefined') ? FOE_EXTRAS : [];
+  const FOEB = () => (typeof FOE_BASE !== 'undefined') ? FOE_BASE : [{ id: 'blob', name: 'ふつう' }];
+  const FOEBS = () => (typeof FOE_BODY_SIZE !== 'undefined') ? FOE_BODY_SIZE
+    : { min: 0.6, max: 1.8, step: 0.05, def: 1.0 };
 
   const LOOK_GROUPS = [
     ['body', 'からだ'], ['eye', 'め'], ['mouth', 'くち'], ['horn', 'つの・みみ'],
@@ -6090,7 +6093,8 @@
     return {
       id: null, name: '',
       preset: null,          // いまの てきの えを つかう ときは その id
-      look: { body: 'round', eye: 'dot', mouth: 'smile', horn: 'none',
+      look: { base: 'blob', bodySize: FOEBS().def,
+              body: 'round', eye: 'dot', mouth: 'smile', horn: 'none',
               arm: 'none', leg: 'two', pattern: 'none', color: 'red' },
       motion: { walk: 'step', atk: 'punch' },
       attr: ['none'],
@@ -6231,12 +6235,43 @@
     };
 
     if (foeTab === 'look') {
+      /* ふるい てきには たいけいが ない ので おぎなう */
+      if (!FOE_EDIT.look.base) FOE_EDIT.look.base = 'blob';
+      if (typeof FOE_EDIT.look.bodySize !== 'number') FOE_EDIT.look.bodySize = FOEBS().def;
       if (FOE_EDIT.preset) {
         head('いま「いまの てきの え」を つかって います。パーツに もどすには したの「パーツに もどす」を おしてね。');
         pick('パーツに もどす', false, () => { FOE_EDIT.preset = null; });
       }
+      /* ★きほんの かたち（たいけい）*/
+      head('きほんの かたち　※「ふつう」いがいを えらぶと、て と あしは その かたちの ものに なります');
+      FOEB().forEach(b => {
+        pick(b.name, FOE_EDIT.look.base === b.id, () => { FOE_EDIT.look.base = b.id; });
+      });
+
+      /* ★からだ（たいけいの ときは あたま）の おおきさ */
+      {
+        const S = FOEBS();
+        const row = document.createElement('div');
+        row.className = 'mk-bar';
+        const label = (FOE_EDIT.look.base === 'blob') ? 'からだの おおきさ' : 'あたまの おおきさ';
+        row.innerHTML = '<span class="mk-bar-head"><span>' + label + '</span><b>' +
+          FOE_EDIT.look.bodySize.toFixed(2) + 'ばい</b></span>';
+        const inp = document.createElement('input');
+        inp.type = 'range'; inp.min = S.min; inp.max = S.max; inp.step = S.step;
+        inp.value = FOE_EDIT.look.bodySize;
+        inp.addEventListener('input', () => {
+          FOE_EDIT.look.bodySize = parseFloat(inp.value);
+          row.querySelector('b').textContent = FOE_EDIT.look.bodySize.toFixed(2) + 'ばい';
+        });
+        row.appendChild(inp);
+        box.appendChild(row);
+      }
+
+      const blob = (FOE_EDIT.look.base === 'blob');
       LOOK_GROUPS.forEach(([k, label]) => {
-        head(label);
+        /* たいけいの ときは て と あしは その かたちの もの に なる */
+        if (!blob && (k === 'arm' || k === 'leg')) return;
+        head(blob ? label : (k === 'body' ? 'あたまの かたち' : label));
         (FOEP()[k] || []).forEach(part => {
           pick(part.name, FOE_EDIT.look[k] === part.id, () => { FOE_EDIT.look[k] = part.id; });
         });
