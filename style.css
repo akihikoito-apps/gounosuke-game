@@ -1867,7 +1867,10 @@ body.dragging-slot #party-slots { touch-action:none; }
   border-radius:calc(10px * var(--ui));
   border:calc(2px * var(--ui)) solid #90a4ae;
   background:#fffdf7; color:#3e2723;
-  font-family:inherit; font-size:calc(17px * var(--ui)); font-weight:bold;
+  font-family:inherit; font-weight:bold;
+  /* ★16px より ちいさいと iOS が かってに ズームして、がめんが
+       ずれた まま もどらなく なります。かならず 16px いじょうに します。*/
+  font-size:max(16px, calc(17px * var(--ui)));
 }
 .vs-input:focus { outline:none; border-color:#ffb300; background:#fffde7; }
 
@@ -1983,7 +1986,7 @@ body.dragging-slot #party-slots { touch-action:none; }
   font-size:calc(11px * var(--ui)); font-weight:bold; color:#ffd54f;
 }
 .vs-input.mk-name { width:100%; flex:0 0 auto; padding:calc(7px * var(--ui)) calc(11px * var(--ui));
-                    font-size:calc(15px * var(--ui)); }
+                    font-size:max(16px, calc(15px * var(--ui))); }
 .mk-tabs {
   width:100%; flex:0 0 auto;
   display:flex; gap:calc(4px * var(--ui)); overflow-x:auto;
@@ -2058,7 +2061,7 @@ body.dragging-slot #party-slots { touch-action:none; }
   font-size:calc(11.5px * var(--ui)); color:#e8e2f5;
 }
 .wv-row select, .wv-row input {
-  font-family:inherit; font-size:calc(11.5px * var(--ui));
+  font-family:inherit; font-size:max(16px, calc(11.5px * var(--ui)));
   border-radius:calc(6px * var(--ui)); border:1px solid #7e6ba8;
   background:#1b1630; color:#fff; padding:calc(3px * var(--ui));
   min-width:0;

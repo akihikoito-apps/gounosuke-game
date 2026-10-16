@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.61';
+  const GAME_VERSION = '6.62';
 
 
   /* =================================================
@@ -450,14 +450,48 @@
 
 
   /* =================================================
+     ★ページが うえに ずれるのを ふせぐ
+
+     iPad・iPhone は なまえの いれものを タップすると、キーボードを
+     だす ために ページ ぜんたいを スクロール します。とじても もどらない
+     ことが あり、アプリの したに すきまが できて したの パネルが
+     うえに ずれて みえます。いつも スクロールを 0 に もどします。
+     ================================================= */
+  function resetScroll() {
+    try {
+      if (window.scrollY || window.scrollX) window.scrollTo(0, 0);
+      if (document.body) { document.body.scrollTop = 0; document.body.scrollLeft = 0; }
+      const de = document.documentElement;
+      if (de) { de.scrollTop = 0; de.scrollLeft = 0; }
+    } catch (e) {}
+  }
+  /* もじを いれて いる さいちゅうか（＝キーボードが でて いるか）*/
+  function typingNow() {
+    const el = document.activeElement;
+    if (!el || !el.tagName) return false;
+    const t = el.tagName.toUpperCase();
+    return (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT');
+  }
+  /* キーボードを とじる */
+  function blurInput() {
+    const el = document.activeElement;
+    if (typingNow() && el.blur) { try { el.blur(); } catch (e) {} }
+  }
+
+  /* =================================================
      がめんの きりかえ
      ================================================= */
   function show(id) {
+    /* ★がめんを かえる ときは キーボードを とじて、ずれも なおす */
+    blurInput();
+    resetScroll();
     /* ★ドルマーク 1つは「はじめの 1つだけ」、2つは「ぜんぶ」を とって
          くる どうぐ です。ここは がめん ぜんぶを みるので 2つの ほうが
          ただしい かきかた です（1つだと forEach が つかえません）。 */
     $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     bgmFor(id);
+    /* iOS は 1フレーム あとに スクロールを もどす ことが あるので もういちど */
+    requestAnimationFrame(resetScroll);
   }
 
   /* =================================================
@@ -3793,6 +3827,11 @@
       Sound.bgm(isBoss ? 'boss' : 'battle');
     }
     applyCharLimit(course);
+    /* ★せんとうは がめん いっぱいを つかう ので、はじめに かならず
+         おおきさを はかりなおします（まえの がめんで キーボードが
+         でて いた ときなどの ずれを ここで なおします）*/
+    applyUiScale();
+    applyUnitLayout();
     show('screen-battle');
     const canvas = $('#canvas');
     Game.canvas = canvas;
@@ -10909,6 +10948,10 @@
      はじめの じゅんび
      ================================================= */
   function relayout() {
+    /* ★キーボードが でて いる あいだは がめんが せまく みえる ので、
+         ここで はかると したの パネルの たかさが くるいます。      */
+    if (typingNow()) return;
+    resetScroll();
     applyUiScale();
     applyUnitLayout();
     if (Game.canvas && $('#screen-battle').classList.contains('active')) {
@@ -11193,6 +11236,17 @@
     watchForUpdateSW();
     watchForUpdate();
 
+    /* ★ページが スクロールしたら すぐ 0 に もどす */
+    window.addEventListener('scroll', resetScroll, { passive: true });
+    /* キーボードを とじた あと、ずれを なおして はかりなおす */
+    document.addEventListener('focusout', () => {
+      resetScroll();
+      setTimeout(() => { resetScroll(); relayout(); }, 260);
+    });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', resetScroll);
+      window.visualViewport.addEventListener('scroll', resetScroll);
+    }
     window.addEventListener('resize', relayout);
     window.addEventListener('orientationchange', () => setTimeout(relayout, 300));
     document.addEventListener('gesturestart', e => e.preventDefault());
