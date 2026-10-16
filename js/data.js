@@ -7259,6 +7259,215 @@ const MEMORY = {
   cheer: 2.6,
 };
 
+/* ==========================================================================
+   ★オリジナルの間 ── じぶんで はいけい・てき・ステージを つくる
+
+   ここに ならんで いるのが「そざい」です。ふやしたい ときは
+   この いちらんに 1つ たすだけで、つくる がめんにも でて きます。
+   ========================================================================== */
+
+/* ---- はいけいの そざい ---- */
+const BG_PARTS = {
+  /* そら（うえ → したの いろ）*/
+  sky: [
+    { id: 'blue',   name: 'あおぞら',     cols: ['#5ec8f5', '#bde8fb', '#f3f7c9'] },
+    { id: 'sunset', name: 'ゆうやけ',     cols: ['#e2492d', '#ff8a4c', '#ffd9a0'] },
+    { id: 'night',  name: 'よぞら',       cols: ['#101a3a', '#1f2f5e', '#3b4c80'] },
+    { id: 'storm',  name: 'あらし',       cols: ['#36404a', '#5a6670', '#8d969e'] },
+    { id: 'space',  name: 'うちゅう',     cols: ['#05050f', '#120a2a', '#241352'] },
+    { id: 'morning',name: 'あさやけ',     cols: ['#ffb199', '#ffd6a5', '#fff6d5'] },
+    { id: 'mint',   name: 'ミントいろ',   cols: ['#7fe3d0', '#bdf3e8', '#f0fff9'] },
+    { id: 'purple', name: 'ふしぎいろ',   cols: ['#2b1046', '#5e2a7e', '#a74b9c'] },
+    { id: 'fire',   name: 'ほのおの そら', cols: ['#3a0b00', '#8e1d00', '#ff6d00'] },
+    { id: 'snowsky',name: 'ゆきぞら',     cols: ['#9fb6c9', '#cfdde8', '#f3f8fb'] },
+  ],
+  /* とおくの やま（far）と ちかくの やま（near）*/
+  hill: [
+    { id: 'green',  name: 'みどりの やま', far: '#9ccc65', near: '#7cb342' },
+    { id: 'brown',  name: 'つちの やま',   far: '#8d6e63', near: '#4e342e' },
+    { id: 'grey',   name: 'はいいろの やま', far: '#90a4ae', near: '#546e7a' },
+    { id: 'snow',   name: 'ゆきやま',      far: '#eceff1', near: '#b0bec5' },
+    { id: 'dark',   name: 'くろい やま',   far: '#37474f', near: '#1c262b' },
+    { id: 'red',    name: 'あかい だいち', far: '#c1562f', near: '#8c3a1c' },
+    { id: 'violet', name: 'むらさきの やま', far: '#4a2068', near: '#2a1140' },
+    { id: 'metal',  name: 'はがねの やま', far: '#78909c', near: '#455a64' },
+  ],
+  /* じめん */
+  ground: [
+    { id: 'soil',  name: 'つち',     c: '#8d6e3a', top: '#a1874a' },
+    { id: 'grass', name: 'くさ',     c: '#5d8a3a', top: '#7cb342' },
+    { id: 'sand',  name: 'すな',     c: '#c9a26c', top: '#e0c48f' },
+    { id: 'stone', name: 'いし',     c: '#616161', top: '#8d8d8d' },
+    { id: 'iron',  name: 'てっぱん', c: '#4e5a63', top: '#78909c' },
+    { id: 'snowg', name: 'ゆき',     c: '#cfd8dc', top: '#eceff1' },
+    { id: 'lava',  name: 'ようがん', c: '#4a1500', top: '#b23c00' },
+    { id: 'moon',  name: 'つきの すな', c: '#5a5a66', top: '#8a8a99' },
+    { id: 'tatami',name: 'たたみ',   c: '#9e9d5a', top: '#c3c17a' },
+  ],
+  /* とんで いる かざり（ゲームの えんしゅつと おなじ なまえ）*/
+  deco: [
+    { id: 'none',   name: 'なし' },
+    { id: 'cloud',  name: 'くも' },
+    { id: 'star',   name: 'ほし' },
+    { id: 'snow',   name: 'ゆき' },
+    { id: 'leaf',   name: 'はっぱ' },
+    { id: 'ember',  name: 'ひのこ' },
+    { id: 'bubble', name: 'あわ' },
+    { id: 'dust',   name: 'すなけむり' },
+    { id: 'wave',   name: 'なみ' },
+    { id: 'rock',   name: 'うかぶ いわ' },
+    { id: 'sun',    name: 'おおきな たいよう' },
+    { id: 'bugs',   name: 'とぶ むし' },
+    { id: 'ruins',  name: 'こわれた たてもの' },
+  ],
+};
+
+/* ---- てきの みための そざい ---- */
+const FOE_PARTS = {
+  body: [
+    { id: 'round', name: 'まるい' },
+    { id: 'tall',  name: 'たてなが' },
+    { id: 'blob',  name: 'ぷにぷに' },
+    { id: 'box',   name: 'しかく' },
+    { id: 'drop',  name: 'しずく' },
+    { id: 'starb', name: 'ほしがた' },
+    { id: 'egg',   name: 'たまご' },
+  ],
+  eye: [
+    { id: 'dot',   name: 'まるい め' },
+    { id: 'line',  name: 'ほそい め' },
+    { id: 'big',   name: 'おおきい め' },
+    { id: 'angry', name: 'おこった め' },
+    { id: 'x',     name: 'バツの め' },
+    { id: 'one',   name: 'ひとつめ' },
+    { id: 'three', name: 'みつめ' },
+  ],
+  mouth: [
+    { id: 'smile', name: 'にっこり' },
+    { id: 'fang',  name: 'きば' },
+    { id: 'wavem', name: 'なみなみ' },
+    { id: 'open',  name: 'おおぐち' },
+    { id: 'beak',  name: 'くちばし' },
+    { id: 'none',  name: 'くち なし' },
+  ],
+  horn: [
+    { id: 'none',  name: 'なし' },
+    { id: 'two',   name: 'つの 2ほん' },
+    { id: 'one',   name: 'つの 1ぽん' },
+    { id: 'ear',   name: 'みみ' },
+    { id: 'anten', name: 'しょっかく' },
+    { id: 'crown', name: 'かんむり' },
+    { id: 'fin',   name: 'せびれ' },
+  ],
+  arm: [
+    { id: 'none',     name: 'なし' },
+    { id: 'stick',    name: 'ぼうの て' },
+    { id: 'claw',     name: 'つめ' },
+    { id: 'wing',     name: 'はね' },
+    { id: 'tentacle', name: 'しょくしゅ' },
+    { id: 'big',      name: 'おおきな こぶし' },
+  ],
+  leg: [
+    { id: 'two',   name: 'あし 2ほん' },
+    { id: 'none',  name: 'ふわふわ（あし なし）' },
+    { id: 'many',  name: 'たくさんの あし' },
+    { id: 'wheel', name: 'キャタピラ' },
+    { id: 'tail',  name: 'しっぽ' },
+  ],
+  pattern: [
+    { id: 'none',   name: 'なし' },
+    { id: 'spot',   name: 'みずたま' },
+    { id: 'stripe', name: 'しましま' },
+    { id: 'belly',  name: 'おなか' },
+    { id: 'scar',   name: 'きずあと' },
+    { id: 'gear',   name: 'ねじ' },
+  ],
+};
+
+/* てきの いろ */
+const FOE_COLORS = [
+  { id: 'red',    name: 'あか',     main: '#e05252', dark: '#8e2222', light: '#ffb4a8' },
+  { id: 'blue',   name: 'あお',     main: '#4a8fe0', dark: '#1d4f8e', light: '#aed4ff' },
+  { id: 'green',  name: 'みどり',   main: '#63b35a', dark: '#2c6b27', light: '#bdeab4' },
+  { id: 'yellow', name: 'きいろ',   main: '#e8c33a', dark: '#9a7c00', light: '#fff0a8' },
+  { id: 'purple', name: 'むらさき', main: '#9a5fc0', dark: '#592d7a', light: '#ddb8f2' },
+  { id: 'orange', name: 'オレンジ', main: '#ef8a3a', dark: '#a04d08', light: '#ffd0a3' },
+  { id: 'pink',   name: 'ピンク',   main: '#ef7fa8', dark: '#a53d63', light: '#ffc9dc' },
+  { id: 'cyan',   name: 'みずいろ', main: '#48c6d8', dark: '#1b6f7d', light: '#b5f0f8' },
+  { id: 'grey',   name: 'はいいろ', main: '#9aa3a8', dark: '#4e575c', light: '#d8dee1' },
+  { id: 'black',  name: 'くろ',     main: '#3c4147', dark: '#15181b', light: '#767e85' },
+  { id: 'white',  name: 'しろ',     main: '#eceff1', dark: '#9aa3a8', light: '#ffffff' },
+  { id: 'gold',   name: 'きんいろ', main: '#d8a93a', dark: '#8a6500', light: '#ffe49a' },
+];
+
+/* てきの うごきかた */
+const FOE_MOTION = {
+  walk: [
+    { id: 'step',  name: 'あるく' },
+    { id: 'hop',   name: 'ぴょんぴょん' },
+    { id: 'float', name: 'ふわふわ' },
+    { id: 'roll',  name: 'ころころ' },
+    { id: 'slide', name: 'すべる' },
+    { id: 'stomp', name: 'どしどし' },
+  ],
+  atk: [
+    { id: 'punch',  name: 'なぐる' },
+    { id: 'bite',   name: 'かみつく' },
+    { id: 'spin',   name: 'まわる' },
+    { id: 'charge', name: 'たいあたり' },
+    { id: 'shoot',  name: 'とばす' },
+    { id: 'stomp',  name: 'ふみつける' },
+  ],
+};
+
+/* ステータスの バー（min 〜 max を うごかして きめます）*/
+const FOE_STATS = [
+  { key: 'hp',    name: 'たいりょく',   min: 100, max: 40000, step: 100, def: 1200, unit: '' },
+  { key: 'atk',   name: 'こうげきりょく', min: 10, max: 4000, step: 10, def: 140, unit: '' },
+  { key: 'speed', name: 'あるく はやさ', min: 4,  max: 140,  step: 2,   def: 26,  unit: '' },
+  { key: 'range', name: 'とどく きょり', min: 40, max: 700,  step: 10,  def: 120, unit: '' },
+  { key: 'attackInterval', name: 'こうげきの かんかく', min: 0.4, max: 8, step: 0.1, def: 2.0, unit: 'びょう' },
+  { key: 'kbCount', name: 'ふきとぶ までの かいすう', min: 1, max: 12, step: 1, def: 3, unit: 'かい' },
+  { key: 'scale', name: 'おおきさ', min: 0.6, max: 2.6, step: 0.1, def: 1.0, unit: 'ばい' },
+];
+
+/* ついかの こうか（えらんだ ものだけ つきます）*/
+const FOE_EXTRAS = [
+  { id: 'area',   name: 'はんい こうげき', desc: 'まわりの みかた みんなに あたる',
+    apply: (d) => { d.attackType = 'area'; d.areaRadius = 150; } },
+  { id: 'slow',   name: 'どんそく',       desc: 'あたると あいての あしが おそく なる',
+    apply: (d) => { d.slow = { rate: 0.5, time: 3, chance: 1 }; } },
+  { id: 'kb',     name: 'ふきとばし',     desc: '30%で あいてを うしろに とばす',
+    apply: (d) => { d.knockbackChance = 0.3; } },
+  { id: 'stun',   name: 'きぜつ',         desc: '25%で あいてを しばらく うごけなく する',
+    apply: (d) => { d.stun = { chance: 0.25, time: 1.5 }; } },
+  { id: 'wave',   name: 'はどう',         desc: 'こうげきが まえに すすむ なみに なる',
+    apply: (d) => { d.wave = { level: 2, damageRate: 0.8 }; } },
+  { id: 'crit',   name: 'かいしんの いちげき', desc: '20%で 2ばいの ダメージ',
+    apply: (d) => { d.crit = { chance: 0.2, mult: 2 }; } },
+  { id: 'weaken', name: 'よわらせる',     desc: 'あいての こうげきりょくを さげる',
+    apply: (d) => { d.weaken = { rate: 0.7, time: 3 }; } },
+  { id: 'burn',   name: 'えんじょう',     desc: 'あたると じわじわ ダメージが つづく',
+    apply: (d) => { d.burn = { dps: 40, time: 4 }; } },
+  { id: 'drain',  name: 'きゅうけつ',     desc: 'あたえた ダメージの はんぶん かいふく',
+    apply: (d) => { d.drain = { rate: 0.5 }; } },
+  { id: 'flying', name: 'そらを とぶ',    desc: 'うかんで いて、かべを こえて おくを ねらう',
+    apply: (d) => { d.flying = true; } },
+  { id: 'boss',   name: 'ボスあつかい',   desc: 'おおきく でて きて、なまえが でる',
+    apply: (d) => { d.isBoss = true; } },
+];
+
+/* ---- オリジナルの間の きまり ---- */
+const ORIG = {
+  maxBg: 20,          // はいけいを いくつ ほぞんできるか
+  maxFoe: 20,         // てきを いくつ
+  maxStage: 20,       // ステージを いくつ
+  maxWaves: 8,        // 1ステージの でて くる かたまりの かず
+  castleMin: 500, castleMax: 40000, castleStep: 500, castleDef: 4000,
+  /* つよさの めやすを だす ときの かんがえかた（おおきいほど つよい）*/
+  powerBase: 1,
+};
+
 const CHAPTERS = {
   1: { name: 'はじまりの のはら',     short: 'のはら',   x: 0.07, y: 0.58, icon: '🌱' },
   2: { name: 'はがねの まち',         short: 'はがね',   x: 0.20, y: 0.34, icon: '⚙️' },
@@ -8257,6 +8466,22 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.60', date: '2026-10-16',
+    title: '★オリジナルの間★ が できました（はいけい・てき・ステージを じぶんで つくれます）＋ 三番勝負',
+    items: [
+      'トップがめんの ひだりしたに ★「オリジナルの間 🛠️」★ が できました。えらびかたは 4つ です。',
+      '★① はいけいを つくる★ … そら（10しゅるい）・やま（8）・じめん（9）・かざり（13）を えらんで、たたかう ばしょを つくります。えらぶ たびに うえの みほんが すぐ かわります。',
+      '★② てきを つくる★ … からだ・め・くち・つの・て・あし・もよう（ぜんぶで 44しゅるい）と いろ（12）を くみあわせます。「いまの てきの え」を そのまま つかう ことも できます。',
+      'うごきかたも えらべます。あるきかた 6つ（あるく・ぴょんぴょん・ふわふわ・ころころ・すべる・どしどし）と こうげきの しかた 6つ（なぐる・かみつく・まわる・たいあたり・とばす・ふみつける）。つくる がめんで ★あるく → ふりかぶる → こうげき★ を くりかえして みせて くれます。',
+      'つよさは ★バーで じゆうに★ きめられます（たいりょく・こうげきりょく・あるく はやさ・とどく きょり・こうげきの かんかく・ふきとぶ かいすう・おおきさ）。みぎうえに ★つよさの めやす★ が ★〜★★★★★ で でるので、いまの へんせいで かてそうか わかります。',
+      'ぞくせいは 2つまで。とくこうかは 11しゅるい（はんい こうげき・どんそく・ふきとばし・きぜつ・はどう・かいしん・よわらせる・えんじょう・きゅうけつ・そらを とぶ・ボスあつかい）から いくつでも。',
+      '★③ ステージを つくる★ … はいけい（じぶんの ものと ゲームの もの）と、しろの たいりょく、そして「★なんびょうに どの てきが なんたい★ でて くるか」を 8つまで ならべます。',
+      '★④ オリジナルステージで あそぶ★ … いまの へんせいで ちょうせん します。ごほうびは ありません（あそび場 なので、けいけんちを かせぐ ぬけみちに ならない ように）。つくった てきは ずかんにも のりません。',
+      'つくった ものは ★ぜんぶ ほぞんされます★（はいけい・てき・ステージ それぞれ 20こ まで）。したの いちらんを タップすると なおせて、× で けせます。ステージで つかって いる はいけいや てきは まちがって けさない ように まもられて います。',
+      '★ふたりで たいけつに「三番勝負」を たしました。★ ①かけっこ → ②むしむし たたき → ③じゅんばん おぼえ を じゅんばんに しょうぶ して、かった かずで ゆうしょうが きまります（3しょう0はい・2しょう1はい …）。しゅもくが おわる たびに せいせきひょうに もどって きます。',
+    ],
+  },
   {
     ver: '6.59', date: '2026-10-16',
     title: '「じゅんばん おぼえ たいけつ」が ★まいかい あたらしい じゅんばん★ に なりました',

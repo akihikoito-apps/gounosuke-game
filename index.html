@@ -90,6 +90,10 @@
         <span class="rb-label">ごうのすけの<br>へや</span>
       </button>
 
+      <button class="orig-btn" id="btn-home-orig">
+        <span class="ob-ico">🛠️</span>
+        <span class="ob-text">オリジナルの間</span>
+      </button>
       <button class="gacha-btn" id="btn-home-gacha">
         <span class="gacha-label">ガチャ🤩</span>
         <span class="gacha-slot"></span>
@@ -203,6 +207,19 @@
       </div>
       <button class="run-tap" id="btn-run-tap">タップ！</button>
       <p class="shoot-hint" id="run-hint">メーターが まんタンの ところで タップ！</p>
+    </div>
+  </section>
+
+  <!-- ============ ふたりで たいけつ：三番勝負の せいせきひょう ============ -->
+  <section id="screen-match" class="screen">
+    <div class="mini-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-match-back">やめる</button>
+        <h2 class="mini-title">三番勝負 🏆</h2>
+      </div>
+      <p class="mini-note" id="match-note"></p>
+      <div class="match-board" id="match-board"></div>
+      <button class="big-btn" id="btn-match-go">だい1しゅもくへ ▶</button>
     </div>
   </section>
 
@@ -532,6 +549,80 @@
       </button>
 
       <p class="map-hint" id="map-hint">すすみたい ステージを タップしてね</p>
+    </div>
+  </section>
+
+  <!-- ============ オリジナルの間（えらぶ）============ -->
+  <section id="screen-orig" class="screen">
+    <div class="mini-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-orig-back">もどる</button>
+        <h2 class="mini-title">オリジナルの間 🛠️</h2>
+      </div>
+      <p class="mini-note">じぶんで はいけいと てきを つくって、オリジナルの ステージで たたかえます。つくった ものは ぜんぶ ほぞんされます。</p>
+      <div class="mini-list" id="orig-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ はいけいを つくる ============ -->
+  <section id="screen-bgmake" class="screen">
+    <div class="mk-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-bgmake-back">もどる</button>
+        <h2 class="mini-title">はいけいを つくる 🏞️</h2>
+        <button class="mini-btn mk-save" id="btn-bgmake-save">ほぞん</button>
+      </div>
+      <div class="mk-view"><canvas id="bgmake-canvas"></canvas></div>
+      <input id="bgmake-name" class="vs-input mk-name" type="text" maxlength="10" placeholder="はいけいの なまえ" autocomplete="off">
+      <div class="mk-tabs" id="bgmake-tabs"></div>
+      <div class="mk-tray" id="bgmake-tray"></div>
+      <div class="mk-saved" id="bgmake-saved"></div>
+    </div>
+  </section>
+
+  <!-- ============ てきキャラを つくる ============ -->
+  <section id="screen-foemake" class="screen">
+    <div class="mk-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-foemake-back">もどる</button>
+        <h2 class="mini-title">てきを つくる 👾</h2>
+        <button class="mini-btn mk-save" id="btn-foemake-save">ほぞん</button>
+      </div>
+      <div class="mk-view foe"><canvas id="foemake-canvas"></canvas>
+        <span class="mk-power" id="foemake-power"></span>
+      </div>
+      <input id="foemake-name" class="vs-input mk-name" type="text" maxlength="10" placeholder="てきの なまえ" autocomplete="off">
+      <div class="mk-tabs" id="foemake-tabs"></div>
+      <div class="mk-tray" id="foemake-tray"></div>
+      <div class="mk-saved" id="foemake-saved"></div>
+    </div>
+  </section>
+
+  <!-- ============ ステージを つくる ============ -->
+  <section id="screen-stgmake" class="screen">
+    <div class="mk-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-stgmake-back">もどる</button>
+        <h2 class="mini-title">ステージを つくる 🗺️</h2>
+        <button class="mini-btn mk-save" id="btn-stgmake-save">ほぞん</button>
+      </div>
+      <div class="mk-view"><canvas id="stgmake-canvas"></canvas></div>
+      <input id="stgmake-name" class="vs-input mk-name" type="text" maxlength="10" placeholder="ステージの なまえ" autocomplete="off">
+      <div class="mk-tabs" id="stgmake-tabs"></div>
+      <div class="mk-tray" id="stgmake-tray"></div>
+      <div class="mk-saved" id="stgmake-saved"></div>
+    </div>
+  </section>
+
+  <!-- ============ オリジナルステージで あそぶ ============ -->
+  <section id="screen-origplay" class="screen">
+    <div class="mini-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-origplay-back">もどる</button>
+        <h2 class="mini-title">オリジナルステージ ⚔️</h2>
+      </div>
+      <p class="mini-note">いまの へんせいで たたかいます。ごほうびは ありません（あそび場です）。</p>
+      <div class="mini-list" id="origplay-list"></div>
     </div>
   </section>
 

@@ -15167,3 +15167,393 @@ function drawNekoso(ctx, st) {
   ctx.restore();
 }
 Object.assign(DRAWERS, { nekoso: drawNekoso });
+
+
+/* =====================================================================
+   ★オリジナルの てきを パーツから かく
+
+   look = { body, eye, mouth, horn, arm, leg, pattern, color }
+   （どれも data.js の FOE_PARTS / FOE_COLORS の id）
+   motion = { walk, atk }
+
+   (0,0) は あしもと。うえが マイナス。たかさは だいたい 120 くらいに
+   そろえて あります（ほかの キャラと ならべても おかしく ない ように）。
+
+   st は ゲームが わたして くる じょうたい です。
+     t … じかん / moving … あるいて いる / atk … 0〜1 ふりかぶり（-1 は なし）
+     fired … うった ちょくご / roll … ころがり
+   ===================================================================== */
+function drawFoeParts(ctx, st, look, motion) {
+  const L = look || {};
+  const M = motion || {};
+  const t = (st && st.t) || 0;
+  const moving = !!(st && st.moving);
+  const atk = (st && st.atk !== undefined) ? st.atk : -1;
+  const fired = !!(st && st.fired);
+  const COL = (typeof FOE_COLORS !== 'undefined')
+    ? (FOE_COLORS.find(c => c.id === L.color) || FOE_COLORS[0])
+    : { main: '#e05252', dark: '#8e2222', light: '#ffb4a8' };
+  const INK = '#20201e';
+
+  /* --- うごき（からだ ぜんたいの ゆれ）--- */
+  let bob = 0, tilt = 0, spin = 0, lean = 0;
+  const w = M.walk || 'step';
+  if (moving) {
+    if (w === 'step')  { bob = Math.abs(Math.sin(t * 7)) * 3.0; tilt = Math.sin(t * 7) * 0.05; }
+    if (w === 'hop')   { bob = Math.abs(Math.sin(t * 5)) * 13.0; }
+    if (w === 'float') { bob = Math.sin(t * 2.2) * 5.0; tilt = Math.sin(t * 1.6) * 0.07; }
+    if (w === 'roll')  { spin = (st && st.roll) ? st.roll : t * 3; }
+    if (w === 'slide') { tilt = -0.10; bob = Math.sin(t * 9) * 1.2; }
+    if (w === 'stomp') { bob = Math.abs(Math.sin(t * 3.4)) * 6.0; tilt = Math.sin(t * 3.4) * 0.10; }
+  } else {
+    bob = Math.sin(t * 2) * 1.4;
+  }
+  /* --- こうげきの かまえ --- */
+  const a = (M.atk || 'punch');
+  let armSwing = 0, bodyPush = 0, mouthOpen = 0, atkSpin = 0, squash = 1;
+  if (atk >= 0) {
+    const k = atk;                      // 0 → 1 で ふりかぶる
+    if (a === 'punch')  { armSwing = -0.9 * k; bodyPush = -3 * k; }
+    if (a === 'bite')   { mouthOpen = k; bodyPush = -2 * k; }
+    if (a === 'spin')   { atkSpin = k * 3.0; }
+    if (a === 'charge') { bodyPush = -7 * k; squash = 1 + 0.12 * k; }
+    if (a === 'shoot')  { armSwing = -0.4 * k; bodyPush = -1.5 * k; }
+    if (a === 'stomp')  { bob += 8 * k; }
+  } else if (fired) {
+    const k = 1;
+    if (a === 'punch')  armSwing = 1.1 * k;
+    if (a === 'bite')   mouthOpen = 0.8;
+    if (a === 'spin')   atkSpin = 2.2;
+    if (a === 'charge') bodyPush = 10;
+    if (a === 'shoot')  armSwing = 0.8;
+    if (a === 'stomp')  bob = 0;
+  }
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 2.4;
+
+  /* ===== あし（からだより さきに かく）===== */
+  const legId = L.leg || 'two';
+  const legTop = -34;
+  ctx.save();
+  ctx.fillStyle = COL.dark;
+  if (legId === 'two') {
+    const sw = moving ? Math.sin(t * 7) * 6 : 0;
+    for (const d of [-1, 1]) {
+      ctx.save();
+      ctx.translate(d * 13, legTop);
+      ctx.beginPath();
+      ctx.moveTo(-6, 0);
+      ctx.lineTo(-6 + (d > 0 ? sw : -sw) * 0.3, 34 - bob);
+      ctx.lineTo(7 + (d > 0 ? sw : -sw) * 0.3, 34 - bob);
+      ctx.lineTo(6, 0);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      /* あしのうら */
+      ctx.beginPath();
+      ctx.ellipse((d > 0 ? sw : -sw) * 0.3, 34 - bob, 10, 4.5, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+  } else if (legId === 'many') {
+    for (let i = 0; i < 3; i++) {
+      for (const d of [-1, 1]) {
+        const ph = Math.sin(t * 8 + i * 1.2) * (moving ? 5 : 1);
+        ctx.beginPath();
+        ctx.moveTo(d * 10, legTop + i * 7);
+        ctx.quadraticCurveTo(d * (24 + ph), legTop + i * 7 + 12, d * (18 + ph), 34 - bob);
+        ctx.lineWidth = 4.2;
+        ctx.strokeStyle = COL.dark;
+        ctx.stroke();
+      }
+    }
+    ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+  } else if (legId === 'wheel') {
+    ctx.fillStyle = '#4a4a4a';
+    roundRect(ctx, -26, 6 - bob, 52, 26, 10);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#9e9e9e';
+    for (let i = 0; i < 4; i++) {
+      const x = -19 + i * 13 + ((t * 26) % 13);
+      ctx.beginPath(); ctx.arc(Math.min(19, x), 19 - bob, 4, 0, Math.PI * 2); ctx.fill();
+    }
+  } else if (legId === 'tail') {
+    ctx.fillStyle = COL.dark;
+    ctx.beginPath();
+    ctx.moveTo(-6, legTop + 6);
+    ctx.quadraticCurveTo(-34 + Math.sin(t * 5) * 6, legTop + 22, -14, 34 - bob);
+    ctx.lineTo(10, 34 - bob);
+    ctx.quadraticCurveTo(14, legTop + 16, 8, legTop + 6);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+  }
+  /* none（ふわふわ）は なにも かかない */
+  ctx.restore();
+
+  /* ===== からだ ===== */
+  ctx.save();
+  const bodyY = -62 - bob + bodyPush * 0 + (legId === 'none' ? -10 : 0);
+  ctx.translate(0 + bodyPush, bodyY);
+  ctx.rotate(tilt + spin + atkSpin);
+  ctx.scale(1 / squash, squash);
+  ctx.fillStyle = COL.main;
+
+  const bodyId = L.body || 'round';
+  const bodyPath = () => {
+    ctx.beginPath();
+    if (bodyId === 'round')      ctx.ellipse(0, 0, 34, 32, 0, 0, Math.PI * 2);
+    else if (bodyId === 'tall')  { ctx.ellipse(0, 0, 25, 42, 0, 0, Math.PI * 2); }
+    else if (bodyId === 'blob')  {
+      ctx.moveTo(-36, 10);
+      ctx.quadraticCurveTo(-40, -30, 0, -34);
+      ctx.quadraticCurveTo(40, -30, 36, 10);
+      ctx.quadraticCurveTo(30, 28, 0, 28);
+      ctx.quadraticCurveTo(-30, 28, -36, 10);
+    }
+    else if (bodyId === 'box')   { roundRect(ctx, -31, -30, 62, 60, 8); }
+    else if (bodyId === 'drop')  {
+      ctx.moveTo(0, -42);
+      ctx.quadraticCurveTo(32, -8, 30, 8);
+      ctx.quadraticCurveTo(26, 30, 0, 30);
+      ctx.quadraticCurveTo(-26, 30, -30, 8);
+      ctx.quadraticCurveTo(-32, -8, 0, -42);
+    }
+    else if (bodyId === 'starb') {
+      for (let i = 0; i < 10; i++) {
+        const ang = -Math.PI / 2 + i * Math.PI / 5;
+        const r = (i % 2 === 0) ? 40 : 19;
+        const x = Math.cos(ang) * r, y = Math.sin(ang) * r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+    }
+    else if (bodyId === 'egg')   { ctx.ellipse(0, 0, 28, 37, 0, 0, Math.PI * 2); }
+    else ctx.ellipse(0, 0, 34, 32, 0, 0, Math.PI * 2);
+  };
+  bodyPath(); ctx.fill(); ctx.stroke();
+
+  /* ===== もよう ===== */
+  const pat = L.pattern || 'none';
+  if (pat !== 'none') {
+    ctx.save();
+    bodyPath(); ctx.clip();
+    if (pat === 'spot') {
+      ctx.fillStyle = COL.dark;
+      [[-16, -12, 7], [12, -16, 6], [18, 8, 8], [-12, 12, 6], [0, 0, 5]]
+        .forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); });
+    } else if (pat === 'stripe') {
+      ctx.fillStyle = COL.dark;
+      for (let x = -44; x < 44; x += 16) ctx.fillRect(x, -48, 7, 96);
+    } else if (pat === 'belly') {
+      ctx.fillStyle = COL.light;
+      ctx.beginPath(); ctx.ellipse(0, 12, 22, 18, 0, 0, Math.PI * 2); ctx.fill();
+    } else if (pat === 'scar') {
+      ctx.strokeStyle = COL.dark; ctx.lineWidth = 3.4;
+      ctx.beginPath(); ctx.moveTo(-22, -18); ctx.lineTo(-6, 6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-18, -6); ctx.lineTo(-10, -14); ctx.stroke();
+      ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+    } else if (pat === 'gear') {
+      ctx.fillStyle = '#9e9e9e';
+      [[-14, 14], [16, 16], [0, -22]].forEach(([x, y]) => {
+        ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#5d5d5d'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(x - 3.4, y); ctx.lineTo(x + 3.4, y); ctx.stroke();
+      });
+      ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+    }
+    ctx.restore();
+  }
+
+  /* ===== つの・みみ ===== */
+  const horn = L.horn || 'none';
+  if (horn !== 'none') {
+    ctx.fillStyle = COL.dark;
+    const topY = (bodyId === 'tall' || bodyId === 'drop') ? -40 : -30;
+    if (horn === 'two') {
+      for (const d of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(d * 11, topY);
+        ctx.lineTo(d * 20, topY - 24);
+        ctx.lineTo(d * 24, topY - 1);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    } else if (horn === 'one') {
+      ctx.beginPath();
+      ctx.moveTo(-9, topY); ctx.lineTo(0, topY - 32); ctx.lineTo(9, topY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (horn === 'ear') {
+      for (const d of [-1, 1]) {
+        ctx.beginPath();
+        ctx.ellipse(d * 22, topY - 6, 9, 17, d * 0.35, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = COL.light;
+        ctx.beginPath();
+        ctx.ellipse(d * 22, topY - 6, 4.5, 10, d * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = COL.dark;
+      }
+    } else if (horn === 'anten') {
+      ctx.strokeStyle = INK; ctx.lineWidth = 2.8;
+      for (const d of [-1, 1]) {
+        const sw = Math.sin(t * 3 + d) * 4;
+        ctx.beginPath();
+        ctx.moveTo(d * 8, topY);
+        ctx.quadraticCurveTo(d * 16, topY - 20, d * (12 + sw), topY - 34);
+        ctx.stroke();
+        ctx.fillStyle = COL.light;
+        ctx.beginPath(); ctx.arc(d * (12 + sw), topY - 36, 5, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+      }
+      ctx.lineWidth = 2.4;
+    } else if (horn === 'crown') {
+      ctx.fillStyle = '#e8c33a';
+      ctx.beginPath();
+      ctx.moveTo(-20, topY - 2);
+      ctx.lineTo(-20, topY - 18); ctx.lineTo(-10, topY - 9);
+      ctx.lineTo(0, topY - 24);   ctx.lineTo(10, topY - 9);
+      ctx.lineTo(20, topY - 18);  ctx.lineTo(20, topY - 2);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (horn === 'fin') {
+      ctx.beginPath();
+      ctx.moveTo(-4, topY + 2);
+      ctx.quadraticCurveTo(0, topY - 30, 16, topY - 6);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+  }
+
+  /* ===== て ===== */
+  const arm = L.arm || 'none';
+  if (arm !== 'none') {
+    const ay = -2;
+    for (const d of [-1, 1]) {
+      ctx.save();
+      ctx.translate(d * 30, ay);
+      const sw = (d > 0 ? armSwing : armSwing * 0.4) + (moving ? Math.sin(t * 7 + (d > 0 ? 0 : 2)) * 0.2 : 0);
+      ctx.rotate(d > 0 ? sw : -sw);
+      ctx.fillStyle = COL.main;
+      if (arm === 'stick') {
+        ctx.strokeStyle = INK; ctx.lineWidth = 5.0;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(d * 20, 8); ctx.stroke();
+        ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.arc(d * 22, 9, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      } else if (arm === 'claw') {
+        ctx.beginPath();
+        ctx.moveTo(0, -6); ctx.lineTo(d * 24, -2); ctx.lineTo(d * 14, 4);
+        ctx.lineTo(d * 26, 8); ctx.lineTo(d * 12, 10); ctx.lineTo(0, 8);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else if (arm === 'wing') {
+        const fl = moving ? Math.sin(t * 10) * 0.35 : 0;
+        ctx.rotate(d > 0 ? fl : -fl);
+        ctx.fillStyle = COL.light;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(d * 26, -22, d * 36, 2);
+        ctx.quadraticCurveTo(d * 22, 10, 0, 10);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else if (arm === 'tentacle') {
+        ctx.strokeStyle = COL.dark; ctx.lineWidth = 6.0;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(d * 18, 12 + Math.sin(t * 4) * 5, d * 28, 24 + Math.cos(t * 4) * 5);
+        ctx.stroke();
+        ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+      } else if (arm === 'big') {
+        ctx.beginPath(); ctx.arc(d * 24, 6, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  /* ===== め ===== */
+  const eye = L.eye || 'dot';
+  const eyeY = (bodyId === 'tall') ? -12 : -8;
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+  const blink = (Math.sin(t * 0.9) > 0.985) ? 0.15 : 1;
+  function oneEye(x, r) {
+    ctx.beginPath(); ctx.ellipse(x, eyeY, r, r * blink, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.beginPath(); ctx.ellipse(x + 1.5, eyeY, r * 0.42, r * 0.42 * blink, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+  }
+  if (eye === 'dot')   { oneEye(-11, 7); oneEye(11, 7); }
+  else if (eye === 'big')  { oneEye(-13, 11); oneEye(13, 11); }
+  else if (eye === 'one')  { oneEye(0, 14); }
+  else if (eye === 'three'){ oneEye(-16, 6); oneEye(0, 7); oneEye(16, 6); }
+  else if (eye === 'line') {
+    ctx.strokeStyle = INK; ctx.lineWidth = 3.2;
+    for (const d of [-1, 1]) {
+      ctx.beginPath(); ctx.moveTo(d * 5, eyeY); ctx.lineTo(d * 18, eyeY); ctx.stroke();
+    }
+    ctx.lineWidth = 2.2;
+  } else if (eye === 'angry') {
+    for (const d of [-1, 1]) {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.ellipse(d * 12, eyeY, 8, 7 * blink, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = INK;
+      ctx.beginPath(); ctx.arc(d * 13, eyeY + 1, 3.4, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = INK; ctx.lineWidth = 3.4;
+      ctx.beginPath();
+      ctx.moveTo(d * 4, eyeY - 12); ctx.lineTo(d * 20, eyeY - 6);
+      ctx.stroke();
+      ctx.lineWidth = 2.2;
+    }
+  } else if (eye === 'x') {
+    ctx.strokeStyle = INK; ctx.lineWidth = 3.4;
+    for (const d of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(d * 12 - 6, eyeY - 6); ctx.lineTo(d * 12 + 6, eyeY + 6);
+      ctx.moveTo(d * 12 + 6, eyeY - 6); ctx.lineTo(d * 12 - 6, eyeY + 6);
+      ctx.stroke();
+    }
+    ctx.lineWidth = 2.2;
+  }
+
+  /* ===== くち ===== */
+  const mo = L.mouth || 'smile';
+  const my = (bodyId === 'tall') ? 12 : 13;
+  const open = 1 + mouthOpen * 2.2;
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.6;
+  if (mo === 'smile') {
+    ctx.beginPath(); ctx.arc(0, my - 6, 11, 0.18 * Math.PI, 0.82 * Math.PI); ctx.stroke();
+  } else if (mo === 'wavem') {
+    ctx.beginPath();
+    ctx.moveTo(-14, my);
+    ctx.quadraticCurveTo(-7, my - 6, 0, my);
+    ctx.quadraticCurveTo(7, my + 6, 14, my);
+    ctx.stroke();
+  } else if (mo === 'fang') {
+    ctx.fillStyle = '#2b2b2b';
+    ctx.beginPath(); ctx.ellipse(0, my, 15, 7 * open, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    for (const d of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(d * 9, my - 6 * open); ctx.lineTo(d * 4, my + 5 * open); ctx.lineTo(d * 13, my - 1);
+      ctx.closePath(); ctx.fill();
+    }
+  } else if (mo === 'open') {
+    ctx.fillStyle = '#b71c1c';
+    ctx.beginPath(); ctx.ellipse(0, my, 13, 10 * open, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  } else if (mo === 'beak') {
+    ctx.fillStyle = '#e8c33a';
+    ctx.beginPath();
+    ctx.moveTo(-12, my - 4); ctx.lineTo(16, my + 1 + 4 * mouthOpen); ctx.lineTo(-12, my + 7);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+
+  ctx.restore();   // からだ
+  ctx.restore();   // ぜんたい
+}
+
+/* ★オリジナルの てきを 1たい、えの いちらん（DRAWERS）に とうろく する。
+     ゲームは def.drawAs の なまえで ここを ひきます。              */
+function registerFoeDrawer(key, look, motion) {
+  DRAWERS[key] = function (ctx, st) { drawFoeParts(ctx, st, look, motion); };
+  return key;
+}

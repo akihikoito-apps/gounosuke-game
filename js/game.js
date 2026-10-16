@@ -49,6 +49,8 @@ const Game = {
     // STAGES に はいって いない コースにも たいおう するため）
     const st = (typeof stageOrCourse === 'number') ? STAGES[stageOrCourse] : stageOrCourse;
     this.stage = st;
+    /* ★オリジナルステージ 以外では もちこみの てきを けします */
+    if (!st || !st.orig) this.extraEnemies = null;
     this.setupGimmicks();          // ★ふしぎな せかいの しかけ
     this.ballUsed = {};            // ★てんきだま：この しあいで つかった もの
     this.ballUntil = 0;            // だまの てんきが おわる じかん
@@ -450,7 +452,8 @@ const Game = {
       }
       if (!fire) continue;
 
-      if (typeof Sound !== 'undefined' && ENEMIES[w.id] && ENEMIES[w.id].isBoss) Sound.se('bossIn');
+      const _bd = this.foeDef(w.id);
+      if (typeof Sound !== 'undefined' && _bd && _bd.isBoss) Sound.se('bossIn');
       const n = w.count || 1;
       const gap = w.gap || 0;
       for (let i = 0; i < n; i++) {
@@ -567,7 +570,7 @@ const Game = {
          でて くる たびに その なかから ランダムに えらびます
          （チューチューは 3しゅるいの ざこと いっしょに うごきます）。
          まだ つくって いない id は しずかに とばします。 */
-      const pool = Array.isArray(c.id) ? c.id.filter(id => ENEMIES[id]) : [c.id];
+      const pool = Array.isArray(c.id) ? c.id.filter(id => this.foeDef(id)) : [c.id];
       if (!pool.length) continue;
       for (let i = 0; i < c.n; i++) {
         this.spawnEnemy(pool[Math.floor(Math.random() * pool.length)], c.x);
@@ -575,8 +578,17 @@ const Game = {
     }
   },
 
+  /* ★てきの データを ひく。
+       ふだんは ENEMIES から。オリジナルステージの ときは
+       Game.extraEnemies に いれた ものも さがします
+       （ENEMIES じたいには たさない ので、ずかんは よごれません）。*/
+  foeDef(id) {
+    if (this.extraEnemies && this.extraEnemies[id]) return this.extraEnemies[id];
+    return ENEMIES[id] || null;
+  },
+
   spawnEnemy(id, nearX) {
-    const def = ENEMIES[id];
+    const def = this.foeDef(id);
     if (!def) return;
     const u = this.makeUnit(def, 'enemy');
     if (nearX !== undefined) u.x = Math.max(20, nearX - 40 + Math.random() * 80);
@@ -1528,6 +1540,9 @@ const Game = {
   },
 
   currentBg() {
+    /* ★オリジナルステージは はいけいを じかに もって きます
+         （BACKGROUNDS に とうろくしないで すむ ように）*/
+    if (this.stage && this.stage.bgData) return this.stage.bgData;
     const key = (this.stage && this.stage.bg) || 'meadow';
     return BACKGROUNDS[key] || BACKGROUNDS.meadow;
   },

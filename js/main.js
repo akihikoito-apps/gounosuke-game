@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.59';
+  const GAME_VERSION = '6.60';
 
 
   /* =================================================
@@ -129,7 +129,9 @@
       'screen-room': 'room', 'screen-garden': 'room', 'screen-shop': 'room',
       'screen-lab': 'room',
       'screen-minimode': 'home', 'screen-vsname': 'home', 'screen-run': 'gacha',
-      'screen-tataki': 'gacha', 'screen-memory': 'gacha',
+      'screen-tataki': 'gacha', 'screen-memory': 'gacha', 'screen-match': 'home',
+      'screen-orig': 'room', 'screen-bgmake': 'room', 'screen-foemake': 'room',
+      'screen-stgmake': 'room', 'screen-origplay': 'home',
       'screen-battle': 'battle',
       'screen-result': null, 'screen-movie': null,
     };
@@ -207,6 +209,8 @@
     if (!s.gear)   s.gear = {};                   // つくった そうび { id: かず }
     if (!s.equip)  s.equip = {};                  // だれが なにを つけて いるか
     if (!s.nekoso) s.nekoso = { at: 0 };          // ネコソに もらった ひ
+    /* ★v6.60 オリジナルの間（じぶんで つくった はいけい・てき・ステージ）*/
+    if (!s.orig) s.orig = { bgs: [], foes: [], stages: [], seq: 1 };
     /* ★v6.44 に あった「142〜144 → 501〜503」の ひきつぎは はずしました。
          v6.47 から 142・143 は「ターツーマーキーが支配する平原」なので、
          のこして おくと ★へいげんを クリアする たびに その きろくが
@@ -3364,7 +3368,12 @@
     if (!s.seenEnemies) s.seenEnemies = {};
     let added = false;
     if (Game.seen) {
-      for (const id in Game.seen) { if (!s.seenEnemies[id]) { s.seenEnemies[id] = true; added = true; } }
+      for (const id in Game.seen) {
+        /* ★オリジナルの間で つくった てきは ずかんに のせません
+             （ずかんの かず が あわなく なって しまう ため）*/
+        if (!ENEMIES[id]) continue;
+        if (!s.seenEnemies[id]) { s.seenEnemies[id] = true; added = true; }
+      }
     }
     if (backfillSeen(s)) added = true;
     if (added) storeSave();
@@ -5669,6 +5678,1080 @@
   }
 
   /* =================================================
+     ★オリジナルの間
+
+     じぶんで「はいけい」「てき」「ステージ」を つくって、
+     じぶんの へんせいで たたかえる あそび場 です。
+     つくった ものは ぜんぶ セーブに のこります（s.orig）。
+
+       s.orig = {
+         bgs:    [ { id, name, sky, hill, ground, deco } ],
+         foes:   [ { id, name, preset, look, motion, attr, stats, extras } ],
+         stages: [ { id, name, bg, castleHp, waves:[{foe,at,count,gap}] } ],
+         seq: つぎの ばんごう,
+       }
+
+     ごほうびは ありません（よわい てきを ならべて けいけんちを
+     かせぐ「ぬけみち」に ならない ように）。
+     ================================================= */
+  function origState() {
+    const s = slot();
+    if (!s) return null;
+    if (!s.orig) s.orig = { bgs: [], foes: [], stages: [], seq: 1 };
+    const o = s.orig;
+    if (!Array.isArray(o.bgs))    o.bgs = [];
+    if (!Array.isArray(o.foes))   o.foes = [];
+    if (!Array.isArray(o.stages)) o.stages = [];
+    if (typeof o.seq !== 'number') o.seq = 1;
+    return o;
+  }
+  function origNextId(prefix) {
+    const o = origState();
+    const n = o.seq++;
+    return prefix + n;
+  }
+  const ORIGCFG = () => (typeof ORIG !== 'undefined') ? ORIG
+    : { maxBg: 20, maxFoe: 20, maxStage: 20, maxWaves: 8,
+        castleMin: 500, castleMax: 40000, castleStep: 500, castleDef: 4000 };
+
+  /* ---- 間の えらびかた ---- */
+  function openOrig() {
+    const o = origState();
+    const box = $('#orig-list');
+    if (box && o) {
+      const cards = [
+        { ico: '🏞️', name: 'はいけいを つくる',
+          desc: 'そら・やま・じめん・かざり を えらんで、たたかう ばしょを つくります。',
+          n: o.bgs.length, max: ORIGCFG().maxBg, go: () => openBgMake(null) },
+        { ico: '👾', name: 'てきを つくる',
+          desc: 'からだ・め・くち・つの・て・あし・もよう・いろ を くみあわせて、うごきかたと つよさも きめます。',
+          n: o.foes.length, max: ORIGCFG().maxFoe, go: () => openFoeMake(null) },
+        { ico: '🗺️', name: 'ステージを つくる',
+          desc: 'はいけいと「どの てきが いつ でて くるか」を きめて、1つの ステージに します。',
+          n: o.stages.length, max: ORIGCFG().maxStage, go: () => openStgMake(null) },
+        { ico: '⚔️', name: 'オリジナルステージで あそぶ',
+          desc: 'つくった ステージに、いまの へんせいで ちょうせん します。',
+          n: o.stages.length, max: null, go: openOrigPlay },
+      ];
+      box.innerHTML = '';
+      cards.forEach(c => {
+        const el = document.createElement('button');
+        el.className = 'mini-card';
+        el.innerHTML =
+          '<span class="mc-ico">' + c.ico + '</span>' +
+          '<span class="mc-body">' +
+            '<span class="mc-name">' + c.name + '</span>' +
+            '<span class="mc-desc">' + c.desc +
+              (c.max !== null ? ('<br>ほぞん：' + c.n + ' ／ ' + c.max) : ('<br>つくった ステージ：' + c.n)) +
+            '</span>' +
+          '</span>' +
+          '<span class="mc-go">▶</span>';
+        el.addEventListener('click', c.go);
+        box.appendChild(el);
+      });
+    }
+    show('screen-orig');
+  }
+
+  /* =================================================
+     はいけいを つくる
+     ================================================= */
+  const BGP = () => (typeof BG_PARTS !== 'undefined') ? BG_PARTS : { sky: [], hill: [], ground: [], deco: [] };
+  function bgPart(kind, id) {
+    const list = BGP()[kind] || [];
+    return list.find(x => x.id === id) || list[0] || null;
+  }
+  /* つくった はいけいを「ゲームが わかる かたち」に する */
+  function bgToData(bg) {
+    const sky = bgPart('sky', bg.sky), hill = bgPart('hill', bg.hill), gr = bgPart('ground', bg.ground);
+    return {
+      sky: (sky && sky.cols) || ['#5ec8f5', '#bde8fb', '#f3f7c9'],
+      hillFar: (hill && hill.far) || '#9ccc65',
+      hillNear: (hill && hill.near) || '#7cb342',
+      ground: (gr && gr.c) || '#8d6e3a',
+      groundTop: (gr && gr.top) || '#a1874a',
+      deco: bg.deco || 'none',
+    };
+  }
+  /* ちいさな みほん（つくる がめん と カード）*/
+  function drawBgPreview(ctx, W, H, d, t) {
+    const g = ctx.createLinearGradient(0, 0, 0, H * 0.78);
+    const cols = d.sky || ['#5ec8f5', '#bde8fb'];
+    cols.forEach((c, i) => g.addColorStop(cols.length > 1 ? i / (cols.length - 1) : 0, c));
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    /* とおくの やま */
+    ctx.fillStyle = d.hillFar;
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.72);
+    for (let i = 0; i <= 10; i++) {
+      ctx.lineTo(W * i / 10, H * (0.56 + 0.10 * Math.sin(i * 1.3)));
+    }
+    ctx.lineTo(W, H * 0.72); ctx.closePath(); ctx.fill();
+    /* ちかくの やま */
+    ctx.fillStyle = d.hillNear;
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.74);
+    for (let i = 0; i <= 8; i++) {
+      ctx.lineTo(W * i / 8, H * (0.64 + 0.07 * Math.cos(i * 1.7)));
+    }
+    ctx.lineTo(W, H * 0.74); ctx.closePath(); ctx.fill();
+    /* じめん */
+    ctx.fillStyle = d.ground; ctx.fillRect(0, H * 0.74, W, H * 0.26);
+    ctx.fillStyle = d.groundTop; ctx.fillRect(0, H * 0.74, W, Math.max(2, H * 0.035));
+    /* かざり（かんたんな みほん）*/
+    const tt = t || 0;
+    const deco = d.deco || 'none';
+    ctx.save();
+    if (deco === 'cloud' || deco === 'bubble') {
+      ctx.fillStyle = (deco === 'cloud') ? 'rgba(255,255,255,.8)' : 'rgba(255,255,255,.45)';
+      for (let i = 0; i < 4; i++) {
+        const x = ((i * 0.27 + tt * 0.02) % 1.1 - 0.05) * W, y = H * (0.12 + (i % 2) * 0.14), r = H * 0.055;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.arc(x + r * 0.9, y + r * 0.2, r * 0.7, 0, Math.PI * 2);
+        ctx.arc(x - r * 0.9, y + r * 0.2, r * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (deco === 'star') {
+      ctx.fillStyle = '#fff59d';
+      for (let i = 0; i < 16; i++) {
+        const x = ((i * 37) % 100) / 100 * W;
+        const y = ((i * 53) % 60) / 100 * H;
+        const r = (1.2 + (i % 3) * 0.7) * (H / 130) * 2;
+        ctx.globalAlpha = 0.5 + 0.5 * Math.abs(Math.sin(tt * 2 + i));
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    } else if (deco === 'snow' || deco === 'dust' || deco === 'leaf' || deco === 'ember') {
+      const col = { snow: '#ffffff', dust: '#d7c49a', leaf: '#8bc34a', ember: '#ff8a65' }[deco];
+      ctx.fillStyle = col;
+      for (let i = 0; i < 18; i++) {
+        const x = ((i * 41) % 100) / 100 * W + Math.sin(tt + i) * 6;
+        const y = (((i * 29) % 70) / 100 + (tt * 0.06) % 0.7) * H;
+        ctx.beginPath(); ctx.arc(x, y % (H * 0.74), Math.max(1.5, H * 0.012), 0, Math.PI * 2); ctx.fill();
+      }
+    } else if (deco === 'sun') {
+      ctx.fillStyle = 'rgba(255,241,118,.85)';
+      ctx.beginPath(); ctx.arc(W * 0.8, H * 0.18, H * 0.13, 0, Math.PI * 2); ctx.fill();
+    } else if (deco === 'wave') {
+      ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = Math.max(1.5, H * 0.012);
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        for (let x = 0; x <= W; x += 8) {
+          const y = H * (0.80 + i * 0.05) + Math.sin(x * 0.05 + tt * 2 + i) * H * 0.012;
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+    } else if (deco === 'rock' || deco === 'ruins') {
+      ctx.fillStyle = 'rgba(0,0,0,.35)';
+      for (let i = 0; i < 3; i++) {
+        const x = W * (0.2 + i * 0.3), y = H * (0.30 + (i % 2) * 0.12), s2 = H * 0.07;
+        ctx.beginPath(); ctx.moveTo(x, y - s2); ctx.lineTo(x + s2, y); ctx.lineTo(x, y + s2); ctx.lineTo(x - s2, y);
+        ctx.closePath(); ctx.fill();
+      }
+    } else if (deco === 'bugs') {
+      ctx.fillStyle = '#4e342e';
+      for (let i = 0; i < 7; i++) {
+        const x = W * ((i * 0.15 + tt * 0.05) % 1), y = H * (0.2 + 0.1 * Math.sin(tt * 3 + i));
+        ctx.beginPath(); ctx.ellipse(x, y, H * 0.018, H * 0.012, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  let BG_EDIT = null, bgTab = 'sky', bgRaf = null;
+  const BG_TABS = [['sky', '🌤️ そら'], ['hill', '⛰️ やま'], ['ground', '🟫 じめん'], ['deco', '✨ かざり']];
+
+  function openBgMake(edit) {
+    const o = origState();
+    BG_EDIT = edit ? Object.assign({}, edit)
+      : { id: null, name: '', sky: 'blue', hill: 'green', ground: 'soil', deco: 'cloud' };
+    bgTab = 'sky';
+    const nm = $('#bgmake-name');
+    if (nm) nm.value = BG_EDIT.name || '';
+    buildBgTabs(); buildBgTray(); buildBgSaved();
+    show('screen-bgmake');
+    startBgLoop();
+  }
+  function closeBgMake() { stopBgLoop(); openOrig(); }
+  function startBgLoop() {
+    stopBgLoop();
+    const tick = () => {
+      const sc = $('#screen-bgmake');
+      if (!sc || !sc.classList.contains('active')) { bgRaf = null; return; }
+      bgRaf = requestAnimationFrame(tick);
+      drawBgMake();
+    };
+    bgRaf = requestAnimationFrame(tick);
+  }
+  function stopBgLoop() { if (bgRaf) cancelAnimationFrame(bgRaf); bgRaf = null; }
+
+  function buildBgTabs() {
+    const box = $('#bgmake-tabs');
+    if (!box) return;
+    box.innerHTML = '';
+    BG_TABS.forEach(([k, label]) => {
+      const b = document.createElement('button');
+      b.className = 'mk-tab' + (bgTab === k ? ' on' : '');
+      b.textContent = label;
+      b.addEventListener('click', () => { bgTab = k; buildBgTabs(); buildBgTray(); });
+      box.appendChild(b);
+    });
+  }
+  function buildBgTray() {
+    const box = $('#bgmake-tray');
+    if (!box || !BG_EDIT) return;
+    box.innerHTML = '';
+    (BGP()[bgTab] || []).forEach(part => {
+      const on = (BG_EDIT[bgTab] === part.id);
+      const b = document.createElement('button');
+      b.className = 'mk-item' + (on ? ' on' : '');
+      let sw = '';
+      if (bgTab === 'sky' && part.cols) {
+        sw = '<span class="mi-sw" style="background:linear-gradient(90deg,' + part.cols.join(',') + ')"></span>';
+      } else if (bgTab === 'hill') {
+        sw = '<span class="mi-sw" style="background:linear-gradient(90deg,' + part.far + ',' + part.near + ')"></span>';
+      } else if (bgTab === 'ground') {
+        sw = '<span class="mi-sw" style="background:linear-gradient(90deg,' + part.top + ',' + part.c + ')"></span>';
+      }
+      b.innerHTML = sw + part.name;
+      b.addEventListener('click', () => {
+        BG_EDIT[bgTab] = part.id;
+        if (typeof Sound !== 'undefined') Sound.se('tap');
+        buildBgTray();
+      });
+      box.appendChild(b);
+    });
+  }
+  function drawBgMake() {
+    const cv = $('#bgmake-canvas');
+    if (!cv || !BG_EDIT) return;
+    const W = cv.clientWidth, H = cv.clientHeight;
+    if (W < 2 || H < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawBgPreview(ctx, W, H, bgToData(BG_EDIT), (Date.now() % 100000) / 1000);
+    /* かざりの なまえ */
+    const dp = bgPart('deco', BG_EDIT.deco);
+    ctx.fillStyle = 'rgba(0,0,0,.55)';
+    ctx.fillRect(0, H - Math.max(16, H * 0.16), W, Math.max(16, H * 0.16));
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.font = 'bold ' + Math.max(10, H * 0.1) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText('かざり：' + (dp ? dp.name : 'なし'), 6, H - Math.max(8, H * 0.08));
+  }
+  function saveBg() {
+    const o = origState();
+    if (!o || !BG_EDIT) return;
+    const nm = $('#bgmake-name');
+    const name = ((nm && nm.value) || '').trim() || ('はいけい' + (o.bgs.length + 1));
+    BG_EDIT.name = name;
+    if (BG_EDIT.id) {
+      const i = o.bgs.findIndex(x => x.id === BG_EDIT.id);
+      if (i >= 0) o.bgs[i] = Object.assign({}, BG_EDIT);
+    } else {
+      if (o.bgs.length >= ORIGCFG().maxBg) { toast('はいけいは ' + ORIGCFG().maxBg + 'こ までです'); return; }
+      BG_EDIT.id = origNextId('bg');
+      o.bgs.push(Object.assign({}, BG_EDIT));
+    }
+    storeSave();
+    if (typeof Sound !== 'undefined') Sound.se('craft');
+    toast('「' + name + '」を ほぞん しました');
+    buildBgSaved();
+  }
+  function buildBgSaved() {
+    const o = origState();
+    const box = $('#bgmake-saved');
+    if (!box || !o) return;
+    box.innerHTML = '';
+    if (!o.bgs.length) {
+      box.innerHTML = '<span class="mk-empty">まだ ほぞんした はいけいは ありません</span>';
+      return;
+    }
+    o.bgs.forEach(bg => {
+      const card = document.createElement('div');
+      card.className = 'mk-card';
+      card.innerHTML = '<canvas></canvas><span>' + bg.name + '</span>' +
+                       '<button class="mc-del" title="けす">×</button>';
+      card.addEventListener('click', (ev) => {
+        if (ev.target && ev.target.classList.contains('mc-del')) return;
+        openBgMake(bg);
+      });
+      card.querySelector('.mc-del').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const used = o.stages.filter(s => s.bg === bg.id);
+        if (used.length) { toast('「' + used[0].name + '」で つかって いるので けせません'); return; }
+        o.bgs = o.bgs.filter(x => x.id !== bg.id);
+        storeSave(); buildBgSaved();
+      });
+      box.appendChild(card);
+      const cv = card.querySelector('canvas');
+      requestAnimationFrame(() => {
+        const W = cv.clientWidth || 90, H = cv.clientHeight || 44;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+        const c2 = cv.getContext('2d');
+        c2.setTransform(dpr, 0, 0, dpr, 0, 0);
+        drawBgPreview(c2, W, H, bgToData(bg), 0);
+      });
+    });
+  }
+
+  /* =================================================
+     てきを つくる
+
+     ・みため … パーツを くみあわせる（または いまの てきの えを つかう）
+     ・うごき … あるきかた と こうげきの しかた
+     ・つよさ … バーで きめる（じゆう。よこに「つよさの めやす」を だします）
+     ・とくこうか … えらんだ ものだけ つきます
+     ================================================= */
+  const FOEP = () => (typeof FOE_PARTS !== 'undefined') ? FOE_PARTS : {};
+  const FOEC = () => (typeof FOE_COLORS !== 'undefined') ? FOE_COLORS : [];
+  const FOEM = () => (typeof FOE_MOTION !== 'undefined') ? FOE_MOTION : { walk: [], atk: [] };
+  const FOES = () => (typeof FOE_STATS !== 'undefined') ? FOE_STATS : [];
+  const FOEX = () => (typeof FOE_EXTRAS !== 'undefined') ? FOE_EXTRAS : [];
+
+  const LOOK_GROUPS = [
+    ['body', 'からだ'], ['eye', 'め'], ['mouth', 'くち'], ['horn', 'つの・みみ'],
+    ['arm', 'て'], ['leg', 'あし'], ['pattern', 'もよう'],
+  ];
+  const ATTR_LIST = ['none', 'water', 'fire', 'grass', 'magic', 'power', 'beast', 'metal', 'god', 'ghost'];
+
+  function foeNew() {
+    const stats = {};
+    FOES().forEach(s => { stats[s.key] = s.def; });
+    return {
+      id: null, name: '',
+      preset: null,          // いまの てきの えを つかう ときは その id
+      look: { body: 'round', eye: 'dot', mouth: 'smile', horn: 'none',
+              arm: 'none', leg: 'two', pattern: 'none', color: 'red' },
+      motion: { walk: 'step', atk: 'punch' },
+      attr: ['none'],
+      stats: stats,
+      extras: [],
+    };
+  }
+  /* つくった てきを「ゲームが わかる かたち」に する */
+  function foeToDef(foe) {
+    const st = foe.stats || {};
+    const g = (k) => {
+      const d = FOES().find(x => x.key === k);
+      return (st[k] !== undefined) ? st[k] : (d ? d.def : 0);
+    };
+    const def = {
+      id: foe.id, name: foe.name || 'なぞの てき',
+      rarity: 'N',                       // power 1 で そのままの つよさに なります
+      attr: (foe.attr && foe.attr.length === 1) ? foe.attr[0] : (foe.attr || ['none']).slice(),
+      hp: Math.round(g('hp')), atk: Math.round(g('atk')),
+      range: Math.round(g('range')), speed: Math.round(g('speed')),
+      attackInterval: g('attackInterval'), attackWindup: 0.35,
+      kbCount: Math.max(1, Math.round(g('kbCount'))),
+      scale: g('scale'),
+      attackType: 'single', projectile: null,
+      /* たおすと もらえる おかね。つよさから じどうで きめます
+         （おかねが 0 だと なかまを だせず あそべません）*/
+      money: Math.max(40, Math.round(g('hp') * 0.035 + g('atk') * 0.12)),
+      drawAs: foe.preset ? foe.preset : ('origfoe_' + foe.id),
+    };
+    (foe.extras || []).forEach(id => {
+      const x = FOEX().find(e => e.id === id);
+      if (x && typeof x.apply === 'function') x.apply(def);
+    });
+    if (def.attackType === 'area' && !def.areaRadius) def.areaRadius = 150;
+    return def;
+  }
+  /* えを DRAWERS に とうろく（パーツの てき だけ）*/
+  function foeRegisterArt(foe) {
+    if (foe.preset) return;
+    if (typeof registerFoeDrawer !== 'function') return;
+    registerFoeDrawer('origfoe_' + foe.id, foe.look, foe.motion);
+  }
+
+  /* ---- つよさの めやす ---- */
+  function foeScoreOf(def) {
+    const dps = def.atk / Math.max(0.4, (def.attackInterval || 2) + 0.35)
+      * ((def.attackType === 'area') ? 1.6 : 1) * (def.wave ? 1.3 : 1)
+      * (def.crit ? 1.2 : 1);
+    return Math.sqrt(Math.max(1, dps) * Math.max(1, def.hp));
+  }
+  function partyScoreAvg() {
+    const s = slot();
+    const list = (PARTY && PARTY.length) ? PARTY : DEFAULT_PARTY;
+    let sum = 0, n = 0;
+    list.forEach(id => {
+      const d = (Game.defOf && Game.defOf(id)) || UNITS[id];
+      if (!d) return;
+      const lv = s ? effLevel(s, id) : 1;
+      const mul = (typeof levelMult === 'function') ? levelMult(lv, d.rarity) : 1;
+      const h = d.multiHit ? d.multiHit.count : 1;
+      const dps = (d.atk * h * mul) / Math.max(0.4, (d.attackInterval || 2) + (d.attackWindup || 0.3))
+        * ((d.attackType === 'area' || d.wave) ? 1.6 : 1);
+      sum += Math.sqrt(Math.max(1, dps) * Math.max(1, d.hp * mul));
+      n++;
+    });
+    return n ? (sum / n) : 1;
+  }
+  function foePowerLabel(def) {
+    const r = foeScoreOf(def) / Math.max(1, partyScoreAvg());
+    if (r < 0.5)  return { stars: '★', text: 'よわめ' };
+    if (r < 1.1)  return { stars: '★★', text: 'ちょうど いい' };
+    if (r < 2.2)  return { stars: '★★★', text: 'てごわい' };
+    if (r < 4.5)  return { stars: '★★★★', text: 'かなり つよい' };
+    return { stars: '★★★★★', text: 'とてつもなく つよい' };
+  }
+
+  let FOE_EDIT = null, foeTab = 'look', foeRaf = null;
+  const FOE_TABS = [['look', '🎨 みため'], ['motion', '🏃 うごき'], ['attr', '🔮 ぞくせい'],
+                    ['stats', '📊 つよさ'], ['extra', '✨ とくこうか'], ['preset', '👹 いまの てきの え']];
+
+  function openFoeMake(edit) {
+    FOE_EDIT = edit ? JSON.parse(JSON.stringify(edit)) : foeNew();
+    if (!FOE_EDIT.stats) FOE_EDIT.stats = foeNew().stats;
+    foeTab = 'look';
+    const nm = $('#foemake-name');
+    if (nm) nm.value = FOE_EDIT.name || '';
+    buildFoeTabs(); buildFoeTray(); buildFoeSaved();
+    show('screen-foemake');
+    startFoeLoop();
+  }
+  function closeFoeMake() { stopFoeLoop(); openOrig(); }
+  function startFoeLoop() {
+    stopFoeLoop();
+    const tick = () => {
+      const sc = $('#screen-foemake');
+      if (!sc || !sc.classList.contains('active')) { foeRaf = null; return; }
+      foeRaf = requestAnimationFrame(tick);
+      drawFoeMake();
+    };
+    foeRaf = requestAnimationFrame(tick);
+  }
+  function stopFoeLoop() { if (foeRaf) cancelAnimationFrame(foeRaf); foeRaf = null; }
+
+  function buildFoeTabs() {
+    const box = $('#foemake-tabs');
+    if (!box) return;
+    box.innerHTML = '';
+    FOE_TABS.forEach(([k, label]) => {
+      const b = document.createElement('button');
+      b.className = 'mk-tab' + (foeTab === k ? ' on' : '');
+      b.textContent = label;
+      b.addEventListener('click', () => { foeTab = k; buildFoeTabs(); buildFoeTray(); });
+      box.appendChild(b);
+    });
+  }
+
+  function buildFoeTray() {
+    const box = $('#foemake-tray');
+    if (!box || !FOE_EDIT) return;
+    box.innerHTML = '';
+    const head = (t) => {
+      const p = document.createElement('p');
+      p.className = 'size-lead';
+      p.style.width = '100%';
+      p.textContent = t;
+      box.appendChild(p);
+    };
+    const pick = (label, on, onTap, swatch) => {
+      const b = document.createElement('button');
+      b.className = 'mk-item' + (on ? ' on' : '');
+      b.innerHTML = (swatch || '') + label;
+      b.addEventListener('click', () => {
+        onTap();
+        if (typeof Sound !== 'undefined') Sound.se('tap');
+        buildFoeTray();
+      });
+      box.appendChild(b);
+    };
+
+    if (foeTab === 'look') {
+      if (FOE_EDIT.preset) {
+        head('いま「いまの てきの え」を つかって います。パーツに もどすには したの「パーツに もどす」を おしてね。');
+        pick('パーツに もどす', false, () => { FOE_EDIT.preset = null; });
+      }
+      LOOK_GROUPS.forEach(([k, label]) => {
+        head(label);
+        (FOEP()[k] || []).forEach(part => {
+          pick(part.name, FOE_EDIT.look[k] === part.id, () => { FOE_EDIT.look[k] = part.id; });
+        });
+      });
+      head('いろ');
+      FOEC().forEach(c => {
+        pick(c.name, FOE_EDIT.look.color === c.id, () => { FOE_EDIT.look.color = c.id; },
+          '<span class="mi-sw" style="background:linear-gradient(90deg,' + c.light + ',' + c.main + ',' + c.dark + ')"></span>');
+      });
+      return;
+    }
+
+    if (foeTab === 'motion') {
+      head('あるきかた');
+      FOEM().walk.forEach(m => pick(m.name, FOE_EDIT.motion.walk === m.id, () => { FOE_EDIT.motion.walk = m.id; }));
+      head('こうげきの しかた');
+      FOEM().atk.forEach(m => pick(m.name, FOE_EDIT.motion.atk === m.id, () => { FOE_EDIT.motion.atk = m.id; }));
+      return;
+    }
+
+    if (foeTab === 'attr') {
+      head('ぞくせい（2つまで えらべます）');
+      ATTR_LIST.forEach(a => {
+        const on = FOE_EDIT.attr.indexOf(a) >= 0;
+        pick((typeof ATTR_LABEL !== 'undefined' ? ATTR_LABEL[a] : a), on, () => {
+          if (on) {
+            if (FOE_EDIT.attr.length > 1) FOE_EDIT.attr = FOE_EDIT.attr.filter(x => x !== a);
+            else toast('ぞくせいは 1つは えらんで ください');
+            return;
+          }
+          /* ★「む」は ほかと いっしょに できない ので いれかえ ます */
+          if (a === 'none') { FOE_EDIT.attr = ['none']; return; }
+          if (FOE_EDIT.attr.length === 1 && FOE_EDIT.attr[0] === 'none') {
+            FOE_EDIT.attr = [a];
+            return;
+          }
+          if (FOE_EDIT.attr.length >= 2) { toast('ぞくせいは 2つまでです（けしてから えらんでね）'); return; }
+          FOE_EDIT.attr.push(a);
+        });
+      });
+      return;
+    }
+
+    if (foeTab === 'stats') {
+      FOES().forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'mk-bar';
+        const val = () => FOE_EDIT.stats[s.key];
+        const fmt = (v) => (s.step < 1 ? v.toFixed(1) : String(Math.round(v))) + (s.unit || '');
+        row.innerHTML =
+          '<span class="mk-bar-head"><span>' + s.name + '</span><b>' + fmt(val()) + '</b></span>';
+        const inp = document.createElement('input');
+        inp.type = 'range';
+        inp.min = s.min; inp.max = s.max; inp.step = s.step;
+        inp.value = val();
+        inp.addEventListener('input', () => {
+          FOE_EDIT.stats[s.key] = parseFloat(inp.value);
+          row.querySelector('b').textContent = fmt(FOE_EDIT.stats[s.key]);
+        });
+        row.appendChild(inp);
+        box.appendChild(row);
+      });
+      return;
+    }
+
+    if (foeTab === 'extra') {
+      head('えらんだ ものだけ つきます（いくつでも）');
+      FOEX().forEach(x => {
+        const on = FOE_EDIT.extras.indexOf(x.id) >= 0;
+        const b = document.createElement('button');
+        b.className = 'mk-item' + (on ? ' on' : '');
+        b.style.minWidth = '46%';
+        b.innerHTML = (on ? '✅ ' : '') + x.name + '<br><span style="font-weight:normal;font-size:.85em">' + x.desc + '</span>';
+        b.addEventListener('click', () => {
+          if (on) FOE_EDIT.extras = FOE_EDIT.extras.filter(y => y !== x.id);
+          else FOE_EDIT.extras.push(x.id);
+          if (typeof Sound !== 'undefined') Sound.se('tap');
+          buildFoeTray();
+        });
+        box.appendChild(b);
+      });
+      return;
+    }
+
+    if (foeTab === 'preset') {
+      head('いまの てきの えを そのまま つかえます（つよさは じぶんで きめます）');
+      pick('パーツで つくる', !FOE_EDIT.preset, () => { FOE_EDIT.preset = null; });
+      Object.keys(ENEMIES).forEach(id => {
+        const e = ENEMIES[id];
+        const key = e.drawAs || id;
+        if (typeof DRAWERS === 'undefined' || !DRAWERS[key]) return;
+        const card = document.createElement('div');
+        card.className = 'mk-card' + (FOE_EDIT.preset === key ? ' on' : '');
+        card.innerHTML = '<canvas></canvas><span>' + e.name + '</span>';
+        card.addEventListener('click', () => {
+          FOE_EDIT.preset = key;
+          if (typeof Sound !== 'undefined') Sound.se('tap');
+          buildFoeTray();
+        });
+        box.appendChild(card);
+        const cv = card.querySelector('canvas');
+        requestAnimationFrame(() => paintFoeArt(cv, key, null, null));
+      });
+      return;
+    }
+  }
+
+  /* ちいさな わくに てきの えを かく */
+  function paintFoeArt(cv, key, look, motion) {
+    if (!cv) return;
+    const W = cv.clientWidth || 90, H = cv.clientHeight || 44;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#263238'; ctx.fillRect(0, 0, W, H);
+    const fn = look ? null : ((typeof DRAWERS !== 'undefined') ? DRAWERS[key] : null);
+    ctx.save();
+    ctx.translate(W * 0.5, H * 0.95);
+    const sc = (H * 0.85) / 130;
+    ctx.scale(sc, sc);
+    const st = { t: 0.8, moving: false, atk: -1, hpRatio: 1, hpRate: 1, roll: 0 };
+    try {
+      if (look && typeof drawFoeParts === 'function') drawFoeParts(ctx, st, look, motion);
+      else if (fn) fn(ctx, st);
+    } catch (e) {}
+    ctx.restore();
+  }
+
+  function drawFoeMake() {
+    const cv = $('#foemake-canvas');
+    if (!cv || !FOE_EDIT) return;
+    const W = cv.clientWidth, H = cv.clientHeight;
+    if (W < 2 || H < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    /* ゆか */
+    ctx.fillStyle = '#b0bec5'; ctx.fillRect(0, H * 0.88, W, H * 0.12);
+    ctx.fillStyle = '#90a4ae'; ctx.fillRect(0, H * 0.88, W, 2);
+
+    /* あるく → ふりかぶる → うった ちょくご を くりかえして みせる */
+    const t = (Date.now() % 100000) / 1000;
+    const cyc = t % 4;
+    let st;
+    if (cyc < 2.2)      st = { t: t, moving: true,  atk: -1, hpRatio: 1, hpRate: 1, roll: t * 3 };
+    else if (cyc < 3.2) st = { t: t, moving: false, atk: Math.min(1, (cyc - 2.2) / 0.9), hpRatio: 1, hpRate: 1, roll: 0 };
+    else                st = { t: t, moving: false, atk: -1, fired: true, hpRatio: 1, hpRate: 1, roll: 0 };
+
+    const scale = (FOE_EDIT.stats && FOE_EDIT.stats.scale) || 1;
+    ctx.save();
+    ctx.translate(W * 0.5, H * 0.90);
+    const sc = (H * 0.72) / 130 * scale;
+    ctx.scale(sc, sc);
+    try {
+      if (FOE_EDIT.preset && typeof DRAWERS !== 'undefined' && DRAWERS[FOE_EDIT.preset]) {
+        DRAWERS[FOE_EDIT.preset](ctx, st);
+      } else if (typeof drawFoeParts === 'function') {
+        drawFoeParts(ctx, st, FOE_EDIT.look, FOE_EDIT.motion);
+      }
+    } catch (e) {}
+    ctx.restore();
+
+    /* じょうたいの もじ */
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(0,0,0,.55)';
+    ctx.fillRect(0, 0, W * 0.56, Math.max(16, H * 0.15));
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold ' + Math.max(9, H * 0.085) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText(cyc < 2.2 ? 'あるく' : (cyc < 3.2 ? 'ふりかぶる' : 'こうげき！'), 5, Math.max(3, H * 0.03));
+
+    /* つよさの めやす */
+    const lab = $('#foemake-power');
+    if (lab) {
+      const d = foeToDef(Object.assign({}, FOE_EDIT, { id: FOE_EDIT.id || 'tmp' }));
+      const p = foePowerLabel(d);
+      lab.textContent = p.stars + ' ' + p.text;
+    }
+  }
+
+  function saveFoe() {
+    const o = origState();
+    if (!o || !FOE_EDIT) return;
+    const nm = $('#foemake-name');
+    const name = ((nm && nm.value) || '').trim() || ('てき' + (o.foes.length + 1));
+    FOE_EDIT.name = name;
+    if (FOE_EDIT.id) {
+      const i = o.foes.findIndex(x => x.id === FOE_EDIT.id);
+      if (i >= 0) o.foes[i] = JSON.parse(JSON.stringify(FOE_EDIT));
+    } else {
+      if (o.foes.length >= ORIGCFG().maxFoe) { toast('てきは ' + ORIGCFG().maxFoe + 'たい までです'); return; }
+      FOE_EDIT.id = origNextId('foe');
+      o.foes.push(JSON.parse(JSON.stringify(FOE_EDIT)));
+    }
+    storeSave();
+    if (typeof Sound !== 'undefined') Sound.se('craft');
+    toast('「' + name + '」を ほぞん しました');
+    buildFoeSaved();
+  }
+  function buildFoeSaved() {
+    const o = origState();
+    const box = $('#foemake-saved');
+    if (!box || !o) return;
+    box.innerHTML = '';
+    if (!o.foes.length) {
+      box.innerHTML = '<span class="mk-empty">まだ ほぞんした てきは いません</span>';
+      return;
+    }
+    o.foes.forEach(foe => {
+      const card = document.createElement('div');
+      card.className = 'mk-card';
+      card.innerHTML = '<canvas></canvas><span>' + foe.name + '</span>' +
+                       '<button class="mc-del" title="けす">×</button>';
+      card.addEventListener('click', (ev) => {
+        if (ev.target && ev.target.classList.contains('mc-del')) return;
+        openFoeMake(foe);
+      });
+      card.querySelector('.mc-del').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const used = o.stages.filter(s => (s.waves || []).some(w => w.foe === foe.id));
+        if (used.length) { toast('「' + used[0].name + '」で つかって いるので けせません'); return; }
+        o.foes = o.foes.filter(x => x.id !== foe.id);
+        storeSave(); buildFoeSaved();
+      });
+      box.appendChild(card);
+      const cv = card.querySelector('canvas');
+      requestAnimationFrame(() => {
+        if (foe.preset) paintFoeArt(cv, foe.preset, null, null);
+        else paintFoeArt(cv, null, foe.look, foe.motion);
+      });
+    });
+  }
+
+  /* =================================================
+     ステージを つくる
+
+     ・はいけい … じぶんで つくった ものと、ゲームに もとから ある もの
+     ・しろの たいりょく … バーで きめる（これを 0 に すれば かち）
+     ・てきの でかた … 「なんびょうに どの てきが なんたい」を ならべる
+     ================================================= */
+  let STG_EDIT = null, stgTab = 'bg', stgRaf = null;
+  const STG_TABS = [['bg', '🏞️ はいけい'], ['castle', '🏰 しろの たいりょく'], ['waves', '👾 てきの でかた']];
+
+  function stgNew() {
+    const o = origState();
+    return {
+      id: null, name: '',
+      bg: (o && o.bgs.length) ? o.bgs[0].id : 'meadow',
+      castleHp: ORIGCFG().castleDef,
+      waves: [],
+    };
+  }
+  /* えらんで いる はいけいを「ゲームが わかる かたち」に する */
+  function stgBgData(st) {
+    const o = origState();
+    const mine = o ? o.bgs.find(b => b.id === st.bg) : null;
+    if (mine) return bgToData(mine);
+    if (typeof BACKGROUNDS !== 'undefined' && BACKGROUNDS[st.bg]) return BACKGROUNDS[st.bg];
+    return (typeof BACKGROUNDS !== 'undefined') ? BACKGROUNDS.meadow : bgToData({});
+  }
+
+  function openStgMake(edit) {
+    STG_EDIT = edit ? JSON.parse(JSON.stringify(edit)) : stgNew();
+    if (!Array.isArray(STG_EDIT.waves)) STG_EDIT.waves = [];
+    stgTab = 'bg';
+    const nm = $('#stgmake-name');
+    if (nm) nm.value = STG_EDIT.name || '';
+    buildStgTabs(); buildStgTray(); buildStgSaved();
+    show('screen-stgmake');
+    startStgLoop();
+  }
+  function closeStgMake() { stopStgLoop(); openOrig(); }
+  function startStgLoop() {
+    stopStgLoop();
+    const tick = () => {
+      const sc = $('#screen-stgmake');
+      if (!sc || !sc.classList.contains('active')) { stgRaf = null; return; }
+      stgRaf = requestAnimationFrame(tick);
+      drawStgMake();
+    };
+    stgRaf = requestAnimationFrame(tick);
+  }
+  function stopStgLoop() { if (stgRaf) cancelAnimationFrame(stgRaf); stgRaf = null; }
+
+  function buildStgTabs() {
+    const box = $('#stgmake-tabs');
+    if (!box) return;
+    box.innerHTML = '';
+    STG_TABS.forEach(([k, label]) => {
+      const b = document.createElement('button');
+      b.className = 'mk-tab' + (stgTab === k ? ' on' : '');
+      b.textContent = label;
+      b.addEventListener('click', () => { stgTab = k; buildStgTabs(); buildStgTray(); });
+      box.appendChild(b);
+    });
+  }
+
+  function buildStgTray() {
+    const box = $('#stgmake-tray');
+    const o = origState();
+    if (!box || !STG_EDIT || !o) return;
+    box.innerHTML = '';
+    const head = (t) => {
+      const p = document.createElement('p');
+      p.className = 'size-lead'; p.style.width = '100%';
+      p.textContent = t; box.appendChild(p);
+    };
+
+    if (stgTab === 'bg') {
+      head('じぶんで つくった はいけい');
+      if (!o.bgs.length) head('（まだ ありません。「はいけいを つくる」で つくって みてね）');
+      o.bgs.forEach(bg => {
+        const b = document.createElement('button');
+        b.className = 'mk-item' + (STG_EDIT.bg === bg.id ? ' on' : '');
+        const d = bgToData(bg);
+        b.innerHTML = '<span class="mi-sw" style="background:linear-gradient(90deg,' +
+          d.sky.join(',') + ',' + d.ground + ')"></span>' + bg.name;
+        b.addEventListener('click', () => { STG_EDIT.bg = bg.id; buildStgTray(); });
+        box.appendChild(b);
+      });
+      head('ゲームに もとから ある はいけい');
+      if (typeof BACKGROUNDS !== 'undefined') {
+        Object.keys(BACKGROUNDS).forEach(k => {
+          const d = BACKGROUNDS[k];
+          if (!d || !d.sky) return;                       // しゃしんの はいけいは のぞく
+          const b = document.createElement('button');
+          b.className = 'mk-item' + (STG_EDIT.bg === k ? ' on' : '');
+          b.innerHTML = '<span class="mi-sw" style="background:linear-gradient(90deg,' +
+            d.sky.join(',') + ',' + (d.ground || '#888') + ')"></span>' + k;
+          b.addEventListener('click', () => { STG_EDIT.bg = k; buildStgTray(); });
+          box.appendChild(b);
+        });
+      }
+      return;
+    }
+
+    if (stgTab === 'castle') {
+      const C = ORIGCFG();
+      const row = document.createElement('div');
+      row.className = 'mk-bar';
+      row.innerHTML = '<span class="mk-bar-head"><span>しろの たいりょく</span><b>' +
+        STG_EDIT.castleHp + '</b></span>';
+      const inp = document.createElement('input');
+      inp.type = 'range'; inp.min = C.castleMin; inp.max = C.castleMax; inp.step = C.castleStep;
+      inp.value = STG_EDIT.castleHp;
+      inp.addEventListener('input', () => {
+        STG_EDIT.castleHp = parseInt(inp.value, 10);
+        row.querySelector('b').textContent = STG_EDIT.castleHp;
+      });
+      row.appendChild(inp);
+      box.appendChild(row);
+      head('しろの たいりょくを 0に すると かちです。おおきく すると ながい たたかいに なります。');
+      return;
+    }
+
+    /* ---- てきの でかた ---- */
+    if (!o.foes.length) {
+      head('まだ てきが いません。「てきを つくる」で つくって きてね。');
+      return;
+    }
+    head('「なんびょうに どの てきが なんたい でて くるか」を ならべます（うえから じゅんばん）');
+    STG_EDIT.waves.forEach((w, i) => {
+      const row = document.createElement('div');
+      row.className = 'wv-row';
+      const sel = document.createElement('select');
+      o.foes.forEach(foe => {
+        const op = document.createElement('option');
+        op.value = foe.id; op.textContent = foe.name;
+        if (w.foe === foe.id) op.selected = true;
+        sel.appendChild(op);
+      });
+      sel.addEventListener('change', () => { w.foe = sel.value; });
+      const at = document.createElement('input');
+      at.type = 'number'; at.min = 0; at.max = 300; at.step = 1; at.value = w.at;
+      at.addEventListener('input', () => { w.at = Math.max(0, parseInt(at.value, 10) || 0); });
+      const cn = document.createElement('input');
+      cn.type = 'number'; cn.min = 1; cn.max = 20; cn.step = 1; cn.value = w.count;
+      cn.addEventListener('input', () => { w.count = Math.max(1, Math.min(20, parseInt(cn.value, 10) || 1)); });
+      const del = document.createElement('button');
+      del.className = 'wv-del'; del.textContent = '×';
+      del.addEventListener('click', () => {
+        STG_EDIT.waves.splice(i, 1);
+        buildStgTray();
+      });
+      row.appendChild(document.createTextNode((i + 1) + '.'));
+      row.appendChild(sel);
+      row.appendChild(document.createTextNode('が'));
+      row.appendChild(at);
+      row.appendChild(document.createTextNode('びょうに'));
+      row.appendChild(cn);
+      row.appendChild(document.createTextNode('たい'));
+      row.appendChild(del);
+      box.appendChild(row);
+    });
+    const add = document.createElement('button');
+    add.className = 'mk-item';
+    add.style.minWidth = '100%';
+    add.textContent = '＋ でかたを ふやす';
+    add.addEventListener('click', () => {
+      if (STG_EDIT.waves.length >= ORIGCFG().maxWaves) {
+        toast('でかたは ' + ORIGCFG().maxWaves + 'つ までです'); return;
+      }
+      const last = STG_EDIT.waves[STG_EDIT.waves.length - 1];
+      STG_EDIT.waves.push({ foe: o.foes[0].id, at: last ? (last.at + 10) : 3, count: 1, gap: 1.0 });
+      if (typeof Sound !== 'undefined') Sound.se('tap');
+      buildStgTray();
+    });
+    box.appendChild(add);
+  }
+
+  function drawStgMake() {
+    const cv = $('#stgmake-canvas');
+    if (!cv || !STG_EDIT) return;
+    const W = cv.clientWidth, H = cv.clientHeight;
+    if (W < 2 || H < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const t = (Date.now() % 100000) / 1000;
+    drawBgPreview(ctx, W, H, stgBgData(STG_EDIT), t);
+
+    /* でて くる てきを じめんに ならべて みせる */
+    const o = origState();
+    const ids = [];
+    (STG_EDIT.waves || []).forEach(w => { if (ids.indexOf(w.foe) < 0) ids.push(w.foe); });
+    ids.slice(0, 5).forEach((id, i) => {
+      const foe = o.foes.find(x => x.id === id);
+      if (!foe) return;
+      const st = { t: t + i, moving: true, atk: -1, hpRatio: 1, hpRate: 1, roll: (t + i) * 3 };
+      ctx.save();
+      ctx.translate(W * (0.14 + i * 0.18), H * 0.95);
+      const sc = (H * 0.38) / 130 * ((foe.stats && foe.stats.scale) || 1);
+      ctx.scale(sc, sc);
+      try {
+        if (foe.preset && typeof DRAWERS !== 'undefined' && DRAWERS[foe.preset]) DRAWERS[foe.preset](ctx, st);
+        else if (typeof drawFoeParts === 'function') drawFoeParts(ctx, st, foe.look, foe.motion);
+      } catch (e) {}
+      ctx.restore();
+    });
+
+    /* しろの たいりょく */
+    ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(0,0,0,.55)';
+    ctx.fillRect(W * 0.45, 0, W * 0.55, Math.max(16, H * 0.16));
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold ' + Math.max(9, H * 0.095) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText('🏰 ' + STG_EDIT.castleHp + '　👾 ' + (STG_EDIT.waves || []).length + 'つ', W - 6, Math.max(3, H * 0.03));
+  }
+
+  function saveStg() {
+    const o = origState();
+    if (!o || !STG_EDIT) return;
+    if (!STG_EDIT.waves.length) { toast('てきの でかたを 1つ いじょう いれて ください'); return; }
+    const nm = $('#stgmake-name');
+    const name = ((nm && nm.value) || '').trim() || ('ステージ' + (o.stages.length + 1));
+    STG_EDIT.name = name;
+    if (STG_EDIT.id) {
+      const i = o.stages.findIndex(x => x.id === STG_EDIT.id);
+      if (i >= 0) o.stages[i] = JSON.parse(JSON.stringify(STG_EDIT));
+    } else {
+      if (o.stages.length >= ORIGCFG().maxStage) { toast('ステージは ' + ORIGCFG().maxStage + 'こ までです'); return; }
+      STG_EDIT.id = origNextId('stg');
+      o.stages.push(JSON.parse(JSON.stringify(STG_EDIT)));
+    }
+    storeSave();
+    if (typeof Sound !== 'undefined') Sound.se('craft');
+    toast('「' + name + '」を ほぞん しました');
+    buildStgSaved();
+  }
+  function buildStgSaved() {
+    const o = origState();
+    const box = $('#stgmake-saved');
+    if (!box || !o) return;
+    box.innerHTML = '';
+    if (!o.stages.length) {
+      box.innerHTML = '<span class="mk-empty">まだ ほぞんした ステージは ありません</span>';
+      return;
+    }
+    o.stages.forEach(stg => {
+      const card = document.createElement('div');
+      card.className = 'mk-card';
+      card.innerHTML = '<canvas></canvas><span>' + stg.name + '</span>' +
+                       '<button class="mc-del" title="けす">×</button>';
+      card.addEventListener('click', (ev) => {
+        if (ev.target && ev.target.classList.contains('mc-del')) return;
+        openStgMake(stg);
+      });
+      card.querySelector('.mc-del').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        o.stages = o.stages.filter(x => x.id !== stg.id);
+        storeSave(); buildStgSaved();
+      });
+      box.appendChild(card);
+      const cv = card.querySelector('canvas');
+      requestAnimationFrame(() => {
+        const W = cv.clientWidth || 90, H = cv.clientHeight || 44;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+        const c2 = cv.getContext('2d');
+        c2.setTransform(dpr, 0, 0, dpr, 0, 0);
+        drawBgPreview(c2, W, H, stgBgData(stg), 0);
+      });
+    });
+  }
+
+  /* =================================================
+     オリジナルステージで あそぶ
+     ================================================= */
+  function openOrigPlay() {
+    const o = origState();
+    const box = $('#origplay-list');
+    if (box && o) {
+      box.innerHTML = '';
+      if (!o.stages.length) {
+        box.innerHTML = '<div class="mini-card"><span class="mc-ico">🗺️</span>' +
+          '<span class="mc-body"><span class="mc-name">まだ ステージが ありません</span>' +
+          '<span class="mc-desc">「ステージを つくる」で 1つ つくって みてね。</span></span></div>';
+      }
+      o.stages.forEach(stg => {
+        const foes = (stg.waves || []).map(w => {
+          const foe = o.foes.find(x => x.id === w.foe);
+          return foe ? foe.name : '？';
+        });
+        const uniq = foes.filter((x, i) => foes.indexOf(x) === i);
+        const el = document.createElement('button');
+        el.className = 'mini-card';
+        el.innerHTML =
+          '<span class="mc-ico">⚔️</span>' +
+          '<span class="mc-body">' +
+            '<span class="mc-name">' + stg.name + '</span>' +
+            '<span class="mc-desc">しろの たいりょく ' + stg.castleHp +
+              '　／　でて くる てき：' + (uniq.join('・') || 'なし') + '</span>' +
+          '</span>' +
+          '<span class="mc-go">▶ たたかう</span>';
+        el.addEventListener('click', () => playOrig(stg));
+        box.appendChild(el);
+      });
+    }
+    show('screen-origplay');
+  }
+
+  /* つくった ステージを せんとうの かたちに して はじめる */
+  function playOrig(stg) {
+    const o = origState();
+    if (!o) return;
+    const used = [];
+    (stg.waves || []).forEach(w => { if (used.indexOf(w.foe) < 0) used.push(w.foe); });
+    const extra = {};
+    used.forEach(id => {
+      const foe = o.foes.find(x => x.id === id);
+      if (!foe) return;
+      foeRegisterArt(foe);
+      extra[id] = foeToDef(foe);
+    });
+    if (!Object.keys(extra).length) { toast('でて くる てきが いません'); return; }
+    Game.extraEnemies = extra;
+
+    const course = {
+      no: 9001, chapter: 0, course: 1,
+      orig: true,                      // ★オリジナルの しるし
+      name: stg.name,
+      desc: '★オリジナル★ じぶんで つくった ステージ',
+      bg: 'meadow',
+      bgData: stgBgData(stg),          // はいけいを じかに わたす
+      castleHp: stg.castleHp,
+      power: 1,
+      drops: [],
+      reward: { coins: 0, exp: 0 },
+      waves: (stg.waves || []).map(w => ({
+        at: w.at, id: w.foe, count: w.count || 1, gap: w.gap || 1.0,
+      })),
+    };
+    startBattle(course);
+  }
+
+  /* =================================================
      ★「1日 1かい」の かぞえかた（v6.33 で かえました）
 
      まえは「もらってから 24じかん」でした。それだと よる おそくに
@@ -6130,6 +7213,11 @@
       when: '',
       open: () => true,
       go: () => openVsName(startMemory, 'じゅんばん おぼえ たいけつ') },
+    { key: 'match3', icon: '🏆', name: '★ 三番勝負（3しゅもく つづけて）',
+      desc: '①かけっこ → ②むしむし たたき → ③じゅんばん おぼえ を じゅんばんに しょうぶ！　かった かずで ゆうしょうが きまります（3しょう0はい・2しょう1はい …）。とくいな しゅもくが ちがう ので、さいごまで わかりません。',
+      when: '',
+      open: () => true,
+      go: () => openVsName(startMatch, '三番勝負') },
   ];
 
   /* いま みて いる いちらん（'solo' か 'duo'）*/
@@ -6401,6 +7489,120 @@
     }
   }
 
+  /* =================================================
+     ★三番勝負（3しゅもく つづけて）
+
+     ①タンクン かけっこ → ②むしむし たたき → ③じゅんばん おぼえ
+     を じゅんばんに あそんで、かった かずで ゆうしょうを きめます。
+
+     しゅもくが おわる たびに「せいせきひょう」の がめんに もどって
+     きます。1しゅもくずつ の けっかの まどは ださずに、
+     せいせきひょうに まとめて だします。
+     ================================================= */
+  const MATCH_EVENTS = [
+    { icon: '🏃', name: 'タンクン かけっこ', unit: 'ｍ',    start: () => startRun },
+    { icon: '🔨', name: 'むしむし たたき',   unit: 'ひき',  start: () => startTataki },
+    { icon: '🧠', name: 'じゅんばん おぼえ', unit: 'こ',    start: () => startMemory },
+  ];
+
+  let MATCH = null;   // { names, wins:[0,0], ev, log:[] }
+
+  function startMatch(a, b) {
+    MATCH = { names: [a, b], wins: [0, 0], ev: 0, log: [] };
+    buildMatchBoard();
+    show('screen-match');
+  }
+  function matchQuit() {
+    MATCH = null;
+    miniMode = 'duo';
+    openMinigames();
+  }
+  /* しゅもくが おわった ときに よばれます */
+  function matchReport(scores) {
+    if (!MATCH) return false;
+    const win = vsWinner(MATCH.names, scores[0], scores[1]);
+    if (win === MATCH.names[0]) MATCH.wins[0]++;
+    else if (win === MATCH.names[1]) MATCH.wins[1]++;
+    MATCH.log[MATCH.ev] = { scores: [scores[0], scores[1]], win: win };
+    MATCH.ev++;
+    buildMatchBoard();
+    show('screen-match');
+    if (MATCH.ev >= MATCH_EVENTS.length && typeof Sound !== 'undefined') Sound.se('fanfare');
+    return true;
+  }
+  function matchGo() {
+    if (!MATCH) return;
+    if (MATCH.ev >= MATCH_EVENTS.length) {
+      /* もういちど 三番勝負 */
+      startMatch(MATCH.names[0], MATCH.names[1]);
+      return;
+    }
+    MATCH_EVENTS[MATCH.ev].start()(MATCH.names[0], MATCH.names[1]);
+  }
+
+  function buildMatchBoard() {
+    const box = $('#match-board');
+    const note = $('#match-note');
+    const go = $('#btn-match-go');
+    if (!MATCH || !box) return;
+    const done = MATCH.ev >= MATCH_EVENTS.length;
+
+    if (note) {
+      note.textContent = done
+        ? '3しゅもく ぜんぶ おわりました！'
+        : (MATCH.names[0] + ' と ' + MATCH.names[1] + ' の 三番勝負。1だいの きかいを じゅんばんに わたして あそびます。');
+    }
+    box.innerHTML = '';
+
+    /* かった かず */
+    const tally = document.createElement('div');
+    tally.className = 'mb-tally';
+    tally.innerHTML =
+      '<span class="p1">' + MATCH.names[0] + '</span><b class="p1">' + MATCH.wins[0] + '</b>' +
+      '<span>かい　－　</span><b class="p2">' + MATCH.wins[1] + '</b>' +
+      '<span class="p2">かい ' + MATCH.names[1] + '</span>';
+    box.appendChild(tally);
+
+    /* ゆうしょう */
+    if (done) {
+      const champ = document.createElement('div');
+      champ.className = 'mb-champ';
+      const w0 = MATCH.wins[0], w1 = MATCH.wins[1];
+      champ.textContent = (w0 === w1)
+        ? '🤝 ひきわけ！　また しょうぶ しよう'
+        : ('🏆 ' + (w0 > w1 ? MATCH.names[0] : MATCH.names[1]) + ' の ゆうしょう！（' +
+           Math.max(w0, w1) + 'しょう ' + Math.min(w0, w1) + 'はい）');
+      box.appendChild(champ);
+    }
+
+    /* 3しゅもく の せいせき */
+    MATCH_EVENTS.forEach((e, i) => {
+      const r = MATCH.log[i];
+      const row = document.createElement('div');
+      row.className = 'mb-row' + (r ? ' done' : (i === MATCH.ev ? ' now' : ''));
+      let sub = 'まだ';
+      if (r) {
+        sub = MATCH.names[0] + ' ' + r.scores[0] + e.unit + '　－　' +
+              MATCH.names[1] + ' ' + r.scores[1] + e.unit;
+      } else if (i === MATCH.ev) {
+        sub = 'つぎは これ！';
+      }
+      row.innerHTML =
+        '<span class="mb-ico">' + (r ? e.icon : (i === MATCH.ev ? e.icon : '🔒')) + '</span>' +
+        '<span class="mb-body">' +
+          '<span class="mb-name">だい' + (i + 1) + 'しゅもく　' + e.name + '</span>' +
+          '<span class="mb-sub">' + sub + '</span>' +
+        '</span>' +
+        '<span class="mb-win">' + (r ? (r.win ? (r.win + ' の かち') : 'ひきわけ') : '') + '</span>';
+      box.appendChild(row);
+    });
+
+    if (go) {
+      go.textContent = done ? 'もういちど 三番勝負 ▶'
+        : ('だい' + (MATCH.ev + 1) + 'しゅもくへ ▶');
+    }
+  }
+
   const RUNCFG = () => (typeof RUNGAME !== 'undefined') ? RUNGAME
     : { rounds: 3, speeds: [55, 80, 115], grace: 0.25, perfect: 98, runSpeed: 95 };
 
@@ -6430,7 +7632,7 @@
     runRaf = requestAnimationFrame(runLoop);
   }
   function stopRunLoop() { if (runRaf) cancelAnimationFrame(runRaf); runRaf = null; }
-  function exitRun() { stopRunLoop(); RG = null; miniMode = 'duo'; openMinigames(); }
+  function exitRun() { stopRunLoop(); RG = null; MATCH = null; miniMode = 'duo'; openMinigames(); }
 
   /* ---- うえの もじ ---- */
   function refreshRunHud() {
@@ -6540,6 +7742,9 @@
   /* ---- けっかを だす ---- */
   function runFinish() {
     RG.phase = 'done';
+    /* ★三番勝負の とちゅう なら、けっかの まどは ださずに
+         せいせきひょうの がめんに もどります。                */
+    if (MATCH && matchReport(RG.dist)) return;
     const ov = $('#run-over');
     const t = $('#run-over-title'), x = $('#run-over-text');
     const d0 = RG.dist[0], d1 = RG.dist[1];
@@ -6815,7 +8020,7 @@
   }
   function exitTataki() {
     if (tkRaf) cancelAnimationFrame(tkRaf);
-    tkRaf = null; TK = null;
+    tkRaf = null; TK = null; MATCH = null;
     miniMode = 'duo'; openMinigames();
   }
 
@@ -6968,6 +8173,7 @@
   }
   function tkFinish() {
     TK.phase = 'done';
+    if (MATCH && matchReport(TK.scores)) return;
     vsFillOver('#tataki-over-title', '#tataki-over-text', TK.names, TK.scores, 'ひき');
     const ov = $('#tataki-over');
     if (ov) ov.classList.remove('hidden');
@@ -7163,7 +8369,7 @@
   }
   function exitMemory() {
     if (mmRaf) cancelAnimationFrame(mmRaf);
-    mmRaf = null; MM = null;
+    mmRaf = null; MM = null; MATCH = null;
     miniMode = 'duo'; openMinigames();
   }
 
@@ -7303,6 +8509,7 @@
   }
   function mmFinish() {
     MM.phase = 'done';
+    if (MATCH && matchReport(MM.scores)) return;
     vsFillOver('#memory-over-title', '#memory-over-text', MM.names, MM.scores, 'こ');
     const ov = $('#memory-over');
     if (ov) ov.classList.remove('hidden');
@@ -9825,6 +11032,19 @@
       else mmTapAt(p.x, p.y);
     });
     $('#btn-memory-back').addEventListener('click', exitMemory);
+    /* ★三番勝負 */
+    $('#btn-match-go').addEventListener('click', matchGo);
+    $('#btn-match-back').addEventListener('click', matchQuit);
+    /* ★オリジナルの間 */
+    $('#btn-home-orig').addEventListener('click', openOrig);
+    $('#btn-orig-back').addEventListener('click', openHome);
+    $('#btn-bgmake-back').addEventListener('click', closeBgMake);
+    $('#btn-bgmake-save').addEventListener('click', saveBg);
+    $('#btn-foemake-back').addEventListener('click', closeFoeMake);
+    $('#btn-foemake-save').addEventListener('click', saveFoe);
+    $('#btn-stgmake-back').addEventListener('click', closeStgMake);
+    $('#btn-stgmake-save').addEventListener('click', saveStg);
+    $('#btn-origplay-back').addEventListener('click', openOrig);
     $('#btn-memory-exit').addEventListener('click', exitMemory);
     $('#btn-memory-again').addEventListener('click', () => {
       const n = vsNames();
@@ -9889,6 +11109,7 @@
       recordSeen();
       Game.paused = false;
       Game.active = false;
+      if (Game.stage && Game.stage.orig) { openOrigPlay(); return; }
       buildStageList();
       show('screen-stage');
     });
@@ -9906,7 +11127,11 @@
     $('#btn-speed').addEventListener('click', cycleSpeed);
 
     /* けっか */
-    const backToStages = () => { buildStageList(); show('screen-stage'); };
+    /* ★オリジナルステージ なら「オリジナルステージ」の いちらんに もどります */
+    const backToStages = () => {
+      if (Game.stage && Game.stage.orig) { openOrigPlay(); return; }
+      buildStageList(); show('screen-stage');
+    };
     $('#btn-result-main').addEventListener('click', () => {
       if (Game.result === 'win') backToStages(); else startBattle(Game.stage);
     });

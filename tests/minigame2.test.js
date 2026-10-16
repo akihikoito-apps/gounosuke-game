@@ -179,7 +179,7 @@ test('もとの 3つは ひとり用、あたらしい 3しゅもくは ふた�
   assert.ok(duo,  'MINIGAMES2 が みつからない');
   ['bugshoot', 'foodcatch', 'duel'].forEach(k =>
     assert.ok(solo[0].indexOf("'" + k + "'") >= 0, k + ' が ひとり用に ない'));
-  ['tankrun', 'tataki', 'memory'].forEach(k =>
+  ['tankrun', 'tataki', 'memory', 'match3'].forEach(k =>
     assert.ok(duo[0].indexOf("'" + k + "'") >= 0, k + ' が ふたり用に ない'));
   ['bugshoot', 'foodcatch', 'duel'].forEach(k =>
     assert.ok(duo[0].indexOf("'" + k + "'") < 0, k + ' が ふたり用にも 入って いる'));

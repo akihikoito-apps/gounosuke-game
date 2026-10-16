@@ -1,9 +1,9 @@
 # STATUS — ごうのすけゲーム
 
 状態: 🟢 順調
-今やっていること: v6.59 ③じゅんばん おぼえ を「毎回まるごと新しい順番」に変更（前の続き＋1だと2人とも満点だった）（10/16）
-次の一手: ③の難易度を再確認してもらう。3種目の評価が出たら「三番勝負」モード（3種目を順番に対戦して勝ち数で決着）を作る
-ブロッカー: なし（node 実行可。tests/ 5本=62件すべて実行して ok）
+今やっていること: v6.60 オリジナルの間（背景/敵/ステージを自作して遊ぶ・4画面）＋ 三番勝負 を実装（10/16）
+次の一手: オリジナルの間を触ってもらって、パーツの数・バーの上限・つよさのめやすの出かたを調整する
+ブロッカー: なし（node 実行可。tests/ 6本=76件すべて実行して ok）
 最終更新: 2026-10-16（Claude）
 
 <!-- 上の5行は本部（_hq）が読む。行の頭の言葉は変えないこと。詳しいメモはこの下に自由に書いてよい。 -->
@@ -18,6 +18,7 @@
 - `node tests/gear.test.js` 17件 ok（装備品の定義・ステータス反映・UNITS 非破壊・vs/pierce/guard の戦闘内挙動・開放条件）
 - `node tests/gimmicks.test.js` 10件 ok
 - `node tests/minigame2.test.js` 19件 ok（RUNGAME/TATAKI/MEMORY の整合・3種目とも余韻がある・③が毎回順番を作り直している・新画面とボタンの存在・1人用/2人用の振り分け）
+- `node tests/original.test.js` 14件 ok（素材カタログの整合・パーツ全組み合わせの描画・とくこうかが engine の項目に落ちる・5画面の存在・オリジナルは報酬0で図鑑も汚さない・三番勝負が3種目を回す）
 - `node tests/selectors.test.js` 5件 ok
 - `node tests/sound.test.js` 11件 ok
 - 画面操作の通しテスト（jsdom、scratchpad の uitest.js）: タイトル→庭→開発室→開発→装備→編成表示→外す まで全 ok
@@ -25,6 +26,7 @@
 - 全コース描画・ロジックの通しテスト（scratchpad の rt.js）: 130コース・描画 12,574回 エラーなし
 
 ## 本部の作業記録
+- 2026-10-16 Claude: v6.60 オリジナルの間。data.js に BG_PARTS/FOE_PARTS/FOE_COLORS/FOE_MOTION/FOE_STATS/FOE_EXTRAS/ORIG を追加、draw.js に drawFoeParts()+registerFoeDrawer() を追加（パーツ44種×色12×動き6×6をすべて描画テスト済み）。engine 側は3点だけ触った：Game.foeDef() で ENEMIES と Game.extraEnemies を見るように、currentBg() が stage.bgData を優先、start() で orig 以外は extraEnemies を破棄。保存は s.orig = {bgs,foes,stages,seq}。オリジナルステージは reward 0・ENEMIES に登録しない・recordSeen で弾くので、育成バランスと図鑑に影響しない。あわせて三番勝負（screen-match の成績表に戻ってくる方式）。
 - 2026-10-16 Claude: v6.59 ③じゅんばん おぼえ の難易度修正。mmNewRound が MM.seq.push で前の続きに1つ足していたため、覚えた分がそのまま使えて実質「新しい1つだけ」の勝負になっており、本人と幸之助君の両方が満点（12）だった。mmMakeSeq(n) を追加して毎ステージ全部作り直す形に。同じパネルが2回連続しないようにもした（間の暗い時間が短く見分けづらいため）。検証は scratchpad/memtest.js — パネルごとの効果音の呼び出しを横取りして光った順番を外から読み取り、その通りに押して8ステージ進め、7回の遷移すべてが「前の続きではない」ことを確認。
 - 2026-10-16 Claude: v6.58 2人用を3種目に。②むしむし たたき（6つの穴・15秒・キンキラ+3／なかま-1・終盤ほど出ている時間が短い）、③じゅんばん おぼえ（4パネルのサイモン・間違えるまでの段数が点数・最大12）。あわせて3種目すべてに「勝ちの余韻」phase 'cheer' を入れ、紙吹雪＋新SE fanfare＋タンクンのジャンプを 2.6秒 見せてから結果ウィンドウを出すようにした。共通処理は vsDrawCheer / vsDrawHandoff / vsFillOver / vsMakeConfetti に集約。次は「三番勝負」モードを足しやすい形にしてある（各種目が names と scores[2] を持つだけ）。
 - 2026-10-16 Claude: v6.57 ミニゲームを「ひとりで あそぶ／ふたりで たいけつ」に分割（screen-minimode を追加、既存3つは MINIGAMES のまま1人用へ）。2人用に「タンクン かけっこ たいけつ」を追加（screen-vsname で名前入力・s.vsNames に保存、screen-run でメーター停止→3回まとめて交代→2体のタンクンが並走して結果）。数値は data.js の RUNGAME に集約。叩き台なので本人の感触待ち。
