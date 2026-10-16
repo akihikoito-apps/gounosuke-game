@@ -7505,6 +7505,10 @@ const ORIG = {
   maxFoe: 20,         // てきを いくつ
   maxStage: 20,       // ステージを いくつ
   maxWaves: 8,        // 1ステージの でて くる かたまりの かず
+  /* ★くりかえしの はんい
+       repeat … なんびょう ごとに くりかえすか（0 なら くりかえさない）
+       times  … ぜんぶで なんかい でて くるか（1 なら 1かいだけ）*/
+  repeatMax: 120, timesMax: 50,
   castleMin: 500, castleMax: 40000, castleStep: 500, castleDef: 4000,
   /* つよさの めやすを だす ときの かんがえかた（おおきいほど つよい）*/
   powerBase: 1,

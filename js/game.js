@@ -83,7 +83,9 @@ const Game = {
     PARTY.forEach(id => { this.cooldown[id] = 0; });
 
     // ウェーブを コピーして じゅんび
-    this.waves = st.waves.map(w => Object.assign({}, w, { done: false, nextAt: w.at }));
+    /* fired は「この かたまりが もう なんかい でたか」。
+       くりかえしの かいすう（times）を かぞえる ために つかいます。 */
+    this.waves = st.waves.map(w => Object.assign({}, w, { done: false, nextAt: w.at, fired: 0 }));
 
     this.camera.x = CONFIG.fieldLength / 2;
     this.camera.target = this.camera.x;
@@ -459,8 +461,13 @@ const Game = {
       for (let i = 0; i < n; i++) {
         this.spawnQueue.push({ at: this.time + i * gap, id: w.id });
       }
-      if (w.repeat) { w.nextAt = this.time + w.repeat; }
-      else { w.done = true; }
+      if (w.repeat) {
+        /* ★times（ぜんぶで なんかい でるか）が きまって いれば そこで おしまい。
+             かいて なければ これまでどおり ずっと くりかえします。     */
+        w.fired = (w.fired || 0) + 1;
+        if (w.times && w.fired >= w.times) w.done = true;
+        else w.nextAt = this.time + w.repeat;
+      } else { w.done = true; }
     }
     // よやくされた てきを だす
     for (let i = this.spawnQueue.length - 1; i >= 0; i--) {

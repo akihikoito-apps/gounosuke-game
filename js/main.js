@@ -6605,9 +6605,35 @@
       return;
     }
     head('「なんびょうに どの てきが なんたい でて くるか」を ならべます（うえから じゅんばん）');
+    head('★「くりかえし」を 0びょうに すると 1かいだけ。すうじを いれると その あいだを あけて なんかいも でて きます。');
     STG_EDIT.waves.forEach((w, i) => {
+      /* ふるい ステージには くりかえしが ない ので おぎなう */
+      if (typeof w.repeat !== 'number') w.repeat = 0;
+      if (typeof w.times !== 'number') w.times = 1;
+
       const row = document.createElement('div');
       row.className = 'wv-row';
+      const line1 = document.createElement('div'); line1.className = 'wv-line';
+      const line2 = document.createElement('div'); line2.className = 'wv-line sub';
+      const sum = document.createElement('div');  sum.className = 'wv-sum';
+      const refresh = () => { sum.textContent = wvSummary(w, o); };
+
+      /* すうじの いれもの を つくる どうぐ */
+      const num = (val, min, max, onCh) => {
+        const el = document.createElement('input');
+        el.type = 'number'; el.min = min; el.max = max; el.step = 1; el.value = val;
+        el.addEventListener('input', () => {
+          const v = parseInt(el.value, 10);
+          onCh(isNaN(v) ? min : Math.max(min, Math.min(max, v)));
+          refresh();
+        });
+        return el;
+      };
+      const txt = (t) => document.createTextNode(t);
+
+      /* --- 1ぎょうめ：だれが いつ なんたい --- */
+      const no = document.createElement('span');
+      no.className = 'wv-no'; no.textContent = (i + 1) + '.';
       const sel = document.createElement('select');
       o.foes.forEach(foe => {
         const op = document.createElement('option');
@@ -6615,27 +6641,32 @@
         if (w.foe === foe.id) op.selected = true;
         sel.appendChild(op);
       });
-      sel.addEventListener('change', () => { w.foe = sel.value; });
-      const at = document.createElement('input');
-      at.type = 'number'; at.min = 0; at.max = 300; at.step = 1; at.value = w.at;
-      at.addEventListener('input', () => { w.at = Math.max(0, parseInt(at.value, 10) || 0); });
-      const cn = document.createElement('input');
-      cn.type = 'number'; cn.min = 1; cn.max = 20; cn.step = 1; cn.value = w.count;
-      cn.addEventListener('input', () => { w.count = Math.max(1, Math.min(20, parseInt(cn.value, 10) || 1)); });
+      sel.addEventListener('change', () => { w.foe = sel.value; refresh(); });
       const del = document.createElement('button');
       del.className = 'wv-del'; del.textContent = '×';
-      del.addEventListener('click', () => {
-        STG_EDIT.waves.splice(i, 1);
-        buildStgTray();
-      });
-      row.appendChild(document.createTextNode((i + 1) + '.'));
-      row.appendChild(sel);
-      row.appendChild(document.createTextNode('が'));
-      row.appendChild(at);
-      row.appendChild(document.createTextNode('びょうに'));
-      row.appendChild(cn);
-      row.appendChild(document.createTextNode('たい'));
-      row.appendChild(del);
+      del.addEventListener('click', () => { STG_EDIT.waves.splice(i, 1); buildStgTray(); });
+
+      line1.appendChild(no);
+      line1.appendChild(sel);
+      line1.appendChild(txt('が'));
+      line1.appendChild(num(w.at, 0, 300, v => { w.at = v; }));
+      line1.appendChild(txt('びょうに'));
+      line1.appendChild(num(w.count, 1, 20, v => { w.count = v; }));
+      line1.appendChild(txt('たい'));
+      line1.appendChild(del);
+
+      /* --- 2ぎょうめ：くりかえし --- */
+      const C = ORIGCFG();
+      line2.appendChild(txt('くりかえし'));
+      line2.appendChild(num(w.repeat, 0, C.repeatMax || 120, v => { w.repeat = v; }));
+      line2.appendChild(txt('びょう ごとに　ぜんぶで'));
+      line2.appendChild(num(w.times, 1, C.timesMax || 50, v => { w.times = v; }));
+      line2.appendChild(txt('かい'));
+
+      row.appendChild(line1);
+      row.appendChild(line2);
+      row.appendChild(sum);
+      refresh();
       box.appendChild(row);
     });
     const add = document.createElement('button');
@@ -6647,11 +6678,28 @@
         toast('でかたは ' + ORIGCFG().maxWaves + 'つ までです'); return;
       }
       const last = STG_EDIT.waves[STG_EDIT.waves.length - 1];
-      STG_EDIT.waves.push({ foe: o.foes[0].id, at: last ? (last.at + 10) : 3, count: 1, gap: 1.0 });
+      STG_EDIT.waves.push({
+        foe: o.foes[0].id, at: last ? (last.at + 10) : 3, count: 1, gap: 1.0,
+        repeat: 0, times: 1,
+      });
       if (typeof Sound !== 'undefined') Sound.se('tap');
       buildStgTray();
     });
     box.appendChild(add);
+  }
+
+  /* その 1ぎょうが どういう いみか、ことばで みせます */
+  function wvSummary(w, o) {
+    const foe = o.foes.find(x => x.id === w.foe);
+    const name = foe ? foe.name : '？';
+    const rep = (typeof w.repeat === 'number') ? w.repeat : 0;
+    const times = (typeof w.times === 'number') ? w.times : 1;
+    if (rep <= 0 || times <= 1) {
+      return '→ ' + w.at + 'びょうに ' + name + 'が ' + w.count + 'たい（ぜんぶで ' + w.count + 'たい）';
+    }
+    const last = w.at + rep * (times - 1);
+    return '→ ' + w.at + 'びょうから ' + rep + 'びょう ごとに ' + times + 'かい（さいごは ' +
+           last + 'びょう／ぜんぶで ' + (w.count * times) + 'たい）';
   }
 
   function drawStgMake() {
@@ -6756,6 +6804,16 @@
   /* =================================================
      オリジナルステージで あそぶ
      ================================================= */
+  /* その ステージに ぜんぶで なんたい でて くるか */
+  function origFoeTotal(stg) {
+    let n = 0;
+    (stg.waves || []).forEach(w => {
+      const times = (w.repeat > 0 && w.times > 1) ? w.times : 1;
+      n += (w.count || 1) * times;
+    });
+    return n;
+  }
+
   function openOrigPlay() {
     const o = origState();
     const box = $('#origplay-list');
@@ -6779,7 +6837,8 @@
           '<span class="mc-body">' +
             '<span class="mc-name">' + stg.name + '</span>' +
             '<span class="mc-desc">しろの たいりょく ' + stg.castleHp +
-              '　／　でて くる てき：' + (uniq.join('・') || 'なし') + '</span>' +
+              '　／　でて くる てき：' + (uniq.join('・') || 'なし') +
+              '　／　ぜんぶで ' + origFoeTotal(stg) + 'たい</span>' +
           '</span>' +
           '<span class="mc-go">▶ たたかう</span>';
         el.addEventListener('click', () => playOrig(stg));
@@ -6816,9 +6875,15 @@
       power: 1,
       drops: [],
       reward: { coins: 0, exp: 0 },
-      waves: (stg.waves || []).map(w => ({
-        at: w.at, id: w.foe, count: w.count || 1, gap: w.gap || 1.0,
-      })),
+      waves: (stg.waves || []).map(w => {
+        const out = { at: w.at, id: w.foe, count: w.count || 1, gap: w.gap || 1.0 };
+        /* ★くりかえし。repeat が 0 なら 1かいだけ です */
+        if (w.repeat > 0 && (w.times || 1) > 1) {
+          out.repeat = w.repeat;
+          out.times = w.times;
+        }
+        return out;
+      }),
     };
     startBattle(course);
   }

@@ -18,7 +18,7 @@ const assert = require('assert');
 
 const ROOT = path.join(__dirname, '..');
 const ctx = vm.createContext({ console, Math });
-for (const file of ['data.js', 'draw.js']) {
+for (const file of ['data.js', 'draw.js', 'game.js']) {
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', file), 'utf8'), ctx, { filename: file });
 }
 const run = (code) => vm.runInContext(code, ctx);
@@ -196,6 +196,67 @@ test('ほぞんできる かずが きまって いる', () => {
   assert.ok(ORIG.castleMin < ORIG.castleMax, 'しろの たいりょくの はんいが おかしい');
   assert.ok(ORIG.castleDef >= ORIG.castleMin && ORIG.castleDef <= ORIG.castleMax,
     'しろの たいりょくの はじめの あたいが はんいの そと');
+});
+
+console.log('てきの でかたの くりかえし');
+
+/* でて くる かずを かぞえる（ほんとうに だす かわりに かぞえる だけ）*/
+const Game = run('Game');
+Game.addEffect = () => {};
+Game.groundWorldY = () => 0;
+function countSpawns(wave, seconds) {
+  Game.levels = {}; Game.evolved = {}; Game.evolved2 = {}; Game.gear = {};
+  Game.extraEnemies = {
+    t_foe: { id: 't_foe', name: 'ためし', rarity: 'N', attr: 'none',
+             hp: 100, atk: 10, range: 100, speed: 20,
+             attackInterval: 2, attackWindup: 0.3, kbCount: 3, scale: 1,
+             attackType: 'single', money: 50, drawAs: 'origfoe_test1' },
+  };
+  Game.start({ no: 9999, orig: true, name: 'ためし', bg: 'meadow', bgData: null,
+               castleHp: 9999999, power: 1, drops: [], reward: { coins: 0, exp: 0 },
+               waves: [wave] });
+  let n = 0;
+  const keep = Game.spawnEnemy;
+  Game.spawnEnemy = function () { n++; };
+  for (let t = 0; t < seconds; t += 1 / 30) Game.update(1 / 30);
+  Game.spawnEnemy = keep;
+  return n;
+}
+
+test('くりかえし なしなら 1かいだけ でる', () => {
+  const n = countSpawns({ at: 2, id: 't_foe', count: 3, gap: 0 }, 40);
+  assert.strictEqual(n, 3, '3たい でる はずが ' + n + 'たい');
+});
+
+test('★「なんびょう ごとに なんかい」で その かいすう だけ でる', () => {
+  /* 2びょうから 5びょう ごとに 3かい → 2・7・12びょう ＝ 2たい × 3かい */
+  const n = countSpawns({ at: 2, id: 't_foe', count: 2, gap: 0, repeat: 5, times: 3 }, 40);
+  assert.strictEqual(n, 6, '2たい × 3かい ＝ 6たい の はずが ' + n + 'たい');
+});
+
+test('かいすうを きめないと ずっと くりかえす（もとの ステージは そのまま）', () => {
+  /* times を かかない のは ゲームに もとから ある ステージの かきかた。
+     30びょうなら 2・7・12・17・22・27 の 6かい。                    */
+  const n = countSpawns({ at: 2, id: 't_foe', count: 1, gap: 0, repeat: 5 }, 30);
+  assert.strictEqual(n, 6, 'ずっと くりかえす はずが ' + n + 'たい');
+});
+
+test('くりかえしの はんいが きまって いる', () => {
+  assert.ok(ORIG.repeatMax >= 10, 'repeatMax が ちいさすぎる');
+  assert.ok(ORIG.timesMax >= 5, 'timesMax が ちいさすぎる');
+});
+
+test('ステージを つくる がめんに くりかえしの いれものが ある', () => {
+  const i = main.indexOf('STG_EDIT.waves.forEach(');
+  assert.ok(i >= 0, 'でかたの ぎょうが みつからない');
+  const body = main.slice(i, i + 3000);
+  assert.ok(/w\.repeat = v/.test(body), 'くりかえしの びょうすうを いじれない');
+  assert.ok(/w\.times = v/.test(body), 'くりかえしの かいすうを いじれない');
+  /* せんとうに わたして いるか */
+  const j = main.indexOf('function playOrig(');
+  const pl = main.slice(j, main.indexOf(NL2 + '  }', j));
+  assert.ok(/out\.repeat = w\.repeat/.test(pl), 'くりかえしを せんとうに わたして いない');
+  assert.ok(/out\.times = w\.times/.test(pl), 'かいすうを せんとうに わたして いない');
 });
 
 console.log('がめんと ボタン');
