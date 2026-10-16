@@ -30,6 +30,8 @@ const FOE_STATS  = run('FOE_STATS');
 const FOE_EXTRAS = run('FOE_EXTRAS');
 const ORIG       = run('ORIG');
 const BACKGROUNDS = run('BACKGROUNDS');
+const BG_NAME = run('BG_NAME');
+const bgNameOf = run('bgNameOf');
 const ATTR_LABEL = run('ATTR_LABEL');
 const drawFoeParts = run('drawFoeParts');
 const registerFoeDrawer = run('registerFoeDrawer');
@@ -49,6 +51,8 @@ const fakeCtx = new Proxy({}, {
   },
   set() { return true; },
 });
+
+const NL2 = String.fromCharCode(10);
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -85,7 +89,24 @@ test('かざりは ゲームが しって いる なまえだけ', () => {
   });
 });
 
+test('ゲームの はいけいは ぜんぶ 日本語の なまえが ある', () => {
+  /* ステージを つくる がめんに ローマ字の しるしが でない ように。*/
+  Object.keys(BACKGROUNDS).forEach(k => {
+    assert.ok(BG_NAME[k], 'はいけい「' + k + '」の 日本語の なまえが ない');
+    assert.notStrictEqual(bgNameOf(k), k, 'はいけい「' + k + '」が ローマ字の まま');
+    assert.ok(!/^[a-zA-Z_]+$/.test(bgNameOf(k)), 'はいけい「' + k + '」の なまえが 日本語で ない');
+  });
+});
+
 console.log('てきの そざい');
+
+test('かたちの バリエーションが じゅうぶん ある', () => {
+  assert.ok(FOE_PARTS.body.length >= 15,
+    'からだの かたちが ' + FOE_PARTS.body.length + 'しゅるい しか ない');
+  /* おおきく ふりきった かたちが 入って いるか */
+  ['wide', 'thin', 'spiky', 'tower'].forEach(id =>
+    assert.ok(FOE_PARTS.body.some(b => b.id === id), 'かたち「' + id + '」が ない'));
+});
 
 test('パーツ・いろ・うごきが ぜんぶ ある', () => {
   ['body', 'eye', 'mouth', 'horn', 'arm', 'leg', 'pattern'].forEach(k => {
@@ -188,6 +209,18 @@ test('トップに ボタンが あって、つくる がめんに ほぞんボ�
   ['btn-home-orig', 'btn-bgmake-save', 'btn-foemake-save', 'btn-stgmake-save',
    'bgmake-name', 'foemake-name', 'stgmake-name', 'foemake-power']
     .forEach(id => assert.ok(html.indexOf('id="' + id + '"') >= 0, id + ' が ない'));
+});
+
+test('★けす ときは かならず かくにんする', () => {
+  ['orig-del', 'orig-del-text', 'btn-origdel-yes', 'btn-origdel-no']
+    .forEach(id => assert.ok(html.indexOf('id="' + id + '"') >= 0, id + ' が ない'));
+  /* 3しゅるい とも かくにんを とおして いるか（× を おして すぐ けして いない）*/
+  ['buildBgSaved', 'buildFoeSaved', 'buildStgSaved'].forEach(fn => {
+    const i = main.indexOf('function ' + fn + '(');
+    assert.ok(i >= 0, fn + ' が みつからない');
+    const body = main.slice(i, main.indexOf(NL2 + '  }', i));
+    assert.ok(/askOrigDelete\(/.test(body), fn + ' が かくにんを とおして いない');
+  });
 });
 
 test('オリジナルステージは ごほうびを ださない', () => {

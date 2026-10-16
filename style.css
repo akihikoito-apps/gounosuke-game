@@ -2068,3 +2068,9 @@ body.dragging-slot #party-slots { touch-action:none; }
 .wv-del { flex:0 0 auto; border:none; background:#e53935; color:#fff;
           border-radius:calc(6px * var(--ui)); padding:calc(4px * var(--ui)) calc(7px * var(--ui));
           font-family:inherit; cursor:pointer; }
+
+
+.orig-del-note {
+  margin:calc(-6px * var(--ui)) 0 calc(10px * var(--ui));
+  font-size:calc(12px * var(--ui)); color:#ffab91; font-weight:bold;
+}

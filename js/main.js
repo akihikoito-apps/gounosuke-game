@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.60';
+  const GAME_VERSION = '6.61';
 
 
   /* =================================================
@@ -5705,6 +5705,28 @@
     if (typeof o.seq !== 'number') o.seq = 1;
     return o;
   }
+  /* ★けす ときは かならず きいて から けします。
+       ほぞんした ものが かんたんに きえると かなしい ので。      */
+  let origDelYes = null;
+  function askOrigDelete(what, name, onYes) {
+    origDelYes = onYes || null;
+    const t = $('#orig-del-text');
+    if (t) t.innerHTML = 'この ' + what + ' を けしますか？<br><b>「' + name + '」</b>';
+    const m = $('#orig-del');
+    if (m) m.classList.remove('hidden');
+    if (typeof Sound !== 'undefined') Sound.se('deny');
+  }
+  function closeOrigDelete() {
+    const m = $('#orig-del');
+    if (m) m.classList.add('hidden');
+    origDelYes = null;
+  }
+  function doOrigDelete() {
+    const fn = origDelYes;
+    closeOrigDelete();
+    if (fn) fn();
+  }
+
   function origNextId(prefix) {
     const o = origState();
     const n = o.seq++;
@@ -5984,8 +6006,11 @@
         ev.stopPropagation();
         const used = o.stages.filter(s => s.bg === bg.id);
         if (used.length) { toast('「' + used[0].name + '」で つかって いるので けせません'); return; }
-        o.bgs = o.bgs.filter(x => x.id !== bg.id);
-        storeSave(); buildBgSaved();
+        askOrigDelete('はいけい', bg.name, () => {
+          o.bgs = o.bgs.filter(x => x.id !== bg.id);
+          storeSave(); buildBgSaved();
+          toast('「' + bg.name + '」を けしました');
+        });
       });
       box.appendChild(card);
       const cv = card.querySelector('canvas');
@@ -6396,8 +6421,11 @@
         ev.stopPropagation();
         const used = o.stages.filter(s => (s.waves || []).some(w => w.foe === foe.id));
         if (used.length) { toast('「' + used[0].name + '」で つかって いるので けせません'); return; }
-        o.foes = o.foes.filter(x => x.id !== foe.id);
-        storeSave(); buildFoeSaved();
+        askOrigDelete('てき', foe.name, () => {
+          o.foes = o.foes.filter(x => x.id !== foe.id);
+          storeSave(); buildFoeSaved();
+          toast('「' + foe.name + '」を けしました');
+        });
       });
       box.appendChild(card);
       const cv = card.querySelector('canvas');
@@ -6502,8 +6530,10 @@
           if (!d || !d.sky) return;                       // しゃしんの はいけいは のぞく
           const b = document.createElement('button');
           b.className = 'mk-item' + (STG_EDIT.bg === k ? ' on' : '');
+          /* ★なまえは 日本語で だします（もとは ローマ字の しるし でした）*/
+          const jp = (typeof bgNameOf === 'function') ? bgNameOf(k) : k;
           b.innerHTML = '<span class="mi-sw" style="background:linear-gradient(90deg,' +
-            d.sky.join(',') + ',' + (d.ground || '#888') + ')"></span>' + k;
+            d.sky.join(',') + ',' + (d.ground || '#888') + ')"></span>' + jp;
           b.addEventListener('click', () => { STG_EDIT.bg = k; buildStgTray(); });
           box.appendChild(b);
         });
@@ -6665,8 +6695,11 @@
       });
       card.querySelector('.mc-del').addEventListener('click', (ev) => {
         ev.stopPropagation();
-        o.stages = o.stages.filter(x => x.id !== stg.id);
-        storeSave(); buildStgSaved();
+        askOrigDelete('ステージ', stg.name, () => {
+          o.stages = o.stages.filter(x => x.id !== stg.id);
+          storeSave(); buildStgSaved();
+          toast('「' + stg.name + '」を けしました');
+        });
       });
       box.appendChild(card);
       const cv = card.querySelector('canvas');
@@ -11045,6 +11078,8 @@
     $('#btn-stgmake-back').addEventListener('click', closeStgMake);
     $('#btn-stgmake-save').addEventListener('click', saveStg);
     $('#btn-origplay-back').addEventListener('click', openOrig);
+    $('#btn-origdel-yes').addEventListener('click', doOrigDelete);
+    $('#btn-origdel-no').addEventListener('click', closeOrigDelete);
     $('#btn-memory-exit').addEventListener('click', exitMemory);
     $('#btn-memory-again').addEventListener('click', () => {
       const n = vsNames();
