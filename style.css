@@ -1889,3 +1889,13 @@ body.dragging-slot #party-slots { touch-action:none; }
 }
 .run-tap:active { transform:translateY(calc(3px * var(--ui))); box-shadow:0 calc(2px * var(--ui)) 0 #c77800; }
 .run-tap.off { filter:grayscale(.7) brightness(.9); }
+
+
+/* ---- ふたりで たいけつ（だい2・だい3しゅもく）---- */
+#tataki-canvas, #memory-canvas {
+  width:100%; height:100%; display:block;
+  border-radius:calc(12px * var(--ui));
+  touch-action:manipulation;
+}
+/* あそんで いる あいだは したの ボタンを おせなく する */
+.run-tap:disabled { opacity:.45; box-shadow:none; }

@@ -131,6 +131,16 @@ const Sound = (function () {
     /* けっか */
     win:      () => ['C5', 'E5', 'G5', 'C6'].forEach((n, i) =>
                       tone({ freq: n, dur: i === 3 ? 0.4 : 0.13, vol: 0.3, delay: i * 0.11, type: 'square' })),
+    /* ★かちの よいんに ながす ファンファーレ（win より ながくて はなやか）*/
+    fanfare:  () => {
+                      ['G5', 'G5', 'G5', 'C6'].forEach((n, i) =>
+                        tone({ freq: n, dur: i === 3 ? 0.42 : 0.12, vol: 0.3,
+                               delay: i * 0.13, type: 'square' }));
+                      ['E6', 'G6', 'C7'].forEach((n, i) =>
+                        tone({ freq: n, dur: 0.5, vol: 0.2,
+                               delay: 0.62 + i * 0.1, type: 'triangle' }));
+                      tone({ freq: 'C4', dur: 0.6, vol: 0.14, delay: 0.62, type: 'sawtooth' });
+                    },
     lose:     () => ['G4', 'F4', 'E4', 'C4'].forEach((n, i) =>
                       tone({ freq: n, dur: i === 3 ? 0.45 : 0.16, vol: 0.24, delay: i * 0.15, type: 'triangle' })),
 

@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.57';
+  const GAME_VERSION = '6.58';
 
 
   /* =================================================
@@ -129,6 +129,7 @@
       'screen-room': 'room', 'screen-garden': 'room', 'screen-shop': 'room',
       'screen-lab': 'room',
       'screen-minimode': 'home', 'screen-vsname': 'home', 'screen-run': 'gacha',
+      'screen-tataki': 'gacha', 'screen-memory': 'gacha',
       'screen-battle': 'battle',
       'screen-result': null, 'screen-movie': null,
     };
@@ -6114,11 +6115,21 @@
        1だいの きかいを じゅんばんに わたして あそびます。
        かつと もらえる ものは ありません（じゅんすいな しょうぶ）。      */
   const MINIGAMES2 = [
-    { key: 'tankrun', icon: '🏃', name: 'タンクン かけっこ たいけつ',
+    { key: 'tankrun', icon: '🏃', name: '① タンクン かけっこ たいけつ',
       desc: 'メーターが「からっぽ ⇄ まんタン」を いききします。まんタンに ちかい ところで タップして とめよう！　1人 3かいずつ とめて、ごうけいの ぶんだけ タンクンが はしります。とおくまで はしれた ほうが かち。',
       when: '',
       open: () => true,
-      go: () => openVsName() },
+      go: () => openVsName(startRun, 'タンクン かけっこ たいけつ') },
+    { key: 'tataki', icon: '🔨', name: '② むしむし たたき たいけつ',
+      desc: '6つの あなから むしが ひょいと でて きます。でて いる あいだに タップして たたこう！　15びょうで なんびき たためるか。キンキラむしは ＋3、★なかまを たたくと −1★ だから きを つけて。',
+      when: '',
+      open: () => true,
+      go: () => openVsName(startTataki, 'むしむし たたき たいけつ') },
+    { key: 'memory', icon: '🧠', name: '③ じゅんばん おぼえ たいけつ',
+      desc: '4たいの なかまが じゅんばんに ひかります。おなじ じゅんばんに タップできたら つぎへ。1つずつ ながく なって いきます。★まちがえずに すすめた かず★ で しょうぶ！',
+      when: '',
+      open: () => true,
+      go: () => openVsName(startMemory, 'じゅんばん おぼえ たいけつ') },
   ];
 
   /* いま みて いる いちらん（'solo' か 'duo'）*/
@@ -6215,11 +6226,21 @@
     storeSave();
   }
 
-  function openVsName() {
+  /* ★つぎに はじめる しゅもく（なまえを いれた あとに よびます）*/
+  let vsStart = null;
+  function openVsName(startFn, label) {
+    vsStart = startFn || null;
     const n = vsNames();
     const i1 = $('#vs-name1'), i2 = $('#vs-name2');
     if (i1) i1.value = n[0] || '';
     if (i2) i2.value = n[1] || '';
+    const t = $('#screen-vsname .mini-title');
+    if (t) t.textContent = 'なまえを いれよう ✏️';
+    const note = $('#screen-vsname .mini-note');
+    if (note) {
+      note.textContent = (label ? ('【' + label + '】　') : '') +
+        'ふたりの なまえを いれて「はじめる」を おしてね。つぎから は まえの なまえが さいしょから はいって います。';
+    }
     show('screen-vsname');
   }
   /* 「はじめる」── なまえが からっぽ なら 1Ｐ／2Ｐに します */
@@ -6233,7 +6254,151 @@
     saveVsNames(a, b);
     if (i1) i1.blur();
     if (i2) i2.blur();
-    startRun(a, b);
+    (vsStart || startRun)(a, b);
+  }
+
+  /* =================================================
+     ★ふたりで たいけつ きょうようの どうぐ
+
+     3しゅもく とも おなじ はこび かた です。
+       ready → （あそぶ）→ turnend → handoff → （あそぶ）→ cheer → done
+     ★cheer★ が「かちの よいん」。かみふぶきと ファンファーレの あいだ、
+     けっかの まどを まだ だしません（すぐ でると あじけない ので）。
+     ================================================= */
+
+  /* かちの なまえ（ひきわけ なら null）*/
+  function vsWinner(names, s0, s1) {
+    if (s0 === s1) return null;
+    return (s0 > s1) ? names[0] : names[1];
+  }
+
+  /* --- かみふぶき --- */
+  function vsMakeConfetti(W, H) {
+    const COL = ['#ff5252', '#ffd54f', '#4fc3f7', '#81c784', '#ba68c8', '#ffffff'];
+    const list = [];
+    for (let i = 0; i < 80; i++) {
+      list.push({
+        x: Math.random() * W,
+        y: -Math.random() * H * 0.8,
+        vx: (Math.random() - 0.5) * 60,
+        vy: 90 + Math.random() * 170,
+        s: 5 + Math.random() * 7,
+        rot: Math.random() * 6.28,
+        rv: (Math.random() - 0.5) * 9,
+        c: COL[i % COL.length],
+      });
+    }
+    return list;
+  }
+  function vsStepConfetti(list, dt, W, H) {
+    if (!list) return;
+    for (const p of list) {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.rv * dt;
+      if (p.y > H + 20) { p.y = -20; p.x = Math.random() * W; }
+    }
+  }
+  function vsDrawConfetti(ctx, list) {
+    if (!list) return;
+    for (const p of list) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.s * 0.5, -p.s * 0.3, p.s, p.s * 0.6);
+      ctx.restore();
+    }
+  }
+
+  /* --- 「やったー！」の がめん ---
+       st = { names, scores, t, conf, unit }                       */
+  function vsDrawCheer(ctx, W, H, st) {
+    const u = Math.min(W, H);
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.fillRect(0, 0, W, H);
+    vsDrawConfetti(ctx, st.conf);
+
+    const win = vsWinner(st.names, st.scores[0], st.scores[1]);
+    const pop = Math.min(1, st.t / 0.35);                 // ぽんと でて くる
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+    ctx.save();
+    ctx.translate(W * 0.5, H * 0.24);
+    ctx.scale(0.6 + pop * 0.4, 0.6 + pop * 0.4);
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = '900 ' + (u * 0.15) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText(win ? 'やったー！' : 'ひきわけ！', 0, 0);
+    ctx.restore();
+
+    if (st.t > 0.45) {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 ' + (u * 0.085) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText(win ? (win + ' の かち！') : 'おなじ てんすう！', W * 0.5, H * 0.41);
+    }
+    if (st.t > 0.8) {
+      ctx.fillStyle = '#e0f7fa';
+      ctx.font = 'bold ' + (u * 0.055) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText(st.names[0] + ' ' + st.scores[0] + (st.unit || '') +
+                   '　－　' + st.names[1] + ' ' + st.scores[1] + (st.unit || ''),
+                   W * 0.5, H * 0.52);
+    }
+
+    /* よろこぶ タンクン（ぴょんぴょん はねる）*/
+    const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS.tankun : null;
+    if (fn) {
+      const jump = Math.abs(Math.sin(st.t * 7)) * u * 0.07;
+      ctx.save();
+      ctx.translate(W * 0.5, H * 0.94 - jump);
+      const sc = (u * 0.30) / 120;
+      ctx.scale(sc, sc);
+      fn(ctx, { t: st.t * 2, moving: true, atk: -1, hpRatio: 1, hpRate: 1, roll: 0 });
+      ctx.restore();
+    }
+  }
+
+  /* --- 「こうたい！」の がめん --- */
+  function vsDrawHandoff(ctx, W, H, name) {
+    const u = Math.min(W, H);
+    ctx.fillStyle = 'rgba(0,0,0,.55)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 ' + (u * 0.11) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText('こうたい！', W * 0.5, H * 0.38);
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = '900 ' + (u * 0.085) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText('2Ｐ ' + name + ' の ばん', W * 0.5, H * 0.53);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold ' + (u * 0.05) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText('きかいを わたしてね', W * 0.5, H * 0.66);
+  }
+
+  /* --- そら と じめん（3しゅもく きょうよう）--- */
+  function vsDrawField(ctx, W, H) {
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#8ed8f8'); sky.addColorStop(1, '#d9f2ff');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#7ec850'; ctx.fillRect(0, H * 0.78, W, H * 0.22);
+    ctx.fillStyle = '#6ab241'; ctx.fillRect(0, H * 0.78, W, Math.max(2, H * 0.012));
+  }
+
+  /* --- キャンバスの どこを タップしたか --- */
+  function vsCanvasPos(cv, ev) {
+    const r = cv.getBoundingClientRect();
+    return { x: ev.clientX - r.left, y: ev.clientY - r.top, W: r.width, H: r.height };
+  }
+
+  /* --- けっかの まどに すうじを かく --- */
+  function vsFillOver(idTitle, idText, names, scores, unit, extra) {
+    const win = vsWinner(names, scores[0], scores[1]);
+    const t = $(idTitle), x = $(idText);
+    if (t) t.textContent = win ? (win + ' の かち！') : 'ひきわけ！';
+    if (x) {
+      x.innerHTML =
+        '1Ｐ ' + names[0] + '：' + scores[0] + (unit || '') + '<br>' +
+        '2Ｐ ' + names[1] + '：' + scores[1] + (unit || '') +
+        (win ? ('<br>さ は ' + Math.abs(scores[0] - scores[1]) + (unit || '') + '！') : '') +
+        (extra ? ('<br>' + extra) : '');
+    }
   }
 
   const RUNCFG = () => (typeof RUNGAME !== 'undefined') ? RUNGAME
@@ -6253,6 +6418,7 @@
       t: 0, waitT: 0, graceT: 0,
       last: null, lastPerfect: false,
       dist: [0, 0], shown: [0, 0], runT: 0,
+      cheerT: 0, conf: null,          // ★かちの よいん（かみふぶき）
       W: 0, H: 0,
     };
     const ov = $('#run-over');
@@ -6273,7 +6439,7 @@
     const turn = $('#run-turn'), sc = $('#run-score'), tap = $('#btn-run-tap'), hint = $('#run-hint');
     const name = RG.names[RG.turn];
     if (turn) {
-      turn.textContent = (RG.phase === 'race' || RG.phase === 'done')
+      turn.textContent = (RG.phase === 'race' || RG.phase === 'cheer' || RG.phase === 'done')
         ? 'けっか'
         : (RG.turn === 0 ? '1Ｐ ' : '2Ｐ ') + name + '　' + (RG.round + 1) + '／' + C.rounds + 'かいめ';
     }
@@ -6281,15 +6447,17 @@
       const mine = RG.scores[RG.turn];
       const list = [];
       for (let i = 0; i < C.rounds; i++) list.push(mine[i] === undefined ? '－' : mine[i]);
-      sc.textContent = (RG.phase === 'race' || RG.phase === 'done') ? '' : list.join(' / ');
+      sc.textContent = (RG.phase === 'race' || RG.phase === 'cheer' || RG.phase === 'done')
+        ? '' : list.join(' / ');
     }
     if (tap) {
       const labels = {
         ready: 'スタート！', charge: 'とめる！', stopped: '…',
-        handoff: 'つぎへ ▶', race: '…', done: '…',
+        handoff: 'つぎへ ▶', race: '…', cheer: '…', done: '…',
       };
       tap.textContent = labels[RG.phase] || 'タップ！';
-      tap.classList.toggle('off', RG.phase === 'stopped' || RG.phase === 'race' || RG.phase === 'done');
+      tap.classList.toggle('off', RG.phase === 'stopped' || RG.phase === 'race'
+                                  || RG.phase === 'cheer' || RG.phase === 'done');
     }
     if (hint) {
       const texts = {
@@ -6298,6 +6466,7 @@
         stopped: 'いくつで とまったかな…？',
         handoff: 'きかいを つぎの ひとに わたしてね。',
         race: 'どっちが とおくまで はしれる？',
+        cheer: 'おめでとう！',
         done: 'もういちど あそべます。',
       };
       hint.textContent = texts[RG.phase] || '';
@@ -6356,6 +6525,18 @@
     refreshRunHud();
   }
 
+  /* ---- ★はしり おわった あとの「やったー！」---- */
+  function runCheer() {
+    const C = RUNCFG();
+    RG.phase = 'cheer';
+    RG.cheerT = (C.cheer === undefined) ? 2.6 : C.cheer;
+    RG.conf = vsMakeConfetti(RG.W || 400, RG.H || 300);
+    if (typeof Sound !== 'undefined') {
+      Sound.se(vsWinner(RG.names, RG.dist[0], RG.dist[1]) ? 'fanfare' : 'levelup');
+    }
+    refreshRunHud();
+  }
+
   /* ---- けっかを だす ---- */
   function runFinish() {
     RG.phase = 'done';
@@ -6373,7 +6554,6 @@
         ((d0 === d1) ? '' : ('<br>さ は ' + Math.abs(d0 - d1) + 'ｍ！'));
     }
     if (ov) ov.classList.remove('hidden');
-    if (typeof Sound !== 'undefined') Sound.se('win');
     refreshRunHud();
   }
 
@@ -6412,7 +6592,12 @@
           moving = true;
         }
       }
-      if (!moving && RG.runT > 0.6) runFinish();
+      if (!moving && RG.runT > 0.6) runCheer();
+    } else if (RG.phase === 'cheer') {
+      /* ★かちの よいん。かみふぶきが まって いる あいだ まつ */
+      RG.cheerT -= dt;
+      vsStepConfetti(RG.conf, dt, RG.W, RG.H);
+      if (RG.cheerT <= 0) runFinish();
     }
   }
 
@@ -6436,8 +6621,20 @@
     ctx.fillStyle = '#7ec850'; ctx.fillRect(0, H * 0.78, W, H * 0.22);
     ctx.fillStyle = '#6ab241'; ctx.fillRect(0, H * 0.78, W, Math.max(2, H * 0.012));
 
-    if (RG.phase === 'race' || RG.phase === 'done') drawRunRace(ctx, W, H);
-    else drawRunCharge(ctx, W, H);
+    if (RG.phase === 'race' || RG.phase === 'cheer' || RG.phase === 'done') {
+      drawRunRace(ctx, W, H);
+      /* ★はしり おわった あとの よろこび。レースの えの うえに かぶせます */
+      if (RG.phase === 'cheer') {
+        const C = RUNCFG();
+        const total = (C.cheer === undefined) ? 2.6 : C.cheer;
+        vsDrawCheer(ctx, W, H, {
+          names: RG.names, scores: RG.dist, unit: 'ｍ',
+          t: total - RG.cheerT, conf: RG.conf,
+        });
+      }
+    } else {
+      drawRunCharge(ctx, W, H);
+    }
   }
 
   /* --- メーターを とめる がめん --- */
@@ -6524,20 +6721,7 @@
       ctx.fillText('したの ボタンで スタート', W * 0.5, H * 0.50);
     }
     /* こうたいの あんない */
-    if (RG.phase === 'handoff') {
-      ctx.fillStyle = 'rgba(0,0,0,.55)';
-      ctx.fillRect(0, 0, W, H);
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 ' + (u * 0.11) + 'px system-ui, "Hiragino Sans", sans-serif';
-      ctx.fillText('こうたい！', W * 0.5, H * 0.38);
-      ctx.fillStyle = '#ffd54f';
-      ctx.font = '900 ' + (u * 0.085) + 'px system-ui, "Hiragino Sans", sans-serif';
-      ctx.fillText('2Ｐ ' + RG.names[1] + ' の ばん', W * 0.5, H * 0.53);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold ' + (u * 0.05) + 'px system-ui, "Hiragino Sans", sans-serif';
-      ctx.fillText('きかいを わたしてね', W * 0.5, H * 0.66);
-    }
+    if (RG.phase === 'handoff') vsDrawHandoff(ctx, W, H, RG.names[1]);
   }
 
   /* --- ふたりの タンクンが はしる がめん --- */
@@ -6588,6 +6772,663 @@
         ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
         ctx.fillText('🚩', cx, y - u * 0.055);
       }
+    }
+  }
+
+  /* =================================================
+     ★だい2しゅもく「むしむし たたき たいけつ」
+
+     6つの あなから むしが ひょいと でて きます。
+     でて いる あいだに タップすると たたけます。
+       ふつうの むし  … ＋1
+       キンキラむし    … ＋3
+       なかま（ぷりお）… ★たたくと −1★（0より したには なりません）
+     15びょうで なんびき たためるか。1Ｐ → こうたい → 2Ｐ。
+     すうじは data.js の TATAKI に まとめて あります。
+     ================================================= */
+  const TKCFG = () => (typeof TATAKI !== 'undefined') ? TATAKI
+    : { time: 15, cols: 3, rows: 2, showFrom: 1.15, showTo: 0.55, gapFrom: 0.55,
+        gapTo: 0.26, maxUp: 3, goldRate: 0.14, friendRate: 0.16,
+        goldPoint: 3, friendPoint: -1, cheer: 2.6 };
+  const TK_BUGS = ['hatchie', 'togehaya_t', 'kamajirou'];
+
+  let TK = null, tkRaf = null, tkLast = 0;
+
+  function startTataki(a, b) {
+    TK = {
+      names: [a, b],
+      scores: [0, 0],
+      turn: 0,
+      phase: 'ready',       // ready → play → turnend → handoff → cheer → done
+      left: 0, pops: [], spawnT: 0, score: 0,
+      waitT: 0, cheerT: 0, conf: null,
+      hitFx: [],            // たたいた ところの えんしゅつ
+      t: 0, W: 0, H: 0,
+    };
+    const ov = $('#tataki-over');
+    if (ov) ov.classList.add('hidden');
+    refreshTkHud();
+    show('screen-tataki');
+    if (tkRaf) cancelAnimationFrame(tkRaf);
+    tkLast = 0;
+    tkRaf = requestAnimationFrame(tkLoop);
+  }
+  function exitTataki() {
+    if (tkRaf) cancelAnimationFrame(tkRaf);
+    tkRaf = null; TK = null;
+    miniMode = 'duo'; openMinigames();
+  }
+
+  function refreshTkHud() {
+    if (!TK) return;
+    const C = TKCFG();
+    const turn = $('#tataki-turn'), sc = $('#tataki-score');
+    const tap = $('#btn-tataki-tap'), hint = $('#tataki-hint');
+    const done = (TK.phase === 'cheer' || TK.phase === 'done');
+    if (turn) {
+      turn.textContent = done ? 'けっか'
+        : (TK.turn === 0 ? '1Ｐ ' : '2Ｐ ') + TK.names[TK.turn];
+    }
+    if (sc) {
+      sc.textContent = done ? ''
+        : (TK.phase === 'play' ? ('のこり ' + Math.ceil(TK.left) + 'びょう　' + TK.score + 'ひき')
+                               : (TK.score + 'ひき'));
+    }
+    if (tap) {
+      const labels = { ready: 'スタート！', play: 'たたいて！', turnend: '…',
+                       handoff: 'つぎへ ▶', cheer: '…', done: '…' };
+      tap.textContent = labels[TK.phase] || 'タップ！';
+      tap.disabled = (TK.phase === 'play' || TK.phase === 'turnend'
+                      || TK.phase === 'cheer' || TK.phase === 'done');
+    }
+    if (hint) {
+      const texts = {
+        ready: 'ボタンで スタート。むしが でたら すぐ タップ！',
+        play: 'キンキラむしは ＋3！　なかまは たたかないで！',
+        turnend: 'なんびき たためたかな…？',
+        handoff: 'きかいを つぎの ひとに わたしてね。',
+        cheer: 'おめでとう！',
+        done: 'もういちど あそべます。',
+      };
+      hint.textContent = texts[TK.phase] || '';
+    }
+  }
+
+  /* あなの ばしょ（えを かく ときと あてる ときで おなじ ものを つかう）*/
+  function tkHoles(W, H) {
+    const C = TKCFG();
+    const top = H * 0.26, bot = H * 0.97;
+    const cw = W / C.cols, chh = (bot - top) / C.rows;
+    const list = [];
+    for (let r = 0; r < C.rows; r++) {
+      for (let c = 0; c < C.cols; c++) {
+        list.push({
+          cx: cw * (c + 0.5), cy: top + chh * (r + 0.78),
+          rx: cw * 0.33, ry: chh * 0.18,
+          x0: cw * c, y0: top + chh * r, w: cw, h: chh,
+        });
+      }
+    }
+    return list;
+  }
+
+  /* つぎの むしを だす */
+  function tkSpawn() {
+    const C = TKCFG();
+    const holes = tkHoles(TK.W || 400, TK.H || 300);
+    const used = {};
+    TK.pops.forEach(p => { used[p.hole] = true; });
+    const free = [];
+    for (let i = 0; i < holes.length; i++) if (!used[i]) free.push(i);
+    if (!free.length) return;
+    const hole = free[Math.floor(Math.random() * free.length)];
+    /* すすんだ わりあい（0 → 1）。おわりに ちかづく ほど みじかく でる */
+    const prog = 1 - Math.max(0, Math.min(1, TK.left / C.time));
+    const life = C.showFrom + (C.showTo - C.showFrom) * prog;
+    const r = Math.random();
+    let kind = 'bug';
+    if (r < C.friendRate) kind = 'friend';
+    else if (r < C.friendRate + C.goldRate) kind = 'gold';
+    TK.pops.push({
+      hole: hole, kind: kind,
+      drawId: (kind === 'friend') ? 'purio' : TK_BUGS[Math.floor(Math.random() * TK_BUGS.length)],
+      t: 0, life: life, hit: false,
+    });
+  }
+
+  /* タップ */
+  function tkTapAt(x, y) {
+    if (!TK || TK.phase !== 'play') return;
+    const C = TKCFG();
+    const holes = tkHoles(TK.W, TK.H);
+    let idx = -1;
+    for (let i = 0; i < holes.length; i++) {
+      const h = holes[i];
+      if (x >= h.x0 && x <= h.x0 + h.w && y >= h.y0 && y <= h.y0 + h.h) { idx = i; break; }
+    }
+    if (idx < 0) return;
+    const p = TK.pops.find(q => q.hole === idx && !q.hit);
+    const h = holes[idx];
+    if (!p) {
+      /* なにも いない あなを たたいた（かわらない。しゅっと だけ）*/
+      TK.hitFx.push({ x: h.cx, y: h.cy, t: 0, text: '', col: '#90a4ae' });
+      if (typeof Sound !== 'undefined') Sound.se('hit');
+      return;
+    }
+    p.hit = true; p.t = Math.max(p.t, p.life - 0.22);
+    let pt = 1, col = '#ffffff';
+    if (p.kind === 'gold') { pt = C.goldPoint; col = '#ffd54f'; }
+    if (p.kind === 'friend') { pt = C.friendPoint; col = '#ff8a80'; }
+    TK.score = Math.max(0, TK.score + pt);
+    TK.hitFx.push({ x: h.cx, y: h.cy - h.ry * 2.2, t: 0,
+                    text: (pt > 0 ? '＋' + pt : String(pt)), col: col });
+    if (typeof Sound !== 'undefined') {
+      let seName = 'hitBig';
+      if (p.kind === 'gold') seName = 'coin';
+      else if (p.kind === 'friend') seName = 'deny';
+      Sound.se(seName);
+    }
+    refreshTkHud();
+  }
+
+  /* ボタン（スタート／こうたい）*/
+  function tkTapButton() {
+    if (!TK) return;
+    const C = TKCFG();
+    if (TK.phase === 'ready') {
+      TK.phase = 'play';
+      TK.left = C.time; TK.score = 0; TK.pops = []; TK.spawnT = 0.35; TK.hitFx = [];
+      if (typeof Sound !== 'undefined') Sound.se('summon');
+      refreshTkHud();
+    } else if (TK.phase === 'handoff') {
+      TK.phase = 'ready';
+      refreshTkHud();
+    }
+  }
+
+  function tkEndTurn() {
+    TK.scores[TK.turn] = TK.score;
+    TK.phase = 'turnend';
+    TK.waitT = 1.4;
+    TK.pops = [];
+    if (typeof Sound !== 'undefined') Sound.se('levelup');
+    refreshTkHud();
+  }
+  function tkNext() {
+    if (TK.turn === 0) { TK.turn = 1; TK.score = 0; TK.phase = 'handoff'; }
+    else {
+      TK.phase = 'cheer';
+      TK.cheerT = (TKCFG().cheer === undefined) ? 2.6 : TKCFG().cheer;
+      TK.conf = vsMakeConfetti(TK.W || 400, TK.H || 300);
+      if (typeof Sound !== 'undefined') {
+        Sound.se(vsWinner(TK.names, TK.scores[0], TK.scores[1]) ? 'fanfare' : 'levelup');
+      }
+    }
+    refreshTkHud();
+  }
+  function tkFinish() {
+    TK.phase = 'done';
+    vsFillOver('#tataki-over-title', '#tataki-over-text', TK.names, TK.scores, 'ひき');
+    const ov = $('#tataki-over');
+    if (ov) ov.classList.remove('hidden');
+    refreshTkHud();
+  }
+
+  function tkLoop(now) {
+    const sc = $('#screen-tataki');
+    if (!sc || !sc.classList.contains('active') || !TK) { tkRaf = null; return; }
+    tkRaf = requestAnimationFrame(tkLoop);
+    const dt = tkLast ? Math.min(0.05, (now - tkLast) / 1000) : 0;
+    tkLast = now;
+    tkStep(dt);
+    drawTataki();
+  }
+
+  function tkStep(dt) {
+    if (!TK || !dt) return;
+    const C = TKCFG();
+    TK.t += dt;
+    TK.hitFx.forEach(x => { x.t += dt; });
+    TK.hitFx = TK.hitFx.filter(x => x.t < 0.7);
+
+    if (TK.phase === 'play') {
+      TK.left = Math.max(0, TK.left - dt);
+      /* むしの でいり */
+      TK.pops.forEach(p => { p.t += dt; });
+      TK.pops = TK.pops.filter(p => p.t < p.life);
+      TK.spawnT -= dt;
+      if (TK.spawnT <= 0 && TK.pops.length < C.maxUp) {
+        tkSpawn();
+        const prog = 1 - Math.max(0, Math.min(1, TK.left / C.time));
+        TK.spawnT = C.gapFrom + (C.gapTo - C.gapFrom) * prog;
+      }
+      if (TK.left <= 0) tkEndTurn();
+      else refreshTkHud();
+    } else if (TK.phase === 'turnend') {
+      TK.waitT -= dt;
+      if (TK.waitT <= 0) tkNext();
+    } else if (TK.phase === 'cheer') {
+      TK.cheerT -= dt;
+      vsStepConfetti(TK.conf, dt, TK.W, TK.H);
+      if (TK.cheerT <= 0) tkFinish();
+    }
+  }
+
+  function drawTataki() {
+    const cv = $('#tataki-canvas');
+    if (!cv || !TK) return;
+    const W = cv.clientWidth, H = cv.clientHeight;
+    if (W < 2 || H < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    TK.W = W; TK.H = H;
+    const u = Math.min(W, H);
+
+    /* はいけい（つちの はたけ）*/
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#ffe0b2'); sky.addColorStop(1, '#d7a86e');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+
+    /* だれの ばん／のこり じかん */
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = TK.turn === 0 ? '#0277bd' : '#d84315';
+    ctx.font = '900 ' + (u * 0.075) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText((TK.turn === 0 ? '1Ｐ ' : '2Ｐ ') + TK.names[TK.turn], W * 0.5, H * 0.08);
+    if (TK.phase === 'play') {
+      ctx.fillStyle = TK.left <= 3 ? '#d50000' : '#4e342e';
+      ctx.font = '900 ' + (u * 0.105) + 'px system-ui, sans-serif';
+      ctx.fillText(Math.ceil(TK.left) + '　|　' + TK.score + 'ひき', W * 0.5, H * 0.18);
+    }
+
+    /* あな と むし */
+    const holes = tkHoles(W, H);
+    holes.forEach((h, i) => {
+      /* あな */
+      ctx.fillStyle = '#4e342e';
+      ctx.beginPath(); ctx.ellipse(h.cx, h.cy, h.rx, h.ry, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.35)';
+      ctx.beginPath(); ctx.ellipse(h.cx, h.cy - h.ry * 0.12, h.rx * 0.86, h.ry * 0.74, 0, 0, Math.PI * 2); ctx.fill();
+      const p = TK.pops.find(q => q.hole === i);
+      if (!p) return;
+      /* でて くる とちゅうは すこし したから */
+      const up = Math.min(1, p.t / 0.12);
+      const sink = (1 - up) * h.ry * 2.4;
+      const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS[p.drawId] : null;
+      if (p.kind === 'gold') {
+        const g = ctx.createRadialGradient(h.cx, h.cy - h.ry, 1, h.cx, h.cy - h.ry, h.rx * 1.5);
+        g.addColorStop(0, 'rgba(255,213,79,.75)'); g.addColorStop(1, 'rgba(255,213,79,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(h.cx, h.cy - h.ry, h.rx * 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+      if (fn) {
+        ctx.save();
+        ctx.translate(h.cx, h.cy + sink);
+        const sc = (h.h * 0.62) / 120;
+        ctx.scale(sc, sc);
+        try { fn(ctx, { t: TK.t * 2, moving: true, atk: -1, hpRatio: 1, hpRate: 1, roll: 0 }); } catch (e) {}
+        ctx.restore();
+      }
+      /* しるし（キンキラ／なかま）*/
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      if (p.kind === 'gold') {
+        ctx.fillStyle = '#ff6f00';
+        ctx.font = '900 ' + (u * 0.05) + 'px system-ui, sans-serif';
+        ctx.fillText('★＋3', h.cx, h.cy - h.ry * 3.6 + sink);
+      } else if (p.kind === 'friend') {
+        ctx.fillStyle = '#d32f2f';
+        ctx.font = '900 ' + (u * 0.044) + 'px system-ui, "Hiragino Sans", sans-serif';
+        ctx.fillText('なかま！', h.cx, h.cy - h.ry * 3.6 + sink);
+      }
+    });
+
+    /* たたいた えんしゅつ */
+    TK.hitFx.forEach(x => {
+      const a = 1 - x.t / 0.7;
+      ctx.globalAlpha = Math.max(0, a);
+      ctx.strokeStyle = x.col; ctx.lineWidth = Math.max(2, u * 0.01);
+      ctx.beginPath(); ctx.arc(x.x, x.y, u * (0.03 + x.t * 0.12), 0, Math.PI * 2); ctx.stroke();
+      if (x.text) {
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = x.col;
+        ctx.font = '900 ' + (u * 0.075) + 'px system-ui, sans-serif';
+        ctx.fillText(x.text, x.x, x.y - x.t * u * 0.12);
+      }
+      ctx.globalAlpha = 1;
+    });
+
+    /* あんない */
+    if (TK.phase === 'ready') {
+      ctx.fillStyle = 'rgba(0,0,0,.42)'; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 ' + (u * 0.085) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText((TK.turn === 0 ? '1Ｐ ' : '2Ｐ ') + TK.names[TK.turn] + ' の ばん', W * 0.5, H * 0.40);
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = 'bold ' + (u * 0.05) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText('したの ボタンで スタート（' + TKCFG().time + 'びょう）', W * 0.5, H * 0.54);
+    }
+    if (TK.phase === 'turnend') {
+      ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 ' + (u * 0.08) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText(TK.names[TK.turn] + ' の きろく', W * 0.5, H * 0.40);
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = '900 ' + (u * 0.15) + 'px system-ui, sans-serif';
+      ctx.fillText(TK.scores[TK.turn] + 'ひき', W * 0.5, H * 0.58);
+    }
+    if (TK.phase === 'handoff') vsDrawHandoff(ctx, W, H, TK.names[1]);
+    if (TK.phase === 'cheer') {
+      const total = (TKCFG().cheer === undefined) ? 2.6 : TKCFG().cheer;
+      vsDrawCheer(ctx, W, H, { names: TK.names, scores: TK.scores, unit: 'ひき',
+                               t: total - TK.cheerT, conf: TK.conf });
+    }
+  }
+
+  /* =================================================
+     ★だい3しゅもく「じゅんばん おぼえ たいけつ」
+
+     4たいの なかまが じゅんばんに ひかります。おなじ じゅんばんに
+     タップできたら つぎの ステージへ。1つずつ ながく なって いきます。
+     まちがえたら そこで おわり。
+     ★まちがえずに すすめた かず★ が その ひとの てんすう です。
+     ================================================= */
+  const MMCFG = () => (typeof MEMORY !== 'undefined') ? MEMORY
+    : { chars: ['tankun', 'purio', 'akibou', 'kabekun'], maxRound: 12,
+        showOn: 0.46, showGap: 0.17, startWait: 0.8, okWait: 1.0, cheer: 2.6 };
+  const MM_SE = ['tap', 'coin', 'drop', 'talk'];
+
+  let MM = null, mmRaf = null, mmLast = 0;
+
+  function startMemory(a, b) {
+    MM = {
+      names: [a, b],
+      scores: [0, 0],
+      turn: 0,
+      phase: 'ready',     // ready → show → input → ok → ng → turnend → handoff → cheer → done
+      seq: [], idx: 0, step: 0, lit: -1, litT: 0,
+      waitT: 0, cheerT: 0, conf: null, flash: null,
+      t: 0, W: 0, H: 0,
+    };
+    const ov = $('#memory-over');
+    if (ov) ov.classList.add('hidden');
+    refreshMmHud();
+    show('screen-memory');
+    if (mmRaf) cancelAnimationFrame(mmRaf);
+    mmLast = 0;
+    mmRaf = requestAnimationFrame(mmLoop);
+  }
+  function exitMemory() {
+    if (mmRaf) cancelAnimationFrame(mmRaf);
+    mmRaf = null; MM = null;
+    miniMode = 'duo'; openMinigames();
+  }
+
+  function refreshMmHud() {
+    if (!MM) return;
+    const turn = $('#memory-turn'), sc = $('#memory-score');
+    const tap = $('#btn-memory-tap'), hint = $('#memory-hint');
+    const done = (MM.phase === 'cheer' || MM.phase === 'done');
+    if (turn) {
+      turn.textContent = done ? 'けっか'
+        : (MM.turn === 0 ? '1Ｐ ' : '2Ｐ ') + MM.names[MM.turn];
+    }
+    if (sc) sc.textContent = done ? '' : (MM.seq.length ? (MM.seq.length + 'こ') : '');
+    if (tap) {
+      const labels = { ready: 'スタート！', show: 'みて いて…', input: 'どうぞ！',
+                       ok: 'せいかい！', ng: '…', turnend: '…', handoff: 'つぎへ ▶',
+                       cheer: '…', done: '…' };
+      tap.textContent = labels[MM.phase] || 'タップ！';
+      tap.disabled = (MM.phase !== 'ready' && MM.phase !== 'handoff');
+    }
+    if (hint) {
+      const texts = {
+        ready: 'ボタンで スタート。ひかる じゅんばんを おぼえよう！',
+        show: 'ひかる じゅんばんを よく みて…',
+        input: 'ひかった じゅんばんに タップ！',
+        ok: 'せいかい！　つぎは 1つ ふえるよ。',
+        ng: 'ざんねん…　ここまでの かずが てんすうです。',
+        turnend: 'きろくが でました。',
+        handoff: 'きかいを つぎの ひとに わたしてね。',
+        cheer: 'おめでとう！',
+        done: 'もういちど あそべます。',
+      };
+      hint.textContent = texts[MM.phase] || '';
+    }
+  }
+
+  /* パネルの ばしょ（2 × 2）*/
+  function mmPanels(W, H) {
+    const top = H * 0.24, bot = H * 0.98;
+    const gap = Math.min(W, H) * 0.02;
+    const pw = (W - gap * 3) / 2, ph = (bot - top - gap) / 2;
+    const list = [];
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < 2; c++) {
+        list.push({ x: gap + c * (pw + gap), y: top + r * (ph + gap), w: pw, h: ph });
+      }
+    }
+    return list;
+  }
+
+  function mmTapButton() {
+    if (!MM) return;
+    if (MM.phase === 'ready') { mmNewRound(true); }
+    else if (MM.phase === 'handoff') { MM.phase = 'ready'; refreshMmHud(); }
+  }
+
+  /* あたらしい ステージ（1つ ながく する）*/
+  function mmNewRound(first) {
+    const C = MMCFG();
+    if (first) { MM.seq = []; MM.scores[MM.turn] = 0; }
+    MM.seq.push(Math.floor(Math.random() * 4));
+    MM.idx = 0; MM.step = 0; MM.lit = -1;
+    MM.litT = C.startWait;
+    MM.phase = 'show';
+    refreshMmHud();
+  }
+
+  function mmTapAt(x, y) {
+    if (!MM || MM.phase !== 'input') return;
+    const ps = mmPanels(MM.W, MM.H);
+    let idx = -1;
+    for (let i = 0; i < ps.length; i++) {
+      const p = ps[i];
+      if (x >= p.x && x <= p.x + p.w && y >= p.y && y <= p.y + p.h) { idx = i; break; }
+    }
+    if (idx < 0) return;
+    const C = MMCFG();
+    MM.flash = { panel: idx, t: 0, ok: (idx === MM.seq[MM.idx]) };
+    if (idx === MM.seq[MM.idx]) {
+      if (typeof Sound !== 'undefined') Sound.se(MM_SE[idx]);
+      MM.idx++;
+      if (MM.idx >= MM.seq.length) {
+        /* ぜんぶ あった → てんすうを 1つ あげて つぎへ */
+        MM.scores[MM.turn] = MM.seq.length;
+        MM.phase = 'ok';
+        MM.waitT = C.okWait;
+        if (typeof Sound !== 'undefined') Sound.se('levelup');
+      }
+    } else {
+      MM.phase = 'ng';
+      MM.waitT = 1.6;
+      if (typeof Sound !== 'undefined') Sound.se('deny');
+    }
+    refreshMmHud();
+  }
+
+  function mmEndTurn() {
+    MM.phase = 'turnend';
+    MM.waitT = 1.4;
+    refreshMmHud();
+  }
+  function mmNext() {
+    if (MM.turn === 0) { MM.turn = 1; MM.seq = []; MM.phase = 'handoff'; }
+    else {
+      MM.phase = 'cheer';
+      MM.cheerT = (MMCFG().cheer === undefined) ? 2.6 : MMCFG().cheer;
+      MM.conf = vsMakeConfetti(MM.W || 400, MM.H || 300);
+      if (typeof Sound !== 'undefined') {
+        Sound.se(vsWinner(MM.names, MM.scores[0], MM.scores[1]) ? 'fanfare' : 'levelup');
+      }
+    }
+    refreshMmHud();
+  }
+  function mmFinish() {
+    MM.phase = 'done';
+    vsFillOver('#memory-over-title', '#memory-over-text', MM.names, MM.scores, 'こ');
+    const ov = $('#memory-over');
+    if (ov) ov.classList.remove('hidden');
+    refreshMmHud();
+  }
+
+  function mmLoop(now) {
+    const sc = $('#screen-memory');
+    if (!sc || !sc.classList.contains('active') || !MM) { mmRaf = null; return; }
+    mmRaf = requestAnimationFrame(mmLoop);
+    const dt = mmLast ? Math.min(0.05, (now - mmLast) / 1000) : 0;
+    mmLast = now;
+    mmStep(dt);
+    drawMemory();
+  }
+
+  function mmStep(dt) {
+    if (!MM || !dt) return;
+    const C = MMCFG();
+    MM.t += dt;
+    if (MM.flash) { MM.flash.t += dt; if (MM.flash.t > 0.3) MM.flash = null; }
+
+    if (MM.phase === 'show') {
+      MM.litT -= dt;
+      if (MM.litT <= 0) {
+        if (MM.lit >= 0) {
+          /* いま ひかって いた ものを けして、つぎへ */
+          MM.lit = -1;
+          MM.step++;
+          MM.litT = C.showGap;
+          if (MM.step >= MM.seq.length) { MM.phase = 'input'; MM.idx = 0; refreshMmHud(); }
+        } else if (MM.step < MM.seq.length) {
+          MM.lit = MM.seq[MM.step];
+          MM.litT = C.showOn;
+          if (typeof Sound !== 'undefined') Sound.se(MM_SE[MM.lit]);
+        }
+      }
+    } else if (MM.phase === 'ok') {
+      MM.waitT -= dt;
+      if (MM.waitT <= 0) {
+        if (MM.seq.length >= C.maxRound) mmEndTurn();
+        else mmNewRound(false);
+      }
+    } else if (MM.phase === 'ng') {
+      MM.waitT -= dt;
+      if (MM.waitT <= 0) mmEndTurn();
+    } else if (MM.phase === 'turnend') {
+      MM.waitT -= dt;
+      if (MM.waitT <= 0) mmNext();
+    } else if (MM.phase === 'cheer') {
+      MM.cheerT -= dt;
+      vsStepConfetti(MM.conf, dt, MM.W, MM.H);
+      if (MM.cheerT <= 0) mmFinish();
+    }
+  }
+
+  function drawMemory() {
+    const cv = $('#memory-canvas');
+    if (!cv || !MM) return;
+    const W = cv.clientWidth, H = cv.clientHeight;
+    if (W < 2 || H < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    MM.W = W; MM.H = H;
+    const u = Math.min(W, H);
+    const C = MMCFG();
+
+    /* はいけい */
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#311b92'); sky.addColorStop(1, '#5e35b1');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+
+    /* だれの ばん／なんこ */
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = MM.turn === 0 ? '#80d8ff' : '#ffab91';
+    ctx.font = '900 ' + (u * 0.075) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText((MM.turn === 0 ? '1Ｐ ' : '2Ｐ ') + MM.names[MM.turn], W * 0.5, H * 0.07);
+    if (MM.phase === 'show' || MM.phase === 'input' || MM.phase === 'ok' || MM.phase === 'ng') {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 ' + (u * 0.058) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText(MM.seq.length + 'こ　（' + (MM.phase === 'input'
+        ? (MM.idx + '／' + MM.seq.length + ' まで)') : 'みて いて…）'), W * 0.5, H * 0.165);
+    }
+
+    /* パネル 4つ */
+    const ps = mmPanels(W, H);
+    ps.forEach((p, i) => {
+      const lit = (MM.phase === 'show' && MM.lit === i);
+      const fl = MM.flash && MM.flash.panel === i;
+      ctx.save();
+      ctx.fillStyle = lit ? '#fff59d' : (fl ? (MM.flash.ok ? '#a5d6a7' : '#ef9a9a') : '#ede7f6');
+      roundRectPath(ctx, p.x, p.y, p.w, p.h, u * 0.03);
+      ctx.fill();
+      ctx.strokeStyle = lit ? '#ff6f00' : 'rgba(255,255,255,.55)';
+      ctx.lineWidth = Math.max(2, u * (lit ? 0.014 : 0.007));
+      roundRectPath(ctx, p.x, p.y, p.w, p.h, u * 0.03);
+      ctx.stroke();
+      ctx.restore();
+      /* なかまの え */
+      const id = C.chars[i] || 'tankun';
+      const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS[id] : null;
+      if (fn) {
+        ctx.save();
+        ctx.translate(p.x + p.w * 0.5, p.y + p.h * 0.92);
+        const sc = (p.h * 0.70) / 150 * (lit ? 1.12 : 1);
+        ctx.scale(sc, sc);
+        try { fn(ctx, { t: MM.t, moving: lit, atk: -1, hpRatio: 1, hpRate: 1, roll: 0 }); } catch (e) {}
+        ctx.restore();
+      }
+    });
+
+    /* あんない */
+    if (MM.phase === 'ready') {
+      ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 ' + (u * 0.085) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText((MM.turn === 0 ? '1Ｐ ' : '2Ｐ ') + MM.names[MM.turn] + ' の ばん', W * 0.5, H * 0.40);
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = 'bold ' + (u * 0.05) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText('したの ボタンで スタート', W * 0.5, H * 0.54);
+    }
+    if (MM.phase === 'ng') {
+      ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ff8a80';
+      ctx.font = '900 ' + (u * 0.095) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText('ざんねん！', W * 0.5, H * 0.42);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold ' + (u * 0.055) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText(MM.scores[MM.turn] + 'こ まで せいかい', W * 0.5, H * 0.56);
+    }
+    if (MM.phase === 'turnend') {
+      ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 ' + (u * 0.08) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText(MM.names[MM.turn] + ' の きろく', W * 0.5, H * 0.40);
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = '900 ' + (u * 0.15) + 'px system-ui, sans-serif';
+      ctx.fillText(MM.scores[MM.turn] + 'こ', W * 0.5, H * 0.58);
+    }
+    if (MM.phase === 'handoff') vsDrawHandoff(ctx, W, H, MM.names[1]);
+    if (MM.phase === 'cheer') {
+      const total = (MMCFG().cheer === undefined) ? 2.6 : MMCFG().cheer;
+      vsDrawCheer(ctx, W, H, { names: MM.names, scores: MM.scores, unit: 'こ',
+                               t: total - MM.cheerT, conf: MM.conf });
     }
   }
 
@@ -8934,6 +9775,36 @@
     $('#btn-run-again').addEventListener('click', () => {
       const n = vsNames();
       startRun(n[0] || '1Ｐ', n[1] || '2Ｐ');
+    });
+    /* ★だい2しゅもく むしむし たたき */
+    $('#btn-tataki-tap').addEventListener('click', (ev) => { ev.preventDefault(); tkTapButton(); });
+    const tcv = $('#tataki-canvas');
+    if (tcv) tcv.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      const p = vsCanvasPos(tcv, ev);
+      if (TK && (TK.phase === 'ready' || TK.phase === 'handoff')) tkTapButton();
+      else tkTapAt(p.x, p.y);
+    });
+    $('#btn-tataki-back').addEventListener('click', exitTataki);
+    $('#btn-tataki-exit').addEventListener('click', exitTataki);
+    $('#btn-tataki-again').addEventListener('click', () => {
+      const n = vsNames();
+      startTataki(n[0] || '1Ｐ', n[1] || '2Ｐ');
+    });
+    /* ★だい3しゅもく じゅんばん おぼえ */
+    $('#btn-memory-tap').addEventListener('click', (ev) => { ev.preventDefault(); mmTapButton(); });
+    const mcv = $('#memory-canvas');
+    if (mcv) mcv.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      const p = vsCanvasPos(mcv, ev);
+      if (MM && (MM.phase === 'ready' || MM.phase === 'handoff')) mmTapButton();
+      else mmTapAt(p.x, p.y);
+    });
+    $('#btn-memory-back').addEventListener('click', exitMemory);
+    $('#btn-memory-exit').addEventListener('click', exitMemory);
+    $('#btn-memory-again').addEventListener('click', () => {
+      const n = vsNames();
+      startMemory(n[0] || '1Ｐ', n[1] || '2Ｐ');
     });
     $('#btn-shootpick-back').addEventListener('click', openMinigames);
     $('#btn-shoot-back').addEventListener('click', quitShoot);

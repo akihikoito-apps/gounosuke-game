@@ -117,7 +117,7 @@ console.log('こうかおん');
 
 const MAIN_SE = ['tap', 'back', 'deny', 'summon', 'hit', 'hitBig', 'crit', 'weak',
                  'nullify', 'knockback', 'die', 'bossIn', 'chudon', 'castle',
-                 'win', 'lose', 'coin', 'levelup', 'evolve', 'gacha', 'rare',
+                 'win', 'lose', 'fanfare', 'coin', 'levelup', 'evolve', 'gacha', 'rare',
                  'craft', 'drop', 'talk'];
 
 test('おもな こうかおんの なまえで よぶと、それぞれ おとが なる', () => {
