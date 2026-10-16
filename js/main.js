@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.58';
+  const GAME_VERSION = '6.59';
 
 
   /* =================================================
@@ -6126,7 +6126,7 @@
       open: () => true,
       go: () => openVsName(startTataki, 'むしむし たたき たいけつ') },
     { key: 'memory', icon: '🧠', name: '③ じゅんばん おぼえ たいけつ',
-      desc: '4たいの なかまが じゅんばんに ひかります。おなじ じゅんばんに タップできたら つぎへ。1つずつ ながく なって いきます。★まちがえずに すすめた かず★ で しょうぶ！',
+      desc: '4たいの なかまが じゅんばんに ひかります。おなじ じゅんばんに タップできたら つぎへ。1つずつ ながく なって いき、★じゅんばんは まいかい ぜんぶ あたらしく なります★（まえの つづきでは ありません）。★まちがえずに すすめた かず★ で しょうぶ！',
       when: '',
       open: () => true,
       go: () => openVsName(startMemory, 'じゅんばん おぼえ たいけつ') },
@@ -7149,7 +7149,7 @@
       scores: [0, 0],
       turn: 0,
       phase: 'ready',     // ready → show → input → ok → ng → turnend → handoff → cheer → done
-      seq: [], idx: 0, step: 0, lit: -1, litT: 0,
+      seq: [], round: 0, idx: 0, step: 0, lit: -1, litT: 0,
       waitT: 0, cheerT: 0, conf: null, flash: null,
       t: 0, W: 0, H: 0,
     };
@@ -7189,7 +7189,7 @@
         ready: 'ボタンで スタート。ひかる じゅんばんを おぼえよう！',
         show: 'ひかる じゅんばんを よく みて…',
         input: 'ひかった じゅんばんに タップ！',
-        ok: 'せいかい！　つぎは 1つ ふえるよ。',
+        ok: 'せいかい！　つぎは ★あたらしい じゅんばん★ で 1つ ふえるよ。',
         ng: 'ざんねん…　ここまでの かずが てんすうです。',
         turnend: 'きろくが でました。',
         handoff: 'きかいを つぎの ひとに わたしてね。',
@@ -7220,11 +7220,35 @@
     else if (MM.phase === 'handoff') { MM.phase = 'ready'; refreshMmHud(); }
   }
 
-  /* あたらしい ステージ（1つ ながく する）*/
+  /* ★あたらしい じゅんばんを つくる（ながさ n）
+
+     まえの じゅんばんの うしろに 1つ たす やりかた だと、いちど
+     おぼえた ところは そのまま つかえて しまい、じつは まいかい
+     「あたらしい 1つ」だけを おぼえる ゲームに なって しまいます。
+     （ふたりとも まんてんに なって しまいました）
+     なので ★まいかい ぜんぶ あたらしく つくりなおします★。
+
+     ただし おなじ パネルが 2かい つづくのは さけて います。
+     あいだの くらい じかんが みじかく、2かい ひかったのか
+     1かいなのか わかりにくい から です。                        */
+  function mmMakeSeq(n) {
+    const out = [];
+    let last = -1;
+    for (let i = 0; i < n; i++) {
+      let v = Math.floor(Math.random() * 4);
+      if (v === last) v = (v + 1 + Math.floor(Math.random() * 3)) % 4;
+      out.push(v);
+      last = v;
+    }
+    return out;
+  }
+
+  /* あたらしい ステージ（1つ ながく して、じゅんばんは つくりなおす）*/
   function mmNewRound(first) {
     const C = MMCFG();
-    if (first) { MM.seq = []; MM.scores[MM.turn] = 0; }
-    MM.seq.push(Math.floor(Math.random() * 4));
+    if (first) { MM.round = 1; MM.scores[MM.turn] = 0; }
+    else MM.round++;
+    MM.seq = mmMakeSeq(MM.round);
     MM.idx = 0; MM.step = 0; MM.lit = -1;
     MM.litT = C.startWait;
     MM.phase = 'show';
@@ -7266,7 +7290,7 @@
     refreshMmHud();
   }
   function mmNext() {
-    if (MM.turn === 0) { MM.turn = 1; MM.seq = []; MM.phase = 'handoff'; }
+    if (MM.turn === 0) { MM.turn = 1; MM.seq = []; MM.round = 0; MM.phase = 'handoff'; }
     else {
       MM.phase = 'cheer';
       MM.cheerT = (MMCFG().cheer === undefined) ? 2.6 : MMCFG().cheer;

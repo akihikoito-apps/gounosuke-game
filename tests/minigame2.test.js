@@ -122,6 +122,26 @@ test('いちばん ながい ステージまで あそべる ながさ', () => {
   assert.ok(show <= 12, 'いちばん ながい ステージの みせる じかんが ' + show.toFixed(1) + 'びょう');
 });
 
+test('★じゅんばんは まいかい ぜんぶ つくりなおす', () => {
+  /* まえの つづきに 1つ たす やりかた だと、いちど おぼえた ところが
+     そのまま つかえて しまい、ふたりとも まんてんに なりました（v6.58）。
+     v6.59 から まいかい つくりなおして います。                     */
+  const grab = (name) => {
+    const i = main.indexOf('function ' + name + '(');
+    assert.ok(i >= 0, name + ' が みつからない');
+    const j = main.indexOf('\n  }', i);
+    return main.slice(i, j);
+  };
+  const m = grab('mmNewRound');
+  assert.ok(/MM\.seq = mmMakeSeq\(MM\.round\)/.test(m),
+    'じゅんばんを つくりなおして いない');
+  assert.ok(!/MM\.seq\.push\(/.test(m),
+    'まだ まえの つづきに たして いる（MM.seq.push が のこって いる）');
+  const g = grab('mmMakeSeq');
+  assert.ok(/last/.test(g),
+    'おなじ パネルが 2かい つづくのを さける しくみが ない');
+});
+
 test('ひかって いる じかんが みえる ながさ', () => {
   assert.ok(MEMORY.showOn >= 0.25, 'ひかる じかんが みじかすぎる（' + MEMORY.showOn + 'びょう）');
   assert.ok(MEMORY.showGap >= 0.08, 'つぎに ひかる までが みじかすぎる');
