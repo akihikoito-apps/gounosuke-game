@@ -1843,3 +1843,49 @@ body.dragging-slot #party-slots { touch-action:none; }
   position:absolute; top:2px; left:3px;
   font-size:calc(12px * var(--ui)); line-height:1; pointer-events:none;
 }
+
+
+/* ============ ふたりで たいけつ ============ */
+/* ---- なまえを いれる ---- */
+.vs-names {
+  width:min(calc(420px * var(--ui)), 94%);
+  display:flex; flex-direction:column; gap:calc(10px * var(--ui));
+  margin:calc(4px * var(--ui)) 0 calc(12px * var(--ui));
+}
+.vs-row { display:flex; align-items:center; gap:calc(8px * var(--ui)); }
+.vs-tag {
+  flex:0 0 auto; width:calc(42px * var(--ui));
+  padding:calc(7px * var(--ui)) 0; text-align:center;
+  border-radius:calc(10px * var(--ui));
+  font-size:calc(16px * var(--ui)); font-weight:bold; color:#fff;
+}
+.vs-tag.p1 { background:linear-gradient(180deg,#4fc3f7,#0277bd); }
+.vs-tag.p2 { background:linear-gradient(180deg,#ff8a65,#d84315); }
+.vs-input {
+  flex:1 1 auto; min-width:0;
+  padding:calc(9px * var(--ui)) calc(12px * var(--ui));
+  border-radius:calc(10px * var(--ui));
+  border:calc(2px * var(--ui)) solid #90a4ae;
+  background:#fffdf7; color:#3e2723;
+  font-family:inherit; font-size:calc(17px * var(--ui)); font-weight:bold;
+}
+.vs-input:focus { outline:none; border-color:#ffb300; background:#fffde7; }
+
+/* ---- かけっこの がめん ---- */
+.run-wrap { }
+#run-canvas { width:100%; height:100%; display:block; border-radius:calc(12px * var(--ui)); }
+.run-tap {
+  flex:0 0 auto;
+  width:min(calc(420px * var(--ui)), 94%);
+  margin:calc(8px * var(--ui)) auto 0;
+  padding:calc(16px * var(--ui)) 0;
+  border:none; border-radius:999px;
+  background:linear-gradient(180deg,#ffe082,#ffb300);
+  box-shadow:0 calc(5px * var(--ui)) 0 #c77800;
+  color:#5d3a00; font-family:inherit;
+  font-size:calc(23px * var(--ui)); font-weight:bold;
+  letter-spacing:2px; cursor:pointer;
+  touch-action:manipulation; -webkit-user-select:none; user-select:none;
+}
+.run-tap:active { transform:translateY(calc(3px * var(--ui))); box-shadow:0 calc(2px * var(--ui)) 0 #c77800; }
+.run-tap.off { filter:grayscale(.7) brightness(.9); }

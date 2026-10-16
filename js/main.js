@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.56';
+  const GAME_VERSION = '6.57';
 
 
   /* =================================================
@@ -128,6 +128,7 @@
       'screen-tower': 'gacha', 'screen-gacha': 'gacha',
       'screen-room': 'room', 'screen-garden': 'room', 'screen-shop': 'room',
       'screen-lab': 'room',
+      'screen-minimode': 'home', 'screen-vsname': 'home', 'screen-run': 'gacha',
       'screen-battle': 'battle',
       'screen-result': null, 'screen-movie': null,
     };
@@ -6109,20 +6110,44 @@
       go: () => openCharPick(startDuel) },
   ];
 
+  /* ★ふたりで たいけつ する ミニゲーム
+       1だいの きかいを じゅんばんに わたして あそびます。
+       かつと もらえる ものは ありません（じゅんすいな しょうぶ）。      */
+  const MINIGAMES2 = [
+    { key: 'tankrun', icon: '🏃', name: 'タンクン かけっこ たいけつ',
+      desc: 'メーターが「からっぽ ⇄ まんタン」を いききします。まんタンに ちかい ところで タップして とめよう！　1人 3かいずつ とめて、ごうけいの ぶんだけ タンクンが はしります。とおくまで はしれた ほうが かち。',
+      when: '',
+      open: () => true,
+      go: () => openVsName() },
+  ];
+
+  /* いま みて いる いちらん（'solo' か 'duo'）*/
+  let miniMode = 'solo';
+
+  /* ★ひとり／ふたり の えらびかた */
+  function openMiniMode() {
+    show('screen-minimode');
+  }
+
   function openMinigames() {
+    const duo = (miniMode === 'duo');
     const note = $('#minigame-note');
     if (note) {
-      note.textContent = 'ごほうびの そざいは ★ゲームごとに 1日 1かいまで★（よる 0じで リセット）。ゲームじたいは なんかいでも あそべます。';
+      note.textContent = duo
+        ? '1だいの きかいを じゅんばんに わたして あそびます。かつ・まけだけの しょうぶ なので、なんかいでも あそべます。'
+        : 'ごほうびの そざいは ★ゲームごとに 1日 1かいまで★（よる 0じで リセット）。ゲームじたいは なんかいでも あそべます。';
     }
+    const title = $('#screen-minigame .mini-title');
+    if (title) title.textContent = duo ? 'ふたりで たいけつ 👥' : 'ひとりで あそぶ 🕹️';
     const box = $('#minigame-list');
     if (box) {
       box.innerHTML = '';
-      MINIGAMES.forEach(g => {
+      (duo ? MINIGAMES2 : MINIGAMES).forEach(g => {
         const ok = g.open();
         const el = document.createElement('button');
         el.className = 'mini-card' + (ok ? '' : ' locked');
         let desc = ok ? g.desc : g.when;
-        if (ok && !miniRewardReady(g.key)) {
+        if (ok && !duo && !miniRewardReady(g.key)) {
           desc += '<br>（きょうの ごほうびは もらいました。つぎは ' + miniLeftText(g.key) + '）';
         }
         el.innerHTML =
@@ -6162,6 +6187,408 @@
       box.scrollTop = 0;
     }
     show('screen-shootpick');
+  }
+
+  /* =================================================
+     ★ふたりで たいけつ「タンクン かけっこ」
+
+     ・さいしょに ふたりの なまえを いれます（まえの なまえを おぼえて います）
+     ・1Ｐが 3かい つづけて とめ、そのあと 2Ｐが 3かい とめます
+     ・メーターは「からっぽ ⇄ まんタン」を いききします。
+       まんタンに ちかい ところで とめた ぶんだけ、タンクンが とおくまで
+       はしります（3かいの ごうけい ＝ メートル）
+     ・かいを かさねる ほど メーターが はやく なります（RUNGAME.speeds）
+     ・さいごに ふたりの タンクンが よこに ならんで はしり、かちが きまります
+     ================================================= */
+
+  /* ---- なまえ（セーブに のこす）---- */
+  function vsNames() {
+    const s = slot();
+    if (!s) return ['1Ｐ', '2Ｐ'];
+    if (!Array.isArray(s.vsNames) || s.vsNames.length < 2) s.vsNames = ['', ''];
+    return s.vsNames;
+  }
+  function saveVsNames(a, b) {
+    const s = slot();
+    if (!s) return;
+    s.vsNames = [a, b];
+    storeSave();
+  }
+
+  function openVsName() {
+    const n = vsNames();
+    const i1 = $('#vs-name1'), i2 = $('#vs-name2');
+    if (i1) i1.value = n[0] || '';
+    if (i2) i2.value = n[1] || '';
+    show('screen-vsname');
+  }
+  /* 「はじめる」── なまえが からっぽ なら 1Ｐ／2Ｐに します */
+  function vsNameGo() {
+    const i1 = $('#vs-name1'), i2 = $('#vs-name2');
+    let a = (i1 && i1.value || '').trim();
+    let b = (i2 && i2.value || '').trim();
+    if (!a) a = '1Ｐ';
+    if (!b) b = '2Ｐ';
+    if (a === b) b = b + '（2Ｐ）';
+    saveVsNames(a, b);
+    if (i1) i1.blur();
+    if (i2) i2.blur();
+    startRun(a, b);
+  }
+
+  const RUNCFG = () => (typeof RUNGAME !== 'undefined') ? RUNGAME
+    : { rounds: 3, speeds: [55, 80, 115], grace: 0.25, perfect: 98, runSpeed: 95 };
+
+  let RG = null, runRaf = null, runLast = 0;
+
+  function startRun(a, b) {
+    const C = RUNCFG();
+    RG = {
+      names: [a, b],
+      scores: [[], []],      // それぞれ なんめもりで とめたか
+      turn: 0,               // 0 = 1Ｐ / 1 = 2Ｐ
+      round: 0,              // 0 〜 rounds-1
+      phase: 'ready',        // ready → charge → stopped → … → handoff → race → done
+      gauge: 0, dir: 1,      // メーターの いち と むき
+      t: 0, waitT: 0, graceT: 0,
+      last: null, lastPerfect: false,
+      dist: [0, 0], shown: [0, 0], runT: 0,
+      W: 0, H: 0,
+    };
+    const ov = $('#run-over');
+    if (ov) ov.classList.add('hidden');
+    refreshRunHud();
+    show('screen-run');
+    if (runRaf) cancelAnimationFrame(runRaf);
+    runLast = 0;
+    runRaf = requestAnimationFrame(runLoop);
+  }
+  function stopRunLoop() { if (runRaf) cancelAnimationFrame(runRaf); runRaf = null; }
+  function exitRun() { stopRunLoop(); RG = null; miniMode = 'duo'; openMinigames(); }
+
+  /* ---- うえの もじ ---- */
+  function refreshRunHud() {
+    if (!RG) return;
+    const C = RUNCFG();
+    const turn = $('#run-turn'), sc = $('#run-score'), tap = $('#btn-run-tap'), hint = $('#run-hint');
+    const name = RG.names[RG.turn];
+    if (turn) {
+      turn.textContent = (RG.phase === 'race' || RG.phase === 'done')
+        ? 'けっか'
+        : (RG.turn === 0 ? '1Ｐ ' : '2Ｐ ') + name + '　' + (RG.round + 1) + '／' + C.rounds + 'かいめ';
+    }
+    if (sc) {
+      const mine = RG.scores[RG.turn];
+      const list = [];
+      for (let i = 0; i < C.rounds; i++) list.push(mine[i] === undefined ? '－' : mine[i]);
+      sc.textContent = (RG.phase === 'race' || RG.phase === 'done') ? '' : list.join(' / ');
+    }
+    if (tap) {
+      const labels = {
+        ready: 'スタート！', charge: 'とめる！', stopped: '…',
+        handoff: 'つぎへ ▶', race: '…', done: '…',
+      };
+      tap.textContent = labels[RG.phase] || 'タップ！';
+      tap.classList.toggle('off', RG.phase === 'stopped' || RG.phase === 'race' || RG.phase === 'done');
+    }
+    if (hint) {
+      const texts = {
+        ready: 'おして スタート。うごきだしたら まんタンで とめよう！',
+        charge: 'いまだ！　まんタンの ところで とめよう！',
+        stopped: 'いくつで とまったかな…？',
+        handoff: 'きかいを つぎの ひとに わたしてね。',
+        race: 'どっちが とおくまで はしれる？',
+        done: 'もういちど あそべます。',
+      };
+      hint.textContent = texts[RG.phase] || '';
+    }
+  }
+
+  /* ---- タップ（スタート／とめる／つぎへ）---- */
+  function runTap() {
+    if (!RG) return;
+    const C = RUNCFG();
+    if (RG.phase === 'ready') {
+      RG.phase = 'charge';
+      RG.gauge = 0; RG.dir = 1;
+      RG.graceT = C.grace;
+      if (typeof Sound !== 'undefined') Sound.se('summon');
+      refreshRunHud();
+      return;
+    }
+    if (RG.phase === 'charge') {
+      if (RG.graceT > 0) return;            // スタートの タップで すぐ とまらない ように
+      const v = Math.max(0, Math.min(100, Math.round(RG.gauge)));
+      RG.scores[RG.turn].push(v);
+      RG.last = v;
+      RG.lastPerfect = (v >= C.perfect);
+      RG.phase = 'stopped';
+      RG.waitT = 1.3;
+      if (typeof Sound !== 'undefined') Sound.se(RG.lastPerfect ? 'rare' : (v >= 70 ? 'hitBig' : 'hit'));
+      refreshRunHud();
+      return;
+    }
+    if (RG.phase === 'handoff') {
+      RG.phase = 'ready';
+      refreshRunHud();
+      return;
+    }
+  }
+
+  /* ---- つぎの ばんへ ---- */
+  function runNext() {
+    const C = RUNCFG();
+    if (RG.round < C.rounds - 1) {
+      RG.round++;
+      RG.phase = 'ready';
+    } else if (RG.turn === 0) {
+      RG.turn = 1; RG.round = 0;
+      RG.phase = 'handoff';
+    } else {
+      /* ふたりとも おわった → はしる */
+      RG.dist[0] = RG.scores[0].reduce((a, b) => a + b, 0);
+      RG.dist[1] = RG.scores[1].reduce((a, b) => a + b, 0);
+      RG.shown = [0, 0];
+      RG.runT = 0;
+      RG.phase = 'race';
+      if (typeof Sound !== 'undefined') Sound.se('chudon');
+    }
+    refreshRunHud();
+  }
+
+  /* ---- けっかを だす ---- */
+  function runFinish() {
+    RG.phase = 'done';
+    const ov = $('#run-over');
+    const t = $('#run-over-title'), x = $('#run-over-text');
+    const d0 = RG.dist[0], d1 = RG.dist[1];
+    if (t) {
+      t.textContent = (d0 === d1) ? 'ひきわけ！'
+        : ((d0 > d1 ? RG.names[0] : RG.names[1]) + ' の かち！');
+    }
+    if (x) {
+      const line = (i) => (i === 0 ? '1Ｐ ' : '2Ｐ ') + RG.names[i] + '：' +
+        RG.dist[i] + 'ｍ　（' + RG.scores[i].join(' ＋ ') + '）';
+      x.innerHTML = line(0) + '<br>' + line(1) +
+        ((d0 === d1) ? '' : ('<br>さ は ' + Math.abs(d0 - d1) + 'ｍ！'));
+    }
+    if (ov) ov.classList.remove('hidden');
+    if (typeof Sound !== 'undefined') Sound.se('win');
+    refreshRunHud();
+  }
+
+  /* ---- まいフレーム ---- */
+  function runLoop(now) {
+    const sc = $('#screen-run');
+    if (!sc || !sc.classList.contains('active') || !RG) { runRaf = null; return; }
+    runRaf = requestAnimationFrame(runLoop);
+    const dt = runLast ? Math.min(0.05, (now - runLast) / 1000) : 0;
+    runLast = now;
+    runStep(dt);
+    drawRun();
+  }
+
+  function runStep(dt) {
+    if (!RG || !dt) return;
+    const C = RUNCFG();
+    RG.t += dt;
+    if (RG.graceT > 0) RG.graceT = Math.max(0, RG.graceT - dt);
+
+    if (RG.phase === 'charge') {
+      const sp = C.speeds[Math.min(RG.round, C.speeds.length - 1)];
+      RG.gauge += sp * RG.dir * dt;
+      if (RG.gauge >= 100) { RG.gauge = 100; RG.dir = -1; }
+      if (RG.gauge <= 0)   { RG.gauge = 0;   RG.dir = 1; }
+    } else if (RG.phase === 'stopped') {
+      RG.waitT -= dt;
+      if (RG.waitT <= 0) runNext();
+    } else if (RG.phase === 'race') {
+      RG.runT += dt;
+      let moving = false;
+      for (let i = 0; i < 2; i++) {
+        const want = RG.dist[i];
+        if (RG.shown[i] < want) {
+          RG.shown[i] = Math.min(want, RG.shown[i] + C.runSpeed * dt);
+          moving = true;
+        }
+      }
+      if (!moving && RG.runT > 0.6) runFinish();
+    }
+  }
+
+  /* ---- え を かく ---- */
+  function drawRun() {
+    const cv = $('#run-canvas');
+    if (!cv || !RG) return;
+    const W = cv.clientWidth, H = cv.clientHeight;
+    if (W < 2 || H < 2) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    RG.W = W; RG.H = H;
+
+    /* そら と じめん */
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#8ed8f8'); sky.addColorStop(1, '#d9f2ff');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#7ec850'; ctx.fillRect(0, H * 0.78, W, H * 0.22);
+    ctx.fillStyle = '#6ab241'; ctx.fillRect(0, H * 0.78, W, Math.max(2, H * 0.012));
+
+    if (RG.phase === 'race' || RG.phase === 'done') drawRunRace(ctx, W, H);
+    else drawRunCharge(ctx, W, H);
+  }
+
+  /* --- メーターを とめる がめん --- */
+  function drawRunCharge(ctx, W, H) {
+    const C = RUNCFG();
+    const u = Math.min(W, H);
+    const me = RG.turn;
+
+    /* だれの ばんか（おおきく）*/
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = me === 0 ? '#0277bd' : '#d84315';
+    ctx.font = '900 ' + (u * 0.085) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText((me === 0 ? '1Ｐ ' : '2Ｐ ') + RG.names[me], W * 0.5, H * 0.12);
+    ctx.fillStyle = '#37474f';
+    ctx.font = 'bold ' + (u * 0.052) + 'px system-ui, "Hiragino Sans", sans-serif';
+    ctx.fillText((RG.round + 1) + 'かいめ ／ ' + C.rounds + 'かい', W * 0.5, H * 0.22);
+
+    /* タンクン（じめんの うえで まって いる）*/
+    const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS.tankun : null;
+    if (fn) {
+      ctx.save();
+      const bob = (RG.phase === 'charge') ? Math.abs(Math.sin(RG.t * 9)) * u * 0.02 : 0;
+      ctx.translate(W * 0.5, H * 0.78 - bob);
+      const sc = (H * 0.30) / 120;
+      ctx.scale(sc, sc);
+      fn(ctx, { t: RG.t, moving: RG.phase === 'charge', atk: -1, hpRatio: 1, hpRate: 1, roll: 0 });
+      ctx.restore();
+    }
+
+    /* ---- メーター ---- */
+    const bx = W * 0.08, bw = W * 0.84;
+    const by = H * 0.86, bh = Math.max(16, H * 0.085);
+    /* わく */
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    roundRectPath(ctx, bx - 4, by - 4, bw + 8, bh + 8, bh * 0.5 + 4); ctx.fill();
+    ctx.fillStyle = '#efebe0';
+    roundRectPath(ctx, bx, by, bw, bh, bh * 0.5); ctx.fill();
+    /* まんタンの ゾーン（みぎはし）*/
+    const zx = bx + bw * (C.perfect / 100);
+    ctx.save();
+    roundRectPath(ctx, bx, by, bw, bh, bh * 0.5); ctx.clip();
+    ctx.fillStyle = 'rgba(255,213,79,.9)';
+    ctx.fillRect(zx, by, bx + bw - zx, bh);
+    ctx.restore();
+    /* たまって いる ぶん */
+    const v = Math.max(0, Math.min(100, RG.gauge));
+    ctx.save();
+    roundRectPath(ctx, bx, by, bw, bh, bh * 0.5); ctx.clip();
+    const g = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+    g.addColorStop(0, '#81d4fa'); g.addColorStop(0.5, '#aed581'); g.addColorStop(1, '#ffb300');
+    ctx.fillStyle = g;
+    ctx.fillRect(bx, by, bw * (v / 100), bh);
+    ctx.restore();
+    /* いまの いちの はり */
+    const mx = bx + bw * (v / 100);
+    ctx.strokeStyle = '#263238'; ctx.lineWidth = Math.max(3, u * 0.012);
+    ctx.beginPath(); ctx.moveTo(mx, by - 6); ctx.lineTo(mx, by + bh + 6); ctx.stroke();
+    /* めもりの もじ */
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#455a64';
+    ctx.font = 'bold ' + (u * 0.038) + 'px system-ui, sans-serif';
+    ctx.fillText('からっぽ', bx, by - bh * 0.75);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#e65100';
+    ctx.fillText('まんタン！', bx + bw, by - bh * 0.75);
+
+    /* とまった あとの すうじ */
+    if (RG.phase === 'stopped' && RG.last !== null) {
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = RG.lastPerfect ? '#e65100' : '#263238';
+      ctx.font = '900 ' + (u * 0.16) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText(String(RG.last), W * 0.5, H * 0.46);
+      if (RG.lastPerfect) {
+        ctx.fillStyle = '#e65100';
+        ctx.font = '900 ' + (u * 0.075) + 'px system-ui, "Hiragino Sans", sans-serif';
+        ctx.fillText('ピッタリ！', W * 0.5, H * 0.60);
+      }
+    }
+    /* はじめる まえの あんない */
+    if (RG.phase === 'ready') {
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(38,50,56,.75)';
+      ctx.font = 'bold ' + (u * 0.055) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText('したの ボタンで スタート', W * 0.5, H * 0.50);
+    }
+    /* こうたいの あんない */
+    if (RG.phase === 'handoff') {
+      ctx.fillStyle = 'rgba(0,0,0,.55)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 ' + (u * 0.11) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText('こうたい！', W * 0.5, H * 0.38);
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = '900 ' + (u * 0.085) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText('2Ｐ ' + RG.names[1] + ' の ばん', W * 0.5, H * 0.53);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold ' + (u * 0.05) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText('きかいを わたしてね', W * 0.5, H * 0.66);
+    }
+  }
+
+  /* --- ふたりの タンクンが はしる がめん --- */
+  function drawRunRace(ctx, W, H) {
+    const u = Math.min(W, H);
+    const maxD = Math.max(1, RG.dist[0], RG.dist[1]);
+    const x0 = W * 0.10, xw = W * 0.74;      // はしる ところ
+    const laneY = [H * 0.42, H * 0.76];
+
+    /* ゴールの はた（ながい ほうの いち）*/
+    ctx.strokeStyle = 'rgba(0,0,0,.18)';
+    ctx.lineWidth = Math.max(2, u * 0.008);
+    ctx.setLineDash([u * 0.02, u * 0.02]);
+    ctx.beginPath(); ctx.moveTo(x0 + xw, H * 0.18); ctx.lineTo(x0 + xw, H * 0.86); ctx.stroke();
+    ctx.setLineDash([]);
+
+    for (let i = 0; i < 2; i++) {
+      const y = laneY[i];
+      /* はしる みち */
+      ctx.fillStyle = i === 0 ? 'rgba(2,119,189,.14)' : 'rgba(216,67,21,.14)';
+      roundRectPath(ctx, x0 - u * 0.02, y - u * 0.045, xw + u * 0.04, u * 0.09, u * 0.02);
+      ctx.fill();
+      /* なまえ */
+      ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      ctx.fillStyle = i === 0 ? '#0277bd' : '#d84315';
+      ctx.font = '900 ' + (u * 0.052) + 'px system-ui, "Hiragino Sans", sans-serif';
+      ctx.fillText((i === 0 ? '1Ｐ ' : '2Ｐ ') + RG.names[i], x0 - u * 0.02, y - u * 0.06);
+      /* すすんだ きょり */
+      const p = RG.shown[i] / maxD;
+      const cx = x0 + xw * p;
+      const fn = (typeof DRAWERS !== 'undefined') ? DRAWERS.tankun : null;
+      if (fn) {
+        ctx.save();
+        ctx.translate(cx, y + u * 0.045);
+        const sc = (u * 0.17) / 120;
+        ctx.scale(sc, sc);
+        fn(ctx, { t: RG.t * 1.4, moving: RG.shown[i] < RG.dist[i], atk: -1, hpRatio: 1, hpRate: 1, roll: 0 });
+        ctx.restore();
+      }
+      /* メートル */
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#263238';
+      ctx.font = '900 ' + (u * 0.055) + 'px system-ui, sans-serif';
+      ctx.fillText(Math.round(RG.shown[i]) + 'ｍ', x0 + xw + u * 0.03, y);
+      /* とまったら はた */
+      if (RG.shown[i] >= RG.dist[i]) {
+        ctx.font = (u * 0.07) + 'px system-ui, "Apple Color Emoji", sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText('🚩', cx, y - u * 0.055);
+      }
+    }
   }
 
   /* =================================================
@@ -8489,8 +8916,25 @@
     $('#btn-home-dex').addEventListener('click', () => openDex({ back: 'home' }));
     $('#btn-home-movie').addEventListener('click', openMovies);
     $('#btn-home-attr').addEventListener('click', openAttr);
-    $('#btn-home-mini').addEventListener('click', openMinigames);
-    $('#btn-minigame-back').addEventListener('click', openHome);
+    $('#btn-home-mini').addEventListener('click', openMiniMode);
+    $('#btn-minigame-back').addEventListener('click', openMiniMode);
+    /* ★ひとり／ふたり の えらびかた */
+    $('#btn-minimode-back').addEventListener('click', openHome);
+    $('#btn-mini-solo').addEventListener('click', () => { miniMode = 'solo'; openMinigames(); });
+    $('#btn-mini-duo').addEventListener('click', () => { miniMode = 'duo'; openMinigames(); });
+    /* ★ふたりで たいけつ：なまえ */
+    $('#btn-vsname-back').addEventListener('click', () => { miniMode = 'duo'; openMinigames(); });
+    $('#btn-vsname-go').addEventListener('click', vsNameGo);
+    /* ★タンクン かけっこ */
+    $('#btn-run-tap').addEventListener('click', (ev) => { ev.preventDefault(); runTap(); });
+    const rcv = $('#run-canvas');
+    if (rcv) rcv.addEventListener('pointerdown', (ev) => { ev.preventDefault(); runTap(); });
+    $('#btn-run-back').addEventListener('click', exitRun);
+    $('#btn-run-exit').addEventListener('click', exitRun);
+    $('#btn-run-again').addEventListener('click', () => {
+      const n = vsNames();
+      startRun(n[0] || '1Ｐ', n[1] || '2Ｐ');
+    });
     $('#btn-shootpick-back').addEventListener('click', openMinigames);
     $('#btn-shoot-back').addEventListener('click', quitShoot);
     $('#btn-shoot-exit').addEventListener('click', quitShoot);

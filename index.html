@@ -131,6 +131,81 @@
   </section>
 
   <!-- ============ ミニゲーム ============ -->
+  <!-- ============ ミニゲーム：ひとり／ふたり えらび ============ -->
+  <section id="screen-minimode" class="screen">
+    <div class="mini-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-minimode-back">もどる</button>
+        <h2 class="mini-title">ミニゲーム 🎮</h2>
+      </div>
+      <p class="mini-note">ひとりで あそぶか、ふたりで たいけつ するか えらんでね。</p>
+      <div class="mini-list">
+        <button class="mini-card" id="btn-mini-solo">
+          <span class="mc-ico">🕹️</span>
+          <span class="mc-body">
+            <span class="mc-name">ひとりで あそぶ</span>
+            <span class="mc-desc">むしたいじ シューティング・たべもの あつめ・ケダマールとの たいけつ。かつと そざいが もらえます。</span>
+          </span>
+          <span class="mc-go">▶ すすむ</span>
+        </button>
+        <button class="mini-card" id="btn-mini-duo">
+          <span class="mc-ico">👥</span>
+          <span class="mc-body">
+            <span class="mc-name">ふたりで たいけつ</span>
+            <span class="mc-desc">1だいの きかいを じゅんばんに わたして あそびます。おともだちや おうちの ひとと しょうぶ！</span>
+          </span>
+          <span class="mc-go">▶ すすむ</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ふたりで たいけつ：なまえを いれる ============ -->
+  <section id="screen-vsname" class="screen">
+    <div class="mini-wrap">
+      <div class="mini-top">
+        <button class="mini-btn" id="btn-vsname-back">もどる</button>
+        <h2 class="mini-title">なまえを いれよう ✏️</h2>
+      </div>
+      <p class="mini-note">ふたりの なまえを いれて「はじめる」を おしてね。つぎから は まえの なまえが さいしょから はいって います。</p>
+      <div class="vs-names">
+        <label class="vs-row">
+          <span class="vs-tag p1">1Ｐ</span>
+          <input id="vs-name1" class="vs-input" type="text" maxlength="8" placeholder="ごうのすけ" autocomplete="off">
+        </label>
+        <label class="vs-row">
+          <span class="vs-tag p2">2Ｐ</span>
+          <input id="vs-name2" class="vs-input" type="text" maxlength="8" placeholder="おとうさん" autocomplete="off">
+        </label>
+      </div>
+      <button class="big-btn" id="btn-vsname-go">はじめる ▶</button>
+    </div>
+  </section>
+
+  <!-- ============ ふたりで たいけつ：タンクン かけっこ ============ -->
+  <section id="screen-run" class="screen">
+    <div class="shoot-wrap run-wrap">
+      <div class="shoot-top">
+        <button class="mini-btn" id="btn-run-back">やめる</button>
+        <span class="shoot-wave" id="run-turn"></span>
+        <span class="shoot-life" id="run-score"></span>
+      </div>
+      <div class="shoot-stage">
+        <canvas id="run-canvas"></canvas>
+        <div class="shoot-over hidden" id="run-over">
+          <p class="so-title" id="run-over-title"></p>
+          <p class="so-text"  id="run-over-text"></p>
+          <div class="so-btns">
+            <button class="big-btn" id="btn-run-again">もういちど</button>
+            <button class="mini-btn" id="btn-run-exit">やめる</button>
+          </div>
+        </div>
+      </div>
+      <button class="run-tap" id="btn-run-tap">タップ！</button>
+      <p class="shoot-hint" id="run-hint">メーターが まんタンの ところで タップ！</p>
+    </div>
+  </section>
+
   <section id="screen-minigame" class="screen">
     <div class="mini-wrap">
       <div class="mini-top">
