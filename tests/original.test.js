@@ -233,6 +233,63 @@ test('たいけいを えらぶ ところが つくる がめんに ある', () 
     'たいけいの ときに て・あしを かくして いない');
 });
 
+test('★パーツを ひとつずつ ぜんぶ えに して、かならず なにか かかれる', () => {
+  const keys = ['body', 'eye', 'mouth', 'horn', 'arm', 'leg', 'pattern'];
+  const base = {};
+  keys.forEach(k => { base[k] = FOE_PARTS[k][0].id; });
+  base.color = FOE_COLORS[0].id;
+  const states = [
+    { t: 0.5, moving: true,  atk: -1 },
+    { t: 1.2, moving: false, atk: 0.6 },
+  ];
+  /* その パーツが ほんとうに かかれて いるか を、
+     「ありえない id」の ときの かいすうと くらべて たしかめます */
+  const count = (k, id) => {
+    const look = Object.assign({}, base, { base: 'blob', bodySize: 1 });
+    look[k] = id;
+    drawCalls = 0;
+    states.forEach(st => drawFoeParts(fakeCtx, st, look, { walk: 'step', atk: 'swing' }));
+    return drawCalls;
+  };
+  let n = 0;
+  keys.forEach(k => {
+    const nothing = count(k, '__nai__');
+    FOE_PARTS[k].forEach(p => {
+      n++;
+      const c = count(k, p.id);
+      assert.ok(c > 0, k + ' の ' + p.id + ' で なにも かかれない');
+      /* からだは id が しらない ものでも かならず かかれる ので くらべません */
+      if (p.id !== 'none' && k !== 'body') {
+        assert.notStrictEqual(c, nothing,
+          k + ' の「' + p.name + '」（' + p.id + '）が えに なって いない');
+      }
+    });
+  });
+  assert.ok(n >= 60, 'ためした パーツが すくなすぎる（' + n + '）');
+});
+
+test('★あたらしい パーツが ふえて いる（しっぽ・たて・ほしの め など）', () => {
+  const want = {
+    leg:     ['fishtail', 'fluff', 'snake'],
+    arm:     ['shield', 'wand', 'arm4'],
+    horn:    ['antler', 'halo', 'hair'],
+    eye:     ['star', 'heart', 'sleepy'],
+    mouth:   ['tongue', 'mustache'],
+    pattern: ['star', 'check', 'bolt'],
+  };
+  Object.keys(want).forEach(k => {
+    want[k].forEach(id => {
+      const p = FOE_PARTS[k].find(x => x.id === id);
+      assert.ok(p, k + ' に ' + id + ' が ない');
+      assert.ok(/^[^A-Za-z]+$/.test(p.name), k + '/' + id + ' の なまえが にほんごで ない：' + p.name);
+    });
+  });
+  /* いままでの はじめの パーツ（＝はじめの すがた）は かわって いない */
+  assert.strictEqual(FOE_PARTS.body[0].id, 'round');
+  assert.strictEqual(FOE_PARTS.leg[0].id, 'two');
+  assert.strictEqual(FOE_PARTS.arm[0].id, 'none');
+});
+
 console.log('ステータスと とくこうか');
 
 test('バーの はんいが つじつまが あって いる', () => {

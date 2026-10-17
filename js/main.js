@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.63';
+  const GAME_VERSION = '6.64';
 
 
   /* =================================================
@@ -457,6 +457,29 @@
      ことが あり、アプリの したに すきまが できて したの パネルが
      うえに ずれて みえます。いつも スクロールを 0 に もどします。
      ================================================= */
+  /* =====================================================================
+     ★タップの おと
+     ボタンを おしたのに なにも ならない ところが おおかった ので、
+     「その クリックで おとが ならなかった とき だけ」ポチッと ならします。
+     （おしたら すぐ こうかおんを だす ボタンは、そのまま 1かい だけ）
+     ===================================================================== */
+  const TAPPABLE = 'button, .mk-pick, .mk-tab, .tabbtn, [data-tap]';
+  function installTapSound() {
+    if (typeof Sound === 'undefined') return;
+    let before = -1;
+    /* キャプチャ（いちばん さきに よばれる）で、おとの かいすうを おぼえる */
+    document.addEventListener('click', () => { before = Sound.count; }, true);
+    /* バブル（いちばん さいごに よばれる）で、まだ ならって いなければ ならす */
+    document.addEventListener('click', (e) => {
+      if (Sound.count !== before) return;        // もう なにか なった
+      const el = e.target && e.target.closest ? e.target.closest(TAPPABLE) : null;
+      if (!el || el.disabled || el.classList.contains('no-tap')) return;
+      const txt = (el.textContent || '') + ' ' + (el.id || '');
+      const back = /もどる|とじる|やめる|キャンセル|back|close/i.test(txt);
+      Sound.se(back ? 'back' : 'tap');
+    });
+  }
+
   function resetScroll() {
     try {
       if (window.scrollY || window.scrollX) window.scrollTo(0, 0);
@@ -3833,6 +3856,7 @@
     applyUiScale();
     applyUnitLayout();
     show('screen-battle');
+    if (typeof Sound !== 'undefined') Sound.se('start');   // ★よーい、スタート！
     const canvas = $('#canvas');
     Game.canvas = canvas;
     Game.ctx = canvas.getContext('2d');
@@ -7699,7 +7723,10 @@
     MATCH.ev++;
     buildMatchBoard();
     show('screen-match');
-    if (MATCH.ev >= MATCH_EVENTS.length && typeof Sound !== 'undefined') Sound.se('fanfare');
+    if (MATCH.ev >= MATCH_EVENTS.length && typeof Sound !== 'undefined') {
+      /* ★ゆうしょうが きまった しゅんかん。ひきわけの ときは あかるく おひらき */
+      Sound.se(MATCH.wins[0] === MATCH.wins[1] ? 'tie' : 'champion');
+    }
     return true;
   }
   function matchGo() {
@@ -10898,7 +10925,7 @@
   }
 
   function showResult() {
-    if (typeof Sound !== 'undefined') Sound.se(Game.result === 'win' ? 'win' : 'lose');
+    if (typeof Sound !== 'undefined') Sound.se(Game.result === 'win' ? 'clear' : 'lose');
     resultShown = true;
     recordSeen();                 // まけても「でてきた てき」は ずかんに のこす
 
@@ -11337,6 +11364,7 @@
     watchForUpdate();
 
     /* ★ページが スクロールしたら すぐ 0 に もどす */
+    installTapSound();
     window.addEventListener('scroll', resetScroll, { passive: true });
     /* キーボードを とじた あと、ずれを なおして はかりなおす */
     document.addEventListener('focusout', () => {

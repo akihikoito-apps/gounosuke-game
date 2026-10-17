@@ -1,10 +1,10 @@
 # STATUS — ごうのすけゲーム
 
 状態: 🟢 順調
-今やっていること: v6.63 敵の体型5種（人型/四足/魚/恐竜/虫）＋からだの大きさバー＋ステージの出かたの繰り返し（10/17）
-次の一手: 体型と繰り返しを触ってもらう。トークン節約のため、重い実装は今後も Codex に委譲して Claude 側は仕様書・検証に回す
-ブロッカー: なし（node 実行可。tests/ 6本=94件すべて実行して ok）。Antigravity は GUI のみで CLI が無く、Claude Code からは駆動できない（Codex は headless で可）
-最終更新: 2026-10-16（Claude）
+今やっていること: v6.64 効果音の増量（ボタン・ステージ開始/終了・ピンチ・三番勝負の決着）＋ 敵づくりのしっぽ描き直しとパーツ21個追加（10/17）
+次の一手: 音の量と鳴る場所の感触、しっぽと新パーツの見た目を見てもらう。重い描画は今後も Codex に委譲して Claude 側は仕様書・検証に回す
+ブロッカー: なし（tests/ 6本=100件 ok、jsdom 通しテスト6本 ok）。Antigravity は GUI のみで CLI が無く、Claude Code からは駆動できない（Codex は headless で可）
+最終更新: 2026-10-17（Claude）
 
 <!-- 上の5行は本部（_hq）が読む。行の頭の言葉は変えないこと。詳しいメモはこの下に自由に書いてよい。 -->
 
@@ -26,6 +26,7 @@
 - 全コース描画・ロジックの通しテスト（scratchpad の rt.js）: 130コース・描画 12,574回 エラーなし
 
 ## 本部の作業記録
+- 2026-10-17 Claude: v6.64 (1) 効果音を増量。sound.js に start（ステージ開始のホイッスル）/ clear（クリア、win より長い）/ champion（三番勝負の優勝、ドラムロール→ファンファーレ）/ tie（引き分け）/ alarm（自陣の城が3割以下で1回）/ count / open を追加。(2) ★ボタンのタップ音を自動化★ — installTapSound() が click をキャプチャ段で Sound.count を記録し、バブル段で変化していなければ tap（文言が「もどる/とじる/やめる」等なら back）を鳴らす。自前で音を出すボタンは二重に鳴らない。この仕組みのため Sound に count を公開した。(3) 敵づくりの「しっぽ」を根元が太く先が細いベジェ＋先端のふさに描き直し、パーツを21個追加（あし3/て3/つの3/め3/くち2/もよう3/いろ4）。★描画分は Codex に委譲（仕様書 scratchpad/brief-parts.md、触ってよいのは data.js の FOE_PARTS と draw.js の drawFoeParts だけ）★。検証: tests/original.test.js に「パーツを1つずつ全部描いて、ありえない id のときと描画回数が違う（＝本当に絵になっている）」テストを追加、tests/sound.test.js に効果音テーブル全32種が鳴る/節々の呼び出しがある/タップ音の仕掛けがあるテストを追加。jsdom の taptest.js で「静かなボタンを押すとちょうど1回」「自前で音を出すボタンでも1回まで」「ボタン以外では鳴らない」を実測。
 - 2026-10-17 Claude: v6.63 (1) 敵の「きほんの かたち」= 体型を追加。FOE_BASE（blob/human/beast/fish/dino/bug）と FOE_BODY_SIZE（0.6〜1.8）を data.js に、drawFoeFrame(ctx, base, t, moving, pose, COL, INK) -> {hx,hy,hr} を draw.js に追加。drawFoeParts は base!=='blob' のとき drawFoeFrame で骨格を描き、返ってきた (hx,hy,hr) に「からだ」の形を頭として縮めて描く。その場合 arm/leg パーツは描かずUIでも隠す。(2) ステージの出かたに repeat/times。engine 側は wave.fired を数えて times で done。(3) ★drawFoeFrame の165行は Codex に委譲（仕様書は scratchpad/brief-frame.md）。既存行の変更0・append のみを条件にし、こちらで全組み合わせ描画・save/restore 均衡・返り値の妥当性を検証してから採用した。Antigravity は CLI が無いため駆動不可。
 - 2026-10-17 Claude: v6.62 iPad で戦闘中に下部 HUD が上にずれ、下に黒い帯が出る不具合を修正。原因は #hud-bottom の高さではなく、**ドキュメント自体のスクロール**。v6.57 以降に追加したテキスト入力（名前入力・各メーカー）にフォーカスすると iOS がページごとスクロールし、キーボードを閉じても戻らないことがある。対策：(1) resetScroll() を show() と window の scroll / focusout / visualViewport に仕込んで常に 0 へ戻す、(2) typingNow() 中は relayout() を打ち切り（キーボードで狭くなった高さで --ui / --hud-h を確定させない）、(3) startBattle で applyUiScale + applyUnitLayout を必ず実行、(4) 入力の font-size を max(16px, …) にして iOS の自動ズームを防止。検証は scratchpad/scrolltest.js（scrollY と innerHeight を差し替えて iPad の挙動を再現。仲間10体＝2段でも --hud-h は 241px＝画面の29%に収まることも確認）。
 - 2026-10-16 Claude: v6.61 本人の指摘4点を修正。(1) × が即削除だったので askOrigDelete() による確認モーダル（#orig-del、#app 直下に1つ置いて全画面から使う）を追加。使用中のものは従来どおり確認前に拒否。(2) ステージ作成の既存背景がローマ字キー表示だったので BG_NAME（43件）と bgNameOf() を追加。(3) からだの形を 7→20（極端な形も: wide/thin/tri/hex/spiky/jelly/mush/tower/heart/crescent/snake/cross/cloudb）、て 6→9、あし 5→7。(4) 攻撃モーションを明確化：ふりかぶりの引きを大きくし、drawFoeParts の最後に fx レイヤ（punch/charge の衝撃光、bite の大あご、spin の回転弧、shoot の弾の成長と発射、stomp の地面の輪）を追加。

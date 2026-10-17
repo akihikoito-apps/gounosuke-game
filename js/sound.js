@@ -162,13 +162,67 @@ const Sound = (function () {
     drop:     () => tone({ freq: 'A5', to: 'E6', dur: 0.12, vol: 0.2, type: 'triangle' }),
     talk:     () => { tone({ freq: 'A5', dur: 0.05, vol: 0.16, type: 'triangle' });
                       tone({ freq: 'D6', dur: 0.07, vol: 0.14, type: 'triangle', delay: 0.05 }); },
+
+    /* ---- ★ここから ステージの ふしめの おと ---- */
+
+    /* ステージの はじまり：ホイッスル から「スタート！」*/
+    start:    () => {
+                      noise({ freq: 3200, to: 2600, dur: 0.18, vol: 0.12, q: 8 });
+                      tone({ freq: 'C5', dur: 0.09, vol: 0.24, type: 'square' });
+                      tone({ freq: 'G5', dur: 0.09, vol: 0.24, type: 'square', delay: 0.1 });
+                      tone({ freq: 'C6', dur: 0.26, vol: 0.28, type: 'square', delay: 0.2 });
+                      tone({ freq: 'C4', dur: 0.3,  vol: 0.12, type: 'sawtooth', delay: 0.2 });
+                    },
+    /* ステージ クリア：win より ながくて はなやか */
+    clear:    () => {
+                      ['C5', 'E5', 'G5', 'C6', 'G5', 'C6'].forEach((n, i) =>
+                        tone({ freq: n, dur: i === 5 ? 0.55 : 0.11, vol: 0.3,
+                               delay: i * 0.12, type: 'square' }));
+                      ['E6', 'G6'].forEach((n, i) =>
+                        tone({ freq: n, dur: 0.5, vol: 0.16,
+                               delay: 0.6 + i * 0.09, type: 'triangle' }));
+                      tone({ freq: 'C3', dur: 0.7, vol: 0.14, delay: 0.6, type: 'sawtooth' });
+                    },
+    /* 三番勝負の ゆうしょう：ドラムロール から ファンファーレ */
+    champion: () => {
+                      for (let i = 0; i < 12; i++)
+                        noise({ freq: 400, to: 260, dur: 0.05,
+                                vol: 0.07 + i * 0.011, filter: 'lowpass', delay: i * 0.045 });
+                      noise({ freq: 1200, to: 300, dur: 0.3, vol: 0.26, delay: 0.56 });
+                      ['C5', 'C5', 'C5', 'E5', 'G5', 'C6'].forEach((n, i) =>
+                        tone({ freq: n, dur: i === 5 ? 0.7 : 0.13, vol: 0.3,
+                               delay: 0.58 + i * 0.14, type: 'square' }));
+                      ['E6', 'G6', 'C7'].forEach((n, i) =>
+                        tone({ freq: n, dur: 0.6, vol: 0.17,
+                               delay: 1.42 + i * 0.08, type: 'triangle' }));
+                    },
+    /* ひきわけ：あかるく おひらき */
+    tie:      () => {
+                      ['G4', 'C5', 'G4', 'C5'].forEach((n, i) =>
+                        tone({ freq: n, dur: i === 3 ? 0.45 : 0.14, vol: 0.24,
+                               delay: i * 0.15, type: 'triangle' }));
+                    },
+    /* しろが ピンチ：ゆっくりした サイレン */
+    alarm:    () => {
+                      for (let i = 0; i < 3; i++) {
+                        tone({ freq: 'E4', to: 'B4', dur: 0.22, vol: 0.2,
+                               type: 'sawtooth', delay: i * 0.3 });
+                      }
+                    },
+    /* カウントダウン：3・2・1 の ひとつぶん */
+    count:    () => tone({ freq: 'A4', dur: 0.1, vol: 0.2, type: 'square' }),
+    /* がめんが ひらく */
+    open:     () => { tone({ freq: 'D5', to: 'A5', dur: 0.1, vol: 0.14, type: 'triangle' });
+                      noise({ freq: 2600, to: 1200, dur: 0.12, vol: 0.06 }); },
   };
+
+  let seCount = 0;   // おとを ならした かいすう（タップおんの だぶり よけ）
 
   function se(name) {
     if (!ready || !on.se) return;
     resume();
     const f = SE[name];
-    if (f) { try { f(); } catch (e) {} }
+    if (f) { try { f(); seCount++; } catch (e) {} }
   }
 
   /* ============================================================
@@ -320,5 +374,6 @@ const Sound = (function () {
   }
 
   return { install, se, bgm, setOn, isOn, wake,
-           get ready() { return ready; } };
+           get ready() { return ready; },
+           get count() { return seCount; } };
 })();

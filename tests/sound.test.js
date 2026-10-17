@@ -118,7 +118,9 @@ console.log('こうかおん');
 const MAIN_SE = ['tap', 'back', 'deny', 'summon', 'hit', 'hitBig', 'crit', 'weak',
                  'nullify', 'knockback', 'die', 'bossIn', 'chudon', 'castle',
                  'win', 'lose', 'fanfare', 'coin', 'levelup', 'evolve', 'gacha', 'rare',
-                 'craft', 'drop', 'talk'];
+                 'craft', 'drop', 'talk',
+                 /* ★ふしめの おと */
+                 'start', 'clear', 'champion', 'tie', 'alarm', 'count', 'open'];
 
 test('おもな こうかおんの なまえで よぶと、それぞれ おとが なる', () => {
   const { Sound, log } = load(true);
@@ -141,6 +143,51 @@ test('ゲームの なかで よんで いる なまえは みんな おとが �
     Sound.se(name);
     assert.ok(log.started > before, 'しらない こうかおん: ' + name);
   }
+});
+
+test('こうかおんの ひょうに ある なまえは のこらず ならせる', () => {
+  const table = [...SOUND_SRC.matchAll(/^    (\w+):\s*\(\)/gm)].map(m => m[1]);
+  assert.ok(table.length >= 30, 'こうかおんが ' + table.length + 'しゅるい しか ない');
+  const { Sound, log } = load(true);
+  Sound.wake();
+  for (const name of table) {
+    const before = log.started;
+    Sound.se(name);
+    assert.ok(log.started > before, name + ' が ならない');
+  }
+});
+
+test('こうかおんを ならした かずを かぞえて いる（タップおんの だぶり よけ）', () => {
+  const { Sound } = load(true);
+  Sound.wake();
+  const a = Sound.count;
+  Sound.se('tap'); Sound.se('tap');
+  assert.strictEqual(Sound.count, a + 2, 'かぞえて いない');
+  Sound.se('nai-oto');
+  assert.strictEqual(Sound.count, a + 2, 'ない おとを かぞえて しまう');
+});
+
+test('★ステージの はじまり・おわり、三番勝負の けっちゃくで おとが なる', () => {
+  const main = fs.readFileSync(path.join(__dirname, '..', 'js', 'main.js'), 'utf8');
+  const game = fs.readFileSync(path.join(__dirname, '..', 'js', 'game.js'), 'utf8');
+  assert.ok(/show\('screen-battle'\);[\s\S]{0,160}Sound\.se\('start'\)/.test(main),
+    'ステージの はじまりに おとが ない');
+  assert.ok(/Game\.result === 'win' \? 'clear'/.test(main),
+    'ステージ クリアの おとが ない');
+  assert.ok(/MATCH\.wins\[0\] === MATCH\.wins\[1\] \? 'tie' : 'champion'/.test(main),
+    '三番勝負の けっちゃくの おとが ない');
+  assert.ok(/pinchDone[\s\S]{0,220}Sound\.se\('alarm'\)/.test(game),
+    'しろが ピンチの おとが ない');
+});
+
+test('★ボタンを おすと おとが なる しかけが ある', () => {
+  const main = fs.readFileSync(path.join(__dirname, '..', 'js', 'main.js'), 'utf8');
+  assert.ok(/function installTapSound/.test(main), 'タップおんの しかけが ない');
+  assert.ok(/\n    installTapSound\(\);/.test(main), 'タップおんを よんで いない');
+  assert.ok(/before = Sound\.count[\s\S]{0,60}true\)/.test(main),
+    'さきに かいすうを おぼえて いない（キャプチャ）');
+  assert.ok(/Sound\.count !== before/.test(main), 'だぶりを よけて いない');
+  assert.ok(/Sound\.se\(back \? 'back' : 'tap'\)/.test(main), 'タップおんを ならして いない');
 });
 
 test('しらない なまえ・からっぽ でも エラーに ならず、なにも ならない', () => {

@@ -15321,14 +15321,72 @@ function drawFoeParts(ctx, st, look, motion) {
       }
     }
   } else if (legId === 'tail') {
+    /* ねもとは ふとく、さきは ほそく。あるくと おおきく ゆらゆら */
+    const sw = Math.sin(t * (moving ? 5 : 2)) * (moving ? 12 : 3);
+    const tipX = -12 + sw;
+    const tipY = 28 - bob;
     ctx.fillStyle = COL.dark;
     ctx.beginPath();
-    ctx.moveTo(-6, legTop + 6);
-    ctx.quadraticCurveTo(-34 + Math.sin(t * 5) * 6, legTop + 22, -14, 34 - bob);
-    ctx.lineTo(10, 34 - bob);
-    ctx.quadraticCurveTo(14, legTop + 16, 8, legTop + 6);
+    ctx.moveTo(-13, legTop - 4);
+    ctx.bezierCurveTo(-36 - sw, -12, 20 + sw, 8 - bob, tipX - 2, tipY);
+    ctx.quadraticCurveTo(tipX, tipY + 3, tipX + 2, tipY);
+    ctx.bezierCurveTo(32 + sw, 7 - bob, -6 - sw, -12, 13, legTop - 4);
     ctx.closePath();
     ctx.fill(); ctx.stroke();
+    /* さきっぽに まるい ふさ */
+    ctx.fillStyle = COL.light;
+    ctx.beginPath(); ctx.ellipse(tipX, tipY, 8, 6, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+  } else if (legId === 'fishtail') {
+    /* ひらいた おびれを ぱたぱた */
+    const sw = Math.sin(t * 5) * (moving ? 8 : 2);
+    ctx.beginPath();
+    ctx.moveTo(-12, legTop - 4);
+    ctx.quadraticCurveTo(-12, 0, sw - 5, 10 - bob);
+    ctx.quadraticCurveTo(-30 + sw, 8 - bob, -30 + sw, 32 - bob);
+    ctx.quadraticCurveTo(-12 + sw, 34 - bob, sw, 22 - bob);
+    ctx.quadraticCurveTo(12 + sw, 34 - bob, 30 + sw, 32 - bob);
+    ctx.quadraticCurveTo(30 + sw, 8 - bob, sw + 5, 10 - bob);
+    ctx.quadraticCurveTo(12, 0, 12, legTop - 4);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = COL.light;
+    for (const d of [-1, 1]) {
+      ctx.beginPath(); ctx.moveTo(sw + d * 5, 16 - bob);
+      ctx.lineTo(sw + d * 22, 28 - bob); ctx.stroke();
+    }
+  } else if (legId === 'fluff') {
+    /* もこもこの ふちと、あかるい さきっぽ */
+    const sw = Math.sin(t * 4) * (moving ? 7 : 2);
+    ctx.beginPath();
+    ctx.moveTo(-10, legTop - 4);
+    ctx.bezierCurveTo(-36, -20, -40 + sw, 6, -28 + sw, 16);
+    ctx.quadraticCurveTo(-38 + sw, 30, -22 + sw, 28);
+    ctx.quadraticCurveTo(-18 + sw, 40 - bob, -8 + sw, 30 - bob);
+    ctx.quadraticCurveTo(8 + sw, 36 - bob, 4 + sw, 22 - bob);
+    ctx.bezierCurveTo(20 + sw, 8, -4, -10, 12, legTop - 4);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = COL.light;
+    ctx.beginPath();
+    ctx.moveTo(-27 + sw, 16); ctx.lineTo(-18 + sw, 20);
+    ctx.lineTo(-12 + sw, 14); ctx.lineTo(-5 + sw, 21);
+    ctx.lineTo(3 + sw, 18);
+    ctx.quadraticCurveTo(8 + sw, 34 - bob, -8 + sw, 29 - bob);
+    ctx.quadraticCurveTo(-21 + sw, 37 - bob, -27 + sw, 16);
+    ctx.closePath(); ctx.fill();
+  } else if (legId === 'snake') {
+    /* ながい どうを くねらせて、じめんを はう */
+    const sw = Math.sin(t * 4) * (moving ? 9 : 2);
+    ctx.beginPath();
+    ctx.moveTo(-14, legTop - 4);
+    ctx.bezierCurveTo(-36 - sw, -6, 25 + sw, 3, 10, 18 - bob);
+    ctx.bezierCurveTo(2, 28 - bob, -24, 15 - bob, -38, 30 - bob);
+    ctx.bezierCurveTo(-12, 38 - bob, 29 + sw, 35 - bob, 28 + sw, 18 - bob);
+    ctx.bezierCurveTo(29 + sw, -2, -6 - sw, -10, 14, legTop - 4);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = COL.light;
+    ctx.beginPath(); ctx.moveTo(-3, -22);
+    ctx.bezierCurveTo(-16 - sw, -1, 25 + sw, 6, 17, 22 - bob);
+    ctx.quadraticCurveTo(8, 31 - bob, -24, 29 - bob); ctx.stroke();
   }
   /* none（ふわふわ）は なにも かかない */
   ctx.restore();
@@ -15515,6 +15573,36 @@ function drawFoeParts(ctx, st, look, motion) {
         ctx.beginPath(); ctx.moveTo(x - 3.4, y); ctx.lineTo(x + 3.4, y); ctx.stroke();
       });
       ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+    } else if (pat === 'star') {
+      /* ほっぺと おなかに ほしを ちりばめる */
+      ctx.fillStyle = COL.light;
+      for (const [cx, cy, size] of [[-23, -21, 8], [22, -23, 7], [-19, 18, 8], [17, 23, 7]]) {
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const ang = -Math.PI / 2 + i * Math.PI / 5;
+          const r = i % 2 === 0 ? size : size * 0.45;
+          const x = cx + Math.cos(ang) * r, y = cy + Math.sin(ang) * r;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath(); ctx.fill();
+      }
+    } else if (pat === 'check') {
+      /* いろちがいの しかくを こうごに ならべる */
+      ctx.fillStyle = COL.light;
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+          if ((row + col) % 2 === 0) ctx.fillRect(-48 + col * 12, -48 + row * 12, 12, 12);
+        }
+      }
+    } else if (pat === 'bolt') {
+      /* かおの よこに ぎざぎざの いなずま */
+      ctx.fillStyle = COL.light;
+      for (const d of [-1, 1]) {
+        ctx.beginPath(); ctx.moveTo(d * 20, -29); ctx.lineTo(d * 31, -29);
+        ctx.lineTo(d * 23, -7); ctx.lineTo(d * 31, -7);
+        ctx.lineTo(d * 15, 26); ctx.lineTo(d * 19, 3); ctx.lineTo(d * 12, 3);
+        ctx.closePath(); ctx.fill();
+      }
     }
     ctx.restore();
   }
@@ -15572,6 +15660,37 @@ function drawFoeParts(ctx, st, look, motion) {
       ctx.beginPath();
       ctx.moveTo(-4, topY + 2);
       ctx.quadraticCurveTo(0, topY - 30, 16, topY - 6);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (horn === 'antler') {
+      /* えだわかれ した、しかの つの */
+      for (const d of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(d * 10, topY + 1); ctx.lineTo(d * 12, topY - 15);
+        ctx.lineTo(d * 8, topY - 27); ctx.lineTo(d * 14, topY - 21);
+        ctx.lineTo(d * 19, topY - 34); ctx.lineTo(d * 20, topY - 19);
+        ctx.lineTo(d * 31, topY - 27); ctx.lineTo(d * 26, topY - 15);
+        ctx.lineTo(d * 18, topY - 10); ctx.lineTo(d * 17, topY + 1);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    } else if (horn === 'halo') {
+      /* あたまの うえに ふわりと うかぶ わっか */
+      const hy = topY - 20 + Math.sin(t * 2) * 2;
+      ctx.fillStyle = '#e8c33a';
+      ctx.beginPath();
+      ctx.ellipse(0, hy, 23, 8, 0, 0, Math.PI * 2);
+      ctx.moveTo(16, hy);
+      ctx.ellipse(0, hy, 16, 3, 0, 0, Math.PI * 2, true);
+      ctx.fill(); ctx.stroke();
+    } else if (horn === 'hair') {
+      /* ふさが みっつ、ぴんと たつ とさか */
+      ctx.fillStyle = COL.light;
+      ctx.beginPath(); ctx.moveTo(-18, topY + 3);
+      ctx.quadraticCurveTo(-26, topY - 12, -16, topY - 24);
+      ctx.lineTo(-7, topY - 9);
+      ctx.quadraticCurveTo(-9, topY - 29, 4, topY - 34);
+      ctx.lineTo(9, topY - 11);
+      ctx.quadraticCurveTo(14, topY - 24, 25, topY - 22);
+      ctx.quadraticCurveTo(17, topY - 7, 20, topY + 3);
       ctx.closePath(); ctx.fill(); ctx.stroke();
     }
   }
@@ -15639,6 +15758,47 @@ function drawFoeParts(ctx, st, look, motion) {
           ctx.stroke();
         }
         ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+      } else if (arm === 'shield') {
+        /* てで もつ、まるい かどの たて */
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(d * 16, 5); ctx.stroke();
+        ctx.fillStyle = COL.dark;
+        ctx.beginPath(); ctx.moveTo(d * 20 - 13, -13);
+        ctx.quadraticCurveTo(d * 20, -19, d * 20 + 13, -13);
+        ctx.lineTo(d * 20 + 12, 8);
+        ctx.quadraticCurveTo(d * 20 + 9, 18, d * 20, 24);
+        ctx.quadraticCurveTo(d * 20 - 9, 18, d * 20 - 12, 8);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = COL.light;
+        ctx.beginPath(); ctx.arc(d * 20, 2, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      } else if (arm === 'wand') {
+        /* ほしの ついた まほうの つえ */
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(d * 20, 8); ctx.stroke();
+        ctx.fillStyle = '#8d6e63';
+        roundRect(ctx, d * 23 - 3, -19, 6, 41, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff59d';
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const ang = -Math.PI / 2 + i * Math.PI / 5;
+          const r = i % 2 === 0 ? 12 : 5.5;
+          const x = d * 23 + Math.cos(ang) * r, y = -25 + Math.sin(ang) * r;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = COL.main;
+        ctx.beginPath(); ctx.arc(d * 21, 9, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      } else if (arm === 'arm4') {
+        /* みぎに ふたつ、ひだりに ふたつの て */
+        for (let i = 0; i < 2; i++) {
+          const y = -10 + i * 20;
+          const ph = Math.sin(t * 5 + i * 2 + d) * (moving ? 4 : 1);
+          ctx.beginPath(); ctx.moveTo(0, y - 4);
+          ctx.quadraticCurveTo(d * 13, y - 5 + ph, d * 24, y + ph);
+          ctx.lineTo(d * 24, y + 7 + ph);
+          ctx.quadraticCurveTo(d * 12, y + 2 + ph, 0, y + 4);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.beginPath(); ctx.arc(d * 25, y + 3 + ph, 6, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+        }
       }
       ctx.restore();
     }
@@ -15690,6 +15850,41 @@ function drawFoeParts(ctx, st, look, motion) {
       ctx.stroke();
     }
     ctx.lineWidth = 2.2;
+  } else if (eye === 'star') {
+    /* きらきらの ほしを ふたつ */
+    ctx.fillStyle = '#fff59d';
+    for (const d of [-1, 1]) {
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const ang = -Math.PI / 2 + i * Math.PI / 5;
+        const r = i % 2 === 0 ? 10 : 4.5;
+        const x = d * 12 + Math.cos(ang) * r, y = eyeY + Math.sin(ang) * r * blink;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+  } else if (eye === 'heart') {
+    /* まるい ふくらみの ハート */
+    ctx.fillStyle = '#ff80ab';
+    for (const d of [-1, 1]) {
+      ctx.save(); ctx.translate(d * 12, eyeY); ctx.scale(1, blink);
+      ctx.beginPath(); ctx.moveTo(0, 9);
+      ctx.bezierCurveTo(-18, -2, -8, -14, 0, -5);
+      ctx.bezierCurveTo(8, -14, 18, -2, 0, 9);
+      ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+    }
+  } else if (eye === 'sleepy') {
+    /* はんぶん とじた めと、おもたい まぶた */
+    for (const d of [-1, 1]) {
+      const x = d * 12;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.ellipse(x, eyeY, 8, 7 * blink, 0, 0, Math.PI);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = INK;
+      ctx.beginPath(); ctx.ellipse(x + 1, eyeY + 2 * blink, 2.5, 3 * blink, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x - 9, eyeY); ctx.lineTo(x + 9, eyeY); ctx.stroke();
+    }
   }
 
   /* ===== くち ===== */
@@ -15722,6 +15917,27 @@ function drawFoeParts(ctx, st, look, motion) {
     ctx.beginPath();
     ctx.moveTo(-12, my - 4); ctx.lineTo(16, my + 1 + 4 * mouthOpen); ctx.lineTo(-12, my + 7);
     ctx.closePath(); ctx.fill(); ctx.stroke();
+  } else if (mo === 'tongue') {
+    /* にっこりした くちから、べろが ぺろり */
+    ctx.fillStyle = '#2b2b2b';
+    ctx.beginPath(); ctx.ellipse(0, my - 2, 12, 5 + mouthOpen * 3, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ff80ab';
+    ctx.beginPath(); ctx.moveTo(-6, my);
+    ctx.lineTo(-6, my + 8 + mouthOpen * 4);
+    ctx.bezierCurveTo(-6, my + 17 + mouthOpen * 4, 8, my + 17 + mouthOpen * 4, 8, my + 8 + mouthOpen * 4);
+    ctx.lineTo(8, my); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(1, my + 2); ctx.lineTo(1, my + 8 + mouthOpen * 3); ctx.stroke();
+  } else if (mo === 'mustache') {
+    /* りょうはしが くるんと した おひげ */
+    ctx.fillStyle = INK;
+    for (const d of [-1, 1]) {
+      ctx.beginPath(); ctx.moveTo(0, my - 2);
+      ctx.bezierCurveTo(d * 9, my - 12, d * 13, my + 7, d * 24, my - 6);
+      ctx.bezierCurveTo(d * 23, my + 12, d * 8, my + 12, 0, my + 3);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(0, my + 6, 5, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
   }
 
   ctx.restore();   // からだ

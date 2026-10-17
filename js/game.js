@@ -59,6 +59,7 @@ const Game = {
     this.active = true;
     this.paused = false;
     this.finished = false;
+    this.pinchDone = false;      // ★しろが ピンチの サイレンを ならしたか
     this.result = null;
     this.time = 0;
 
@@ -1417,6 +1418,12 @@ const Game = {
       if (this.enemyCastle.hp < this.enemyCastle.maxHp) this.enemyCastle.hp = this.enemyCastle.maxHp;
       if (this.playerCastle.hp <= 0) { this.finished = true; this.result = 'lose'; this.finishAt = this.time; }
       return;
+    }
+    /* ★じぶんの しろが あと すこしに なったら、1かい だけ サイレン */
+    if (!this.pinchDone && this.playerCastle.hp > 0 &&
+        this.playerCastle.hp < this.playerCastle.maxHp * 0.3) {
+      this.pinchDone = true;
+      if (typeof Sound !== 'undefined') Sound.se('alarm');
     }
     if (this.enemyCastle.hp <= 0)  { if (typeof Sound !== 'undefined') { Sound.se('castle'); Sound.bgm(null); } this.finished = true; this.result = 'win';  this.finishAt = this.time; }
     else if (this.playerCastle.hp <= 0) { this.finished = true; this.result = 'lose'; this.finishAt = this.time; }
