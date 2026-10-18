@@ -72,6 +72,11 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 
 /* ---- タイトル ---- */
 .title { justify-content: center; gap: 22px; background: repeating-linear-gradient(90deg, #fff6e8 0 30px, #fdebd6 30px 60px); }
+/* iPhone の上下のすきま（ノッチ・ホームバーの所）まで しまを続ける。しまが途中で切れて、下のボタンに線がかかって見えないように */
+@supports selector(:has(a)) {
+  .app:has(> .screen.title) { background: repeating-linear-gradient(90deg, #fff6e8 0 30px, #fdebd6 30px 60px); }
+  .app > .screen.title { background: none; }
+}
 .logo { text-align: center; }
 .logo h1 { font-size: clamp(34px, 10vw, 58px); line-height: 1.1; letter-spacing: 0.04em; text-shadow: 0 4px 0 #fff; }
 .peeks { display: flex; justify-content: center; gap: 4px; margin-bottom: -6px; }

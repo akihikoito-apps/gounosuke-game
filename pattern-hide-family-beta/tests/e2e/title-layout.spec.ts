@@ -45,3 +45,20 @@ for (const size of SIZES) {
     await page.screenshot({ path: `test-results/title-layout/${size.width}x${size.height}.png` });
   });
 }
+
+test('iPhone の上下のすきま（ノッチ・ホームバー）まで しまが続き、下のボタンに線がかからない', async ({ page }) => {
+  await page.setViewportSize({ width: 440, height: 956 });
+  await fresh(page);
+  // Chromium では すきまが 0 なので、iPhone 16 Pro Max と同じ大きさを ふりで入れる
+  await page.addStyleTag({ content: ':root { --safe-t: 62px !important; --safe-b: 34px !important; }' });
+  const bg = await page.evaluate(() => {
+    const app = document.querySelector('.app')!;
+    const title = document.querySelector('.screen.title')!;
+    return { app: getComputedStyle(app).backgroundImage, title: getComputedStyle(title).backgroundImage };
+  });
+  expect(bg.app).toContain('repeating-linear-gradient');
+  expect(bg.title).toBe('none');
+  const foot = await page.locator('.title-foot').boundingBox();
+  expect(foot!.y + foot!.height).toBeLessThanOrEqual(956 - 34);
+  await page.screenshot({ path: 'test-results/title-layout/safe-area.png' });
+});
