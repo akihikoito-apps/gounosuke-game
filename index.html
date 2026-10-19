@@ -451,6 +451,20 @@
         <div class="shop-got" id="shop-got"></div>
         <p class="shop-next" id="shop-next"></p>
         <button class="big-btn" id="btn-shop-talk">ネコスに はなしかける 💬</button>
+
+        <!-- ★けいけんち → Gコイン の こうかん -->
+        <div class="shop-coin">
+          <p class="sc-head">🪙 Gコインの こうかん</p>
+          <p class="sc-have">
+            けいけんち <b id="sc-exp">0</b>　／　Gコイン <b id="sc-coin">0</b>
+          </p>
+          <div class="sc-btns">
+            <button class="sc-btn" id="btn-sc-1">1まい</button>
+            <button class="sc-btn" id="btn-sc-3">3まい（ガチャ 1かいぶん）</button>
+            <button class="sc-btn" id="btn-sc-max">できる だけ</button>
+          </div>
+          <p class="sc-note" id="sc-note"></p>
+        </div>
       </div>
     </div>
   </section>
@@ -810,6 +824,9 @@
     </div>
     <p id="gacha-rates" class="panel-hint"></p>
     <button class="big-btn" id="btn-gacha-pull">ガチャを ひく（3コイン）</button>
+    <button class="mini-btn gacha-shop-btn" id="btn-gacha-shop">
+      Gコインが ほしい ときは → ネコスの店 ☕
+    </button>
   </section>
 
   <!-- ============ バトル画面 ============ -->
@@ -898,6 +915,12 @@
   </div>
 
   <!-- ============ オリジナルの間：ほんとうに けす？ ============ -->
+  <!-- ★ガチャの えんしゅつ（がめん いっぱいに かぶせる）-->
+  <div id="gacha-fx" class="hidden">
+    <canvas id="gacha-fx-canvas"></canvas>
+    <p class="gfx-skip">タップで すすむ</p>
+  </div>
+
   <div id="orig-del" class="modal hidden">
     <div class="modal-box">
       <p class="modal-text" id="orig-del-text">ほんとうに けしますか？</p>
@@ -915,6 +938,7 @@
 <script src="js/data.js"></script>
 <script src="js/bg-photo.js"></script>
 <script src="js/draw.js"></script>
+<script src="js/gacha-fx.js"></script>
 <script src="js/game.js"></script>
 <script src="js/main.js"></script>
 </body>

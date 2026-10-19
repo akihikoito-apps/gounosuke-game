@@ -60,7 +60,7 @@ test('1つだけ とって くる $ に くりかえしを つないで いな�
 });
 
 test('がめんの きりかえ show() は $$ を つかって いる', () => {
-  const m = main.match(/function show\(id\) \{[\s\S]{0,400}?\n  \}/);
+  const m = main.match(/function show\(id\) \{[\s\S]{0,700}?\n  \}/);
   assert.ok(m, 'show() が みつからない');
   assert.ok(m[0].indexOf("$$('.screen')") >= 0,
             "show() が $$('.screen') を つかって いない（がめんが きりかわらなく なります）");

@@ -1,10 +1,10 @@
 # STATUS — ごうのすけゲーム
 
 状態: 🟢 順調
-今やっていること: v6.64 効果音の増量（ボタン・ステージ開始/終了・ピンチ・三番勝負の決着）＋ 敵づくりのしっぽ描き直しとパーツ21個追加（10/17）
-次の一手: 音の量と鳴る場所の感触、しっぽと新パーツの見た目を見てもらう。重い描画は今後も Codex に委譲して Claude 側は仕様書・検証に回す
-ブロッカー: なし（tests/ 6本=100件 ok、jsdom 通しテスト6本 ok）。Antigravity は GUI のみで CLI が無く、Claude Code からは駆動できない（Codex は headless で可）
-最終更新: 2026-10-17（Claude）
+今やっていること: v6.65 ガチャの演出（ガチャポンが落ちてパカーン・レア度で溜め）＋ Gコインの入手経路を4つ追加（10/19）
+次の一手: 演出のテンポとレア演出の派手さ、Gコインのレート（けいけんち1,500＝1まい）が妥当か見てもらう
+ブロッカー: なし（tests/ 7本=119件 ok、jsdom 通しテスト7本 ok）。Antigravity は GUI のみで CLI が無く、Claude Code からは駆動できない（Codex は headless で可）
+最終更新: 2026-10-19（Claude）
 
 <!-- 上の5行は本部（_hq）が読む。行の頭の言葉は変えないこと。詳しいメモはこの下に自由に書いてよい。 -->
 
@@ -26,6 +26,7 @@
 - 全コース描画・ロジックの通しテスト（scratchpad の rt.js）: 130コース・描画 12,574回 エラーなし
 
 ## 本部の作業記録
+- 2026-10-19 Claude: v6.65 (1) ガチャの演出。★新規ファイル `js/gacha-fx.js`（`GachaFX.play(canvas, opts) -> {skip, stop}`）を Codex に委譲★。落下→2回バウンド→震えて発光→パカーンと半球が飛ぶ→キャラが伸び上がる、の時間割（通常 2.3秒／special 3.5秒）。opts で色・星・ラベル・special・drawChar・se・onReveal・onEnd を渡す設計にしたので、main.js 側は結果を先に確定してから `gachaFxPlay(rank, gotId, onReveal, onEnd)` を呼び、onReveal のタイミングで結果ウィンドウを差し替えるだけ。げきレア以上が special（ドラムロール＋光の輪＋紙吹雪）。幕をタップで skip、画面を離れると show() が stop。新 SE は ball / bounce / roll / pakaan。(2) ★Gコインの入手経路を4つに★ — 全ステージをクリアし切ると初回クリア報酬しか無いコインが増えなくなるため、data.js の COINS に集約して ①ネコスの店でけいけんち1,500→1まいの交換（×1／×3＝ガチャ1回ぶん／できるだけ）②ネコスの店で1日1まい ③クリア済みの再クリアで34%で1まい ④1人用ミニゲームのごほうびに1まい（1日1種目1回）を追加。ガチャ画面に店への導線を置き、店の「もどる」は来た画面（shopFrom）に戻す。レートはクリア後の周回でもらえるけいけんち（後半ステージ1周で 3,750〜7,500）を見て「1周でガチャ1回ぶん＝4,500」に合わせた。(3) 検証: tests/gacha.test.js 19件を追加（にせ canvas で演出を最後まで回し、reveal/end が1回ずつ・音の名前が sound.js に実在・special が長い・skip/stop・save/restore 均衡・0サイズや横長でも落ちない、＋結線のソース検査）。scratchpad/gachatest.js で実際にガチャを引いて「幕が出る→コイン-3→ドキドキ…→2.3秒後に結果と星」「タップで0.9秒に短縮」「店で4,500→3まい」「1日1まいは2回目は出ない」まで実測。
 - 2026-10-17 Claude: v6.64 (1) 効果音を増量。sound.js に start（ステージ開始のホイッスル）/ clear（クリア、win より長い）/ champion（三番勝負の優勝、ドラムロール→ファンファーレ）/ tie（引き分け）/ alarm（自陣の城が3割以下で1回）/ count / open を追加。(2) ★ボタンのタップ音を自動化★ — installTapSound() が click をキャプチャ段で Sound.count を記録し、バブル段で変化していなければ tap（文言が「もどる/とじる/やめる」等なら back）を鳴らす。自前で音を出すボタンは二重に鳴らない。この仕組みのため Sound に count を公開した。(3) 敵づくりの「しっぽ」を根元が太く先が細いベジェ＋先端のふさに描き直し、パーツを21個追加（あし3/て3/つの3/め3/くち2/もよう3/いろ4）。★描画分は Codex に委譲（仕様書 scratchpad/brief-parts.md、触ってよいのは data.js の FOE_PARTS と draw.js の drawFoeParts だけ）★。検証: tests/original.test.js に「パーツを1つずつ全部描いて、ありえない id のときと描画回数が違う（＝本当に絵になっている）」テストを追加、tests/sound.test.js に効果音テーブル全32種が鳴る/節々の呼び出しがある/タップ音の仕掛けがあるテストを追加。jsdom の taptest.js で「静かなボタンを押すとちょうど1回」「自前で音を出すボタンでも1回まで」「ボタン以外では鳴らない」を実測。
 - 2026-10-17 Claude: v6.63 (1) 敵の「きほんの かたち」= 体型を追加。FOE_BASE（blob/human/beast/fish/dino/bug）と FOE_BODY_SIZE（0.6〜1.8）を data.js に、drawFoeFrame(ctx, base, t, moving, pose, COL, INK) -> {hx,hy,hr} を draw.js に追加。drawFoeParts は base!=='blob' のとき drawFoeFrame で骨格を描き、返ってきた (hx,hy,hr) に「からだ」の形を頭として縮めて描く。その場合 arm/leg パーツは描かずUIでも隠す。(2) ステージの出かたに repeat/times。engine 側は wave.fired を数えて times で done。(3) ★drawFoeFrame の165行は Codex に委譲（仕様書は scratchpad/brief-frame.md）。既存行の変更0・append のみを条件にし、こちらで全組み合わせ描画・save/restore 均衡・返り値の妥当性を検証してから採用した。Antigravity は CLI が無いため駆動不可。
 - 2026-10-17 Claude: v6.62 iPad で戦闘中に下部 HUD が上にずれ、下に黒い帯が出る不具合を修正。原因は #hud-bottom の高さではなく、**ドキュメント自体のスクロール**。v6.57 以降に追加したテキスト入力（名前入力・各メーカー）にフォーカスすると iOS がページごとスクロールし、キーボードを閉じても戻らないことがある。対策：(1) resetScroll() を show() と window の scroll / focusout / visualViewport に仕込んで常に 0 へ戻す、(2) typingNow() 中は relayout() を打ち切り（キーボードで狭くなった高さで --ui / --hud-h を確定させない）、(3) startBattle で applyUiScale + applyUnitLayout を必ず実行、(4) 入力の font-size を max(16px, …) にして iOS の自動ズームを防止。検証は scratchpad/scrolltest.js（scrollY と innerHeight を差し替えて iPad の挙動を再現。仲間10体＝2段でも --hud-h は 241px＝画面の29%に収まることも確認）。

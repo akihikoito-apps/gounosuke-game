@@ -211,6 +211,25 @@ const Sound = (function () {
                     },
     /* カウントダウン：3・2・1 の ひとつぶん */
     count:    () => tone({ freq: 'A4', dur: 0.1, vol: 0.2, type: 'square' }),
+    /* ---- ★ガチャの えんしゅつ ---- */
+
+    /* ガチャポンの ボールが おちて きて、コンと あたる */
+    ball:     () => { tone({ freq: 'A5', to: 'C4', dur: 0.18, vol: 0.18, type: 'triangle' });
+                      noise({ freq: 900, to: 260, dur: 0.1, vol: 0.2, filter: 'lowpass', delay: 0.16 });
+                      tone({ freq: 'G4', dur: 0.08, vol: 0.16, type: 'square', delay: 0.16 }); },
+    /* ころんと はねる */
+    bounce:   () => { noise({ freq: 1100, to: 400, dur: 0.07, vol: 0.14, filter: 'lowpass' });
+                      tone({ freq: 'D5', dur: 0.06, vol: 0.13, type: 'triangle' }); },
+    /* ドラムロール（なにか すごいものが でる まえ）*/
+    roll:     () => { for (let i = 0; i < 16; i++)
+                        noise({ freq: 420, to: 260, dur: 0.05,
+                                vol: 0.05 + i * 0.009, filter: 'lowpass', delay: i * 0.05 }); },
+    /* パカーン！と ふたが あく */
+    pakaan:   () => { noise({ freq: 3000, to: 700, dur: 0.22, vol: 0.26 });
+                      ['C6', 'E6', 'G6', 'C7'].forEach((n, i) =>
+                        tone({ freq: n, dur: 0.1, vol: 0.2, delay: i * 0.035, type: 'square' }));
+                      tone({ freq: 'C4', to: 'C5', dur: 0.25, vol: 0.14, type: 'sawtooth' }); },
+
     /* がめんが ひらく */
     open:     () => { tone({ freq: 'D5', to: 'A5', dur: 0.1, vol: 0.14, type: 'triangle' });
                       noise({ freq: 2600, to: 1200, dur: 0.12, vol: 0.06 }); },

@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.64';
+  const GAME_VERSION = '6.65';
 
 
   /* =================================================
@@ -505,6 +505,8 @@
      がめんの きりかえ
      ================================================= */
   function show(id) {
+    /* ★ガチャの えんしゅつは、がめんを かえる ときに とめます */
+    if (id !== 'screen-gacha') gachaFxStop();
     /* ★がめんを かえる ときは キーボードを とじて、ずれも なおす */
     blurInput();
     resetScroll();
@@ -1503,7 +1505,7 @@
         '<span class="mn-label">' +
           (open ? (info.name || ('だい' + ch + 'ステージ'))
                 : (shop ? '？？？' : ('だい' + ch + 'ステージ'))) + '</span>';
-      if (open && shop) el.addEventListener('click', openShop);
+      if (open && shop) el.addEventListener('click', () => openShop('screen-chapter'));
       else if (open)    el.addEventListener('click', () => { currentChapter = ch; buildStageList(); show('screen-stage'); });
       else              el.addEventListener('click', () => toast('まえの ステージを ぜんぶ クリアしてね'));
       box.appendChild(el);
@@ -3652,9 +3654,118 @@
     requestAnimationFrame(buildDex);
   }
 
+  /* =====================================================================
+     ★Gコインの てにいれかた（v6.65）
+
+     ステージの しょかいクリアだけ だと、ぜんぶ クリアした あとに
+     Gコインが ふえなく なって しまいます。そこで
+       ① ネコスの店で けいけんち → Gコイン の こうかん
+       ② ネコスの店で 1日に 1まい
+       ③ クリアずみの ステージを もういちど クリアすると ときどき 1まい
+       ④ ひとりようの ミニゲームの ごほうびに 1まい
+     の 4つを ふやしました。すうじは data.js の COINS に まとめて あります。
+     ===================================================================== */
+  const COINCFG = () => (typeof COINS !== 'undefined') ? COINS
+    : { exp: 1500, daily: 1, backRate: 0.34, back: 1, mini: 1, maxBuy: 99 };
+
+  /* いまの けいけんちで なんまい こうかん できるか */
+  function coinBuyMax(s) {
+    if (!s) return 0;
+    const e = COINCFG().exp;
+    return (e > 0) ? Math.floor((s.exp || 0) / e) : 0;
+  }
+  function addCoins(n) {
+    const s = slot();
+    if (!s || !n) return 0;
+    s.coins = Math.max(0, (s.coins || 0) + n);
+    return n;
+  }
+
+  /* ネコスの店の こうかんの ひょうじ */
+  function refreshShopCoin() {
+    const s = slot();
+    if (!s || !$('#sc-exp')) return;
+    const C = COINCFG();
+    const can = Math.min(coinBuyMax(s), C.maxBuy);
+    $('#sc-exp').textContent  = Math.floor(s.exp || 0);
+    $('#sc-coin').textContent = Math.floor(s.coins || 0);
+    const b1 = $('#btn-sc-1'), b3 = $('#btn-sc-3'), bm = $('#btn-sc-max');
+    const cost = GACHA.cost;
+    if (b1) { b1.textContent = '1まい（' + C.exp + '）';            b1.disabled = can < 1; }
+    if (b3) { b3.textContent = cost + 'まい（' + (C.exp * cost) + '）＝ガチャ 1かいぶん';
+              b3.disabled = can < cost; }
+    if (bm) { bm.textContent = 'できる だけ（' + can + 'まい）';    bm.disabled = can < 1; }
+    const note = $('#sc-note');
+    if (note) note.textContent = (can > 0)
+      ? 'けいけんち ' + C.exp + ' で Gコイン 1まい。いまなら ' + can + 'まい（ガチャ ' +
+        Math.floor(can / cost) + 'かいぶん）に できるよ。'
+      : 'けいけんち ' + C.exp + ' で Gコイン 1まい。クリアした ステージを もういちど クリアしても けいけんちは もらえるよ。';
+  }
+
+  /* けいけんち → Gコイン */
+  function buyCoins(n) {
+    const s = slot();
+    if (!s) return;
+    const C = COINCFG();
+    const k = Math.min(n, coinBuyMax(s), C.maxBuy);
+    if (k <= 0) {
+      if (typeof Sound !== 'undefined') Sound.se('deny');
+      shopSay('おっと、けいけんちが たりない みたいだ。　ステージを もういちど クリアすると けいけんちが たまるよ。', []);
+      refreshShopCoin();
+      return;
+    }
+    s.exp -= k * C.exp;
+    addCoins(k);
+    storeSave();
+    if (typeof Sound !== 'undefined') Sound.se('coin');
+    shopSay('はいよ、Gコイン ' + k + 'まい だね！　けいけんち ' + (k * C.exp) +
+            ' を あずかって おくよ。　いい なかまが でると いいね！', []);
+    refreshShopCoin();
+  }
+
   /* =================================================
      ガチャ
      ================================================= */
+  /* いろを 白に ちかづけた あかるい いろ（えんしゅつの ひかり用）*/
+  function lightOf(hex) {
+    const m = /^#([0-9a-f]{6})$/i.exec(String(hex || ''));
+    if (!m) return '#ffffff';
+    const v = parseInt(m[1], 16);
+    const mix = (c) => Math.round(c + (255 - c) * 0.55);
+    const r = mix((v >> 16) & 255), g = mix((v >> 8) & 255), b = mix(v & 255);
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  /* ★ガチャポンの えんしゅつ。おわったら onEnd を よびます */
+  let gachaFxHandle = null;
+  function gachaFxStop() {
+    if (gachaFxHandle) { try { gachaFxHandle.stop(); } catch (e) {} gachaFxHandle = null; }
+    const wrap = $('#gacha-fx');
+    if (wrap) wrap.classList.add('hidden');
+  }
+  function gachaFxPlay(rank, charId, onReveal, onEnd) {
+    const wrap = $('#gacha-fx'), cv = $('#gacha-fx-canvas');
+    const info = (typeof RARITY !== 'undefined' && RARITY[rank]) ? RARITY[rank] : { color: '#90caf9', star: '★', label: '' };
+    if (!wrap || !cv || typeof GachaFX === 'undefined') { onReveal(); onEnd(); return; }
+    /* ★げきレア いじょうは「ただごとでは ない」えんしゅつ */
+    const special = ['GR', 'SR', 'LR'].indexOf(rank) >= 0;
+    const drawFn = charId ? DRAWERS[shownDrawId(charId)] : null;
+    wrap.classList.remove('hidden');
+    gachaFxHandle = GachaFX.play(cv, {
+      color: info.color, color2: lightOf(info.color),
+      star: info.star, label: info.label, special: special,
+      drawChar: drawFn ? (ctx, h) => {
+        const sc = h / 88;                 // キャラの えは たかさ 88 で かかれて います
+        ctx.save(); ctx.scale(sc, sc);
+        drawFn(ctx, { t: 0.7, moving: false, atk: -1, hpRatio: 1, roll: 0.35 });
+        ctx.restore();
+      } : null,
+      se: (n) => { if (typeof Sound !== 'undefined') Sound.se(n); },
+      onReveal: onReveal,
+      onEnd: () => { gachaFxHandle = null; wrap.classList.add('hidden'); onEnd(); },
+    });
+  }
+
   function openGacha() {
     resetGachaWindow();          // まえの けっかを けす
     refreshGacha();
@@ -3694,8 +3805,13 @@
   }
 
   function pullGacha() {
+    if (gachaFxHandle) return;          // えんしゅつの あいだは おせません
     const s = slot();
-    if (!s || (s.coins || 0) < GACHA.cost) { toast('Gコインが たりません'); return; }
+    if (!s || (s.coins || 0) < GACHA.cost) {
+      toast('Gコインが たりません');
+      if (typeof Sound !== 'undefined') Sound.se('deny');
+      return;
+    }
     s.coins -= GACHA.cost;
 
     /* --- レアリティを ちゅうせん --- */
@@ -3708,6 +3824,7 @@
     /* --- その レアリティの キャラから 1たい --- */
     const pool = ALL_CHARS.filter(id => UNITS[id] && UNITS[id].rarity === rank);
     let html = '';
+    let gotId = null;        // ★えんしゅつで みせる キャラ
 
     if (pool.length === 0) {
       /* まだ キャラが いない レアリティ（でんせつレア）*/
@@ -3716,6 +3833,7 @@
              info.label + '<span class="gacha-new">まだ とうじょう して いません！<br>けいけんち +' + GACHA.emptyExp + '</span>';
     } else {
       const id = pool[Math.floor(Math.random() * pool.length)];
+      gotId = id;
       const def = UNITS[id];
       const has = s.owned.indexOf(id) >= 0;
 
@@ -3748,14 +3866,23 @@
     storeSave();
     applyParty();
 
+    /* ★けっかは さきに きまって いますが、
+         ガチャポンが おちて → パカーンと あいて から まどに だします。*/
     const win = $('#gacha-window');
-    $('#gacha-result').innerHTML = html;
-    const cv = $('#gacha-result').querySelector('canvas');
-    if (cv) requestAnimationFrame(() => paintChar(cv, cv.dataset ? cv.dataset.char : null));
-    win.classList.remove('pop');
-    void win.offsetWidth;
-    win.classList.add('pop');
-    refreshGacha();
+    const btn = $('#btn-gacha-pull');
+    if (btn) btn.disabled = true;
+    $('#gacha-result').innerHTML = 'ドキドキ…';
+    gachaFxPlay(rank, gotId, () => {
+      /* キャラが でた しゅんかん */
+      $('#gacha-result').innerHTML = html;
+      const cv = $('#gacha-result').querySelector('canvas');
+      if (cv) requestAnimationFrame(() => paintChar(cv, cv.dataset ? cv.dataset.char : null));
+      win.classList.remove('pop');
+      void win.offsetWidth;
+      win.classList.add('pop');
+    }, () => {
+      refreshGacha();
+    });
   }
 
 
@@ -7009,7 +7136,12 @@
   }
   function nekosLeftText() { return nextDayText(); }
 
-  function openShop() {
+  let shopFrom = 'screen-chapter';     // 「もどる」で どこへ かえるか
+  function openShopFromGacha() { openShop('screen-gacha'); }
+
+  function openShop(from) {
+    shopFrom = from || 'screen-chapter';
+    refreshShopCoin();
     shopSay(nekosReady()
       ? 'いらっしゃい！　ぼくは ネコス。あの たつまきから にげのびた にんげんさ。　はなしかけて くれたら、ひろって おいた そざいを わけて あげるよ。'
       : 'やあ、また きて くれたんだね。きょうの そざいは わたしちゃった けど、はなしなら いくらでも するよ。', []);
@@ -7077,10 +7209,16 @@
       count[id] = (count[id] || 0) + 1;
     }
     n.at = Date.now();
+    /* ★きょうの Gコインも いっしょに（v6.65）*/
+    const coin = COINCFG().daily || 0;
+    if (coin) addCoins(coin);
     storeSave();
     const got = MATERIAL_ORDER.filter(id => count[id]).map(id => ({ id: id, n: count[id] }));
-    shopSay('はい どうぞ！　きょうの ぶんの そざい 5こ だよ。　また あした おいでね。', got);
+    shopSay('はい どうぞ！　きょうの ぶんの そざい 5こ' +
+            (coin ? 'と、Gコイン ' + coin + 'まい' : '') +
+            ' だよ。　また あした おいでね。', got);
     refreshShopBtn();
+    refreshShopCoin();
     drawShop();
   }
 
@@ -7358,6 +7496,9 @@
       const id = MATERIAL_ORDER[Math.floor(Math.random() * MATERIAL_ORDER.length)];
       addMat(id, 1); count[id] = (count[id] || 0) + 1;
     }
+    /* ★ごほうびに Gコインも（1日 1しゅもく 1まい・v6.65）*/
+    const coin = COINCFG().mini || 0;
+    if (coin) { addCoins(coin); count.gcoin = coin; }
     miniMarkGot(key);
     storeSave();
     return count;
@@ -7365,6 +7506,12 @@
   function miniShowGot(box, count) {
     if (!box) return;
     box.innerHTML = '';
+    /* ★Gコインは いちばん さいしょに みせます */
+    if (count && count.gcoin) {
+      const c = document.createElement('span');
+      c.textContent = '🪙Gコイン ×' + count.gcoin;
+      box.appendChild(c);
+    }
     MATERIAL_ORDER.filter(id => count[id]).forEach(id => {
       const el = document.createElement('span');
       el.textContent = MATERIALS[id].icon + MATERIALS[id].name + ' ×' + count[id];
@@ -10960,15 +11107,21 @@
       const r = Game.stage.reward || { coins: 1, exp: 100 };
       const s = slot();
       const first = !!(s && !s.cleared[Game.stage.no]);   // はじめての クリアか
+      let backCoin = 0;      // ★2かいめ いこうの おまけの Gコイン
       if (s) {
         if (first) s.coins = (s.coins || 0) + r.coins;    // Gコインは しょかいだけ
+        /* ★クリアずみを もういちど クリアすると ときどき Gコインが でます */
+        else if (Math.random() < (COINCFG().backRate || 0)) {
+          backCoin = COINCFG().back || 1;
+          addCoins(backCoin);
+        }
         /* ★けいけんちは まいかい もらえるが、2かいめ いこうは すくない */
         s.exp = (s.exp || 0) + gainExp(r.exp, first);
       }
       $('#result-sub').textContent += first
         ? '　／　Gコイン +' + r.coins + '　けいけんち +' + r.exp
-        : '　／　けいけんち +' + gainExp(r.exp, false)
-          + '（2かいめ いこうは すくなめ・Gコインは しょかいだけ）';
+        : '　／　けいけんち +' + gainExp(r.exp, false) + '（2かいめ いこうは すくなめ）'
+          + (backCoin ? '　／　★Gコイン +' + backCoin + '！' : '');
       /* ★そざいの ドロップ（3しゅるい それぞれ 30%）*/
       const drops = rollDrops(Game.stage);
       if (drops.length) {
@@ -11280,7 +11433,18 @@
     $('#btn-duel-act').addEventListener('click', duelAct);
     $('#btn-attr-back').addEventListener('click', openHome);
     $('#btn-movie-back').addEventListener('click', openHome);
-    $('#btn-shop-back').addEventListener('click', () => { show('screen-chapter'); redrawMap(); });
+    $('#btn-shop-back').addEventListener('click', () => {
+      if (shopFrom === 'screen-gacha') { openGacha(); return; }
+      show('screen-chapter'); redrawMap();
+    });
+    $('#btn-gacha-shop').addEventListener('click', openShopFromGacha);
+    $('#btn-sc-1').addEventListener('click', () => buyCoins(1));
+    $('#btn-sc-3').addEventListener('click', () => buyCoins(GACHA.cost));
+    $('#btn-sc-max').addEventListener('click', () => buyCoins(COINCFG().maxBuy));
+    /* えんしゅつを タップしたら さきへ すすむ */
+    $('#gacha-fx').addEventListener('click', () => {
+      if (gachaFxHandle) { try { gachaFxHandle.skip(); } catch (e) {} }
+    });
     $('#btn-shop-talk').addEventListener('click', nekosTalk);
     $('#btn-shop-nekos').addEventListener('click', nekosTalk);
     $('#btn-dex-back').addEventListener('click', () => {
