@@ -254,26 +254,57 @@ test('5ステージ ぜんぶ、さいごまで うごかしても エラーに 
   });
 });
 
-test('むずかしさ：なかまを だす だけでは すぐに クリアできない', () => {
-  /* レア いかの なかまを レベル20で だしつづけても、
-     さいしゅうステージが 60びょう いないに おわらない こと      */
-  const last = courseOf(705);
+/* ★つよさの めやす：レア いかの なかまを「さいしゅう形態・レベル35」に して、
+     だせる ものを どんどん だす（じょうずな あそびかた）で たたかいます。    */
+function fightSmart(course, sec, lv) {
   const c = load(), G = c.Game;
-  const party = Object.keys(c.UNITS)
-    .filter(id => ['N', 'R'].indexOf(c.UNITS[id].rarity) >= 0).slice(0, 10);
-  G.levels = {}; G.evolved = {};
-  party.forEach(id => { G.levels[id] = 20; });
-  G.start(last);
+  const pool = Object.keys(c.UNITS).filter(id => ['N', 'R'].indexOf(c.UNITS[id].rarity) >= 0);
+  const strength = (id) => {
+    const u = c.UNITS[id], d = (u.evolve2 || u.evolve || u);
+    return (d.atk || u.atk || 0) / Math.max(0.3, (d.attackInterval || u.attackInterval || 1))
+         + (d.hp || u.hp || 0) / 12;
+  };
+  const party = pool.sort((a, b) => strength(b) - strength(a)).slice(0, 10);
+  G.levels = {}; G.evolved = {}; G.evolved2 = {};
+  party.forEach(id => {
+    G.levels[id] = lv;
+    if (c.UNITS[id].evolve)  G.evolved[id] = true;
+    if (c.UNITS[id].evolve2) G.evolved2[id] = true;
+  });
+  G.start(course);
   G.canvas = { width: 800, height: 400, clientWidth: 800, clientHeight: 400 };
   G.ctx = mkctx();
-  let t = 0;
-  while (t < 60 && !G.finished) {
-    party.forEach(id => G.summon(id));     // おかねが あれば でる
-    G.update(1 / 30);
-    t += 1 / 30;
+  let t = 0; const dt = 1 / 30;
+  let bossLow = 1;
+  while (t < sec && !G.finished) {
+    party.forEach(id => G.summon(id));
+    if (G.walletCost !== null && G.money >= G.walletCost + 150) G.upgradeWallet();
+    if (G.chudonReady) G.fireChudon();
+    G.update(dt);
+    t += dt;
+    const b = G.units.find(u => u.side === 'enemy' && u.def.id === 'akuma');
+    if (b) bossLow = Math.min(bossLow, b.hp / b.maxHp);
   }
-  assert.ok(!(G.finished && G.result === 'win'),
-    '60びょうで クリアできて しまう（かんたんすぎ）');
+  return { win: G.finished && G.result === 'win', sec: t, bossLow: bossLow };
+}
+
+test('★レベル35・さいしゅう形態でも、さいしゅうステージは すぐには クリアできない', () => {
+  const r = fightSmart(courseOf(705), 90, 35);
+  assert.ok(!r.win, '90びょうで クリアできて しまう（かんたんすぎ）');
+});
+
+test('★それでも、さいしゅうステージの ボスは ちゃんと たおせる（むりゲーでは ない）', () => {
+  const r = fightSmart(courseOf(705), 300, 35);
+  assert.ok(r.bossLow < 0.4,
+    'ボスを ' + Math.round(r.bossLow * 100) + '%までしか けずれない（かてない しあいに なって いる）');
+});
+
+test('★1〜3ステージは レベル35なら クリアできる（すすめなく ならない）', () => {
+  [701, 702, 703].forEach(no => {
+    const r = fightSmart(courseOf(no), 300, 35);
+    assert.ok(r.win, no + ' が 300びょうでも クリアできない');
+    assert.ok(r.sec > 40, no + ' が ' + r.sec.toFixed(0) + 'びょうで おわる（あっけない）');
+  });
 });
 
 console.log('\n' + passed + ' ok / ' + failed + ' NG');

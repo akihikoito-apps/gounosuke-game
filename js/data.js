@@ -3716,7 +3716,7 @@ const ENEMIES = {
     kbImmune: true, stunImmune: true, slowImmune: true,
     resist: { attrs: ['ghost', 'magic'], mult: 0.5 },
     /* ★まわりの ざこが あくまを まもる */
-    escort: { id: ['tatemori', 'koakuma', 'komorin'], count: 2, interval: 9, first: 4 },
+    escort: { id: ['tatemori', 'koakuma', 'komorin'], count: 2, interval: 14, first: 8 },
     money: 3200,
     isBoss: true,
   },
@@ -8534,7 +8534,7 @@ const UNDERGROUND = {
 const AKUMA_FORT = {
   name: '特設・あくまの とりで',
   icon: '😈',
-  desc: '★レア いかの なかま だけ★で いどむ とりで。おくに ゆみを もつ あくま！',
+  desc: '★レア いかの なかま だけ★で いどむ とりで。おくに ゆみを もつ あくま！　めやすは さいしゅう形態・レベル35。',
   floors: 5,
   world: 'storm',
   unit: 'ステージ',
@@ -8576,7 +8576,7 @@ const AKUMA_FORT = {
       waves: [
         { at: 3,  id: 'tatemori', count: 1 },
         { at: 12, id: 'koakuma',  count: 3, gap: 0.7 },
-        { at: 24, id: 'tatemori', count: 1, repeat: 20, times: 6 },
+        { at: 24, id: 'tatemori', count: 1, repeat: 20, times: 4 },
         { at: 32, id: 'koakuma',  count: 4, gap: 0.6, repeat: 13, times: 9 },
         { at: 56, id: 'komorin',  count: 3, gap: 0.8, repeat: 18, times: 6 },
       ],
@@ -8589,7 +8589,7 @@ const AKUMA_FORT = {
       desc: '★うしろから とどく ながい やり。ちかづく まえに やられない ように。',
       bg: 'rock',
       castleHp: 3600,
-      power: 1.7,
+      power: 1.8,
       allowRarity: ['N', 'R'],
       drops: ['iron', 'alumi', 'cloth'],
       reward: { coins: 10, exp: 13000 },
@@ -8599,6 +8599,7 @@ const AKUMA_FORT = {
         { at: 22, id: 'tatemori', count: 1, repeat: 24, times: 5 },
         { at: 30, id: 'yarioni',  count: 1, repeat: 15, times: 8 },
         { at: 44, id: 'koakuma',  count: 4, gap: 0.6, repeat: 12, times: 10 },
+        { at: 58, id: 'gargon',   count: 1, repeat: 30, times: 3 },
       ],
     },
 
@@ -8630,7 +8631,11 @@ const AKUMA_FORT = {
       desc: '★さいしゅう★ 10びょうごに ゆみを もつ「あくま」が とうじょう！まわりの てきが あくまを まもる。',
       bg: 'boss',
       castleHp: 4600,
+      /* ★ざこは 1.9ばい、ボス（LR）だけ 1.0ばい。
+           ボスまで つよく すると、レア いかの なかまでは
+           ぜったいに とどかない しあいに なって しまいます。   */
       power: 1.9,
+      powerBy: { N: 1.9, R: 1.9, GR: 1.9, LR: 1.0 },
       allowRarity: ['N', 'R'],
       drops: ['alumi', 'glue', 'iron'],
       reward: { coins: 50, exp: 24000 },
@@ -8641,10 +8646,11 @@ const AKUMA_FORT = {
         { at: 6,  id: 'tatemori', count: 1 },
         /* ★10びょうごに 大ボス。それまで しろは 60%より したに へりません */
         { at: 10, id: 'akuma',    count: 1, hold: 0.6 },
-        { at: 20, id: 'komorin',  count: 3, gap: 0.7, repeat: 13, times: 12 },
-        { at: 30, id: 'yarioni',  count: 2, gap: 1.8, repeat: 16, times: 10 },
-        { at: 46, id: 'tatemori', count: 1, repeat: 20, times: 8 },
-        { at: 58, id: 'gargon',   count: 1, repeat: 28, times: 6 },
+        /* ★ここからは「ボスを たおす」しあい。ざこを だしすぎると
+             ボスに たどりつけない ので、かずは ひかえめに。        */
+        { at: 30, id: 'komorin',  count: 2, gap: 0.9, repeat: 30, times: 4 },
+        { at: 50, id: 'yarioni',  count: 1, repeat: 35, times: 3 },
+        { at: 80, id: 'gargon',   count: 1, repeat: 45, times: 2 },
       ],
     },
 
@@ -8803,6 +8809,17 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.68', date: '2026-10-20',
+    title: 'あくまの とりでの つよさを ちょうせい（さいしゅう形態・レベル35 まえてい）',
+    items: [
+      '★「さいしゅう形態・レベル35の なかま」を めやすに して、5ステージの つよさを はかりなおしました。★',
+      '★さいしゅうステージが「ぜったいに かてない」しあいに なって いた のを なおしました。★ あくまが まもりの てきを よぶ ペースが はやすぎて（9びょうごと）、まもりが たまりすぎて ★あくまに たどりつけませんでした★。14びょうごとに して、まわりの ざこの かずも へらしました。',
+      'あくま じしんの つよさも なおしました。ざこは 1.9ばいの まま、★ボスだけ 1.0ばい★ に して、ながい しょうぶに なるけれど ちゃんと たおせる ように しました。',
+      '3ステージめが 2ステージめより やさしく なって いた ので、つよさを あげて ガーゴンを くわえました。2ステージめの たてもりは すこし へらしました。',
+      'めやす（じょうずに あそんだ ばあい）：1ステージめ 60〜75びょう、2・3ステージめ 90〜120びょう、4ステージめ 200びょう、★さいしゅう 200〜290びょう★。レベル25くらいだと さいしゅうステージは まだ とどきません。',
+    ],
+  },
   {
     ver: '6.67', date: '2026-10-20',
     title: '★特設・あくまの とりで（5ステージ）★ ＋ ガチャの テンポを はやく',
