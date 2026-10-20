@@ -489,16 +489,6 @@
       <div class="room-tray lab-tray" id="lab-tray"></div>
 
       <!-- そうびを えらぶ -->
-      <div id="gear-modal" class="modal hidden">
-        <div class="modal-box store-box">
-          <p class="modal-text" id="gear-ask">そうびを えらんでね</p>
-          <div class="store-grid gear-grid" id="gear-grid"></div>
-          <div class="modal-btns">
-            <button id="btn-gear-close" class="modal-btn keep">とじる</button>
-          </div>
-        </div>
-      </div>
-
       <!-- 「ほんとうに かいはつする？」の かくにん -->
       <div id="dev-modal" class="modal hidden">
         <div class="modal-box">
@@ -755,12 +745,36 @@
   <section id="screen-party" class="screen">
     <div class="panel-head">
       <h2 class="sub-title">キャラクター へんせい</h2>
+      <button class="mini-btn" id="btn-party-status">🎽 そうび</button>
       <button class="mini-btn" id="btn-party-back">もどる</button>
     </div>
     <p class="panel-hint" id="party-hint">わくを タップして、したの キャラを えらぶと セットできます</p>
     <div id="party-slots"></div>
     <p class="panel-sub">もっている キャラ</p>
     <div id="party-pool"></div>
+  </section>
+
+  <!-- ============ ステータス と そうび ============ -->
+  <section id="screen-status" class="screen">
+    <div class="panel-head">
+      <h2 class="sub-title">ステータス と そうび</h2>
+      <button class="mini-btn" id="btn-status-back">もどる</button>
+    </div>
+    <div class="st-wrap">
+      <div class="st-left">
+        <div class="st-namebar">
+          <button class="st-change" id="btn-status-change">へんこう</button>
+          <span class="st-name" id="status-name">キャラ</span>
+        </div>
+        <div class="st-pic"><canvas id="status-canvas"></canvas></div>
+        <div class="st-stats" id="status-stats"></div>
+      </div>
+      <div class="st-right">
+        <p class="st-eq-title">そうび</p>
+        <div class="st-slots" id="status-slots"></div>
+        <p class="st-note" id="status-note"></p>
+      </div>
+    </div>
   </section>
 
   <!-- ============ ずかん ============ -->
@@ -932,6 +946,28 @@
   <div id="gacha-fx" class="hidden">
     <canvas id="gacha-fx-canvas"></canvas>
     <p class="gfx-skip">タップで すすむ</p>
+  </div>
+
+  <!-- ★そうびを えらぶ まど（ステータスの がめんから つかいます）-->
+  <div id="gear-modal" class="modal hidden">
+    <div class="modal-box store-box">
+      <p class="modal-text" id="gear-ask">そうびを えらんでね</p>
+      <div class="store-grid gear-grid" id="gear-grid"></div>
+      <div class="modal-btns">
+        <button id="btn-gear-close" class="modal-btn keep">とじる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ★だれの ステータスを みるか えらぶ まど -->
+  <div id="char-modal" class="modal hidden">
+    <div class="modal-box store-box">
+      <p class="modal-text">だれの ステータスを みますか？</p>
+      <div class="store-grid char-grid" id="char-grid"></div>
+      <div class="modal-btns">
+        <button id="btn-char-close" class="modal-btn keep">とじる</button>
+      </div>
+    </div>
   </div>
 
   <div id="orig-del" class="modal hidden">

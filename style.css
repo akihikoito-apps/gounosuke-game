@@ -2205,3 +2205,87 @@ body.dragging-slot #party-slots { touch-action:none; }
 .gm-box .big-btn{
   flex:0 0 auto; margin-top:calc(8px * var(--ui)); width:100%;
 }
+
+/* =====================================================================
+   ★ステータス と そうび（からだ・あし・ぶき の 3かしょ）
+   ===================================================================== */
+#screen-status{
+  background:linear-gradient(180deg,#1e3c5a,#0d1b2a);
+  justify-content:flex-start; overflow-y:auto;
+  padding:calc(10px * var(--ui) + var(--safe-top)) calc(10px * var(--ui)) calc(20px * var(--ui));
+  gap:calc(8px * var(--ui));
+}
+.st-wrap{
+  display:flex; gap:calc(8px * var(--ui)); width:100%;
+  align-items:flex-start;
+}
+.st-left{ flex:1 1 60%; min-width:0; display:flex; flex-direction:column; gap:calc(8px * var(--ui)); }
+.st-right{
+  flex:0 0 calc(116px * var(--ui));
+  background:#f6c445; border-radius:calc(16px * var(--ui));
+  padding:calc(8px * var(--ui)) calc(7px * var(--ui));
+  display:flex; flex-direction:column; gap:calc(7px * var(--ui));
+}
+.st-namebar{
+  display:flex; align-items:center; gap:calc(8px * var(--ui));
+  background:#b9bec4; border-radius:calc(14px * var(--ui));
+  padding:calc(7px * var(--ui)) calc(9px * var(--ui));
+}
+.st-change{
+  flex:0 0 auto; background:#a5e8cf; border:2px solid #1b2733;
+  border-radius:999px; font-family:inherit; font-weight:bold; color:#14323f;
+  font-size:calc(12px * var(--ui));
+  padding:calc(6px * var(--ui)) calc(10px * var(--ui)); cursor:pointer;
+}
+.st-name{
+  flex:1 1 auto; min-width:0; color:#17212b; font-weight:bold;
+  font-size:calc(16px * var(--ui)); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.st-pic{
+  background:#fff; border-radius:calc(14px * var(--ui));
+  height:calc(150px * var(--ui)); padding:calc(6px * var(--ui));
+}
+.st-pic canvas{ width:100%; height:100%; display:block; }
+.st-stats{
+  background:rgba(255,255,255,.94); border-radius:calc(14px * var(--ui));
+  padding:calc(8px * var(--ui));
+  display:flex; flex-direction:column; gap:calc(4px * var(--ui));
+}
+.st-row{
+  display:flex; align-items:baseline; gap:calc(6px * var(--ui));
+  font-size:calc(13px * var(--ui)); color:#26323c;
+}
+.st-row .k{ flex:0 0 calc(74px * var(--ui)); color:#5b6b78; }
+.st-row .v{ font-weight:bold; font-variant-numeric:tabular-nums; }
+.st-row .up{ color:#2e7d32; font-weight:bold; }
+.st-row .down{ color:#c62828; font-weight:bold; }
+.st-eq-title{
+  margin:0; text-align:center; font-weight:bold; color:#3a2410;
+  font-size:calc(14px * var(--ui));
+}
+.st-slots{ display:flex; flex-direction:column; gap:calc(7px * var(--ui)); }
+.st-slot{
+  background:#49b6e8; border:2px solid #1f6f96;
+  border-radius:calc(13px * var(--ui));
+  padding:calc(6px * var(--ui)) calc(5px * var(--ui));
+  font-family:inherit; color:#06293b; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:calc(2px * var(--ui));
+  min-height:calc(74px * var(--ui));
+}
+.st-slot .sl-head{ font-size:calc(13px * var(--ui)); font-weight:bold; }
+.st-slot .sl-ico{ font-size:calc(21px * var(--ui)); line-height:1.1; }
+.st-slot .sl-name{ font-size:calc(10.5px * var(--ui)); line-height:1.25; text-align:center; }
+.st-slot.empty{ background:#8fd4f2; }
+.st-slot.empty .sl-name{ color:#2b5566; }
+.st-note{
+  margin:0; color:#5a3f06; font-size:calc(10.5px * var(--ui)); line-height:1.4;
+}
+.char-grid .room-item{ padding:calc(5px * var(--ui)); }
+.char-grid canvas{ width:100%; height:calc(44px * var(--ui)); display:block; }
+
+/* そうびの いちらんの みだし（からだ／あし／ぶき） */
+.gear-head{
+  grid-column:1 / -1; margin:calc(6px * var(--ui)) 0 0;
+  font-weight:bold; color:#6b4a00; font-size:calc(13px * var(--ui));
+}

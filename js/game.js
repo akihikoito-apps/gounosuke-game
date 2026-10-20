@@ -118,8 +118,40 @@ const Game = {
   gearEffOf(id) {
     if (!this.gear || !this.gear[id]) return null;
     if (typeof GEARS === 'undefined') return null;
-    const g = GEARS.find(x => x.id === this.gear[id]);
-    return (g && g.eff) ? g.eff : null;
+    const e = this.gear[id];
+    /* ★むかしの セーブは「1たいに 1つ」（もじ）、
+         いまは { body: …, foot: …, weapon: … } の かたち です。    */
+    const ids = (typeof e === 'string') ? [e]
+      : Object.keys(e).map(k => e[k]).filter(Boolean);
+    if (!ids.length) return null;
+
+    const out = {};
+    let any = false;
+    for (const gid of ids) {
+      const g = GEARS.find(x => x.id === gid);
+      if (!g || !g.eff) continue;
+      any = true;
+      const ef = g.eff;
+      /* ばいりつは かけ算（1.1 と 1.2 なら 1.32ばい）*/
+      for (const k of ['hp', 'atk', 'speed', 'recharge', 'cost']) {
+        if (ef[k]) out[k] = (out[k] || 1) * ef[k];
+      }
+      /* きょりと ふきとび かいすうは たし算 */
+      for (const k of ['range', 'kb']) {
+        if (ef[k]) out[k] = (out[k] || 0) + ef[k];
+      }
+      if (ef.pierce) out.pierce = true;
+      /* とくいな あいて・まもりは ぜんぶ ためて おいて、1つずつ みます */
+      if (ef.vs)    (out.vsList    = out.vsList    || []).push(ef.vs);
+      if (ef.guard) (out.guardList = out.guardList || []).push(ef.guard);
+      /* かいしんは いちばん つよい ものを つかいます */
+      if (ef.crit) {
+        const now = out.crit;
+        const score = (c) => (c.chance || 0) * (c.mult || 1);
+        if (!now || score(ef.crit) > score(now)) out.crit = ef.crit;
+      }
+    }
+    return any ? out : null;
   },
 
   defOf(id) {
@@ -963,7 +995,7 @@ const Game = {
     const burn   = src.def ? (src.def.burn   || null) : (src.burn   || null);
     /* ★そうびひんの こうか（vs＝とくいな あいて／crit＝かいしん／pierce＝つきぬけ）*/
     const ge     = (src.def && src.def.gearEff) ? src.def.gearEff : null;
-    const gearVs = ge ? (ge.vs || null) : null;
+    const gearVs = ge ? (ge.vsList || (ge.vs ? [ge.vs] : null)) : null;
     const pierce = !!(ge && ge.pierce);
     let critUse = crit;
     if (ge && ge.crit) {
@@ -1004,8 +1036,12 @@ const Game = {
       // ★きめられた ぞくせいの こうげきを おさえる（たたみん）
       //   ふつうより ちいさく なる ときだけ てきよう します
       /* ★そうびひん：きめた ぞくせいの あいてに よぶんに ダメージ */
-      if (gearVs && gearVs.attrs && attrList(v.def.attr).some(x => gearVs.attrs.indexOf(x) >= 0)) {
-        mult *= (gearVs.mult || 1.1);
+      if (gearVs) {
+        for (const gv of gearVs) {
+          if (gv && gv.attrs && attrList(v.def.attr).some(x => gv.attrs.indexOf(x) >= 0)) {
+            mult *= (gv.mult || 1.1);
+          }
+        }
       }
       const rs = v.def.resist;
       if (rs && rs.attrs && attrList(attr).some(x => rs.attrs.indexOf(x) >= 0)) {
@@ -1162,11 +1198,20 @@ const Game = {
 
     /* ★そうびひんの まもり（みずよけの マント など）。
          きめた ぞくせいの こうげきを うけにくく なります。          */
-    const gg = (u.def.gearEff && u.def.gearEff.guard) ? u.def.gearEff.guard : null;
-    if (gg && gg.attrs && attr && attrList(attr).some(x => gg.attrs.indexOf(x) >= 0)) {
-      dmg = Math.max(1, Math.round(dmg * (gg.mult === undefined ? 0.7 : gg.mult)));
-      this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 100 - u.lane,
-                       text: 'まもった！', color: '#4fc3f7', life: 0.7 });
+    const geU = u.def.gearEff || null;
+    const ggList = geU ? (geU.guardList || (geU.guard ? [geU.guard] : null)) : null;
+    if (ggList && attr) {
+      let guarded = false;
+      for (const gg of ggList) {
+        if (gg && gg.attrs && attrList(attr).some(x => gg.attrs.indexOf(x) >= 0)) {
+          dmg = Math.max(1, Math.round(dmg * (gg.mult === undefined ? 0.7 : gg.mult)));
+          guarded = true;
+        }
+      }
+      if (guarded) {
+        this.addEffect({ type: 'dmg', x: u.x, y: this.groundWorldY() - 100 - u.lane,
+                         text: 'まもった！', color: '#4fc3f7', life: 0.7 });
+      }
     }
 
     // きゅうけいちゅうは よけいに ダメージを うける

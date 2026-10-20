@@ -33,6 +33,7 @@ const Game      = run('Game');
 const UNITS     = run('UNITS');
 const ENEMIES   = run('ENEMIES');
 const GEARS     = run('GEARS');
+const SLOTS     = run('GEAR_SLOTS');
 const GEAR_CORE = run('GEAR_CORE');
 const LAB       = run('LAB');
 const STAGES    = run('STAGES');
@@ -56,6 +57,14 @@ function defWith(unitId, gearId) {
   Game.gear = gearId ? { [unitId]: gearId } : {};
   return Game.defOf(unitId);
 }
+
+/* ★3かしょに つけた ときの すがた。wear = { body: id, foot: id, weapon: id } */
+function defWear(unitId, wear) {
+  Game.evolved = {}; Game.evolved2 = {};
+  Game.gear = { [unitId]: wear };
+  return Game.defOf(unitId);
+}
+const gearOfSlot = (sid, pick) => GEARS.filter(g => g.slot === sid)[pick || 0];
 
 /* みかた 1たい と てき 1たいを ならべて 1かい たたかわせ、
    あいてが うけた ダメージを かえす。
@@ -255,6 +264,179 @@ test('そうびのもとが もらえる コースが ある', () => {
   /* ふしぎ遊園地の さいごの コースで もらえる こと */
   const last = PARK.courses[PARK.courses.length - 1];
   assert.ok(last.gearCore >= 1, 'ふしぎ遊園地の さいごで もらえない');
+});
+
+console.log('そうびの ばしょ（からだ・あし・ぶき）');
+
+test('ばしょが 3つ あって、ぜんぶの そうびに ばしょが ある', () => {
+  assert.ok(Array.isArray(SLOTS) && SLOTS.length === 3, 'ばしょが ' + (SLOTS || []).length + 'こ');
+  SLOTS.forEach(s => {
+    assert.ok(s.id && s.name && s.icon, 'ばしょに なまえか えが ない');
+    assert.ok(!/[A-Za-z]/.test(s.name), 'ばしょの なまえが にほんごで ない: ' + s.name);
+  });
+  GEARS.forEach(g => {
+    assert.ok(SLOTS.some(s => s.id === g.slot), g.id + ' の ばしょが へん: ' + g.slot);
+  });
+});
+
+test('どの ばしょにも そうびが じゅうぶん ある', () => {
+  SLOTS.forEach(s => {
+    const n = GEARS.filter(g => g.slot === s.id).length;
+    assert.ok(n >= 12, s.name + ' の そうびが ' + n + 'こ しか ない');
+  });
+  assert.ok(GEARS.length >= 36, 'そうびが ' + GEARS.length + 'こ しか ない');
+});
+
+test('あたらしい そうびも なまえ・せつめいが にほんご', () => {
+  GEARS.forEach(g => {
+    assert.ok(!/[A-Za-z]/.test(g.desc), g.id + ' の せつめいに ローマ字: ' + g.desc);
+    assert.ok(g.icon && g.icon.length <= 4, g.id + ' の えが へん');
+  });
+});
+
+test('つよすぎる そうびが ない（1こで ばいりつ 1.7いじょうは なし）', () => {
+  GEARS.forEach(g => {
+    ['hp', 'atk'].forEach(k => {
+      if (g.eff[k]) assert.ok(g.eff[k] <= 1.7, g.id + ' の ' + k + ' が ' + g.eff[k] + 'ばい');
+    });
+    if (g.eff.speed) assert.ok(g.eff.speed <= 1.8, g.id + ' の はやさが ' + g.eff.speed + 'ばい');
+    if (g.eff.range) assert.ok(g.eff.range <= 100, g.id + ' の きょりが ＋' + g.eff.range);
+  });
+});
+
+console.log('3かしょぶんの こうかが かさなる');
+
+test('たいりょくと こうげきは かけ算で かさなる', () => {
+  const unit = 'tankun';
+  const body = GEARS.find(g => g.slot === 'body' && g.eff.hp);
+  const wep  = GEARS.find(g => g.slot === 'weapon' && g.eff.atk);
+  assert.ok(body && wep, 'ためす そうびが ない');
+  const base = defWith(unit, null);
+  const both = defWear(unit, { body: body.id, weapon: wep.id });
+  assert.strictEqual(both.hp,  Math.round(base.hp * body.eff.hp), 'たいりょくが かさならない');
+  assert.strictEqual(both.atk, Math.round(base.atk * wep.eff.atk), 'こうげきが かさならない');
+});
+
+test('きょりと ふきとびは たし算で かさなる', () => {
+  const unit = 'tankun';
+  const a = GEARS.find(g => g.eff.range);
+  const b = GEARS.find(g => g.eff.kb && g.slot !== a.slot);
+  assert.ok(a && b, 'ためす そうびが ない');
+  const base = defWith(unit, null);
+  const w = {}; w[a.slot] = a.id; w[b.slot] = b.id;
+  const both = defWear(unit, w);
+  assert.strictEqual(both.range, base.range + a.eff.range, 'きょりが たされない');
+  assert.strictEqual(both.kbCount, (base.kbCount || 1) + b.eff.kb, 'ふきとびが たされない');
+});
+
+test('おなじ ばいりつの そうびを 2つ つけると もっと のびる', () => {
+  const unit = 'tankun';
+  const a = GEARS.filter(g => g.slot === 'body' && g.eff.hp)[0];
+  const b = GEARS.filter(g => g.slot === 'foot' && g.eff.hp)[0];
+  if (!a || !b) return;                       // どちらかの ばしょに なければ とばす
+  const one  = defWear(unit, { body: a.id });
+  const both = defWear(unit, { body: a.id, foot: b.id });
+  assert.ok(both.hp > one.hp, '2つめの そうびが きいて いない');
+});
+
+test('3かしょ つけても こわれない（ぜんぶの くみあわせを ためす）', () => {
+  const unit = 'tankun';
+  const bodies = GEARS.filter(g => g.slot === 'body');
+  const foots  = GEARS.filter(g => g.slot === 'foot');
+  const weps   = GEARS.filter(g => g.slot === 'weapon');
+  let n = 0;
+  bodies.forEach(b => foots.forEach(ft => weps.forEach(w => {
+    n++;
+    const d = defWear(unit, { body: b.id, foot: ft.id, weapon: w.id });
+    assert.ok(d.hp > 0 && d.atk >= 0, b.id + '/' + ft.id + '/' + w.id + ' が へん');
+    assert.ok(d.cost >= 1 && d.recharge >= 0.5, b.id + '/' + ft.id + '/' + w.id + ' の すうじが へん');
+    assert.ok(isFinite(d.speed) && d.speed >= 1, 'はやさが へん');
+  })));
+  assert.ok(n >= 1000, 'ためした くみあわせが すくない（' + n + '）');
+});
+
+test('とくいな あいて（vs）は 2つ つけると どちらも きく', () => {
+  const vs = GEARS.filter(g => g.eff.vs);
+  const a = vs[0];
+  const b = vs.find(g => g.slot !== a.slot &&
+    g.eff.vs.attrs.join() !== a.eff.vs.attrs.join());
+  if (!b) return;
+  const w = {}; w[a.slot] = a.id; w[b.slot] = b.id;
+  const d = defWear('tankun', w);
+  assert.ok(d.gearEff && d.gearEff.vsList && d.gearEff.vsList.length === 2,
+    'とくいな あいてが 1つ しか のこって いない');
+});
+
+test('まもり（guard）も 2つ つけると どちらも きく', () => {
+  const gs = GEARS.filter(g => g.eff.guard);
+  const a = gs[0];
+  const b = gs.find(g => g.eff.guard.attrs.join() !== a.eff.guard.attrs.join());
+  if (!b || a.slot === b.slot) {
+    /* おなじ ばしょ どうし なら 1つしか つけられない ので、かたほうだけ たしかめる */
+    const w = {}; w[a.slot] = a.id;
+    const d = defWear('tankun', w);
+    assert.ok(d.gearEff.guardList && d.gearEff.guardList.length === 1, 'まもりが きえた');
+    return;
+  }
+  const w = {}; w[a.slot] = a.id; w[b.slot] = b.id;
+  const d = defWear('tankun', w);
+  assert.strictEqual(d.gearEff.guardList.length, 2, 'まもりが 1つ しか のこらない');
+});
+
+test('つきぬけ（pierce）と かいしんは いちばん いい ものに なる', () => {
+  const p = GEARS.find(g => g.eff.pierce);
+  const c = GEARS.filter(g => g.eff.crit);
+  if (p) {
+    const w = {}; w[p.slot] = p.id;
+    assert.ok(defWear('tankun', w).gearEff.pierce, 'つきぬけが きえた');
+  }
+  if (c.length) {
+    const w = {}; w[c[0].slot] = c[0].id;
+    const d = defWear('tankun', w);
+    assert.ok(d.gearEff.crit && d.gearEff.crit.chance > 0, 'かいしんが きえた');
+  }
+});
+
+test('むかしの セーブ（1たいに 1つ）でも うごく', () => {
+  const g = GEARS.find(x => x.eff.hp);
+  const base = defWith('tankun', null);
+  const old  = defWith('tankun', g.id);        // もじで わたす ＝ むかしの かたち
+  assert.strictEqual(old.hp, Math.round(base.hp * g.eff.hp), 'むかしの セーブが きかない');
+});
+
+test('からっぽの そうびでも こわれない', () => {
+  const base = defWith('tankun', null);
+  assert.strictEqual(defWear('tankun', {}).hp, base.hp);
+  assert.strictEqual(defWear('tankun', { body: null, foot: null, weapon: null }).hp, base.hp);
+  assert.strictEqual(defWear('tankun', { body: 'nai-gear' }).hp, base.hp);
+});
+
+console.log('ステータスの がめん');
+
+test('がめんと ボタンが ある', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const main = fs.readFileSync(path.join(__dirname, '..', 'js', 'main.js'), 'utf8');
+  ['screen-status', 'status-name', 'status-canvas', 'status-stats', 'status-slots',
+   'btn-status-back', 'btn-status-change', 'char-modal', 'char-grid', 'btn-char-close']
+    .forEach(id => assert.ok(html.indexOf('id="' + id + '"') >= 0, id + ' が index.html に ない'));
+  assert.ok(html.indexOf('id="btn-party-status"') >= 0, 'へんせいに そうびの ボタンが ない');
+  /* そうびの まどは がめんの そとに ある（どの がめんからでも ひらく）*/
+  const iLab = html.indexOf('id="screen-lab"');
+  const iEnd = html.indexOf('</section>', iLab);
+  const iGear = html.indexOf('id="gear-modal"');
+  assert.ok(iGear > iEnd, 'そうびの まどが かいはつしつの なかに ある');
+  assert.ok(/function openStatus/.test(main), 'ステータスの がめんが ない');
+  assert.ok(/function buildStatus/.test(main), 'ちゅうみが つくられない');
+  assert.ok(/openGearPick\(id, sl\.id\)/.test(main), 'ばしょごとに えらべない');
+  assert.ok(/if \(\(g\.slot \|\| 'body'\) !== gearPickSlot\) return;/.test(main),
+    'まどが その ばしょの そうびだけに なって いない');
+  assert.ok(/btn-party-status'\)\.addEventListener/.test(main), 'ボタンが つながって いない');
+});
+
+test('むかしの セーブを 3かしょの かたちに なおして いる', () => {
+  const main = fs.readFileSync(path.join(__dirname, '..', 'js', 'main.js'), 'utf8');
+  assert.ok(/typeof v === 'string'[\s\S]{0,260}o\[g\.slot \|\| 'body'\] = v;/.test(main),
+    'ひきつぎの しょりが ない');
 });
 
 /* ====================================================================== */
