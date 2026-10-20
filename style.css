@@ -2143,3 +2143,65 @@ body.dragging-slot #party-slots { touch-action:none; }
   display:block; width:100%; margin-top:calc(6px * var(--ui));
   font-size:calc(13px * var(--ui)); white-space:nowrap;
 }
+
+/* =====================================================================
+   ★ガチャ：1かい・5れん・10れん の ボタンと けっか いちらん
+   ===================================================================== */
+.gacha-pulls{
+  display:flex; flex-wrap:wrap; gap:calc(6px * var(--ui));
+}
+.gacha-pulls .big-btn{
+  flex:1 1 100%; margin:0; white-space:nowrap;
+  font-size:calc(17px * var(--ui));
+  padding:calc(10px * var(--ui)) calc(8px * var(--ui));
+}
+.gacha-pulls .pull-multi{
+  flex:1 1 calc(40% - 6px * var(--ui));
+  background:linear-gradient(#ffb74d, #f57c00);
+  font-size:calc(15px * var(--ui));
+}
+
+#gacha-many{
+  position:absolute; inset:0; z-index:480;
+  background:rgba(12,10,24,.82);
+  display:flex; align-items:center; justify-content:center;
+  padding:calc(10px * var(--ui));
+}
+#gacha-many.hidden{ display:none; }
+.gm-box{
+  width:100%; max-width:calc(360px * var(--ui));
+  max-height:92%; display:flex; flex-direction:column;
+  background:#fff8eb; border:3px solid #e0b431;
+  border-radius:calc(16px * var(--ui));
+  padding:calc(10px * var(--ui));
+}
+.gm-title{
+  margin:0 0 calc(8px * var(--ui)); text-align:center; font-weight:bold;
+  color:#6b4a00; font-size:calc(16px * var(--ui));
+}
+.gm-list{
+  flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  display:grid; grid-template-columns:repeat(2, 1fr);
+  gap:calc(6px * var(--ui));
+}
+.gm-item{
+  display:flex; flex-direction:column; align-items:center;
+  background:#fff; border:2px solid #e8d9b0;
+  border-radius:calc(10px * var(--ui));
+  padding:calc(5px * var(--ui));
+}
+.gm-item canvas{
+  width:100%; height:calc(44px * var(--ui)); display:block;
+}
+.gm-item .gm-none{
+  height:calc(44px * var(--ui)); display:flex; align-items:center;
+  font-size:calc(22px * var(--ui)); color:#bbb;
+}
+.gm-star{ font-size:calc(12px * var(--ui)); letter-spacing:-.05em; }
+.gm-note{
+  margin-top:calc(2px * var(--ui)); text-align:center; line-height:1.35;
+  font-size:calc(11px * var(--ui)); color:#3a2410;
+}
+.gm-box .big-btn{
+  flex:0 0 auto; margin-top:calc(8px * var(--ui)); width:100%;
+}

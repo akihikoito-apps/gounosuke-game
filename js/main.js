@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.65';
+  const GAME_VERSION = '6.66';
 
 
   /* =================================================
@@ -3742,6 +3742,66 @@
     if (gachaFxHandle) { try { gachaFxHandle.stop(); } catch (e) {} gachaFxHandle = null; }
     const wrap = $('#gacha-fx');
     if (wrap) wrap.classList.add('hidden');
+    const many = $('#gacha-many');
+    if (many) many.classList.add('hidden');
+  }
+
+  /* ★5れん・10れん の えんしゅつ（ボールを ならべて、よい ものを さいごに）*/
+  function gachaFxMulti(list, onEnd) {
+    const wrap = $('#gacha-fx'), cv = $('#gacha-fx-canvas');
+    if (!wrap || !cv || typeof GachaFX === 'undefined' || !GachaFX.playMulti) { onEnd(); return; }
+    const items = list.map(g => {
+      const info = (typeof RARITY !== 'undefined' && RARITY[g.rank])
+        ? RARITY[g.rank] : { color: '#90caf9', star: '★', label: '' };
+      const drawFn = g.id ? DRAWERS[shownDrawId(g.id)] : null;
+      return {
+        color: info.color, color2: lightOf(info.color),
+        star: info.star, label: info.label,
+        special: ['GR', 'SR', 'LR'].indexOf(g.rank) >= 0,
+        drawChar: drawFn ? (ctx, h) => {
+          const sc = h / 88;
+          ctx.save(); ctx.scale(sc, sc);
+          drawFn(ctx, { t: 0.7, moving: false, atk: -1, hpRatio: 1, roll: 0.35 });
+          ctx.restore();
+        } : null,
+      };
+    });
+    wrap.classList.remove('hidden');
+    gachaFxHandle = GachaFX.playMulti(cv, {
+      items: items,
+      se: (n) => { if (typeof Sound !== 'undefined') Sound.se(n); },
+      onReveal: () => {},
+      onEnd: () => { gachaFxHandle = null; wrap.classList.add('hidden'); onEnd(); },
+    });
+  }
+
+  /* ★5れん・10れん の けっかを いちらんに ならべます */
+  function showGachaMany(list) {
+    const panel = $('#gacha-many'), box = $('#gacha-many-list');
+    if (!panel || !box) return;
+    box.innerHTML = '';
+    let nw = 0, pl = 0;
+    list.forEach(g => {
+      if (g.kind === 'new') nw++;
+      else if (g.kind === 'plus') pl++;
+      const info = (typeof RARITY !== 'undefined' && RARITY[g.rank])
+        ? RARITY[g.rank] : { color: '#90caf9', star: '★' };
+      const el = document.createElement('div');
+      el.className = 'gm-item';
+      el.innerHTML =
+        '<span class="gm-star" style="color:' + info.color + '">' + info.star + '</span>' +
+        (g.id ? '<canvas data-char="' + g.id + '"></canvas>' : '<span class="gm-none">？</span>') +
+        '<span class="gm-note">' + g.note + '</span>';
+      box.appendChild(el);
+    });
+    const t = $('#gacha-many-title');
+    if (t) t.textContent = list.length + 'れんガチャの けっか';
+    panel.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      $$('#gacha-many-list canvas').forEach(c => paintChar(c, c.dataset ? c.dataset.char : null));
+    });
+    $('#gacha-result').innerHTML = list.length + 'かい ひいた！' +
+      '<span class="gacha-new">あたらしい なかま ' + nw + 'たい／じょうげんかいほう ' + pl + '</span>';
   }
   function gachaFxPlay(rank, charId, onReveal, onEnd) {
     const wrap = $('#gacha-fx'), cv = $('#gacha-fx-canvas');
@@ -3775,6 +3835,8 @@
 
   /* ガチャの まどを はじめの ひょうじに もどす */
   function resetGachaWindow() {
+    const many = $('#gacha-many');
+    if (many) many.classList.add('hidden');
     const r = $('#gacha-result');
     if (r) r.innerHTML = GACHA.cost + 'Gコインで<br>1かい ひけるよ！';
     const w = $('#gacha-window');
@@ -3792,9 +3854,14 @@
     if (!s) return;
     $('#gacha-coin').textContent = Math.floor(s.coins || 0);
     $('#gacha-exp').textContent  = Math.floor(s.exp || 0);
-    const btn = $('#btn-gacha-pull');
-    btn.disabled = (s.coins || 0) < GACHA.cost;
-    btn.textContent = 'ガチャを ひく（' + GACHA.cost + 'コイン）';
+    /* ★1かい・5れん・10れん の 3つ。おかねが たりない ものは おせません */
+    PULL_SETS.forEach(set => {
+      const b = $(set.sel);
+      if (!b) return;
+      const c = GACHA.cost * set.n;
+      b.disabled = !!gachaFxHandle || (s.coins || 0) < c;
+      b.textContent = set.label + '（' + c + 'コイン）';
+    });
     const info = $('#gacha-rates');
     if (info && !info.dataset.done) {
       info.dataset.done = '1';
@@ -3804,16 +3871,20 @@
     }
   }
 
-  function pullGacha() {
-    if (gachaFxHandle) return;          // えんしゅつの あいだは おせません
-    const s = slot();
-    if (!s || (s.coins || 0) < GACHA.cost) {
-      toast('Gコインが たりません');
-      if (typeof Sound !== 'undefined') Sound.se('deny');
-      return;
-    }
-    s.coins -= GACHA.cost;
+  /* ★ひく かずの セット */
+  const PULL_SETS = [
+    { n: 1,  sel: '#btn-gacha-pull',   label: '1かい'  },
+    { n: 5,  sel: '#btn-gacha-pull5',  label: '5れん'  },
+    { n: 10, sel: '#btn-gacha-pull10', label: '10れん' },
+  ];
+  function lockPullBtns() {
+    PULL_SETS.forEach(set => { const b = $(set.sel); if (b) b.disabled = true; });
+  }
 
+  /* ★1かいぶんの ちゅうせん。セーブを かきかえて、でた ものを かえします。
+       kind … 'new'（あたらしい なかま）／'plus'（じょうげんかいほう）
+               'exp'（＋MAX なので けいけんち）／'empty'（まだ いない レア度）*/
+  function rollGachaOnce(s) {
     /* --- レアリティを ちゅうせん --- */
     const keys = RARITY_ORDER.slice();
     const total = keys.reduce((a, k) => a + RARITY[k].rate, 0);
@@ -3823,64 +3894,94 @@
 
     /* --- その レアリティの キャラから 1たい --- */
     const pool = ALL_CHARS.filter(id => UNITS[id] && UNITS[id].rarity === rank);
-    let html = '';
-    let gotId = null;        // ★えんしゅつで みせる キャラ
+    const star = '<span class="gacha-rank" style="color:' + info.color + '">' + info.star + '</span>';
 
     if (pool.length === 0) {
       /* まだ キャラが いない レアリティ（でんせつレア）*/
       s.exp = (s.exp || 0) + GACHA.emptyExp;
-      html = '<span class="gacha-rank" style="color:' + info.color + '">' + info.star + '</span>' +
-             info.label + '<span class="gacha-new">まだ とうじょう して いません！<br>けいけんち +' + GACHA.emptyExp + '</span>';
-    } else {
-      const id = pool[Math.floor(Math.random() * pool.length)];
-      gotId = id;
-      const def = UNITS[id];
-      const has = s.owned.indexOf(id) >= 0;
-
-      if (!has) {
-        /* --- あたらしい なかま！ --- */
-        s.owned.push(id);
-        s.levels[id] = 1;
-        s.plus[id] = 0;
-        const empty = s.party.indexOf(null);
-        if (empty >= 0) s.party[empty] = id;
-        html = '<span class="gacha-rank" style="color:' + info.color + '">' + info.star + '</span>' +
-               '<canvas class="gacha-char" data-char="' + id + '"></canvas>' +
-               '<span class="gacha-new">' + def.name + ' が なかまに なった！</span>';
-      } else if ((s.plus[id] || 0) < GACHA.plusMax) {
-        /* --- ダブり → レベルの じょうげんかいほう --- */
-        s.plus[id] = (s.plus[id] || 0) + 1;
-        html = '<span class="gacha-rank" style="color:' + info.color + '">' + info.star + '</span>' +
-               '<canvas class="gacha-char" data-char="' + id + '"></canvas>' +
-               '<span class="gacha-new">' + def.name + ' ＋' + s.plus[id] + '<br>じょうげんかいほう！</span>';
-      } else {
-        /* --- ＋が MAX → けいけんちに --- */
-        const e = GACHA.dupExp[rank] || 100;
-        s.exp = (s.exp || 0) + e;
-        html = '<span class="gacha-rank" style="color:' + info.color + '">' + info.star + '</span>' +
-               '<canvas class="gacha-char" data-char="' + id + '"></canvas>' +
-               '<span class="gacha-new">' + def.name + ' は ＋MAX！<br>けいけんち +' + e + '</span>';
-      }
+      const note = 'まだ とうじょう して いません！<br>けいけんち +' + GACHA.emptyExp;
+      return { rank: rank, id: null, kind: 'empty', name: info.label, note: note,
+               html: star + info.label + '<span class="gacha-new">' + note + '</span>' };
     }
 
+    const id = pool[Math.floor(Math.random() * pool.length)];
+    const def = UNITS[id];
+    const has = s.owned.indexOf(id) >= 0;
+    let kind, note;
+
+    if (!has) {
+      /* --- あたらしい なかま！ --- */
+      s.owned.push(id);
+      s.levels[id] = 1;
+      s.plus[id] = 0;
+      const empty = s.party.indexOf(null);
+      if (empty >= 0) s.party[empty] = id;
+      kind = 'new';
+      note = def.name + ' が なかまに なった！';
+    } else if ((s.plus[id] || 0) < GACHA.plusMax) {
+      /* --- ダブり → レベルの じょうげんかいほう --- */
+      s.plus[id] = (s.plus[id] || 0) + 1;
+      kind = 'plus';
+      note = def.name + ' ＋' + s.plus[id] + '<br>じょうげんかいほう！';
+    } else {
+      /* --- ＋が MAX → けいけんちに --- */
+      const e = GACHA.dupExp[rank] || 100;
+      s.exp = (s.exp || 0) + e;
+      kind = 'exp';
+      note = def.name + ' は ＋MAX！<br>けいけんち +' + e;
+    }
+    return { rank: rank, id: id, kind: kind, name: def.name, note: note,
+             html: star + '<canvas class="gacha-char" data-char="' + id + '"></canvas>' +
+                   '<span class="gacha-new">' + note + '</span>' };
+  }
+
+  /* ★ガチャを n かい ひきます（n は 1・5・10）*/
+  function pullGacha(n) {
+    n = Math.max(1, Math.floor(n || 1));
+    if (gachaFxHandle) return;          // えんしゅつの あいだは おせません
+    const s = slot();
+    const cost = GACHA.cost * n;
+    if (!s || (s.coins || 0) < cost) {
+      toast('Gコインが たりません');
+      if (typeof Sound !== 'undefined') Sound.se('deny');
+      return;
+    }
+    s.coins -= cost;
+
+    const got = [];
+    for (let i = 0; i < n; i++) got.push(rollGachaOnce(s));
     storeSave();
     applyParty();
 
-    /* ★けっかは さきに きまって いますが、
-         ガチャポンが おちて → パカーンと あいて から まどに だします。*/
-    const win = $('#gacha-window');
-    const btn = $('#btn-gacha-pull');
-    if (btn) btn.disabled = true;
-    $('#gacha-result').innerHTML = 'ドキドキ…';
-    gachaFxPlay(rank, gotId, () => {
-      /* キャラが でた しゅんかん */
-      $('#gacha-result').innerHTML = html;
-      const cv = $('#gacha-result').querySelector('canvas');
-      if (cv) requestAnimationFrame(() => paintChar(cv, cv.dataset ? cv.dataset.char : null));
-      win.classList.remove('pop');
-      void win.offsetWidth;
-      win.classList.add('pop');
-    }, () => {
+    /* ★レア度の ひくい ものから ならべて、いちばん よい ものが
+         さいごに でる ように します（さいごまで ドキドキ する ため）*/
+    const order = got.slice().sort(
+      (a, b) => RARITY_ORDER.indexOf(a.rank) - RARITY_ORDER.indexOf(b.rank));
+
+    lockPullBtns();
+    $('#gacha-result').innerHTML = (n === 1) ? 'ドキドキ…' : (n + 'かい ひいた！　ドキドキ…');
+
+    if (n === 1) {
+      /* --- 1かい：ボールが 1つ おちて パカーン --- */
+      const g = order[0];
+      const win = $('#gacha-window');
+      gachaFxPlay(g.rank, g.id, () => {
+        /* キャラが でた しゅんかん */
+        $('#gacha-result').innerHTML = g.html;
+        const cv = $('#gacha-result').querySelector('canvas');
+        if (cv) requestAnimationFrame(() => paintChar(cv, cv.dataset ? cv.dataset.char : null));
+        win.classList.remove('pop');
+        void win.offsetWidth;
+        win.classList.add('pop');
+      }, () => {
+        refreshGacha();
+      });
+      return;
+    }
+
+    /* --- 5れん・10れん：ボールが ならんで おちて、じゅんに ひらく --- */
+    gachaFxMulti(order, () => {
+      showGachaMany(order);
       refreshGacha();
     });
   }
@@ -11337,7 +11438,12 @@
     $('#btn-party-back').addEventListener('click', openHome);
     $('#btn-power-back').addEventListener('click', openHome);
     $('#btn-gacha-back').addEventListener('click', openHome);
-    $('#btn-gacha-pull').addEventListener('click', pullGacha);
+    $('#btn-gacha-pull').addEventListener('click', () => pullGacha(1));
+    $('#btn-gacha-pull5').addEventListener('click', () => pullGacha(5));
+    $('#btn-gacha-pull10').addEventListener('click', () => pullGacha(10));
+    $('#btn-gacha-many-close').addEventListener('click', () => {
+      $('#gacha-many').classList.add('hidden');
+    });
     $('#btn-home-back').addEventListener('click', () => { buildSaveSlots(); show('screen-save'); });
 
     /* ずかん */

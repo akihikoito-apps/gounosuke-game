@@ -823,7 +823,11 @@
       <span class="w-exp">けいけんち <b id="gacha-exp">0</b></span>
     </div>
     <p id="gacha-rates" class="panel-hint"></p>
-    <button class="big-btn" id="btn-gacha-pull">ガチャを ひく（3コイン）</button>
+    <div class="gacha-pulls">
+      <button class="big-btn" id="btn-gacha-pull">1かい（3コイン）</button>
+      <button class="big-btn pull-multi" id="btn-gacha-pull5">5れん（15コイン）</button>
+      <button class="big-btn pull-multi" id="btn-gacha-pull10">10れん（30コイン）</button>
+    </div>
     <button class="mini-btn gacha-shop-btn" id="btn-gacha-shop">
       Gコインが ほしい ときは → ネコスの店 ☕
     </button>
@@ -915,6 +919,15 @@
   </div>
 
   <!-- ============ オリジナルの間：ほんとうに けす？ ============ -->
+  <!-- ★5れん・10れん の けっか いちらん -->
+  <div id="gacha-many" class="hidden">
+    <div class="gm-box">
+      <p class="gm-title" id="gacha-many-title">けっか</p>
+      <div class="gm-list" id="gacha-many-list"></div>
+      <button class="big-btn" id="btn-gacha-many-close">とじる</button>
+    </div>
+  </div>
+
   <!-- ★ガチャの えんしゅつ（がめん いっぱいに かぶせる）-->
   <div id="gacha-fx" class="hidden">
     <canvas id="gacha-fx-canvas"></canvas>

@@ -85,6 +85,69 @@ function runFx(opt) {
   return { reveal, end, se, charH, draws, depth, minDepth, sec: now / 1000, handle };
 }
 
+
+/* ---- 5れん・10れん の えんしゅつを にせものの canvas で うごかす ---- */
+function runMulti(n, opt) {
+  opt = opt || {};
+  let now = 0, frames = [];
+  let depth = 0, minDepth = 0, draws = 0;
+  const ctxProxy = new Proxy({}, {
+    get(t, k) {
+      if (k === 'createLinearGradient' || k === 'createRadialGradient')
+        return () => ({ addColorStop() {} });
+      if (k === 'measureText') return () => ({ width: 20 });
+      if (k === 'save') return () => { depth++; };
+      if (k === 'restore') return () => { depth--; if (depth < minDepth) minDepth = depth; };
+      if (typeof k === 'string') return () => { draws++; };
+      return undefined;
+    },
+    set() { return true; },
+  });
+  const canvas = {
+    clientWidth: (opt.w === undefined) ? 390 : opt.w,
+    clientHeight: (opt.h === undefined) ? 700 : opt.h,
+    width: 0, height: 0, style: {},
+    getContext: () => ctxProxy, addEventListener() {}, removeEventListener() {},
+  };
+  const sandbox = {
+    Math, Date, console, Number, String, Array, Object, isNaN, parseInt, parseFloat,
+    performance: { now: () => now },
+    requestAnimationFrame: (fn) => { frames.push(fn); return frames.length; },
+    cancelAnimationFrame: () => {},
+    devicePixelRatio: 2,
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(FX_SRC, sandbox, { filename: 'gacha-fx.js' });
+  const FX = vm.runInContext('GachaFX', sandbox);
+  const charH = [];
+  const items = [];
+  for (let i = 0; i < n; i++) {
+    items.push({
+      color: '#ffd54f', color2: '#fff3c0', star: '★★', label: 'レア',
+      special: (opt.special === undefined) ? (i === n - 1) : !!opt.special,
+      drawChar: opt.noChar ? null : (c, h) => { charH.push(h); c.beginPath(); },
+    });
+  }
+  const seen = [], se = [];
+  let end = 0;
+  const handle = FX.playMulti(canvas, {
+    items: items,
+    se: opt.noSe ? null : ((x) => se.push(x)),
+    onReveal: (i) => seen.push(i),
+    onEnd: () => end++,
+  });
+  for (let i = 0; i < 1500 && end === 0; i++) {
+    now += 16.7;
+    if (opt.skipAt === i) handle.skip();
+    if (opt.stopAt === i) handle.stop();
+    if (opt.stopAt !== undefined && i > opt.stopAt + 3) break;
+    const list = frames; frames = [];
+    list.forEach(fn => fn(now));
+    if (!list.length && i > 2 && !end) break;
+  }
+  return { n, seen, end, se, charH, draws, depth, minDepth, sec: now / 1000, handle };
+}
+
 let passed = 0, failed = 0;
 function test(name, fn) {
   try { fn(); passed++; console.log('  ok  ' + name); }
@@ -170,10 +233,10 @@ test('ひいたら えんしゅつ → でた あとで けっかを みせる �
   const i = MAIN.indexOf('function pullGacha');
   assert.ok(i > 0, 'pullGacha が ない');
   const body = MAIN.slice(i, i + 3200);
-  assert.ok(/gachaFxPlay\(rank, gotId/.test(body), 'えんしゅつを よんで いない');
+  assert.ok(/gachaFxPlay\(g\.rank, g\.id/.test(body), 'えんしゅつを よんで いない');
   assert.ok(body.indexOf('ドキドキ') < body.indexOf('gachaFxPlay'), 'ひいた すぐ あとに けっかが でて しまう');
   assert.ok(/if \(gachaFxHandle\) return;/.test(body), 'えんしゅつちゅうに また ひけて しまう');
-  assert.ok(/\$\('#gacha-result'\)\.innerHTML = html;/.test(body), 'けっかを だす ところが ない');
+  assert.ok(/\$\('#gacha-result'\)\.innerHTML = g\.html;/.test(body), 'けっかを だす ところが ない');
 });
 
 test('レア度に あわせて いろと「ため」が かわる', () => {
@@ -197,6 +260,148 @@ test('えんしゅつの いれものと よみこみが index.html に ある',
   assert.ok(/id="gacha-fx-canvas"/.test(HTML), 'キャンバスが ない');
   assert.ok(/<script src="js\/gacha-fx\.js"><\/script>/.test(HTML), 'よみこんで いない');
   assert.ok(HTML.indexOf('js/gacha-fx.js') < HTML.indexOf('js/main.js'), 'main.js より あとに よみこんで いる');
+});
+
+console.log('5れん・10れん の えんしゅつ');
+
+test('5こ・10この ボールが ならんで おちて、ぜんぶ じゅんばんに ひらく', () => {
+  [5, 10].forEach(n => {
+    const r = runMulti(n);
+    assert.deepStrictEqual(r.seen, r.items || [...Array(n).keys()],
+      n + 'こ のうち でたのは ' + r.seen.length + 'こ（' + r.seen + '）');
+    assert.strictEqual(r.end, 1, n + 'れんが おわらない');
+    assert.ok(r.draws > 500, n + 'れんで えを かいて いない');
+  });
+});
+
+test('1こ・2こ でも ならべられる', () => {
+  [1, 2].forEach(n => {
+    const r = runMulti(n);
+    assert.strictEqual(r.seen.length, n);
+    assert.strictEqual(r.end, 1);
+  });
+});
+
+test('かずが おおい ほど ながく、1かいぶんより ながい', () => {
+  const a = runMulti(1), b = runMulti(5), c = runMulti(10);
+  assert.ok(b.sec > a.sec, '5れんが 1こより みじかい');
+  assert.ok(c.sec > b.sec + 0.8, '10れんが 5れんと ほとんど おなじ（' +
+    b.sec.toFixed(2) + ' / ' + c.sec.toFixed(2) + '）');
+  assert.ok(c.sec < 12, '10れんが ながすぎる（' + c.sec.toFixed(2) + 'びょう）');
+});
+
+test('おとは ぜんぶ ある なまえで、パカーンは ひらいた かず だけ なる', () => {
+  const r = runMulti(10);
+  const bad = [...new Set(r.se)].filter(x => OK_SE.indexOf(x) < 0);
+  assert.strictEqual(bad.length, 0, 'ない おと: ' + bad);
+  const paka = r.se.filter(x => x === 'pakaan').length;
+  assert.strictEqual(paka, 10, 'パカーンが ' + paka + 'かい（10かい の はず）');
+  assert.strictEqual(r.se.filter(x => x === 'fanfare').length, 1, 'パッパラーンは 1かい だけ');
+});
+
+test('めずらしい ものが まざって いると ドラムロールと キラキラが なる', () => {
+  const r = runMulti(10);
+  assert.ok(r.se.indexOf('roll') >= 0, 'ドラムロールが ない');
+  assert.ok(r.se.indexOf('rare') >= 0, 'キラキラが ない');
+  const none = runMulti(10, { special: false });
+  assert.ok(none.se.indexOf('roll') < 0, 'めずらしい ものが ないのに ドラムロール');
+  assert.ok(r.sec > none.sec, 'めずらしい ものの「ため」が ない');
+});
+
+test('とばすと のこりが ぜんぶ ひらいて、すぐ おわる', () => {
+  [5, 10].forEach(n => {
+    const full = runMulti(n);
+    const sk = runMulti(n, { skipAt: 40 });
+    assert.strictEqual(sk.seen.length, n, 'とばしたら ' + sk.seen.length + 'こ しか でない');
+    assert.deepStrictEqual(sk.seen, full.seen, 'じゅんばんが かわって いる');
+    assert.strictEqual(sk.end, 1, 'おわらない');
+    assert.ok(sk.sec < full.sec, 'みじかく なって いない');
+  });
+});
+
+test('とめたら おわりの しらせを ださない（まとめて の ほう）', () => {
+  assert.strictEqual(runMulti(10, { stopAt: 20 }).end, 0);
+});
+
+test('save と restore の かずが あって いる（まとめて の ほう）', () => {
+  [5, 10].forEach(n => {
+    const r = runMulti(n);
+    assert.strictEqual(r.depth, 0, n + 'れんで のこって いる');
+    assert.strictEqual(r.minDepth, 0, n + 'れんで おおく もどして いる');
+  });
+});
+
+test('10こでも キャラが つぶれず がめんに おさまる', () => {
+  const r = runMulti(10);
+  const h = r.charH[0];
+  assert.ok(h > 24, 'ちいさすぎる（' + Math.round(h) + 'px）');
+  assert.ok(h < 700 / 3, 'おおきすぎて かさなる（' + Math.round(h) + 'px）');
+  const one = runMulti(1);
+  assert.ok(one.charH[0] > h, '1こ の ときも おなじ おおきさ');
+});
+
+test('キャラの えや おとが なくても、がめんが 0でも、よこながでも おちない（まとめて）', () => {
+  assert.doesNotThrow(() => {
+    assert.strictEqual(runMulti(10, { noChar: true, noSe: true }).end, 1);
+    runMulti(10, { w: 0, h: 0 });
+    assert.strictEqual(runMulti(10, { w: 1200, h: 400 }).end, 1);
+  });
+});
+
+test('skip と stop は なんかい よんでも へいき（まとめて）', () => {
+  const r = runMulti(5);
+  assert.doesNotThrow(() => { r.handle.skip(); r.handle.skip(); r.handle.stop(); r.handle.stop(); });
+});
+
+console.log('1かい・5れん・10れん の ボタン');
+
+test('ボタンが 3つ あって、ねだんが かずの ぶん だけ かかる', () => {
+  ['btn-gacha-pull', 'btn-gacha-pull5', 'btn-gacha-pull10'].forEach(id =>
+    assert.ok(HTML.indexOf('id="' + id + '"') >= 0, id + ' が ない'));
+  assert.ok(/const PULL_SETS = \[[\s\S]{0,400}n: 10/.test(MAIN), 'セットの ひょうが ない');
+  assert.ok(/const cost = GACHA\.cost \* n;/.test(MAIN), 'ねだんが かずの ぶん に なって いない');
+  assert.ok(/s\.coins -= cost;/.test(MAIN), 'まとめた ぶんを はらって いない');
+  assert.ok(/GACHA\.cost \* set\.n/.test(MAIN), 'ボタンに ねだんを かいて いない');
+  [[1, ''], [5, '5'], [10, '10']].forEach(([n, suf]) =>
+    assert.ok(new RegExp("#btn-gacha-pull" + suf + "'\\)\\.addEventListener\\('click', \\(\\) => pullGacha\\(" + n + "\\)\\)").test(MAIN),
+      n + 'かいの ボタンが つながって いない'));
+});
+
+test('ひいた かずだけ ちゅうせんして、よい ものを さいごに ならべる', () => {
+  const i = MAIN.indexOf('function pullGacha');
+  const body = MAIN.slice(i, i + 2600);
+  assert.ok(/for \(let i = 0; i < n; i\+\+\) got\.push\(rollGachaOnce\(s\)\);/.test(body),
+    'かずの ぶん ちゅうせんして いない');
+  assert.ok(/RARITY_ORDER\.indexOf\(a\.rank\) - RARITY_ORDER\.indexOf\(b\.rank\)/.test(body),
+    'レア度で ならべかえて いない');
+  assert.ok(/if \(n === 1\)/.test(body), '1かいと まとめての わけが ない');
+  assert.ok(/gachaFxMulti\(order/.test(body), 'まとめての えんしゅつを よんで いない');
+});
+
+test('けっかの いちらんが つくられる', () => {
+  const i = MAIN.indexOf('function showGachaMany');
+  assert.ok(i > 0, 'いちらんが ない');
+  const body = MAIN.slice(i, i + 1800);
+  assert.ok(/list\.forEach/.test(body), 'ひとつずつ ならべて いない');
+  assert.ok(/kind === 'new'/.test(body) && /kind === 'plus'/.test(body), 'まとめの かぞえが ない');
+  assert.ok(/paintChar\(c, c\.dataset/.test(body), 'キャラの えを かいて いない');
+  assert.ok(/panel\.classList\.remove\('hidden'\)/.test(body), 'いちらんを ひらいて いない');
+  ['gacha-many', 'gacha-many-list', 'gacha-many-title', 'btn-gacha-many-close'].forEach(id =>
+    assert.ok(HTML.indexOf('id="' + id + '"') >= 0, id + ' が index.html に ない'));
+  assert.ok(/#btn-gacha-many-close'\)\.addEventListener/.test(MAIN), 'とじる ボタンが つながって いない');
+  assert.ok(/const many = \$\('#gacha-many'\)[\s\S]{0,120}add\('hidden'\)/.test(MAIN),
+    'がめんを かえる ときに いちらんを とじて いない');
+});
+
+test('ちゅうせんは 1かいぶんの かんすうに なって いる（1かいでも 10れんでも おなじ）', () => {
+  const i = MAIN.indexOf('function rollGachaOnce');
+  assert.ok(i > 0, 'rollGachaOnce が ない');
+  const body = MAIN.slice(i, MAIN.indexOf('function pullGacha'));
+  ['new', 'plus', 'exp', 'empty'].forEach(k =>
+    assert.ok(body.indexOf("'" + k + "'") >= 0, k + ' の ばあいが ない'));
+  assert.ok(/s\.owned\.push\(id\)/.test(body), 'なかまに ならない');
+  assert.ok(/s\.plus\[id\] = \(s\.plus\[id\] \|\| 0\) \+ 1;/.test(body), 'じょうげんかいほうが ない');
+  assert.ok(!/storeSave\(\)/.test(body), 'ちゅうせんの なかで ほぞんして いる（10れんで 10かい ほぞんに なる）');
 });
 
 console.log('Gコインの てにいれかた');
