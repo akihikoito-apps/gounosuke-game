@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.66';
+  const GAME_VERSION = '6.67';
 
 
   /* =================================================
@@ -276,6 +276,7 @@
     if (typeof DOZLE_PLANET !== 'undefined' && DOZLE_PLANET) list.push(DOZLE_PLANET);
     if (typeof UNDERGROUND !== 'undefined' && UNDERGROUND) list.push(UNDERGROUND);
     if (typeof FUSHIGI_PARK !== 'undefined' && FUSHIGI_PARK) list.push(FUSHIGI_PARK);
+    if (typeof AKUMA_FORT !== 'undefined' && AKUMA_FORT) list.push(AKUMA_FORT);
     return list;
   }
   /* その ちずに ある とくべつステージ（ふくすう ある ばあいも）*/
@@ -1530,7 +1531,14 @@
       const rs = (T.courses || []).map(cc => cc.allowRarity).filter(Boolean);
       if (rs.length) {
         lim.classList.remove('hidden');
-        lim.textContent = '★ステージごとに つかえる なかまの レア度が きまって います';
+        /* ★ぜんぶの ステージが おなじ せいげんなら、それを はっきり かく */
+        const all = rs.length === (T.courses || []).length;
+        const same = all && rs.every(r => r.join(',') === rs[0].join(','));
+        lim.textContent = same
+          ? ('★この とくせつは ' +
+             rs[0].map(k => (RARITY[k] ? RARITY[k].label : k)).join('・') +
+             ' の なかま だけ つれて いけます')
+          : '★ステージごとに つかえる なかまの レア度が きまって います';
       } else {
         lim.classList.add('hidden');
       }

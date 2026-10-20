@@ -128,24 +128,25 @@ function runMulti(n, opt) {
       drawChar: opt.noChar ? null : (c, h) => { charH.push(h); c.beginPath(); },
     });
   }
-  const seen = [], se = [];
+  const seen = [], se = [], seenAt = [];
   let end = 0;
   const handle = FX.playMulti(canvas, {
     items: items,
     se: opt.noSe ? null : ((x) => se.push(x)),
-    onReveal: (i) => seen.push(i),
+    onReveal: (i) => { seen.push(i); seenAt.push(now / 1000); },
     onEnd: () => end++,
   });
   for (let i = 0; i < 1500 && end === 0; i++) {
     now += 16.7;
     if (opt.skipAt === i) handle.skip();
+    if (opt.skipEvery && i >= opt.skipEvery) handle.skip();
     if (opt.stopAt === i) handle.stop();
     if (opt.stopAt !== undefined && i > opt.stopAt + 3) break;
     const list = frames; frames = [];
     list.forEach(fn => fn(now));
     if (!list.length && i > 2 && !end) break;
   }
-  return { n, seen, end, se, charH, draws, depth, minDepth, sec: now / 1000, handle };
+  return { n, seen, seenAt, end, se, charH, draws, depth, minDepth, sec: now / 1000, handle };
 }
 
 let passed = 0, failed = 0;
@@ -308,15 +309,35 @@ test('めずらしい ものが まざって いると ドラムロールと キ
   assert.ok(r.sec > none.sec, 'めずらしい ものの「ため」が ない');
 });
 
-test('とばすと のこりが ぜんぶ ひらいて、すぐ おわる', () => {
+test('★タップすると、つぎの 1たいが すぐ でる', () => {
+  [5, 10].forEach(n => {
+    const sk = runMulti(n, { skipAt: 6 });        // おちて いる とちゅうで タップ
+    const at = sk.seenAt[0];
+    assert.ok(at < 0.45, n + 'れん：タップしても 1たいめが ' + at.toFixed(2) + 'びょう かかる');
+    assert.strictEqual(sk.seen.length, n, 'さいごまで でない');
+    assert.strictEqual(sk.end, 1, 'おわらない');
+  });
+});
+
+test('★タップを つづけると どんどん すすんで、はやく おわる', () => {
   [5, 10].forEach(n => {
     const full = runMulti(n);
-    const sk = runMulti(n, { skipAt: 40 });
+    const sk = runMulti(n, { skipEvery: 6 });
     assert.strictEqual(sk.seen.length, n, 'とばしたら ' + sk.seen.length + 'こ しか でない');
     assert.deepStrictEqual(sk.seen, full.seen, 'じゅんばんが かわって いる');
     assert.strictEqual(sk.end, 1, 'おわらない');
-    assert.ok(sk.sec < full.sec, 'みじかく なって いない');
+    assert.ok(sk.sec < full.sec * 0.6, 'みじかく なって いない（' +
+      sk.sec.toFixed(2) + ' / ' + full.sec.toFixed(2) + '）');
   });
+});
+
+test('★5れん・10れんの テンポ（まちすぎない）', () => {
+  const b = runMulti(5), c = runMulti(10);
+  assert.ok(b.sec < 3.6, '5れんが ' + b.sec.toFixed(2) + 'びょう（ながい）');
+  assert.ok(c.sec < 6.0, '10れんが ' + c.sec.toFixed(2) + 'びょう（ながい）');
+  const gaps = c.seenAt.slice(1).map((v, i) => v - c.seenAt[i]);
+  assert.ok(Math.max.apply(null, gaps) < 0.75,
+    'あいだが あきすぎ（さいだい ' + Math.max.apply(null, gaps).toFixed(2) + 'びょう）');
 });
 
 test('とめたら おわりの しらせを ださない（まとめて の ほう）', () => {

@@ -3622,6 +3622,104 @@ const ENEMIES = {
     attackType: 'area',  areaRadius: 68,  projectile: 'stone',
     money: 220,
   },
+
+  /* ==========================================================================
+     ★ 特設・あくまの とりで の てき（6たい）
+
+     この とくせつステージは「★レア いか の なかま しか つれて いけない★」
+     ので、ふつうの てきより すこし ひかえめ … に すると かんたんすぎます。
+     なかまが よわい ぶん、てきは「かず」と「やくわり」で せめて きます。
+       ・こあくま／こうもりん … かずで おしよせる
+       ・たてもり           … たいりょくの かべ。なかなか たおれない
+       ・やりおに           … うしろから とどく ながい やり
+       ・ガーゴン           … ふきとばない いしの かべ
+       ・あくま（大ボス）   … とおくから やを はなつ。まわりを まもらせる
+     ========================================================================== */
+
+  /* --- こあくま --- かずで くる あくまの こども */
+  koakuma: {
+    id: 'koakuma', name: 'こあくま',
+    rarity: 'N',
+    attr: 'ghost',                        // ゆうれい
+    hp: 760,    atk: 170,  range: 70,   speed: 52,
+    attackInterval: 1.0,   attackWindup: 0.2,
+    kbCount: 3, scale: 0.92,
+    attackType: 'single', projectile: null,
+    money: 110,
+  },
+
+  /* --- こうもりん --- そらを とぶ。とても はやい */
+  komorin: {
+    id: 'komorin', name: 'こうもりん',
+    rarity: 'N',
+    attr: ['ghost', 'beast'],
+    hp: 520,    atk: 215,  range: 64,   speed: 104,
+    attackInterval: 0.85,  attackWindup: 0.14,
+    kbCount: 2, scale: 0.88,
+    attackType: 'single', projectile: null,
+    money: 125,
+  },
+
+  /* --- たてもり --- ボスを まもる かべ。ふきとびにくい */
+  tatemori: {
+    id: 'tatemori', name: 'たてもり',
+    rarity: 'R',
+    attr: 'none',
+    hp: 5200,   atk: 150,  range: 78,   speed: 17,
+    attackInterval: 1.8,   attackWindup: 0.4,
+    kbCount: 6, scale: 1.12,
+    attackType: 'single', projectile: null,
+    resist: { attrs: ['none', 'metal'], mult: 0.7 },   // かたい
+    money: 230,
+  },
+
+  /* --- やりおに --- うしろから とどく ながい やり */
+  yarioni: {
+    id: 'yarioni', name: 'やりおに',
+    rarity: 'R',
+    attr: ['ghost', 'beast'],
+    hp: 1450,   atk: 340,  range: 215,  speed: 26,
+    attackInterval: 2.0,   attackWindup: 0.42,
+    kbCount: 3, scale: 1.05,
+    attackType: 'single', projectile: null,
+    knockbackChance: 0.18,
+    money: 240,
+  },
+
+  /* --- ガーゴン --- いしの まもりがみ。ふきとばない */
+  gargon: {
+    id: 'gargon', name: 'ガーゴン',
+    rarity: 'GR',
+    attr: ['metal', 'none'],
+    hp: 7600,   atk: 560,  range: 92,   speed: 12,
+    attackInterval: 2.8,   attackWindup: 0.6,
+    kbCount: 99, scale: 1.3,
+    attackType: 'area',  areaRadius: 70,  projectile: null,
+    kbImmune: true,
+    money: 420,
+  },
+
+  /* --- あくま（大ボス）---
+       さいしゅうステージの 10びょうごに とうじょう。
+       とおくから やを はなち、まわりの ざこに じぶんを まもらせる。
+       はんぶん けずると おこって、はやく つよく なる。                */
+  akuma: {
+    id: 'akuma', name: 'あくま',
+    rarity: 'LR',
+    attr: ['ghost', 'magic'],
+    hp: 46000,  atk: 760,  range: 430,  speed: 15,
+    attackInterval: 2.3,   attackWindup: 0.5,
+    kbCount: 99, scale: 1.5,
+    attackType: 'area',  areaRadius: 86,  projectile: 'firearrow',
+    multiHit: { count: 2, delay: 0.3 },                      // や 2ほん
+    enrage: { below: 0.5, atkMult: 1.6, intervalMult: 0.6 }, // ★ほんきの あくま
+    kbImmune: true, stunImmune: true, slowImmune: true,
+    resist: { attrs: ['ghost', 'magic'], mult: 0.5 },
+    /* ★まわりの ざこが あくまを まもる */
+    escort: { id: ['tatemori', 'koakuma', 'komorin'], count: 2, interval: 9, first: 4 },
+    money: 3200,
+    isBoss: true,
+  },
 };
 
 /* --------------------------------------------------------------------------
@@ -8418,6 +8516,142 @@ const UNDERGROUND = {
   ],
 };
 
+/* --------------------------------------------------------------------------
+   特設・あくまの とりで（5ステージ）
+
+   ★この とくせつは ほかと ちがって「つかえる なかまが レア いか」★。
+   ノーマルと レアの なかま だけで、あくまの とりでを せめます。
+   つよい なかまに たよれない ので、へんせいと おかねの つかいかたが
+   ためされる、むずかしい ステージです。
+
+   5ステージめの おくに 大ボス「あくま」。
+     ・たたかいが はじまって 10びょうごに とうじょう（それまで しろは
+       60%より したには へりません）
+     ・とおく（430）から やを 2ほん はなって くる
+     ・9びょうごとに まわりの ざこを よんで、じぶんを まもらせる
+   ぜんぶ クリアすると ★そうびのもと 5こ と Gコイン 50まい★。
+   -------------------------------------------------------------------------- */
+const AKUMA_FORT = {
+  name: '特設・あくまの とりで',
+  icon: '😈',
+  desc: '★レア いかの なかま だけ★で いどむ とりで。おくに ゆみを もつ あくま！',
+  floors: 5,
+  world: 'storm',
+  unit: 'ステージ',
+  rewardChar: null,
+  rewardName: 'そうびのもと 5こ ＋ Gコイン 50まい',
+  courses: [
+
+    /* ---------- 1 もんばんの いしだたみ ---------- */
+    {
+      no: 701, floor: 1, chapter: 0, course: 1,
+      name: 'もんばんの いしだたみ',
+      desc: '★とくせつ★ つかえるのは ノーマルと レアの なかま だけ。こあくまが むれで くる。',
+      bg: 'yami',
+      castleHp: 2800,
+      power: 1.5,
+      allowRarity: ['N', 'R'],
+      drops: ['stone', 'cloth', 'wood'],
+      reward: { coins: 6, exp: 9000 },
+      waves: [
+        { at: 2,  id: 'koakuma', count: 3, gap: 0.8 },
+        { at: 14, id: 'komorin', count: 2, gap: 1.0 },
+        { at: 26, id: 'koakuma', count: 4, gap: 0.7, repeat: 14, times: 8 },
+        { at: 40, id: 'komorin', count: 2, gap: 0.9, repeat: 16, times: 6 },
+        { at: 64, id: 'tatemori', count: 1, repeat: 30, times: 3 },
+      ],
+    },
+
+    /* ---------- 2 たての ひろま ---------- */
+    {
+      no: 702, floor: 2, chapter: 0, course: 2,
+      name: 'たての ひろま',
+      desc: '★たてもりが みちを ふさぐ。かべの うしろから こあくまが せめて くる。',
+      bg: 'ut_hall',
+      castleHp: 3200,
+      power: 1.6,
+      allowRarity: ['N', 'R'],
+      drops: ['iron', 'stone', 'string'],
+      reward: { coins: 8, exp: 11000 },
+      waves: [
+        { at: 3,  id: 'tatemori', count: 1 },
+        { at: 12, id: 'koakuma',  count: 3, gap: 0.7 },
+        { at: 24, id: 'tatemori', count: 1, repeat: 20, times: 6 },
+        { at: 32, id: 'koakuma',  count: 4, gap: 0.6, repeat: 13, times: 9 },
+        { at: 56, id: 'komorin',  count: 3, gap: 0.8, repeat: 18, times: 6 },
+      ],
+    },
+
+    /* ---------- 3 やりの かいろう ---------- */
+    {
+      no: 703, floor: 3, chapter: 0, course: 3,
+      name: 'やりの かいろう',
+      desc: '★うしろから とどく ながい やり。ちかづく まえに やられない ように。',
+      bg: 'rock',
+      castleHp: 3600,
+      power: 1.7,
+      allowRarity: ['N', 'R'],
+      drops: ['iron', 'alumi', 'cloth'],
+      reward: { coins: 10, exp: 13000 },
+      waves: [
+        { at: 2,  id: 'komorin',  count: 2, gap: 0.9 },
+        { at: 10, id: 'yarioni',  count: 1 },
+        { at: 22, id: 'tatemori', count: 1, repeat: 24, times: 5 },
+        { at: 30, id: 'yarioni',  count: 1, repeat: 15, times: 8 },
+        { at: 44, id: 'koakuma',  count: 4, gap: 0.6, repeat: 12, times: 10 },
+      ],
+    },
+
+    /* ---------- 4 いしの まもりがみ ---------- */
+    {
+      no: 704, floor: 4, chapter: 0, course: 4,
+      name: 'いしの まもりがみ',
+      desc: '★ガーゴンは ふきとばない。やりおにと いっしょに せめて くる。',
+      bg: 'ut_throne',
+      castleHp: 4000,
+      power: 1.8,
+      allowRarity: ['N', 'R'],
+      drops: ['alumi', 'iron', 'glue'],
+      reward: { coins: 12, exp: 16000 },
+      waves: [
+        { at: 3,  id: 'koakuma',  count: 3, gap: 0.7 },
+        { at: 14, id: 'gargon',   count: 1 },
+        { at: 28, id: 'yarioni',  count: 2, gap: 2.0, repeat: 18, times: 7 },
+        { at: 40, id: 'gargon',   count: 1, repeat: 26, times: 5 },
+        { at: 52, id: 'komorin',  count: 4, gap: 0.6, repeat: 14, times: 9 },
+        { at: 66, id: 'tatemori', count: 2, gap: 2.5, repeat: 22, times: 6 },
+      ],
+    },
+
+    /* ---------- 5 あくまの ぎょくざ（大ボス）---------- */
+    {
+      no: 705, floor: 5, chapter: 0, course: 5,
+      name: 'あくまの ぎょくざ',
+      desc: '★さいしゅう★ 10びょうごに ゆみを もつ「あくま」が とうじょう！まわりの てきが あくまを まもる。',
+      bg: 'boss',
+      castleHp: 4600,
+      power: 1.9,
+      allowRarity: ['N', 'R'],
+      drops: ['alumi', 'glue', 'iron'],
+      reward: { coins: 50, exp: 24000 },
+      /* ★ぜんぶ クリアの ごほうび（はじめて クリアした ときだけ）*/
+      gearCore: 5,
+      waves: [
+        { at: 2,  id: 'koakuma',  count: 3, gap: 0.7 },
+        { at: 6,  id: 'tatemori', count: 1 },
+        /* ★10びょうごに 大ボス。それまで しろは 60%より したに へりません */
+        { at: 10, id: 'akuma',    count: 1, hold: 0.6 },
+        { at: 20, id: 'komorin',  count: 3, gap: 0.7, repeat: 13, times: 12 },
+        { at: 30, id: 'yarioni',  count: 2, gap: 1.8, repeat: 16, times: 10 },
+        { at: 46, id: 'tatemori', count: 1, repeat: 20, times: 8 },
+        { at: 58, id: 'gargon',   count: 1, repeat: 28, times: 6 },
+      ],
+    },
+
+  ],
+};
+
+
 /* ぞくせいを あらわす 1もじ（てきの あたまの うえに でます）*/
 /* --------------------------------------------------------------------------
    ふしぎな せかいの しかけ
@@ -8569,6 +8803,20 @@ const NEKOS_TALKS = [
    date は みための ひづけ、items は かじょうがき（なんこ でも OK）。
    -------------------------------------------------------------------------- */
 const CHANGELOG = [
+  {
+    ver: '6.67', date: '2026-10-20',
+    title: '★特設・あくまの とりで（5ステージ）★ ＋ ガチャの テンポを はやく',
+    items: [
+      '★たつまき ちずに「特設・あくまの とりで」を たしました（5ステージ）。★ ちずの みぎうえ、😈の ボタンから はいれます。',
+      '★この とくせつだけは、つれて いける なかまが「ノーマル」と「レア」だけ★ です。つよい なかまに たよれない ぶん、だす じゅんばんと おかねの つかいかたが だいじに なります。むずかしさは たかめです。',
+      '★あたらしい てきが 6たい。★ こあくま・こうもりん（かずで くる）、たてもり（かたい かべ）、やりおに（とおくから とどく やり）、ガーゴン（ふきとばない いし）、そして 大ボス「★あくま★」。',
+      '★大ボス「あくま」は 5ステージめ、たたかいが はじまって 10びょうごに とうじょう。★ それまでは しろを 60%より したには けずれません。',
+      'あくまは ★とおく（430）から ゆみで やを 2ほん はなって きます。★ 9びょうごとに まわりの てきを よんで じぶんを まもらせ、たいりょくが はんぶんに なると おこって つよく なります。ふきとばしも、しびれも、おそくするのも ききません。',
+      '★5ステージめを はじめて クリアすると、そうびのもと 5こ と Gコイン 50まい★ が もらえます。',
+      '★5れん・10れんガチャを テンポよく しました。★ 10れんが 7.3びょう → 4.5びょう くらいに なりました。',
+      '★えんしゅつちゅうに タップすると、つぎの 1たいが すぐ でて きます。★ おし つづけると どんどん すすみます（まえは ぜんぶ とばして いました）。',
+    ],
+  },
   {
     ver: '6.66', date: '2026-10-20',
     title: '★ガチャが 1かい・5れん・10れん★（えんしゅつも それぞれ ちがいます）',

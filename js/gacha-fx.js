@@ -300,22 +300,22 @@ const GachaFX = (() => {
     }
     const n = items.length, cols = Math.min(5, n) || 1;
     const rows = Math.ceil(n / cols) || 1;
-    const lastLand = 0.5 + Math.max(0, n - 1) * 0.06;
-    const shakeAt = lastLand + 0.28, readyAt = shakeAt + 0.45;
+    const lastLand = 0.5 + Math.max(0, n - 1) * 0.045;
+    const shakeAt = lastLand + 0.22, readyAt = shakeAt + 0.30;
     const times = [], opened = [], revealed = [];
     let next = readyAt, hasSpecial = false;
     for (let i = 0; i < n; i++) {
-      if (items[i].special) { next += 0.55; hasSpecial = true; }
+      if (items[i].special) { next += 0.33; hasSpecial = true; }
       times.push(next);
-      next += 0.33;
+      next += 0.22;
     }
-    const endAt = n ? times[n - 1] + 0.12 + 0.8 : 0;
+    const endAt = n ? times[n - 1] + 0.12 + 0.7 : 0;
     let start = performance.now();
     const clamp = (v) => Math.max(0, Math.min(1, v));
     const ease = (v) => 1 - Math.pow(1 - clamp(v), 3);
     let ctx, w = 0, h = 0, stopped = false, ended = false;
     let landed = false, bounced = false, rolled = false;
-    let fanfare = false, rare = false, running = false, skipping = false;
+    let fanfare = false, rare = false, running = false;
 
     // お知らせがなくてもへいき。とばす、とめるは何度でもよい。
     function call(fn, a, b) {
@@ -335,28 +335,21 @@ const GachaFX = (() => {
       ended = true;
       call(opts.onEnd);
     }
+    /* ★タップ（とばす）＝「つぎの 1たいが でる ところ」まで 時間を とばす。
+         おして いくと 1たいずつ どんどん でて、
+         ぜんぶ でて いたら そのまま おしまいまで すすみます。      */
     function skip() {
-      if (stopped || ended || skipping) return;
-      skipping = true;
-      if (!running) finishSkip();
-    }
-    function finishSkip() {
       if (stopped || ended) return;
-      running = true;
-      try {
-        /* ★とばした ときは、のこりを ぜんぶ あけて、
-             ならんだ すがたを すこしだけ みせてから おわります
-             （いきなり きえると、なにが でたか わかりません）*/
-        let left = false;
-        for (let i = 0; i < n; i++) if (!opened[i]) { opened[i] = true; left = true; }
-        if (left) sound('pakaan');
-        for (let i = 0; i < n && !stopped; i++) reveal(i);
-        if (!stopped) {
-          const hold = 0.7;
-          start = performance.now() - Math.max(0, endAt - hold) * 1000;
-          skipping = false;
+      const t = (performance.now() - start) / 1000;
+      /* とばす と、おちる・はねる・ドラムロールは もう ならしません */
+      landed = true; bounced = true; rolled = true;
+      for (let i = 0; i < n; i++) {
+        if (!opened[i]) {
+          if (times[i] > t) start -= (times[i] - t) * 1000;
+          return;
         }
-      } finally { running = false; }
+      }
+      if (endAt > t) start -= (endAt - t) * 1000;
     }
 
     // ひとつ用とおなじ大きさの合わせかた。背景はぬらない。
@@ -585,19 +578,14 @@ const GachaFX = (() => {
         if (n && !landed && t >= 0.5) { landed = true; sound('ball'); }
         if (n && !bounced && t >= lastLand) { bounced = true; sound('bounce'); }
         if (!rolled && hasSpecial && t >= shakeAt) { rolled = true; sound('roll'); }
-        for (let i = 0; i < n && !stopped && !skipping; i++) {
+        for (let i = 0; i < n && !stopped; i++) {
           if (!opened[i] && t >= times[i]) { opened[i] = true; sound('pakaan'); }
-          if (!stopped && !skipping && t >= times[i] + 0.12) reveal(i);
+          if (!stopped && t >= times[i] + 0.12) reveal(i);
         }
-        if (!stopped && !skipping) paint(Math.min(t, endAt));
-        if (!skipping && t >= endAt) finish();
+        if (!stopped) paint(Math.min(t, endAt));
+        if (t >= endAt) finish();
       } finally { running = false; }
       if (stopped || ended) return;
-      if (skipping) {
-        finishSkip();
-        if (!stopped && !ended) requestAnimationFrame(frame);
-        return;
-      }
       requestAnimationFrame(frame);
     }
     try { ctx = canvas && canvas.getContext('2d'); } catch (_) {}
