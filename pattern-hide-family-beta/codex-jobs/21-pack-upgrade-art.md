@@ -24,6 +24,9 @@
 ## 数値の優先順位
 この依頼書や `strategy/` の文書と `src/` のコードで数値が食い違うときは、**`src/` のコード（`characters.ts`・`myroom.ts`・`movers.ts`・`moverView.ts`・`beach.ts`・`props-beach.ts`・`stickers.ts`）が正** です。
 
+## 数値の優先順位
+この依頼書と `src/` のコードで数値が食い違うときは、**`src/` のコード（`characters.ts`・`myroom.ts`・`movers.ts`・`props-beach.ts`・`scenes/beach.ts`）を正** とする。
+
 ## 書き込んでよい場所
 - `art/` の中だけ（`src/` や `tests/` や `scripts/` は変更しない）
 
