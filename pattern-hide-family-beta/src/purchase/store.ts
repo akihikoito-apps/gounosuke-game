@@ -21,7 +21,8 @@ export const PRODUCTS: ProductDef[] = [
   { id: `${P}forest`, packs: ['forest'], name: 'きのこの もり パック', summary: '背景「きのこの もり」・友だち「ぴの」・へや「もりの ひろば」・おもちゃと家具8つ・シール5枚' },
   { id: `${P}aquarium`, packs: ['aquarium'], name: 'すいぞくかん パック', summary: '背景「すいぞくかん」・友だち「ぷか」・へや「すいぞくかんの へや」・おもちゃと家具6つ・シール5枚' },
   { id: `${P}night`, packs: ['night'], name: 'ほたるの かわべ パック', summary: '背景「ほたるの かわべ」・友だち「ひか」・へや「ほたるの えんがわ」・おもちゃと家具6つ・シール5枚' },
-  { id: `${P}allpacks`, packs: ['more-courses', 'beach', 'forest', 'aquarium', 'night'], name: 'ぜんぶ いり', summary: '上の5つ すべて（まとめて お得）' },
+  { id: `${P}dino`, packs: ['dino'], name: 'きょうりゅうの たに パック', summary: '背景「きょうりゅうの たに」・動く恐竜5体・友だち「がお」・へや「きょうりゅうの ひろば」・おもちゃと家具8つ・シール5枚' },
+  { id: `${P}allpacks`, packs: ['more-courses', 'beach', 'forest', 'aquarium', 'night', 'dino'], name: 'ぜんぶ いり', summary: '上の6つ すべて（まとめて お得）' },
 ];
 
 /** 購入記録（製品IDの一覧）→ 持っているパック。セットは中身のパックすべて。どれかを返金しても ほかの購入は消さない */

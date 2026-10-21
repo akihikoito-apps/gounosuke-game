@@ -2,7 +2,7 @@
 // ローカル座標：足もと中央が原点、上が -y。高さ約200。
 import { type Pt, type Shape, quadPoints, shapeToSvg } from './geometry';
 
-export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'ou' | 'choki' | 'pino' | 'puka' | 'hika';
+export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'ou' | 'choki' | 'pino' | 'puka' | 'hika' | 'gao';
 import type { SceneId } from './scene';
 
 export interface CharacterDef {
@@ -186,9 +186,26 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     ],
     facePoints: FACE,
   },
+  // 背景パック5「きょうりゅうの たに」の友だち。きょうりゅうの たにで初めて誰かを見つけると仲間になる
+  gao: {
+    id: 'gao',
+    name: 'がお',
+    personality: 'きょうりゅうごっこが だいすきな げんきっこ。あたまの まるい せびれ が めじるし。',
+    skin: '#C8E6B8',
+    silhouette: [
+      BODY,
+      HEAD,
+      { kind: 'ellipse', cx: 0, cy: -196, rx: 11, ry: 15 },
+      rotEllipse(-28, -188, 10, 14, -28, -28, -188),
+      rotEllipse(28, -188, 10, 14, 28, 28, -188),
+      rotEllipse(-50, -166, 9, 12, -55, -50, -166),
+      rotEllipse(50, -166, 9, 12, 55, 50, -166),
+    ],
+    facePoints: FACE,
+  },
 };
 
-export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'ou', 'choki', 'pino', 'puka', 'hika'];
+export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'ou', 'choki', 'pino', 'puka', 'hika', 'gao'];
 /** 最初からいる3体 */
 export const BASE_CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
 /** 新しい友だちが仲間になるコース（このコースをクリアしたら）。最初のクリアで1体目が来る */
@@ -204,6 +221,7 @@ export const SCENE_FRIENDS: { scene: SceneId; char: CharacterId }[] = [
   { scene: 'forest', char: 'pino' },
   { scene: 'aquarium', char: 'puka' },
   { scene: 'night', char: 'hika' },
+  { scene: 'dino', char: 'gao' },
 ];
 
 /** いま遊べるキャラクター（コースの進み具合と、背景パックで見つけた回数で増える） */
@@ -333,6 +351,25 @@ function headMarkup(c: CharacterDef): string {
         eyes() +
         cheeks() +
         `<path d="M-7 -125 Q0 -118 7 -125" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
+      );
+    }
+    case 'gao': {
+      // 頭のふちに並んだ5つのまるいせびれプレート（とがらない、花びら・水滴形）
+      const plate = (cx: number, cy: number, rx: number, ry: number, deg: number) =>
+        `<g transform="rotate(${deg} ${cx} ${cy})">` +
+        `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#F2A868" ${st}/>` +
+        `<ellipse cx="${cx}" cy="${cy + 2}" rx="${Math.max(4, rx - 5)}" ry="${Math.max(5, ry - 6)}" fill="#FFE29A"/>` +
+        `</g>`;
+      return (
+        plate(-50, -166, 9, 12, -55) +
+        plate(50, -166, 9, 12, 55) +
+        plate(-28, -188, 10, 14, -28) +
+        plate(28, -188, 10, 14, 28) +
+        plate(0, -196, 11, 15, 0) +
+        `<ellipse cx="0" cy="-142" rx="48" ry="45" fill="${c.skin}" ${st}/>` +
+        eyes() +
+        cheeks() +
+        `<path d="M-9 -125 Q0 -116 9 -125" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
       );
     }
     case 'popo': {

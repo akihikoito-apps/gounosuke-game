@@ -30,3 +30,4 @@
 - [x] 91-hardest-course-r1.md — 最難関コースの議論・第1回 2026-10-08（audit/codex/hardest-course-r1.md）
 - [x] 92-hardest-course-r2.md — 最難関コースの議論・第2回（仕様確定）2026-10-08（audit/codex/hardest-course-r2.md）
 - [ ] 21-pack-upgrade-art.md — 既存パックの魅力強化（友だち「おう」・おもちゃ6点・かわべのうごくもの2点・うみべ前景小物）
+- [ ] 22-dino-art.md — 追加パック「きょうりゅうの たに」の絵一式（背景4層・柄4枚・友だち「がお」6枚・動く恐竜5枚・へやと物8枚・シール5枚の計32枚）

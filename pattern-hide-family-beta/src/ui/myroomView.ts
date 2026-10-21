@@ -38,6 +38,7 @@ const OUTFIT: Record<string, PatternSpec> = {
   pino: { kind: 'leaf', bg: '#E5F2DC', fg: '#9AC88E', size: 32 },
   puka: { kind: 'dots', bg: '#DCECF8', fg: '#FFFFFF', size: 30 },
   hika: { kind: 'dots', bg: '#E2F0DC', fg: '#FFF3B0', size: 30 },
+  gao: { kind: 'stripes', bg: '#F4E4CE', fg: '#D99B78', size: 30 },
 };
 
 const L = 'stroke="#4A3A40" stroke-width="5" stroke-linejoin="round"';
@@ -46,6 +47,24 @@ function itemArt(it: ItemDef, part = ''): string {
   const f = itemArtFile(part ? `${it.id}-${part}` : it.id);
   if (f) return `<image href="${f}" x="-150" y="-300" width="300" height="300"/>`;
   if (part) return '';
+  switch (it.id) {
+    case 'egg-sofa':
+      return `<ellipse cx="0" cy="-70" rx="126" ry="66" fill="#FFF6E6" ${L}/><circle cx="-54" cy="-94" r="14" fill="#88C894"/><circle cx="48" cy="-96" r="13" fill="#F2A488"/><rect x="-112" y="-68" width="224" height="44" rx="22" fill="#98C686" ${L}/>`;
+    case 'bone-slide':
+      return `<path d="M-92 -12 V-112 H-36 V-12" fill="#E6C6A0" ${L}/><path d="M-46 -108 Q18 -96 98 -16 L76 -4 Q4 -74 -58 -84 Z" fill="#FFF8EE" ${L}/>`;
+    case 'footprint-rug':
+      return `<ellipse cx="0" cy="-24" rx="138" ry="38" fill="#E8D5B5" ${L}/><ellipse cx="0" cy="-20" rx="34" ry="18" fill="#98C686"/><circle cx="-36" cy="-36" r="10" fill="#98C686"/><circle cx="0" cy="-42" r="11" fill="#98C686"/><circle cx="36" cy="-36" r="10" fill="#98C686"/>`;
+    case 'dino-egg':
+      return `<ellipse cx="0" cy="-54" rx="44" ry="52" fill="#FFF6E6" ${L}/><circle cx="-14" cy="-64" r="9" fill="#88C894"/><circle cx="16" cy="-46" r="10" fill="#F2A488"/><path d="M-28 -52 L-10 -62 L6 -48 L24 -60" fill="none" stroke="#4A3A40" stroke-width="3.5" stroke-linecap="round"/>`;
+    case 'dino-plush':
+      return `<ellipse cx="0" cy="-42" rx="44" ry="36" fill="#88C88E" ${L}/><circle cx="24" cy="-82" r="24" fill="#88C88E" ${L}/><circle cx="30" cy="-86" r="4" fill="#4A3A40"/><ellipse cx="0" cy="-38" rx="24" ry="20" fill="#FFF4C8"/>`;
+    case 'dino-ride':
+      return `<path d="M-84 -10 Q0 12 84 -10" fill="none" stroke="#C89664" stroke-width="10" stroke-linecap="round"/><ellipse cx="0" cy="-52" rx="64" ry="34" fill="#78B888" ${L}/><circle cx="52" cy="-92" r="24" fill="#78B888" ${L}/><circle cx="58" cy="-96" r="4" fill="#4A3A40"/>`;
+    case 'volcano-lamp':
+      return `<path d="M-48 -6 L-24 -86 H24 L48 -6 Z" fill="#C89678" ${L}/><circle cx="0" cy="-108" r="20" fill="#FFE082" ${L}/><circle cx="-10" cy="-134" r="12" fill="#FFF6C8" ${L}/>`;
+    case 'baby-dino':
+      return `<ellipse cx="0" cy="-42" rx="34" ry="28" fill="#A8D898" ${L}/><path d="M-34 -36 L-18 -48 L0 -34 L18 -48 L34 -36 A34 26 0 0 1 -34 -36 Z" fill="#FFF6E8" ${L}/><circle cx="18" cy="-76" r="22" fill="#A8D898" ${L}/><circle cx="24" cy="-78" r="4" fill="#4A3A40"/>`;
+  }
   // 絵が無いときの かんたんな形
   const w = it.w;
   const h = it.flat ? 30 : Math.min(200, w * 0.6);
@@ -698,6 +717,8 @@ const TALL: Record<string, number> = {
   'firefly-jar': 130,
   'goldfish-bowl': 130,
   'rocking-horse': 160,
+  'volcano-lamp': 160,
+  'dino-ride': 160,
 };
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const r1s = (n: number) => Math.round(n * 1000) / 1000;

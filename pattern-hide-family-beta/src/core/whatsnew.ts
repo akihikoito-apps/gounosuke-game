@@ -1,6 +1,6 @@
 // 「あたらしく なったよ」：アプリを更新したあと、増えた物を1回だけ知らせる（通信はしない。中身はアプリに同梱）。
 // 新しい版を出すときは、CONTENT_VERSION を1つ上げ、NEWS の先頭に足す。
-export const CONTENT_VERSION = 5;
+export const CONTENT_VERSION = 6;
 
 export interface News {
   version: number;
@@ -9,6 +9,7 @@ export interface News {
 }
 
 export const NEWS: News[] = [
+  { version: 6, lines: ['あたらしい ついかパック「きょうりゅうの たに」が できたよ', 'うごく きょうりゅうたちと ともだち「がお」に あえるよ'] },
   { version: 5, lines: ['「じゆうに さがす」でも いきものが うごくよ', 'シールちょうが ページをめくれる ほんに なったよ'] },
   { version: 4, lines: ['「ほたるの かわべ」の パックが できたよ', 'あたらしい ともだち「ひか」と ほたるの えんがわが ふえたよ'] },
   { version: 3, lines: ['おうちの ひとと パックが えらべるよ', 'うみべに デッキの へやが ふえたよ', 'へやの ともだちを タップで おひっこし できるよ'] },

@@ -20,15 +20,16 @@ import { SCENES, SCENE_IDS } from '../../src/core/scenes';
 import { validate } from '../../src/storage/schema';
 
 describe('sticker book and the new friend', () => {
-  it('35 stickers: one per course, five by total finds, five for beach, five for forest, five for aquarium, five for night; no randomness', () => {
-    expect(STICKERS).toHaveLength(35);
-    expect(new Set(STICKERS.map((s) => s.id)).size).toBe(35);
+  it('40 stickers: one per course, five by total finds, five for beach, five for forest, five for aquarium, five for night, five for dino; no randomness', () => {
+    expect(STICKERS).toHaveLength(40);
+    expect(new Set(STICKERS.map((s) => s.id)).size).toBe(40);
     expect(earnedStickers(0, 0)).toHaveLength(0);
     expect(earnedStickers(10, 150)).toHaveLength(15);
     expect(earnedStickers(10, 150, { beach: 50 })).toHaveLength(20);
     expect(earnedStickers(10, 150, { beach: 50, forest: 50 })).toHaveLength(25);
     expect(earnedStickers(10, 150, { beach: 50, forest: 50, aquarium: 50 })).toHaveLength(30);
     expect(earnedStickers(10, 150, { beach: 50, forest: 50, aquarium: 50, night: 50 })).toHaveLength(35);
+    expect(earnedStickers(10, 150, { beach: 50, forest: 50, aquarium: 50, night: 50, dino: 50 })).toHaveLength(40);
     expect(earnedStickers(0, 0, { beach: 1 }).map((s) => s.id)).toEqual(['b1']);
     expect(earnedStickers(0, 0, { beach: 10 }).map((s) => s.id)).toEqual(['b1', 'b5', 'b10']);
     expect(earnedStickers(0, 0, { beach: 30 }).map((s) => s.id)).toEqual(['b1', 'b5', 'b10', 'b30']);
@@ -36,6 +37,7 @@ describe('sticker book and the new friend', () => {
     expect(earnedStickers(0, 0, { forest: 1 }).map((s) => s.id)).toEqual(['f-s1']);
     expect(earnedStickers(0, 0, { aquarium: 1 }).map((s) => s.id)).toEqual(['a-s1']);
     expect(earnedStickers(0, 0, { night: 1 }).map((s) => s.id)).toEqual(['n-s1']);
+    expect(earnedStickers(0, 0, { dino: 1 }).map((s) => s.id)).toEqual(['d-s1']);
     expect(earnedStickers(3, 30).map((s) => s.id)).toEqual(['c1', 'c2', 'c3', 'f10', 'f30']);
     expect(newStickers({ cleared: 4, totalFinds: 29 }, { cleared: 5, totalFinds: 30 }).map((s) => s.id)).toEqual(['c5', 'f30']);
     expect(STICKERS.find((s) => s.id === 'c5')?.char).toBe('popo');
@@ -50,6 +52,8 @@ describe('sticker book and the new friend', () => {
     expect(stickerHint(STICKERS.find((s) => s.id === 'a-s5')!)).toBe('すいぞくかんで 5かい');
     expect(stickerHint(STICKERS.find((s) => s.id === 'n-s1')!)).toBe('ほたるの かわべで みつけたら');
     expect(stickerHint(STICKERS.find((s) => s.id === 'n-s5')!)).toBe('ほたるの かわべで 5かい');
+    expect(stickerHint(STICKERS.find((s) => s.id === 'd-s1')!)).toBe('きょうりゅうの たにで みつけたら');
+    expect(stickerHint(STICKERS.find((s) => s.id === 'd-s5')!)).toBe('きょうりゅうの たにで 5かい');
   });
 
   it('sticker book pages, progress hints, and initial page selection', () => {
@@ -58,7 +62,7 @@ describe('sticker book and the new friend', () => {
     expect(freePages.map((p) => p.id)).toEqual(['course', 'finds']);
 
     const allPages = stickerPages(STICKERS);
-    expect(allPages.map((p) => p.id)).toEqual(['course', 'finds', 'beach', 'forest', 'aquarium', 'night']);
+    expect(allPages.map((p) => p.id)).toEqual(['course', 'finds', 'beach', 'forest', 'aquarium', 'night', 'dino']);
 
     const prog = { cleared: 6, totalFinds: 18, sceneFinds: { beach: 2 } };
     expect(stickerProgressHint(STICKERS.find((s) => s.id === 'c7')!, prog)).toBe('コース7');
@@ -89,7 +93,8 @@ describe('sticker book and the new friend', () => {
     expect(unlockedCharacters(0, { forest: 1 })).toEqual([...BASE_CHARACTER_IDS, 'pino']);
     expect(unlockedCharacters(0, { aquarium: 1 })).toEqual([...BASE_CHARACTER_IDS, 'puka']);
     expect(unlockedCharacters(0, { night: 1 })).toEqual([...BASE_CHARACTER_IDS, 'hika']);
-    expect(unlockedCharacters(10, { beach: 3, forest: 1, aquarium: 1, night: 1 })).toEqual(CHARACTER_IDS);
+    expect(unlockedCharacters(0, { dino: 1 })).toEqual([...BASE_CHARACTER_IDS, 'gao']);
+    expect(unlockedCharacters(10, { beach: 3, forest: 1, aquarium: 1, night: 1, dino: 1 })).toEqual(CHARACTER_IDS);
     for (const id of SCENE_IDS) {
       for (let seed = 1; seed <= 60; seed++) {
         expect(autoLayout(SCENES[id], 'normal', seed).some((p) => p.char === 'nyako' || p.char === 'popo' || p.char === 'ou')).toBe(false);

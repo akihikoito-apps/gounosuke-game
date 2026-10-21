@@ -25,6 +25,11 @@ const SIZE: Record<MoverKind, { w: number; h: number }> = {
   frog: { w: 84, h: 56 },
   dragonfly: { w: 84, h: 52 },
   'floating-lantern': { w: 84, h: 64 },
+  brachio: { w: 180, h: 160 },
+  pteranodon: { w: 148, h: 86 },
+  tricera: { w: 160, h: 106 },
+  stegosaur: { w: 164, h: 110 },
+  'mini-raptor': { w: 116, h: 88 },
 };
 
 describe('うごくもの', () => {
@@ -59,9 +64,11 @@ describe('うごくもの', () => {
         expect(pickSearchMovers(id, 'normal', seed * 17)).toEqual(normal);
       }
     }
-    // ほたるの かわべ は 4種類（ほたる・とんぼ・かえる・とうろうぶね）5軌道
+    // ほたるの かわべ は 4種類（ほたる・とんぼ・かえる・とうろうぶね）5軌道、きょうりゅうの たに は 5種類5軌道
     expect(MOVERS.night).toHaveLength(5);
     expect(new Set(MOVERS.night.map((m) => m.kind))).toEqual(new Set(['firefly', 'dragonfly', 'frog', 'floating-lantern']));
+    expect(MOVERS.dino).toHaveLength(5);
+    expect(new Set(MOVERS.dino.map((m) => m.kind))).toEqual(new Set(['brachio', 'pteranodon', 'tricera', 'stegosaur', 'mini-raptor']));
   });
 
   it('前を通るものは、どの隠れ場所の顔も 3秒より長く隠さない', () => {

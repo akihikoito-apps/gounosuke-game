@@ -4,7 +4,7 @@ import type { CharacterId } from './characters';
 import type { SceneId } from './scene';
 import { SCENES, SCENE_IDS } from './scenes';
 
-export type Motif = 'shell' | 'floatring' | 'shavedice' | 'crab' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel' | 'jellyfish' | 'dolphin' | 'treasure' | 'penguin' | 'firefly' | 'frog' | 'dragonfly';
+export type Motif = 'shell' | 'floatring' | 'shavedice' | 'crab' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel' | 'jellyfish' | 'dolphin' | 'treasure' | 'penguin' | 'firefly' | 'frog' | 'dragonfly' | 'dino-egg' | 'footprint' | 'tricera' | 'ammonite' | 'brachio';
 
 export interface StickerDef {
   id: string;
@@ -61,6 +61,12 @@ export const STICKERS: StickerDef[] = [
   { id: 'n-s15', name: 'かわべで 15かい', kind: 'scene', scene: 'night', need: 15, char: 'hika', motif: 'frog', color: '#D4EBD8' },
   { id: 'n-s30', name: 'かわべで 30かい', kind: 'scene', scene: 'night', need: 30, char: 'moko', motif: 'dragonfly', color: '#D8E4F4' },
   { id: 'n-s50', name: 'かわべで 50かい', kind: 'scene', scene: 'night', need: 50, char: 'hika', motif: 'moon', color: '#F6EAB8' },
+  // 背景パック5「きょうりゅうの たに」
+  { id: 'd-s1', name: 'がおが きたよ', kind: 'scene', scene: 'dino', need: 1, char: 'gao', motif: 'dino-egg', color: '#E2F0D4' },
+  { id: 'd-s5', name: 'たにで 5かい', kind: 'scene', scene: 'dino', need: 5, char: 'koro', motif: 'footprint', color: '#F4E2C6' },
+  { id: 'd-s15', name: 'たにで 15かい', kind: 'scene', scene: 'dino', need: 15, char: 'gao', motif: 'tricera', color: '#F5D8C8' },
+  { id: 'd-s30', name: 'たにで 30かい', kind: 'scene', scene: 'dino', need: 30, char: 'popo', motif: 'ammonite', color: '#DCE8F2' },
+  { id: 'd-s50', name: 'きょうりゅう はかせ', kind: 'scene', scene: 'dino', need: 50, char: 'gao', motif: 'brachio', color: '#D6ECD8' },
 ];
 
 export interface Progress {

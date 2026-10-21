@@ -822,9 +822,18 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 .mv-inner { transform-box: view-box; animation: mv-step 0.5s ease-in-out infinite alternate; }
 .mv-inner.fly { animation: mv-fly 0.9s ease-in-out infinite alternate; }
 .mv-inner.drift { animation: mv-drift 3s ease-in-out infinite alternate; }
+.mv-inner.lumber { animation: mv-lumber 0.85s ease-in-out infinite alternate; transform-origin: 0 0; }
+.mv.tickled > .mv-inner { animation: mv-tickle 0.55s ease-in-out; transform-origin: 0 -45px; }
 @keyframes mv-step { from { transform: translateY(0); } to { transform: translateY(-5px); } }
 @keyframes mv-fly { from { transform: translateY(0); } to { transform: translateY(-14px); } }
 @keyframes mv-drift { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+@keyframes mv-lumber { from { transform: translateY(0) rotate(-1.8deg); } to { transform: translateY(-7px) rotate(1.8deg); } }
+@keyframes mv-tickle {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  25% { transform: translateY(-12px) rotate(-8deg) scale(1.06); }
+  50% { transform: translateY(-6px) rotate(8deg) scale(1.06); }
+  75% { transform: translateY(-10px) rotate(-5deg) scale(1.04); }
+}
 @media (prefers-reduced-motion: reduce) {
   .mv, .mv-inner { animation-play-state: paused; }
 }

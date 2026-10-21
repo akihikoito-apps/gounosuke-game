@@ -69,6 +69,16 @@ function motif(m: Motif): string {
       return `<ellipse cx="0" cy="3" rx="13" ry="10" fill="#88C88E" ${L}/><circle cx="-7" cy="-6" r="5" fill="#88C88E" ${L}/><circle cx="7" cy="-6" r="5" fill="#88C88E" ${L}/><circle cx="-7" cy="-6" r="2" fill="#4A3A40"/><circle cx="7" cy="-6" r="2" fill="#4A3A40"/><path d="M-5 4 Q0 8 5 4" fill="none" ${L}/>`;
     case 'dragonfly':
       return `<ellipse cx="-7" cy="-3" rx="9" ry="4" fill="#CFE8F6" ${L}/><ellipse cx="7" cy="-3" rx="9" ry="4" fill="#CFE8F6" ${L}/><path d="M0 -10 V12" stroke="#6BA8A0" stroke-width="4" stroke-linecap="round"/><circle cx="0" cy="-10" r="4" fill="#6BA8A0" ${L}/>`;
+    case 'dino-egg':
+      return `<ellipse cx="0" cy="2" rx="12" ry="15" fill="#FFF6E6" ${L}/><circle cx="-4" cy="-2" r="3" fill="#88C894"/><circle cx="5" cy="4" r="3.5" fill="#F2A488"/><circle cx="-2" cy="8" r="2.5" fill="#88C894"/>`;
+    case 'footprint':
+      return `<ellipse cx="0" cy="5" rx="9" ry="7" fill="#D99B78" ${L}/><circle cx="-8" cy="-5" r="3.5" fill="#D99B78" ${L}/><circle cx="0" cy="-8" r="4" fill="#D99B78" ${L}/><circle cx="8" cy="-5" r="3.5" fill="#D99B78" ${L}/>`;
+    case 'tricera':
+      return `<circle cx="-3" cy="-2" r="11" fill="#D99B78" ${L}/><ellipse cx="3" cy="3" rx="10" ry="8" fill="#F4E4CE" ${L}/><circle cx="2" cy="-7" r="3" fill="#FFF6E8" ${L}/><circle cx="10" cy="-3" r="3" fill="#FFF6E8" ${L}/><circle cx="6" cy="2" r="1.8" fill="#4A3A40"/>`;
+    case 'ammonite':
+      return `<circle cx="0" cy="0" r="13" fill="#F2DEC4" ${L}/><path d="M0 0 m-3 0 a3 3 0 1 0 6 0 a6 6 0 1 0 -10 -2" fill="none" stroke="#8C684C" stroke-width="2.4" stroke-linecap="round"/>`;
+    case 'brachio':
+      return `<ellipse cx="-4" cy="6" rx="10" ry="7" fill="#78B888" ${L}/><path d="M2 2 Q6 -8 8 -11" fill="none" stroke="#78B888" stroke-width="6" stroke-linecap="round"/><circle cx="9" cy="-11" r="5" fill="#78B888" ${L}/><circle cx="10.5" cy="-12" r="1.5" fill="#4A3A40"/>`;
   }
 }
 
@@ -104,7 +114,9 @@ export function stickerPageIcon(id: StickerPageId): string {
               ? 'dolphin'
               : id === 'night'
                 ? 'firefly'
-                : 'flower';
+                : id === 'dino'
+                  ? 'tricera'
+                  : 'flower';
   return `<svg viewBox="-20 -20 40 40" aria-hidden="true" focusable="false">${motif(m)}</svg>`;
 }
 
@@ -116,6 +128,7 @@ export function stickerPageShortName(id: StickerPageId, fallback: string): strin
   if (id === 'forest') return 'もり';
   if (id === 'aquarium') return 'すいぞくかん';
   if (id === 'night') return 'かわべ';
+  if (id === 'dino') return 'きょうりゅう';
   return fallback;
 }
 

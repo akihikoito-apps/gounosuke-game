@@ -56,7 +56,7 @@ import { NATIVE } from './platform';
 import { CONTENT_VERSION, newsSince } from '../core/whatsnew';
 import { PurchaseStore } from '../purchase/store';
 import { type UpcomingReward, friendAtCourse, upcomingRewards } from '../core/rewards';
-import { HIDE_MOVERS_MAX, MOVERS, MOVER_NAMES, type MoverDef, pickMovers, pickSearchMovers } from '../core/movers';
+import { HIDE_MOVERS_MAX, MOVERS, MOVER_NAMES, type MoverDef, moverPos, pickMovers, pickSearchMovers } from '../core/movers';
 import { moverIcon, moversMarkup } from './moverView';
 import { MyRoomView, itemThumbSvg } from './myroomView';
 import { ROOMS, itemForSticker, itemsForSticker, openRooms, ownedItems } from '../core/myroom';
@@ -1534,6 +1534,7 @@ export class App {
     const scene = SCENES[this.session.sceneId];
     const r = tap(scene, this.session, p);
     if (r.foundIndex < 0) {
+      this.tickleMover(svg, p);
       this.ripple(e.clientX, e.clientY);
       return;
     }
@@ -1586,6 +1587,29 @@ export class App {
     const cp = this.root.querySelector<HTMLElement>('.course-progress');
     if (cp && s.origin === 'course') cp.outerHTML = this.courseProgressHtml();
     if (cp && s.origin === 'trial') cp.outerHTML = this.trialProgressHtml();
+  }
+
+  /** 外れタップの近くに動くもの（恐竜など）がいれば、くすぐったそうにゆれる（友だち探しの判定はさえぎらない） */
+  private tickleMover(svg: SVGSVGElement, p: { x: number; y: number }): void {
+    if (prefersReducedMotion() || !this.movers.length) return;
+    const elapsed = (performance.now() - this.moverStart) / 1000;
+    for (const m of this.movers) {
+      const pos = moverPos(m, elapsed);
+      const dx = p.x - pos.x;
+      const dy = p.y - (pos.y - 55 * m.scale);
+      const rad = 75 * m.scale;
+      if (dx * dx + dy * dy <= rad * rad) {
+        const el = svg.querySelector<SVGGElement>(`.mv[data-mover="${m.id}"]`);
+        if (el) {
+          el.classList.remove('tickled');
+          void el.getBoundingClientRect();
+          el.classList.add('tickled');
+          window.setTimeout(() => el.classList.remove('tickled'), 600);
+          play('pop');
+        }
+        return;
+      }
+    }
   }
 
   /** 外れたときの、色の付かないやさしい波紋（罰ではない） */

@@ -18,7 +18,7 @@ describe('じぶんの へや', () => {
     expect(openRooms(6, all).map((r) => r.id)).toEqual(['living', 'treehouse', 'bedroom']);
     // パックの部屋は、その背景で初めて見つけたら
     expect(openRooms(0, all, { forest: 1, aquarium: 1, night: 1 }).map((r) => r.id)).toEqual(['living', 'yard', 'aquarium-room', 'veranda']);
-    expect(openRooms(0, all, { beach: 1, forest: 1, aquarium: 1, night: 1 }).map((r) => r.id)).toEqual(['living', 'beach-deck', 'yard', 'aquarium-room', 'veranda']);
+    expect(openRooms(0, all, { beach: 1, forest: 1, aquarium: 1, night: 1, dino: 1 }).map((r) => r.id)).toEqual(['living', 'beach-deck', 'yard', 'aquarium-room', 'veranda', 'dino-land']);
     // どの部屋も、ちょうど1つのパックに入っている
     for (const r of ROOMS) expect(PACKS.filter((p) => p.contents.includes(r.content)).length, r.id).toBe(1);
   });
@@ -36,6 +36,9 @@ describe('じぶんの へや', () => {
       'log-seesaw',
       'shell-sofa',
       'engawa-bench',
+      'egg-sofa',
+      'bone-slide',
+      'footprint-rug',
     ]);
     expect(ownedItems({ cleared: 3, totalFinds: 12 }, all).map((i) => i.id)).toEqual([
       'sofa',
@@ -50,6 +53,9 @@ describe('じぶんの へや', () => {
       'log-seesaw',
       'shell-sofa',
       'engawa-bench',
+      'egg-sofa',
+      'bone-slide',
+      'footprint-rug',
     ]);
     // コース7・8で きしゃの おもちゃ・もくば、きのこの もり5回で どんぐり ごま、かわべで ほたるかご・きんぎょの すいそう が増える
     expect(itemsForSticker('c7').map((i) => i.id)).toEqual(['moonlamp', 'train-toy']);
@@ -61,7 +67,7 @@ describe('じぶんの へや', () => {
     expect(ITEM_BY_ID['floatring'].seats).toEqual([{ x: 0, y: -36 }]);
     expect(ITEM_BY_ID['floatring'].motion).toBe('bob');
     // パックが無ければ、そのパックのシールの もの は出ない（コース7〜10・うみべ・きのこの もり・すいぞくかん・ほたるの かわべ）
-    const base = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99, forest: 99, aquarium: 99, night: 99 } }, baseOnly).map((i) => i.id);
+    const base = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99, forest: 99, aquarium: 99, night: 99, dino: 99 } }, baseOnly).map((i) => i.id);
     expect(base).not.toContain('train-toy');
     expect(base).not.toContain('rocking-horse');
     expect(base).not.toContain('puppy');
@@ -76,6 +82,11 @@ describe('じぶんの へや', () => {
     expect(base).not.toContain('engawa-bench');
     expect(base).not.toContain('firefly-jar');
     expect(base).not.toContain('goldfish-bowl');
+    expect(base).not.toContain('egg-sofa');
+    expect(base).not.toContain('bone-slide');
+    expect(base).not.toContain('footprint-rug');
+    expect(base).not.toContain('dino-egg');
+    expect(base).not.toContain('baby-dino');
     expect(base).not.toContain('star-rug');
     expect(base).not.toContain('music-box');
     expect(base).toContain('balloon');

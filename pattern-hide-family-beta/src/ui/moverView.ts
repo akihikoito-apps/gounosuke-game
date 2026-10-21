@@ -52,6 +52,68 @@ function fallback(kind: MoverKind): string {
       return `<ellipse cx="-8" cy="-42" rx="18" ry="6" transform="rotate(-18 -8 -42)" fill="#D6ECF4" fill-opacity="0.85" ${L}/><ellipse cx="-10" cy="-28" rx="16" ry="5" transform="rotate(14 -10 -28)" fill="#D6ECF4" fill-opacity="0.85" ${L}/><path d="M-34 -34 H18" stroke="#6B9AC4" stroke-width="7" stroke-linecap="round"/><path d="M-34 -34 H18" fill="none" ${L}/><circle cx="22" cy="-35" r="9" fill="#78B5A8" ${L}/><circle cx="25" cy="-37" r="3" fill="#4A3A40"/>`;
     case 'floating-lantern':
       return `<ellipse cx="0" cy="-4" rx="40" ry="6" fill="#4A3A40" opacity="0.15"/><path d="M-38 -16 H38 L28 -2 H-28 Z" fill="#C48E5A" ${L}/><rect x="-22" y="-54" width="44" height="38" rx="8" fill="#FFF099" ${L}/><circle cx="0" cy="-35" r="10" fill="#FFFDF4" opacity="0.85"/><path d="M-26 -54 H26 M-24 -16 H24" ${L}/>`;
+    case 'brachio':
+      // 水玉（dots）柄のまあるい胴体と長い首・にっこり顔
+      return (
+        `<ellipse cx="0" cy="-2" rx="64" ry="7" fill="#4A3A40" opacity="0.1"/>` +
+        `<rect x="-38" y="-34" width="18" height="30" rx="8" fill="#78B888" ${L}/><rect x="14" y="-34" width="18" height="30" rx="8" fill="#78B888" ${L}/>` +
+        `<path d="M-44 -48 Q-78 -42 -84 -62 Q-74 -70 -44 -58" fill="#78B888" ${L}/>` +
+        `<ellipse cx="-6" cy="-54" rx="52" ry="34" fill="#78B888" ${L}/>` +
+        `<circle cx="-26" cy="-60" r="9" fill="#FFF4C8"/><circle cx="-2" cy="-46" r="10" fill="#FFF4C8"/><circle cx="16" cy="-64" r="8" fill="#FFF4C8"/>` +
+        `<path d="M22 -72 Q36 -118 44 -138" fill="none" stroke="#78B888" stroke-width="26" stroke-linecap="round"/>` +
+        `<path d="M22 -72 Q36 -118 44 -138" fill="none" ${L}/>` +
+        `<ellipse cx="52" cy="-140" rx="22" ry="17" fill="#78B888" ${L}/>` +
+        `<circle cx="58" cy="-144" r="3.5" fill="#4A3A40"/><ellipse cx="62" cy="-136" rx="5" ry="3" fill="#F28B8B" opacity="0.6"/>` +
+        `<path d="M52 -133 Q58 -128 64 -133" fill="none" stroke="#4A3A40" stroke-width="3" stroke-linecap="round"/>`
+      );
+    case 'pteranodon':
+      // しま（stripes）柄のまあるい翼でふわふわ飛ぶよくりゅう
+      return (
+        `<path d="M-64 -54 Q-26 -86 0 -52 Q26 -86 64 -54 Q28 -34 0 -42 Q-28 -34 -64 -54 Z" fill="#F4E4CE" ${L}/>` +
+        `<path d="M-42 -62 L-26 -44 M-18 -66 L-6 -44 M18 -66 L6 -44 M42 -62 L26 -44" stroke="#D99B78" stroke-width="6" stroke-linecap="round"/>` +
+        `<ellipse cx="4" cy="-46" rx="22" ry="15" fill="#F4E4CE" ${L}/>` +
+        `<ellipse cx="-8" cy="-64" rx="14" ry="8" transform="rotate(-18 -8 -64)" fill="#D99B78" ${L}/>` +
+        `<circle cx="24" cy="-54" r="14" fill="#F4E4CE" ${L}/>` +
+        `<ellipse cx="40" cy="-52" rx="12" ry="7" fill="#F2B880" ${L}/>` +
+        `<circle cx="27" cy="-56" r="3" fill="#4A3A40"/>`
+      );
+    case 'tricera':
+      // しま（stripes）柄の大きな丸エリマキと、先が丸い3本のつの
+      return (
+        `<ellipse cx="0" cy="-2" rx="58" ry="6" fill="#4A3A40" opacity="0.1"/>` +
+        `<rect x="-36" y="-28" width="16" height="24" rx="7" fill="#E8C69E" ${L}/><rect x="12" y="-28" width="16" height="24" rx="7" fill="#E8C69E" ${L}/>` +
+        `<ellipse cx="-8" cy="-46" rx="46" ry="30" fill="#F4E4CE" ${L}/>` +
+        `<path d="M-28 -72 V-22 M-8 -75 V-18 M12 -72 V-22" stroke="#D99B78" stroke-width="7" stroke-linecap="round"/>` +
+        `<ellipse cx="-8" cy="-46" rx="46" ry="30" fill="none" ${L}/>` +
+        `<circle cx="26" cy="-64" r="28" fill="#D99B78" ${L}/>` +
+        `<ellipse cx="40" cy="-52" rx="22" ry="18" fill="#F4E4CE" ${L}/>` +
+        `<circle cx="38" cy="-76" r="6" fill="#FFF6E8" ${L}/><circle cx="52" cy="-70" r="6" fill="#FFF6E8" ${L}/><circle cx="62" cy="-54" r="5" fill="#FFF6E8" ${L}/>` +
+        `<circle cx="46" cy="-54" r="3.5" fill="#4A3A40"/><path d="M42 -44 Q48 -39 54 -44" fill="none" stroke="#4A3A40" stroke-width="3" stroke-linecap="round"/>`
+      );
+    case 'stegosaur':
+      // チェック（check）柄のまあるい背中と、花びら形の背びれプレート
+      return (
+        `<ellipse cx="0" cy="-2" rx="60" ry="6" fill="#4A3A40" opacity="0.1"/>` +
+        `<rect x="-36" y="-28" width="16" height="24" rx="7" fill="#98C686" ${L}/><rect x="12" y="-28" width="16" height="24" rx="7" fill="#98C686" ${L}/>` +
+        `<ellipse cx="-26" cy="-84" rx="10" ry="14" fill="#F2A868" ${L}/><ellipse cx="-4" cy="-92" rx="12" ry="16" fill="#F2A868" ${L}/><ellipse cx="18" cy="-84" rx="10" ry="14" fill="#F2A868" ${L}/>` +
+        `<ellipse cx="-4" cy="-48" rx="48" ry="32" fill="#FFF6E8" ${L}/>` +
+        `<rect x="-28" y="-66" width="18" height="18" rx="4" fill="#98C686" opacity="0.75"/><rect x="-4" y="-48" width="18" height="18" rx="4" fill="#98C686" opacity="0.75"/><rect x="14" y="-66" width="16" height="18" rx="4" fill="#98C686" opacity="0.75"/>` +
+        `<ellipse cx="-4" cy="-48" rx="48" ry="32" fill="none" ${L}/>` +
+        `<ellipse cx="48" cy="-48" rx="18" ry="15" fill="#98C686" ${L}/>` +
+        `<circle cx="53" cy="-51" r="3.5" fill="#4A3A40"/><path d="M48 -42 Q54 -38 59 -42" fill="none" stroke="#4A3A40" stroke-width="3" stroke-linecap="round"/>`
+      );
+    case 'mini-raptor':
+      // たまごの殻パンツをはいた、無地（plain）色のちびきょうりゅう
+      return (
+        `<ellipse cx="0" cy="-2" rx="38" ry="5" fill="#4A3A40" opacity="0.1"/>` +
+        `<path d="M-10 -6 V-22 M10 -6 V-22" ${L}/>` +
+        `<path d="M-20 -36 Q-44 -42 -48 -56 Q-32 -54 -16 -44" fill="#A8D898" ${L}/>` +
+        `<ellipse cx="0" cy="-40" rx="24" ry="22" fill="#A8D898" ${L}/>` +
+        `<path d="M-24 -36 L-14 -44 L-4 -34 L6 -44 L16 -34 L24 -38 A24 20 0 0 1 -24 -36 Z" fill="#FFF6E8" ${L}/>` +
+        `<circle cx="14" cy="-64" r="18" fill="#A8D898" ${L}/>` +
+        `<circle cx="20" cy="-66" r="3.5" fill="#4A3A40"/><ellipse cx="23" cy="-59" rx="5" ry="3" fill="#F28B8B" opacity="0.6"/>` +
+        `<path d="M15 -56 Q21 -52 26 -56" fill="none" stroke="#4A3A40" stroke-width="2.8" stroke-linecap="round"/>`
+      );
   }
 }
 
@@ -60,7 +122,8 @@ function art(kind: MoverKind): string {
   return f ? `<image href="${f}" x="-150" y="-300" width="300" height="300"/>` : fallback(kind);
 }
 
-const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon', 'owl', 'falling-leaf', 'tropical-fish', 'jellyfish', 'bubble', 'firefly', 'dragonfly'];
+const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon', 'owl', 'falling-leaf', 'tropical-fish', 'jellyfish', 'bubble', 'firefly', 'dragonfly', 'pteranodon'];
+const LUMBER: MoverKind[] = ['brachio', 'tricera', 'stegosaur'];
 
 /** うごくもの1つ。elapsed：出題が始まってからの秒数 */
 function one(P: string, m: MoverDef, elapsed: number): string {
@@ -76,7 +139,14 @@ function one(P: string, m: MoverDef, elapsed: number): string {
     `--period:${period}s`,
     `--delay:${-(elapsed % period).toFixed(2)}s`,
   ].join(';');
-  const inner = `<g class="mv-inner${FLY.includes(m.kind) ? ' fly' : m.kind === 'cloud' || m.kind === 'sailboat' || m.kind === 'floating-lantern' ? ' drift' : ' step'}"><g transform="scale(${m.scale})">${art(m.kind)}</g></g>`;
+  const motion = FLY.includes(m.kind)
+    ? ' fly'
+    : m.kind === 'cloud' || m.kind === 'sailboat' || m.kind === 'floating-lantern'
+      ? ' drift'
+      : LUMBER.includes(m.kind)
+        ? ' lumber'
+        : ' step';
+  const inner = `<g class="mv-inner${motion}"><g transform="scale(${m.scale})">${art(m.kind)}</g></g>`;
   const g = `<g class="mv mv-${m.move}" data-mover="${m.id}" style="${vars}" aria-hidden="true">${inner}</g>`;
   if (!m.clip) return g;
   const id = `${P}mvclip-${m.id}`;
@@ -106,6 +176,11 @@ const BOX: Record<MoverKind, [number, number, number, number]> = {
   frog: [-42, -56, 84, 56],
   dragonfly: [-42, -58, 84, 52],
   'floating-lantern': [-42, -64, 84, 64],
+  brachio: [-90, -162, 180, 160],
+  pteranodon: [-74, -92, 148, 86],
+  tricera: [-80, -108, 160, 106],
+  stegosaur: [-82, -112, 164, 110],
+  'mini-raptor': [-58, -90, 116, 88],
 };
 
 /** 選ぶボタン用の絵（その絵の大きさに合わせて切り取る） */

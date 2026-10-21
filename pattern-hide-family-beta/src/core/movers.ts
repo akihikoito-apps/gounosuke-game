@@ -25,7 +25,12 @@ export type MoverKind =
   | 'firefly'
   | 'frog'
   | 'dragonfly'
-  | 'floating-lantern';
+  | 'floating-lantern'
+  | 'brachio'
+  | 'pteranodon'
+  | 'tricera'
+  | 'stegosaur'
+  | 'mini-raptor';
 /** cross：端から端へ通りぬけて、また最初から / patrol：行って もどる（向きを変える） */
 export type MoverMove = 'cross' | 'patrol';
 
@@ -96,6 +101,13 @@ export const MOVERS: Record<SceneId, MoverDef[]> = {
     { id: 'night-firefly2', kind: 'firefly', move: 'cross', from: { x: 240, y: 1060 }, to: { x: 760, y: -40 }, sec: 12, scale: 1.0, layer: 'front' },
     { id: 'night-lantern', kind: 'floating-lantern', move: 'patrol', from: { x: 1090, y: 548 }, to: { x: -90, y: 556 }, sec: 14, scale: 1.0, layer: 'front' },
   ],
+  dino: [
+    { id: 'dino-brachio', kind: 'brachio', move: 'patrol', from: { x: -130, y: 455 }, to: { x: 1130, y: 455 }, sec: 22, scale: 1.15, layer: 'back' },
+    { id: 'dino-ptera', kind: 'pteranodon', move: 'cross', from: { x: 1120, y: 175 }, to: { x: -120, y: 135 }, sec: 14, scale: 1.1, layer: 'back' },
+    { id: 'dino-tricera', kind: 'tricera', move: 'patrol', from: { x: -120, y: 615 }, to: { x: 1120, y: 615 }, sec: 14, scale: 1.1, layer: 'front' },
+    { id: 'dino-stego', kind: 'stegosaur', move: 'patrol', from: { x: 1120, y: 855 }, to: { x: -120, y: 855 }, sec: 15, scale: 1.1, layer: 'front' },
+    { id: 'dino-raptor', kind: 'mini-raptor', move: 'cross', from: { x: -110, y: 740 }, to: { x: 1110, y: 760 }, sec: 9, scale: 1.05, layer: 'front' },
+  ],
 };
 
 /** かくして わたす で、隠す人が選べる うごくもの の数 */
@@ -123,6 +135,11 @@ export const MOVER_NAMES: Record<MoverKind, string> = {
   frog: 'かえる',
   dragonfly: 'とんぼ',
   'floating-lantern': 'とうろうぶね',
+  brachio: 'くびながりゅう',
+  pteranodon: 'よくりゅう',
+  tricera: 'つのりゅう',
+  stegosaur: 'せびれりゅう',
+  'mini-raptor': 'ちびきょうりゅう',
 };
 
 /** コースごとの うごくものの数（コース1は なし） */

@@ -126,8 +126,8 @@ describe('hardest trial with all ten friends', { timeout: 120_000 }, () => {
           }
         }
       }
-      // 新しい7体も、最難関に出てくる
-      for (const c of ['nyako', 'popo', 'ou', 'choki', 'pino', 'puka', 'hika']) expect(seen.has(c), c).toBe(true);
+      // 新しい8体も、最難関に出てくる
+      for (const c of ['nyako', 'popo', 'ou', 'choki', 'pino', 'puka', 'hika', 'gao']) expect(seen.has(c), c).toBe(true);
     });
   }
 });

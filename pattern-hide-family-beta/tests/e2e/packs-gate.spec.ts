@@ -15,7 +15,7 @@ async function seed(page: import('@playwright/test').Page, cleared: number, tria
           resume: null,
           playtest: { enabled: false, counters: {} },
           course: { cleared, current: Math.min(10, (cleared as number) + 1), finds: 0 },
-          collection: { totalFinds: (cleared as number) * 10, sceneFinds: { beach: 5, forest: 5, aquarium: 5, night: 5 } },
+          collection: { totalFinds: (cleared as number) * 10, sceneFinds: { beach: 5, forest: 5, aquarium: 5, night: 5, dino: 5 } },
         }),
       ),
     [KEY, cleared, trialAllPacks] as const,
@@ -28,7 +28,7 @@ test('買っていないと：じゆうに さがす は無料の3つだけ、�
   await seed(page, 5, false);
   await act(page, 'toSearch');
   await expect(page.locator('.scene-card')).toHaveCount(3);
-  for (const s of ['beach', 'forest', 'aquarium', 'night']) await expect(page.locator(`.scene-card[data-scene="${s}"]`)).toHaveCount(0);
+  for (const s of ['beach', 'forest', 'aquarium', 'night', 'dino']) await expect(page.locator(`.scene-card[data-scene="${s}"]`)).toHaveCount(0);
   await act(page, 'home');
   await act(page, 'toCourse');
   await expect(page.locator('[data-course="6"]')).toBeDisabled();
@@ -36,14 +36,14 @@ test('買っていないと：じゆうに さがす は無料の3つだけ、�
   await act(page, 'toMyRoom');
   // コース5クリアで ひみつきち（無料）。パックの部屋は出ない
   await expect(page.locator('.mr-room-tab')).toHaveText(['リビング', 'ひみつきち']);
-  for (const c of ['choki', 'pino', 'puka', 'hika']) await expect(page.locator(`[data-mr-ref="char:${c}"]`)).toHaveCount(0);
+  for (const c of ['choki', 'pino', 'puka', 'hika', 'gao']) await expect(page.locator(`[data-mr-ref="char:${c}"]`)).toHaveCount(0);
 });
 
 test('保護者の画面の「追加パックを ためす」を入れると、パックが使える', async ({ page }) => {
   await fresh(page);
   await seed(page, 5, true);
   await act(page, 'toSearch');
-  await expect(page.locator('.scene-card')).toHaveCount(7);
+  await expect(page.locator('.scene-card')).toHaveCount(8);
   await act(page, 'home');
   await act(page, 'toCourse');
   await expect(page.locator('[data-course="6"]')).toBeEnabled();

@@ -123,7 +123,7 @@ export function moverArtFile(kind: string): string | undefined {
 
 /** じぶんの へや の もの（art/myroom/items/{id}.svg。無ければ うごくもの の同じ名前） */
 export function itemArtFile(id: string): string | undefined {
-  return find('myroom/items', id) ?? find('movers', id);
+  return find('myroom/items', id) ?? find('movers', id === 'baby-dino' ? 'mini-raptor' : id);
 }
 
 /** じぶんの へや の背景（art/myroom/rooms/{id}.svg、1000×1000） */

@@ -127,6 +127,30 @@ const RIVER_FRONT: Shape[] = [
   },
 ];
 
+// きょうりゅうの たに：赤土の地層がけ（アーチ枠と台座まで）、シダのしげみドーム
+const CLIFF_FRONT: Shape[] = [
+  {
+    kind: 'poly',
+    pts: [
+      { x: 18, y: 666 },
+      { x: 18, y: 310 },
+      ...quadPoints({ x: 18, y: 310 }, { x: 195, y: 192 }, { x: 370, y: 310 }, 16),
+      { x: 370, y: 666 },
+    ],
+  },
+];
+const FERN_FRONT: Shape[] = [
+  {
+    kind: 'poly',
+    pts: [
+      { x: 568, y: 664 },
+      { x: 568, y: 436 },
+      ...quadPoints({ x: 568, y: 436 }, { x: 775, y: 368 }, { x: 982, y: 436 }, 16),
+      { x: 982, y: 664 },
+    ],
+  },
+];
+
 const peek = (id: string, x: number, y: number, s: number, region: string, front: Shape[], kind: 'peek' | 'window' = 'peek', clip?: Shape[]): PeekDef => ({
   id,
   x,
@@ -177,6 +201,11 @@ export const PEEKS: Record<SceneId, PeekDef[]> = {
     peek('night-peek-grass', 396, 584, 1, 'path', GRASS_FRONT),
     peek('night-peek-river-1', 680, 452, 0.9, 'river', RIVER_FRONT),
     peek('night-peek-river-2', 860, 452, 0.9, 'river', RIVER_FRONT),
+  ],
+  dino: [
+    peek('dino-peek-cliff', 372, 652, 1, 'valley', CLIFF_FRONT),
+    peek('dino-peek-fern-1', 680, 520, 0.9, 'fern', FERN_FRONT),
+    peek('dino-peek-fern-2', 860, 520, 0.9, 'fern', FERN_FRONT),
   ],
 };
 
