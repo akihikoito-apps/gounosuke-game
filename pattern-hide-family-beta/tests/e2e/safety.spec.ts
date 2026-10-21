@@ -123,11 +123,13 @@ test('parent area is keyboard operable; settings, delete, playtest toggle', asyn
   await page.locator('[data-set="sound"]').focus();
   await page.keyboard.press('Space');
   expect(await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).settings.sound, KEY)).toBe(false);
-  // 記録 ON → 表が出る → OFF で消える
-  await page.locator('[data-set="playtest"]').check();
+  // 記録は初期ON（表が出ている）→ OFF で消える → ON でまた出る
+  await expect(page.locator('[data-set="playtest"]')).toBeChecked();
   await expect(page.locator('.counts')).toBeVisible();
   await page.locator('[data-set="playtest"]').uncheck();
   await expect(page.locator('.counts')).toHaveCount(0);
+  await page.locator('[data-set="playtest"]').check();
+  await expect(page.locator('.counts')).toBeVisible();
   // データ削除（このアプリのキーだけ）
   await page.evaluate(() => localStorage.setItem('someone-else', 'keep'));
   await page.locator('[data-act="delete"]').click();
@@ -141,6 +143,10 @@ test('parent area is keyboard operable; settings, delete, playtest toggle', asyn
 test('10/12. playtest OFF leaves no counters; ON counts locally; never any external request', async ({ page }) => {
   const ext = sameOriginGuard(page);
   await fresh(page);
+  // 初期はONなので、まず保護者の画面でOFFにする
+  await openParent(page);
+  await page.locator('[data-set="playtest"]').uncheck();
+  await page.keyboard.press('Escape');
   await startSearch(page, 'room', 'easy');
   await act(page, 'hint');
   await findAll(page);
