@@ -1,6 +1,6 @@
 # 絵の自動検査結果
 
-対象：`art/`（243ファイル、合計 4718KB） 実行：2026-10-21T01:37:25.658Z
+対象：`art/`（275ファイル、合計 4854KB） 実行：2026-10-21T02:21:38.322Z
 
 **すべて合格**
 
@@ -96,34 +96,47 @@
 | OK | art\characters\hika\front.svg | 顔の位置に絵がある |
 | OK | art\characters\hika\front-found.svg | 輪郭の判定からはみ出す割合 3.9%（12%以下） |
 | OK | art\characters\hika\front-found.svg | 顔の位置に絵がある |
+| OK | art\characters\gao\back.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\gao\clothes-mask.svg | 服の白い部分がからだの判定内 100%（95%以上） |
+| OK | art\characters\gao\clothes-mask.svg | からだの判定を服が覆う割合 100%（70%以上） |
+| OK | art\characters\gao\clothes-shade.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\gao\clothes-line.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\gao\front.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\gao\front.svg | 顔の位置に絵がある |
+| OK | art\characters\gao\front-found.svg | 輪郭の判定からはみ出す割合 4.2%（12%以下） |
+| OK | art\characters\gao\front-found.svg | 顔の位置に絵がある |
 | OK | art\scenes\room\back.png | 寸法確認のみ |
-| OK | art\scenes\room\over.png | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\room\minor.png | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\room\fore.png | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\room\over.png | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\room\minor.png | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\room\fore.png | 全 9 か所 × 11体で問題なし |
 | OK | art\scenes\garden\back.png | 寸法確認のみ |
-| OK | art\scenes\garden\over.png | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\garden\minor.png | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\garden\fore.png | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\garden\over.png | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\garden\minor.png | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\garden\fore.png | 全 9 か所 × 11体で問題なし |
 | OK | art\scenes\shop\back.png | 寸法確認のみ |
-| OK | art\scenes\shop\over.png | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\shop\minor.png | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\shop\fore.png | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\shop\over.png | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\shop\minor.png | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\shop\fore.png | 全 9 か所 × 11体で問題なし |
 | OK | art\scenes\beach\back.svg | 寸法確認のみ |
-| OK | art\scenes\beach\over.svg | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\beach\minor.svg | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\beach\fore.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\beach\over.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\beach\minor.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\beach\fore.svg | 全 9 か所 × 11体で問題なし |
 | OK | art\scenes\forest\back.svg | 寸法確認のみ |
-| OK | art\scenes\forest\over.svg | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\forest\minor.svg | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\forest\fore.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\forest\over.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\forest\minor.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\forest\fore.svg | 全 9 か所 × 11体で問題なし |
 | OK | art\scenes\aquarium\back.svg | 寸法確認のみ |
-| OK | art\scenes\aquarium\over.svg | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\aquarium\minor.svg | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\aquarium\fore.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\aquarium\over.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\aquarium\minor.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\aquarium\fore.svg | 全 9 か所 × 11体で問題なし |
 | OK | art\scenes\night\back.svg | 寸法確認のみ |
-| OK | art\scenes\night\over.svg | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\night\minor.svg | 全 9 か所 × 10体で問題なし |
-| OK | art\scenes\night\fore.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\night\over.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\night\minor.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\night\fore.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\dino\back.svg | 寸法確認のみ |
+| OK | art\scenes\dino\over.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\dino\minor.svg | 全 9 か所 × 11体で問題なし |
+| OK | art\scenes\dino\fore.svg | 全 9 か所 × 11体で問題なし |
 | OK | art\accessories\hat\mask.svg | 形の判定からはみ出す割合 0.0%（5%以下） |
 | OK | art\accessories\hat\mask.svg | 形の判定を白が覆う割合 97%（70%以上） |
 | OK | art\accessories\hat\mask.svg | 顔に重ならない |
@@ -156,6 +169,14 @@
 | OK | art\patterns\beach-plain.svg | 不透明 |
 | OK | art\patterns\beach-stripes.svg | つなぎ目の差 0.0（28未満） |
 | OK | art\patterns\beach-stripes.svg | 不透明 |
+| OK | art\patterns\dino-check.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\dino-check.svg | 不透明 |
+| OK | art\patterns\dino-dots.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\dino-dots.svg | 不透明 |
+| OK | art\patterns\dino-plain.svg | つなぎ目の差 0.0（28未満） |
+| OK | art\patterns\dino-plain.svg | 不透明 |
+| OK | art\patterns\dino-stripes.svg | つなぎ目の差 0.1（28未満） |
+| OK | art\patterns\dino-stripes.svg | 不透明 |
 | OK | art\patterns\forest-dots.svg | つなぎ目の差 0.0（28未満） |
 | OK | art\patterns\forest-dots.svg | 不透明 |
 | OK | art\patterns\forest-leaf.svg | つなぎ目の差 0.0（28未満） |
@@ -201,6 +222,7 @@
 | OK | art\ui\title.png | 寸法 1200×700 |
 | OK | art\movers\balloon.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\bird.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\brachio.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\bubble.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\butterfly.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\cat.svg | 枠 -150 -300 300 300 |
@@ -212,12 +234,16 @@
 | OK | art\movers\floating-lantern.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\frog.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\jellyfish.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\mini-raptor.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\owl.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\penguin.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\pteranodon.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\puppy.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\sailboat.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\seagull.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\squirrel.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\stegosaur.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\tricera.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\tropical-fish.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\acorn-lamp.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\acorn-top.svg | 枠 -150 -300 300 300 |
@@ -227,19 +253,25 @@
 | OK | art\myroom\items\beach-chair.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\beachball.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\bed.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\bone-slide.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\breadbasket.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\cake.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\camp-tent.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\campfire-pot.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\coral-rug.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\cushion.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\dino-egg.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\dino-plush.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\dino-ride.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\dolphin-ride.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\egg-sofa.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\engawa-bench.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\firefly-jar.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\fishtank-fish.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\fishtank.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\floatring.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\flowerpot.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\footprint-rug.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\frog-plush.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\goldfish-bowl.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\heartcushion.svg | 枠 -150 -300 300 300 |
@@ -269,9 +301,11 @@
 | OK | art\myroom\items\table.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\train-toy.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\treasure-box.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\volcano-lamp.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\rooms\aquarium-room.svg | 枠 0 0 1000 1000 |
 | OK | art\myroom\rooms\beach-deck.svg | 枠 0 0 1000 1000 |
 | OK | art\myroom\rooms\bedroom.svg | 枠 0 0 1000 1000 |
+| OK | art\myroom\rooms\dino-land.svg | 枠 0 0 1000 1000 |
 | OK | art\myroom\rooms\living.svg | 枠 0 0 1000 1000 |
 | OK | art\myroom\rooms\treehouse.svg | 枠 0 0 1000 1000 |
 | OK | art\myroom\rooms\veranda.svg | 枠 0 0 1000 1000 |
