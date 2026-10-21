@@ -214,10 +214,14 @@ export class ParentArea {
           : '<span class="have">いまは 買えません</span>';
       return `<li class="shop-item"><div><strong>${p.name}</strong><br><small>${p.summary}</small></div>${btn}</li>`;
     }).join('');
+    // 値段が1つも取れない＝App Store から商品の情報が来ていない（通信なし・商品の準備中など）
+    const noInfo = PRODUCTS.every((p) => !pu.price(p.id) && !p.packs.every((k) => owned.includes(k)));
+    const why = noInfo ? '<p class="note">App Store から 商品の 情報を 受け取れませんでした。インターネットに つながっているか 確かめて、少し あとで もう一度 この画面を 開いてください。</p>' : '';
     return `<section class="shop">
         <h3>追加パック（買い切り）</h3>
         <p>一度買うと、ずっと遊べます。同じ Apple ID の 端末では「購入を 復元」で 使えます。友だちは、その背景で はじめて見つけたときに 仲間に なります。</p>
         <ul class="shop-list">${rows}</ul>
+        ${why}
         ${this.shopNote ? `<p class="note" role="status">${this.shopNote}</p>` : ''}
         <button type="button" class="pbtn" data-act="restore">購入を 復元</button>
       </section>`;
