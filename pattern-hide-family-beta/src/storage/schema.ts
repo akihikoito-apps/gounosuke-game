@@ -4,6 +4,7 @@ import type { Difficulty, Placement } from '../core/placement';
 import type { SceneId } from '../core/scene';
 import { SCENES, SCENE_IDS } from '../core/scenes';
 import { ROOMS, type RoomId, type RoomLayouts, validLayouts } from '../core/myroom';
+import { STICKERS, earnedStickers } from '../core/stickers';
 
 export const STORAGE_KEY = 'moyou-kakurenbo-beta';
 export const SCHEMA_VERSION = 1;
@@ -45,8 +46,8 @@ export interface SaveData {
   resume: ResumeState | null;
   playtest: { enabled: boolean; counters: PlaytestCounters };
   course: CourseProgress;
-  /** シールちょう用：見つけた合計回数（コース・さがす・かくして わたす。おためしは数えない） */
-  collection: { totalFinds: number; sceneFinds: Partial<Record<SceneId, number>> };
+  /** シールちょう用：見つけた合計回数（コース・さがす・かくして わたす。おためしは数えない）と、すでに見たシールID */
+  collection: { totalFinds: number; sceneFinds: Partial<Record<SceneId, number>>; seenStickers: string[] };
   /** じぶんの へや：部屋ごとの置き方と、いま開いている部屋 */
   myroom: { layouts: RoomLayouts; current: RoomId };
 }
@@ -92,7 +93,7 @@ export function defaults(): SaveData {
     resume: null,
     playtest: { enabled: false, counters: emptyCounters() },
     course: emptyCourse(),
-    collection: { totalFinds: 0, sceneFinds: {} },
+    collection: { totalFinds: 0, sceneFinds: {}, seenStickers: [] },
     myroom: { layouts: {}, current: 'living' },
   };
 }
@@ -178,6 +179,9 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
     // OFF のときは集計を持たない
     if (!d.playtest.enabled) d.playtest.counters = emptyCounters();
   } else if (p !== undefined) repaired = true;
+  const course = validateCourse(raw.course);
+  d.course = course.course;
+  if (course.repaired) repaired = true;
   const col = raw.collection;
   if (col !== undefined) {
     const tf = typeof col === 'object' && col !== null ? (col as Record<string, unknown>).totalFinds : undefined;
@@ -199,9 +203,22 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
         }
     }
   }
-  const course = validateCourse(raw.course);
-  d.course = course.course;
-  if (course.repaired) repaired = true;
+  const validStickerIds = new Set(STICKERS.map((st) => st.id));
+  const ss = typeof col === 'object' && col !== null ? (col as Record<string, unknown>).seenStickers : undefined;
+  if (ss === undefined) {
+    // 以前の保存データ（seenStickers 追加前）は、すでに持っているシールを「見た」扱いにする
+    d.collection.seenStickers = earnedStickers(d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds).map((st) => st.id);
+  } else if (!Array.isArray(ss)) {
+    repaired = true;
+    d.collection.seenStickers = earnedStickers(d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds).map((st) => st.id);
+  } else {
+    const seenSet = new Set<string>();
+    for (const id of ss) {
+      if (typeof id === 'string' && validStickerIds.has(id)) seenSet.add(id);
+      else repaired = true;
+    }
+    d.collection.seenStickers = [...seenSet];
+  }
   // じぶんの へや：壊れた部屋だけ消す（ほかの部屋と進み具合は残す）
   if (raw.myroom !== undefined) {
     const m = raw.myroom;

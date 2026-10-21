@@ -214,14 +214,19 @@ test('clearing course 5 gives its sticker and brings popo; the sticker book show
   const saved = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY);
   expect(saved.collection.totalFinds).toBe(30);
   expect(saved.course.cleared).toBe(5);
-  // シールちょう
+  // シールちょう（ページごとに表示、見出しに合計枚数）
   await act(page, 'bye');
   await act(page, 'home');
   await act(page, 'toStickers');
   // コース1〜5 ＋ 10回・30回。コースの背景は順番に回るので、うみべ・もり・すいぞくかん・ほたるの かわべ で初めて見つけていれば その1枚も
   const sceneFirst = ['beach', 'forest', 'aquarium', 'night'].filter((sc) => (saved.collection.sceneFinds[sc] ?? 0) >= 1).length;
-  await expect(page.locator('.sticker.got')).toHaveCount(7 + sceneFirst);
-  await expect(page.locator('.sticker.locked')).toHaveCount(28 - sceneFirst); // 全35枚
+  await expect(page.locator('.stickers h2 .count')).toHaveText(`${7 + sceneFirst}/35`);
+  await expect(page.locator('.sticker-page[data-page="course"]')).toBeVisible();
+  await expect(page.locator('.sticker.got')).toHaveCount(5);
+  await expect(page.locator('.sticker.locked')).toHaveCount(5);
+  await act(page, 'stickerPage', '[data-page="finds"]');
+  await expect(page.locator('.sticker.got')).toHaveCount(2);
+  await expect(page.locator('.sticker.locked')).toHaveCount(3);
   // 仲間になったあとは、かくす画面に ぽぽ がいる
   await act(page, 'home');
   await act(page, 'toHide');

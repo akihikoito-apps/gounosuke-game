@@ -53,6 +53,18 @@ function itemArt(it: ItemDef, part = ''): string {
     : `<rect x="${-w / 2}" y="${-h}" width="${w}" height="${h}" rx="18" fill="#F6E4C8" ${L}/>`;
 }
 
+/** じぶんの へや の棚やシールちょうで使う、家具・おもちゃの小さな絵 */
+export function itemThumbSvg(it: ItemDef): string {
+  const f = itemArtFile(it.id);
+  // 小さい物も大きく見えるよう、物の大きさに合わせて切り取る
+  const side = TALL[it.id] ?? Math.max(it.w * 1.15, 100);
+  if (!f) {
+    return `<svg viewBox="${-side / 2} ${-side + 8} ${side} ${side}" aria-hidden="true">${itemArt(it)}</svg>`;
+  }
+  const seat = it.id === 'swing' ? itemArtFile('swing-seat') : undefined;
+  return `<svg viewBox="${-side / 2} ${-side + 8} ${side} ${side}" aria-hidden="true"><image href="${f}" x="-150" y="-300" width="300" height="300"/>${seat ? `<image href="${seat}" x="-150" y="-300" width="300" height="300"/>` : ''}</svg>`;
+}
+
 export interface MyRoomDeps {
   /** 置ける友だち・もの・へや（進み具合とパック） */
   chars: () => CharacterId[];
@@ -305,12 +317,8 @@ export class MyRoomView {
   }
 
   private itemIcon(it: ItemDef): string {
-    const f = itemArtFile(it.id);
-    // 小さい物も大きく見えるよう、物の大きさに合わせて切り取る
-    const side = TALL[it.id] ?? Math.max(it.w * 1.15, 100);
-    if (!f) return `<span>${it.name}</span>`;
-    const seat = it.id === 'swing' ? itemArtFile('swing-seat') : undefined;
-    return `<svg viewBox="${-side / 2} ${-side + 8} ${side} ${side}" aria-hidden="true"><image href="${f}" x="-150" y="-300" width="300" height="300"/>${seat ? `<image href="${seat}" x="-150" y="-300" width="300" height="300"/>` : ''}</svg>`;
+    if (!itemArtFile(it.id)) return `<span>${it.name}</span>`;
+    return itemThumbSvg(it);
   }
 
   /** ほかの部屋にあることを、小さな部屋の絵で見せる（字が読めなくても分かるように） */

@@ -1,6 +1,6 @@
 // シールの絵。art/stickers/{id}.png があればそれを使い、無ければコードで描く（白いふちの丸いシール＋キャラクター＋モチーフ）。
 import { CHARACTERS } from '../core/characters';
-import type { Motif, StickerDef } from '../core/stickers';
+import type { Motif, StickerDef, StickerPageId } from '../core/stickers';
 import { faceIcon } from './charArt';
 import { stickerArtFile } from '../art/registry';
 
@@ -85,6 +85,50 @@ export function stickerSvg(s: StickerDef): string {
     `<path d="M24 40 A42 42 0 0 1 60 16" fill="none" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="5" stroke-linecap="round"/>` +
     face +
     `<g transform="translate(86 36)">${motif(s.motif)}</g>` +
+    `</svg>`
+  );
+}
+
+/** シールちょうのページタブ用の小さな絵 */
+export function stickerPageIcon(id: StickerPageId): string {
+  const m: Motif =
+    id === 'course'
+      ? 'crown'
+      : id === 'finds'
+        ? 'star'
+        : id === 'beach'
+          ? 'shell'
+          : id === 'forest'
+            ? 'mushroom'
+            : id === 'aquarium'
+              ? 'dolphin'
+              : id === 'night'
+                ? 'firefly'
+                : 'flower';
+  return `<svg viewBox="-20 -20 40 40" aria-hidden="true" focusable="false">${motif(m)}</svg>`;
+}
+
+/** シールちょうのページタブ用の短いひらがな */
+export function stickerPageShortName(id: StickerPageId, fallback: string): string {
+  if (id === 'course') return 'コース';
+  if (id === 'finds') return 'みつけた';
+  if (id === 'beach') return 'うみべ';
+  if (id === 'forest') return 'もり';
+  if (id === 'aquarium') return 'すいぞくかん';
+  if (id === 'night') return 'かわべ';
+  return fallback;
+}
+
+/** ページが ぜんぶ そろったときの はなまる・おうかん スタンプ */
+export function completeStampSvg(): string {
+  const petals = [0, 45, 90, 135, 180, 225, 270, 315]
+    .map((a) => `<circle cx="0" cy="-18" r="9" transform="rotate(${a})" fill="#FFF1DC" stroke="#E26D5A" stroke-width="2.4"/>`)
+    .join('');
+  return (
+    `<svg viewBox="-32 -32 64 64" aria-hidden="true" focusable="false">` +
+    petals +
+    `<circle r="17" fill="#FFFDF8" stroke="#E26D5A" stroke-width="2.4"/>` +
+    `<g transform="scale(0.75)">${motif('crown')}</g>` +
     `</svg>`
   );
 }

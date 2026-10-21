@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { STICKERS, earnedStickers, newStickers, stickerHint } from '../../src/core/stickers';
+import {
+  STICKERS,
+  earnedStickers,
+  initialStickerPage,
+  newStickers,
+  nextStickerOnPage,
+  stickerHint,
+  stickerPages,
+  stickerProgressHint,
+  unseenEarnedStickers,
+} from '../../src/core/stickers';
+import { visibleStickers } from '../../src/core/access';
+import { freeEntitlements } from '../../src/entitlements/entitlements';
 import { BASE_CHARACTER_IDS, CHARACTER_IDS, unlockedCharacters } from '../../src/core/characters';
 import { autoLayout } from '../../src/core/placement';
 import { courseRound } from '../../src/core/courses';
@@ -36,6 +48,31 @@ describe('sticker book and the new friend', () => {
     expect(stickerHint(STICKERS.find((s) => s.id === 'a-s5')!)).toBe('すいぞくかんで 5かい');
     expect(stickerHint(STICKERS.find((s) => s.id === 'n-s1')!)).toBe('ほたるの かわべで みつけたら');
     expect(stickerHint(STICKERS.find((s) => s.id === 'n-s5')!)).toBe('ほたるの かわべで 5かい');
+  });
+
+  it('sticker book pages, progress hints, and initial page selection', () => {
+    const freeCan = (id: Parameters<typeof freeEntitlements.canPlay>[0]) => freeEntitlements.canPlay(id);
+    const freePages = stickerPages(visibleStickers(freeCan));
+    expect(freePages.map((p) => p.id)).toEqual(['course', 'finds']);
+
+    const allPages = stickerPages(STICKERS);
+    expect(allPages.map((p) => p.id)).toEqual(['course', 'finds', 'beach', 'forest', 'aquarium', 'night']);
+
+    const prog = { cleared: 6, totalFinds: 18, sceneFinds: { beach: 2 } };
+    expect(stickerProgressHint(STICKERS.find((s) => s.id === 'c7')!, prog)).toBe('コース7');
+    expect(stickerProgressHint(STICKERS.find((s) => s.id === 'f30')!, prog)).toBe('あと 12かい');
+    expect(stickerProgressHint(STICKERS.find((s) => s.id === 'b5')!, prog)).toBe('うみべで あと 3かい');
+
+    expect(nextStickerOnPage(allPages[0], prog)?.id).toBe('c7');
+    expect(nextStickerOnPage(allPages[1], prog)?.id).toBe('f30');
+    expect(nextStickerOnPage(allPages[2], prog)?.id).toBe('b5');
+
+    // 未見のシールがあれば そのページを最初に出す
+    const seen = earnedStickers(6, 18, { beach: 2 }).map((s) => s.id);
+    expect(unseenEarnedStickers(STICKERS, prog, seen)).toHaveLength(0);
+    expect(initialStickerPage(allPages, prog, seen.filter((id) => id !== 'b1'))).toBe('beach');
+    // 未見がなければ、つぎにもらえそうなシールのページ（うみべで あと3かい）を出す
+    expect(initialStickerPage(allPages, prog, seen)).toBe('beach');
   });
 
   it('nyako joins after course 1, popo after course 5, and never before that', () => {

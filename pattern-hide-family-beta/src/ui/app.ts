@@ -1,7 +1,17 @@
 // 画面の流れと入力。ゲームの判定は core、保存は storage に任せる。
 import { CHARACTERS, CHARACTER_IDS, FRIEND_UNLOCKS, SCENE_FRIENDS, type CharacterId } from '../core/characters';
-import { hasSticker, newStickers, stickerHint } from '../core/stickers';
-import { stickerSvg } from './stickerArt';
+import {
+  type StickerPageId,
+  hasSticker,
+  initialStickerPage,
+  newStickers,
+  nextStickerOnPage,
+  stickerHint,
+  stickerPages,
+  stickerProgressHint,
+  unseenEarnedStickers,
+} from '../core/stickers';
+import { completeStampSvg, stickerPageIcon, stickerPageShortName, stickerSvg } from './stickerArt';
 import { availableCharacters, canPlayCourse, canResume, visibleStickers } from '../core/access';
 import { charArtMarkup, faceIcon, fullIcon } from './charArt';
 import { allArtUrls, uiArt } from '../art/registry';
@@ -48,7 +58,7 @@ import { PurchaseStore } from '../purchase/store';
 import { type UpcomingReward, friendAtCourse, upcomingRewards } from '../core/rewards';
 import { HIDE_MOVERS_MAX, MOVERS, MOVER_NAMES, type MoverDef, pickMovers } from '../core/movers';
 import { moverIcon, moversMarkup } from './moverView';
-import { MyRoomView } from './myroomView';
+import { MyRoomView, itemThumbSvg } from './myroomView';
 import { ROOMS, itemForSticker, openRooms, ownedItems } from '../core/myroom';
 
 
@@ -101,6 +111,12 @@ export class App {
   private movers: MoverDef[] = [];
   /** かくして わたす：隠す人が選んだ うごくもの（id） */
   private hideMovers: string[] = [];
+  /** シールちょう：いま開いているページ・めくる向き・拡大中のシール・いま「あたらしい！」を出しているシール */
+  private stickerPage: StickerPageId = 'course';
+  private stickerTurn: 'prev' | 'next' | null = null;
+  private activeStickerId: string | null = null;
+  private stickerFresh = new Set<string>();
+  private stickerPopPlayed = new Set<string>();
   private myroom = new MyRoomView({
     chars: () => this.allowedChars(),
     items: () => ownedItems(this.progress(), this.can),
@@ -153,6 +169,9 @@ export class App {
       () => {
         this.session = null;
         this.draft = emptyDraft();
+        this.stickerFresh.clear();
+        this.stickerPopPlayed.clear();
+        this.activeStickerId = null;
         // データを消したら、待っている知らせも消す（消す前の「もらったよ」を出さない）
         this.toastQueue = [];
         document.querySelectorAll('.toast').forEach((t) => t.remove());
@@ -195,6 +214,11 @@ export class App {
   private go(s: Screen, lockMs = 350): void {
     this.cancelDrag();
     window.clearTimeout(this.autoTimer);
+    if (this.screen === 'stickers' && s !== 'stickers') {
+      this.markAllEarnedStickersSeen();
+      this.activeStickerId = null;
+      this.stickerTurn = null;
+    }
     this.screen = s;
     this.justFound = -1;
     this.navLockUntil = performance.now() + lockMs;
@@ -270,6 +294,10 @@ export class App {
     const newsHtml = news.length
       ? `<div class="news" role="status"><p class="news-title">あたらしく なったよ！</p><ul>${news.flatMap((n) => n.lines).slice(0, 4).map((l) => `<li>${l}</li>`).join('')}</ul>${btn('newsOk', ICONS.done, 'わかった', 'small news-ok')}</div>`
       : '';
+    const hasNewSticker = this.hasUnseenStickers();
+    const stickerBtn = btn('toStickers', ICONS.sticker, `シールちょう ${this.stickerCount()}/${visibleStickers(this.can).length}`, `small sticker-btn${hasNewSticker ? ' has-new' : ''}`)
+      .replace(/ (\d+\/\d+)<\/span>/, ' <small class="cnt">$1</small></span>')
+      .replace(/<\/button>$/, `${hasNewSticker ? '<span class="sticker-btn-badge" aria-label="あたらしい シール"></span>' : ''}</button>`);
     return `<main class="screen title" data-screen="title">
       ${newsHtml}
       <div class="logo" aria-label="もようの かくれんぼ">
@@ -287,7 +315,7 @@ export class App {
         ${resume ? btn('resume', ICONS.play, 'つづきから', 'mid') : ''}
       </div>
       <div class="title-foot">
-        ${btn('toStickers', ICONS.sticker, `シールちょう ${this.stickerCount()}/${visibleStickers(this.can).length}`, 'small sticker-btn').replace(/ (\d+\/\d+)<\/span>/, ' <small class="cnt">$1</small></span>')}
+        ${stickerBtn}
         ${btn('howto', ICONS.question, 'あそびかた', 'small howto-btn')}
         ${btn('parent', ICONS.parent, 'おとなの かたへ', 'small parent-btn')}
       </div>
@@ -394,19 +422,182 @@ export class App {
     return visibleStickers(this.can).filter((x) => hasSticker(x, d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds)).length;
   }
 
-  /** シールちょう：もらったシールと、まだのシール（何をするともらえるか） */
+  private hasUnseenStickers(): boolean {
+    const d = this.store.data;
+    return (
+      unseenEarnedStickers(
+        visibleStickers(this.can),
+        { cleared: d.course.cleared, totalFinds: d.collection.totalFinds, sceneFinds: d.collection.sceneFinds },
+        d.collection.seenStickers,
+      ).length > 0
+    );
+  }
+
+  private openStickers(): void {
+    const d = this.store.data;
+    const pages = stickerPages(visibleStickers(this.can));
+    this.stickerTurn = null;
+    this.activeStickerId = null;
+    this.stickerPopPlayed.clear();
+    this.stickerPage = initialStickerPage(
+      pages,
+      {
+        cleared: d.course.cleared,
+        totalFinds: d.collection.totalFinds,
+        sceneFinds: d.collection.sceneFinds,
+        courseCurrent: d.course.current,
+        courseFinds: d.course.finds,
+      },
+      d.collection.seenStickers,
+    );
+    this.syncStickerPageSeen(this.stickerPage);
+    this.go('stickers', 0);
+  }
+
+  private syncStickerPageSeen(pageId: StickerPageId): void {
+    const d = this.store.data;
+    const pages = stickerPages(visibleStickers(this.can));
+    const pg = pages.find((p) => p.id === pageId) ?? pages[0];
+    if (!pg) {
+      this.stickerFresh.clear();
+      return;
+    }
+    const seen = new Set(d.collection.seenStickers);
+    const fresh = pg.stickers
+      .filter((s) => hasSticker(s, d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds) && !seen.has(s.id))
+      .map((s) => s.id);
+    this.stickerFresh = new Set(fresh);
+    if (fresh.length > 0) {
+      this.store.update((x) => {
+        const next = new Set(x.collection.seenStickers);
+        for (const id of fresh) next.add(id);
+        x.collection.seenStickers = [...next];
+      });
+    }
+  }
+
+  private markAllEarnedStickersSeen(): void {
+    const d = this.store.data;
+    const unseen = unseenEarnedStickers(
+      visibleStickers(this.can),
+      { cleared: d.course.cleared, totalFinds: d.collection.totalFinds, sceneFinds: d.collection.sceneFinds },
+      d.collection.seenStickers,
+    );
+    this.stickerFresh.clear();
+    if (unseen.length > 0) {
+      this.store.update((x) => {
+        const next = new Set(x.collection.seenStickers);
+        for (const s of unseen) next.add(s.id);
+        x.collection.seenStickers = [...next];
+      });
+    }
+  }
+
+  private turnStickerPage(delta: -1 | 1): void {
+    const pages = stickerPages(visibleStickers(this.can));
+    if (pages.length <= 1) return;
+    const curIdx = Math.max(0, pages.findIndex((p) => p.id === this.stickerPage));
+    const nextIdx = (curIdx + delta + pages.length) % pages.length;
+    if (nextIdx === curIdx) return;
+    this.stickerTurn = delta > 0 ? 'next' : 'prev';
+    this.activeStickerId = null;
+    this.stickerPage = pages[nextIdx].id;
+    this.syncStickerPageSeen(this.stickerPage);
+    this.render();
+  }
+
+  private selectStickerPage(pageId: StickerPageId): void {
+    const pages = stickerPages(visibleStickers(this.can));
+    const nextIdx = pages.findIndex((p) => p.id === pageId);
+    if (nextIdx < 0) return;
+    const curIdx = Math.max(0, pages.findIndex((p) => p.id === this.stickerPage));
+    if (nextIdx === curIdx) return;
+    this.stickerTurn = nextIdx > curIdx ? 'next' : 'prev';
+    this.activeStickerId = null;
+    this.stickerPage = pageId;
+    this.syncStickerPageSeen(this.stickerPage);
+    this.render();
+  }
+
+  /** シールちょう：ページごとに本のようにめくれる。もらったシールはタップで大きく見せる */
   private stickersHtml(): string {
     const d = this.store.data;
-    const cells = visibleStickers(this.can).map((x) => {
-      const got = hasSticker(x, d.course.cleared, d.collection.totalFinds, d.collection.sceneFinds);
-      return got
-        ? `<figure class="sticker got" aria-label="${x.name}">${stickerSvg(x)}<figcaption>${x.name}</figcaption></figure>`
-        : `<figure class="sticker locked" aria-label="まだ。${stickerHint(x)}"><div class="sticker-q" aria-hidden="true">？</div><figcaption>${stickerHint(x)}</figcaption></figure>`;
-    }).join('');
+    const visible = visibleStickers(this.can);
+    const pages = stickerPages(visible);
+    const curIdx = Math.max(0, pages.findIndex((p) => p.id === this.stickerPage));
+    const page = pages[curIdx] ?? pages[0];
+    if (page && page.id !== this.stickerPage) this.stickerPage = page.id;
+    const prog = { cleared: d.course.cleared, totalFinds: d.collection.totalFinds, sceneFinds: d.collection.sceneFinds };
+    const seen = new Set(d.collection.seenStickers);
+
+    const tabs = pages
+      .map((pg) => {
+        const on = pg.id === page.id;
+        const tabNew = pg.stickers.some((s) => hasSticker(s, prog.cleared, prog.totalFinds, prog.sceneFinds) && (!seen.has(s.id) || this.stickerFresh.has(s.id)));
+        return `<button type="button" class="sticker-tab${on ? ' on' : ''}${tabNew ? ' has-new' : ''}" data-action="stickerPage" data-page="${pg.id}" role="tab" aria-selected="${on}" aria-label="${pg.name}"><span class="sticker-tab-icon">${stickerPageIcon(pg.id)}</span><span class="sticker-tab-name">${stickerPageShortName(pg.id, pg.name)}</span>${tabNew ? '<span class="sticker-tab-dot" aria-hidden="true"></span>' : ''}</button>`;
+      })
+      .join('');
+
+    const gotOnPage = page ? page.stickers.filter((s) => hasSticker(s, prog.cleared, prog.totalFinds, prog.sceneFinds)).length : 0;
+    const pageComplete = !!page && page.stickers.length > 0 && gotOnPage === page.stickers.length;
+    const next = page ? nextStickerOnPage(page, prog) : null;
+
+    const cells = (page ? page.stickers : [])
+      .map((x) => {
+        const got = hasSticker(x, prog.cleared, prog.totalFinds, prog.sceneFinds);
+        const gift = itemForSticker(x.id);
+        if (got) {
+          const isNew = this.stickerFresh.has(x.id);
+          const popIn = isNew && !this.stickerPopPlayed.has(x.id);
+          if (isNew) this.stickerPopPlayed.add(x.id);
+          return `<button type="button" class="sticker got${isNew ? ' is-new' : ''}${popIn ? ' pop-in' : ''}" data-action="openSticker" data-sticker="${x.id}" aria-label="${x.name}${isNew ? ' あたらしい' : ''}${gift ? `。へやに ${gift.name}` : ''}">${isNew ? '<span class="sticker-new">あたらしい！</span>' : ''}<div class="sticker-art">${stickerSvg(x)}</div><span class="sticker-name">${x.name}</span>${gift ? `<span class="sticker-gift" aria-hidden="true">${itemThumbSvg(gift)}</span>` : ''}</button>`;
+        }
+        const cond = stickerProgressHint(x, prog);
+        const isNext = next?.id === x.id;
+        return `<figure class="sticker locked${isNext ? ' next' : ''}" data-sticker="${x.id}" aria-label="まだ。${cond}。${stickerHint(x)}"><div class="sticker-art silhouette" aria-hidden="true">${stickerSvg(x)}<span class="sticker-q">？</span></div><figcaption class="sticker-name">${cond}</figcaption>${gift ? `<span class="sticker-gift silhouette" aria-hidden="true">${itemThumbSvg(gift)}</span>` : ''}</figure>`;
+      })
+      .join('');
+
+    const turnCls = !prefersReducedMotion() && this.stickerTurn ? ` turn-${this.stickerTurn}` : '';
+    const dots = pages.map((pg, i) => `<i class="dot${i === curIdx ? ' on' : ''}" data-dot-page="${pg.id}"></i>`).join('');
+
+    const active = this.activeStickerId
+      ? visible.find((s) => s.id === this.activeStickerId && hasSticker(s, prog.cleared, prog.totalFinds, prog.sceneFinds)) ?? null
+      : null;
+    const activeGift = active ? itemForSticker(active.id) : undefined;
+    const detailModal = active
+      ? `<div class="overlay clear sticker-detail" role="dialog" aria-modal="true" aria-label="${active.name}">
+          <div class="clear-card sticker-modal-card">
+            <div class="sticker-modal-art">${stickerSvg(active)}</div>
+            <p class="clear-title sticker-modal-title">${active.name}</p>
+            ${activeGift ? `<div class="sticker-modal-gift"><span class="sticker-modal-gift-icon" aria-hidden="true">${itemThumbSvg(activeGift)}</span><p class="sticker-modal-gift-text">へやに ${activeGift.name}が とどいたよ</p></div>` : ''}
+            <div class="clear-actions two">
+              ${btn('toMyRoom', ICONS.room, 'へやで あそぶ', 'equal primary', 'data-autofocus')}
+              ${btn('closeSticker', ICONS.done, 'とじる', 'equal')}
+            </div>
+          </div>
+        </div>`
+      : '';
+
     return `<main class="screen setup stickers" data-screen="stickers">
-      <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>シールちょう <span class="count">${this.stickerCount()}/${visibleStickers(this.can).length}</span></h2><span></span></header>
+      <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>シールちょう <span class="count">${this.stickerCount()}/${visible.length}</span></h2><span></span></header>
       <p class="sticker-note">みつけた かず：${d.collection.totalFinds}かい</p>
-      <div class="sticker-grid">${cells}</div>
+      <div class="sticker-tabs" role="tablist" aria-label="シールちょうの ページ">${tabs}</div>
+      <div class="sticker-book">
+        <div class="sticker-page${turnCls}" data-page="${page?.id ?? 'course'}" role="tabpanel" aria-label="${page?.name ?? ''}">
+          <div class="sticker-page-head">
+            <h3 class="sticker-page-title">${page?.name ?? ''} <span class="page-count">${gotOnPage}/${page?.stickers.length ?? 0}</span></h3>
+            ${pageComplete ? `<div class="sticker-complete" role="status" aria-label="コンプリート">${completeStampSvg()}<span>コンプリート</span></div>` : ''}
+          </div>
+          <div class="sticker-grid">${cells}</div>
+        </div>
+      </div>
+      <footer class="sticker-pager" aria-label="ページおくり">
+        ${btn('stickerPrev', ICONS.back, 'まえ', 'round sticker-nav-btn')}
+        <div class="sticker-dots" role="status" aria-label="${curIdx + 1} / ${pages.length} ページ">${dots}</div>
+        ${btn('stickerNext', ICONS.next, 'つぎ', 'round sticker-nav-btn')}
+      </footer>
+      ${detailModal}
     </main>`;
   }
 
@@ -717,7 +908,16 @@ export class App {
   // ---------- 入力 ----------
 
   private onClick(e: MouseEvent): void {
-    const el = (e.target as HTMLElement).closest<HTMLElement>('[data-action]');
+    const target = e.target as HTMLElement;
+    if (this.screen === 'stickers' && this.activeStickerId && target.classList.contains('sticker-detail')) {
+      play('pop');
+      this.stickerFresh.delete(this.activeStickerId);
+      this.activeStickerId = null;
+      this.stickerTurn = null;
+      this.render();
+      return;
+    }
+    const el = target.closest<HTMLElement>('[data-action]');
     if (!el || !this.root.contains(el) || (el as HTMLButtonElement).disabled) return;
     if (performance.now() < this.navLockUntil) return;
     const a = el.dataset.action as string;
@@ -727,7 +927,27 @@ export class App {
         this.go('searchSetup');
         break;
       case 'toStickers':
-        this.go('stickers');
+        this.openStickers();
+        break;
+      case 'stickerPrev':
+        this.turnStickerPage(-1);
+        break;
+      case 'stickerNext':
+        this.turnStickerPage(1);
+        break;
+      case 'stickerPage':
+        this.selectStickerPage(el.dataset.page as StickerPageId);
+        break;
+      case 'openSticker':
+        this.activeStickerId = el.dataset.sticker ?? null;
+        this.stickerTurn = null;
+        this.render();
+        break;
+      case 'closeSticker':
+        if (this.activeStickerId) this.stickerFresh.delete(this.activeStickerId);
+        this.activeStickerId = null;
+        this.stickerTurn = null;
+        this.render();
         break;
       case 'toMyRoom':
         this.myroom.open();
@@ -1201,10 +1421,35 @@ export class App {
     }
     if (this.screen === 'play') this.bindPlay();
     if (this.screen === 'hidePlace') this.bindPlace();
+    if (this.screen === 'stickers') this.bindStickers();
     if (this.screen === 'myroom') {
       const main = this.root.querySelector<HTMLElement>('main');
       if (main) this.myroom.bind(main);
     }
+  }
+
+  /** シールちょう：横スワイプでもページをめくれる（縦スクロールはそのまま） */
+  private bindStickers(): void {
+    const book = this.root.querySelector<HTMLElement>('.sticker-book');
+    if (!book) return;
+    let start: { id: number; x: number; y: number } | null = null;
+    book.addEventListener('pointerdown', (e) => {
+      if (!e.isPrimary || this.activeStickerId) return;
+      start = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    });
+    book.addEventListener('pointerup', (e) => {
+      if (!start || e.pointerId !== start.id) return;
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+      start = null;
+      if (Math.abs(dx) >= 44 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+        play('pop');
+        this.turnStickerPage(dx < 0 ? 1 : -1);
+      }
+    });
+    book.addEventListener('pointercancel', () => {
+      start = null;
+    });
   }
 
   private renderToken = 0;

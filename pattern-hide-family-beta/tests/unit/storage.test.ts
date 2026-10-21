@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MemoryKV, Store } from '../../src/storage/storage';
-import { STORAGE_KEY, defaults } from '../../src/storage/schema';
+import { STORAGE_KEY, defaults, validate } from '../../src/storage/schema';
 import { record, setEnabled } from '../../src/storage/playtest';
 
 describe('storage', () => {
@@ -18,6 +18,28 @@ describe('storage', () => {
     expect(s2.status).toBe('ok');
     expect(s2.data.settings.difficulty).toBe('normal');
     expect(s2.data.resume?.placements[0].spot).toBe('room-curtain');
+  });
+
+  it('old save without seenStickers marks already-earned stickers as seen without marking repaired', () => {
+    const oldRaw = {
+      schema: 1,
+      settings: { sound: true, difficulty: 'easy', tutorialSeen: true, movers: true },
+      resume: null,
+      playtest: { enabled: false, counters: defaults().playtest.counters },
+      course: { cleared: 3, current: 4, finds: 2 },
+      collection: { totalFinds: 32, sceneFinds: { beach: 5 } },
+    };
+    const res = validate(oldRaw);
+    expect(res.repaired).toBe(false);
+    expect(res.data.collection.seenStickers).toEqual(['c1', 'c2', 'c3', 'f10', 'f30', 'b1', 'b5']);
+
+    // 壊れた seenStickers は使えるシールIDだけ残して修復する
+    const broken = validate({
+      ...oldRaw,
+      collection: { totalFinds: 32, sceneFinds: { beach: 5 }, seenStickers: ['c1', 123, 'unknown-sticker', 'b1'] },
+    });
+    expect(broken.repaired).toBe(true);
+    expect(broken.data.collection.seenStickers).toEqual(['c1', 'b1']);
   });
 
   it.each([

@@ -2,7 +2,7 @@
 // コースをクリアすると1枚ずつ（10枚）、見つけた合計回数でも5枚。ガチャやランダムはなし（何をするともらえるか、いつも分かる）。
 import type { CharacterId } from './characters';
 import type { SceneId } from './scene';
-import { SCENES } from './scenes';
+import { SCENES, SCENE_IDS } from './scenes';
 
 export type Motif = 'shell' | 'floatring' | 'shavedice' | 'crab' | 'ball' | 'cushion' | 'cloud' | 'flower' | 'cake' | 'leaf' | 'heart' | 'moon' | 'crown' | 'rainbow' | 'star' | 'fish' | 'bread' | 'balloon' | 'present' | 'mushroom' | 'acorn' | 'lantern' | 'squirrel' | 'jellyfish' | 'dolphin' | 'treasure' | 'penguin' | 'firefly' | 'frog' | 'dragonfly';
 
@@ -94,4 +94,90 @@ export function stickerHint(s: StickerDef): string {
     return s.need === 1 ? `${sceneName}で みつけたら` : `${sceneName}で ${s.need}かい`;
   }
   return `${s.need}かい みつけたら`;
+}
+
+/** まだのシールの短い条件（「コース7」「あと 12かい」「うみべで あと 3かい」など、いまの進み具合に合わせる） */
+export function stickerProgressHint(s: StickerDef, p: Progress): string {
+  if (s.kind === 'course') return `コース${s.need}`;
+  if (s.kind === 'scene') {
+    const sc = s.scene ?? 'beach';
+    const done = p.sceneFinds?.[sc] ?? 0;
+    const rem = Math.max(1, s.need - done);
+    return `${SCENES[sc].name}で あと ${rem}かい`;
+  }
+  const rem = Math.max(1, s.need - p.totalFinds);
+  return `あと ${rem}かい`;
+}
+
+export type StickerPageId = 'course' | 'finds' | SceneId;
+
+export interface StickerPageDef {
+  id: StickerPageId;
+  name: string;
+  stickers: StickerDef[];
+}
+
+/** シールちょうのページ一覧（見せるシール visibleStickers の範囲だけ） */
+export function stickerPages(visible: readonly StickerDef[]): StickerPageDef[] {
+  const out: StickerPageDef[] = [];
+  const course = visible.filter((s) => s.kind === 'course');
+  if (course.length) out.push({ id: 'course', name: 'コース', stickers: course });
+  const finds = visible.filter((s) => s.kind === 'finds');
+  if (finds.length) out.push({ id: 'finds', name: 'みつけた かず', stickers: finds });
+  for (const sc of SCENE_IDS) {
+    const list = visible.filter((s) => s.kind === 'scene' && s.scene === sc);
+    if (list.length) out.push({ id: sc, name: SCENES[sc].name, stickers: list });
+  }
+  return out;
+}
+
+/** そのページで つぎに もらえる（いちばん近い）まだのシール */
+export function nextStickerOnPage(page: StickerPageDef, p: Progress): StickerDef | null {
+  return page.stickers.find((s) => !hasSticker(s, p.cleared, p.totalFinds, p.sceneFinds)) ?? null;
+}
+
+/** もらったシールのうち、まだシールちょうで見ていないもの */
+export function unseenEarnedStickers(visible: readonly StickerDef[], p: Progress, seenIds: readonly string[]): StickerDef[] {
+  const seen = new Set(seenIds);
+  return visible.filter((s) => hasSticker(s, p.cleared, p.totalFinds, p.sceneFinds) && !seen.has(s.id));
+}
+
+/**
+ * シールちょうを開いたときに出すページ：
+ * 1) あたらしい（まだ見ていない）シールがあるページ
+ * 2) なければ、つぎに もらえそうなシールがあるページ
+ */
+export function initialStickerPage(
+  pages: readonly StickerPageDef[],
+  p: Progress & { courseCurrent?: number; courseFinds?: number },
+  seenIds: readonly string[],
+): StickerPageId {
+  if (pages.length === 0) return 'course';
+  const seen = new Set(seenIds);
+  const withNew = pages.find((pg) => pg.stickers.some((s) => hasSticker(s, p.cleared, p.totalFinds, p.sceneFinds) && !seen.has(s.id)));
+  if (withNew) return withNew.id;
+
+  let best: { id: StickerPageId; tier: number; rem: number; idx: number } | null = null;
+  pages.forEach((pg, idx) => {
+    const next = nextStickerOnPage(pg, p);
+    if (!next) return;
+    let tier = 0;
+    let rem = 9999;
+    if (next.kind === 'course') {
+      const coursesLeft = Math.max(1, next.need - p.cleared);
+      const curFinds = p.courseCurrent === next.need ? (p.courseFinds ?? 0) : 0;
+      rem = Math.max(1, coursesLeft * 10 - curFinds);
+    } else if (next.kind === 'finds') {
+      rem = Math.max(1, next.need - p.totalFinds);
+    } else if (next.kind === 'scene') {
+      const sc = next.scene ?? 'beach';
+      const done = p.sceneFinds?.[sc] ?? 0;
+      tier = done >= 1 ? 0 : 1;
+      rem = Math.max(1, next.need - done);
+    }
+    if (!best || tier < best.tier || (tier === best.tier && (rem < best.rem || (rem === best.rem && idx < best.idx)))) {
+      best = { id: pg.id, tier, rem, idx };
+    }
+  });
+  return best ? (best as { id: StickerPageId }).id : pages[0].id;
 }
