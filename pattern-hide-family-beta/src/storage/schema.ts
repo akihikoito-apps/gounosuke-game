@@ -43,7 +43,8 @@ export interface SaveData {
   schema: typeof SCHEMA_VERSION;
   settings: Settings;
   resume: ResumeState | null;
-  playtest: { enabled: boolean; counters: PlaytestCounters };
+  /** optedOut：保護者が自分でOFFにしたか（初期はON。OFFにしたら、その選択を守る） */
+  playtest: { enabled: boolean; optedOut: boolean; counters: PlaytestCounters };
   course: CourseProgress;
   /** シールちょう用：見つけた合計回数（コース・さがす・かくして わたす。おためしは数えない） */
   collection: { totalFinds: number; sceneFinds: Partial<Record<SceneId, number>> };
@@ -90,7 +91,7 @@ export function defaults(): SaveData {
     schema: SCHEMA_VERSION,
     settings: { sound: true, difficulty: 'easy', tutorialSeen: false, movers: true },
     resume: null,
-    playtest: { enabled: false, counters: emptyCounters() },
+    playtest: { enabled: true, optedOut: false, counters: emptyCounters() },
     course: emptyCourse(),
     collection: { totalFinds: 0, sceneFinds: {} },
     myroom: { layouts: {}, current: 'living' },
@@ -168,7 +169,9 @@ export function validate(raw: unknown): { data: SaveData; repaired: boolean } {
   }
   const p = raw.playtest;
   if (isObj(p) && isBool(p.enabled) && isObj(p.counters)) {
-    d.playtest.enabled = p.enabled;
+    // 前は初期OFFだった。保護者が自分でOFFにした記録（optedOut）が無ければ、新しい初期値のONにする
+    d.playtest.optedOut = p.optedOut === true;
+    d.playtest.enabled = p.enabled || !d.playtest.optedOut;
     const c = p.counters;
     for (const k of Object.keys(d.playtest.counters) as (keyof PlaytestCounters)[]) {
       const v = validCount(c[k]);

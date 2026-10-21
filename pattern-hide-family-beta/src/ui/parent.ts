@@ -298,8 +298,8 @@ export class ParentArea {
         </details>
       </section>
       <section>
-        <h3>試遊用の記録（初期値：OFF）</h3>
-        <p>ONにすると、この端末の中だけに、回数などの簡単な集計を記録します（さがした回数・ぜんぶ見つけた回数・ヒントの回数・かくした回数・1回の時間のおおまかな区分）。<strong>端末の外へは送信しません。</strong>操作の記録や個人を特定する情報は残しません。OFFに戻すと集計も消えます。</p>
+        <h3>試遊用の記録（初期値：ON）</h3>
+        <p>この端末の中だけに、回数などの簡単な集計を記録します（さがした回数・ぜんぶ見つけた回数・ヒントの回数・かくした回数・1回の時間のおおまかな区分）。<strong>端末の外へは送信しません。</strong>操作の記録や個人を特定する情報は残しません。OFFに戻すと集計も消えます。</p>
         <label class="switch"><input type="checkbox" data-set="playtest" ${d.playtest.enabled ? 'checked' : ''}> 試遊用の記録をする</label>
         ${
           d.playtest.enabled

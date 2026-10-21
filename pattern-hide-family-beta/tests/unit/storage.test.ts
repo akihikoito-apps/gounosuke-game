@@ -79,9 +79,34 @@ describe('storage', () => {
 });
 
 describe('playtest counters', () => {
-  it('OFF by default: nothing recorded', () => {
+  it('ON by default (2026-10-21 持ち主の決定)', () => {
     const s = new Store(new MemoryKV());
     s.load();
+    expect(s.data.playtest.enabled).toBe(true);
+    record(s, { type: 'searchStarted' });
+    expect(s.data.playtest.counters.searchStarted).toBe(1);
+  });
+
+  it('前の初期値（OFF）のままの保存データは ONになり、保護者が自分でOFFにした選択は守る', () => {
+    const old = new MemoryKV();
+    old.setItem(STORAGE_KEY, JSON.stringify({ ...defaults(), playtest: { enabled: false, counters: {} } }));
+    const a = new Store(old);
+    a.load();
+    expect(a.data.playtest.enabled).toBe(true);
+    const s = new Store(new MemoryKV());
+    s.load();
+    setEnabled(s, false);
+    const kv = new MemoryKV();
+    kv.setItem(STORAGE_KEY, JSON.stringify(s.data));
+    const b = new Store(kv);
+    b.load();
+    expect(b.data.playtest.enabled).toBe(false);
+  });
+
+  it('OFF: nothing recorded', () => {
+    const s = new Store(new MemoryKV());
+    s.load();
+    setEnabled(s, false);
     record(s, { type: 'searchStarted' });
     record(s, { type: 'hint' });
     expect(Object.values(s.data.playtest.counters).every((v) => v === 0)).toBe(true);

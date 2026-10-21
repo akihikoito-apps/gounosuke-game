@@ -1,4 +1,4 @@
-// 試遊用の最小集計。既定OFF。端末外へは送らない（送信処理そのものが無い）。
+// 試遊用の最小集計。既定ON（保護者がOFFにできる）。端末外へは送らない（送信処理そのものが無い）。
 import type { Store } from './storage';
 import { COUNTER_MAX, type PlaytestCounters, emptyCounters } from './schema';
 
@@ -38,6 +38,7 @@ export function record(store: Store, ev: PlaytestEvent): void {
 export function setEnabled(store: Store, enabled: boolean): void {
   store.update((d) => {
     d.playtest.enabled = enabled;
+    d.playtest.optedOut = !enabled;
     // OFF に戻したら集計も消す
     if (!enabled) d.playtest.counters = emptyCounters();
   });
