@@ -27,10 +27,10 @@ export interface RoomDef {
 }
 
 /**
- * 部屋は ゆっくり増える（ご本人の方針 2026-10-15）：
- * はじめは リビングだけ → コース5 クリアで ひみつきち（無料はここまでの2部屋）→ コース6 クリアで しんしつ（つづきのコースを買って最初のクリアで。Gemini 最終点検の提案を採用）。
- * ほかは追加パックの部屋で、その背景で初めて友だちを見つけたときに開く。
- */
+  * 部屋は ゆっくり増える（ご本人の方針 2026-10-15）：
+  * はじめは リビングだけ → コース5 クリアで ひみつきち（無料はここまでの2部屋）→ コース6 クリアで しんしつ（つづきのコースを買って最初のクリアで。Gemini 最終点検の提案を採用）。
+  * ほかは追加パックの部屋で、その背景で初めて友だちを見つけたときに開く。
+  */
 export const ROOMS: RoomDef[] = [
   { id: 'living', name: 'リビング', needCleared: 0, content: 'room:living', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
   { id: 'treehouse', name: 'ひみつきち', needCleared: 5, content: 'room:treehouse', floorTop: 560, scaleBack: 1.0, scaleFront: 1.5 },
@@ -74,6 +74,8 @@ export interface ItemDef {
   /** 座れる場所（ソファ・ベッド・ブランコ） */
   seats?: Seat[];
   motion?: Motion;
+  /** 旧保存データとの互換用（すでに部屋に置いてある分は残し、新しくシールから届いたり棚に並んだりはしない） */
+  legacy?: boolean;
 }
 
 // 絵の枠は全部同じ：viewBox "-150 -300 300 300"、足もと中央が (0, 0)。友だちと同じ大きさの単位で描く。
@@ -90,7 +92,9 @@ export const ITEMS: ItemDef[] = [
   { id: 'present', name: 'プレゼント', sticker: 'c5', genre: 'toy', w: 90 },
   { id: 'cake', name: 'ケーキ', sticker: 'c6', genre: 'food', w: 90 },
   { id: 'moonlamp', name: 'おつきさまの ランプ', sticker: 'c7', genre: 'deco', w: 90, motion: 'bob' },
+  { id: 'train-toy', name: 'きしゃの おもちゃ', sticker: 'c7', genre: 'toy', w: 140, motion: 'walk' },
   { id: 'fishtank', name: 'すいそう', sticker: 'c8', genre: 'animal', w: 150, motion: 'swim' },
+  { id: 'rocking-horse', name: 'もくば', sticker: 'c8', genre: 'toy', w: 160, seats: [{ x: 0, y: -64 }], motion: 'sway' },
   { id: 'swing', name: 'ブランコ', sticker: 'c9', genre: 'toy', w: 260, seats: [{ x: 0, y: -62 }], motion: 'swing' },
   { id: 'puppy', name: 'こいぬ', sticker: 'c10', genre: 'animal', w: 120, motion: 'walk' },
   // 見つけた回数のシール
@@ -103,13 +107,15 @@ export const ITEMS: ItemDef[] = [
   { id: 'beach-chair', name: 'パラソル ベンチ', sticker: null, genre: 'furniture', content: 'scene:beach', w: 260, seats: [{ x: -52, y: -58 }, { x: 52, y: -58 }] },
   { id: 'shell', name: 'かいがら', sticker: 'b1', genre: 'deco', w: 70 },
   { id: 'shaved-ice', name: 'かきごおりき', sticker: 'b5', genre: 'food', w: 110, motion: 'sway' },
-  { id: 'floatring', name: 'うきわ', sticker: 'b10', genre: 'toy', w: 120 },
+  { id: 'floatring', name: 'うきわ', sticker: 'b10', genre: 'toy', w: 120, seats: [{ x: 0, y: -36 }], motion: 'bob' },
   { id: 'beachball', name: 'ビーチボール', sticker: 'b30', genre: 'toy', w: 80, motion: 'roll' },
   { id: 'hermit-crab', name: 'やどかり', sticker: 'b50', genre: 'animal', w: 96, motion: 'walk' },
   // きのこの もりパック
   { id: 'camp-tent', name: 'キャンプテント', sticker: null, genre: 'furniture', content: 'scene:forest', w: 280, seats: [{ x: 0, y: -50 }] },
+  { id: 'log-seesaw', name: 'まるたの シーソー', sticker: null, genre: 'toy', content: 'scene:forest', w: 220, seats: [{ x: -58, y: -52 }, { x: 58, y: -52 }], motion: 'sway' },
   { id: 'stump-chair', name: 'きりかぶの いす', sticker: 'f-s1', genre: 'furniture', w: 120, seats: [{ x: 0, y: -55 }] },
   { id: 'acorn-lamp', name: 'どんぐりランプ', sticker: 'f-s5', genre: 'deco', w: 90, motion: 'bob' },
+  { id: 'acorn-top', name: 'どんぐり ごま', sticker: 'f-s5', genre: 'toy', w: 86, motion: 'roll' },
   { id: 'mushroom-table', name: 'きのこの つくえ', sticker: 'f-s15', genre: 'furniture', w: 170 },
   { id: 'campfire-pot', name: 'たきびの なべ', sticker: 'f-s30', genre: 'food', w: 140, motion: 'sway' },
   { id: 'squirrel', name: 'りす', sticker: 'f-s50', genre: 'animal', w: 110, motion: 'walk' },
@@ -122,11 +128,14 @@ export const ITEMS: ItemDef[] = [
   { id: 'penguin', name: 'ペンギン', sticker: 'a-s50', genre: 'animal', w: 100, motion: 'walk' },
   // ほたるの かわべ パック
   { id: 'engawa-bench', name: 'えんがわの ベンチ', sticker: null, genre: 'furniture', content: 'scene:night', w: 280, seats: [{ x: -58, y: -60 }, { x: 58, y: -60 }] },
-  { id: 'star-rug', name: 'ほしぞらの ラグ', sticker: 'n-s1', genre: 'deco', w: 290, flat: true },
+  { id: 'firefly-jar', name: 'ほたるかご', sticker: 'n-s1', genre: 'toy', w: 100, motion: 'bob' },
   { id: 'paper-lantern', name: 'ちょうちん', sticker: 'n-s5', genre: 'deco', w: 96, motion: 'sway' },
-  { id: 'music-box', name: 'ほしの オルゴール', sticker: 'n-s15', genre: 'toy', w: 130, motion: 'sway' },
+  { id: 'goldfish-bowl', name: 'きんぎょの すいそう', sticker: 'n-s15', genre: 'animal', w: 120, motion: 'sway' },
   { id: 'bamboo-chair', name: 'たけの ゆりいす', sticker: 'n-s30', genre: 'furniture', w: 160, seats: [{ x: 0, y: -62 }], motion: 'sway' },
   { id: 'frog-plush', name: 'かえるの ぬいぐるみ', sticker: 'n-s50', genre: 'toy', w: 100, motion: 'bob' },
+  // 旧保存データ互換用（n-s1 / n-s15 で置かれていた star-rug / music-box）
+  { id: 'star-rug', name: 'ほしぞらの ラグ', sticker: null, content: 'scene:night', genre: 'deco', w: 290, flat: true, legacy: true },
+  { id: 'music-box', name: 'ほしの オルゴール', sticker: null, content: 'scene:night', genre: 'toy', w: 130, motion: 'sway', legacy: true },
 ];
 
 export const ITEM_BY_ID: Record<string, ItemDef> = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
@@ -140,6 +149,7 @@ export interface ProgressLike {
 /** いま使える もの（シールを持っていて、そのシールのパックも遊べる） */
 export function ownedItems(p: ProgressLike, can: CanPlay): ItemDef[] {
   return ITEMS.filter((it) => {
+    if (it.legacy) return false;
     if (!it.sticker) return !it.content || can(it.content);
     const s = STICKERS.find((x) => x.id === it.sticker);
     if (!s || !can(`char:${s.char}`)) return false;
@@ -149,9 +159,14 @@ export function ownedItems(p: ProgressLike, can: CanPlay): ItemDef[] {
   });
 }
 
-/** シールでもらえる もの（シールちょう・ごほうびの告知で使う） */
+/** シールでもらえる代表の もの（シールちょう・ごほうびの告知で使う） */
 export function itemForSticker(stickerId: string): ItemDef | undefined {
-  return ITEMS.find((i) => i.sticker === stickerId);
+  return ITEMS.find((i) => !i.legacy && i.sticker === stickerId);
+}
+
+/** シールでもらえる すべての もの（複数とどくコース・背景用） */
+export function itemsForSticker(stickerId: string): ItemDef[] {
+  return ITEMS.filter((i) => !i.legacy && i.sticker === stickerId);
 }
 
 export function openRooms(cleared: number, can: CanPlay, sceneFinds: Partial<Record<SceneId, number>> = {}): RoomDef[] {
@@ -159,9 +174,9 @@ export function openRooms(cleared: number, can: CanPlay, sceneFinds: Partial<Rec
 }
 
 /**
- * 置いてある部屋（同じ友だち・物は1つの部屋にだけ置ける。先に並ぶ部屋が優先）。
- * open を渡すと、開いている部屋だけを見る（閉じた部屋＝パックが使えない部屋に取り残された物は、ほかで使える）。
- */
+  * 置いてある部屋（同じ友だち・物は1つの部屋にだけ置ける。先に並ぶ部屋が優先）。
+  * open を渡すと、開いている部屋だけを見る（閉じた部屋＝パックが使えない部屋に取り残された物は、ほかで使える）。
+  */
 export function ownerRooms(layouts: RoomLayouts, open?: readonly RoomId[]): Map<string, RoomId> {
   const m = new Map<string, RoomId>();
   for (const r of ROOMS) {
@@ -229,9 +244,9 @@ export function clampToFloor(room: RoomDef, x: number, y: number): { x: number; 
 }
 
 /**
- * 保存データの検査：壊れていたら、その部屋だけ消す。
- * 同じ物は1つだけ・座標は部屋の中・座れるのは「友だち」が「座席のある物（それ自体は座っていない）」の「実在する空いた座席」だけ。
- */
+  * 保存データの検査：壊れていたら、その部屋だけ消す。
+  * 同じ物は1つだけ・座標は部屋の中・座れるのは「友だち」が「座席のある物（それ自体は座っていない）」の「実在する空いた座席」だけ。
+  */
 export function validLayouts(v: unknown, charIds: readonly CharacterId[]): RoomLayouts {
   const out: RoomLayouts = {};
   if (typeof v !== 'object' || v === null) return out;

@@ -4,7 +4,28 @@
 import { type Rng, mulberry32, shuffle } from './rng';
 import type { SceneId } from './scene';
 
-export type MoverKind = 'bird' | 'butterfly' | 'cloud' | 'cat' | 'puppy' | 'balloon' | 'seagull' | 'sailboat' | 'crab' | 'ball' | 'squirrel' | 'owl' | 'falling-leaf' | 'tropical-fish' | 'jellyfish' | 'penguin' | 'bubble' | 'firefly' | 'frog';
+export type MoverKind =
+  | 'bird'
+  | 'butterfly'
+  | 'cloud'
+  | 'cat'
+  | 'puppy'
+  | 'balloon'
+  | 'seagull'
+  | 'sailboat'
+  | 'crab'
+  | 'ball'
+  | 'squirrel'
+  | 'owl'
+  | 'falling-leaf'
+  | 'tropical-fish'
+  | 'jellyfish'
+  | 'penguin'
+  | 'bubble'
+  | 'firefly'
+  | 'frog'
+  | 'dragonfly'
+  | 'floating-lantern';
 /** cross：端から端へ通りぬけて、また最初から / patrol：行って もどる（向きを変える） */
 export type MoverMove = 'cross' | 'patrol';
 
@@ -70,10 +91,10 @@ export const MOVERS: Record<SceneId, MoverDef[]> = {
   ],
   night: [
     { id: 'night-firefly1', kind: 'firefly', move: 'cross', from: { x: -120, y: 170 }, to: { x: 1120, y: 140 }, sec: 14, scale: 1.1, layer: 'back' },
-    { id: 'night-firefly2', kind: 'firefly', move: 'patrol', from: { x: 180, y: 240 }, to: { x: 820, y: 200 }, sec: 20, scale: 1.05, layer: 'back' },
+    { id: 'night-dragonfly', kind: 'dragonfly', move: 'patrol', from: { x: 180, y: 240 }, to: { x: 820, y: 200 }, sec: 18, scale: 1.05, layer: 'back' },
     { id: 'night-frog', kind: 'frog', move: 'patrol', from: { x: -90, y: 860 }, to: { x: 1090, y: 860 }, sec: 14, scale: 1.15, layer: 'front' },
-    { id: 'night-firefly3', kind: 'firefly', move: 'cross', from: { x: 240, y: 1060 }, to: { x: 760, y: -40 }, sec: 12, scale: 1.0, layer: 'front' },
-    { id: 'night-firefly4', kind: 'firefly', move: 'patrol', from: { x: 1090, y: 580 }, to: { x: -90, y: 600 }, sec: 13, scale: 1.0, layer: 'front' },
+    { id: 'night-firefly2', kind: 'firefly', move: 'cross', from: { x: 240, y: 1060 }, to: { x: 760, y: -40 }, sec: 12, scale: 1.0, layer: 'front' },
+    { id: 'night-lantern', kind: 'floating-lantern', move: 'patrol', from: { x: 1090, y: 548 }, to: { x: -90, y: 556 }, sec: 14, scale: 1.0, layer: 'front' },
   ],
 };
 
@@ -100,6 +121,8 @@ export const MOVER_NAMES: Record<MoverKind, string> = {
   bubble: 'あわ',
   firefly: 'ほたる',
   frog: 'かえる',
+  dragonfly: 'とんぼ',
+  'floating-lantern': 'とうろうぶね',
 };
 
 /** コースごとの うごくものの数（コース1は なし） */
@@ -117,6 +140,20 @@ export function pickMovers(scene: SceneId, courseNo: number, seed: number): Move
   const front = courseNo >= FRONT_FROM_COURSE ? shuffle(rng, list.filter((m) => m.layer === 'front')) : [];
   // 前半は うしろの物だけ。後半は 前を通る物を先に1つ以上
   const order = courseNo >= FRONT_FROM_COURSE ? [front[0], ...back, ...front.slice(1)] : back;
+  return order.filter(Boolean).slice(0, n) as MoverDef[];
+}
+
+/** 「じゆうに さがす」の1回分に出す うごくもの（やさしい＝後ろ2〜3個、ふつう＝前も入れて4〜5個） */
+export function pickSearchMovers(scene: SceneId, difficulty: 'easy' | 'normal', seed: number): MoverDef[] {
+  const rng: Rng = mulberry32(seed ^ 0x5eed);
+  const list = MOVERS[scene];
+  const back = shuffle(rng, list.filter((m) => m.layer === 'back'));
+  if (difficulty === 'easy') {
+    return back.slice(0, 3);
+  }
+  const front = shuffle(rng, list.filter((m) => m.layer === 'front'));
+  const n = rng() < 0.5 ? 4 : 5;
+  const order = [front[0], ...back, ...front.slice(1)];
   return order.filter(Boolean).slice(0, n) as MoverDef[];
 }
 

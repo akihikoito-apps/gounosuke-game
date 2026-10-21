@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { COURSE_MOVERS, FRONT_FROM_COURSE, MOVERS, type MoverKind, moverPos, pickMovers } from '../../src/core/movers';
+import { COURSE_MOVERS, FRONT_FROM_COURSE, MOVERS, type MoverKind, moverPos, pickMovers, pickSearchMovers } from '../../src/core/movers';
 import { SCENES, SCENE_IDS } from '../../src/core/scenes';
 
 // 絵の大きさのめやす（ART：art/movers の横幅、高さ）
@@ -23,6 +23,8 @@ const SIZE: Record<MoverKind, { w: number; h: number }> = {
   bubble: { w: 56, h: 60 },
   firefly: { w: 72, h: 60 },
   frog: { w: 84, h: 56 },
+  dragonfly: { w: 84, h: 52 },
+  'floating-lantern': { w: 84, h: 64 },
 };
 
 describe('うごくもの', () => {
@@ -39,6 +41,27 @@ describe('うごくもの', () => {
         else expect(ms.some((m) => m.layer === 'front')).toBe(true);
       }
     }
+  });
+
+  it('じゆうに さがす：やさしい＝後ろだけ2〜3個、ふつう＝前も入れて4〜5個（同じシードなら同じ）', () => {
+    for (const id of SCENE_IDS) {
+      for (let seed = 1; seed <= 20; seed++) {
+        const easy = pickSearchMovers(id, 'easy', seed * 17);
+        expect(easy.length, `${id} easy`).toBeGreaterThanOrEqual(2);
+        expect(easy.length, `${id} easy`).toBeLessThanOrEqual(3);
+        expect(easy.every((m) => m.layer === 'back')).toBe(true);
+        expect(pickSearchMovers(id, 'easy', seed * 17)).toEqual(easy);
+
+        const normal = pickSearchMovers(id, 'normal', seed * 17);
+        expect(normal.length, `${id} normal`).toBeGreaterThanOrEqual(4);
+        expect(normal.length, `${id} normal`).toBeLessThanOrEqual(5);
+        expect(normal.some((m) => m.layer === 'front')).toBe(true);
+        expect(pickSearchMovers(id, 'normal', seed * 17)).toEqual(normal);
+      }
+    }
+    // ほたるの かわべ は 4種類（ほたる・とんぼ・かえる・とうろうぶね）5軌道
+    expect(MOVERS.night).toHaveLength(5);
+    expect(new Set(MOVERS.night.map((m) => m.kind))).toEqual(new Set(['firefly', 'dragonfly', 'frog', 'floating-lantern']));
   });
 
   it('前を通るものは、どの隠れ場所の顔も 3秒より長く隠さない', () => {
@@ -71,7 +94,10 @@ describe('うごくもの', () => {
           const body = { x: sp.x, y: sp.y - 80 * sp.s };
           for (let t = 0; t < m.sec * 2; t += 0.1) {
             const p = moverPos(m, t);
-            if (Math.abs(body.x - p.x) < (w * m.scale) / 2 && body.y < p.y && body.y > p.y - h * m.scale) { crossings++; break; }
+            if (Math.abs(body.x - p.x) < (w * m.scale) / 2 && body.y < p.y && body.y > p.y - h * m.scale) {
+              crossings++;
+              break;
+            }
           }
         }
       }

@@ -33,6 +33,7 @@ const OUTFIT: Record<string, PatternSpec> = {
   moko: { kind: 'check', bg: '#EEE6FA', fg: '#CDBDEB', size: 34 },
   nyako: { kind: 'stripes', bg: '#DCEAF6', fg: '#A9C9E6', size: 28 },
   popo: { kind: 'dots', bg: '#F8E0E0', fg: '#FFFFFF', size: 30 },
+  ou: { kind: 'check', bg: '#FFF3C4', fg: '#F2B880', size: 32 },
   choki: { kind: 'check', bg: '#FDE6DA', fg: '#F4B9A0', size: 32 },
   pino: { kind: 'leaf', bg: '#E5F2DC', fg: '#9AC88E', size: 32 },
   puka: { kind: 'dots', bg: '#DCECF8', fg: '#FFFFFF', size: 30 },
@@ -146,7 +147,11 @@ export class MyRoomView {
     };
     const owned = (p: Placed) => {
       const [k, id] = p.ref.split(':');
-      return k === 'char' ? chars.has(id as CharacterId) : items.has(id);
+      if (k === 'char') return chars.has(id as CharacterId);
+      if (items.has(id)) return true;
+      // 旧保存データの star-rug / music-box は、すでに部屋に置いてあり かわべパックが使えるときそのまま残す
+      const def = ITEM_BY_ID[id];
+      return !!def?.legacy && items.has('engawa-bench');
     };
     const base = (saved ?? starterLayout(this.room)).filter((p) => !(saved ? false : this.otherRoomHas(p.ref)));
     // パックが使えない物は見せないが、置き場所は残す（hidden）。座っている先が消えたら床に下ろす
@@ -181,9 +186,9 @@ export class MyRoomView {
   }
 
   /**
-   * この物を ここに置くとき、ほかの部屋に いたら そこから つれてくる（おひっこし。1つの部屋だけ、を守る）。
-   * 幼い子には「そこで しまってから」より わかりやすい（Gemini 最終点検の提案、持ち主が採用）。
-   */
+    * この物を ここに置くとき、ほかの部屋に いたら そこから つれてくる（おひっこし。1つの部屋だけ、を守る）。
+    * 幼い子には「そこで しまってから」より わかりやすい（Gemini 最終点検の提案、持ち主が採用）。
+    */
   private releaseFromClosedRooms(ref: string): void {
     const all = this.deps.allLayouts();
     let from: RoomId | null = null;
@@ -259,7 +264,10 @@ export class MyRoomView {
     if (kind === 'char') {
       const c = CHARACTERS[id as CharacterId];
       const fill = `mr-fill-${id}`;
-      return `<g class="mr-obj mr-char${p.on ? ' seated' : ''}" data-idx="${i}" transform="${tf}"><g class="mr-hop"><ellipse cx="0" cy="2" rx="60" ry="9" fill="#4A3A40" opacity="${p.on ? 0 : 0.12}"/>${charArtMarkup(c, { fillId: fill, outline: 1, found: true })}</g></g>`;
+      const baseIt = p.on ? ITEM_BY_ID[this.list[p.on.idx]?.ref.split(':')[1]] : undefined;
+      const seatMotion = baseIt?.motion === 'bob' || baseIt?.motion === 'sway' ? ` mr-m-${baseIt.motion}` : '';
+      const inner = `<g class="mr-hop"><ellipse cx="0" cy="2" rx="60" ry="9" fill="#4A3A40" opacity="${p.on ? 0 : 0.12}"/>${charArtMarkup(c, { fillId: fill, outline: 1, found: true })}</g>`;
+      return `<g class="mr-obj mr-char${p.on ? ' seated' : ''}${seatMotion}" data-idx="${i}" transform="${tf}">${seatMotion ? `<g class="mr-move">${inner}</g>` : inner}</g>`;
     }
     const it = ITEM_BY_ID[id];
     const motion = it.motion ? ` mr-m-${it.motion}` : '';
@@ -372,8 +380,8 @@ export class MyRoomView {
     this.drag = null;
     // 部屋が多いとき、選んでいる部屋のタブが見えるように
     // （scrollIntoView は画面全体まで動かすことがあるので、タブの列だけを横に送る）
-    const row = main.querySelector<HTMLElement>(".mr-rooms");
-    const on = main.querySelector<HTMLElement>(".mr-room-tab.on");
+    const row = main.querySelector<HTMLElement>('.mr-rooms');
+    const on = main.querySelector<HTMLElement>('.mr-room-tab.on');
     if (row && on) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - (row.clientWidth - on.offsetWidth) / 2);
     main.querySelector<HTMLElement>('#stage')?.addEventListener('pointerdown', (e) => this.onStageDown(e));
     main.addEventListener('pointermove', (e) => this.onMove(e));
@@ -674,6 +682,22 @@ export class MyRoomView {
 }
 
 /** 横幅より背が高い物（棚の絵の切り取り） */
-const TALL: Record<string, number> = { swing: 300, plant: 170, flowerpot: 140, balloon: 170, starmobile: 190, moonlamp: 140, puppy: 140, fishtank: 170, 'shaved-ice': 160, 'acorn-lamp': 160, 'jelly-lamp': 160, 'paper-lantern': 160 };
+const TALL: Record<string, number> = {
+  swing: 300,
+  plant: 170,
+  flowerpot: 140,
+  balloon: 170,
+  starmobile: 190,
+  moonlamp: 140,
+  puppy: 140,
+  fishtank: 170,
+  'shaved-ice': 160,
+  'acorn-lamp': 160,
+  'jelly-lamp': 160,
+  'paper-lantern': 160,
+  'firefly-jar': 130,
+  'goldfish-bowl': 130,
+  'rocking-horse': 160,
+};
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const r1s = (n: number) => Math.round(n * 1000) / 1000;

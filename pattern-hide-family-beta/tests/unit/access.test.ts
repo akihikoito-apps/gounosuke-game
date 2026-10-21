@@ -16,12 +16,15 @@ const withNight = owns('night');
 const withMore = owns('more-courses');
 
 describe('access by pack', () => {
-  it('free base: courses 1-5 only, no hardest; nyako (course 1) and popo (course 5) are free rewards', () => {
+  it('free base: courses 1-5 only, no hardest; nyako (course 1) and popo (course 5) are free rewards, ou (course 10) requires more-courses', () => {
     for (let n = 1; n <= 5; n++) expect(canPlayCourse(n, baseOnly)).toBe(true);
     for (let n = 6; n <= 10; n++) expect(canPlayCourse(n, baseOnly)).toBe(false);
     expect(baseOnly('trial:hardest')).toBe(false);
-    for (const f of FRIEND_UNLOCKS) expect(packOf(`char:${f.char}`)?.free, f.char).toBe(true);
+    for (const f of FRIEND_UNLOCKS.filter((x) => x.course <= 5)) expect(packOf(`char:${f.char}`)?.free, f.char).toBe(true);
+    expect(packOf('char:ou')?.id).toBe('more-courses');
     expect(availableCharacters(5, {}, baseOnly)).toEqual(['koro', 'mimi', 'moko', 'nyako', 'popo']);
+    expect(availableCharacters(10, {}, baseOnly)).toEqual(['koro', 'mimi', 'moko', 'nyako', 'popo']);
+    expect(availableCharacters(10, {}, withMore)).toEqual(['koro', 'mimi', 'moko', 'nyako', 'popo', 'ou']);
   });
 
   it('choki, pino, puka, and hika need their scene pack even if old save data says the scene was played', () => {
@@ -44,6 +47,7 @@ describe('access by pack', () => {
     const pl = (char: any, spot: string) => ({ char, spot, costume: 'plain', variant: 'exact' as const });
     expect(canResume({ sceneId: 'beach', placements: [pl('koro', 'beach-hut-1')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('choki', 'room-plant')] }, baseOnly)).toBe(false);
+    expect(canResume({ sceneId: 'room', placements: [pl('ou', 'room-plant')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'forest', placements: [pl('koro', 'forest-tent-1')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('pino', 'room-plant')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'aquarium', placements: [pl('koro', 'aquarium-tank-1')] }, baseOnly)).toBe(false);
@@ -51,6 +55,7 @@ describe('access by pack', () => {
     expect(canResume({ sceneId: 'night', placements: [pl('koro', 'night-grass-1')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('hika', 'room-plant')] }, baseOnly)).toBe(false);
     expect(canResume({ sceneId: 'room', placements: [pl('koro', 'room-plant')] }, baseOnly)).toBe(true);
+    expect(canResume({ sceneId: 'room', placements: [pl('ou', 'room-plant')] }, withMore)).toBe(true);
     expect(canResume({ sceneId: 'beach', placements: [pl('choki', 'beach-hut-1')] }, withBeach)).toBe(true);
     expect(canResume({ sceneId: 'forest', placements: [pl('pino', 'forest-tent-1')] }, withForest)).toBe(true);
     expect(canResume({ sceneId: 'aquarium', placements: [pl('puka', 'aquarium-tank-1')] }, withAquarium)).toBe(true);

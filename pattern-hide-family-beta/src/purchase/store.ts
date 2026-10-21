@@ -16,11 +16,11 @@ export interface ProductDef {
 
 const P = 'com.akihikoito.moyoukakurenbo.';
 export const PRODUCTS: ProductDef[] = [
-  { id: `${P}morecourses`, packs: ['more-courses'], name: 'つづきの コース', summary: 'コース6〜10・最難関モード・へや「しんしつ」・コースのシール5枚と家具' },
-  { id: `${P}beach`, packs: ['beach'], name: 'うみべ パック', summary: '背景「うみべ」・友だち「ちょき」・へや「うみべの デッキ」・家具6つ・シール5枚' },
-  { id: `${P}forest`, packs: ['forest'], name: 'きのこの もり パック', summary: '背景「きのこの もり」・友だち「ぴの」・へや「もりの ひろば」・家具6つ・シール5枚' },
-  { id: `${P}aquarium`, packs: ['aquarium'], name: 'すいぞくかん パック', summary: '背景「すいぞくかん」・友だち「プカ」・へや・家具6つ・シール5枚' },
-  { id: `${P}night`, packs: ['night'], name: 'ほたるの かわべ パック', summary: '背景「ほたるの かわべ」・友だち「ひか」・へや「ほたるの えんがわ」・家具6つ・シール5枚' },
+  { id: `${P}morecourses`, packs: ['more-courses'], name: 'つづきの コース', summary: 'コース6〜10・最難関モード・友だち「おう」・へや「しんしつ」・おもちゃと家具7つ・シール5枚' },
+  { id: `${P}beach`, packs: ['beach'], name: 'うみべ パック', summary: '背景「うみべ」・友だち「ちょき」・へや「うみべの デッキ」・おもちゃと家具6つ・シール5枚' },
+  { id: `${P}forest`, packs: ['forest'], name: 'きのこの もり パック', summary: '背景「きのこの もり」・友だち「ぴの」・へや「もりの ひろば」・おもちゃと家具8つ・シール5枚' },
+  { id: `${P}aquarium`, packs: ['aquarium'], name: 'すいぞくかん パック', summary: '背景「すいぞくかん」・友だち「ぷか」・へや「すいぞくかんの へや」・おもちゃと家具6つ・シール5枚' },
+  { id: `${P}night`, packs: ['night'], name: 'ほたるの かわべ パック', summary: '背景「ほたるの かわべ」・友だち「ひか」・へや「ほたるの えんがわ」・おもちゃと家具6つ・シール5枚' },
   { id: `${P}allpacks`, packs: ['more-courses', 'beach', 'forest', 'aquarium', 'night'], name: 'ぜんぶ いり', summary: '上の5つ すべて（まとめて お得）' },
 ];
 

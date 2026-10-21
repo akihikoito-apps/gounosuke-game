@@ -21,10 +21,13 @@ describe('つぎの ごほうび', () => {
     expect(upcomingRewards({ cleared: 2, totalFinds: 23 }, all).find((x) => x.kind === 'findsSticker')).toMatchObject({ at: 30, remaining: 7, done: 23 });
   });
 
-  it('友だちが全員そろうと、友だちの告知は出ない', () => {
-    const r = upcomingRewards({ cleared: 5, totalFinds: 50 }, all);
-    expect(r.some((x) => x.kind === 'friend')).toBe(false);
-    expect(r.find((x) => x.kind === 'courseSticker')).toMatchObject({ at: 6 });
+  it('コース5クリア後は、つづきのコースがあれば「コース10で おう」、コース10クリアで友だちの告知は出なくなる', () => {
+    const r5 = upcomingRewards({ cleared: 5, totalFinds: 50 }, all);
+    expect(r5.find((x) => x.kind === 'friend')).toMatchObject({ char: 'ou', at: 10, remaining: 5 });
+    expect(r5.find((x) => x.kind === 'courseSticker')).toMatchObject({ at: 6 });
+
+    const r10 = upcomingRewards({ cleared: 10, totalFinds: 50 }, all);
+    expect(r10.some((x) => x.kind === 'friend')).toBe(false);
   });
 
   it('へや：コース5で ひみつきち、コース6で しんしつ。つづきのコースが無ければ しんしつ は告知しない', () => {
@@ -36,11 +39,14 @@ describe('つぎの ごほうび', () => {
     expect(upcomingRewards({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99 } }, all)).toEqual([]);
   });
 
-  it('パックを持っていない人には、そのパックのコース・シールを告知しない', () => {
+  it('パックを持っていない人には、そのパックのコース・友だち・シールを告知しない', () => {
     const r = upcomingRewards({ cleared: 5, totalFinds: 50 }, baseOnly);
-    // コース6〜10 は追加パック：コースのシールの告知は出ない
+    // コース6〜10（おう・コースシール）は追加パック：告知は出ない
+    expect(r.some((x) => x.kind === 'friend')).toBe(false);
     expect(r.some((x) => x.kind === 'courseSticker')).toBe(false);
     expect(friendAtCourse(5, baseOnly)).toBe('popo');
+    expect(friendAtCourse(10, baseOnly)).toBeNull();
+    expect(friendAtCourse(10, all)).toBe('ou');
     expect(friendAtCourse(1, all)).toBe('nyako');
     expect(friendAtCourse(2, all)).toBeNull();
   });

@@ -183,7 +183,7 @@ test('regression: characters never show before the background (slow image loadin
   await expect(page.locator('#stage.loading')).toHaveCount(1);
   await expect(page.locator('#stage svg')).toBeHidden();
   // 読み込みが終わると、背景とキャラクターが一緒に出る
-  await expect(page.locator("#stage.loading")).toHaveCount(0, { timeout: 15000 });
+  await expect(page.locator('#stage.loading')).toHaveCount(0, { timeout: 15000 });
   await expect(page.locator('#stage svg')).toBeVisible();
   await ctx.close();
 });
@@ -232,6 +232,29 @@ test('clearing course 5 gives its sticker and brings popo; the sticker book show
   await act(page, 'toHide');
   await act(page, 'hidePickScene', '[data-scene="room"]');
   await expect(page.locator('[data-action="pickChar"][data-char="popo"]')).toBeVisible();
+});
+
+test('clearing course 10 gives its sticker c10 and brings ou', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ schema: 1, settings: { sound: false, difficulty: 'easy', tutorialSeen: true }, resume: null, playtest: { enabled: false, counters: {} }, course: { cleared: 9, current: 10, finds: 9 }, collection: { totalFinds: 99 } })), KEY);
+  await page.reload();
+  await act(page, 'toHide');
+  await act(page, 'hidePickScene', '[data-scene="room"]');
+  await expect(page.locator('[data-action="pickChar"][data-char="ou"]')).toHaveCount(0);
+  await act(page, 'toHide');
+  await act(page, 'home');
+  await act(page, 'toCourse');
+  await act(page, 'pickCourse', '[data-course="10"]');
+  const eyes = await eyePoints(page, 0);
+  await tapAt(page, { x: (eyes[0].x + eyes[1].x) / 2, y: eyes[0].y });
+  await expect(page.locator('.course-clear')).toBeVisible({ timeout: 4000 });
+  await expect(page.locator('.course-clear .reward-sticker')).toBeVisible();
+  await expect(page.locator('.course-clear .new-friend')).toContainText('おう');
+  await act(page, 'bye');
+  await act(page, 'home');
+  await act(page, 'toHide');
+  await act(page, 'hidePickScene', '[data-scene="room"]');
+  await expect(page.locator('[data-action="pickChar"][data-char="ou"]')).toBeVisible();
 });
 
 test('beach pack: first find at the beach brings choki and the b1 sticker; notices do not overlap', async ({ page }) => {

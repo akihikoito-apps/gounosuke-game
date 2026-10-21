@@ -48,6 +48,10 @@ function fallback(kind: MoverKind): string {
       return `<circle cx="-18" cy="-42" r="14" fill="#FFF3B0" opacity="0.5"/><circle cx="16" cy="-54" r="12" fill="#FFF3B0" opacity="0.5"/><ellipse cx="-18" cy="-44" rx="9" ry="7" fill="#82B596" ${L}/><circle cx="-12" cy="-40" r="6" fill="#FFE866" ${L}/><ellipse cx="16" cy="-56" rx="8" ry="6" fill="#82B596" ${L}/><circle cx="22" cy="-52" r="5" fill="#FFE866" ${L}/>`;
     case 'frog':
       return `<ellipse cx="0" cy="-2" rx="38" ry="5" fill="#4A3A40" opacity="0.1"/><path d="M-26 -14 Q-40 -26 -30 -4 L-16 -4 M26 -14 Q40 -26 30 -4 L16 -4" fill="#7AB87E" ${L}/><ellipse cx="0" cy="-24" rx="28" ry="20" fill="#88C88E" ${L}/><ellipse cx="0" cy="-18" rx="18" ry="12" fill="#EAF5D8"/><circle cx="-12" cy="-42" r="9" fill="#88C88E" ${L}/><circle cx="12" cy="-42" r="9" fill="#88C88E" ${L}/><circle cx="-12" cy="-42" r="3.5" fill="#4A3A40"/><circle cx="12" cy="-42" r="3.5" fill="#4A3A40"/><path d="M-8 -22 Q0 -16 8 -22" fill="none" ${L}/>`;
+    case 'dragonfly':
+      return `<ellipse cx="-8" cy="-42" rx="18" ry="6" transform="rotate(-18 -8 -42)" fill="#D6ECF4" fill-opacity="0.85" ${L}/><ellipse cx="-10" cy="-28" rx="16" ry="5" transform="rotate(14 -10 -28)" fill="#D6ECF4" fill-opacity="0.85" ${L}/><path d="M-34 -34 H18" stroke="#6B9AC4" stroke-width="7" stroke-linecap="round"/><path d="M-34 -34 H18" fill="none" ${L}/><circle cx="22" cy="-35" r="9" fill="#78B5A8" ${L}/><circle cx="25" cy="-37" r="3" fill="#4A3A40"/>`;
+    case 'floating-lantern':
+      return `<ellipse cx="0" cy="-4" rx="40" ry="6" fill="#4A3A40" opacity="0.15"/><path d="M-38 -16 H38 L28 -2 H-28 Z" fill="#C48E5A" ${L}/><rect x="-22" y="-54" width="44" height="38" rx="8" fill="#FFF099" ${L}/><circle cx="0" cy="-35" r="10" fill="#FFFDF4" opacity="0.85"/><path d="M-26 -54 H26 M-24 -16 H24" ${L}/>`;
   }
 }
 
@@ -56,7 +60,7 @@ function art(kind: MoverKind): string {
   return f ? `<image href="${f}" x="-150" y="-300" width="300" height="300"/>` : fallback(kind);
 }
 
-const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon', 'owl', 'falling-leaf', 'tropical-fish', 'jellyfish', 'bubble', 'firefly'];
+const FLY: MoverKind[] = ['bird', 'seagull', 'butterfly', 'balloon', 'owl', 'falling-leaf', 'tropical-fish', 'jellyfish', 'bubble', 'firefly', 'dragonfly'];
 
 /** うごくもの1つ。elapsed：出題が始まってからの秒数 */
 function one(P: string, m: MoverDef, elapsed: number): string {
@@ -72,7 +76,7 @@ function one(P: string, m: MoverDef, elapsed: number): string {
     `--period:${period}s`,
     `--delay:${-(elapsed % period).toFixed(2)}s`,
   ].join(';');
-  const inner = `<g class="mv-inner${FLY.includes(m.kind) ? ' fly' : m.kind === 'cloud' || m.kind === 'sailboat' ? ' drift' : ' step'}"><g transform="scale(${m.scale})">${art(m.kind)}</g></g>`;
+  const inner = `<g class="mv-inner${FLY.includes(m.kind) ? ' fly' : m.kind === 'cloud' || m.kind === 'sailboat' || m.kind === 'floating-lantern' ? ' drift' : ' step'}"><g transform="scale(${m.scale})">${art(m.kind)}</g></g>`;
   const g = `<g class="mv mv-${m.move}" data-mover="${m.id}" style="${vars}" aria-hidden="true">${inner}</g>`;
   if (!m.clip) return g;
   const id = `${P}mvclip-${m.id}`;
@@ -100,6 +104,8 @@ const BOX: Record<MoverKind, [number, number, number, number]> = {
   bubble: [-28, -64, 56, 60],
   firefly: [-36, -72, 72, 60],
   frog: [-42, -56, 84, 56],
+  dragonfly: [-42, -58, 84, 52],
+  'floating-lantern': [-42, -64, 84, 64],
 };
 
 /** 選ぶボタン用の絵（その絵の大きさに合わせて切り取る） */

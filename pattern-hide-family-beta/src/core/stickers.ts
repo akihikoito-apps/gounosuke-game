@@ -31,7 +31,7 @@ export const STICKERS: StickerDef[] = [
   { id: 'c7', name: 'もこと おつきさま', kind: 'course', need: 7, char: 'moko', motif: 'moon', color: '#D9D6EE' },
   { id: 'c8', name: 'にゃこと さかな', kind: 'course', need: 8, char: 'nyako', motif: 'fish', color: '#CFE3EE' },
   { id: 'c9', name: 'ころと にじ', kind: 'course', need: 9, char: 'koro', motif: 'rainbow', color: '#F3E7C6' },
-  { id: 'c10', name: 'みんなの おうかん', kind: 'course', need: 10, char: 'moko', motif: 'crown', color: '#F6E3A8' },
+  { id: 'c10', name: 'おうが きたよ', kind: 'course', need: 10, char: 'ou', motif: 'crown', color: '#F6E3A8' },
   { id: 'f10', name: '10かい みつけた', kind: 'finds', need: 10, char: 'mimi', motif: 'leaf', color: '#D6EBCB' },
   { id: 'f30', name: '30かい みつけた', kind: 'finds', need: 30, char: 'koro', motif: 'bread', color: '#F1DDC2' },
   { id: 'f60', name: '60かい みつけた', kind: 'finds', need: 60, char: 'moko', motif: 'heart', color: '#F5D5DE' },

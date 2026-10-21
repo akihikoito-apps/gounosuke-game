@@ -100,16 +100,16 @@ describe('night pack: entitlement boundaries', () => {
     expect(openRooms(0, withNight, { night: 1 }).map((r) => r.id)).toContain('veranda');
 
     const baseItems = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { night: 99 } }, baseOnly).map((i) => i.id);
-    for (const id of ['engawa-bench', 'star-rug', 'paper-lantern', 'music-box', 'bamboo-chair', 'frog-plush']) {
+    for (const id of ['engawa-bench', 'firefly-jar', 'paper-lantern', 'goldfish-bowl', 'bamboo-chair', 'frog-plush']) {
       expect(baseItems).not.toContain(id);
     }
 
     const nightStartItems = ownedItems({ cleared: 0, totalFinds: 0, sceneFinds: {} }, withNight).map((i) => i.id);
     expect(nightStartItems).toContain('engawa-bench');
-    expect(nightStartItems).not.toContain('star-rug');
+    expect(nightStartItems).not.toContain('firefly-jar');
 
     const nightAllItems = ownedItems({ cleared: 0, totalFinds: 0, sceneFinds: { night: 50 } }, withNight).map((i) => i.id);
-    for (const id of ['engawa-bench', 'star-rug', 'paper-lantern', 'music-box', 'bamboo-chair', 'frog-plush']) {
+    for (const id of ['engawa-bench', 'firefly-jar', 'paper-lantern', 'goldfish-bowl', 'bamboo-chair', 'frog-plush']) {
       expect(nightAllItems).toContain(id);
     }
 

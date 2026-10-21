@@ -167,6 +167,42 @@ test('壊れた保存データでも開ける（その部屋だけ初めから�
   await expect(page.locator('.mr-obj')).toHaveCount(4);
 });
 
+test('新しいおもちゃ・うきわの座席ゆれ・旧 star-rug / music-box の互換表示が動く', async ({ page }) => {
+  await fresh(page);
+  await seed(
+    page,
+    8,
+    {
+      layouts: {
+        veranda: [
+          { ref: 'item:star-rug', x: 500, y: 820 },
+          { ref: 'item:music-box', x: 320, y: 780 },
+          { ref: 'item:floatring', x: 640, y: 820 },
+          { ref: 'char:koro', x: 640, y: 780, on: { idx: 2, seat: 0 } },
+        ],
+      },
+      current: 'veranda',
+    },
+    { beach: 10, forest: 5, night: 15 },
+  );
+  await act(page, 'toMyRoom');
+  await expect(page.locator('#stage.loading')).toHaveCount(0);
+  // 旧保存データの star-rug / music-box も壊れず部屋に残っており、うきわに座った ころ もゆれる
+  await expect(page.locator('.mr-obj')).toHaveCount(4);
+  await expect(page.locator('.mr-obj.mr-char.seated.mr-m-bob')).toHaveCount(1);
+  // 棚のおもちゃタブには きしゃの おもちゃ・もくば・まるたの シーソー・どんぐり ごま・ほたるかご があり、旧 music-box は並ばない
+  await page.locator('[data-mr-tab="toy"]').click();
+  await expect(page.locator('[data-mr-ref="item:train-toy"]')).toHaveCount(1);
+  await expect(page.locator('[data-mr-ref="item:rocking-horse"]')).toHaveCount(1);
+  await expect(page.locator('[data-mr-ref="item:log-seesaw"]')).toHaveCount(1);
+  await expect(page.locator('[data-mr-ref="item:acorn-top"]')).toHaveCount(1);
+  await expect(page.locator('[data-mr-ref="item:firefly-jar"]')).toHaveCount(1);
+  await expect(page.locator('[data-mr-ref="item:music-box"]')).toHaveCount(0);
+  // いきものタブには きんぎょの すいそう がある
+  await page.locator('[data-mr-tab="animal"]').click();
+  await expect(page.locator('[data-mr-ref="item:goldfish-bowl"]')).toHaveCount(1);
+});
+
 // ---- Codex レビュー96 の指摘の再現 ----
 test('ブランコの子を引っぱると、指の所へ降りる（二重にずれない）', async ({ page }) => {
   await fresh(page);

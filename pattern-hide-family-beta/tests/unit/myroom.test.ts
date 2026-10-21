@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ITEMS, ROOMS, depthScale, itemForSticker, openRooms, ownedItems, starterLayout, validLayouts } from '../../src/core/myroom';
+import { ITEM_BY_ID, ITEMS, ROOMS, depthScale, itemForSticker, itemsForSticker, openRooms, ownedItems, starterLayout, validLayouts } from '../../src/core/myroom';
 import { CHARACTER_IDS } from '../../src/core/characters';
 import { STICKERS } from '../../src/core/stickers';
 import { type ContentId, PACKS } from '../../src/entitlements/entitlements';
@@ -23,24 +23,68 @@ describe('じぶんの へや', () => {
     for (const r of ROOMS) expect(PACKS.filter((p) => p.contents.includes(r.content)).length, r.id).toBe(1);
   });
 
-  it('シール1枚に もの1つ。無料は はじめから3つ、うみべ・もり・すいぞくかん・ほたるのかわべパックで パラソル ベンチ・キャンプテント・かいがらのソファ・えんがわのベンチが増える', () => {
+  it('シール1枚に もの1つ以上。無料は はじめから3つ、パックで家具・おもちゃが増える', () => {
     for (const s of STICKERS) expect(itemForSticker(s.id), s.id).toBeTruthy();
     expect(new Set(ITEMS.map((i) => i.id)).size).toBe(ITEMS.length);
     expect(ownedItems({ cleared: 0, totalFinds: 0 }, baseOnly).map((i) => i.id)).toEqual(['sofa', 'table', 'rug']);
-    expect(ownedItems({ cleared: 0, totalFinds: 0 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'beach-chair', 'camp-tent', 'shell-sofa', 'engawa-bench']);
-    expect(ownedItems({ cleared: 3, totalFinds: 12 }, all).map((i) => i.id)).toEqual(['sofa', 'table', 'rug', 'ball', 'cushion', 'bed', 'plant', 'beach-chair', 'camp-tent', 'shell-sofa', 'engawa-bench']);
-    // パックが無ければ、そのパックのシールの もの は出ない（コース10のこいぬ・うみべ・きのこの もり・すいぞくかん・ほたるの かわべ）
+    expect(ownedItems({ cleared: 0, totalFinds: 0 }, all).map((i) => i.id)).toEqual([
+      'sofa',
+      'table',
+      'rug',
+      'beach-chair',
+      'camp-tent',
+      'log-seesaw',
+      'shell-sofa',
+      'engawa-bench',
+    ]);
+    expect(ownedItems({ cleared: 3, totalFinds: 12 }, all).map((i) => i.id)).toEqual([
+      'sofa',
+      'table',
+      'rug',
+      'ball',
+      'cushion',
+      'bed',
+      'plant',
+      'beach-chair',
+      'camp-tent',
+      'log-seesaw',
+      'shell-sofa',
+      'engawa-bench',
+    ]);
+    // コース7・8で きしゃの おもちゃ・もくば、きのこの もり5回で どんぐり ごま、かわべで ほたるかご・きんぎょの すいそう が増える
+    expect(itemsForSticker('c7').map((i) => i.id)).toEqual(['moonlamp', 'train-toy']);
+    expect(itemsForSticker('c8').map((i) => i.id)).toEqual(['fishtank', 'rocking-horse']);
+    expect(itemsForSticker('f-s5').map((i) => i.id)).toEqual(['acorn-lamp', 'acorn-top']);
+    expect(itemsForSticker('n-s1').map((i) => i.id)).toEqual(['firefly-jar']);
+    expect(itemsForSticker('n-s15').map((i) => i.id)).toEqual(['goldfish-bowl']);
+    // うきわ は座ってゆれる
+    expect(ITEM_BY_ID['floatring'].seats).toEqual([{ x: 0, y: -36 }]);
+    expect(ITEM_BY_ID['floatring'].motion).toBe('bob');
+    // パックが無ければ、そのパックのシールの もの は出ない（コース7〜10・うみべ・きのこの もり・すいぞくかん・ほたるの かわべ）
     const base = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99, forest: 99, aquarium: 99, night: 99 } }, baseOnly).map((i) => i.id);
+    expect(base).not.toContain('train-toy');
+    expect(base).not.toContain('rocking-horse');
     expect(base).not.toContain('puppy');
     expect(base).not.toContain('beach-chair');
     expect(base).not.toContain('shell');
     expect(base).not.toContain('camp-tent');
+    expect(base).not.toContain('log-seesaw');
+    expect(base).not.toContain('acorn-top');
     expect(base).not.toContain('stump-chair');
     expect(base).not.toContain('shell-sofa');
     expect(base).not.toContain('coral-rug');
     expect(base).not.toContain('engawa-bench');
+    expect(base).not.toContain('firefly-jar');
+    expect(base).not.toContain('goldfish-bowl');
     expect(base).not.toContain('star-rug');
+    expect(base).not.toContain('music-box');
     expect(base).toContain('balloon');
+    // 全開放でも legacy の star-rug / music-box は棚（ownedItems）には出ない
+    const allOwned = ownedItems({ cleared: 10, totalFinds: 999, sceneFinds: { beach: 99, forest: 99, aquarium: 99, night: 99 } }, all).map((i) => i.id);
+    expect(allOwned).toContain('firefly-jar');
+    expect(allOwned).toContain('goldfish-bowl');
+    expect(allOwned).not.toContain('star-rug');
+    expect(allOwned).not.toContain('music-box');
   });
 
   it('奥ほど小さく、手前ほど大きい', () => {
@@ -50,9 +94,11 @@ describe('じぶんの へや', () => {
     expect(depthScale(r, 0)).toBeCloseTo(r.scaleBack);
   });
 
-  it('保存データの検査：正しいものは残し、壊れた部屋だけ消す', () => {
+  it('保存データの検査：正しいものは残し、壊れた部屋だけ消す（旧 star-rug / music-box も壊れない）', () => {
     const living = starterLayout('living');
     expect(validLayouts({ living }, CHARACTER_IDS)).toEqual({ living });
+    const verandaLegacy = [{ ref: 'item:star-rug', x: 500, y: 820 }, { ref: 'item:music-box', x: 640, y: 780 }];
+    expect(validLayouts({ veranda: verandaLegacy }, CHARACTER_IDS)).toEqual({ veranda: verandaLegacy });
     expect(validLayouts({ living, bedroom: [{ ref: 'item:nope', x: 1, y: 1 }] }, CHARACTER_IDS)).toEqual({ living });
     expect(validLayouts({ living: [{ ref: 'char:koro', x: 'a', y: 1 }] }, CHARACTER_IDS)).toEqual({});
     expect(validLayouts({ living: [{ ref: 'char:koro', x: 1, y: 1, on: { idx: 0, seat: 0 } }] }, CHARACTER_IDS)).toEqual({}); // 自分の上には座れない

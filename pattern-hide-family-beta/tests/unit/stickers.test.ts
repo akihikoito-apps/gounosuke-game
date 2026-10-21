@@ -39,6 +39,7 @@ describe('sticker book and the new friend', () => {
     expect(earnedStickers(3, 30).map((s) => s.id)).toEqual(['c1', 'c2', 'c3', 'f10', 'f30']);
     expect(newStickers({ cleared: 4, totalFinds: 29 }, { cleared: 5, totalFinds: 30 }).map((s) => s.id)).toEqual(['c5', 'f30']);
     expect(STICKERS.find((s) => s.id === 'c5')?.char).toBe('popo');
+    expect(STICKERS.find((s) => s.id === 'c10')?.char).toBe('ou');
     expect(stickerHint(STICKERS.find((s) => s.id === 'b1')!)).toBe('うみべで みつけたら');
     expect(stickerHint(STICKERS.find((s) => s.id === 'b5')!)).toBe('うみべで 5かい');
     expect(stickerHint(STICKERS.find((s) => s.id === 'b10')!)).toBe('うみべで 10かい');
@@ -76,11 +77,13 @@ describe('sticker book and the new friend', () => {
     expect(initialStickerPage(allPages, prog, seen)).toBe('beach');
   });
 
-  it('nyako joins after course 1, popo after course 5, and never before that', () => {
+  it('nyako joins after course 1, popo after course 5, ou after course 10, and never before that', () => {
     expect(unlockedCharacters(0)).toEqual(BASE_CHARACTER_IDS);
     expect(unlockedCharacters(1)).toEqual([...BASE_CHARACTER_IDS, 'nyako']);
     expect(unlockedCharacters(4)).toEqual([...BASE_CHARACTER_IDS, 'nyako']);
     expect(unlockedCharacters(5)).toEqual([...BASE_CHARACTER_IDS, 'nyako', 'popo']);
+    expect(unlockedCharacters(9)).toEqual([...BASE_CHARACTER_IDS, 'nyako', 'popo']);
+    expect(unlockedCharacters(10)).toEqual([...BASE_CHARACTER_IDS, 'nyako', 'popo', 'ou']);
     // うみべパックの ちょき・きのこの もりパックの ぴの・すいぞくかんパックの ぷか・ほたるの かわべパックの ひか は、それぞれの背景で初めて見つけたら
     expect(unlockedCharacters(0, { beach: 1 })).toEqual([...BASE_CHARACTER_IDS, 'choki']);
     expect(unlockedCharacters(0, { forest: 1 })).toEqual([...BASE_CHARACTER_IDS, 'pino']);
@@ -89,12 +92,13 @@ describe('sticker book and the new friend', () => {
     expect(unlockedCharacters(10, { beach: 3, forest: 1, aquarium: 1, night: 1 })).toEqual(CHARACTER_IDS);
     for (const id of SCENE_IDS) {
       for (let seed = 1; seed <= 60; seed++) {
-        expect(autoLayout(SCENES[id], 'normal', seed).some((p) => p.char === 'nyako' || p.char === 'popo')).toBe(false);
-        expect(courseRound(SCENES[id], 9, 3, seed, unlockedCharacters(1)).some((p) => p.char === 'popo')).toBe(false);
+        expect(autoLayout(SCENES[id], 'normal', seed).some((p) => p.char === 'nyako' || p.char === 'popo' || p.char === 'ou')).toBe(false);
+        expect(courseRound(SCENES[id], 9, 3, seed, unlockedCharacters(1)).some((p) => p.char === 'popo' || p.char === 'ou')).toBe(false);
+        expect(courseRound(SCENES[id], 9, 3, seed, unlockedCharacters(5)).some((p) => p.char === 'ou')).toBe(false);
       }
     }
     // 仲間になったあとは出てくる
-    for (const who of ['nyako', 'popo']) {
+    for (const who of ['nyako', 'popo', 'ou']) {
       const seen = SCENE_IDS.some((id) => Array.from({ length: 60 }, (_, s) => courseRound(SCENES[id], 9, 3, s + 1, CHARACTER_IDS)).flat().some((p) => p.char === who));
       expect(seen).toBe(true);
     }

@@ -1,7 +1,7 @@
 // うみべ（背景パック1）：しまの海の家、水玉の風よけ、チェックのレジャーシート、砂浜
 import type { SceneDef, CostumeDef } from '../scene';
 import { ball } from '../props';
-import { cooler, floatRing, sandBucket, sandcastle, shellPile } from '../props-beach';
+import { beachBag, cooler, floatRing, pineappleBasket, sandBucket, sandcastle, shellPile, surfboard } from '../props-beach';
 
 const costumes: CostumeDef[] = [
   { id: 'plain', kind: 'plain', spec: { kind: 'plain', bg: '#F1DDB5', fg: '#F1DDB5', size: 40 } },
@@ -63,13 +63,13 @@ export const beach: SceneDef = {
     `<path d="M420 200 q12 -12 24 0 q12 -12 24 0" stroke="#4A3A40" stroke-width="4" fill="none"/>`,
   spots: [
     { id: 'beach-hut-1', x: 110, y: 652, s: 1, region: 'hut', prop: sandBucket(110, 594), easy: true },
-    { id: 'beach-hut-2', x: 260, y: 652, s: 1, region: 'hut', prop: floatRing(258, 616), easy: false },
+    { id: 'beach-hut-2', x: 260, y: 652, s: 1, region: 'hut', prop: surfboard(258, 616), easy: false },
     { id: 'beach-wind-1', x: 690, y: 652, s: 1, region: 'windbreak', prop: cooler(690, 606, 132, 70), easy: true },
-    { id: 'beach-wind-2', x: 880, y: 652, s: 1, region: 'windbreak', prop: sandcastle(880, 600, 132, 78), easy: false },
+    { id: 'beach-wind-2', x: 880, y: 652, s: 1, region: 'windbreak', prop: pineappleBasket(880, 600, 132, 78), easy: false },
     { id: 'beach-towel-1', x: 490, y: 884, s: 1, region: 'towel', prop: ball(490, 870, 52), easy: true },
     { id: 'beach-towel-2', x: 660, y: 948, s: 1, region: 'towel', prop: shellPile(660, 926), easy: false },
     { id: 'beach-towel-3', x: 830, y: 884, s: 1, region: 'towel', prop: floatRing(830, 852), easy: true },
     { id: 'beach-sand-1', x: 150, y: 900, s: 1, region: 'sand', prop: sandcastle(150, 848, 132, 78), easy: true },
-    { id: 'beach-sand-2', x: 320, y: 960, s: 0.95, region: 'sand', prop: sandBucket(320, 914), easy: false },
+    { id: 'beach-sand-2', x: 320, y: 960, s: 0.95, region: 'sand', prop: beachBag(320, 914), easy: false },
   ],
 };

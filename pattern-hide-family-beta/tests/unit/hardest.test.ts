@@ -1,4 +1,4 @@
-// 最難関（おためし）：Codex 第2回・第3回の検証条件（3背景×100シード×残り1〜10）
+// 最難関（おためし）：Codex 第2回・第3回の検証条件（全背景×100シード×残り1〜10）
 import { describe, expect, it } from 'vitest';
 import { HARDEST, hardestRound } from '../../src/core/courses';
 import { accessoryFits, deepHatShapes, glassesShapes } from '../../src/core/accessories';
@@ -107,7 +107,7 @@ describe('hardest trial: variety', () => {
 });
 
 import { CHARACTER_IDS as ALL } from '../../src/core/characters';
-describe('hardest trial with all six friends', { timeout: 120_000 }, () => {
+describe('hardest trial with all ten friends', { timeout: 120_000 }, () => {
   for (const id of SCENE_IDS) {
     it(`${id}: peeks, deep hats and glasses stay safe for every friend`, () => {
       const sc = SCENES[id];
@@ -126,8 +126,8 @@ describe('hardest trial with all six friends', { timeout: 120_000 }, () => {
           }
         }
       }
-      // 新しい6体も、最難関に出てくる
-      for (const c of ['nyako', 'popo', 'choki', 'pino', 'puka', 'hika']) expect(seen.has(c), c).toBe(true);
+      // 新しい7体も、最難関に出てくる
+      for (const c of ['nyako', 'popo', 'ou', 'choki', 'pino', 'puka', 'hika']) expect(seen.has(c), c).toBe(true);
     });
   }
 });

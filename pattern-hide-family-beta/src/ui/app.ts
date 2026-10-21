@@ -56,10 +56,10 @@ import { NATIVE } from './platform';
 import { CONTENT_VERSION, newsSince } from '../core/whatsnew';
 import { PurchaseStore } from '../purchase/store';
 import { type UpcomingReward, friendAtCourse, upcomingRewards } from '../core/rewards';
-import { HIDE_MOVERS_MAX, MOVERS, MOVER_NAMES, type MoverDef, pickMovers } from '../core/movers';
+import { HIDE_MOVERS_MAX, MOVERS, MOVER_NAMES, type MoverDef, pickMovers, pickSearchMovers } from '../core/movers';
 import { moverIcon, moversMarkup } from './moverView';
 import { MyRoomView, itemThumbSvg } from './myroomView';
-import { ROOMS, itemForSticker, openRooms, ownedItems } from '../core/myroom';
+import { ROOMS, itemForSticker, itemsForSticker, openRooms, ownedItems } from '../core/myroom';
 
 
 type Screen =
@@ -389,8 +389,8 @@ export class App {
       return `<div class="up-row friend"><span class="up-icon">${faceIcon(CHARACTERS[r.char])}</span><p>${when(r.remaining)}<br><strong>${CHARACTERS[r.char].name}</strong>が なかまに なるよ！${dots(prev, r.at, d.course.cleared)}</p></div>`;
     }
     const gift = (id: string) => {
-      const it = itemForSticker(id);
-      return it ? `<br><span class="up-gift">へやに「${it.name}」も とどくよ</span>` : '';
+      const its = itemsForSticker(id);
+      return its.length ? `<br><span class="up-gift">へやに「${its.map((i) => i.name).join('」と「')}」も とどくよ</span>` : '';
     };
     if (r.kind === 'sceneSticker') {
       const pct = Math.round((r.done / r.at) * 100);
@@ -564,13 +564,14 @@ export class App {
     const active = this.activeStickerId
       ? visible.find((s) => s.id === this.activeStickerId && hasSticker(s, prog.cleared, prog.totalFinds, prog.sceneFinds)) ?? null
       : null;
-    const activeGift = active ? itemForSticker(active.id) : undefined;
+    const activeGifts = active ? itemsForSticker(active.id) : [];
+    const activeGift = activeGifts[0];
     const detailModal = active
       ? `<div class="overlay clear sticker-detail" role="dialog" aria-modal="true" aria-label="${active.name}">
           <div class="clear-card sticker-modal-card">
             <div class="sticker-modal-art">${stickerSvg(active)}</div>
             <p class="clear-title sticker-modal-title">${active.name}</p>
-            ${activeGift ? `<div class="sticker-modal-gift"><span class="sticker-modal-gift-icon" aria-hidden="true">${itemThumbSvg(activeGift)}</span><p class="sticker-modal-gift-text">へやに ${activeGift.name}が とどいたよ</p></div>` : ''}
+            ${activeGift ? `<div class="sticker-modal-gift"><span class="sticker-modal-gift-icon" aria-hidden="true">${itemThumbSvg(activeGift)}</span><p class="sticker-modal-gift-text">へやに ${activeGifts.map((g) => g.name).join('と ')}が とどいたよ</p></div>` : ''}
             <div class="clear-actions two">
               ${btn('toMyRoom', ICONS.room, 'へやで あそぶ', 'equal primary', 'data-autofocus')}
               ${btn('closeSticker', ICONS.done, 'とじる', 'equal')}
@@ -654,7 +655,7 @@ export class App {
       shade: s.origin === 'trial' ? HARDEST.shade : 1,
       hint: currentHint(scene, s),
       title: `${scene.name}。かくれている こを さがして タッチ`,
-      movers: (s.origin === 'course' || s.origin === 'hide') && this.movers.length ? moversMarkup('g-', this.movers, (performance.now() - this.moverStart) / 1000) : undefined,
+      movers: (s.origin === 'hide' || ((s.origin === 'course' || s.origin === 'search') && this.store.data.settings.movers)) && this.movers.length ? moversMarkup('g-', this.movers, (performance.now() - this.moverStart) / 1000) : undefined,
     });
   }
 
@@ -714,15 +715,15 @@ export class App {
     return base.replace('viewBox="-70 -215 140 120"', 'viewBox="-78 -250 156 155"').replace(/<\/svg>$/, `${hat}</svg>`);
   }
 
-  /** コースクリアのごほうび：そのコースのシール、コース1・5では新しい友だち */
+  /** コースクリアのごほうび：そのコースのシール、コース1・5・10では新しい友だち */
   private courseRewardHtml(): string {
     // 初めてクリアしたときだけ（もう一度クリアしても「あたらしい」とは言わない）
     if (!this.courseFirstClear) return '';
     const st = visibleStickers(this.can).find((x) => x.kind === 'course' && x.need === this.courseNo);
-    const gift = st ? itemForSticker(st.id) : undefined;
+    const gifts = st ? itemsForSticker(st.id) : [];
     const room = ROOMS.find((r) => r.needCleared === this.courseNo && this.can(r.content));
     const sticker = st
-      ? `<div class="reward-sticker">${stickerSvg(st)}<p>シールを もらったよ！${gift ? `<br><small>へやに「${gift.name}」が とどいたよ</small>` : ''}${room ? `<br><small>へやに「${room.name}」が ふえたよ</small>` : ''}</p></div>`
+      ? `<div class="reward-sticker">${stickerSvg(st)}<p>シールを もらったよ！${gifts.length ? `<br><small>へやに「${gifts.map((g) => g.name).join('」と「')}」が とどいたよ</small>` : ''}${room ? `<br><small>へやに「${room.name}」が ふえたよ</small>` : ''}</p></div>`
       : '';
     const nf = FRIEND_UNLOCKS.find((f) => f.course === this.courseNo && this.can(`char:${f.char}`));
     const friend = nf
@@ -1138,6 +1139,8 @@ export class App {
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
     const placements = autoLayout(scene, difficulty, seed, this.allowedChars(), this.firstMeet(scene.id));
     this.session = newSession(scene.id, difficulty, placements, 'search', Date.now());
+    this.movers = this.store.data.settings.movers ? pickSearchMovers(scene.id, difficulty, seed) : [];
+    this.moverStart = performance.now();
     record(this.store, { type: 'searchStarted' });
     this.saveResume();
     this.go('play');

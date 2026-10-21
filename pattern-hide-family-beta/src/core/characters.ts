@@ -1,8 +1,8 @@
-// オリジナルキャラクター3体。形（輪郭）・顔・色・性格がそれぞれ違う。
+// オリジナルキャラクター。形（輪郭）・顔・色・性格がそれぞれ違う。
 // ローカル座標：足もと中央が原点、上が -y。高さ約200。
 import { type Pt, type Shape, quadPoints, shapeToSvg } from './geometry';
 
-export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'choki' | 'pino' | 'puka' | 'hika';
+export type CharacterId = 'koro' | 'mimi' | 'moko' | 'nyako' | 'popo' | 'ou' | 'choki' | 'pino' | 'puka' | 'hika';
 import type { SceneId } from './scene';
 
 export interface CharacterDef {
@@ -32,7 +32,7 @@ function rotEllipse(cx: number, cy: number, rx: number, ry: number, deg: number,
   return { kind: 'poly', pts };
 }
 
-/** 服（からだ）の多角形。3体共通の形で、柄が主役になる。 */
+/** 服（からだ）の多角形。共通の形で、柄が主役になる。 */
 export const BODY_POLY: Pt[] = [
   { x: -58, y: 0 },
   ...B({ x: -58, y: 0 }, { x: -64, y: -62 }, { x: -34, y: -94 }),
@@ -113,6 +113,22 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     ],
     facePoints: FACE,
   },
+  // コース10をクリアすると仲間になる、つづきのコースの友だち
+  ou: {
+    id: 'ou',
+    name: 'おう',
+    personality: 'おうさまごっこが だいすきな たのしい こ。あたまの まるい おうかん が めじるし。',
+    skin: '#F7DFB8',
+    silhouette: [
+      BODY,
+      HEAD,
+      { kind: 'rect', x: -30, y: -196, w: 60, h: 18, rx: 6 },
+      { kind: 'ellipse', cx: 0, cy: -202, rx: 10, ry: 12 },
+      { kind: 'ellipse', cx: -22, cy: -197, rx: 9, ry: 10 },
+      { kind: 'ellipse', cx: 22, cy: -197, rx: 9, ry: 10 },
+    ],
+    facePoints: FACE,
+  },
   // 背景パック1「うみべ」の友だち。うみべで初めて誰かを見つけると仲間になる
   choki: {
     id: 'choki',
@@ -172,13 +188,14 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
   },
 };
 
-export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'choki', 'pino', 'puka', 'hika'];
+export const CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko', 'nyako', 'popo', 'ou', 'choki', 'pino', 'puka', 'hika'];
 /** 最初からいる3体 */
 export const BASE_CHARACTER_IDS: CharacterId[] = ['koro', 'mimi', 'moko'];
 /** 新しい友だちが仲間になるコース（このコースをクリアしたら）。最初のクリアで1体目が来る */
 export const FRIEND_UNLOCKS: { course: number; char: CharacterId }[] = [
   { course: 1, char: 'nyako' },
   { course: 5, char: 'popo' },
+  { course: 10, char: 'ou' },
 ];
 
 /** 背景パックの友だち：その背景で初めて誰かを見つけると仲間になる */
@@ -329,6 +346,24 @@ function headMarkup(c: CharacterDef): string {
         cheeks() +
         `<ellipse cx="0" cy="-132" rx="5" ry="3.6" fill="#6B4E4A"/>` +
         `<path d="M-7 -124 Q0 -117 7 -124" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
+      );
+    }
+    case 'ou': {
+      // 頭のてっぺんの まるい3つ山の おうかん
+      const crown =
+        `<path d="M-28 -180 L-30 -198 L-13 -189 L0 -204 L13 -189 L30 -198 L28 -180 Z" fill="#FFD45C" ${st}/>` +
+        `<circle cx="-29" cy="-200" r="6" fill="#FFD45C" ${st}/>` +
+        `<circle cx="0" cy="-206" r="7" fill="#FFD45C" ${st}/>` +
+        `<circle cx="29" cy="-200" r="6" fill="#FFD45C" ${st}/>` +
+        `<circle cx="0" cy="-190" r="3.8" fill="#E9785F"/>` +
+        `<circle cx="-16" cy="-187" r="2.8" fill="#7CC6BC"/>` +
+        `<circle cx="16" cy="-187" r="2.8" fill="#7CC6BC"/>`;
+      return (
+        crown +
+        `<ellipse cx="0" cy="-142" rx="48" ry="45" fill="${c.skin}" ${st}/>` +
+        eyes() +
+        cheeks() +
+        `<path d="M-8 -125 Q0 -117 8 -125" fill="none" stroke="#3B2F35" stroke-width="3" stroke-linecap="round"/>`
       );
     }
     case 'moko': {

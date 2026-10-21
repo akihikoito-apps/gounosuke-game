@@ -1,6 +1,6 @@
-// うごくもの（コース）：コース1は なし、後半は前を横切る、保護者が切れる、タップは さえぎらない
+// うごくもの（コース・じゆうに さがす）：コース1は なし、後半・ふつうは前を横切る、保護者が切れる、タップは さえぎらない
 import { expect, test } from '@playwright/test';
-import { act, faceCenter, fresh, state, tapAt } from './helpers';
+import { act, faceCenter, fresh, startSearch, state, tapAt } from './helpers';
 
 const KEY = 'moyou-kakurenbo-beta';
 
@@ -45,11 +45,32 @@ test('コース1は うごくもの なし、コース7は 3つ（前を通る�
   expect(s.session.placements.length).toBeGreaterThan(0);
 });
 
-test('保護者が「うごくものを出す」を切ると、出ない', async ({ page }) => {
+test('じゆうに さがす：やさしい は後ろだけ2〜3個、ふつう は前も入れて4〜5個', async ({ page }) => {
+  await fresh(page);
+  await seed(page, 0, true);
+  await startSearch(page, 'room', 'easy');
+  const easyCount = await page.locator('#stage .mv').count();
+  expect(easyCount).toBeGreaterThanOrEqual(2);
+  expect(easyCount).toBeLessThanOrEqual(3);
+  await expect(page.locator('#stage .movers.front .mv')).toHaveCount(0);
+
+  await act(page, 'home');
+  await startSearch(page, 'room', 'normal');
+  const normalCount = await page.locator('#stage .mv').count();
+  expect(normalCount).toBeGreaterThanOrEqual(4);
+  expect(normalCount).toBeLessThanOrEqual(5);
+  await expect(page.locator('#stage .movers.front .mv')).not.toHaveCount(0);
+});
+
+test('保護者が「うごくものを出す」を切ると、コースでも じゆうに さがす でも出ない', async ({ page }) => {
   await fresh(page);
   await seed(page, 9, false);
   await act(page, 'toCourse');
   await act(page, 'pickCourse', '[data-course="10"]');
   await expect(page.locator('[data-screen="play"]')).toBeVisible();
+  await expect(page.locator('#stage .mv')).toHaveCount(0);
+
+  await act(page, 'home');
+  await startSearch(page, 'room', 'normal');
   await expect(page.locator('#stage .mv')).toHaveCount(0);
 });

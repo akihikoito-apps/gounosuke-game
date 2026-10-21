@@ -37,7 +37,7 @@ export const PACKS: PackDef[] = [
     id: 'more-courses',
     name: 'つづきの コース',
     free: false,
-    contents: [...courses(6, 10), 'trial:hardest', 'room:bedroom'],
+    contents: [...courses(6, 10), 'char:ou', 'trial:hardest', 'room:bedroom'],
   },
   {
     id: 'beach',
