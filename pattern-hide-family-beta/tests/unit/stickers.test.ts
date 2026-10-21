@@ -11,7 +11,8 @@ import {
   unseenEarnedStickers,
 } from '../../src/core/stickers';
 import { visibleStickers } from '../../src/core/access';
-import { freeEntitlements } from '../../src/entitlements/entitlements';
+import { packEntitlements } from '../../src/entitlements/entitlements';
+const freeEntitlements = packEntitlements(() => []);
 import { BASE_CHARACTER_IDS, CHARACTER_IDS, unlockedCharacters } from '../../src/core/characters';
 import { autoLayout } from '../../src/core/placement';
 import { courseRound } from '../../src/core/courses';

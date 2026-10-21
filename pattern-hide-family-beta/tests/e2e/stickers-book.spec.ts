@@ -182,7 +182,7 @@ test('遊べないパックのページは出ず、購入や価格の案内も�
   await seedSave(page, { cleared: 2, totalFinds: 12, trialAllPacks: false });
   await act(page, 'toStickers');
 
-  await expect(page.locator('.stickers h2 .count')).toHaveText('3/15');
+  await expect(page.locator('.stickers h2 .count')).toHaveText('3/10');
   await expect(page.locator('.sticker-tab')).toHaveCount(2);
   await expect(page.locator('.sticker-tab[data-page="course"]')).toBeVisible();
   await expect(page.locator('.sticker-tab[data-page="finds"]')).toBeVisible();
