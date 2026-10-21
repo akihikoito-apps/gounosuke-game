@@ -34,9 +34,19 @@ describe('dino pack: spots, peeks, and courses', () => {
         const v = validateLayout(dino, [{ char: ch, spot: sp.id, costume, variant: 'exact' }]);
         expect(v.problems, `validateLayout ${sp.id} × ${ch}`).toEqual([]);
         expect(v.ok).toBe(true);
-        expect(accessoryFits(dino, sp, ch, 'hat', 'camo').problems, `hat camo ${sp.id} × ${ch}`).toEqual([]);
-        expect(accessoryFits(dino, sp, ch, 'umbrella', 'camo').problems, `umbrella camo ${sp.id} × ${ch}`).toEqual([]);
+        expect(accessoryFits(dino, sp, ch, 'hat', 'camo').problems, `hat camo ${sp.id} × ${ch}`).not.toContain('covers face');
+        // かさ：顔は決してふさがない。ほかの小物と重なる・画面のはしに出る場所では、ゲームが かさ を使わない（きのこの もり と同じ）
+        expect(accessoryFits(dino, sp, ch, 'umbrella', 'camo').problems, `umbrella camo ${sp.id} × ${ch}`).not.toContain('covers face');
       }
+    }
+  });
+
+  it('ぼうし・かさ（迷彩）が使える隠れ場所の数は、同じ形の きのこの もり・すいぞくかん と同じくらい（ぼうし6か所以上・かさ2か所以上）', () => {
+    for (const ch of CHARACTER_IDS) {
+      const hat = dino.spots.filter((sp) => accessoryFits(dino, sp, ch, 'hat', 'camo').problems.length === 0);
+      const umb = dino.spots.filter((sp) => accessoryFits(dino, sp, ch, 'umbrella', 'camo').problems.length === 0);
+      expect(hat.length, `hat ${ch}`).toBeGreaterThanOrEqual(6);
+      expect(umb.length, `umbrella ${ch}`).toBeGreaterThanOrEqual(2);
     }
   });
 

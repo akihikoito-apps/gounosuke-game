@@ -102,8 +102,8 @@ export const MOVERS: Record<SceneId, MoverDef[]> = {
     { id: 'night-lantern', kind: 'floating-lantern', move: 'patrol', from: { x: 1090, y: 548 }, to: { x: -90, y: 556 }, sec: 14, scale: 1.0, layer: 'front' },
   ],
   dino: [
-    { id: 'dino-brachio', kind: 'brachio', move: 'patrol', from: { x: -130, y: 455 }, to: { x: 1130, y: 455 }, sec: 22, scale: 1.15, layer: 'back' },
-    { id: 'dino-ptera', kind: 'pteranodon', move: 'cross', from: { x: 1120, y: 175 }, to: { x: -120, y: 135 }, sec: 14, scale: 1.1, layer: 'back' },
+    { id: 'dino-brachio', kind: 'brachio', move: 'patrol', from: { x: -200, y: 455 }, to: { x: 1200, y: 455 }, sec: 26, scale: 1.8, layer: 'back' },
+    { id: 'dino-ptera', kind: 'pteranodon', move: 'cross', from: { x: 1160, y: 175 }, to: { x: -160, y: 135 }, sec: 15, scale: 1.4, layer: 'back' },
     { id: 'dino-tricera', kind: 'tricera', move: 'patrol', from: { x: -120, y: 615 }, to: { x: 1120, y: 615 }, sec: 14, scale: 1.1, layer: 'front' },
     { id: 'dino-stego', kind: 'stegosaur', move: 'patrol', from: { x: 1120, y: 855 }, to: { x: -120, y: 855 }, sec: 15, scale: 1.1, layer: 'front' },
     { id: 'dino-raptor', kind: 'mini-raptor', move: 'cross', from: { x: -110, y: 740 }, to: { x: 1110, y: 760 }, sec: 9, scale: 1.05, layer: 'front' },
