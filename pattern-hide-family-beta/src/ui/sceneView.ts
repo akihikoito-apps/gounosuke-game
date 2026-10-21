@@ -161,12 +161,12 @@ export function renderScene(scene: SceneDef, o: SceneRenderOpts): string {
   }
   return (
     `<svg class="scene-svg${o.compact ? ' compact' : ''}" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${o.title ?? scene.name}">` +
-    `<defs>${scenePatternDefs(P, scene)}</defs>` +
+    `<defs>${scenePatternDefs(P, scene)}${o.movers ? `<clipPath id="${P}frame"><rect x="0" y="0" width="1000" height="1000"/></clipPath>` : ''}</defs>` +
     `<g class="bg" id="${P}bg">${backgroundMarkup(P, scene)}</g>` +
-    (o.movers?.back ? `<g class="movers back">${o.movers.back}</g>` : '') +
+    (o.movers?.back ? `<g class="movers back" clip-path="url(#${P}frame)">${o.movers.back}</g>` : '') +
     `<g class="chars">${chars}</g>` +
     `<g class="props">${props}</g>` +
-    (o.movers?.front ? `<g class="movers front">${o.movers.front}</g>` : '') +
+    (o.movers?.front ? `<g class="movers front" clip-path="url(#${P}frame)">${o.movers.front}</g>` : '') +
     `<g class="fx">${fx}</g>` +
     `<g class="edit-layer">${cand}${sel}</g>` +
     `<g class="hint-layer">${hintMarkup(scene, placements, o.hint)}</g>` +
