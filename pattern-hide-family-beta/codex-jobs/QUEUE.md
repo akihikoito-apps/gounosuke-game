@@ -29,5 +29,5 @@
 - [x] 90-review-code.md — コードの独立レビュー（状態遷移・入力・保存・情報流出・課金境界） 2026-10-08 完了。指摘3件を Claude が修正（audit/codex/review-2026-10-08.md）
 - [x] 91-hardest-course-r1.md — 最難関コースの議論・第1回 2026-10-08（audit/codex/hardest-course-r1.md）
 - [x] 92-hardest-course-r2.md — 最難関コースの議論・第2回（仕様確定）2026-10-08（audit/codex/hardest-course-r2.md）
-- [ ] 21-pack-upgrade-art.md — 既存パックの魅力強化（友だち「おう」・おもちゃ6点・かわべのうごくもの2点・うみべ前景小物）
+- [x] 21-pack-upgrade-art.md — 既存パックの魅力強化（友だち「おう」・おもちゃ6点・かわべのうごくもの2点・うみべ前景小物） 2026-10-21 完了
 - [ ] 22-dino-art.md — 追加パック「きょうりゅうの たに」の絵一式（背景4層・柄4枚・友だち「がお」6枚・動く恐竜5枚・へやと物8枚・シール5枚の計32枚）

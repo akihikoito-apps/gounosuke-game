@@ -1,6 +1,6 @@
 # 絵の自動検査結果
 
-対象：`art/`（229ファイル、合計 4678KB） 実行：2026-10-15T10:00:04.290Z
+対象：`art/`（243ファイル、合計 4718KB） 実行：2026-10-21T01:37:25.658Z
 
 **すべて合格**
 
@@ -51,6 +51,15 @@
 | OK | art\characters\popo\front.svg | 顔の位置に絵がある |
 | OK | art\characters\popo\front-found.svg | 輪郭の判定からはみ出す割合 6.3%（12%以下） |
 | OK | art\characters\popo\front-found.svg | 顔の位置に絵がある |
+| OK | art\characters\ou\back.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\ou\clothes-mask.svg | 服の白い部分がからだの判定内 100%（95%以上） |
+| OK | art\characters\ou\clothes-mask.svg | からだの判定を服が覆う割合 100%（70%以上） |
+| OK | art\characters\ou\clothes-shade.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\ou\clothes-line.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\ou\front.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
+| OK | art\characters\ou\front.svg | 顔の位置に絵がある |
+| OK | art\characters\ou\front-found.svg | 輪郭の判定からはみ出す割合 4.1%（12%以下） |
+| OK | art\characters\ou\front-found.svg | 顔の位置に絵がある |
 | OK | art\characters\choki\back.svg | 輪郭の判定からはみ出す割合 0.0%（4%以下） |
 | OK | art\characters\choki\clothes-mask.svg | 服の白い部分がからだの判定内 100%（95%以上） |
 | OK | art\characters\choki\clothes-mask.svg | からだの判定を服が覆う割合 100%（70%以上） |
@@ -88,33 +97,33 @@
 | OK | art\characters\hika\front-found.svg | 輪郭の判定からはみ出す割合 3.9%（12%以下） |
 | OK | art\characters\hika\front-found.svg | 顔の位置に絵がある |
 | OK | art\scenes\room\back.png | 寸法確認のみ |
-| OK | art\scenes\room\over.png | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\room\minor.png | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\room\fore.png | 全 9 か所 × 9体で問題なし |
+| OK | art\scenes\room\over.png | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\room\minor.png | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\room\fore.png | 全 9 か所 × 10体で問題なし |
 | OK | art\scenes\garden\back.png | 寸法確認のみ |
-| OK | art\scenes\garden\over.png | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\garden\minor.png | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\garden\fore.png | 全 9 か所 × 9体で問題なし |
+| OK | art\scenes\garden\over.png | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\garden\minor.png | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\garden\fore.png | 全 9 か所 × 10体で問題なし |
 | OK | art\scenes\shop\back.png | 寸法確認のみ |
-| OK | art\scenes\shop\over.png | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\shop\minor.png | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\shop\fore.png | 全 9 か所 × 9体で問題なし |
+| OK | art\scenes\shop\over.png | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\shop\minor.png | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\shop\fore.png | 全 9 か所 × 10体で問題なし |
 | OK | art\scenes\beach\back.svg | 寸法確認のみ |
-| OK | art\scenes\beach\over.svg | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\beach\minor.svg | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\beach\fore.svg | 全 9 か所 × 9体で問題なし |
+| OK | art\scenes\beach\over.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\beach\minor.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\beach\fore.svg | 全 9 か所 × 10体で問題なし |
 | OK | art\scenes\forest\back.svg | 寸法確認のみ |
-| OK | art\scenes\forest\over.svg | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\forest\minor.svg | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\forest\fore.svg | 全 9 か所 × 9体で問題なし |
+| OK | art\scenes\forest\over.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\forest\minor.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\forest\fore.svg | 全 9 か所 × 10体で問題なし |
 | OK | art\scenes\aquarium\back.svg | 寸法確認のみ |
-| OK | art\scenes\aquarium\over.svg | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\aquarium\minor.svg | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\aquarium\fore.svg | 全 9 か所 × 9体で問題なし |
+| OK | art\scenes\aquarium\over.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\aquarium\minor.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\aquarium\fore.svg | 全 9 か所 × 10体で問題なし |
 | OK | art\scenes\night\back.svg | 寸法確認のみ |
-| OK | art\scenes\night\over.svg | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\night\minor.svg | 全 9 か所 × 9体で問題なし |
-| OK | art\scenes\night\fore.svg | 全 9 か所 × 9体で問題なし |
+| OK | art\scenes\night\over.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\night\minor.svg | 全 9 か所 × 10体で問題なし |
+| OK | art\scenes\night\fore.svg | 全 9 か所 × 10体で問題なし |
 | OK | art\accessories\hat\mask.svg | 形の判定からはみ出す割合 0.0%（5%以下） |
 | OK | art\accessories\hat\mask.svg | 形の判定を白が覆う割合 97%（70%以上） |
 | OK | art\accessories\hat\mask.svg | 顔に重ならない |
@@ -197,8 +206,10 @@
 | OK | art\movers\cat.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\cloud.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\crab.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\dragonfly.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\falling-leaf.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\firefly.svg | 枠 -150 -300 300 300 |
+| OK | art\movers\floating-lantern.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\frog.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\jellyfish.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\owl.svg | 枠 -150 -300 300 300 |
@@ -209,6 +220,7 @@
 | OK | art\movers\squirrel.svg | 枠 -150 -300 300 300 |
 | OK | art\movers\tropical-fish.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\acorn-lamp.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\acorn-top.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\ball.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\balloon.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\bamboo-chair.svg | 枠 -150 -300 300 300 |
@@ -223,14 +235,17 @@
 | OK | art\myroom\items\cushion.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\dolphin-ride.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\engawa-bench.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\firefly-jar.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\fishtank-fish.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\fishtank.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\floatring.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\flowerpot.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\frog-plush.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\goldfish-bowl.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\heartcushion.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\hermit-crab.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\jelly-lamp.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\log-seesaw.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\moonlamp.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\mushroom-table.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\music-box.svg | 枠 -150 -300 300 300 |
@@ -239,6 +254,7 @@
 | OK | art\myroom\items\plant.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\present.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\puppy.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\rocking-horse.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\rug.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\shaved-ice.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\shell-sofa.svg | 枠 -150 -300 300 300 |
@@ -251,6 +267,7 @@
 | OK | art\myroom\items\swing-seat.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\swing.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\table.svg | 枠 -150 -300 300 300 |
+| OK | art\myroom\items\train-toy.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\items\treasure-box.svg | 枠 -150 -300 300 300 |
 | OK | art\myroom\rooms\aquarium-room.svg | 枠 0 0 1000 1000 |
 | OK | art\myroom\rooms\beach-deck.svg | 枠 0 0 1000 1000 |
