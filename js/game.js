@@ -115,6 +115,39 @@ const Game = {
   /* ★そうびひん（かいはつしつで つくった もの）
        Game.gear = { なかまの id: そうびの id } の かたちで もらいます。
        ついて いなければ null。                                      */
+  /* ★その そうびの レベル（おなじ そうびを 3つ あわせると 1あがる）。
+       Game.gearLv = { そうびの id: レベル } で もらいます。          */
+  gearLvOf(gid) {
+    const max = (typeof GEAR_FUSE !== 'undefined' && GEAR_FUSE.maxLv) ? GEAR_FUSE.maxLv : 5;
+    const n = (this.gearLv && this.gearLv[gid]) ? this.gearLv[gid] : 1;
+    return Math.max(1, Math.min(max, n));
+  },
+  /* ★レベルの ぶん こうかを つよく する。
+       「1ばいから ふえた ぶん」を おおきく する ので、
+       1.3ばい（ふえた ぶん 0.3）の そうびは Lv5 で 1.6ばい に なります。
+       0.8ばい（へった ぶん 0.2）の そうびは Lv5 で 0.6ばい に なります。 */
+  gearEffLv(ef, lv) {
+    const step = (typeof GEAR_FUSE !== 'undefined' && GEAR_FUSE.step) ? GEAR_FUSE.step : 0.25;
+    const k = 1 + (Math.max(1, lv) - 1) * step;
+    if (k === 1) return ef;
+    const out = {};
+    for (const key in ef) {
+      const v = ef[key];
+      if (key === 'hp' || key === 'atk' || key === 'speed' || key === 'recharge' || key === 'cost') {
+        out[key] = 1 + (v - 1) * k;
+      } else if (key === 'range' || key === 'kb') {
+        out[key] = Math.round(v * k);
+      } else if (key === 'vs' || key === 'guard') {
+        out[key] = { attrs: v.attrs, mult: 1 + ((v.mult === undefined ? 1 : v.mult) - 1) * k };
+      } else if (key === 'crit') {
+        out[key] = { chance: Math.min(1, (v.chance || 0) * k), mult: v.mult };
+      } else {
+        out[key] = v;
+      }
+    }
+    return out;
+  },
+
   gearEffOf(id) {
     if (!this.gear || !this.gear[id]) return null;
     if (typeof GEARS === 'undefined') return null;
@@ -131,7 +164,7 @@ const Game = {
       const g = GEARS.find(x => x.id === gid);
       if (!g || !g.eff) continue;
       any = true;
-      const ef = g.eff;
+      const ef = this.gearEffLv(g.eff, this.gearLvOf(gid));   // ★レベルの ぶん
       /* ばいりつは かけ算（1.1 と 1.2 なら 1.32ばい）*/
       for (const k of ['hp', 'atk', 'speed', 'recharge', 'cost']) {
         if (ef[k]) out[k] = (out[k] || 1) * ef[k];

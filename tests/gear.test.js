@@ -34,6 +34,9 @@ const UNITS     = run('UNITS');
 const ENEMIES   = run('ENEMIES');
 const GEARS     = run('GEARS');
 const SLOTS     = run('GEAR_SLOTS');
+const RANKS     = run('GEAR_RANKS');
+const RANK_ORDER = run('GEAR_RANK_ORDER');
+const FUSE      = run('GEAR_FUSE');
 const GEAR_CORE = run('GEAR_CORE');
 const LAB       = run('LAB');
 const STAGES    = run('STAGES');
@@ -154,9 +157,11 @@ test('きょり・ふきとび・さいせいさん・コストも かわる', (
   if (gr) assert.strictEqual(defWith('akibou', gr.id).range, UNITS.akibou.range + gr.eff.range);
   const gk = GEARS.find(x => x.eff.kb);
   if (gk) assert.strictEqual(defWith('tankun', gk.id).kbCount, UNITS.tankun.kbCount + gk.eff.kb);
-  const gc = GEARS.find(x => x.eff.cost);
+  const gc = GEARS.find(x => x.eff.cost && x.eff.cost < 1);
   if (gc) assert.ok(defWith('tankun', gc.id).cost < UNITS.tankun.cost);
-  const gb = GEARS.find(x => x.eff.recharge);
+  const gc2 = GEARS.find(x => x.eff.cost && x.eff.cost > 1);
+  if (gc2) assert.ok(defWith('tankun', gc2.id).cost > UNITS.tankun.cost);
+  const gb = GEARS.find(x => x.eff.recharge && x.eff.recharge < 1);
   if (gb) assert.ok(defWith('tankun', gb.id).recharge < UNITS.tankun.recharge);
 });
 
@@ -268,8 +273,10 @@ test('そうびのもとが もらえる コースが ある', () => {
 
 console.log('そうびの ばしょ（からだ・あし・ぶき）');
 
-test('ばしょが 3つ あって、ぜんぶの そうびに ばしょが ある', () => {
-  assert.ok(Array.isArray(SLOTS) && SLOTS.length === 3, 'ばしょが ' + (SLOTS || []).length + 'こ');
+test('ばしょが 6つ あって、ぜんぶの そうびに ばしょが ある', () => {
+  assert.ok(Array.isArray(SLOTS) && SLOTS.length === 6, 'ばしょが ' + (SLOTS || []).length + 'こ');
+  assert.deepStrictEqual(SLOTS.map(x => x.id).sort().join(','),
+    'acce,body,foot,hand,head,weapon', 'ばしょの id: ' + SLOTS.map(x => x.id));
   SLOTS.forEach(s => {
     assert.ok(s.id && s.name && s.icon, 'ばしょに なまえか えが ない');
     assert.ok(!/[A-Za-z]/.test(s.name), 'ばしょの なまえが にほんごで ない: ' + s.name);
@@ -282,9 +289,9 @@ test('ばしょが 3つ あって、ぜんぶの そうびに ばしょが あ�
 test('どの ばしょにも そうびが じゅうぶん ある', () => {
   SLOTS.forEach(s => {
     const n = GEARS.filter(g => g.slot === s.id).length;
-    assert.ok(n >= 12, s.name + ' の そうびが ' + n + 'こ しか ない');
+    assert.ok(n >= 8, s.name + ' の そうびが ' + n + 'こ しか ない');
   });
-  assert.ok(GEARS.length >= 36, 'そうびが ' + GEARS.length + 'こ しか ない');
+  assert.ok(GEARS.length >= 50, 'そうびが ' + GEARS.length + 'こ しか ない');
 });
 
 test('あたらしい そうびも なまえ・せつめいが にほんご', () => {
@@ -352,7 +359,7 @@ test('3かしょ つけても こわれない（ぜんぶの くみあわせを 
     assert.ok(d.cost >= 1 && d.recharge >= 0.5, b.id + '/' + ft.id + '/' + w.id + ' の すうじが へん');
     assert.ok(isFinite(d.speed) && d.speed >= 1, 'はやさが へん');
   })));
-  assert.ok(n >= 1000, 'ためした くみあわせが すくない（' + n + '）');
+  assert.ok(n >= 900, 'ためした くみあわせが すくない（' + n + '）');
 });
 
 test('とくいな あいて（vs）は 2つ つけると どちらも きく', () => {
@@ -417,26 +424,135 @@ test('がめんと ボタンが ある', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   const main = fs.readFileSync(path.join(__dirname, '..', 'js', 'main.js'), 'utf8');
   ['screen-status', 'status-name', 'status-canvas', 'status-stats', 'status-slots',
-   'btn-status-back', 'btn-status-change', 'char-modal', 'char-grid', 'btn-char-close']
+   'status-col-l', 'status-col-r', 'status-atk', 'status-hp', 'status-bag',
+   'btn-status-back', 'btn-status-change', 'btn-status-sort', 'btn-status-fuse',
+   'char-modal', 'char-grid', 'btn-char-close']
     .forEach(id => assert.ok(html.indexOf('id="' + id + '"') >= 0, id + ' が index.html に ない'));
   assert.ok(html.indexOf('id="btn-party-status"') >= 0, 'へんせいに そうびの ボタンが ない');
-  /* そうびの まどは がめんの そとに ある（どの がめんからでも ひらく）*/
-  const iLab = html.indexOf('id="screen-lab"');
-  const iEnd = html.indexOf('</section>', iLab);
-  const iGear = html.indexOf('id="gear-modal"');
-  assert.ok(iGear > iEnd, 'そうびの まどが かいはつしつの なかに ある');
   assert.ok(/function openStatus/.test(main), 'ステータスの がめんが ない');
   assert.ok(/function buildStatus/.test(main), 'ちゅうみが つくられない');
-  assert.ok(/openGearPick\(id, sl\.id\)/.test(main), 'ばしょごとに えらべない');
-  assert.ok(/if \(\(g\.slot \|\| 'body'\) !== gearPickSlot\) return;/.test(main),
-    'まどが その ばしょの そうびだけに なって いない');
+  assert.ok(/bagFilter = \(bagFilter === sid\) \? null : sid;/.test(main),
+    'わくを おしても その ばしょの そうびに しぼれない');
   assert.ok(/btn-party-status'\)\.addEventListener/.test(main), 'ボタンが つながって いない');
+  /* ふるい「そうびを えらぶ まど」は もう つかって いない */
+  assert.ok(html.indexOf('gear-modal') < 0, 'つかって いない まどが のこって いる');
+  assert.ok(main.indexOf('openGearPick') < 0, 'つかって いない しくみが のこって いる');
 });
 
 test('むかしの セーブを 3かしょの かたちに なおして いる', () => {
   const main = fs.readFileSync(path.join(__dirname, '..', 'js', 'main.js'), 'utf8');
   assert.ok(/typeof v === 'string'[\s\S]{0,260}o\[g\.slot \|\| 'body'\] = v;/.test(main),
     'ひきつぎの しょりが ない');
+});
+
+console.log('レア度');
+
+test('レア度が 4だんかい あって、ぜんぶの そうびに ついて いる', () => {
+  assert.ok(RANKS && RANK_ORDER && RANK_ORDER.length === 4,
+    'レア度が ' + (RANK_ORDER || []).length + 'だんかい');
+  RANK_ORDER.forEach(k => {
+    const r = RANKS[k];
+    assert.ok(r && r.label && /^#[0-9a-f]{6}$/i.test(r.color), k + ' の いろか なまえが へん');
+    assert.ok(!/[A-Za-z]/.test(r.label), k + ' の なまえが にほんごで ない');
+  });
+  GEARS.forEach(g => assert.ok(RANKS[g.rank], g.id + ' の レア度が へん: ' + g.rank));
+});
+
+test('レア度が たかい そうびほど つくるのに そうびのもとが いる', () => {
+  const avg = {};
+  RANK_ORDER.forEach(k => {
+    const list = GEARS.filter(g => g.rank === k);
+    if (!list.length) return;
+    avg[k] = list.reduce((a, g) => a + (g.cost.core || 0), 0) / list.length;
+  });
+  let prev = 0;
+  RANK_ORDER.forEach(k => {
+    if (avg[k] === undefined) return;
+    assert.ok(avg[k] >= prev, k + ' の そうびのもとが まえの レア度より すくない');
+    prev = avg[k];
+  });
+  assert.ok((avg.SP || 9) > (avg.N || 0), 'とくべつと ノーマルで おなじ ねだん');
+});
+
+test('どの レア度も そこそこ ある', () => {
+  RANK_ORDER.forEach(k => {
+    const n = GEARS.filter(g => g.rank === k).length;
+    assert.ok(n >= 3, RANKS[k].label + ' が ' + n + 'こ しか ない');
+  });
+});
+
+console.log('合成（おなじ そうび 3つで レベルアップ）');
+
+test('合成の せっていが そろって いる', () => {
+  assert.ok(FUSE && FUSE.need >= 2 && FUSE.maxLv >= 2 && FUSE.step > 0, 'GEAR_FUSE が へん');
+  assert.ok(FUSE.maxLv <= 9 && FUSE.step <= 0.5, 'つよく なりすぎ');
+});
+
+test('レベルが あがると こうかが つよく なる（ばいりつ）', () => {
+  const g = GEARS.find(x => x.eff.hp && x.eff.hp > 1.2);
+  Game.gearLv = {};
+  const lv1 = defWear('tankun', { [g.slot]: g.id }).hp;
+  Game.gearLv = { [g.id]: FUSE.maxLv };
+  const lvM = defWear('tankun', { [g.slot]: g.id }).hp;
+  Game.gearLv = {};
+  const base = defWith('tankun', null).hp;
+  const want = Math.round(base * (1 + (g.eff.hp - 1) * (1 + (FUSE.maxLv - 1) * FUSE.step)));
+  assert.ok(lvM > lv1, 'レベルを あげても かわらない（' + lv1 + ' → ' + lvM + '）');
+  assert.strictEqual(lvM, want, 'けいさんが あわない（' + lvM + ' ／ ' + want + '）');
+});
+
+test('レベルが あがると きょり・かいしん・とくいな あいても つよく なる', () => {
+  const gr = GEARS.find(x => x.eff.range);
+  Game.gearLv = {}; const r1 = defWear('akibou', { [gr.slot]: gr.id }).range;
+  Game.gearLv = { [gr.id]: FUSE.maxLv }; const r5 = defWear('akibou', { [gr.slot]: gr.id }).range;
+  assert.ok(r5 > r1, 'きょりが のびない');
+
+  const gc = GEARS.find(x => x.eff.crit);
+  Game.gearLv = {}; const c1 = defWear('tankun', { [gc.slot]: gc.id }).gearEff.crit.chance;
+  Game.gearLv = { [gc.id]: FUSE.maxLv }; const c5 = defWear('tankun', { [gc.slot]: gc.id }).gearEff.crit.chance;
+  assert.ok(c5 > c1, 'かいしんが ふえない');
+
+  const gv = GEARS.find(x => x.eff.vs);
+  Game.gearLv = {}; const v1 = defWear('tankun', { [gv.slot]: gv.id }).gearEff.vsList[0].mult;
+  Game.gearLv = { [gv.id]: FUSE.maxLv }; const v5 = defWear('tankun', { [gv.slot]: gv.id }).gearEff.vsList[0].mult;
+  assert.ok(v5 > v1, 'とくいな あいてに つよく ならない');
+  Game.gearLv = {};
+});
+
+test('レベルを あげても こわれない（ぜんぶの そうび × ぜんぶの レベル）', () => {
+  let n = 0;
+  GEARS.forEach(g => {
+    for (let lv = 1; lv <= FUSE.maxLv; lv++) {
+      Game.gearLv = { [g.id]: lv };
+      const d = defWear('tankun', { [g.slot]: g.id });
+      n++;
+      assert.ok(d.hp > 0 && d.atk >= 0 && d.cost >= 1 && d.recharge >= 0.5,
+        g.id + ' の Lv' + lv + ' が へん');
+      assert.ok(isFinite(d.speed) && d.speed >= 1, g.id + ' の はやさが へん');
+    }
+  });
+  Game.gearLv = {};
+  assert.ok(n >= 200, 'ためした かずが すくない（' + n + '）');
+});
+
+test('つきぬけは レベルを あげても ついた まま', () => {
+  const g = GEARS.find(x => x.eff.pierce);
+  if (!g) return;
+  Game.gearLv = { [g.id]: FUSE.maxLv };
+  assert.ok(defWear('tankun', { [g.slot]: g.id }).gearEff.pierce, 'つきぬけが きえた');
+  Game.gearLv = {};
+});
+
+test('合成の しくみが main.js に ある', () => {
+  const main = fs.readFileSync(path.join(__dirname, '..', 'js', 'main.js'), 'utf8');
+  assert.ok(/function canFuse/.test(main) && /function doFuse/.test(main), '合成の しくみが ない');
+  assert.ok(/gearFree\(gid\) >= FUSE\(\)\.need/.test(main),
+    'つけて いる ぶんまで つかって しまう おそれ');
+  assert.ok(/bag\[gid\] = Math\.max\(0, \(bag\[gid\] \|\| 0\) - \(FUSE\(\)\.need - 1\)\);/.test(main),
+    '3つ あわせて 1つ のこる かたちに なって いない');
+  assert.ok(/lvs\[gid\] = gearLv\(gid\) \+ 1;/.test(main), 'レベルが あがらない');
+  assert.ok(/if \(!s\.gearLv\) s\.gearLv = \{\};/.test(main), 'セーブに レベルが ない');
+  assert.ok(/Game\.gearLv = gearLvMap\(\);/.test(main), 'せんとうに レベルが つたわらない');
 });
 
 /* ====================================================================== */

@@ -2289,3 +2289,157 @@ body.dragging-slot #party-slots { touch-action:none; }
   grid-column:1 / -1; margin:calc(6px * var(--ui)) 0 0;
   font-weight:bold; color:#6b4a00; font-size:calc(13px * var(--ui));
 }
+
+/* =====================================================================
+   ★そうびの がめん（6かしょ ＋ もって いる そうびの いちらん）
+   ===================================================================== */
+.st2-sum{
+  display:flex; gap:calc(8px * var(--ui)); width:100%;
+  background:rgba(0,0,0,.28); border-radius:calc(12px * var(--ui));
+  padding:calc(6px * var(--ui)) calc(8px * var(--ui));
+  justify-content:center; flex-wrap:wrap;
+}
+.st2-sum span{ color:#ffe9b0; font-size:calc(12.5px * var(--ui)); }
+.st2-sum b{
+  color:#fff; font-size:calc(17px * var(--ui));
+  font-variant-numeric:tabular-nums; margin-left:calc(3px * var(--ui));
+}
+.st2-stage{
+  display:flex; align-items:stretch; gap:calc(5px * var(--ui)); width:100%;
+  background:linear-gradient(180deg,#ff9f43,#f97f1d);
+  border-radius:calc(16px * var(--ui));
+  padding:calc(7px * var(--ui)) calc(6px * var(--ui));
+}
+.st2-col{
+  flex:0 0 calc(80px * var(--ui));
+  display:flex; flex-direction:column; gap:calc(5px * var(--ui));
+}
+.st2-mid{
+  flex:1 1 auto; min-width:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  gap:calc(3px * var(--ui));
+}
+.st2-mid canvas{ width:100%; height:calc(132px * var(--ui)); display:block; }
+.st2-name{
+  color:#fff; font-weight:bold; font-size:calc(13px * var(--ui));
+  text-shadow:0 2px 0 rgba(0,0,0,.35); max-width:100%;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.st2-change{
+  background:#a5e8cf; border:2px solid #15323f; border-radius:999px;
+  font-family:inherit; font-weight:bold; color:#14323f;
+  font-size:calc(11.5px * var(--ui));
+  padding:calc(4px * var(--ui)) calc(10px * var(--ui)); cursor:pointer;
+}
+/* ---- そうびの わく（6かしょ）---- */
+.st-slot{
+  position:relative; flex:1 1 0; min-height:calc(54px * var(--ui));
+  background:#2b3a4a; border:calc(3px * var(--ui)) solid #90a4ae;
+  border-radius:calc(11px * var(--ui));
+  font-family:inherit; color:#fff; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:calc(3px * var(--ui)) calc(2px * var(--ui));
+  overflow:hidden;
+}
+.st-slot .sl-part{
+  position:absolute; left:calc(2px * var(--ui)); top:calc(1px * var(--ui));
+  font-size:calc(10px * var(--ui));
+}
+.st-slot .sl-lv{
+  position:absolute; right:calc(3px * var(--ui)); top:calc(1px * var(--ui));
+  font-size:calc(9.5px * var(--ui)); color:#ffe082; font-weight:bold;
+}
+.st-slot .sl-head{
+  position:absolute; left:0; right:0; bottom:calc(1px * var(--ui));
+  font-size:calc(9px * var(--ui)); color:#b0bec5; text-align:center;
+}
+.st-slot .sl-ico{ font-size:calc(22px * var(--ui)); line-height:1; }
+.st-slot .sl-name{
+  font-size:calc(8.5px * var(--ui)); line-height:1.2; text-align:center;
+  margin-top:calc(1px * var(--ui)); max-width:100%;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.st-slot.empty{ background:#48596b; }
+.st-slot.empty .sl-ico{ color:#90a4ae; }
+/* レア度の わく いろ */
+.rank-N  { border-color:#b0bec5; }
+.rank-R  { border-color:#4fa3e3; }
+.rank-GR { border-color:#a569d6; }
+.rank-SP { border-color:#e8b321; box-shadow:0 0 calc(7px * var(--ui)) rgba(232,179,33,.65); }
+
+/* ---- もって いる そうび ---- */
+.st2-bar{
+  display:flex; align-items:center; gap:calc(6px * var(--ui)); width:100%;
+  margin-top:calc(2px * var(--ui));
+}
+.st2-bar-title{
+  flex:1 1 auto; text-align:center; color:#ffe9b0; font-weight:bold;
+  font-size:calc(15px * var(--ui));
+}
+.st2-sort, .st2-fuse{
+  flex:0 0 auto; font-family:inherit; font-weight:bold; cursor:pointer;
+  border-radius:calc(9px * var(--ui)); font-size:calc(11.5px * var(--ui));
+  padding:calc(6px * var(--ui)) calc(9px * var(--ui));
+  border:2px solid #a06b00; background:#ffc93c; color:#4a3000; white-space:nowrap;
+}
+.st2-fuse.on{ background:#ff8a5c; border-color:#a33a12; color:#3d1200; }
+.st2-grid{
+  width:100%;
+  display:grid; grid-template-columns:repeat(5, 1fr);
+  gap:calc(5px * var(--ui));
+}
+.st2-item{
+  position:relative; aspect-ratio:1 / 1;
+  background:#20303f; border:calc(3px * var(--ui)) solid #90a4ae;
+  border-radius:calc(10px * var(--ui));
+  font-family:inherit; color:#fff; cursor:pointer; padding:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.st2-item .it-ico{ font-size:calc(21px * var(--ui)); line-height:1; }
+.st2-item .it-part{
+  position:absolute; left:calc(2px * var(--ui)); top:calc(1px * var(--ui));
+  font-size:calc(9px * var(--ui));
+}
+.st2-item .it-lv{
+  position:absolute; right:calc(3px * var(--ui)); top:calc(1px * var(--ui));
+  font-size:calc(9px * var(--ui)); color:#ffe082; font-weight:bold;
+}
+.st2-item .it-n{
+  position:absolute; right:calc(3px * var(--ui)); bottom:calc(1px * var(--ui));
+  font-size:calc(9.5px * var(--ui)); color:#cfd8dc;
+}
+.st2-item .it-on{
+  position:absolute; left:calc(2px * var(--ui)); bottom:calc(1px * var(--ui));
+  font-size:calc(9px * var(--ui)); color:#7cf0a0; font-weight:bold;
+}
+.st2-item .it-up{
+  position:absolute; left:50%; bottom:calc(-6px * var(--ui)); transform:translateX(-50%);
+  font-size:calc(12px * var(--ui)); color:#ff7043;
+}
+.st2-item.sel{ outline:calc(3px * var(--ui)) solid #fff; }
+.st2-empty{
+  grid-column:1 / -1; color:#cfd8dc; font-size:calc(12px * var(--ui));
+  text-align:center; padding:calc(10px * var(--ui)) 0; margin:0;
+}
+/* ---- えらんだ そうびの せつめい ---- */
+.st2-detail{
+  width:100%; background:rgba(255,255,255,.95);
+  border-radius:calc(12px * var(--ui)); padding:calc(8px * var(--ui));
+  display:flex; flex-direction:column; gap:calc(5px * var(--ui));
+}
+.st2-detail .d-head{
+  display:flex; align-items:center; gap:calc(6px * var(--ui));
+  font-weight:bold; color:#26323c; font-size:calc(14px * var(--ui));
+}
+.st2-detail .d-rank{ font-size:calc(11px * var(--ui)); font-weight:bold; }
+.st2-detail .d-desc{ color:#37474f; font-size:calc(12px * var(--ui)); line-height:1.45; }
+.st2-detail .d-btns{ display:flex; gap:calc(6px * var(--ui)); flex-wrap:wrap; }
+.st2-detail .d-btn{
+  flex:1 1 calc(90px * var(--ui)); font-family:inherit; font-weight:bold; cursor:pointer;
+  border-radius:calc(10px * var(--ui)); font-size:calc(13px * var(--ui));
+  padding:calc(8px * var(--ui)) calc(6px * var(--ui));
+  border:2px solid #1b5e20; background:#66bb6a; color:#06230a; white-space:nowrap;
+}
+.st2-detail .d-btn.off{ border-color:#7a4a00; background:#ffcc80; color:#4a3000; }
+.st2-detail .d-btn.fuse{ border-color:#a33a12; background:#ff8a5c; color:#3d1200; }
+.st2-detail .d-btn:disabled{ opacity:.45; }

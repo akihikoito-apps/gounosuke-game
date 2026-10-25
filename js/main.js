@@ -16,7 +16,7 @@
      あたらしく こうかいする ときは この すうじと
      sw.js の APP_VERSION を おなじ すうじに あげます。
      ================================================= */
-  const GAME_VERSION = '6.69';
+  const GAME_VERSION = '6.70';
 
 
   /* =================================================
@@ -208,6 +208,7 @@
     if (typeof s.core !== 'number') s.core = 0;   // そうびのもと
     if (!s.gear)   s.gear = {};                   // つくった そうび { id: かず }
     if (!s.equip)  s.equip = {};                  // だれが なにを つけて いるか
+    if (!s.gearLv) s.gearLv = {};                 // ★そうびの レベル（合成で あがる）
     /* ★v6.69 そうびは「からだ・あし・ぶき」の 3かしょに なりました。
          むかしの セーブは 1たいに 1つ（もじ）だった ので、
          その そうびの ばしょに いれなおします。                    */
@@ -5561,7 +5562,38 @@
     return GEARS.find(g => g.id === id) || null;
   }
 
-  /* ★そうびを つける ばしょ（からだ・あし・ぶき）*/
+  /* ★そうびの レベル（おなじ そうびを あつめると あがる）*/
+  const FUSE = () => (typeof GEAR_FUSE !== 'undefined') ? GEAR_FUSE
+    : { need: 3, maxLv: 5, step: 0.25 };
+  const RANKS = () => (typeof GEAR_RANKS !== 'undefined') ? GEAR_RANKS
+    : { N: { label: 'ノーマル', color: '#b0bec5', star: '★' } };
+  function gearLvMap() {
+    const s = slot(); if (!s) return {};
+    if (!s.gearLv) s.gearLv = {};
+    return s.gearLv;
+  }
+  function gearLv(gid) {
+    return Math.max(1, Math.min(FUSE().maxLv, gearLvMap()[gid] || 1));
+  }
+  function rankOf(gid) { const g = gearDef(gid); return (g && g.rank) ? g.rank : 'N'; }
+  function rankInfo(gid) {
+    return RANKS()[rankOf(gid)] || { label: '', color: '#b0bec5', star: '' };
+  }
+  /* ★合成できるか：つけて いない ぶんが 3つ いじょう あって、レベルが まだ あがる */
+  function canFuse(gid) {
+    return gearFree(gid) >= FUSE().need && gearLv(gid) < FUSE().maxLv;
+  }
+  /* ★3つ あわせて 1つの つよい そうびに する（2つ へって レベルが 1 あがる）*/
+  function doFuse(gid) {
+    if (!canFuse(gid)) return false;
+    const bag = gearBag(), lvs = gearLvMap();
+    bag[gid] = Math.max(0, (bag[gid] || 0) - (FUSE().need - 1));
+    lvs[gid] = gearLv(gid) + 1;
+    storeSave(); applyGear();
+    return true;
+  }
+
+  /* ★そうびを つける ばしょ（6かしょ）*/
   const SLOTS = () => (typeof GEAR_SLOTS !== 'undefined' && GEAR_SLOTS.length)
     ? GEAR_SLOTS
     : [{ id: 'body', name: 'からだ', icon: '🎽' },
@@ -5611,7 +5643,7 @@
   }
 
   /* ---- そうびを せんとうに はんえい ---- */
-  function applyGear() { Game.gear = equipMap(); }
+  function applyGear() { Game.gear = equipMap(); Game.gearLv = gearLvMap(); }
 
   /* ---- つくれるか ---- */
   function canDev(g) {
@@ -5688,7 +5720,7 @@
     requestAnimationFrame(() => { drawLab(); buildLabTray(); });
   }
   function closeLab() {
-    closeGearPick(); closeDevAsk(); stopLabLoop(); storeSave();
+    closeDevAsk(); stopLabLoop(); storeSave();
     roomScene = 'garden';
     show('screen-room');
     refreshSceneUi(); buildRoomTabs(); buildRoomTray();
@@ -5814,69 +5846,6 @@
     });
   }
 
-  /* ---- そうびを えらぶ まど（ばしょごとに えらびます）---- */
-  let gearPickFor = null, gearPickSlot = 'body';
-  function openGearPick(unitId, slotId) {
-    gearPickFor = unitId;
-    gearPickSlot = slotId || 'body';
-    const m = $('#gear-modal'); if (!m) return;
-    const sd = slotDef(gearPickSlot);
-    const ask = $('#gear-ask');
-    const def = shownDef(unitId) || UNITS[unitId];
-    if (ask) ask.innerHTML = def.name + ' の ' + sd.icon + sd.name +
-      '<br><small>つけたい ものを タップ（1かしょに 1つ）</small>';
-    const grid = $('#gear-grid');
-    grid.innerHTML = '';
-    const wear = equipOf(unitId);
-    const now = wear[gearPickSlot] || null;
-
-    /* 「はずす」*/
-    const off = document.createElement('button');
-    off.className = 'room-item gear-item' + (now ? '' : ' have');
-    off.innerHTML = '<span class="gi-ico">🚫</span><span class="ri-name">そうび なし</span>';
-    off.addEventListener('click', () => {
-      delete wear[gearPickSlot]; storeSave(); applyGear();
-      closeGearPick(); buildStatus(); buildLabTray();
-      toast(def.shortName + ' の ' + sd.name + 'の そうびを はずした');
-    });
-    grid.appendChild(off);
-
-    let any = 0;
-    (typeof GEARS !== 'undefined' ? GEARS : []).forEach(g => {
-      if ((g.slot || 'body') !== gearPickSlot) return;   // ★その ばしょの ものだけ
-      const free = gearFree(g.id);
-      const isNow = (now === g.id);
-      if (free <= 0 && !isNow) return;          // もって いない ものは ださない
-      any++;
-      const b = document.createElement('button');
-      b.className = 'room-item gear-item' + (isNow ? ' have' : '');
-      b.innerHTML =
-        '<span class="gi-n">' + (isNow ? 'つけてる' : '×' + free) + '</span>' +
-        '<span class="gi-ico">' + g.icon + '</span>' +
-        '<span class="ri-name">' + g.name + '</span>' +
-        '<span class="gi-eff">' + g.desc + '</span>';
-      b.addEventListener('click', () => {
-        if (isNow) { closeGearPick(); return; }
-        wear[gearPickSlot] = g.id; storeSave(); applyGear();
-        closeGearPick(); buildStatus(); buildLabTray();
-        if (typeof Sound !== 'undefined') Sound.se('summon');
-        toast(def.shortName + ' に 「' + g.name + '」を つけた！');
-      });
-      grid.appendChild(b);
-    });
-    if (!any) {
-      const p = document.createElement('p');
-      p.className = 'size-lead';
-      p.textContent = 'この ばしょに つけられる そうびが まだ ないよ。かいはつしつの「🔨 かいはつ」で つくって みてね！';
-      grid.appendChild(p);
-    }
-    m.classList.remove('hidden');
-  }
-  function closeGearPick() {
-    const m = $('#gear-modal'); if (m) m.classList.add('hidden');
-    gearPickFor = null;
-  }
-
   /* =====================================================================
      ★ステータスと そうびの がめん
 
@@ -5903,6 +5872,7 @@
     }
     applyParty();          // レベル・しんかを はんえい
     applyGear();           // そうびを はんえい
+    bagFilter = null; bagSel = null; fuseOnly = false;
     buildStatus();
     show('screen-status');
     requestAnimationFrame(buildStatus);
@@ -5919,23 +5889,91 @@
     return { raw: raw, now: now };
   }
 
+  /* ---- いちらんの ならびかた と えらんで いる もの ---- */
+  let bagSort = 'slot';        // slot（ばしょ）／ rank（ひんしつ）／ lv（レベル）
+  let bagFilter = null;        // その ばしょの そうび だけ みる
+  let bagSel = null;           // えらんで いる そうび
+  let fuseOnly = false;        // 合成できる ものだけ みる
+  const SORT_LABEL = { slot: 'ばしょ', rank: 'ひんしつ', lv: 'レベル' };
+  const SORT_NEXT  = { slot: 'rank', rank: 'lv', lv: 'slot' };
+
+  /* もって いる そうびを ならべて かえす */
+  function bagItems() {
+    const bag = gearBag();
+    let list = (typeof GEARS !== 'undefined' ? GEARS : []).filter(g => (bag[g.id] || 0) > 0);
+    if (bagFilter) list = list.filter(g => (g.slot || 'body') === bagFilter);
+    if (fuseOnly)  list = list.filter(g => canFuse(g.id));
+    const si = (g) => SLOTS().findIndex(x => x.id === (g.slot || 'body'));
+    const ri = (g) => ['SP', 'GR', 'R', 'N'].indexOf(g.rank || 'N');
+    if (bagSort === 'rank')    list.sort((a, b) => ri(a) - ri(b) || si(a) - si(b));
+    else if (bagSort === 'lv') list.sort((a, b) => gearLv(b.id) - gearLv(a.id) || ri(a) - ri(b));
+    else                       list.sort((a, b) => si(a) - si(b) || ri(a) - ri(b));
+    return list;
+  }
+
   function buildStatus() {
     const id = statusChar;
     if (!id || !UNITS[id]) return;
     const s = slot();
     const def = shownDef(id) || UNITS[id];
+    const wear = equipOf(id);
+
+    /* ---- まんなか：なまえと すがた ---- */
     const nm = $('#status-name');
-    if (nm) nm.textContent = 'キャラ　' + def.name;
-
+    if (nm) nm.textContent = def.name;
     const cv = $('#status-canvas');
-    if (cv) paintChar(cv, id, { zoom: 1.25 });
+    if (cv) paintChar(cv, id, { zoom: 1.15 });
 
-    /* ---- すうじ ---- */
+    /* ---- うえ：ごうけいの つよさ ---- */
+    const d = statusDefs(id);
+    const lv = s ? effLevel(s, id) : 1;
+    const m = (typeof levelMult === 'function') ? levelMult(lv, def.rarity || 'N') : 1;
+    const hpOf = (x) => Math.round(x.hp * m), atOf = (x) => Math.round(x.atk * m);
+    const setSum = (sel, a, b) => {
+      const el = $(sel);
+      if (!el) return;
+      el.textContent = b.toLocaleString();
+      el.style.color = (b > a) ? '#9cff9c' : '#fff';
+    };
+    setSum('#status-atk', atOf(d.raw), atOf(d.now));
+    setSum('#status-hp',  hpOf(d.raw), hpOf(d.now));
+
+    /* ---- そうびの わく（ひだり 3つ・みぎ 3つ）---- */
+    const order = SLOTS().map(x => x.id);
+    const left  = ['weapon', 'body', 'foot'].filter(x => order.indexOf(x) >= 0);
+    const right = order.filter(x => left.indexOf(x) < 0);
+    const fill = (boxSel, ids) => {
+      const box = $(boxSel);
+      if (!box) return;
+      box.innerHTML = '';
+      ids.forEach(sid => {
+        const sl = slotDef(sid);
+        const gid = wear[sid];
+        const g = gid ? gearDef(gid) : null;
+        const b = document.createElement('button');
+        b.className = 'st-slot ' + (g ? ('rank-' + rankOf(gid)) : 'empty') +
+                      (bagFilter === sid ? ' sel' : '');
+        b.dataset.slot = sid;
+        b.innerHTML =
+          '<span class="sl-part">' + sl.icon + '</span>' +
+          (g && gearLv(gid) > 1 ? '<span class="sl-lv">Lv.' + gearLv(gid) + '</span>' : '') +
+          '<span class="sl-ico">' + (g ? g.icon : '＋') + '</span>' +
+          '<span class="sl-name">' + (g ? g.name : '') + '</span>' +
+          '<span class="sl-head">' + sl.name + '</span>';
+        b.addEventListener('click', () => {
+          bagFilter = (bagFilter === sid) ? null : sid;
+          bagSel = wear[sid] || null;
+          buildStatus();
+        });
+        box.appendChild(b);
+      });
+    };
+    fill('#status-col-l', left);
+    fill('#status-col-r', right);
+
+    /* ---- こまかい すうじ ---- */
     const box = $('#status-stats');
     if (box) {
-      const d = statusDefs(id);
-      const lv = s ? effLevel(s, id) : 1;
-      const m = (typeof levelMult === 'function') ? levelMult(lv, def.rarity || 'N') : 1;
       box.innerHTML = '';
       const row = (key, a, b, better, unit) => {
         const el = document.createElement('div');
@@ -5949,10 +5987,7 @@
         el.innerHTML = '<span class="k">' + key + '</span>' + v;
         box.appendChild(el);
       };
-      const hp = (x) => Math.round(x.hp * m), at = (x) => Math.round(x.atk * m);
       row('レベル', lv, lv, 'up', '');
-      row('たいりょく', hp(d.raw), hp(d.now), 'up');
-      row('こうげき',   at(d.raw), at(d.now), 'up');
       row('とどく きょり', d.raw.range, d.now.range, 'up');
       row('あるく はやさ', d.raw.speed, d.now.speed, 'up');
       row('だす おかね', d.raw.cost, d.now.cost, 'down', '円');
@@ -5960,31 +5995,108 @@
       row('ふきとび', (d.raw.kbCount || 1), (d.now.kbCount || 1), 'up', 'かい');
     }
 
-    /* ---- そうびの 3かしょ ---- */
-    const sb = $('#status-slots');
-    if (sb) {
-      sb.innerHTML = '';
-      const wear = equipOf(id);
-      SLOTS().forEach(sl => {
-        const gid = wear[sl.id];
-        const g = gid ? gearDef(gid) : null;
+    /* ---- した：もって いる そうび ---- */
+    const sortBtn = $('#btn-status-sort');
+    if (sortBtn) sortBtn.textContent = 'ならび：' + SORT_LABEL[bagSort];
+    const fuseBtn = $('#btn-status-fuse');
+    if (fuseBtn) {
+      const n = (typeof GEARS !== 'undefined' ? GEARS : []).filter(g => canFuse(g.id)).length;
+      fuseBtn.textContent = '合成' + (n ? '（' + n + '）' : '');
+      fuseBtn.classList.toggle('on', fuseOnly);
+    }
+    const title = document.querySelector('.st2-bar-title');
+    if (title) {
+      title.textContent = bagFilter ? (slotDef(bagFilter).icon + slotDef(bagFilter).name + 'の そうび')
+                                    : 'もって いる そうび';
+    }
+
+    const grid = $('#status-bag');
+    if (grid) {
+      grid.innerHTML = '';
+      const list = bagItems();
+      if (!list.length) {
+        const p = document.createElement('p');
+        p.className = 'st2-empty';
+        p.textContent = fuseOnly ? '合成できる そうびは まだ ありません（おなじ ものが 3こ いります）'
+          : (bagFilter ? 'この ばしょの そうびは まだ ありません'
+                       : 'そうびが まだ ないよ。にわの おくの かいはつしつで つくって みてね！');
+        grid.appendChild(p);
+      }
+      list.forEach(g => {
+        const n = gearBag()[g.id] || 0;
+        const worn = (wear[g.slot || 'body'] === g.id);
         const b = document.createElement('button');
-        b.className = 'st-slot' + (g ? '' : ' empty');
+        b.className = 'st2-item rank-' + (g.rank || 'N') + (bagSel === g.id ? ' sel' : '');
+        b.dataset.gear = g.id;
         b.innerHTML =
-          '<span class="sl-head">' + sl.name + '</span>' +
-          '<span class="sl-ico">' + (g ? g.icon : '＋') + '</span>' +
-          '<span class="sl-name">' + (g ? g.name : 'なし') + '</span>';
-        b.addEventListener('click', () => openGearPick(id, sl.id));
-        sb.appendChild(b);
+          '<span class="it-part">' + slotDef(g.slot || 'body').icon + '</span>' +
+          '<span class="it-lv">Lv.' + gearLv(g.id) + '</span>' +
+          '<span class="it-ico">' + g.icon + '</span>' +
+          (n > 1 ? '<span class="it-n">×' + n + '</span>' : '') +
+          (worn ? '<span class="it-on">つけてる</span>' : '') +
+          (canFuse(g.id) ? '<span class="it-up">▲</span>' : '');
+        b.addEventListener('click', () => { bagSel = g.id; buildStatus(); });
+        grid.appendChild(b);
       });
     }
 
+    /* ---- えらんだ そうびの せつめい ---- */
     const note = $('#status-note');
     if (note) {
-      const list = equipList(id).map(gid => { const g = gearDef(gid); return g ? g.desc : ''; })
-                                .filter(Boolean);
-      note.innerHTML = list.length ? list.map(x => '・' + x).join('<br>')
-                                   : 'ばしょを タップすると そうびを つけられます。';
+      note.innerHTML = '';
+      note.className = 'st2-detail';
+      const g = bagSel ? gearDef(bagSel) : null;
+      if (!g) {
+        note.className = 'st-note';
+        note.textContent = 'そうびを タップすると、つけたり 合成したり できます。' +
+          'わくを タップすると その ばしょの そうびだけ でます。';
+        return;
+      }
+      const ri = rankInfo(g.id);
+      const L = gearLv(g.id), mx = FUSE().maxLv, need = FUSE().need;
+      const worn = (wear[g.slot || 'body'] === g.id);
+      const head = document.createElement('div');
+      head.className = 'd-head';
+      head.innerHTML = '<span>' + g.icon + '</span><span>' + g.name + '</span>' +
+        '<span class="d-rank" style="color:' + ri.color + '">' + (ri.star || '') + ri.label + '</span>' +
+        '<span class="d-rank">Lv.' + L + (L >= mx ? '（MAX）' : '') + '</span>';
+      note.appendChild(head);
+      const ds = document.createElement('div');
+      ds.className = 'd-desc';
+      ds.textContent = g.desc + '（' + slotDef(g.slot || 'body').name + 'に つけます）' +
+        (L > 1 ? '　※レベル' + L + 'なので こうかは もっと つよく なって います' : '');
+      note.appendChild(ds);
+      const btns = document.createElement('div');
+      btns.className = 'd-btns';
+
+      const bOn = document.createElement('button');
+      bOn.className = 'd-btn' + (worn ? ' off' : '');
+      bOn.textContent = worn ? 'はずす' : 'つける';
+      bOn.addEventListener('click', () => {
+        if (worn) { delete wear[g.slot || 'body']; }
+        else {
+          if (gearFree(g.id) <= 0 && !worn) { toast('ぜんぶ ほかの なかまが つけて いるよ'); return; }
+          wear[g.slot || 'body'] = g.id;
+        }
+        storeSave(); applyGear();
+        if (typeof Sound !== 'undefined') Sound.se(worn ? 'back' : 'summon');
+        buildStatus();
+      });
+      btns.appendChild(bOn);
+
+      const bF = document.createElement('button');
+      bF.className = 'd-btn fuse';
+      const free = gearFree(g.id);
+      bF.textContent = (L >= mx) ? 'レベル MAX' : ('合成（' + free + '／' + need + '）');
+      bF.disabled = !canFuse(g.id);
+      bF.addEventListener('click', () => {
+        if (!doFuse(g.id)) return;
+        if (typeof Sound !== 'undefined') Sound.se('craft');
+        toast(g.name + ' が Lv.' + gearLv(g.id) + ' に なった！');
+        buildStatus();
+      });
+      btns.appendChild(bF);
+      note.appendChild(btns);
     }
   }
 
@@ -11605,7 +11717,6 @@
     });
     const lbk = $('#btn-lab-back');   if (lbk) lbk.addEventListener('click', closeLab);
     const lnk = $('#btn-lab-nekoso'); if (lnk) lnk.addEventListener('click', nekosoTalk);
-    const gc  = $('#btn-gear-close'); if (gc)  gc.addEventListener('click', closeGearPick);
     const dy  = $('#btn-dev-yes');    if (dy)  dy.addEventListener('click', doDevConfirmed);
     const dn  = $('#btn-dev-no');     if (dn)  dn.addEventListener('click', closeDevAsk);
     const mc = $('#btn-mix-close');  if (mc) mc.addEventListener('click', closeMix);
@@ -11651,6 +11762,15 @@
       openParty();
     });
     $('#btn-status-change').addEventListener('click', openCharPickStatus);
+    $('#btn-status-sort').addEventListener('click', () => {
+      bagSort = SORT_NEXT[bagSort] || 'slot';
+      buildStatus();
+    });
+    $('#btn-status-fuse').addEventListener('click', () => {
+      fuseOnly = !fuseOnly;
+      bagSel = null;
+      buildStatus();
+    });
     $('#btn-char-close').addEventListener('click', closeCharPick);
     $('#btn-power-back').addEventListener('click', openHome);
     $('#btn-gacha-back').addEventListener('click', openHome);
