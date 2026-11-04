@@ -4,6 +4,8 @@
 アプリの記録：App Store Connect に「もようのかくれんぼ」（iOS 1.0・提出準備中）作成済み（2026-10-08）。
 Bundle ID：`com.akihikoito.moyoukakurenbo`（native/capacitor.config.json と Xcode の設定）
 
+**最終版（2026-11-05）**：Codex（`audit/codex/review-store-listing.md`）と Antigravity/Gemini（`audit/gemini-store-review.md`）の点検を受けて、App Store Connect に入れる文言は **`audit/gemini-store-review.md` の「③ 最終の完成版」** を正とする（説明・プロモーション用テキスト・キーワード・IAP の説明・審査メモ）。下の §2〜§6 は以前の下書き。
+
 ---
 
 ## 1. 決まったこと（持ち主 2026-10-09〜10）
