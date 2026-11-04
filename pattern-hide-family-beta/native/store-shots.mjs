@@ -84,6 +84,13 @@ for (const d of devices) {
   await shot('courses');
   await p.click('[data-course="5"]');
   await p.waitForTimeout(2500);
+  // 見出し「ぼうしや うごく どうぶつで」に合わせて、帽子の子がいる回になるまで やりなおす（iPhone と iPad で同じ見せ方に）
+  for (let k = 0; k < 20 && (await p.locator('.acc-hat').count()) === 0; k++) {
+    await p.goto(URL0);
+    await p.click('[data-action=toCourse]');
+    await p.click('[data-course="5"]');
+    await p.waitForTimeout(2500);
+  }
   await shot('course5');
   await p.goto(URL0);
   await p.click('[data-action=toMyRoom]');
