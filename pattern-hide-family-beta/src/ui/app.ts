@@ -41,7 +41,7 @@ import {
   toPlacements,
   undo,
 } from '../core/hideEditor';
-import { type ContentId, PACKS, packEntitlements } from '../entitlements/entitlements';
+import { type ContentId, PACKS, packEntitlements, packOf } from '../entitlements/entitlements';
 import { COURSES, FINDS_PER_COURSE, HARDEST, courseDef, courseRound, courseScene, hardestRound } from '../core/courses';
 import { accessoryArt } from './accessoryArt';
 import { COURSE_COUNT } from '../storage/schema';
@@ -145,11 +145,12 @@ export class App {
    */
   /** Apple の購入（iPhone アプリ版だけ）。変わったら、遊んでいる途中でなければ描き直す */
   private purchases = new PurchaseStore(() => {
+    this.activeCourseScene();
     if (this.screen !== 'play' && !this.parent?.isOpen()) this.render();
   });
   private entitlements = packEntitlements(() => {
     // テスト用の切りかえは ウェブの試遊版だけ（アプリ版では Apple の購入だけが根拠）
-    const t = NATIVE ? false : this.store.data.settings.trialAllPacks;
+    const t = NATIVE || this.purchases.available() ? false : this.store.data.settings.trialAllPacks;
     const trial = t ?? import.meta.env.MODE === 'e2e';
     return trial ? PACKS.filter((p) => !p.free).map((p) => p.id) : this.purchases.owned();
   });
@@ -177,7 +178,15 @@ export class App {
         document.querySelectorAll('.toast').forEach((t) => t.remove());
       },
       () => this.startTrial(),
-      this.purchases
+      this.purchases,
+      (scene) => this.startBoughtScene(scene),
+      () => {
+        this.parent.close();
+        this.trial = null;
+        this.session = null;
+        this.courseJustCleared = false;
+        this.go('courseSelect');
+      },
     );
     root.addEventListener('click', (e) => this.onClick(e));
     // 最初の操作のあとだけ音を出せるようにする
@@ -322,13 +331,50 @@ export class App {
     </main>`;
   }
 
+  /** 新しく手に入った背景で、まだ1回も遊んでいない（見つけていない）か */
+  private isSceneNew(id: SceneId): boolean {
+    const pk = packOf(`scene:${id}`);
+    return !!pk && !pk.free && this.can(`scene:${id}`) && (this.store.data.collection.sceneFinds[id] ?? 0) === 0;
+  }
+
+  /** コースで選ばれている背景。遊べなくなった背景（返金など）なら「おまかせ」に戻す */
+  private activeCourseScene(): SceneId | undefined {
+    const s = this.store.data.course.scene;
+    if (!s) return undefined;
+    if (!this.can(`scene:${s}`)) {
+      this.store.update((d) => {
+        delete d.course.scene;
+      });
+      return undefined;
+    }
+    return s;
+  }
+
   private sceneCards(action: string): string {
     return SCENE_IDS.filter((id) => this.can(`scene:${id}`))
-      .map(
-        (id) =>
-          `<button type="button" class="scene-card" data-action="${action}" data-scene="${id}" aria-label="${SCENES[id].name}">${sceneThumb(SCENES[id])}<span class="lbl">${SCENES[id].name}</span></button>`,
-      )
+      .map((id) => {
+        const isNew = action === 'startSearch' && this.isSceneNew(id);
+        const badge = isNew ? '<span class="scene-new">あたらしい！</span>' : '';
+        return `<button type="button" class="scene-card${isNew ? ' is-new' : ''}" data-action="${action}" data-scene="${id}" aria-label="${SCENES[id].name}${isNew ? ' あたらしい' : ''}">${badge}${sceneThumb(SCENES[id])}<span class="lbl">${SCENES[id].name}</span></button>`;
+      })
       .join('');
+  }
+
+  /** コース選択画面の「どこで あそぶ？」行 */
+  private courseSceneRowHtml(): string {
+    const chosen = this.activeCourseScene();
+    const autoOn = !chosen;
+    const autoIcon = `<div class="course-auto-thumb" aria-hidden="true">${ICONS.course}</div>`;
+    const autoBtn = `<button type="button" class="course-scene-card auto${autoOn ? ' on' : ''}" data-action="pickCourseScene" data-scene="auto" aria-pressed="${autoOn}" aria-label="おまかせ">${autoIcon}<span class="lbl">おまかせ</span></button>`;
+    const cards = SCENE_IDS.filter((id) => this.can(`scene:${id}`))
+      .map((id) => {
+        const on = chosen === id;
+        const isNew = this.isSceneNew(id);
+        const badge = isNew ? '<span class="scene-new">あたらしい！</span>' : '';
+        return `<button type="button" class="course-scene-card${on ? ' on' : ''}${isNew ? ' is-new' : ''}" data-action="pickCourseScene" data-scene="${id}" aria-pressed="${on}" aria-label="${SCENES[id].name}${isNew ? ' あたらしい' : ''}">${badge}${sceneThumb(SCENES[id])}<span class="lbl">${SCENES[id].name}</span></button>`;
+      })
+      .join('');
+    return `<section class="course-scenes" aria-label="どこで あそぶ？"><h3 class="course-scenes-title">どこで あそぶ？</h3><div class="course-scene-list" role="group" aria-label="どこで あそぶ？">${autoBtn}${cards}</div></section>`;
   }
 
   private searchSetupHtml(): string {
@@ -362,6 +408,7 @@ export class App {
     }).join('');
     return `<main class="screen setup course-select" data-screen="courseSelect">
       <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>コースを えらぶ</h2><span></span></header>
+      ${this.courseSceneRowHtml()}
       <div class="course-grid">${tiles}</div>
       ${this.upcomingHtml()}
     </main>`;
@@ -962,6 +1009,16 @@ export class App {
       case 'pickCourse':
         this.startCourse(Number(el.dataset.course));
         break;
+      case 'pickCourseScene': {
+        const raw = el.dataset.scene;
+        const next = raw && raw !== 'auto' && this.can(`scene:${raw as SceneId}`) ? (raw as SceneId) : undefined;
+        this.store.update((d) => {
+          if (next) d.course.scene = next;
+          else delete d.course.scene;
+        });
+        this.render();
+        break;
+      }
       case 'nextRound':
         this.startCourseRound();
         break;
@@ -1133,6 +1190,19 @@ export class App {
     this.render();
   }
 
+  /** 購入・復元の案内から「この背景で あそぶ」が押されたとき：やさしいで すぐ始める */
+  private startBoughtScene(scene: SceneId): void {
+    this.parent.close();
+    if (!this.can(`scene:${scene}`)) return this.go('title');
+    this.trial = null;
+    this.store.update((d) => {
+      d.settings.difficulty = 'easy';
+    });
+    this.searchScene = scene;
+    this.afterTutorial = 'search';
+    this.startSearch();
+  }
+
   private startSearch(): void {
     const difficulty = this.store.data.settings.difficulty;
     const scene = SCENES[this.searchScene];
@@ -1170,7 +1240,7 @@ export class App {
   private startCourseRound(): void {
     if (this.courseJustCleared) return this.startCourse(Math.min(COURSE_COUNT, this.courseNo + 1));
     const ids = SCENE_IDS.filter((id) => this.can(`scene:${id}`));
-    const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids)];
+    const scene = SCENES[courseScene(this.courseNo, this.courseRoundIdx++, ids, this.activeCourseScene())];
     const remaining = FINDS_PER_COURSE - this.store.data.course.finds;
     const seed = (Date.now() ^ (++this.seedCounter * 2654435761)) >>> 0;
     const placements = courseRound(scene, this.courseNo, remaining, seed, this.allowedChars(), this.firstMeet(scene.id));
@@ -1421,6 +1491,13 @@ export class App {
         stage.classList.toggle('compact', Math.min(r.width, r.height) < 360);
       });
       this.resizeObs.observe(stage);
+    }
+    if (this.screen === 'courseSelect') {
+      const list = this.root.querySelector<HTMLElement>('.course-scene-list');
+      const active = list?.querySelector<HTMLElement>('.course-scene-card.on');
+      if (list && active) {
+        list.scrollLeft = Math.max(0, active.offsetLeft - list.clientWidth / 2 + active.clientWidth / 2);
+      }
     }
     if (this.screen === 'play') this.bindPlay();
     if (this.screen === 'hidePlace') this.bindPlace();

@@ -53,11 +53,12 @@ export interface SaveData {
   myroom: { layouts: RoomLayouts; current: RoomId };
 }
 
-/** コースの進み具合。cleared：クリアした最後のコース（0〜10）。current の finds：そのコースで見つけた回数 */
+/** コースの進み具合。cleared：クリアした最後のコース（0〜10）。current の finds：そのコースで見つけた回数。scene：選んだ背景（無ければ おまかせ） */
 export interface CourseProgress {
   cleared: number;
   current: number;
   finds: number;
+  scene?: SceneId;
 }
 
 export const COURSE_COUNT = 10;
@@ -77,8 +78,17 @@ export function validateCourse(v: unknown): { course: CourseProgress; repaired: 
   if (!isInt(o.cleared, 0, COURSE_COUNT) || !isInt(o.current, 1, COURSE_COUNT) || !isInt(o.finds, 0, COURSE_FINDS - 1)) {
     return { course: emptyCourse(), repaired: true };
   }
-  if (o.current > Math.min(COURSE_COUNT, o.cleared + 1)) return { course: { cleared: o.cleared, current: Math.min(COURSE_COUNT, o.cleared + 1), finds: 0 }, repaired: true };
-  return { course: { cleared: o.cleared, current: o.current, finds: o.finds }, repaired: false };
+  let repaired = false;
+  let scene: SceneId | undefined;
+  if (o.scene !== undefined && o.scene !== null && o.scene !== 'auto') {
+    if (SCENE_IDS.includes(o.scene as SceneId)) scene = o.scene as SceneId;
+    else repaired = true;
+  }
+  const maxCur = Math.min(COURSE_COUNT, o.cleared + 1);
+  if (o.current > maxCur) {
+    return { course: { cleared: o.cleared, current: maxCur, finds: 0, ...(scene ? { scene } : {}) }, repaired: true };
+  }
+  return { course: { cleared: o.cleared, current: o.current, finds: o.finds, ...(scene ? { scene } : {}) }, repaired };
 }
 
 export const COUNTER_MAX = 9999;

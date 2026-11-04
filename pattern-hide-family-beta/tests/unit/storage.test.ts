@@ -11,13 +11,41 @@ describe('storage', () => {
     expect(s.status).toBe('empty');
     s.update((d) => {
       d.settings.difficulty = 'normal';
+      d.course.scene = 'beach';
       d.resume = { sceneId: 'room', difficulty: 'normal', origin: 'hide', placements: [{ char: 'koro', spot: 'room-curtain', costume: 'stripes', variant: 'exact' }], found: [false] };
     });
     const s2 = new Store(kv);
     s2.load();
     expect(s2.status).toBe('ok');
     expect(s2.data.settings.difficulty).toBe('normal');
+    expect(s2.data.course.scene).toBe('beach');
     expect(s2.data.resume?.placements[0].spot).toBe('room-curtain');
+  });
+
+  it('course.scene: old save without scene defaults to auto (undefined) without marking repaired; invalid scene repairs to auto', () => {
+    const base = {
+      schema: 1,
+      settings: { sound: true, difficulty: 'easy', tutorialSeen: true, movers: true },
+      resume: null,
+      playtest: { enabled: false, counters: defaults().playtest.counters },
+      course: { cleared: 2, current: 3, finds: 1 },
+      collection: { totalFinds: 0, sceneFinds: {}, seenStickers: ['c1', 'c2'] },
+    };
+    const rOld = validate(base);
+    expect(rOld.repaired).toBe(false);
+    expect(rOld.data.course.scene).toBeUndefined();
+
+    const rBeach = validate({ ...base, course: { ...base.course, scene: 'beach' } });
+    expect(rBeach.repaired).toBe(false);
+    expect(rBeach.data.course.scene).toBe('beach');
+
+    const rAuto = validate({ ...base, course: { ...base.course, scene: 'auto' } });
+    expect(rAuto.repaired).toBe(false);
+    expect(rAuto.data.course.scene).toBeUndefined();
+
+    const rBad = validate({ ...base, course: { ...base.course, scene: 'moon' } });
+    expect(rBad.repaired).toBe(true);
+    expect(rBad.data.course.scene).toBeUndefined();
   });
 
   it('old save without seenStickers marks already-earned stickers as seen without marking repaired', () => {

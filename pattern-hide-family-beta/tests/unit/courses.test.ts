@@ -13,6 +13,18 @@ describe('courses', () => {
     expect(COURSES.slice(0, 3).every((c) => !c.hat && !c.umbrella)).toBe(true);
   });
 
+  it('courseScene rotates playable scenes by default and locks to a chosen playable scene', () => {
+    const base = ['room', 'garden', 'shop'] as const;
+    expect(courseScene(1, 0, [...base])).toBe('room');
+    expect(courseScene(1, 1, [...base])).toBe('garden');
+    expect(courseScene(1, 2, [...base])).toBe('shop');
+    expect(courseScene(1, 0, [...base, 'beach'], 'beach')).toBe('beach');
+    expect(courseScene(1, 4, [...base, 'beach'], 'beach')).toBe('beach');
+    // 遊べない背景が選ばれていたら、おまかせ（順番回し）に戻る
+    expect(courseScene(1, 0, [...base], 'beach')).toBe('room');
+    expect(courseScene(1, 1, [...base], 'auto')).toBe('garden');
+  });
+
   for (const c of COURSES) {
     it(`course ${c.no}: every round is a safe layout and the course ends at exactly ${FINDS_PER_COURSE}`, () => {
       const usage = { hat: 0, umbrella: 0, chars: 0 };
@@ -81,6 +93,14 @@ describe('course progress in the save data', () => {
     // まだ開いていないコースは選べない
     expect(validateCourse({ cleared: 1, current: 9, finds: 5 })).toEqual({ course: { cleared: 1, current: 2, finds: 0 }, repaired: true });
     expect(validateCourse({ cleared: 10, current: 10, finds: 9 })).toEqual({ course: { cleared: 10, current: 10, finds: 9 }, repaired: false });
+    expect(validateCourse({ cleared: 2, current: 2, finds: 3, scene: 'beach' })).toEqual({
+      course: { cleared: 2, current: 2, finds: 3, scene: 'beach' },
+      repaired: false,
+    });
+    expect(validateCourse({ cleared: 2, current: 2, finds: 3, scene: 'invalid' })).toEqual({
+      course: { cleared: 2, current: 2, finds: 3 },
+      repaired: true,
+    });
   });
 });
 

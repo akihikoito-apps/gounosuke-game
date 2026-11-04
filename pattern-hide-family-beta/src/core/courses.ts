@@ -51,8 +51,9 @@ export function courseDef(no: number): CourseDef {
   return COURSES[Math.min(COURSES.length, Math.max(1, Math.floor(no))) - 1];
 }
 
-/** 何回目の出題で、どの背景を使うか（同じ背景が続かないよう順番に回す） */
-export function courseScene(no: number, round: number, sceneIds: SceneId[]): SceneId {
+/** 何回目の出題で、どの背景を使うか（背景を選んでいるときはその背景、おまかせなら順番に回す） */
+export function courseScene(no: number, round: number, sceneIds: SceneId[], chosen?: SceneId | 'auto' | null): SceneId {
+  if (chosen && chosen !== 'auto' && sceneIds.includes(chosen)) return chosen;
   return sceneIds[(no - 1 + round) % sceneIds.length];
 }
 

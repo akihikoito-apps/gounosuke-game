@@ -1,9 +1,12 @@
 // 保護者用の領域と、偶然の操作を防ぐゲート（試作品。年齢確認や法的同意の取得ではない）。
+import type { SceneId } from '../core/scene';
+import type { PackId } from '../entitlements/entitlements';
 import type { Store } from '../storage/storage';
 import { resetCounters, setEnabled } from '../storage/playtest';
 import { setSoundEnabled } from '../audio/sound';
 import { NATIVE } from './platform';
 import { type PurchaseStore, PRODUCTS } from '../purchase/store';
+import { renderBoughtGuide, renderPackPreview } from './packPreview';
 import { PRIVACY_POLICY_HTML } from './privacy';
 
 const KANJI = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -41,15 +44,32 @@ export class ParentArea {
 
   private onTrial: () => void;
   private purchases: PurchaseStore | null;
+  private onPlayScene: (scene: SceneId) => void;
+  private onGoCourses: () => void;
   /** 買い物の結果の知らせ */
   private shopNote = '';
+  /** いま「なかみを みる」を開いている製品ID */
+  private previewProductId: string | null = null;
+  private previewFromBundle: string | null = null;
+  /** 購入・復元直後の案内 */
+  private boughtGuide: { packs: PackId[]; title?: string } | null = null;
 
-  constructor(store: Store, onChange: () => void, onCleared: () => void = () => undefined, onTrial: () => void = () => undefined, purchases: PurchaseStore | null = null) {
+  constructor(
+    store: Store,
+    onChange: () => void,
+    onCleared: () => void = () => undefined,
+    onTrial: () => void = () => undefined,
+    purchases: PurchaseStore | null = null,
+    onPlayScene: (scene: SceneId) => void = () => undefined,
+    onGoCourses: () => void = () => undefined,
+  ) {
     this.purchases = purchases;
     this.store = store;
     this.onChange = onChange;
     this.onCleared = onCleared;
     this.onTrial = onTrial;
+    this.onPlayScene = onPlayScene;
+    this.onGoCourses = onGoCourses;
   }
 
   isOpen(): boolean {
@@ -71,6 +91,9 @@ export class ParentArea {
     this.el.remove();
     this.el = null;
     this.confirmDelete = false;
+    this.previewProductId = null;
+    this.previewFromBundle = null;
+    this.boughtGuide = null;
     document.removeEventListener('keydown', this.keyHandler);
     const back = this.returnFocus?.isConnected ? this.returnFocus : document.querySelector<HTMLElement>('[data-action="parent"]');
     back?.focus?.({ preventScroll: true });
@@ -191,6 +214,9 @@ export class ParentArea {
 
   private openPanel(): void {
     this.shopNote = '';
+    this.previewProductId = null;
+    this.previewFromBundle = null;
+    this.boughtGuide = null;
     this.mount(this.panelHtml());
     this.bindPanel();
     // 価格と購入済みを Apple に聞いてから、もう一度描く
@@ -204,23 +230,42 @@ export class ParentArea {
       return `<section class="shop"><h3>追加パック（買い切り）</h3><p>追加パックは iPhone・iPad の アプリ版で 購入できます。</p></section>`;
     }
     const owned = pu.owned();
-    const rows = PRODUCTS.map((p) => {
-      const have = p.packs.every((k) => owned.includes(k));
-      const price = pu.price(p.id);
-      const btn = have
-        ? '<span class="have">もっています</span>'
-        : price
-          ? `<button type="button" class="pbtn primary" data-act="buy" data-product="${p.id}">${price} で かう</button>`
-          : '<span class="have">いまは 買えません</span>';
-      return `<li class="shop-item"><div><strong>${p.name}</strong><br><small>${p.summary}</small></div>${btn}</li>`;
-    }).join('');
+    const previewProd = this.previewProductId ? PRODUCTS.find((p) => p.id === this.previewProductId) ?? null : null;
+    const previewHtml = previewProd
+      ? renderPackPreview(previewProd, {
+          owned,
+          price: pu.price(previewProd.id),
+          available: true,
+          fromBundle: this.previewFromBundle ?? undefined,
+        })
+      : '';
+    const boughtHtml = this.boughtGuide ? renderBoughtGuide(this.boughtGuide.packs, this.boughtGuide.title) : '';
+    const hideShopList = previewProd !== null && previewProd.packs.length > 1;
+    const rows = hideShopList
+      ? ''
+      : PRODUCTS.map((p) => {
+          const have = p.packs.every((k) => owned.includes(k));
+          const price = pu.price(p.id);
+          const isPreviewing = previewProd?.id === p.id;
+          const packKey = p.packs.length === 1 ? p.packs[0] : 'allpacks';
+          const previewBtn = `<button type="button" class="pbtn" data-act="preview" data-product="${p.id}" data-pack="${packKey}">なかみを みる</button>`;
+          const buyBtn = have
+            ? '<span class="have">もっています</span>'
+            : price
+              ? `<button type="button" class="pbtn primary" data-act="buy" data-product="${p.id}">${price} で かう</button>`
+              : '<span class="have">いまは 買えません</span>';
+          const actions = isPreviewing ? '<span class="have">表示中</span>' : `<div class="shop-item-actions">${previewBtn}${buyBtn}</div>`;
+          return `<li class="shop-item" data-shop-product="${p.id}"><div><strong>${p.name}</strong><br><small>${p.summary}</small></div>${actions}</li>`;
+        }).join('');
     // 値段が1つも取れない＝App Store から商品の情報が来ていない（通信なし・商品の準備中など）
     const noInfo = PRODUCTS.every((p) => !pu.price(p.id) && !p.packs.every((k) => owned.includes(k)));
     const why = noInfo ? '<p class="note">App Store から 商品の 情報を 受け取れませんでした。インターネットに つながっているか 確かめて、少し あとで もう一度 この画面を 開いてください。</p>' : '';
     return `<section class="shop">
         <h3>追加パック（買い切り）</h3>
         <p>一度買うと、ずっと遊べます。同じ Apple ID の 端末では「購入を 復元」で 使えます。友だちは、その背景で はじめて見つけたときに 仲間に なります。</p>
-        <ul class="shop-list">${rows}</ul>
+        ${boughtHtml}
+        ${previewHtml}
+        ${rows ? `<ul class="shop-list">${rows}</ul>` : ''}
         ${why}
         ${this.shopNote ? `<p class="note" role="status">${this.shopNote}</p>` : ''}
         <button type="button" class="pbtn" data-act="restore">購入を 復元</button>
@@ -386,27 +431,87 @@ export class ParentArea {
             );
             break;
           }
-            break;
           case 'trial':
             this.onTrial();
             break;
+          case 'preview': {
+            const id = b.dataset.product ?? null;
+            this.previewProductId = id;
+            this.previewFromBundle = b.dataset.fromBundle ?? null;
+            this.rerenderPanel('[data-act="closePreview"]');
+            this.el?.querySelector('.pack-preview')?.scrollIntoView({ block: 'nearest' });
+            break;
+          }
+          case 'closePreview': {
+            const prevId = this.previewProductId;
+            this.previewProductId = null;
+            this.previewFromBundle = null;
+            this.rerenderPanel(prevId ? `[data-act="preview"][data-product="${prevId}"]` : '[data-close]');
+            break;
+          }
           case 'buy': {
             const id = b.dataset.product as string;
+            const prod = PRODUCTS.find((p) => p.id === id);
             b.setAttribute('disabled', '');
             void this.purchases?.buy(id).then((r) => {
-              this.shopNote = { ok: 'ありがとうございます。追加パックが 使えるように なりました。', cancelled: '', pending: '保護者の 承認待ちです（ファミリー共有の「承認と購入のリクエスト」）。承認されると 使えるように なります。', error: '購入できませんでした。時間をおいて、もう一度 お試しください。', unavailable: 'いまは 購入できません。' }[r];
+              this.shopNote = {
+                ok: 'ありがとうございます。追加パックが 使えるように なりました。',
+                cancelled: '',
+                pending: '保護者の 承認待ちです（ファミリー共有の「承認と購入のリクエスト」）。承認されると 使えるように なります。',
+                error: '購入できませんでした。時間をおいて、もう一度 お試しください。',
+                unavailable: 'いまは 購入できません。',
+              }[r];
+              if (r === 'ok' && prod) {
+                this.boughtGuide = { packs: prod.packs, title: prod.name };
+                this.previewProductId = null;
+                this.previewFromBundle = null;
+              }
               this.onChange();
-              if (this.el) this.rerenderPanel('[data-act="restore"]');
+              if (this.el) {
+                this.rerenderPanel(r === 'ok' ? '[data-bought-guide] [data-autofocus]' : '[data-act="restore"]');
+                this.el?.querySelector('.bought-guide')?.scrollIntoView({ block: 'nearest' });
+              }
             });
             break;
           }
-          case 'restore':
+          case 'restore': {
+            const before = new Set(this.purchases?.owned() ?? []);
             b.setAttribute('disabled', '');
             void this.purchases?.restore().then((ok) => {
+              const after = this.purchases?.owned() ?? [];
+              const added = after.filter((k) => !before.has(k));
+              const packsToGuide = added.length > 0 ? added : after;
+              if (ok && packsToGuide.length > 0) {
+                const matchProd = PRODUCTS.find(
+                  (p) => p.packs.length === packsToGuide.length && p.packs.every((k) => packsToGuide.includes(k)),
+                );
+                this.boughtGuide = {
+                  packs: packsToGuide,
+                  title: matchProd?.name ?? (packsToGuide.length > 1 ? '復元した パック' : undefined),
+                };
+                this.previewProductId = null;
+                this.previewFromBundle = null;
+              }
               this.shopNote = ok ? '購入を 復元しました。' : '復元できませんでした。通信できる場所で もう一度 お試しください。';
               this.onChange();
-              if (this.el) this.rerenderPanel('[data-act="restore"]');
+              if (this.el) {
+                this.rerenderPanel(ok && packsToGuide.length > 0 ? '[data-bought-guide] [data-autofocus]' : '[data-act="restore"]');
+                this.el?.querySelector('.bought-guide')?.scrollIntoView({ block: 'nearest' });
+              }
             });
+            break;
+          }
+          case 'closeBought':
+            this.boughtGuide = null;
+            this.rerenderPanel('[data-act="restore"]');
+            break;
+          case 'playBoughtScene': {
+            const scene = b.dataset.scene as SceneId | undefined;
+            if (scene) this.onPlayScene(scene);
+            break;
+          }
+          case 'goBoughtCourses':
+            this.onGoCourses();
             break;
           case 'resetCounts':
             resetCounters(this.store);

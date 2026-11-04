@@ -1,7 +1,14 @@
 // 追加パックの購入（Apple の アプリ内課金・買い切り）。
 // iPhone アプリ版だけで動く。購入の確認は端末の StoreKit 2 の結果だけを使い、外部のサーバーには何も送らない。
 // 保存データ（localStorage）の値を購入の証明にはしない（毎回 StoreKit に聞く。StoreKit は通信なしでも購入済みを返せる）。
-import type { PackId } from '../entitlements/entitlements';
+import { stickerRequires } from '../core/access';
+import { CHARACTERS, type CharacterId } from '../core/characters';
+import { MOVERS } from '../core/movers';
+import { ITEMS, ROOMS, type RoomId } from '../core/myroom';
+import type { SceneId } from '../core/scene';
+import { SCENES } from '../core/scenes';
+import { STICKERS } from '../core/stickers';
+import { PACKS, type PackId } from '../entitlements/entitlements';
 import { NATIVE } from '../ui/platform';
 
 export interface ProductDef {
@@ -14,15 +21,47 @@ export interface ProductDef {
   summary: string;
 }
 
+/** コードの定義（パック・背景・友だち・へや・家具・シール・うごくもの）から説明文を作る */
+function packSummary(packId: PackId): string {
+  const pack = PACKS.find((p) => p.id === packId)!;
+  const parts: string[] = [];
+  const courses = pack.contents
+    .filter((c) => c.startsWith('course:'))
+    .map((c) => Number(c.slice(7)))
+    .sort((a, b) => a - b);
+  if (courses.length) parts.push(`コース${courses[0]}〜${courses[courses.length - 1]}`);
+  if (pack.contents.includes('trial:hardest')) parts.push('最難関モード');
+  const sceneId = pack.contents.find((c): c is `scene:${SceneId}` => c.startsWith('scene:'))?.slice(6) as SceneId | undefined;
+  if (sceneId) {
+    parts.push(`背景「${SCENES[sceneId].name}」`);
+    if (sceneId === 'dino') parts.push(`動く恐竜${MOVERS.dino.length}体`);
+  }
+  const charId = pack.contents.find((c): c is `char:${CharacterId}` => c.startsWith('char:'))?.slice(5) as CharacterId | undefined;
+  if (charId) parts.push(`友だち「${CHARACTERS[charId].name}」`);
+  const roomId = pack.contents.find((c) => c.startsWith('room:'))?.slice(5) as RoomId | undefined;
+  const room = roomId ? ROOMS.find((r) => r.id === roomId) : undefined;
+  if (room) parts.push(`へや「${room.name}」`);
+  const stickers = STICKERS.filter((s) => stickerRequires(s).some((req) => pack.contents.includes(req)));
+  const stickerIds = new Set(stickers.map((s) => s.id));
+  const items = ITEMS.filter(
+    (it) => !it.legacy && ((it.content && pack.contents.includes(it.content)) || (it.sticker !== null && stickerIds.has(it.sticker))),
+  );
+  if (items.length) parts.push(`おもちゃと家具${items.length}つ`);
+  if (stickers.length) parts.push(`シール${stickers.length}枚`);
+  return parts.join('・');
+}
+
+const PAID_PACK_IDS: PackId[] = ['more-courses', 'beach', 'forest', 'aquarium', 'night', 'dino'];
+
 const P = 'com.akihikoito.moyoukakurenbo.';
 export const PRODUCTS: ProductDef[] = [
-  { id: `${P}morecourses`, packs: ['more-courses'], name: 'つづきの コース', summary: 'コース6〜10・最難関モード・友だち「おう」・へや「しんしつ」・おもちゃと家具7つ・シール5枚' },
-  { id: `${P}beach`, packs: ['beach'], name: 'うみべ パック', summary: '背景「うみべ」・友だち「ちょき」・へや「うみべの デッキ」・おもちゃと家具6つ・シール5枚' },
-  { id: `${P}forest`, packs: ['forest'], name: 'きのこの もり パック', summary: '背景「きのこの もり」・友だち「ぴの」・へや「もりの ひろば」・おもちゃと家具8つ・シール5枚' },
-  { id: `${P}aquarium`, packs: ['aquarium'], name: 'すいぞくかん パック', summary: '背景「すいぞくかん」・友だち「ぷか」・へや「すいぞくかんの へや」・おもちゃと家具6つ・シール5枚' },
-  { id: `${P}night`, packs: ['night'], name: 'ほたるの かわべ パック', summary: '背景「ほたるの かわべ」・友だち「ひか」・へや「ほたるの えんがわ」・おもちゃと家具6つ・シール5枚' },
-  { id: `${P}dino`, packs: ['dino'], name: 'きょうりゅうの たに パック', summary: '背景「きょうりゅうの たに」・動く恐竜5体・友だち「がお」・へや「きょうりゅうの ひろば」・おもちゃと家具8つ・シール5枚' },
-  { id: `${P}allpacks`, packs: ['more-courses', 'beach', 'forest', 'aquarium', 'night', 'dino'], name: 'ぜんぶ いり', summary: '上の6つ すべて（まとめて お得）' },
+  { id: `${P}morecourses`, packs: ['more-courses'], name: 'つづきの コース', summary: packSummary('more-courses') },
+  { id: `${P}beach`, packs: ['beach'], name: 'うみべ パック', summary: packSummary('beach') },
+  { id: `${P}forest`, packs: ['forest'], name: 'きのこの もり パック', summary: packSummary('forest') },
+  { id: `${P}aquarium`, packs: ['aquarium'], name: 'すいぞくかん パック', summary: packSummary('aquarium') },
+  { id: `${P}night`, packs: ['night'], name: 'ほたるの かわべ パック', summary: packSummary('night') },
+  { id: `${P}dino`, packs: ['dino'], name: 'きょうりゅうの たに パック', summary: packSummary('dino') },
+  { id: `${P}allpacks`, packs: PAID_PACK_IDS, name: 'ぜんぶ いり', summary: `上の${PAID_PACK_IDS.length}つ すべて（まとめて お得）` },
 ];
 
 /** 購入記録（製品IDの一覧）→ 持っているパック。セットは中身のパックすべて。どれかを返金しても ほかの購入は消さない */
@@ -42,7 +81,7 @@ interface Plugin {
 }
 
 function plugin(): Plugin | null {
-  if (!NATIVE) return null;
+  if (!NATIVE && import.meta.env.MODE !== 'e2e') return null;
   const p = (window as unknown as { Capacitor?: { Plugins?: { NativePurchases?: Plugin } } }).Capacitor?.Plugins?.NativePurchases;
   return p ?? null;
 }
