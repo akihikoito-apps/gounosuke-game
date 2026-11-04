@@ -92,7 +92,7 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 .title-foot .btn { pointer-events: auto; min-width: 0; white-space: nowrap; }
 .sticker-btn { position: relative; }
 .sticker-btn-badge {
-  position: absolute; top: 3px; right: 3px; width: 13px; height: 13px; border-radius: 50%;
+  position: absolute; top: -6px; right: -6px; width: 13px; height: 13px; border-radius: 50%;
   background: #e9785f; border: 2px solid #fff; box-shadow: 0 0 0 2px var(--line); pointer-events: none;
 }
 @media (max-width: 620px) {
@@ -1311,3 +1311,9 @@ h2 { font-size: clamp(20px, 5vw, 30px); text-align: center; }
 .bought-list { margin: 0; padding-left: 1.2em; flex: 1 1 160px; font-size: 14px; line-height: 1.45; }
 .bought-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .bought-actions .pbtn { margin: 0; }
+/* つづきから があるとき：じぶんの へや と半分ずつ */
+.title .title-row .btn.myroom-btn { width: auto; }
+/* カードの一覧：入りきらないとき、上のカードが画面の上にはみ出して スクロールで戻れなくなる不具合の対策。
+   基本は上ぞろえ。対応している端末では「入りきるときだけ真ん中」（safe center） */
+.cards { align-content: flex-start; }
+@supports (align-content: safe center) { .cards { align-content: safe center; } }

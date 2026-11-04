@@ -1,6 +1,6 @@
 // タイトル画面のボタンが、どの画面の大きさでも重ならず、文字も切れない（ご本人の実機 iPhone で下の3つが重なった 2026-10-15）
 import { expect, test } from '@playwright/test';
-import { fresh } from './helpers';
+import { act, fresh, startSearch } from './helpers';
 
 const KEY = 'moyou-kakurenbo-beta';
 const SIZES = [
@@ -22,6 +22,15 @@ for (const size of SIZES) {
       localStorage.setItem(k, JSON.stringify({ schema: 1, settings: { sound: false, difficulty: 'easy', tutorialSeen: true, newsSeen: 99 }, resume: null, playtest: { enabled: false, counters: {} }, course: { cleared: 5, current: 6, finds: 0 }, collection: { totalFinds: 400, sceneFinds: { room: 100, garden: 100, shop: 100 } } }));
     }, KEY);
     await page.reload();
+    // 「つづきから」が出る状態（さがす を途中でやめて戻る）でも重ならないか確かめる
+    await startSearch(page, 'room', 'easy');
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+      Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+    });
+    await act(page, 'home');
+    await expect(page.locator('[data-action="resume"]')).toHaveCount(1);
     const boxes = await page.$$eval('[data-screen="title"] .btn', (els) =>
       els.map((e) => {
         const r = e.getBoundingClientRect();
@@ -61,4 +70,17 @@ test('iPhone の上下のすきま（ノッチ・ホームバー）まで しま
   const foot = await page.locator('.title-foot').boundingBox();
   expect(foot!.y + foot!.height).toBeLessThanOrEqual(956 - 34);
   await page.screenshot({ path: 'test-results/title-layout/safe-area.png' });
+});
+
+test('小さい画面（320×568）でも、背景カードの いちばん上まで スクロールで戻れる', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await fresh(page);
+  await act(page, 'toSearch');
+  const r = await page.evaluate(() => {
+    const list = document.querySelector('.cards') as HTMLElement;
+    list.scrollTop = 0;
+    const first = list.querySelector('[data-action="startSearch"]') as HTMLElement;
+    return { listTop: list.getBoundingClientRect().top, firstTop: first.getBoundingClientRect().top };
+  });
+  expect(r.firstTop).toBeGreaterThanOrEqual(r.listTop - 1);
 });
