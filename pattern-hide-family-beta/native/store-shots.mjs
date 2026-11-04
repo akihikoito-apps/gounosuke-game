@@ -49,7 +49,7 @@ const save = {
   },
 };
 const devices = [
-  { name: 'iphone69', viewport: { width: 440, height: 956 }, scale: 3, mobile: true },
+  { name: 'iphone63', viewport: { width: 402, height: 874 }, scale: 3, mobile: true },
   { name: 'ipad13', viewport: { width: 1032, height: 1376 }, scale: 2, mobile: false },
 ];
 const b = await chromium.launch();
