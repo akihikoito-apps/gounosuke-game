@@ -96,8 +96,9 @@ for (const d of devices) {
   await p.click('[data-action=toSearch]');
   await p.waitForTimeout(500);
   await p.click('[data-diff=normal]');
-  await p.click('[data-action=startSearch][data-scene=forest]');
-  await shot('forest');
+  await p.click('[data-action=startSearch][data-scene=dino]');
+  await p.waitForTimeout(Number(process.env.DINO_WAIT ?? 9000)); // 恐竜が画面の真ん中に来るまで待つ
+  await shot('dino');
   await ctx.close();
 }
 await b.close();

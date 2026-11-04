@@ -18,12 +18,13 @@ const CAPTIONS = {
   course5: ['ぼうしや うごく どうぶつで', 'だんだん むずかしく'],
   myroom: ['なかまと かぐで', 'じぶんの へや'],
   stickers: ['みつけて あつめる', 'シールちょう'],
-  forest: ['追加パック', 'きのこの もり'],
+  dino: ['追加パック', 'きょうりゅうの たに'],
 };
 const SIZES = { iphone69: [1320, 2868], ipad13: [2064, 2752] };
 
 const b = await chromium.launch();
-const files = readdirSync(src).filter((f) => f.endsWith('.png'));
+// 画面写真（iphone69-1-title.png など）だけ。審査用の iap-review.png などは飛ばす
+const files = readdirSync(src).filter((f) => /^(iphone69|ipad13)-\d+-\w+\.png$/.test(f));
 for (const f of files) {
   const [dev, , key] = f.replace('.png', '').split('-');
   const [W, H] = SIZES[dev];

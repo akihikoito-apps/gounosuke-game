@@ -6,12 +6,12 @@
 | 参照名（自分用） | 製品ID | 種類 | 価格（案） | 表示名（お客さんに見える名前） |
 |---|---|---|---|---|
 | つづきのコース | `com.akihikoito.moyoukakurenbo.morecourses` | 非消耗型 | 480円 | つづきの コース |
-| うみべパック | `com.akihikoito.moyoukakurenbo.beach` | 非消耗型 | 400円 | うみべ パック |
-| きのこのもりパック | `com.akihikoito.moyoukakurenbo.forest` | 非消耗型 | 400円 | きのこの もり パック |
-| すいぞくかんパック | `com.akihikoito.moyoukakurenbo.aquarium` | 非消耗型 | 400円 | すいぞくかん パック |
-| ほたるのかわべパック | `com.akihikoito.moyoukakurenbo.night` | 非消耗型 | 400円 | ほたるの かわべ パック |
-| きょうりゅうのたにパック | `com.akihikoito.moyoukakurenbo.dino` | 非消耗型 | 480円（案・持ち主が決める） | きょうりゅうの たに パック |
-| ぜんぶいり | `com.akihikoito.moyoukakurenbo.allpacks` | 非消耗型 | 1,480円 | ぜんぶ いり |
+| うみべパック | `com.akihikoito.moyoukakurenbo.beach` | 非消耗型 | 480円 | うみべ パック |
+| きのこのもりパック | `com.akihikoito.moyoukakurenbo.forest` | 非消耗型 | 480円 | きのこの もり パック |
+| すいぞくかんパック | `com.akihikoito.moyoukakurenbo.aquarium` | 非消耗型 | 480円 | すいぞくかん パック |
+| ほたるのかわべパック | `com.akihikoito.moyoukakurenbo.night` | 非消耗型 | 480円 | ほたるの かわべ パック |
+| きょうりゅうのたにパック | `com.akihikoito.moyoukakurenbo.dino` | 非消耗型 | 480円 | きょうりゅうの たに パック |
+| ぜんぶいり | `com.akihikoito.moyoukakurenbo.allpacks` | 非消耗型 | 1,980円 | ぜんぶ いり |
 
 ## 手順（1つの商品ごと）
 1. App Store Connect →「アプリ」→「もようのかくれんぼ」
