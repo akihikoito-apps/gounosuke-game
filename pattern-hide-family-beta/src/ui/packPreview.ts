@@ -246,6 +246,7 @@ export function renderBoughtGuide(packs: readonly PackId[], titleName?: string):
       return `<div class="bought-guide" data-bought-guide role="status" aria-live="polite">
         <h4>${title} が あそべるように なりました</h4>
         <p class="bought-lead"><strong>コース${cFrom}から あそべます</strong>（コース${cFrom}〜${cTo}）</p>
+        <p class="bought-note">コースは じゅんばんに すすみます。コース${cFrom - 1}を クリアすると コース${cFrom}が ひらきます。「最難関を ためす」は いまから ためせます。</p>
         <ul class="bought-list">
           ${d.friend ? `<li>あたらしい ともだち：<strong>${d.friend.name}</strong>（コース${cTo} クリアで なかまに）</li>` : ''}
           ${d.room ? `<li>あたらしい へや：<strong>${d.room.name}</strong>（コース${d.room.needCleared} クリアで ひらく）</li>` : ''}
@@ -300,7 +301,7 @@ export function renderBoughtGuide(packs: readonly PackId[], titleName?: string):
     <h4>${title} が あそべるように なりました</h4>
     <ul class="bought-list">
       ${sceneNames ? `<li>ふえた 背景：<strong>${sceneNames}</strong></li>` : ''}
-      ${moreCourses ? `<li><strong>コース${moreCourses.courses[0]}から あそべます</strong>（コース${moreCourses.courses[0]}〜${moreCourses.courses[moreCourses.courses.length - 1]}）</li>` : ''}
+      ${moreCourses ? `<li><strong>コース${moreCourses.courses[0]}から あそべます</strong>（コース${moreCourses.courses[0]}〜${moreCourses.courses[moreCourses.courses.length - 1]}。コース${moreCourses.courses[0] - 1}の クリアで ひらきます）</li>` : ''}
       ${friendNames ? `<li>あたらしい ともだち：${friendNames}</li>` : ''}
       ${roomNames ? `<li>あたらしい へや：${roomNames}</li>` : ''}
     </ul>
