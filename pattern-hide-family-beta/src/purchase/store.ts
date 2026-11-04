@@ -46,7 +46,7 @@ function packSummary(packId: PackId): string {
   const items = ITEMS.filter(
     (it) => !it.legacy && ((it.content && pack.contents.includes(it.content)) || (it.sticker !== null && stickerIds.has(it.sticker))),
   );
-  if (items.length) parts.push(`おもちゃと家具${items.length}つ`);
+  if (items.length) parts.push(`へやに置けるもの${items.length}こ`);
   if (stickers.length) parts.push(`シール${stickers.length}枚`);
   return parts.join('・');
 }

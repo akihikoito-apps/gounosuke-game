@@ -44,6 +44,8 @@ export class ParentArea {
 
   private onTrial: () => void;
   private purchases: PurchaseStore | null;
+  /** 最難関を ためせるか（「つづきの コース」か「ぜんぶ いり」を持っているとき） */
+  private canTrial: () => boolean;
   private onPlayScene: (scene: SceneId) => void;
   private onGoCourses: () => void;
   /** 買い物の結果の知らせ */
@@ -62,7 +64,9 @@ export class ParentArea {
     purchases: PurchaseStore | null = null,
     onPlayScene: (scene: SceneId) => void = () => undefined,
     onGoCourses: () => void = () => undefined,
+    canTrial: () => boolean = () => true,
   ) {
+    this.canTrial = canTrial;
     this.purchases = purchases;
     this.store = store;
     this.onChange = onChange;
@@ -262,7 +266,7 @@ export class ParentArea {
     const why = noInfo ? '<p class="note">App Store から 商品の 情報を 受け取れませんでした。インターネットに つながっているか 確かめて、少し あとで もう一度 この画面を 開いてください。</p>' : '';
     return `<section class="shop">
         <h3>追加パック（買い切り）</h3>
-        <p>一度買うと、ずっと遊べます。同じ Apple ID の 端末では「購入を 復元」で 使えます。友だちは、その背景で はじめて見つけたときに 仲間に なります。</p>
+        <p>一度買うと、ずっと遊べます。同じ Apple ID の 端末では「購入を 復元」で 使えます。背景パックの友だちと へやは、その背景で はじめて友だちを見つけると ふえます。「つづきの コース」の しんしつは コース6、おうは コース10の クリアで ふえます。シールと ごほうびの家具・おもちゃは、遊びを すすめると 手に入ります。</p>
         ${boughtHtml}
         ${previewHtml}
         ${rows ? `<ul class="shop-list">${rows}</ul>` : ''}
@@ -298,7 +302,11 @@ export class ParentArea {
       <section>
         <h3>最難関を ためす（大人向けのおためし）</h3>
         <p>いちばん難しい設定を、コースを進めなくても試せます。見つけにくい場所に最大3人、服は背景と同じ柄、ふち線と服の陰影が薄く、家具のかげからのぞいていたり、帽子やサングラスで顔の片方がかくれていたりします。<strong>10人みつけたらおしまい。進み具合やコースの記録は保存しません。</strong>目はいつも少なくとも片方見えていて、ヒントは何回でも使えます。</p>
-        <button type="button" class="pbtn" data-act="trial">最難関を ためす</button>
+        ${
+          this.canTrial()
+            ? '<button type="button" class="pbtn" data-act="trial">最難関を ためす</button>'
+            : '<p class="note">「つづきの コース」または「ぜんぶ いり」を買うと、コースの進み具合に関係なく ためせます。</p><button type="button" class="pbtn" data-act="trial" disabled>最難関を ためす</button>'
+        }
       </section>
       <section>
         <h3>音</h3>

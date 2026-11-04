@@ -187,6 +187,7 @@ export class App {
         this.courseJustCleared = false;
         this.go('courseSelect');
       },
+      () => this.can('trial:hardest'),
     );
     root.addEventListener('click', (e) => this.onClick(e));
     // 最初の操作のあとだけ音を出せるようにする
