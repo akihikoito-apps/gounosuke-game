@@ -306,7 +306,7 @@ export class App {
         ${NATIVE ? '' : '<p class="beta-tag">かぞく テスト ばん（かりの なまえ）</p>'}
       </div>
       <div class="title-actions">
-        ${btn('toCourse', ICONS.course, 'コースで あそぶ', 'big primary', 'data-autofocus')}
+        ${btn('toCourse', ICONS.course, 'コースで あそぶ', `big primary${this.store.data.collection.totalFinds === 0 ? ' beckon' : ''}`, 'data-autofocus')}
         <div class="title-row">
           ${btn('toSearch', ICONS.search, 'じゆうに さがす', 'mid')}
           ${btn('toHide', ICONS.hide, 'かくして わたす', 'mid secondary')}
@@ -358,7 +358,7 @@ export class App {
       const badge = cleared ? `<span class="badge">${ICONS.star}</span>` : open ? '' : `<span class="badge">${ICONS.lock}</span>`;
       const fc = cleared ? null : friendAtCourse(c.no, this.can);
       const friendMark = fc ? `<span class="tile-friend" aria-hidden="true">${faceIcon(CHARACTERS[fc])}</span>` : '';
-      return `<button type="button" class="course-tile${cleared ? ' cleared' : ''}${open ? '' : ' locked'}${c.no === next && !cleared ? ' next' : ''}" data-action="pickCourse" data-course="${c.no}" aria-label="${label}" ${open ? '' : 'disabled'}${c.no === next ? ' data-autofocus' : ''}><span class="num">${c.no}</span>${badge}${friendMark}${courseMark(c.no)}${pips}</button>`;
+      return `<button type="button" class="course-tile${cleared ? ' cleared' : ''}${open ? '' : ' locked'}${c.no === next && !cleared ? ' next' : ''}${c.no === next && this.store.data.collection.totalFinds === 0 ? ' beckon' : ''}" data-action="pickCourse" data-course="${c.no}" aria-label="${label}" ${open ? '' : 'disabled'}${c.no === next ? ' data-autofocus' : ''}><span class="num">${c.no}</span>${badge}${friendMark}${courseMark(c.no)}${pips}</button>`;
     }).join('');
     return `<main class="screen setup course-select" data-screen="courseSelect">
       <header class="topbar">${btn('home', ICONS.back, 'もどる', 'round')}<h2>コースを えらぶ</h2><span></span></header>
