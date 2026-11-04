@@ -311,8 +311,12 @@ export class App {
           ${btn('toSearch', ICONS.search, 'じゆうに さがす', 'mid')}
           ${btn('toHide', ICONS.hide, 'かくして わたす', 'mid secondary')}
         </div>
-        ${btn('toMyRoom', ICONS.room, 'じぶんの へや', 'mid myroom-btn')}
-        ${resume ? btn('resume', ICONS.play, 'つづきから', 'mid') : ''}
+        ${
+          // 「つづきから」があるときは じぶんの へや と横に並べて、ボタンの段を増やさない（下の3つと重ならないように）
+          resume
+            ? `<div class="title-row">${btn('toMyRoom', ICONS.room, 'じぶんの へや', 'mid myroom-btn')}${btn('resume', ICONS.play, 'つづきから', 'mid resume-btn')}</div>`
+            : btn('toMyRoom', ICONS.room, 'じぶんの へや', 'mid myroom-btn')
+        }
       </div>
       <div class="title-foot">
         ${stickerBtn}
