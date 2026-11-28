@@ -9,11 +9,12 @@
     "sync": "node build-www.mjs && node check-www.mjs && npx cap sync ios"
   },
   "dependencies": {
-    "@capacitor/core": "^7.0.0",
-    "@capacitor/ios": "^7.0.0",
-    "@capgo/native-purchases": "^7.19.3"
+    "@capacitor/android": "^8.6.3",
+    "@capacitor/core": "^8.6.3",
+    "@capacitor/ios": "^8.6.3",
+    "@capgo/native-purchases": "^8.11.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.0.0"
+    "@capacitor/cli": "^8.6.3"
   }
 }

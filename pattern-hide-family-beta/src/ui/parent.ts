@@ -4,7 +4,7 @@ import type { PackId } from '../entitlements/entitlements';
 import type { Store } from '../storage/storage';
 import { resetCounters, setEnabled } from '../storage/playtest';
 import { setSoundEnabled } from '../audio/sound';
-import { NATIVE } from './platform';
+import { NATIVE, storeWords } from './platform';
 import { type PurchaseStore, PRODUCTS } from '../purchase/store';
 import { renderBoughtGuide, renderPackPreview } from './packPreview';
 import { PRIVACY_POLICY_HTML } from './privacy';
@@ -223,7 +223,7 @@ export class ParentArea {
     this.boughtGuide = null;
     this.mount(this.panelHtml());
     this.bindPanel();
-    // 価格と購入済みを Apple に聞いてから、もう一度描く
+    // 価格と購入済みをストアに聞いてから、もう一度描く
     if (this.purchases?.available()) void Promise.all([this.purchases.loadPrices(), this.purchases.refresh()]).then(() => this.el && this.rerenderPanel('[data-close]'));
   }
 
@@ -261,12 +261,12 @@ export class ParentArea {
           const actions = isPreviewing ? '<span class="have">表示中</span>' : `<div class="shop-item-actions">${previewBtn}${buyBtn}</div>`;
           return `<li class="shop-item" data-shop-product="${p.id}"><div><strong>${p.name}</strong><br><small>${p.summary}</small></div>${actions}</li>`;
         }).join('');
-    // 値段が1つも取れない＝App Store から商品の情報が来ていない（通信なし・商品の準備中など）
+    // 値段が1つも取れない＝ストアから商品の情報が来ていない（通信なし・商品の準備中など）
     const noInfo = PRODUCTS.every((p) => !pu.price(p.id) && !p.packs.every((k) => owned.includes(k)));
-    const why = noInfo ? '<p class="note">App Store から 商品の 情報を 受け取れませんでした。インターネットに つながっているか 確かめて、少し あとで もう一度 この画面を 開いてください。</p>' : '';
+    const why = noInfo ? `<p class="note">${storeWords().store} から 商品の 情報を 受け取れませんでした。インターネットに つながっているか 確かめて、少し あとで もう一度 この画面を 開いてください。</p>` : '';
     return `<section class="shop">
         <h3>追加パック（買い切り）</h3>
-        <p>一度買うと、ずっと遊べます。同じ Apple ID の 端末では「購入を 復元」で 使えます。背景パックの友だちと へやは、その背景で はじめて友だちを見つけると ふえます。「つづきの コース」の しんしつは コース6、おうは コース10の クリアで ふえます。シールと ごほうびの家具・おもちゃは、遊びを すすめると 手に入ります。</p>
+        <p>一度買うと、ずっと遊べます。同じ ${storeWords().account} の 端末では「購入を 復元」で 使えます。背景パックの友だちと へやは、その背景で はじめて友だちを見つけると ふえます。「つづきの コース」の しんしつは コース6、おうは コース10の クリアで ふえます。シールと ごほうびの家具・おもちゃは、遊びを すすめると 手に入ります。</p>
         ${boughtHtml}
         ${previewHtml}
         ${rows ? `<ul class="shop-list">${rows}</ul>` : ''}
@@ -293,7 +293,7 @@ export class ParentArea {
         ${
           NATIVE
             ? `<h3>このアプリについて</h3>
-        <p>広告・外部リンク・アカウント登録はありません。ゲームは通信なしで遊べます（追加パックの商品情報の取得・購入・復元・購入状態の確認では Apple の仕組みを利用します）。名前・写真・位置などの個人の情報は集めません。</p>`
+        <p>広告・外部リンク・アカウント登録はありません。ゲームは通信なしで遊べます（追加パックの商品情報の取得・購入・復元・購入状態の確認では ${storeWords().company} の仕組みを利用します）。名前・写真・位置などの個人の情報は集めません。</p>`
             : `<h3>このベータについて</h3>
         <p>家族内で遊びを確かめるためのテスト版です。<strong>このベータでは課金はありません。</strong>広告・購入・外部リンク・アカウント登録もありません。通信なしで遊べるように作っています。</p>`
         }
@@ -465,7 +465,7 @@ export class ParentArea {
               this.shopNote = {
                 ok: 'ありがとうございます。追加パックが 使えるように なりました。',
                 cancelled: '',
-                pending: '保護者の 承認待ちです（ファミリー共有の「承認と購入のリクエスト」）。承認されると 使えるように なります。',
+                pending: storeWords().pending,
                 error: '購入できませんでした。時間をおいて、もう一度 お試しください。',
                 unavailable: 'いまは 購入できません。',
               }[r];

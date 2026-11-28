@@ -1,0 +1,167 @@
+name: Android もようのかくれんぼ → AAB
+
+# GitHub の Linux 環境で Android 用の配布ファイル（AAB）と、実機確認用の APK を作ります。
+# 公開リポジトリなので Linux ランナーの利用料はかかりません。手順は My柔道（judo-repo の android-office.yml）と同じ。
+#
+# 必要な GitHub シークレット（このリポジトリの Settings › Secrets and variables › Actions）
+#   ANDROID_KEYSTORE_B64 / ANDROID_KEYSTORE_PASS / ANDROID_KEY_ALIAS / ANDROID_KEY_PASS
+#   ※ My柔道 と同じ Aki-TT のアップロード鍵。OneDrive\judo-署名鍵 の
+#     「もようのかくれんぼ-GitHub-Secretsに登録.cmd」をダブルクリックすると入る。
+#   未設定なら署名なしで作る（見た目の確認には使えるが、Play には出せない）。
+#
+# 【いつ走るか】moyou-android ブランチへの push（Android まわりを触ったとき）と、
+#   moyou-android-vX.Y という名札（タグ）を付けて push したとき。iOS の moyou-v* とは別。
+on:
+  workflow_dispatch:
+  push:
+    branches: [moyou-android]
+    paths:
+      - 'pattern-hide-family-beta/native/android/**'
+      - 'pattern-hide-family-beta/native/package*.json'
+      - 'pattern-hide-family-beta/src/**'
+      - '.github/workflows/android-moyou.yml'
+    tags:
+      - 'moyou-android-v*'
+
+concurrency:
+  group: android-moyou
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GAME_DIR: pattern-hide-family-beta
+      APP_DIR: pattern-hide-family-beta/native
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Node.js を用意
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            pattern-hide-family-beta/package-lock.json
+            pattern-hide-family-beta/native/package-lock.json
+
+      - name: Java を用意（Android のビルドに必要）
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Android SDK を用意
+        uses: android-actions/setup-android@v4
+
+      - name: 依存パッケージを入れる
+        run: |
+          npm ci --no-audit --no-fund --prefix "$GAME_DIR"
+          npm ci --no-audit --no-fund --prefix "$APP_DIR"
+
+      - name: 型と単体テスト
+        working-directory: pattern-hide-family-beta
+        run: |
+          npm run typecheck
+          npm test
+
+      - name: ビルド番号を設定（GitHub の実行番号を使う）
+        run: |
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" "$APP_DIR/android/app/build.gradle"
+          grep -n "versionCode\|versionName" "$APP_DIR/android/app/build.gradle"
+
+      - name: www を作って Android 側へ同期
+        working-directory: pattern-hide-family-beta/native
+        run: |
+          node build-www.mjs
+          node check-www.mjs   # 外部通信なし・Service Worker なし・テスト版の表示なし
+          npx cap sync android
+          test -f android/app/src/main/assets/public/index.html || { echo "::error::www がコピーされていません"; exit 1; }
+
+      - name: 署名鍵を用意（シークレットがあるときだけ）
+        id: keystore
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            printf '%s' "$KS_B64" | base64 -d > "$RUNNER_TEMP/upload-keystore.jks"
+            test -s "$RUNNER_TEMP/upload-keystore.jks" || { echo "::error::鍵の取り出しに失敗しました"; exit 1; }
+            echo "path=$RUNNER_TEMP/upload-keystore.jks" >> "$GITHUB_OUTPUT"
+            echo "::notice::署名鍵を読み込みました（署名ありで作ります）"
+          else
+            echo "::warning::ANDROID_KEYSTORE_B64 が未設定です。署名なしで作ります（Play には出せません）"
+          fi
+
+      - name: AAB と APK を作る
+        working-directory: pattern-hide-family-beta/native/android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ steps.keystore.outputs.path }}
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASS: ${{ secrets.ANDROID_KEY_PASS }}
+        run: |
+          set +e
+          chmod +x ./gradlew
+          ./gradlew bundleRelease assembleRelease --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            grep -aE "error:|FAILURE|What went wrong|Could not|Execution failed" /tmp/gradle.log | tail -10 > /tmp/e.txt
+            [ -s /tmp/e.txt ] || tail -10 /tmp/gradle.log > /tmp/e.txt
+            while IFS= read -r line; do
+              echo "::error::GRADLE $(printf '%s' "$line" | tr -d '\r' | cut -c1-400)"
+            done < /tmp/e.txt
+          fi
+          exit $code
+
+      # ファミリー向けポリシー：広告ID（AD_ID）や位置・連絡先などの権限が混ざっていないこと
+      - name: 権限を確かめる（子ども向け）
+        run: |
+          a=$(find "$APP_DIR/android" -name "*.apk" | head -1)
+          aapt=$(find "$ANDROID_HOME/build-tools" -name aapt2 | sort | tail -1)
+          "$aapt" dump permissions "$a" | tee /tmp/perm.txt
+          if grep -E "AD_ID|LOCATION|CONTACTS|CAMERA|RECORD_AUDIO|READ_PHONE|POST_NOTIFICATIONS|ACCOUNTS" /tmp/perm.txt; then
+            echo "::error::子ども向けに要らない権限が入っています（上の行）"; exit 1
+          fi
+          echo "::notice::権限 $(grep -c 'uses-permission' /tmp/perm.txt) 個（広告ID・位置・連絡先などは無し）"
+
+      - name: できあがりを確認（署名も見る）
+        run: |
+          f=$(find "$APP_DIR/android" -name "*.aab" | head -1)
+          echo "::notice::AAB=$f ($(du -h "$f" | cut -f1))"
+          a=$(find "$APP_DIR/android" -name "*.apk" | head -1)
+          echo "::notice::APK=$a ($(du -h "$a" | cut -f1))"
+          case "$a" in
+            *unsigned*) echo "::warning::APK が未署名です（シークレット未設定）";;
+            *)
+              signer=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort | tail -1)
+              "$signer" verify --print-certs "$a" | tee /tmp/sig.txt
+              grep -q "SHA-256 digest: ac180fdbda146b1e8a03f435226e90929448577fb37ff0a33dbaeb2a677cd5c4" /tmp/sig.txt || { echo "::error::APK の署名が想定の鍵（Aki-TT）と違います"; exit 1; }
+              echo "::notice::署名を確認しました（アップロード鍵 Aki-TT）"
+              ;;
+          esac
+
+      - name: AAB を保存（Play Console に上げるもの）
+        uses: actions/upload-artifact@v4
+        with:
+          name: moyou-aab
+          path: pattern-hide-family-beta/native/android/app/build/outputs/bundle/release/*.aab
+          retention-days: 14
+
+      # 実機に直接入れて動作を確かめる用。Play には出さない。
+      - name: APK を保存（実機確認用）
+        uses: actions/upload-artifact@v4
+        with:
+          name: moyou-apk
+          path: pattern-hide-family-beta/native/android/app/build/outputs/apk/release/*.apk
+          retention-days: 14
+
+      - name: 失敗時：ログを保存
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moyou-gradle-log
+          path: /tmp/gradle.log
+          if-no-files-found: ignore
+          retention-days: 7

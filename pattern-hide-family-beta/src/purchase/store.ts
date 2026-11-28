@@ -1,6 +1,6 @@
-// 追加パックの購入（Apple の アプリ内課金・買い切り）。
-// iPhone アプリ版だけで動く。購入の確認は端末の StoreKit 2 の結果だけを使い、外部のサーバーには何も送らない。
-// 保存データ（localStorage）の値を購入の証明にはしない（毎回 StoreKit に聞く。StoreKit は通信なしでも購入済みを返せる）。
+// 追加パックの購入（アプリ内課金・買い切り）。iPhone・iPad は App Store（StoreKit 2）、Android は Google Play Billing。
+// アプリ版だけで動く。購入の確認は端末のストアの結果だけを使い、外部のサーバーには何も送らない。
+// 保存データ（localStorage）の値を購入の証明にはしない（毎回ストアに聞く。どちらも通信なしで購入済みを返せる）。
 import { stickerRequires } from '../core/access';
 import { CHARACTERS, type CharacterId } from '../core/characters';
 import { MOVERS } from '../core/movers';
@@ -12,7 +12,7 @@ import { PACKS, type PackId } from '../entitlements/entitlements';
 import { NATIVE } from '../ui/platform';
 
 export interface ProductDef {
-  /** App Store Connect に登録する 製品ID */
+  /** App Store Connect と Google Play Console に登録する 製品ID（両方で同じ） */
   id: string;
   packs: PackId[];
   /** 保護者の画面での名前 */
@@ -74,10 +74,25 @@ export function packsFromProducts(productIds: readonly string[]): PackId[] {
 export type BuyResult = 'ok' | 'cancelled' | 'pending' | 'error' | 'unavailable';
 
 interface Plugin {
-  getPurchases(o: { productType: string }): Promise<{ purchases: { productIdentifier: string }[] }>;
+  getPurchases(o: { productType: string }): Promise<{ purchases: Purchase[] }>;
   getProducts(o: { productIdentifiers: string[]; productType: string }): Promise<{ products: { identifier: string; priceString: string }[] }>;
   purchaseProduct(o: { productIdentifier: string; productType: string }): Promise<{ productIdentifier?: string }>;
   restorePurchases(): Promise<void>;
+  acknowledgePurchase(o: { purchaseToken: string }): Promise<void>;
+}
+
+interface Purchase {
+  productIdentifier: string;
+  /** Android だけ。"1"＝支払い済み、"0"＝支払い待ち（コンビニ払いなど） */
+  purchaseState?: string;
+  /** Android だけ。3日以内に承認しないと Google が自動で返金する */
+  isAcknowledged?: boolean;
+  purchaseToken?: string;
+}
+
+/** 使える購入だけ。Android の支払い待ちは、まだ使えない（iOS は purchaseState が無い） */
+export function paidPurchases(purchases: readonly Purchase[]): Purchase[] {
+  return purchases.filter((x) => x.purchaseState === undefined || x.purchaseState === '1');
 }
 
 function plugin(): Plugin | null {
@@ -116,7 +131,12 @@ export class PurchaseStore {
     if (!p) return;
     try {
       const { purchases } = await p.getPurchases({ productType: 'inapp' });
-      const next = packsFromProducts(purchases.map((x) => x.productIdentifier));
+      const paid = paidPurchases(purchases);
+      // 支払い待ちのあとで支払われた購入は、購入の画面の外で届く。ここで承認しておく（承認は何度でも害がない）
+      for (const x of paid) {
+        if (x.isAcknowledged === false && x.purchaseToken) await p.acknowledgePurchase({ purchaseToken: x.purchaseToken }).catch(() => {});
+      }
+      const next = packsFromProducts(paid.map((x) => x.productIdentifier));
       const changed = JSON.stringify(next) !== JSON.stringify(this.ownedPacks);
       this.ownedPacks = next;
       if (changed) this.onChange();
@@ -147,8 +167,14 @@ export class PurchaseStore {
     } catch (e) {
       const msg = String((e as { message?: string; code?: string })?.message ?? e).toLowerCase();
       if (msg.includes('cancel')) return 'cancelled';
-      // 「承認と購入のリクエスト」（ファミリー共有）で保護者の承認待ち
+      // 「承認と購入のリクエスト」（ファミリー共有／Google ファミリー リンク）で保護者の承認待ち、または Android の支払い待ち
       if (msg.includes('pending') || msg.includes('deferred')) return 'pending';
+      // Android：前の購入がまだ届いていない。持っているか聞き直す
+      if (msg.includes('already_owned') || msg.includes('already owned')) {
+        await this.refresh();
+        const want = PRODUCTS.find((x) => x.id === productId)!.packs;
+        if (want.every((pk) => this.owned().includes(pk))) return 'ok';
+      }
       return 'error';
     }
   }
